@@ -1,23 +1,15 @@
-import React from 'react'
 import { Box, HStack, Image, VStack, Text, Pressable } from 'native-base'
 
 export default function NavButtons() {
   return (
-    <Box
-      bg='themeGrey'
-      py='4'
-      px='3'
-      borderRadius='5'
-      rounded='md'
-      maxWidth='100%'
-    >
+    <Box bg='themeGrey' py='5' px='3' maxWidth='100%'>
       <HStack justifyContent='space-between'>
         <Pressable
           rounded='xs'
           bg='secondary'
           alignSelf='flex-start'
-          py='1'
-          px='50'
+          py='3'
+          px='175'
           borderRadius='5'
         >
           <Text
@@ -33,8 +25,8 @@ export default function NavButtons() {
           rounded='xs'
           bg='primary'
           alignSelf='flex-start'
-          py='1'
-          px='50'
+          py='3'
+          px='175'
           borderRadius='5'
         >
           <Text
