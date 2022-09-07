@@ -4,15 +4,16 @@ import { View } from 'react-native'
 import NavButtons from './NavButtons'
 import ProgressStepper from './ProgressStepper'
 import VisitSetup from '../VisitSetup/VisitSetup'
+import TrapStatus from '../TrapStatus/TrapStatus'
 
-export default function TrapVisitForm() {
+export default function TrapVisitForm({ navigation }: { navigation: any }) {
   return (
-    <View>
-      <VStack justifyContent='space-between'>
-        <ProgressStepper />
-        <VisitSetup />
-        <NavButtons />
-      </VStack>
-    </View>
+    <VStack h='full' justifyContent='space-between'>
+      <ProgressStepper />
+      {/* <VisitSetup /> */}
+      <TrapStatus />
+
+      <NavButtons navigation={navigation} />
+    </VStack>
   )
 }
