@@ -1,62 +1,25 @@
-import React from 'react'
+import React, { useCallback } from 'react'
+import { Text, VStack, CircleIcon, Flex, Heading, Center } from 'native-base'
 import { StatusBar } from 'expo-status-bar'
-import {
-  Center,
-  Button,
-  Text,
-  Box,
-  VStack,
-  Image,
-  View,
-  Avatar,
-  HStack,
-  Icon,
-  CircleIcon,
-  PlayIcon,
-  Flex,
-  Heading,
-} from 'native-base'
 import Logo from '../Shared/Logo'
-import BottomNavigator from './BottomNavigator'
+import BottomNavigation from './BottomNavigation'
+import TopIcons from './TopIcons'
 const IMG = require('../../assets/chinook_salmon.jpeg')
 
 export default function Home({ navigation }: { navigation: any }) {
-  const handlePress = () => navigation.navigate('Trap Visit Data Entry')
-
   return (
-    <Flex align='center'>
-      <Heading>Welcome back Jordan!</Heading>
-
-      <Text>Select the action you would like to preform.</Text>
-      {/* <BottomNavigator /> */}
-      <Button variant='solid' bg='primary' onPress={handlePress}>
-        Enter a New Trap Visit
-      </Button>
+    <Flex>
+      <VStack space={100} alignItems='center' justifyContent='space-between'>
+        <TopIcons />
+        {/* <Logo /> */}
+        <CircleIcon size='300' color='primary' />
+        <Heading>Welcome back, Jordan!</Heading>
+        <Text>Select the action you would like to preform.</Text>
+        <Center bg='secondary' h='100' w='90%'>
+          <Text>Recent Items Placeholder</Text>
+        </Center>
+        <BottomNavigation navigation={navigation} />
+      </VStack>
     </Flex>
-
-    // <Flex align='center'>
-    //   <VStack>
-    //     <HStack>
-    //       <Icon as={<CircleIcon />} />
-    //       <Icon as={<PlayIcon />} />
-    //     </HStack>
-    //     <Avatar
-    //       bg='green.500'
-    //       // source={{
-    //       //   uri: 'https://user-images.githubusercontent.com/22649273/186754977-50398ed3-47dc-4af8-a127-d2ddf155e7f1.jpeg',
-    //       // }}
-    //       size='2xl'
-    //     ></Avatar>
-    //     <VStack space={30}>
-    //       <StatusBar style='auto' />
-
-    //       <Button variant='solid' bg='primary' onPress={handlePress}>
-    //         Enter a New Trap Visit
-    //       </Button>
-    //     </VStack>
-    //     {/* </Center> */}
-    //     {/* <BottomNavigator /> */}
-    //   </VStack>
-    // </Flex>
   )
 }
