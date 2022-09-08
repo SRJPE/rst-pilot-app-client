@@ -5,14 +5,13 @@ import NavButtons from './NavButtons'
 import ProgressStepper from './ProgressStepper'
 import VisitSetup from '../VisitSetup/VisitSetup'
 import TrapStatus from '../TrapStatus/TrapStatus'
+import FormTabNavigation from './FormTabNavigation'
 
 export default function TrapVisitForm({ navigation }: { navigation: any }) {
   return (
     <VStack h='full' justifyContent='space-between'>
       <ProgressStepper />
-      {/* <VisitSetup /> */}
-      <TrapStatus />
-
+      <FormTabNavigation />
       <NavButtons navigation={navigation} />
     </VStack>
   )
