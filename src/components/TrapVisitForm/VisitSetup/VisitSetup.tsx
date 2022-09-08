@@ -22,44 +22,44 @@ const testStreams = [
 ]
 
 export default function VisitSetup() {
-  const [service, setService] = useState('')
+  const [stream, setStream] = useState('')
 
   return (
     <View>
-      <Box height='800px' bg='#fff' padding='15'>
+      <Box height='full' bg='#fff' padding='25'>
         <VStack space={4}>
           <Heading fontSize='lg'>Which stream are you trapping on?</Heading>
-          <FormControl w='3/4' maxW='300'>
+          <FormControl w='3/4'>
             <FormControl.Label>Stream</FormControl.Label>
             <Select
-              selectedValue={service}
+              selectedValue={stream}
               minWidth='200'
               accessibilityLabel='Stream'
               placeholder='Stream'
               _selectedItem={{
-                bg: 'teal.600',
-                endIcon: <CheckIcon size='5' />,
+                bg: 'secondary',
+                endIcon: <CheckIcon size='6' />,
               }}
               mt={1}
-              onValueChange={itemValue => setService(itemValue)}
+              onValueChange={itemValue => setStream(itemValue)}
             >
               {testStreams.map((item, idx) => (
                 <Select.Item key={idx} label={item.label} value={item.value} />
               ))}
             </Select>
           </FormControl>
-          {service && (
+          {stream && (
             <>
               <Heading fontSize='lg'>Confirm the following values</Heading>
-              <FormControl w='3/4' maxW='300'>
+              <FormControl w='3/4'>
                 <FormControl.Label>Trap Site</FormControl.Label>
-                <Input></Input>
+                <Input placeholder='Default Trap Site Value'></Input>
               </FormControl>
-              <FormControl w='3/4' maxW='300'>
+              <FormControl w='3/4'>
                 <FormControl.Label>Trap Sub Site</FormControl.Label>
-                <Input></Input>
+                <Input placeholder='Default Trap Sub Site Value'></Input>
               </FormControl>
-              <FormControl w='3/4' maxW='300'>
+              <FormControl w='3/4'>
                 <FormControl.Label>Crew</FormControl.Label>
                 <CrewDropDown />
               </FormControl>
