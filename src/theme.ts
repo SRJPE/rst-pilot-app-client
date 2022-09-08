@@ -1,12 +1,17 @@
 import { extendTheme, NativeBaseProvider } from 'native-base'
 // 2. Extend the theme to include custom colors, fonts, etc
 const newColorTheme = {
-  brand: {
-    900: '#8287af',
-    800: '#7c83db',
-    700: '#b3bef6',
-  },
+  // brand: {
+  //   900: '#8287af',
+  //   800: '#7c83db',
+  //   700: '#b3bef6',
+  // },
 }
+const config = {
+  useSystemColorMode: false,
+  initialColorMode: 'dark',
+}
+
 const theme = extendTheme({
   colors: {
     primary: '#007C7C',
