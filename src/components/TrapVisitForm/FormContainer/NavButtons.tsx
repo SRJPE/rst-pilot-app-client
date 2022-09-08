@@ -5,7 +5,7 @@ export default function NavButtons({ navigation }: { navigation: any }) {
     navigation.navigate('Home')
   }
   const handleNext = () => {
-    navigation.navigate('Trap Visit Data Entry')
+    navigation.navigate('Trap Visit Form')
   }
 
   return (
