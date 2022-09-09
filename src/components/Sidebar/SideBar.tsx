@@ -56,6 +56,9 @@ export default function Sidebar(props: DrawerContentComponentProps) {
   const handlePressMenuHighTemperatures = useCallback(() => {
     navigation.navigate('High Temperatures')
   }, [navigation])
+  const handlePressMenuNonFunctionalTrap = useCallback(() => {
+    navigation.navigate('Non Functional Trap')
+  }, [navigation])
 
   return (
     <Box safeArea flex={1} bg={useColorModeValue('#FFFFFF', 'primary')} p={7}>
@@ -157,6 +160,13 @@ export default function Sidebar(props: DrawerContentComponentProps) {
             icon='clipboard'
           >
             High Temperatures
+          </MenuButton>
+          <MenuButton
+            active={currentRoute === 'Non Functional Trap'}
+            onPress={handlePressMenuNonFunctionalTrap}
+            icon='clipboard'
+          >
+            Non Functional Trap
           </MenuButton>
         </DrawerContentScrollView>
         <Center>

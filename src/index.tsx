@@ -12,6 +12,7 @@ import TrapStatus from './components/TrapVisitForm/TrapStatus/TrapStatus'
 import TrapOperations from './components/TrapVisitForm/TrapOperations/TrapOperations'
 import HighFlows from './components/TrapVisitForm/TrapStatus/HighFlows'
 import HighTemperatures from './components/TrapVisitForm/TrapStatus/HighTemperatures'
+import NonFunctionalTrap from './components/TrapVisitForm/TrapStatus/NonFunctionalTrap'
 
 const Drawer = createDrawerNavigator()
 
@@ -36,6 +37,7 @@ export default function Navigator() {
       <Drawer.Screen name='Fish Processing' component={FishProcessing} />
       <Drawer.Screen name='High Flows' component={HighFlows} />
       <Drawer.Screen name='High Temperatures' component={HighTemperatures} />
+      <Drawer.Screen name='Non Functional Trap' component={NonFunctionalTrap} />
     </Drawer.Navigator>
   )
 }
