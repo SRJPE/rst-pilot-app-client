@@ -35,21 +35,27 @@ export default function Sidebar(props: DrawerContentComponentProps) {
   const handlePressMenuTrapVisitForm = useCallback(() => {
     navigation.navigate('Trap Visit Form')
   }, [navigation])
-  // const handlePressMenuVisitSetup = useCallback(() => {
-  //   navigation.navigate('Visit Setup')
-  // }, [navigation])
-  // const handlePressMenuTrapStatus = useCallback(() => {
-  //   navigation.navigate('Trap Status')
-  // }, [navigation])
-  // const handlePressMenuTrapOperations = useCallback(() => {
-  //   navigation.navigate('Trap Operations')
-  // }, [navigation])
-  // const handlePressMenuFishInput = useCallback(() => {
-  //   navigation.navigate('Fish Input')
-  // }, [navigation])
-  // const handlePressMenuFishProcessing = useCallback(() => {
-  //   navigation.navigate('Fish Processing')
-  // }, [navigation])
+  const handlePressMenuVisitSetup = useCallback(() => {
+    navigation.navigate('Visit Setup')
+  }, [navigation])
+  const handlePressMenuTrapStatus = useCallback(() => {
+    navigation.navigate('Trap Status')
+  }, [navigation])
+  const handlePressMenuTrapOperations = useCallback(() => {
+    navigation.navigate('Trap Operations')
+  }, [navigation])
+  const handlePressMenuFishInput = useCallback(() => {
+    navigation.navigate('Fish Input')
+  }, [navigation])
+  const handlePressMenuFishProcessing = useCallback(() => {
+    navigation.navigate('Fish Processing')
+  }, [navigation])
+  const handlePressMenuHighFlows = useCallback(() => {
+    navigation.navigate('High Flows')
+  }, [navigation])
+  const handlePressMenuHighTemperatures = useCallback(() => {
+    navigation.navigate('High Temperatures')
+  }, [navigation])
 
   return (
     <Box safeArea flex={1} bg={useColorModeValue('#FFFFFF', 'primary')} p={7}>
@@ -103,7 +109,7 @@ export default function Sidebar(props: DrawerContentComponentProps) {
           >
             Trap Visit Form
           </MenuButton>
-          {/* <MenuButton
+          <MenuButton
             active={currentRoute === 'Visit Setup'}
             onPress={handlePressMenuVisitSetup}
             icon='clipboard'
@@ -137,7 +143,21 @@ export default function Sidebar(props: DrawerContentComponentProps) {
             icon='clipboard'
           >
             Fish Processing
-          </MenuButton> */}
+          </MenuButton>
+          <MenuButton
+            active={currentRoute === 'High Flows'}
+            onPress={handlePressMenuHighFlows}
+            icon='clipboard'
+          >
+            High Flows
+          </MenuButton>
+          <MenuButton
+            active={currentRoute === 'High Temperatures'}
+            onPress={handlePressMenuHighTemperatures}
+            icon='clipboard'
+          >
+            High Temperatures
+          </MenuButton>
         </DrawerContentScrollView>
         <Center>
           <ThemeToggle />
