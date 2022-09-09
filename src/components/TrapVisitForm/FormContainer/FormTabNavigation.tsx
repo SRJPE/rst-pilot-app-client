@@ -1,27 +1,30 @@
-import React from 'react'
-import {
-  createMaterialTopTabNavigator,
-  MaterialTopTabNavigationOptions,
-} from '@react-navigation/material-top-tabs'
+import { createStackNavigator } from '@react-navigation/stack'
+// import { FormStackParamList } from '../../../types/'
 import FishInput from '../FishInput/FishInput'
 import FishProcessing from '../FishProcessing/FishProcessing'
 import VisitSetup from '../VisitSetup/VisitSetup'
 import TrapStatus from '../TrapStatus/TrapStatus'
-import { FormTabParamList } from '../../../types/'
+import TrapOperations from '../TrapOperations/TrapOperations'
+import HighFlows from '../TrapStatus/HighFlows'
+import HighTemperatures from '../TrapStatus/HighTemperatures'
 
-const FormTab = createMaterialTopTabNavigator<FormTabParamList>()
+const FormStack = createStackNavigator()
 
-export default function FormTabNavigation() {
+export default function FormStackNavigation() {
   return (
-    <FormTab.Navigator
-      screenOptions={{
-        swipeEnabled: false,
-      }}
-    >
-      <FormTab.Screen name='Visit Setup' component={VisitSetup} />
-      <FormTab.Screen name='Trap Status' component={TrapStatus} />
-      <FormTab.Screen name='Fish Input' component={FishInput} />
-      <FormTab.Screen name='Fish Processing' component={FishProcessing} />
-    </FormTab.Navigator>
+    <FormStack.Navigator initialRouteName='Visit Setup'>
+      <FormStack.Screen name='Visit Setup' component={VisitSetup} />
+      <FormStack.Screen name='Trap Status' component={TrapStatus} />
+      <FormStack.Screen name='Trap Operations' component={TrapOperations} />
+      <FormStack.Screen name='Fish Input' component={FishInput} />
+      <FormStack.Screen name='Fish Processing' component={FishProcessing} />
+      <FormStack.Group screenOptions={{ presentation: 'modal' }}>
+        <FormStack.Screen name='High Flows' component={HighFlows} />
+        <FormStack.Screen
+          name='High Temperatures'
+          component={HighTemperatures}
+        />
+      </FormStack.Group>
+    </FormStack.Navigator>
   )
 }
