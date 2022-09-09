@@ -10,9 +10,8 @@
   },
   "dependencies": {
     "@react-navigation/drawer": "^6.4.4",
-    "@react-navigation/material-top-tabs": "^6.2.3",
     "@react-navigation/native": "^6.0.12",
-    "@react-navigation/native-stack": "^6.8.0",
+    "@react-navigation/stack": "^6.2.3",
     "@redux-offline/redux-offline": "^2.6.0-expo.0",
     "axios": "^0.27.2",
     "expo": "~46.0.9",
