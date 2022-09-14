@@ -41,7 +41,7 @@ export default function TrapStatus() {
     <Formik
       initialValues={initialValues}
       validationSchema={trapStatusSchema}
-      onSubmit={result => console.log(result)}
+      onSubmit={result => console.log('RESULT:', result)}
     >
       {({ handleChange, handleBlur, handleSubmit, values }) => (
         <Box height='full' bg='#fff' padding='15'>
@@ -128,11 +128,16 @@ export default function TrapStatus() {
                       keyboardType='numeric'
                     />
                   </FormControl>
-                  <Button onPress={handleSubmit} title='Submit' />
                 </HStack>
               </>
             )}
           </VStack>
+          {/*           
+// @ts-ignore */}
+          {/* <Button onPress={handleSubmit} colorScheme='pink'>
+            Submit
+          </Button> */}
+          {/* <Button onPress={handleSubmit}>Submit</Button> */}
         </Box>
       )}
     </Formik>

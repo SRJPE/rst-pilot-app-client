@@ -1,9 +1,9 @@
 import * as yup from 'yup'
 
 export const trapStatusSchema = yup.object().shape({
-  email: yup.string().email('Invalid email').required('Email Required'),
-  password: yup
-    .string()
-    .required('Password Required')
-    .min(6, 'Password must be at least 6 characters'),
+  trapStatus: yup.string().required('Trap Status Required'),
+  reasonNotFunc: yup.string().required('Reason Not Functioning Required'),
+  flowMeasure: yup.number().required('Flow Measure Required'),
+  WaterTemperature: yup.number().required('Water Temperature Required'),
+  waterTurbidity: yup.number().required('Water Turbidity Required'),
 })

@@ -55,7 +55,8 @@ const FishInput = () => {
             />
 
             <Button
-              /* tslint:disable:next-line */
+              /* 
+// @ts-ignore */
               onPress={handleSubmit}
               title='Submit'
             />
