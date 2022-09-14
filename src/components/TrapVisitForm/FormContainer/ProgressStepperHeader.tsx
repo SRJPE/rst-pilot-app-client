@@ -9,13 +9,13 @@ import {
   Progress,
 } from 'native-base'
 
-export default function ProgressStepper(props: any) {
+export default function ProgressStepperHeader(props: any) {
   return (
     <Box
       // bg='themeGrey'
-      py='3'
-      px='3'
-      maxWidth='100%'
+      // py='3'
+      // px='3'
+      width='100%'
       justifyContent='space-between'
     >
       <VStack space={4}>

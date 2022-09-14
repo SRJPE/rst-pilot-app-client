@@ -1,4 +1,5 @@
 import { createStackNavigator } from '@react-navigation/stack'
+import { Button } from 'native-base'
 // import { FormStackParamList } from '../../../types/'
 import FishInput from '../FishInput/FishInput'
 import FishProcessing from '../FishProcessing/FishProcessing'
@@ -7,13 +8,18 @@ import TrapStatus from '../TrapStatus/TrapStatus'
 import TrapOperations from '../TrapOperations/TrapOperations'
 import HighFlows from '../TrapStatus/HighFlows'
 import HighTemperatures from '../TrapStatus/HighTemperatures'
+import ProgressStepperHeader from './ProgressStepperHeader'
 
 const FormStack = createStackNavigator()
 
 export default function FormStackNavigation() {
   return (
     <FormStack.Navigator initialRouteName='Visit Setup'>
-      <FormStack.Screen name='Visit Setup' component={VisitSetup} />
+      <FormStack.Screen
+        name='Visit Setup'
+        component={VisitSetup}
+        options={{ headerTitle: props => <ProgressStepperHeader {...props} /> }}
+      />
       <FormStack.Screen name='Trap Status' component={TrapStatus} />
       <FormStack.Screen name='Trap Operations' component={TrapOperations} />
       <FormStack.Screen name='Fish Input' component={FishInput} />

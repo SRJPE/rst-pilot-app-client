@@ -8,6 +8,14 @@ export default function NavButtons({ navigation }: { navigation: any }) {
     navigation.navigate('Trap Visit Form')
   }
 
+  const steps = [
+    { name: 'Visit Setup', completed: false },
+    { name: 'Trap Status', completed: false },
+    { name: 'Trap Operations', completed: false },
+    { name: 'Fish Processing', completed: false },
+    { name: 'Fish Input', completed: false },
+  ] as Array<any>
+
   return (
     <Box bg='themeGrey' py='5' px='3' maxWidth='100%'>
       <HStack justifyContent='space-between'>

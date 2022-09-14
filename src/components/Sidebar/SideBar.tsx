@@ -169,9 +169,9 @@ export default function Sidebar(props: DrawerContentComponentProps) {
             Non Functional Trap
           </MenuButton>
         </DrawerContentScrollView>
-        <Center>
+        {/* <Center>
           <ThemeToggle />
-        </Center>
+        </Center> */}
       </VStack>
     </Box>
   )
