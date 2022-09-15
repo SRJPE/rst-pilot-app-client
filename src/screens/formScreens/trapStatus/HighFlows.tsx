@@ -1,12 +1,4 @@
-import {
-  Button,
-  Heading,
-  Icon,
-  Image,
-  Text,
-  View,
-  VStack,
-} from 'native-base'
+import { Button, Heading, Icon, Image, Text, View, VStack } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 export default function HighFlows() {
@@ -26,7 +18,7 @@ export default function HighFlows() {
         </Heading>
         <Image
           alignSelf='center'
-          source={require('../../../../assets/warning.png')}
+          source={require('../../../assets/warning.png')}
           alt='Warning Icon'
           size='2xl'
         />

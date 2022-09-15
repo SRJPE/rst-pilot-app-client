@@ -14,7 +14,7 @@ export default function HighFlows() {
         </Heading>
         <Image
           alignSelf='center'
-          source={require('../../../../assets/warning.png')}
+          source={require('../../../assets/warning.png')}
           alt='Warning Icon'
           size='2xl'
         />
