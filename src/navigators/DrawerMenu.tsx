@@ -120,7 +120,7 @@ export default function DrawerMenu(props: DrawerContentComponentProps) {
               onPress={handlePressMenuVisitSetup}
               icon='clipboard'
             >
-              VisitSetup
+              Visit Setup
             </MenuButton>
             <MenuButton
               active={currentRoute === 'Trap Status'}
