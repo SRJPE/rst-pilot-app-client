@@ -20,7 +20,7 @@ import ThemeToggle from '../components/drawerMenu/ThemeToggle'
 
 //temporary routing during development into nested form.
 
-export default function Sidebar(props: DrawerContentComponentProps) {
+export default function DrawerMenu(props: DrawerContentComponentProps) {
   const { state, navigation } = props
   const currentRoute = state.routeNames[state.index]
 
@@ -37,19 +37,19 @@ export default function Sidebar(props: DrawerContentComponentProps) {
     navigation.navigate('Trap Visit Form')
   }, [navigation])
   const handlePressMenuVisitSetup = useCallback(() => {
-    navigation.navigate('Visit Setup')
+    navigation.navigate('Trap Visit Form', { screen: 'Visit Setup' })
   }, [navigation])
   const handlePressMenuTrapStatus = useCallback(() => {
-    navigation.navigate('Trap Status')
+    navigation.navigate('Trap Visit Form', { screen: 'Trap Status' })
   }, [navigation])
   const handlePressMenuTrapOperations = useCallback(() => {
-    navigation.navigate('Trap Operations')
+    navigation.navigate('Trap Visit Form', { screen: 'Trap Operations' })
   }, [navigation])
   const handlePressMenuFishInput = useCallback(() => {
-    navigation.navigate('Fish Input')
+    navigation.navigate('Trap Visit Form', { screen: 'Fish Input' })
   }, [navigation])
   const handlePressMenuFishProcessing = useCallback(() => {
-    navigation.navigate('Fish Processing')
+    navigation.navigate('Trap Visit Form', { screen: 'Fish Processing' })
   }, [navigation])
   const handlePressMenuHighFlows = useCallback(() => {
     navigation.navigate('High Flows')
