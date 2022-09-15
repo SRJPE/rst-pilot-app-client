@@ -18,10 +18,21 @@ export default function FormStackNavigation() {
       <FormStack.Screen
         name='Visit Setup'
         component={VisitSetup}
+        options={{
+          headerTitle: props => <ProgressStepperHeader {...props} />,
+        }}
+      />
+      <FormStack.Screen
+        name='Trap Status form'
+        component={TrapStatus}
+        options={{ headerTitle: props => <ProgressStepperHeader {...props} /> }}
+        // options={{ headerShown: false }}
+      />
+      <FormStack.Screen
+        name='Trap Operations'
+        component={TrapOperations}
         options={{ headerTitle: props => <ProgressStepperHeader {...props} /> }}
       />
-      <FormStack.Screen name='Trap Status' component={TrapStatus} />
-      <FormStack.Screen name='Trap Operations' component={TrapOperations} />
       <FormStack.Screen name='Fish Input' component={FishInput} />
       <FormStack.Screen name='Fish Processing' component={FishProcessing} />
       <FormStack.Group screenOptions={{ presentation: 'modal' }}>

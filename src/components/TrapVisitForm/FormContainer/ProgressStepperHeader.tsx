@@ -1,33 +1,25 @@
-import {
-  Box,
-  HStack,
-  Image,
-  VStack,
-  Text,
-  Pressable,
-  Center,
-  Progress,
-} from 'native-base'
+import { Box, HStack, VStack, Text, Progress } from 'native-base'
+import { useState } from 'react'
 
 export default function ProgressStepperHeader(props: any) {
+  const [step, setStep] = useState(1 as number)
   return (
-    <Box
-      // bg='themeGrey'
-      // py='3'
-      // px='3'
-      width='100%'
-      justifyContent='space-between'
-    >
+    <Box>
       <VStack space={4}>
-        <HStack justifyContent='space-between'>
+        <HStack w='100%' justifyContent='space-between'>
           <Text fontSize='lg'>Visit Setup</Text>
-          <Text>Step 1</Text>
+          <Text>{`Step ${step} of 6`}</Text>
         </HStack>
-        <Center w='100%'>
-          <Box w='100%'>
-            <Progress value={45} mx='4' />
-          </Box>
-        </Center>
+        <Box w='100%'>
+          <Progress
+            bg='coolGray.100'
+            _filledTrack={{
+              bg: 'primary',
+            }}
+            value={(step / 6) * 100}
+            mx='4'
+          />
+        </Box>
       </VStack>
     </Box>
   )
