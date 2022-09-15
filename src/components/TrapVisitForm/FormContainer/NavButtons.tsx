@@ -1,13 +1,6 @@
 import { Box, HStack, Text, Button } from 'native-base'
 
 export default function NavButtons({ navigation }: { navigation: any }) {
-  const handleBack = () => {
-    navigation.navigate('Home')
-  }
-  const handleNext = () => {
-    navigation.navigate('Trap Visit Form')
-  }
-
   const steps = [
     { name: 'Visit Setup', completed: false },
     { name: 'Trap Status', completed: false },
@@ -15,6 +8,13 @@ export default function NavButtons({ navigation }: { navigation: any }) {
     { name: 'Fish Processing', completed: false },
     { name: 'Fish Input', completed: false },
   ] as Array<any>
+
+  const handleBack = () => {
+    navigation.goBack()
+  }
+  const handleNext = () => {
+    navigation.navigate('Trap Status form', { screen: 'Visit Setup' })
+  }
 
   return (
     <Box bg='themeGrey' py='5' px='3' maxWidth='100%'>
