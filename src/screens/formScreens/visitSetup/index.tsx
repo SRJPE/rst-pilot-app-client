@@ -24,9 +24,9 @@ export default function VisitSetup() {
 
   return (
     <View>
-      <Box height='full' bg='#fff' padding='25'>
+      <Box h='full' bg='#fff' p='50'>
         <VStack space={4}>
-          <Heading fontSize='lg'>Which stream are you trapping on?</Heading>
+          <Heading>Which stream are you trapping on?</Heading>
           <FormControl w='3/4'>
             <FormControl.Label>Stream</FormControl.Label>
             <Select
