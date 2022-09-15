@@ -15,9 +15,8 @@ import {
   DrawerContentComponentProps,
 } from '@react-navigation/drawer'
 import Ionicons from '@expo/vector-icons/Ionicons'
-
-import MenuButton from './MenuButton'
-import ThemeToggle from '../ThemeToggle'
+import MenuButton from '../components/drawerMenu/MenuButton'
+import ThemeToggle from '../components/drawerMenu/ThemeToggle'
 
 //temporary routing during development into nested form.
 

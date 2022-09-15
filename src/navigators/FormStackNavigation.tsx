@@ -1,14 +1,14 @@
 import { createStackNavigator } from '@react-navigation/stack'
 import { Button } from 'native-base'
 // import { FormStackParamList } from '../../../types/'
-import FishInput from '../FishInput/FishInput'
-import FishProcessing from '../FishProcessing/FishProcessing'
-import VisitSetup from '../VisitSetup/VisitSetup'
-import TrapStatus from '../TrapStatus/TrapStatus'
-import TrapOperations from '../TrapOperations/TrapOperations'
-import HighFlows from '../TrapStatus/HighFlows'
-import HighTemperatures from '../TrapStatus/HighTemperatures'
-import ProgressStepperHeader from './ProgressStepperHeader'
+import FishInput from '../screens/formScreens/fishInput'
+import FishProcessing from '../screens/formScreens/fishProcessing'
+import VisitSetup from '../screens/formScreens/visitSetup'
+import TrapStatus from '../screens/formScreens/trapStatus'
+import TrapOperations from '../screens/formScreens/trapOperations'
+import HighFlows from '../screens/formScreens/trapStatus/HighFlows'
+import HighTemperatures from '../screens/formScreens/trapStatus/HighTemperatures'
+import ProgressStepperHeader from '../components/formContainer/ProgressStepperHeader'
 
 const FormStack = createStackNavigator()
 

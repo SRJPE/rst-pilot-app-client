@@ -1,7 +1,7 @@
 import { Text, VStack, CircleIcon, Flex, Heading, Center } from 'native-base'
-import Logo from '../Shared/Logo'
-import BottomNavigation from './BottomNavigation'
-import TopIcons from './TopIcons'
+import Logo from '../../components/Shared/Logo'
+import BottomNavigation from '../../components/home/HomeNavButtons'
+import TopIcons from '../../components/home/TopIcons'
 
 export default function Home({ navigation }: { navigation: any }) {
   return (

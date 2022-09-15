@@ -10,8 +10,8 @@ import {
   VStack,
   HStack,
 } from 'native-base'
-import { trapStatusSchema } from '../../../helpers/yupValidations'
-import { TrapStatusInitialValues } from '../../../interfaces'
+import { trapStatusSchema } from '../../../services/utils/helpers/yupValidations'
+import { TrapStatusInitialValues } from '../../../services/utils/interfaces'
 
 const trapStatuses = [
   { label: 'Trap Functioning Normally', value: 'TFN' },

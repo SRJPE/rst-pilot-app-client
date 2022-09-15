@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-  Button,
-  GestureResponderEvent,
-  Text,
-  TextInput,
-  View,
-} from 'react-native'
+import { Button, Text, TextInput, View } from 'react-native'
 import { Formik } from 'formik'
 
 // interface MyFormValues {

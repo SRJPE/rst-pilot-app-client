@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Heading,
   Icon,
@@ -10,38 +9,27 @@ import {
 } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-export default function NonFunctionalTrap() {
-  const handlePressViewMonitoringProtocols = () => {
-    console.log('🚀 ~ pressed')
-  }
+export default function HighFlows() {
   const handlePressCallTeamLead = () => {
     console.log('🚀 ~ pressed')
   }
-
+  const handlePressTakePhoto = () => {
+    console.log('🚀  ~ pressed')
+  }
   return (
     <View flex={1} justifyContent='center' alignItems='center'>
       <VStack space={10} p='10'>
         <Heading textAlign='center'>
-          {'Please refer to monitoring protocols to \n safely handle the trap.'}
+          {
+            'Flow is high and unsafe. Please remove your \n trap from the water.'
+          }
         </Heading>
-        <Button
-          rounded='xs'
-          bg='primary'
+        <Image
           alignSelf='center'
-          py='3'
-          px='16'
-          borderRadius='5'
-          onPress={handlePressViewMonitoringProtocols}
-        >
-          <Text
-            textTransform='uppercase'
-            fontSize='sm'
-            fontWeight='bold'
-            color='#FFFFFF'
-          >
-            View Monitoring Protocols
-          </Text>
-        </Button>
+          source={require('../../../../assets/warning.png')}
+          alt='Warning Icon'
+          size='2xl'
+        />
         <Button
           rounded='xs'
           bg='primary'
@@ -59,6 +47,25 @@ export default function NonFunctionalTrap() {
             color='#FFFFFF'
           >
             Call Team Lead
+          </Text>
+        </Button>
+        <Button
+          rounded='xs'
+          bg='primary'
+          alignSelf='center'
+          py='3'
+          px='20'
+          borderRadius='5'
+          onPress={handlePressTakePhoto}
+          leftIcon={<Icon as={Ionicons} name='camera' size='sm' />}
+        >
+          <Text
+            textTransform='uppercase'
+            fontSize='sm'
+            fontWeight='bold'
+            color='#FFFFFF'
+          >
+            Take Photo
           </Text>
         </Button>
       </VStack>

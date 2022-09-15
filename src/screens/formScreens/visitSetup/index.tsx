@@ -3,15 +3,13 @@ import {
   View,
   Box,
   Select,
-  Text,
   FormControl,
   CheckIcon,
-  WarningOutlineIcon,
   Heading,
   Input,
   VStack,
 } from 'native-base'
-import CrewDropDown from './CrewDropDown'
+import CrewDropDown from '../../../components/form/CrewDropDown'
 
 const testStreams = [
   { label: 'Default Stream 1', value: 'DS1' },

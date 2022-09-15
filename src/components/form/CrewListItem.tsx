@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 import { Avatar, HStack } from 'native-base'
-import { getInitials } from '../../../utils'
+import { getInitials } from '../../services/utils'
 
 export default function CrewListItem(props: any) {
   return (
