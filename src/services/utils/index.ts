@@ -9,3 +9,42 @@ export const getInitials = (name: string) => {
 
   return result
 }
+
+// standard form flow steps
+const steps = [
+  { name: 'Visit Setup', completed: false },
+  { name: 'Trap Status', completed: false },
+  { name: 'Trap Operations', completed: false },
+  { name: 'Fish Processing', completed: false },
+  { name: 'Fish Input', completed: false },
+] as Array<any>
+
+//return the current position in the standard form flow
+export const getPosition = (name: string) => {
+  for (let i = 0; i < steps.length; i++) {
+    if (steps[i].name === name) {
+      return i + 1
+    }
+  }
+}
+//return the string of the next step in the standard form flow
+export const goForward = (name: string) => {
+  let index = 0
+  for (let i = 0; i < steps.length; i++) {
+    if (steps[i].name === name) {
+      index = i
+    }
+  }
+  return steps[index + 1]?.name || steps[steps.length - 1]?.name
+}
+
+//return the string of the previous step in the standard form flow
+export const goBack = (name: string) => {
+  let index = 0
+  for (let i = 0; i < steps.length; i++) {
+    if (steps[i].name === name) {
+      index = i
+    }
+  }
+  return steps[index - 1]?.name || steps[0]?.name
+}

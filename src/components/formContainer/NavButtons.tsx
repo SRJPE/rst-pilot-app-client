@@ -1,19 +1,21 @@
+import { useCallback } from 'react'
 import { Box, HStack, Text, Button } from 'native-base'
+import { goForward, goBack } from '../../services/utils'
+import { ParamListBase, RouteProp, useRoute } from '@react-navigation/native'
 
 export default function NavButtons({ navigation }: { navigation: any }) {
-  const steps = [
-    { name: 'Visit Setup', completed: false },
-    { name: 'Trap Status', completed: false },
-    { name: 'Trap Operations', completed: false },
-    { name: 'Fish Processing', completed: false },
-    { name: 'Fish Input', completed: false },
-  ] as Array<any>
+  const route: RouteProp<ParamListBase, string> = useRoute()
+
+  /* eslint-disable */
+  // eslint-disable-next-line
+  const currentPage = route?.params?.screen //?????
+  /* eslint-enable */
 
   const handleBack = () => {
-    navigation.goBack()
+    navigation.navigate('Trap Visit Form', { screen: goBack(currentPage) })
   }
   const handleNext = () => {
-    navigation.navigate('Trap Status form', { screen: 'Visit Setup' })
+    navigation.navigate('Trap Visit Form', { screen: goForward(currentPage) })
   }
 
   return (
