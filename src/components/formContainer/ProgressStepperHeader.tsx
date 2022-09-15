@@ -17,7 +17,7 @@ export default function ProgressStepperHeader(props: any) {
         </HStack>
         <Box w='100%'>
           <Progress
-            bg='coolGray.100'
+            bg='secondary'
             _filledTrack={{
               bg: 'primary',
             }}

@@ -11,12 +11,12 @@ export default function NavButtons({ navigation }: { navigation: any }) {
   const currentPage = route?.params?.screen //?????
   /* eslint-enable */
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     navigation.navigate('Trap Visit Form', { screen: goBack(currentPage) })
-  }
-  const handleNext = () => {
+  }, [currentPage])
+  const handleNext = useCallback(() => {
     navigation.navigate('Trap Visit Form', { screen: goForward(currentPage) })
-  }
+  }, [currentPage])
 
   return (
     <Box bg='themeGrey' py='5' px='3' maxWidth='100%'>
