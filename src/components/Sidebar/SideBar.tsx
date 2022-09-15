@@ -7,7 +7,7 @@ import {
   IconButton,
   useColorModeValue,
   Box,
-  Center,
+  Divider,
 } from 'native-base'
 import {
   DrawerContentScrollView,
@@ -18,6 +18,8 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 
 import MenuButton from './MenuButton'
 import ThemeToggle from '../ThemeToggle'
+
+//temporary routing during development into nested form.
 
 export default function Sidebar(props: DrawerContentComponentProps) {
   const { state, navigation } = props
@@ -112,62 +114,65 @@ export default function Sidebar(props: DrawerContentComponentProps) {
           >
             Trap Visit Form
           </MenuButton>
-          <MenuButton
-            active={currentRoute === 'Visit Setup'}
-            onPress={handlePressMenuVisitSetup}
-            icon='clipboard'
-          >
-            VisitSetup
-          </MenuButton>
-          <MenuButton
-            active={currentRoute === 'Trap Status'}
-            onPress={handlePressMenuTrapStatus}
-            icon='clipboard'
-          >
-            Trap Status
-          </MenuButton>
-          <MenuButton
-            active={currentRoute === 'Trap Operations'}
-            onPress={handlePressMenuTrapOperations}
-            icon='clipboard'
-          >
-            Trap Operations
-          </MenuButton>
-          <MenuButton
-            active={currentRoute === 'Fish Input'}
-            onPress={handlePressMenuFishInput}
-            icon='clipboard'
-          >
-            Fish Input
-          </MenuButton>
-          <MenuButton
-            active={currentRoute === 'Fish Processing'}
-            onPress={handlePressMenuFishProcessing}
-            icon='clipboard'
-          >
-            Fish Processing
-          </MenuButton>
-          <MenuButton
-            active={currentRoute === 'High Flows'}
-            onPress={handlePressMenuHighFlows}
-            icon='clipboard'
-          >
-            High Flows
-          </MenuButton>
-          <MenuButton
-            active={currentRoute === 'High Temperatures'}
-            onPress={handlePressMenuHighTemperatures}
-            icon='clipboard'
-          >
-            High Temperatures
-          </MenuButton>
-          <MenuButton
-            active={currentRoute === 'Non Functional Trap'}
-            onPress={handlePressMenuNonFunctionalTrap}
-            icon='clipboard'
-          >
-            Non Functional Trap
-          </MenuButton>
+          <Divider />
+          <VStack ml='8'>
+            <MenuButton
+              active={currentRoute === 'Visit Setup'}
+              onPress={handlePressMenuVisitSetup}
+              icon='clipboard'
+            >
+              VisitSetup
+            </MenuButton>
+            <MenuButton
+              active={currentRoute === 'Trap Status'}
+              onPress={handlePressMenuTrapStatus}
+              icon='clipboard'
+            >
+              Trap Status
+            </MenuButton>
+            <MenuButton
+              active={currentRoute === 'Trap Operations'}
+              onPress={handlePressMenuTrapOperations}
+              icon='clipboard'
+            >
+              Trap Operations
+            </MenuButton>
+            <MenuButton
+              active={currentRoute === 'Fish Input'}
+              onPress={handlePressMenuFishInput}
+              icon='clipboard'
+            >
+              Fish Input
+            </MenuButton>
+            <MenuButton
+              active={currentRoute === 'Fish Processing'}
+              onPress={handlePressMenuFishProcessing}
+              icon='clipboard'
+            >
+              Fish Processing
+            </MenuButton>
+            <MenuButton
+              active={currentRoute === 'High Flows'}
+              onPress={handlePressMenuHighFlows}
+              icon='clipboard'
+            >
+              High Flows
+            </MenuButton>
+            <MenuButton
+              active={currentRoute === 'High Temperatures'}
+              onPress={handlePressMenuHighTemperatures}
+              icon='clipboard'
+            >
+              High Temperatures
+            </MenuButton>
+            <MenuButton
+              active={currentRoute === 'Non Functional Trap'}
+              onPress={handlePressMenuNonFunctionalTrap}
+              icon='clipboard'
+            >
+              Non Functional Trap
+            </MenuButton>
+          </VStack>
         </DrawerContentScrollView>
         {/* <Center>
           <ThemeToggle />

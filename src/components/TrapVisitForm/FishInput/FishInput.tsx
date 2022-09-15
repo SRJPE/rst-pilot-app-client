@@ -14,6 +14,8 @@ import { Formik } from 'formik'
 //   password: string
 // }
 
+//Simple formik demo component
+
 const FishInput = () => {
   const initialValues = { firstName: '', email: '', password: '' }
 

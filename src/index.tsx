@@ -20,7 +20,6 @@ export default function Navigator() {
   return (
     <Drawer.Navigator
       initialRouteName='Home'
-      screenOptions={{}}
       drawerContent={props => <Sidebar {...props} />}
     >
       <Drawer.Screen name='Home' component={Home} />

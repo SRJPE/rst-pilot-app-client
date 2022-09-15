@@ -14,7 +14,6 @@ export default function ThemeToggle() {
       <Switch
         isChecked={colorMode === 'light'}
         onToggle={toggleColorMode}
-        // onThumbColor='indigo.500'
         offThumbColor='primary'
         onTrackColor='primary'
         offTrackColor='#FFFFFF'

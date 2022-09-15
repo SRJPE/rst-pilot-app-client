@@ -3,8 +3,6 @@ import { Formik } from 'formik'
 import {
   Box,
   Select,
-  Text,
-  Button,
   FormControl,
   CheckIcon,
   Heading,
@@ -44,7 +42,7 @@ export default function TrapStatus() {
       onSubmit={result => console.log('RESULT:', result)}
     >
       {({ handleChange, handleBlur, handleSubmit, values }) => (
-        <Box height='full' bg='#fff' padding='15'>
+        <Box h='full' bg='#fff' p='15'>
           <VStack space={4}>
             <Heading fontSize='lg'>Is the Trap functioning normally?</Heading>
             <FormControl w='3/4'>

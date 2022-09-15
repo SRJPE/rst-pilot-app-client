@@ -1,12 +1,8 @@
 import { useState } from 'react'
 import {
-  View,
   Box,
-  Select,
   Text,
   FormControl,
-  CheckIcon,
-  WarningOutlineIcon,
   Heading,
   Input,
   VStack,
