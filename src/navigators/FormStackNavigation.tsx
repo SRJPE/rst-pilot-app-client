@@ -9,6 +9,7 @@ import TrapOperations from '../screens/formScreens/trapOperations'
 import HighFlows from '../screens/formScreens/trapStatus/HighFlows'
 import HighTemperatures from '../screens/formScreens/trapStatus/HighTemperatures'
 import ProgressStepperHeader from '../components/formContainer/ProgressStepperHeader'
+import NonFunctionalTrap from '../screens/formScreens/trapStatus/NonFunctionalTrap'
 
 const FormStack = createStackNavigator()
 
@@ -19,27 +20,49 @@ export default function FormStackNavigation() {
         name='Visit Setup'
         component={VisitSetup}
         options={{
-          headerTitle: props => <ProgressStepperHeader {...props} />,
+          // headerTitle: props => <ProgressStepperHeader {...props} />,
+          header: props => <ProgressStepperHeader {...props} />,
         }}
       />
       <FormStack.Screen
-        name='Trap Status form'
+        name='Trap Status'
         component={TrapStatus}
-        options={{ headerTitle: props => <ProgressStepperHeader {...props} /> }}
-        // options={{ headerShown: false }}
+        options={{
+          // headerTitle: props => <ProgressStepperHeader {...props} />,
+          header: props => <ProgressStepperHeader {...props} />,
+        }}
       />
       <FormStack.Screen
         name='Trap Operations'
         component={TrapOperations}
-        options={{ headerTitle: props => <ProgressStepperHeader {...props} /> }}
+        options={{
+          // headerTitle: props => <ProgressStepperHeader {...props} />,
+          header: props => <ProgressStepperHeader {...props} />,
+        }}
       />
-      <FormStack.Screen name='Fish Input' component={FishInput} />
-      <FormStack.Screen name='Fish Processing' component={FishProcessing} />
+      <FormStack.Screen
+        name='Fish Input'
+        component={FishInput}
+        options={{
+          header: props => <ProgressStepperHeader {...props} />,
+        }}
+      />
+      <FormStack.Screen
+        name='Fish Processing'
+        component={FishProcessing}
+        options={{
+          header: props => <ProgressStepperHeader {...props} />,
+        }}
+      />
       <FormStack.Group screenOptions={{ presentation: 'modal' }}>
         <FormStack.Screen name='High Flows' component={HighFlows} />
         <FormStack.Screen
           name='High Temperatures'
           component={HighTemperatures}
+        />
+        <FormStack.Screen
+          name='Non Functional Trap'
+          component={NonFunctionalTrap}
         />
       </FormStack.Group>
     </FormStack.Navigator>
