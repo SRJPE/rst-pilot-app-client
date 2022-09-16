@@ -18,7 +18,12 @@ interface ValuesI {
   fishProcessed: any[]
   lifeStage: any[]
   markType: any[]
+  markColor: any[]
   run: any[]
+  releasePurpose: any[]
+  coneDebrisVolume: any[]
+  visitType: any[]
+  lightCondition: any[]
 }
 
 interface APIResponseI {
@@ -33,7 +38,12 @@ const initialState: InitialStateI = {
     fishProcessed: [],
     lifeStage: [],
     markType: [],
+    markColor: [],
     run: [],
+    releasePurpose: [],
+    coneDebrisVolume: [],
+    visitType: [],
+    lightCondition: [],
   },
 }
 
