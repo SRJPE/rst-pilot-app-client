@@ -1,27 +1,18 @@
-import DropDownPicker from 'react-native-dropdown-picker'
 import { useState } from 'react'
-import { View, Image } from 'react-native'
-import { Avatar, HStack } from 'native-base'
+import { View, Avatar, HStack } from 'native-base'
+import DropDownPicker from 'react-native-dropdown-picker'
 import CrewListItem from './CrewListItem'
 
 const CrewAvatar = () => {
-  return (
-    <Avatar
-      bg='primary'
-      mr='1'
-      alignSelf='center'
-      size='sm'
-      source={{
-        uri: 'https://bit.ly/broken-link/?',
-      }}
-    ></Avatar>
-  )
+  return <Avatar bg='primary' mr='1' alignSelf='center' size='sm'></Avatar>
 }
 
-export default function CrewDropDown() {
-  const [open, setOpen] = useState(false)
+export default function CrewDropDown(setCrew: any) {
+  const [open, setOpen] = useState(false as boolean)
+  const [value, setValue] = useState([] as Array<any>)
 
-  const [value, setValue] = useState([])
+  console.log('🚀 ~ CrewDropDown ~ value', value)
+
   const [items, setItems] = useState([
     {
       label: 'Ben Pintel',
@@ -63,7 +54,7 @@ export default function CrewDropDown() {
       value: 'David Gilmour',
       icon: CrewAvatar,
     },
-  ])
+  ] as Array<any>)
 
   return (
     <View
@@ -72,7 +63,6 @@ export default function CrewDropDown() {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        // paddingHorizontal: 1,
       }}
     >
       <DropDownPicker
