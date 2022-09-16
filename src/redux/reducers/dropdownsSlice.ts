@@ -37,7 +37,7 @@ const initialState: InitialStateI = {
   },
 }
 
-// Async API calls
+// Async actions API calls
 export const getTrapVisitDropdownValues = createAsyncThunk(
   'dropdowns/getTrapVisitDropdownValues',
   async () => {
@@ -63,7 +63,7 @@ export const dropdownsSlice = createSlice({
     },
   },
   extraReducers: {
-    // Add reducers for async and additional action types here, and handle loading state as needed
+    // Add async and additional action types here, and handle loading state as needed
     [getTrapVisitDropdownValues.pending.type]: (state, action) => {
       state.status = pendingStatus
     },
