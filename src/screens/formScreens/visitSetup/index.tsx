@@ -88,9 +88,8 @@ export default function VisitSetup() {
                       onChangeText={handleChange('trapSite')}
                       onBlur={handleBlur('trapSite')}
                       value={values.trapSite}
-                    >
-                      Default Trap Site value
-                    </Input>
+                      placeholder='Default Trap Site value'
+                    ></Input>
                   </FormControl>
                   <FormControl w='3/4'>
                     <FormControl.Label>Trap Sub Site</FormControl.Label>
@@ -98,9 +97,8 @@ export default function VisitSetup() {
                       onChangeText={handleChange('trapSubSite')}
                       onBlur={handleBlur('trapSubSite')}
                       value={values.trapSubSite}
-                    >
-                      Default Trap Site value
-                    </Input>
+                      placeholder='Default Trap Site value'
+                    ></Input>
                   </FormControl>
                   <FormControl w='3/4'>
                     <FormControl.Label>Crew</FormControl.Label>
