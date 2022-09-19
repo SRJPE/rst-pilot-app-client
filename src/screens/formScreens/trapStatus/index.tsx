@@ -81,11 +81,10 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
         <Box h='full' bg='#fff' p='10%'>
           <VStack space={8}>
             <Heading>Is the Trap functioning normally?</Heading>
-            <FormControl w='3/4'>
+            <FormControl>
               <FormControl.Label>Trap Status</FormControl.Label>
               <Select
                 selectedValue={status}
-                width='133%'
                 accessibilityLabel='Status'
                 placeholder='Status'
                 _selectedItem={{
@@ -111,7 +110,6 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                 </FormControl.Label>
                 <Select
                   selectedValue={reasonNotFunc}
-                  minWidth='200'
                   accessibilityLabel='Reason'
                   placeholder='Reason'
                   _selectedItem={{

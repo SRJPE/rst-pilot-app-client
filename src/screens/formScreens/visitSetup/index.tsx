@@ -54,11 +54,10 @@ export default function VisitSetup() {
           <Box h='full' bg='#fff' p='10%'>
             <VStack space={8}>
               <Heading>Which stream are you trapping on?</Heading>
-              <FormControl w='3/4'>
+              <FormControl>
                 <FormControl.Label>Stream</FormControl.Label>
                 <Select
                   selectedValue={stream}
-                  width='133%'
                   accessibilityLabel='Stream'
                   placeholder='Stream'
                   _selectedItem={{
