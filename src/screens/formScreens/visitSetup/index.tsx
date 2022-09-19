@@ -58,7 +58,7 @@ export default function VisitSetup() {
                 <FormControl.Label>Stream</FormControl.Label>
                 <Select
                   selectedValue={stream}
-                  width='135%'
+                  width='133%'
                   accessibilityLabel='Stream'
                   placeholder='Stream'
                   _selectedItem={{
@@ -80,7 +80,7 @@ export default function VisitSetup() {
               {stream && (
                 <>
                   <Heading fontSize='lg'>Confirm the following values</Heading>
-                  <FormControl w='3/4'>
+                  <FormControl>
                     <FormControl.Label>Trap Site</FormControl.Label>
                     <Input
                       onChangeText={handleChange('trapSite')}
@@ -89,7 +89,7 @@ export default function VisitSetup() {
                       placeholder='Default Trap Site value'
                     ></Input>
                   </FormControl>
-                  <FormControl w='3/4'>
+                  <FormControl>
                     <FormControl.Label>Trap Sub Site</FormControl.Label>
                     <Input
                       onChangeText={handleChange('trapSubSite')}
@@ -98,7 +98,7 @@ export default function VisitSetup() {
                       placeholder='Default Trap Site value'
                     ></Input>
                   </FormControl>
-                  <FormControl w='3/4'>
+                  <FormControl>
                     <FormControl.Label>Crew</FormControl.Label>
                     <CrewDropDown setCrew={setCrew} />
                   </FormControl>

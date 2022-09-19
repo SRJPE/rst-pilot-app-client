@@ -85,7 +85,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
               <FormControl.Label>Trap Status</FormControl.Label>
               <Select
                 selectedValue={status}
-                width='135%'
+                width='133%'
                 accessibilityLabel='Status'
                 placeholder='Status'
                 _selectedItem={{
@@ -105,7 +105,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
               </Select>
             </FormControl>
             {status === 'Trap functioning, but not normally' && (
-              <FormControl w='3/4'>
+              <FormControl>
                 <FormControl.Label>
                   Reason For Trap Not Functioning
                 </FormControl.Label>
