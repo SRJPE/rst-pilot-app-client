@@ -47,6 +47,8 @@ export default function TrapStatus() {
 
   useEffect(() => {
     console.log('dropdown values on initial load: ', dropdownValues)
+    // Dispatch reducers' actions to make changes to that reducer's state
+    // Parameters can be passed to these actions and will be recognized as the 'action.payload'
     dispatch(getTrapVisitDropdownValues())
   }, [])
 
