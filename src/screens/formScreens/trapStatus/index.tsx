@@ -14,7 +14,7 @@ import {
 } from 'native-base'
 import { trapStatusSchema } from '../../../services/utils/helpers/yupValidations'
 import { TrapStatusInitialValues } from '../../../services/utils/interfaces'
-// import { Button } from 'react-native'
+import { Button as RNButton } from 'react-native'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../../redux/store'
 import {
@@ -22,15 +22,6 @@ import {
   clearValuesFromDropdown,
 } from '../../../redux/reducers/dropdownsSlice'
 
-const trapStatuses = [
-  { label: 'Trap Functioning Normally', value: 'Trap Functioning Normally' },
-  {
-    label: 'Trap Functioning but not Normally',
-    value: 'Trap Functioning but not Normally',
-  },
-  { label: 'Trap Not Functioning', value: 'Trap Not Functioning' },
-  { label: 'Trap Not in Service', value: 'Trap Not in Service' },
-]
 const reasonsForTrapNotFunctioning = [
   { label: 'High Rain', value: 'High Rain' },
   { label: 'Broken Trap', value: 'Broken Trap' },
@@ -40,10 +31,7 @@ const reasonsForTrapNotFunctioning = [
 export default function TrapStatus({ navigation }: { navigation: any }) {
   const [status, setStatus] = useState('' as string)
   const [reasonNotFunc, setReasonNotFunc] = useState('' as string)
-  // const [flowMeasure, setFlowMeasure] = useState('' as string)
-  // const [temp, setTemp] = useState('' as string)
-  // const [turbidity, setTurbidity] = useState('' as string)
-  const [initialValues, setInitialValues] = useState({
+  const [initialValues] = useState({
     trapStatus: '',
     reasonNotFunc: '',
     flowMeasure: '',
@@ -70,16 +58,16 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
     // Parameters can be passed to these actions and will be recognized as the 'action.payload'
     dispatch(getTrapVisitDropdownValues())
   }, [])
+  const { trapFunctionality } = dropdownValues.values
 
   return (
     <Formik
       initialValues={initialValues}
+      // validationSchema={trapStatusSchema}
       onSubmit={values => {
         values.trapStatus = status
         values.reasonNotFunc = reasonNotFunc
         console.log('🚀 ~ TrapStatus ~ values', values)
-        //currently displaying proper values on submission
-        // need to improve validation
       }}
     >
       {({
@@ -90,10 +78,10 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
         errors,
         touched,
       }) => (
-        <Box h='full' bg='#fff' p='50'>
-          <VStack space={4}>
+        <Box h='full' bg='#fff' p='10%'>
+          <VStack space={8}>
             <Heading>Is the Trap functioning normally?</Heading>
-            <FormControl w='3/4' isRequired>
+            <FormControl w='3/4'>
               <FormControl.Label>Trap Status</FormControl.Label>
               <Select
                 selectedValue={status}
@@ -107,17 +95,17 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                 mt={1}
                 onValueChange={itemValue => setStatus(itemValue)}
               >
-                {trapStatuses.map((item, idx) => (
+                {trapFunctionality.map((item: any) => (
                   <Select.Item
-                    key={idx}
-                    label={item.label}
-                    value={item.value}
+                    key={item.id}
+                    label={item.definition}
+                    value={item.definition}
                   />
                 ))}
               </Select>
             </FormControl>
-            {status === 'Trap Functioning but not Normally' && (
-              <FormControl w='3/4' isRequired>
+            {status === 'Trap functioning, but not normally' && (
+              <FormControl w='3/4'>
                 <FormControl.Label>
                   Reason For Trap Not Functioning
                 </FormControl.Label>
@@ -127,7 +115,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                   accessibilityLabel='Reason'
                   placeholder='Reason'
                   _selectedItem={{
-                    bg: 'teal.600',
+                    bg: 'primary',
                     endIcon: <CheckIcon size='5' />,
                   }}
                   mt={1}
@@ -236,33 +224,24 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
             </Button>
             <Button
               /* 
-// @ts-ignore */
+              // @ts-ignore */
               onPress={handleSubmit}
               title='Submit'
               variant='solid'
-              backgroundColor='amber.800'
+              backgroundColor='primary'
             >
               SUBMIT
             </Button>
           </VStack>
-          {/*           
-// @ts-ignore */}
-          {/* <Button onPress={handleSubmit} colorScheme='pink'>
-            Submit
-          </Button> */}
-          {/* <Button onPress={handleSubmit}>Submit</Button> */}
-          <Button
-            // title='Log dropdown values from redux'
+
+          <RNButton
+            title='Log dropdown values from redux'
             onPress={() => console.log(dropdownValues)}
-          >
-            'Log dropdown values from redux'
-          </Button>
-          <Button
-            // title='Empty "markType" from redux state'
+          />
+          <RNButton
+            title='Empty "markType" from redux state'
             onPress={() => dispatch(clearValuesFromDropdown('markType'))}
-          >
-            Empty "markType" from redux state{' '}
-          </Button>
+          />
         </Box>
       )}
     </Formik>

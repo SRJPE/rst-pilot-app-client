@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Formik } from 'formik'
 import {
-  View,
   Box,
   Select,
   FormControl,
@@ -11,7 +11,8 @@ import {
   Button,
 } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
-import { Formik } from 'formik'
+import { TrapVisitInitialValues } from '../../../services/utils/interfaces'
+import { trapVisitSchema } from '../../../services/utils/helpers/yupValidations'
 
 const testStreams = [
   { label: 'Default Stream 1', value: 'DS1' },
@@ -24,24 +25,21 @@ const testStreams = [
 export default function VisitSetup() {
   const [stream, setStream] = useState('' as string)
   const [crew, setCrew] = useState([] as Array<any>)
+  const [initialValues] = useState({
+    stream: '',
+    trapSite: '',
+    trapSubSite: '',
+    crew: [],
+  } as TrapVisitInitialValues)
 
   return (
     <Formik
-      initialValues={{
-        stream: '',
-        trapSite: '',
-        trapSubSite: '',
-        crew: [],
-      }}
+      initialValues={initialValues}
+      // validationSchema={trapVisitSchema}
       onSubmit={(values: any) => {
         values.stream = stream
         values.crew = [...crew]
-
-        console.log('🚀 ~ VisitSetup ~ crew', crew)
         console.log('🚀 ~ TrapStatus ~ values', values)
-
-        // currently not displaying proper values on submission
-        // need to improve validation
       }}
     >
       {({
@@ -53,10 +51,10 @@ export default function VisitSetup() {
         touched,
       }) => (
         <>
-          <Box h='full' bg='#fff' p='50'>
-            <VStack space={4}>
+          <Box h='full' bg='#fff' p='10%'>
+            <VStack space={8}>
               <Heading>Which stream are you trapping on?</Heading>
-              <FormControl w='3/4' isRequired>
+              <FormControl w='3/4'>
                 <FormControl.Label>Stream</FormControl.Label>
                 <Select
                   selectedValue={stream}
@@ -114,7 +112,7 @@ export default function VisitSetup() {
               onPress={handleSubmit}
               title='Submit'
               variant='solid'
-              backgroundColor='amber.400'
+              backgroundColor='primary'
             >
               SUBMIT
             </Button>
