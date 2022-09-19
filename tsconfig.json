@@ -3,7 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "allowSyntheticDefaultImports": true,
-    "jsx": "react-native"
+    "jsx": "react-native",
+    "typeRoots": ["./src/types"]
     // "lib": ["dom", "esnext"],
     // "moduleResolution": "node",
     // "noEmit": true,

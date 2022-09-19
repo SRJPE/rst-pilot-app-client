@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Formik } from 'formik'
 import {
   Box,
@@ -14,6 +14,13 @@ import {
 } from 'native-base'
 import { trapStatusSchema } from '../../../services/utils/helpers/yupValidations'
 import { TrapStatusInitialValues } from '../../../services/utils/interfaces'
+import { Button } from 'react-native'
+import { useSelector, useDispatch } from 'react-redux'
+import { AppDispatch } from '../../../redux/store'
+import {
+  getTrapVisitDropdownValues,
+  clearValuesFromDropdown,
+} from '../../../redux/reducers/dropdownsSlice'
 
 const trapStatuses = [
   { label: 'Trap Functioning Normally', value: 'Trap Functioning Normally' },
@@ -54,9 +61,20 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
     navigation.navigate('Non Functional Trap')
   }
 
+  const dispatch = useDispatch<AppDispatch>()
+  const dropdownValues = useSelector((state: any) => state.dropdowns)
+
+  useEffect(() => {
+    console.log('dropdown values on initial load: ', dropdownValues)
+    // Dispatch reducers' actions to make changes to that reducer's state
+    // Parameters can be passed to these actions and will be recognized as the 'action.payload'
+    dispatch(getTrapVisitDropdownValues())
+  }, [])
+
   return (
     <Formik
       initialValues={initialValues}
+<<<<<<< HEAD
       onSubmit={values => {
         values.trapStatus = status
         values.reasonNotFunc = reasonNotFunc
@@ -64,6 +82,10 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
         //currently displaying proper values on submission
         // need to improve validation
       }}
+=======
+      validationSchema={trapStatusSchema}
+      onSubmit={(result) => console.log('RESULT:', result)}
+>>>>>>> 2ac0781eb2fd9f34f708fac7989c3bbbfb6e27f2
     >
       {({
         handleChange,
@@ -88,7 +110,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                   endIcon: <CheckIcon size='5' />,
                 }}
                 mt={1}
-                onValueChange={itemValue => setStatus(itemValue)}
+                onValueChange={(itemValue) => setStatus(itemValue)}
               >
                 {trapStatuses.map((item, idx) => (
                   <Select.Item
@@ -114,7 +136,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                     endIcon: <CheckIcon size='5' />,
                   }}
                   mt={1}
-                  onValueChange={itemValue => setReasonNotFunc(itemValue)}
+                  onValueChange={(itemValue) => setReasonNotFunc(itemValue)}
                 >
                   {reasonsForTrapNotFunctioning.map((item, idx) => (
                     <Select.Item
@@ -228,6 +250,23 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
               SUBMIT
             </Button>
           </VStack>
+<<<<<<< HEAD
+=======
+          {/*           
+// @ts-ignore */}
+          {/* <Button onPress={handleSubmit} colorScheme='pink'>
+            Submit
+          </Button> */}
+          {/* <Button onPress={handleSubmit}>Submit</Button> */}
+          <Button
+            title='Log dropdown values from redux'
+            onPress={() => console.log(dropdownValues)}
+          />
+          <Button
+            title='Empty "markType" from redux state'
+            onPress={() => dispatch(clearValuesFromDropdown('markType'))}
+          />
+>>>>>>> 2ac0781eb2fd9f34f708fac7989c3bbbfb6e27f2
         </Box>
       )}
     </Formik>
