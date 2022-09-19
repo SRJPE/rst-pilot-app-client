@@ -39,7 +39,7 @@ export default function VisitSetup() {
       onSubmit={(values: any) => {
         values.stream = stream
         values.crew = [...crew]
-        console.log('🚀 ~ TrapStatus ~ values', values)
+        console.log('🚀 ~ VisitSetup ~ values', values)
       }}
     >
       {({
@@ -58,7 +58,7 @@ export default function VisitSetup() {
                 <FormControl.Label>Stream</FormControl.Label>
                 <Select
                   selectedValue={stream}
-                  minWidth='200'
+                  width='135%'
                   accessibilityLabel='Stream'
                   placeholder='Stream'
                   _selectedItem={{

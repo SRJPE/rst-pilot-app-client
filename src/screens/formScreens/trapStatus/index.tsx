@@ -64,7 +64,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
     <Formik
       initialValues={initialValues}
       // validationSchema={trapStatusSchema}
-      onSubmit={values => {
+      onSubmit={(values: any) => {
         values.trapStatus = status
         values.reasonNotFunc = reasonNotFunc
         console.log('🚀 ~ TrapStatus ~ values', values)
@@ -85,7 +85,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
               <FormControl.Label>Trap Status</FormControl.Label>
               <Select
                 selectedValue={status}
-                minWidth='200'
+                width='135%'
                 accessibilityLabel='Status'
                 placeholder='Status'
                 _selectedItem={{
@@ -134,7 +134,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
             {status.length > 0 && (
               <>
                 <Heading fontSize='lg'>Environmental Conditions</Heading>
-                <HStack space={6}>
+                <HStack space={5} width='125%'>
                   <FormControl w='1/4'>
                     <FormControl.Label>Flow Measure</FormControl.Label>
                     <Input
@@ -158,8 +158,8 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                   <FormControl w='1/4'>
                     <FormControl.Label>Water Turbidity</FormControl.Label>
                     <Input
-                      onChangeText={handleChange('turbidity')}
-                      onBlur={handleBlur('turbidity')}
+                      onChangeText={handleChange('waterTurbidity')}
+                      onBlur={handleBlur('waterTurbidity')}
                       value={values.waterTurbidity}
                       placeholder='Numeric Value'
                       keyboardType='numeric'
@@ -168,60 +168,62 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                 </HStack>
               </>
             )}
-            <Button
-              rounded='xs'
-              bg='primary'
-              alignSelf='center'
-              py='3'
-              px='16'
-              borderRadius='5'
-              onPress={handlePressTestFlow}
-            >
-              <Text
-                textTransform='uppercase'
-                fontSize='sm'
-                fontWeight='bold'
-                color='#FFFFFF'
+            <HStack space={4}>
+              <Button
+                rounded='xs'
+                bg='primary'
+                alignSelf='center'
+                py='3'
+                px='16'
+                borderRadius='5'
+                onPress={handlePressTestFlow}
               >
-                TEST FLOW
-              </Text>
-            </Button>
-            <Button
-              rounded='xs'
-              bg='primary'
-              alignSelf='center'
-              py='3'
-              px='16'
-              borderRadius='5'
-              onPress={handlePressTestTemp}
-            >
-              <Text
-                textTransform='uppercase'
-                fontSize='sm'
-                fontWeight='bold'
-                color='#FFFFFF'
+                <Text
+                  textTransform='uppercase'
+                  fontSize='sm'
+                  fontWeight='bold'
+                  color='#FFFFFF'
+                >
+                  TEST FLOW
+                </Text>
+              </Button>
+              <Button
+                rounded='xs'
+                bg='primary'
+                alignSelf='center'
+                py='3'
+                px='16'
+                borderRadius='5'
+                onPress={handlePressTestTemp}
               >
-                TEST TEMP
-              </Text>
-            </Button>
-            <Button
-              rounded='xs'
-              bg='primary'
-              alignSelf='center'
-              py='3'
-              px='16'
-              borderRadius='5'
-              onPress={handlePressTestNonFunc}
-            >
-              <Text
-                textTransform='uppercase'
-                fontSize='sm'
-                fontWeight='bold'
-                color='#FFFFFF'
+                <Text
+                  textTransform='uppercase'
+                  fontSize='sm'
+                  fontWeight='bold'
+                  color='#FFFFFF'
+                >
+                  TEST TEMP
+                </Text>
+              </Button>
+              <Button
+                rounded='xs'
+                bg='primary'
+                alignSelf='center'
+                py='3'
+                px='16'
+                borderRadius='5'
+                onPress={handlePressTestNonFunc}
               >
-                TEST NON-FUNC
-              </Text>
-            </Button>
+                <Text
+                  textTransform='uppercase'
+                  fontSize='sm'
+                  fontWeight='bold'
+                  color='#FFFFFF'
+                >
+                  TEST NON-FUNC
+                </Text>
+              </Button>
+            </HStack>
             <Button
               /* 
               // @ts-ignore */
