@@ -1,14 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Box, HStack, VStack, Text, Progress } from 'native-base'
 import { getHeaderTitle } from '@react-navigation/elements'
 import { getPosition, formStepLength } from '../../services/utils'
 
 export default function ProgressHeader(props: any) {
-  const title = useMemo(
-    () => getHeaderTitle(props.options, props.route.name),
-    [props]
-  )
-  const position = useMemo(() => getPosition(title) || 1, [props])
+  const [position, setPosition] = useState(0 as number)
+  const [title, setTitle] = useState('' as string)
+
+  useEffect(() => {
+    const title = getHeaderTitle(props.options, props.route.name)
+    const currentPosition = getPosition(title) || 1
+    setTitle(title)
+    setPosition(currentPosition)
+  }, [props])
 
   return (
     <Box>
