@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { View, Avatar, HStack } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
 import CrewListItem from './CrewListItem'
@@ -7,11 +7,13 @@ const CrewAvatar = () => {
   return <Avatar bg='primary' mr='1' alignSelf='center' size='sm'></Avatar>
 }
 
-export default function CrewDropDown(setCrew: any) {
+export default function CrewDropDown({ setCrew }: { setCrew: any }) {
   const [open, setOpen] = useState(false as boolean)
   const [value, setValue] = useState([] as Array<any>)
 
-  console.log('🚀 ~ CrewDropDown ~ value', value)
+  useEffect(() => {
+    setCrew(value)
+  }, [value])
 
   const [items, setItems] = useState([
     {
