@@ -18,7 +18,7 @@ export default function TrapOperations() {
   const [checked, setChecked] = useState(false as boolean)
 
   return (
-    <Box h='full' bg='#fff' p='50'>
+    <Box h='full' bg='#fff' p='10%'>
       <VStack space={8}>
         <Heading>Trap Pre-Processing</Heading>
         <FormControl w='1/4'>
