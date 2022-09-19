@@ -33,12 +33,17 @@ const reasonsForTrapNotFunctioning = [
 export default function TrapStatus({ navigation }: { navigation: any }) {
   const [status, setStatus] = useState('' as string)
   const [reasonNotFunc, setReasonNotFunc] = useState('' as string)
-  const [flowMeasure, setFlowMeasure] = useState('' as string)
-  const [temp, setTemp] = useState('' as string)
-  const [turbidity, setTurbidity] = useState('' as string)
-  const [initialValues, setInitialvalues] = useState(
-    {} as TrapStatusInitialValues
-  )
+  // const [flowMeasure, setFlowMeasure] = useState('' as string)
+  // const [temp, setTemp] = useState('' as string)
+  // const [turbidity, setTurbidity] = useState('' as string)
+  const [initialValues, setInitialValues] = useState({
+    trapStatus: '',
+    reasonNotFunc: '',
+    flowMeasure: '',
+    waterTemperature: '',
+    waterTurbidity: '',
+  } as TrapStatusInitialValues)
+
   const handlePressTestFlow = () => {
     navigation.navigate('High Flows')
   }
@@ -51,19 +56,11 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
 
   return (
     <Formik
-      initialValues={{
-        trapStatus: '',
-        trapNotFunc: '',
-        flowMeasure: '',
-        waterTemperature: '',
-        turbidity: '',
-      }}
+      initialValues={initialValues}
       onSubmit={values => {
         values.trapStatus = status
-        values.trapNotFunc = reasonNotFunc
-
+        values.reasonNotFunc = reasonNotFunc
         console.log('🚀 ~ TrapStatus ~ values', values)
-
         //currently displaying proper values on submission
         // need to improve validation
       }}
@@ -158,7 +155,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                     <Input
                       onChangeText={handleChange('turbidity')}
                       onBlur={handleBlur('turbidity')}
-                      value={values.turbidity}
+                      value={values.waterTurbidity}
                       placeholder='Numeric Value'
                       keyboardType='numeric'
                     />
