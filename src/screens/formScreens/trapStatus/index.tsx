@@ -14,7 +14,7 @@ import {
 } from 'native-base'
 import { trapStatusSchema } from '../../../services/utils/helpers/yupValidations'
 import { TrapStatusInitialValues } from '../../../services/utils/interfaces'
-import { Button } from 'react-native'
+// import { Button } from 'react-native'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../../redux/store'
 import {
@@ -74,7 +74,6 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
   return (
     <Formik
       initialValues={initialValues}
-<<<<<<< HEAD
       onSubmit={values => {
         values.trapStatus = status
         values.reasonNotFunc = reasonNotFunc
@@ -82,10 +81,6 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
         //currently displaying proper values on submission
         // need to improve validation
       }}
-=======
-      validationSchema={trapStatusSchema}
-      onSubmit={(result) => console.log('RESULT:', result)}
->>>>>>> 2ac0781eb2fd9f34f708fac7989c3bbbfb6e27f2
     >
       {({
         handleChange,
@@ -110,7 +105,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                   endIcon: <CheckIcon size='5' />,
                 }}
                 mt={1}
-                onValueChange={(itemValue) => setStatus(itemValue)}
+                onValueChange={itemValue => setStatus(itemValue)}
               >
                 {trapStatuses.map((item, idx) => (
                   <Select.Item
@@ -136,7 +131,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                     endIcon: <CheckIcon size='5' />,
                   }}
                   mt={1}
-                  onValueChange={(itemValue) => setReasonNotFunc(itemValue)}
+                  onValueChange={itemValue => setReasonNotFunc(itemValue)}
                 >
                   {reasonsForTrapNotFunctioning.map((item, idx) => (
                     <Select.Item
@@ -250,8 +245,6 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
               SUBMIT
             </Button>
           </VStack>
-<<<<<<< HEAD
-=======
           {/*           
 // @ts-ignore */}
           {/* <Button onPress={handleSubmit} colorScheme='pink'>
@@ -259,14 +252,17 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
           </Button> */}
           {/* <Button onPress={handleSubmit}>Submit</Button> */}
           <Button
-            title='Log dropdown values from redux'
+            // title='Log dropdown values from redux'
             onPress={() => console.log(dropdownValues)}
-          />
+          >
+            'Log dropdown values from redux'
+          </Button>
           <Button
-            title='Empty "markType" from redux state'
+            // title='Empty "markType" from redux state'
             onPress={() => dispatch(clearValuesFromDropdown('markType'))}
-          />
->>>>>>> 2ac0781eb2fd9f34f708fac7989c3bbbfb6e27f2
+          >
+            Empty "markType" from redux state{' '}
+          </Button>
         </Box>
       )}
     </Formik>
