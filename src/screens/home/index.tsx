@@ -1,9 +1,9 @@
 import React from 'react'
-import { Text, VStack, CircleIcon, Flex, Heading, Center } from 'native-base'
+import { Text, VStack, CircleIcon, Heading, View } from 'native-base'
 import Logo from '../../components/Shared/Logo'
 import BottomNavigation from '../../components/home/HomeNavButtons'
 import TopIcons from '../../components/home/TopIcons'
-import { View, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 
 const styles = StyleSheet.create({
   landingContent: {
@@ -59,7 +59,9 @@ export default function Home({ navigation }: { navigation: any }) {
       <View style={styles.recentItemsCard}>
         <View style={styles.recentItemsCardPreviewContainer}></View>
         <View style={styles.recentItemsCardTextContainer}>
-          <Text fontSize={19} maxWidth={150}>{title}</Text>
+          <Text fontSize={19} maxWidth={150}>
+            {title}
+          </Text>
           <Text color='#A1A1A1'>{date}</Text>
         </View>
       </View>

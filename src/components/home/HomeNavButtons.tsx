@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
-import { Button, HStack, Flex, CircleIcon } from 'native-base'
-import { StyleSheet, Text, View } from 'react-native'
+import { Button, HStack, Flex, Text, View } from 'native-base'
+import { StyleSheet } from 'react-native'
 import { Entypo } from '@expo/vector-icons'
 import { MaterialIcons } from '@expo/vector-icons'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
 })
 
