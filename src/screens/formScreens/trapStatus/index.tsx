@@ -60,6 +60,16 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
   }, [])
   const { trapFunctionality } = dropdownValues.values
 
+  const navigateFlow = (values: any) => {
+    if (values.trapStatus === 'Trap stopped functioning') {
+      navigation.navigate('Non Functional Trap')
+    } else if (values.flowMeasure > 1000) {
+      navigation.navigate('High Flows')
+    } else if (values.waterTemperature > 30) {
+      navigation.navigate('High Temperatures')
+    }
+  }
+
   return (
     <Formik
       initialValues={initialValues}
@@ -68,6 +78,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
         values.trapStatus = status
         values.reasonNotFunc = reasonNotFunc
         console.log('🚀 ~ TrapStatus ~ values', values)
+        navigateFlow(values)
       }}
     >
       {({

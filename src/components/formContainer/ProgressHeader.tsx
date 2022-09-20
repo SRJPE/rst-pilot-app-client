@@ -9,7 +9,16 @@ export default function ProgressHeader(props: any) {
 
   useEffect(() => {
     const title = getHeaderTitle(props.options, props.route.name)
-    const currentPosition = getPosition(title) || 1
+    let currentPosition
+    //if the title is not high flows or non func
+    //getposition()
+    //otherwise  position is formStepLength
+    if (title !== 'HighFlows' && title !== 'Non Functional Trap') {
+      currentPosition = getPosition(title) || 1
+    } else {
+      currentPosition = formStepLength
+    }
+
     setTitle(title)
     setPosition(currentPosition)
   }, [props])
