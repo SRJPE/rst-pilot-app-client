@@ -8,16 +8,17 @@ import { updateActiveStep } from '../../redux/reducers/navigationSlice'
 
 export default function NavButtons({ navigation }: { navigation: any }) {
   const route: RouteProp<ParamListBase, string> = useRoute()
-
-  /* eslint-disable */
-  // eslint-disable-next-line
-  const currentPage = route?.params?.screen //?????
-  /* eslint-enable */
-
+  // @ts-ignore-next-line
+  const currentPage = route?.params?.screen
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
 
+  const handleSave = () => {
+    console.log('dev-saved')
+  }
+
   const handleNext = useCallback(() => {
+    handleSave()
     navigation.navigate('Trap Visit Form', { screen: goForward(currentPage) })
     dispatch({
       type: updateActiveStep,
