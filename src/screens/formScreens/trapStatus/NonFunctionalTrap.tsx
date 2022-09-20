@@ -1,4 +1,14 @@
-import { Button, Heading, Icon, Text, View, VStack } from 'native-base'
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  Heading,
+  Icon,
+  Text,
+  View,
+  VStack,
+} from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
 export default function NonFunctionalTrap() {
