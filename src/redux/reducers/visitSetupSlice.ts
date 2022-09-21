@@ -25,7 +25,7 @@ export const visitSetupSlice = createSlice({
   initialState: initialState,
   reducers: {
     saveVisitSetup: (state, action) => {
-      state.values.stream = action.payload
+      state.values = action.payload
     },
   },
 })

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Formik } from 'formik'
 import {
   Box,
@@ -18,17 +18,13 @@ import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../../redux/store'
 import { useSelector } from 'react-redux'
 import { saveVisitSetup } from '../../../redux/reducers/visitSetupSlice'
+import { useFocusEffect } from '@react-navigation/native'
 
 export default function VisitSetup({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>()
   const visitSetupState = useSelector((state: any) => state.visitSetup)
-
-  const [stream, setStream] = useState('' as string)
-  const [trapSite, setTrapSite] = useState('' as string)
-  const [trapSubSite, setTrapSubSite] = useState('' as string)
   const [crew, setCrew] = useState([] as Array<any>)
-
-  const [initialValues, setInitialValues] = useState({
+  const [visitSetupFormValues, setVisitSetupFormValues] = useState({
     stream: '',
     trapSite: '',
     trapSubSite: '',
@@ -36,22 +32,19 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
   } as TrapVisitInitialValues)
 
   useEffect(() => {
-    setInitialValues({ ...initialValues, crew })
+    setVisitSetupFormValues({ ...visitSetupFormValues, crew })
   }, [crew])
 
-  useEffect(() => {
-    console.log(
-      '🚀 ~ VisitSetup ~ visitSetupState.values',
-      visitSetupState.values
-    )
-    return () => {
-      console.log('unmount')
-      dispatch({
-        type: saveVisitSetup,
-        payload: stream,
-      })
-    }
-  }, [])
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        dispatch({
+          type: saveVisitSetup,
+          payload: visitSetupFormValues,
+        })
+      }
+    }, [])
+  )
 
   return (
     <View>
@@ -62,7 +55,7 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
             <FormControl>
               <FormControl.Label>Stream</FormControl.Label>
               <Select
-                selectedValue={initialValues.stream}
+                selectedValue={visitSetupFormValues.stream}
                 accessibilityLabel='Stream'
                 placeholder='Stream'
                 _selectedItem={{
@@ -71,8 +64,8 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
                 }}
                 mt={1}
                 onValueChange={(selectedValue: any) =>
-                  setInitialValues({
-                    ...initialValues,
+                  setVisitSetupFormValues({
+                    ...visitSetupFormValues,
                     stream: selectedValue,
                   })
                 }
@@ -86,33 +79,43 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
                 ))}
               </Select>
             </FormControl>
-            <Button
-              bg='red'
+            {/* <Button
               variant='solid'
               onPress={() => {
-                console.log(initialValues)
+                console.log(visitSetupFormValues)
                 dispatch({
                   type: saveVisitSetup,
-                  payload: stream,
+                  payload: visitSetupFormValues,
                 })
               }}
-              _text={{
-                color: 'black',
-              }}
+              backgroundColor='primary'
             >
-              PRESS ME
+              Submit
+            </Button> */}
+            <Button
+              variant='solid'
+              onPress={() => {
+                console.log('logVALUES:', visitSetupState.values)
+                dispatch({
+                  type: saveVisitSetup,
+                  payload: visitSetupFormValues,
+                })
+              }}
+              backgroundColor='primary'
+            >
+              log
             </Button>
-            {initialValues.stream && (
+            {visitSetupFormValues.stream && (
               <>
                 <Heading fontSize='lg'>Confirm the following values</Heading>
                 <FormControl>
                   <FormControl.Label>Trap Site</FormControl.Label>
                   <Input
-                    value={initialValues.trapSite}
+                    value={visitSetupFormValues.trapSite}
                     placeholder='Default Trap Site value'
                     onChangeText={(currentText: any) =>
-                      setInitialValues({
-                        ...initialValues,
+                      setVisitSetupFormValues({
+                        ...visitSetupFormValues,
                         trapSite: currentText,
                       })
                     }
@@ -121,11 +124,11 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
                 <FormControl>
                   <FormControl.Label>Trap Sub Site</FormControl.Label>
                   <Input
-                    value={initialValues.trapSubSite}
+                    value={visitSetupFormValues.trapSubSite}
                     placeholder='Default Trap Site value'
                     onChangeText={(currentText: any) =>
-                      setInitialValues({
-                        ...initialValues,
+                      setVisitSetupFormValues({
+                        ...visitSetupFormValues,
                         trapSubSite: currentText,
                       })
                     }
