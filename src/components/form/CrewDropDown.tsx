@@ -36,26 +36,6 @@ export default function CrewDropDown({ setCrew }: { setCrew: any }) {
       value: 'Sadie Gill',
       icon: CrewAvatar,
     },
-    {
-      label: 'Jimi Hendrix',
-      value: 'Jimi Hendrix',
-      icon: CrewAvatar,
-    },
-    {
-      label: 'Eddie VanHalen',
-      value: 'Eddie VanHalen',
-      icon: CrewAvatar,
-    },
-    {
-      label: 'Jimmy Page',
-      value: 'Jimmy Page',
-      icon: CrewAvatar,
-    },
-    {
-      label: 'David Gilmour',
-      value: 'David Gilmour',
-      icon: CrewAvatar,
-    },
   ] as Array<any>)
 
   return (
