@@ -1,9 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
-export const ACTIONS = {
-  UPDATE_ACTIVE_STEP: 'update-active-step',
-}
-
 const formSteps = [
   { name: 'Visit Setup', completed: false },
   { name: 'Trap Status', completed: false },
@@ -12,13 +8,13 @@ const formSteps = [
   { name: 'Fish Input', completed: false },
 ] as Array<any>
 
-export interface NavigationState {
+interface NavigationStateI {
   activeStep: number
   steps: Array<any>
   formIsValid?: boolean
 }
 
-export const initialState: NavigationState = {
+const initialState: NavigationStateI = {
   activeStep: 1,
   steps: formSteps,
   formIsValid: false,
