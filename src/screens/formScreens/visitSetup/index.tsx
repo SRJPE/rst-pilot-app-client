@@ -107,10 +107,6 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
               variant='solid'
               onPress={() => {
                 console.log('logVALUES:', visitSetupState.values)
-                dispatch({
-                  type: saveVisitSetup,
-                  payload: visitSetupFormValues,
-                })
               }}
               backgroundColor='primary'
             >
