@@ -78,7 +78,7 @@ export default function NavButtons({
           bg='secondary'
           alignSelf='flex-start'
           py='3'
-          px='175'
+          px='125'
           borderRadius='5'
           isDisabled={isDisabled(currentPage)}
           onPress={handleLeftButton}
@@ -97,7 +97,7 @@ export default function NavButtons({
           bg='primary'
           alignSelf='flex-start'
           py='3'
-          px='175'
+          px='125'
           borderRadius='5'
           onPress={handleRightButton}
         >
