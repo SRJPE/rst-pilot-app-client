@@ -9,6 +9,7 @@ import HighFlows from '../screens/formScreens/trapStatus/HighFlows'
 import HighTemperatures from '../screens/formScreens/trapStatus/HighTemperatures'
 import ProgressHeader from '../components/formContainer/ProgressHeader'
 import NonFunctionalTrap from '../screens/formScreens/trapStatus/NonFunctionalTrap'
+import EndTrapping from '../screens/formScreens/endTrapping'
 
 const FormStack = createStackNavigator()
 
@@ -23,14 +24,13 @@ export default function FormStackNavigation() {
       <FormStack.Screen name='Trap Operations' component={TrapOperations} />
       <FormStack.Screen name='Fish Input' component={FishInput} />
       <FormStack.Screen name='Fish Processing' component={FishProcessing} />
-      {/* <FormStack.Group> */}
       <FormStack.Screen name='High Flows' component={HighFlows} />
       <FormStack.Screen name='High Temperatures' component={HighTemperatures} />
       <FormStack.Screen
         name='Non Functional Trap'
         component={NonFunctionalTrap}
       />
-      {/* </FormStack.Group> */}
+      <FormStack.Screen name='End Trapping' component={EndTrapping} />
     </FormStack.Navigator>
   )
 }

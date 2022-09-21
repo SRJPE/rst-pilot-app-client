@@ -17,7 +17,11 @@ export default function NavButtons({ navigation }: { navigation: any }) {
     console.log('dev-saved')
   }
 
-  const handleNext = useCallback(() => {
+  const handleRightButton = useCallback(() => {
+    if (currentPage === ' Non Functional Trap' || currentPage === 'HighFlows') {
+      navigation.navigate('Trap Visit Form', { screen: 'End Trapping' })
+      return
+    }
     handleSave()
     navigation.navigate('Trap Visit Form', { screen: goForward(currentPage) })
     dispatch({
@@ -26,7 +30,7 @@ export default function NavButtons({ navigation }: { navigation: any }) {
     })
   }, [currentPage])
 
-  const handleBack = useCallback(() => {
+  const handleLeftButton = useCallback(() => {
     navigation.navigate('Trap Visit Form', { screen: goBack(currentPage) })
     if (navigationState.activeStep !== 1)
       dispatch({
@@ -35,6 +39,19 @@ export default function NavButtons({ navigation }: { navigation: any }) {
       })
   }, [currentPage])
 
+  const renderButtonText = (currentPage: string) => {
+    let buttonText
+    if (currentPage === 'HighFlows' || currentPage === 'Non Functional Trap') {
+      buttonText = 'End Trapping'
+    } else if (currentPage === 'High Temperatures') {
+      buttonText = 'Move on to Fish Processing'
+    } else {
+      buttonText = 'Next'
+    }
+    return buttonText
+  }
+
+  console.log('🚀 ~ NavButtons ~ currentPage', currentPage)
   console.log('🚀 ~ NavButtons ~ navigationState', navigationState)
 
   return (
@@ -47,7 +64,15 @@ export default function NavButtons({ navigation }: { navigation: any }) {
           py='3'
           px='175'
           borderRadius='5'
-          onPress={handleBack}
+          isDisabled={
+            currentPage === 'Visit Setup' ||
+            currentPage === 'High Flows' ||
+            currentPage === 'High Temperatures' ||
+            currentPage === 'Non Functional Trap'
+              ? true
+              : false
+          }
+          onPress={handleLeftButton}
         >
           <Text
             textTransform='uppercase'
@@ -65,7 +90,7 @@ export default function NavButtons({ navigation }: { navigation: any }) {
           py='3'
           px='175'
           borderRadius='5'
-          onPress={handleNext}
+          onPress={handleRightButton}
         >
           <Text
             textTransform='uppercase'
@@ -73,7 +98,7 @@ export default function NavButtons({ navigation }: { navigation: any }) {
             fontWeight='bold'
             color='white'
           >
-            Next
+            {renderButtonText(currentPage)}
           </Text>
         </Button>
       </HStack>

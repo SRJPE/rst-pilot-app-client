@@ -39,16 +39,6 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
     waterTurbidity: '',
   } as TrapStatusInitialValues)
 
-  const handlePressTestFlow = () => {
-    navigation.navigate('High Flows')
-  }
-  const handlePressTestTemp = () => {
-    navigation.navigate('High Temperatures')
-  }
-  const handlePressTestNonFunc = () => {
-    navigation.navigate('Non Functional Trap')
-  }
-
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
 
@@ -62,11 +52,11 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
 
   const navigateFlow = (values: any) => {
     if (values.trapStatus === 'Trap stopped functioning') {
-      navigation.navigate('Non Functional Trap')
+      navigation.navigate('Trap Visit Form', { screen: 'Non Functional Trap' })
     } else if (values.flowMeasure > 1000) {
-      navigation.navigate('High Flows')
+      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
     } else if (values.waterTemperature > 30) {
-      navigation.navigate('High Temperatures')
+      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
     }
   }
 
@@ -177,62 +167,6 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                 </HStack>
               </>
             )}
-            <HStack space={4}>
-              <Button
-                rounded='xs'
-                bg='primary'
-                alignSelf='center'
-                py='3'
-                px='16'
-                borderRadius='5'
-                onPress={handlePressTestFlow}
-              >
-                <Text
-                  textTransform='uppercase'
-                  fontSize='sm'
-                  fontWeight='bold'
-                  color='#FFFFFF'
-                >
-                  TEST FLOW
-                </Text>
-              </Button>
-              <Button
-                rounded='xs'
-                bg='primary'
-                alignSelf='center'
-                py='3'
-                px='16'
-                borderRadius='5'
-                onPress={handlePressTestTemp}
-              >
-                <Text
-                  textTransform='uppercase'
-                  fontSize='sm'
-                  fontWeight='bold'
-                  color='#FFFFFF'
-                >
-                  TEST TEMP
-                </Text>
-              </Button>
-              <Button
-                rounded='xs'
-                bg='primary'
-                alignSelf='center'
-                py='3'
-                px='16'
-                borderRadius='5'
-                onPress={handlePressTestNonFunc}
-              >
-                <Text
-                  textTransform='uppercase'
-                  fontSize='sm'
-                  fontWeight='bold'
-                  color='#FFFFFF'
-                >
-                  TEST NON-FUNC
-                </Text>
-              </Button>
-            </HStack>
             <Button
               /* 
               // @ts-ignore */
