@@ -35,16 +35,27 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
     setVisitSetupFormValues({ ...visitSetupFormValues, crew })
   }, [crew])
 
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        dispatch({
-          type: saveVisitSetup,
-          payload: visitSetupFormValues,
-        })
-      }
-    }, [])
-  )
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     return () => {
+  //       dispatch({
+  //         type: saveVisitSetup,
+  //         payload: visitSetupFormValues,
+  //       })
+  //     }
+  //   }, [])
+  // )
+
+  useEffect(() => {
+    const saveOnUnmount = navigation.addListener('blur', () => {
+      dispatch({
+        type: saveVisitSetup,
+        payload: visitSetupFormValues,
+      })
+    })
+
+    return saveOnUnmount
+  }, [navigation])
 
   return (
     <View>
