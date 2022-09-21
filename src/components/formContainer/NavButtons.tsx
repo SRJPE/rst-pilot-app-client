@@ -11,7 +11,7 @@ export default function NavButtons({
   handleSubmit,
 }: {
   navigation: any
-  handleSubmit: Function
+  handleSubmit?: Function
 }) {
   const route: RouteProp<ParamListBase, string> = useRoute()
   // @ts-ignore-next-line
@@ -21,8 +21,9 @@ export default function NavButtons({
 
   const handleSave = () => {
     console.log('save-placeholder')
-
-    handleSubmit()
+    if (handleSubmit !== undefined) {
+      handleSubmit()
+    }
   }
 
   const handleRightButton = useCallback(() => {
@@ -58,6 +59,7 @@ export default function NavButtons({
     }
     return buttonText
   }
+
   const isDisabled = (currentPage: string) => {
     return currentPage === 'Visit Setup' ||
       currentPage === 'High Flows' ||
@@ -67,8 +69,10 @@ export default function NavButtons({
       : false
   }
 
-  console.log('🚀 ~ NavButtons ~ currentPage', currentPage)
-  console.log('🚀 ~ NavButtons ~ navigationState', navigationState)
+  useEffect(() => {
+    console.log('🚀 ~ NavButtons ~ currentPage', currentPage)
+    console.log('🚀 ~ NavButtons ~ navigationState', navigationState)
+  }, [])
 
   return (
     <Box bg='themeGrey' py='5' px='3' maxWidth='100%'>
@@ -78,17 +82,12 @@ export default function NavButtons({
           bg='secondary'
           alignSelf='flex-start'
           py='3'
-          px='125'
+          px='175'
           borderRadius='5'
           isDisabled={isDisabled(currentPage)}
           onPress={handleLeftButton}
         >
-          <Text
-            textTransform='uppercase'
-            fontSize='sm'
-            fontWeight='bold'
-            color='primary'
-          >
+          <Text fontSize='sm' fontWeight='bold' color='primary'>
             Back
           </Text>
         </Button>
@@ -97,16 +96,11 @@ export default function NavButtons({
           bg='primary'
           alignSelf='flex-start'
           py='3'
-          px='125'
+          px='175'
           borderRadius='5'
           onPress={handleRightButton}
         >
-          <Text
-            textTransform='uppercase'
-            fontSize='sm'
-            fontWeight='bold'
-            color='white'
-          >
+          <Text fontSize='sm' fontWeight='bold' color='white'>
             {renderButtonText(currentPage)}
           </Text>
         </Button>
