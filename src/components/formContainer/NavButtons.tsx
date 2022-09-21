@@ -6,7 +6,13 @@ import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/navigationSlice'
 
-export default function NavButtons({ navigation }: { navigation: any }) {
+export default function NavButtons({
+  navigation,
+  handleSubmit,
+}: {
+  navigation: any
+  handleSubmit: Function
+}) {
   const route: RouteProp<ParamListBase, string> = useRoute()
   // @ts-ignore-next-line
   const currentPage = route?.params?.screen
@@ -14,7 +20,9 @@ export default function NavButtons({ navigation }: { navigation: any }) {
   const navigationState = useSelector((state: any) => state.navigation)
 
   const handleSave = () => {
-    console.log('dev-saved')
+    console.log('save-placeholder')
+
+    handleSubmit()
   }
 
   const handleRightButton = useCallback(() => {
@@ -50,6 +58,14 @@ export default function NavButtons({ navigation }: { navigation: any }) {
     }
     return buttonText
   }
+  const isDisabled = (currentPage: string) => {
+    return currentPage === 'Visit Setup' ||
+      currentPage === 'High Flows' ||
+      currentPage === 'High Temperatures' ||
+      currentPage === 'Non Functional Trap'
+      ? true
+      : false
+  }
 
   console.log('🚀 ~ NavButtons ~ currentPage', currentPage)
   console.log('🚀 ~ NavButtons ~ navigationState', navigationState)
@@ -64,14 +80,7 @@ export default function NavButtons({ navigation }: { navigation: any }) {
           py='3'
           px='175'
           borderRadius='5'
-          isDisabled={
-            currentPage === 'Visit Setup' ||
-            currentPage === 'High Flows' ||
-            currentPage === 'High Temperatures' ||
-            currentPage === 'Non Functional Trap'
-              ? true
-              : false
-          }
+          isDisabled={isDisabled(currentPage)}
           onPress={handleLeftButton}
         >
           <Text

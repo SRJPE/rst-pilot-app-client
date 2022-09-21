@@ -6,7 +6,7 @@ export default function TrapVisitForm({ navigation }: { navigation: any }) {
   return (
     <VStack h='full' justifyContent='space-between'>
       <FormStackNavigation />
-      <NavButtons navigation={navigation} />
+      {/* <NavButtons navigation={navigation} /> */}
     </VStack>
   )
 }

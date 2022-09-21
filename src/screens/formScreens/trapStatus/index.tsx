@@ -21,6 +21,7 @@ import {
   getTrapVisitDropdownValues,
   clearValuesFromDropdown,
 } from '../../../redux/reducers/dropdownsSlice'
+import NavButtons from '../../../components/formContainer/NavButtons'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Rain', value: 'High Rain' },
@@ -167,7 +168,10 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                 </HStack>
               </>
             )}
+
+            <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
             <Button
+              mt='300'
               /* 
               // @ts-ignore */
               onPress={handleSubmit}
