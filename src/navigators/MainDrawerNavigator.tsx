@@ -12,6 +12,7 @@ export default function DrawerNavigator() {
   return (
     <Drawer.Navigator
       initialRouteName='Home'
+      screenOptions={{ drawerType: 'front' }}
       drawerContent={props => <DrawerMenu {...props} />}
     >
       <Drawer.Screen name='Home' component={Home} />
