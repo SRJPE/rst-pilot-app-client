@@ -6,13 +6,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/navigationSlice'
 
-export default function NavButtons({
-  navigation,
-  handleSubmit,
-}: {
-  navigation: any
-  handleSubmit?: Function
-}) {
+export default function NavButtons({ navigation }: { navigation: any }) {
   const route: RouteProp<ParamListBase, string> = useRoute()
   // @ts-ignore-next-line
   const currentPage = route?.params?.screen
@@ -21,9 +15,6 @@ export default function NavButtons({
 
   const handleSave = () => {
     console.log('save-placeholder')
-    if (handleSubmit !== undefined) {
-      handleSubmit()
-    }
   }
 
   const handleRightButton = useCallback(() => {
@@ -69,10 +60,9 @@ export default function NavButtons({
       : false
   }
 
-  useEffect(() => {
-    console.log('🚀 ~ NavButtons ~ currentPage', currentPage)
-    console.log('🚀 ~ NavButtons ~ navigationState', navigationState)
-  }, [])
+  useEffect(() => {}, [])
+  console.log('🚀 ~ NavButtons ~ currentPage', currentPage)
+  console.log('🚀 ~ NavButtons ~ navigationState', navigationState)
 
   return (
     <Box bg='themeGrey' py='5' px='3' maxWidth='100%'>

@@ -44,7 +44,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
   const dropdownValues = useSelector((state: any) => state.dropdowns)
 
   useEffect(() => {
-    console.log('dropdown values on initial load: ', dropdownValues)
+    // console.log('dropdown values on initial load: ', dropdownValues)
     // Dispatch reducers' actions to make changes to that reducer's state
     // Parameters can be passed to these actions and will be recognized as the 'action.payload'
     dispatch(getTrapVisitDropdownValues())
@@ -168,8 +168,6 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                 </HStack>
               </>
             )}
-
-            <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
             <Button
               mt='300'
               /* 

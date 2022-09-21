@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Text, VStack, CircleIcon, Heading, View } from 'native-base'
 import Logo from '../../components/Shared/Logo'
 import BottomNavigation from '../../components/home/HomeNavButtons'
@@ -48,6 +48,12 @@ const styles = StyleSheet.create({
 })
 
 export default function Home({ navigation }: { navigation: any }) {
+  useEffect(() => {
+    console.log('Mounted')
+    return () => {
+      console.log('unmount')
+    }
+  }, [])
   const recentItemsCard = ({
     title,
     date,
