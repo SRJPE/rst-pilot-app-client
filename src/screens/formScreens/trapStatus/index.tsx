@@ -21,6 +21,7 @@ import {
   getTrapVisitDropdownValues,
   clearValuesFromDropdown,
 } from '../../../redux/reducers/dropdownsSlice'
+import NavButtons from '../../../components/formContainer/NavButtons'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Rain', value: 'High Rain' },
@@ -39,26 +40,27 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
     waterTurbidity: '',
   } as TrapStatusInitialValues)
 
-  const handlePressTestFlow = () => {
-    navigation.navigate('High Flows')
-  }
-  const handlePressTestTemp = () => {
-    navigation.navigate('High Temperatures')
-  }
-  const handlePressTestNonFunc = () => {
-    navigation.navigate('Non Functional Trap')
-  }
-
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
+  const reduxState = useSelector((state: any) => state)
 
   useEffect(() => {
-    console.log('dropdown values on initial load: ', dropdownValues)
+    // console.log('dropdown values on initial load: ', dropdownValues)
     // Dispatch reducers' actions to make changes to that reducer's state
     // Parameters can be passed to these actions and will be recognized as the 'action.payload'
     dispatch(getTrapVisitDropdownValues())
   }, [])
   const { trapFunctionality } = dropdownValues.values
+
+  const navigateFlow = (values: any) => {
+    if (values.trapStatus === 'Trap stopped functioning') {
+      navigation.navigate('Trap Visit Form', { screen: 'Non Functional Trap' })
+    } else if (values.flowMeasure > 1000) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
+    } else if (values.waterTemperature > 30) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
+    }
+  }
 
   return (
     <Formik
@@ -68,6 +70,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
         values.trapStatus = status
         values.reasonNotFunc = reasonNotFunc
         console.log('🚀 ~ TrapStatus ~ values', values)
+        navigateFlow(values)
       }}
     >
       {({
@@ -92,7 +95,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                   endIcon: <CheckIcon size='5' />,
                 }}
                 mt={1}
-                onValueChange={itemValue => setStatus(itemValue)}
+                onValueChange={(itemValue) => setStatus(itemValue)}
               >
                 {trapFunctionality.map((item: any) => (
                   <Select.Item
@@ -117,7 +120,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                     endIcon: <CheckIcon size='5' />,
                   }}
                   mt={1}
-                  onValueChange={itemValue => setReasonNotFunc(itemValue)}
+                  onValueChange={(itemValue) => setReasonNotFunc(itemValue)}
                 >
                   {reasonsForTrapNotFunctioning.map((item, idx) => (
                     <Select.Item
@@ -166,63 +169,8 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                 </HStack>
               </>
             )}
-            <HStack space={4}>
-              <Button
-                rounded='xs'
-                bg='primary'
-                alignSelf='center'
-                py='3'
-                px='16'
-                borderRadius='5'
-                onPress={handlePressTestFlow}
-              >
-                <Text
-                  textTransform='uppercase'
-                  fontSize='sm'
-                  fontWeight='bold'
-                  color='#FFFFFF'
-                >
-                  TEST FLOW
-                </Text>
-              </Button>
-              <Button
-                rounded='xs'
-                bg='primary'
-                alignSelf='center'
-                py='3'
-                px='16'
-                borderRadius='5'
-                onPress={handlePressTestTemp}
-              >
-                <Text
-                  textTransform='uppercase'
-                  fontSize='sm'
-                  fontWeight='bold'
-                  color='#FFFFFF'
-                >
-                  TEST TEMP
-                </Text>
-              </Button>
-              <Button
-                rounded='xs'
-                bg='primary'
-                alignSelf='center'
-                py='3'
-                px='16'
-                borderRadius='5'
-                onPress={handlePressTestNonFunc}
-              >
-                <Text
-                  textTransform='uppercase'
-                  fontSize='sm'
-                  fontWeight='bold'
-                  color='#FFFFFF'
-                >
-                  TEST NON-FUNC
-                </Text>
-              </Button>
-            </HStack>
             <Button
+              mt='300'
               /* 
               // @ts-ignore */
               onPress={handleSubmit}
@@ -237,6 +185,10 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
           <RNButton
             title='Log dropdown values from redux'
             onPress={() => console.log(dropdownValues)}
+          />
+          <RNButton
+            title='Log all of visitSetup redux state'
+            onPress={() => console.log(reduxState.visitSetup)}
           />
           <RNButton
             title='Empty "markType" from redux state'
