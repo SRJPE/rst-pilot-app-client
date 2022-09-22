@@ -42,6 +42,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
 
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
+  const reduxState = useSelector((state: any) => state)
 
   useEffect(() => {
     // console.log('dropdown values on initial load: ', dropdownValues)
@@ -94,7 +95,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                   endIcon: <CheckIcon size='5' />,
                 }}
                 mt={1}
-                onValueChange={itemValue => setStatus(itemValue)}
+                onValueChange={(itemValue) => setStatus(itemValue)}
               >
                 {trapFunctionality.map((item: any) => (
                   <Select.Item
@@ -119,7 +120,7 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
                     endIcon: <CheckIcon size='5' />,
                   }}
                   mt={1}
-                  onValueChange={itemValue => setReasonNotFunc(itemValue)}
+                  onValueChange={(itemValue) => setReasonNotFunc(itemValue)}
                 >
                   {reasonsForTrapNotFunctioning.map((item, idx) => (
                     <Select.Item
@@ -184,6 +185,10 @@ export default function TrapStatus({ navigation }: { navigation: any }) {
           <RNButton
             title='Log dropdown values from redux'
             onPress={() => console.log(dropdownValues)}
+          />
+          <RNButton
+            title='Log all of visitSetup redux state'
+            onPress={() => console.log(reduxState.visitSetup)}
           />
           <RNButton
             title='Empty "markType" from redux state'

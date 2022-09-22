@@ -1,16 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
-const formSteps = [
-  { name: 'Visit Setup', completed: false },
-  { name: 'Trap Status', completed: false },
-  { name: 'Trap Operations', completed: false },
-  { name: 'Fish Processing', completed: false },
-  { name: 'Fish Input', completed: false },
-] as Array<any>
+const formSteps = {
+  1: { name: 'Visit Setup', completed: false },
+  2: { name: 'Trap Status', completed: false },
+  3: { name: 'Trap Operations', completed: false },
+  4: { name: 'Fish Processing', completed: false },
+  5: { name: 'Fish Input', completed: false },
+} as any
 
 interface NavigationStateI {
   activeStep: number
-  steps: Array<any>
+  steps: any
   formIsValid?: boolean
 }
 

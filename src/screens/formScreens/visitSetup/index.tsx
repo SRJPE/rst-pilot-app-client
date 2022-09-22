@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Formik } from 'formik'
+import { useEffect, useState } from 'react'
 import {
   Box,
   Select,
@@ -8,54 +7,37 @@ import {
   Heading,
   Input,
   VStack,
-  Button,
   View,
 } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import { TrapVisitInitialValues } from '../../../services/utils/interfaces'
-import { trapVisitSchema } from '../../../services/utils/helpers/yupValidations'
-import { useDispatch } from 'react-redux'
-import { AppDispatch } from '../../../redux/store'
-import { useSelector } from 'react-redux'
-import { saveVisitSetup } from '../../../redux/reducers/visitSetupSlice'
-import { useFocusEffect } from '@react-navigation/native'
 
-export default function VisitSetup({ navigation }: { navigation: any }) {
-  const dispatch = useDispatch<AppDispatch>()
-  const visitSetupState = useSelector((state: any) => state.visitSetup)
-  const [crew, setCrew] = useState([] as Array<any>)
-  const [visitSetupFormValues, setVisitSetupFormValues] = useState({
+export default function VisitSetup({
+  route,
+  navigation,
+}: {
+  route: any
+  navigation: any
+}) {
+  const step = route.params.step
+  const activeFormState = route.params.activeFormState
+  const passToActiveFormState = route.params.passToActiveFormState
+  const initialFormState = {
     stream: '',
     trapSite: '',
     trapSubSite: '',
     crew: [],
-  } as TrapVisitInitialValues)
+  } as TrapVisitInitialValues
+  const [crew, setCrew] = useState([] as Array<any>)
 
   useEffect(() => {
-    setVisitSetupFormValues({ ...visitSetupFormValues, crew })
+    passToActiveFormState(navigation, step, initialFormState, step)
+  }, [])
+
+  useEffect(() => {
+    passToActiveFormState(navigation, step, { ...activeFormState, crew })
   }, [crew])
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     return () => {
-  //       dispatch({
-  //         type: saveVisitSetup,
-  //         payload: visitSetupFormValues,
-  //       })
-  //     }
-  //   }, [])
-  // )
-
-  useEffect(() => {
-    const saveOnUnmount = navigation.addListener('blur', () => {
-      dispatch({
-        type: saveVisitSetup,
-        payload: visitSetupFormValues,
-      })
-    })
-
-    return saveOnUnmount
-  }, [navigation])
 
   return (
     <View>
@@ -66,7 +48,7 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
             <FormControl>
               <FormControl.Label>Stream</FormControl.Label>
               <Select
-                selectedValue={visitSetupFormValues.stream}
+                selectedValue={activeFormState?.stream}
                 accessibilityLabel='Stream'
                 placeholder='Stream'
                 _selectedItem={{
@@ -75,8 +57,8 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
                 }}
                 mt={1}
                 onValueChange={(selectedValue: any) =>
-                  setVisitSetupFormValues({
-                    ...visitSetupFormValues,
+                  passToActiveFormState(navigation, step, {
+                    ...activeFormState,
                     stream: selectedValue,
                   })
                 }
@@ -90,39 +72,17 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
                 ))}
               </Select>
             </FormControl>
-            {/* <Button
-              variant='solid'
-              onPress={() => {
-                console.log(visitSetupFormValues)
-                dispatch({
-                  type: saveVisitSetup,
-                  payload: visitSetupFormValues,
-                })
-              }}
-              backgroundColor='primary'
-            >
-              Submit
-            </Button> */}
-            <Button
-              variant='solid'
-              onPress={() => {
-                console.log('logVALUES:', visitSetupState.values)
-              }}
-              backgroundColor='primary'
-            >
-              log
-            </Button>
-            {visitSetupFormValues.stream && (
+            {activeFormState.stream && (
               <>
                 <Heading fontSize='lg'>Confirm the following values</Heading>
                 <FormControl>
                   <FormControl.Label>Trap Site</FormControl.Label>
                   <Input
-                    value={visitSetupFormValues.trapSite}
+                    value={activeFormState.trapSite}
                     placeholder='Default Trap Site value'
                     onChangeText={(currentText: any) =>
-                      setVisitSetupFormValues({
-                        ...visitSetupFormValues,
+                      passToActiveFormState(navigation, step, {
+                        ...activeFormState,
                         trapSite: currentText,
                       })
                     }
@@ -131,11 +91,11 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
                 <FormControl>
                   <FormControl.Label>Trap Sub Site</FormControl.Label>
                   <Input
-                    value={visitSetupFormValues.trapSubSite}
+                    value={activeFormState.trapSubSite}
                     placeholder='Default Trap Site value'
                     onChangeText={(currentText: any) =>
-                      setVisitSetupFormValues({
-                        ...visitSetupFormValues,
+                      passToActiveFormState(navigation, step, {
+                        ...activeFormState,
                         trapSubSite: currentText,
                       })
                     }
@@ -154,17 +114,6 @@ export default function VisitSetup({ navigation }: { navigation: any }) {
   )
 }
 
-// <Button
-//   mt='300'
-//   /*
-//     // @ts-ignore */
-//   onPress={handleSubmit}
-//   title='Submit'
-//   variant='solid'
-//   backgroundColor='primary'
-// >
-//   SUBMIT
-// </Button>
 const testStreams = [
   { label: 'Default Stream 1', value: 'DS1' },
   { label: 'Default Stream 2', value: 'DS2' },
