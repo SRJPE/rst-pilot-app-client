@@ -13,3 +13,12 @@ export interface TrapStatusInitialValues {
   waterTemperature: string
   waterTurbidity: string
 }
+export interface TrapOperationsInitialValues {
+  coneDepth: string
+  coneSetting: string
+  totalRevolutions: string
+  checked: any
+  rpm1: number
+  rpm2: number
+  rpm3: number
+}
