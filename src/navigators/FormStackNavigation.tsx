@@ -8,6 +8,7 @@ import HighFlows from '../screens/formScreens/trapStatus/HighFlows'
 import HighTemperatures from '../screens/formScreens/trapStatus/HighTemperatures'
 import ProgressHeader from '../components/formContainer/ProgressHeader'
 import NonFunctionalTrap from '../screens/formScreens/trapStatus/NonFunctionalTrap'
+import NoFishCaught from '../screens/formScreens/fishProcessing/NoFishCaught'
 import EndTrapping from '../screens/formScreens/endTrapping'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
@@ -53,7 +54,7 @@ export default function FormStackNavigation() {
     formData: any
   ) => {
     console.log('passing new form data: ', formData)
-    
+
     // set local state to prepare for dispatch
     setStepToSubmit(step)
     setActiveFormState(formData)
@@ -67,7 +68,7 @@ export default function FormStackNavigation() {
   return (
     <FormStack.Navigator
       initialRouteName='Visit Setup'
-      screenOptions={{ header: (props) => <ProgressHeader {...props} /> }}
+      screenOptions={{ header: props => <ProgressHeader {...props} /> }}
     >
       <FormStack.Screen
         name='Visit Setup'
@@ -110,9 +111,14 @@ export default function FormStackNavigation() {
         initialParams={{ step: 8, passToActiveFormState, activeFormState }}
       />
       <FormStack.Screen
+        name='No Fish Caught'
+        component={NoFishCaught}
+        initialParams={{ step: 9, passToActiveFormState, activeFormState }}
+      />
+      <FormStack.Screen
         name='End Trapping'
         component={EndTrapping}
-        initialParams={{ step: 9, passToActiveFormState, activeFormState }}
+        initialParams={{ step: 10, passToActiveFormState, activeFormState }}
       />
     </FormStack.Navigator>
   )

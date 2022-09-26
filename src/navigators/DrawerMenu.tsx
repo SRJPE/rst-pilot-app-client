@@ -60,6 +60,9 @@ export default function DrawerMenu(props: DrawerContentComponentProps) {
   const handlePressMenuNonFunctionalTrap = useCallback(() => {
     navigation.navigate('Non Functional Trap')
   }, [navigation])
+  const handlePressMenuNoFishCaught = useCallback(() => {
+    navigation.navigate('No Fish Caught')
+  }, [navigation])
 
   return (
     <Box safeArea flex={1} bg={useColorModeValue('#FFFFFF', 'primary')} p={7}>
@@ -170,6 +173,13 @@ export default function DrawerMenu(props: DrawerContentComponentProps) {
               icon='clipboard'
             >
               Non Functional Trap
+            </MenuButton>
+            <MenuButton
+              active={currentRoute === 'No Fish Caught'}
+              onPress={handlePressMenuNoFishCaught}
+              icon='clipboard'
+            >
+              No Fish Caught
             </MenuButton>
           </VStack>
         </DrawerContentScrollView>
