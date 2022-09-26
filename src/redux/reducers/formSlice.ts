@@ -2,12 +2,14 @@ import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
   complete: boolean
-  values: trapStatusValuesI
+  values: trapVisitFormValuesI
 }
 
-export interface trapStatusValuesI {
+export interface trapVisitFormValuesI {
   trapVisit: Object
   trapStatus: Object
+  trapOperations: Object
+  fishProcessing: Object
 }
 
 const initialState: InitialStateI = {
@@ -15,6 +17,8 @@ const initialState: InitialStateI = {
   values: {
     trapVisit: {},
     trapStatus: {},
+    trapOperations: {},
+    fishProcessing: {},
   },
 }
 
