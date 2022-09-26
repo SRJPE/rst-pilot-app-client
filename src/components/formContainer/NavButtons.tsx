@@ -61,8 +61,8 @@ export default function NavButtons({ navigation }: { navigation: any }) {
   }
 
   useEffect(() => {}, [])
-  console.log('🚀 ~ NavButtons ~ currentPage', currentPage)
-  console.log('🚀 ~ NavButtons ~ navigationState', navigationState)
+  // console.log('🚀 ~ NavButtons ~ currentPage', currentPage)
+  // console.log('🚀 ~ NavButtons ~ navigationState', navigationState)
 
   return (
     <Box bg='themeGrey' py='5' px='3' maxWidth='100%'>
