@@ -167,7 +167,7 @@ export default function TrapOperations({
           cleaning the trap.
         </Text>
       </VStack>
-      <Heading alignSelf='center' fontSize='lg'>
+      <Heading alignSelf='center' fontSize='lg' mt='300'>
         Remove debris and begin fish processing
       </Heading>
     </Box>
