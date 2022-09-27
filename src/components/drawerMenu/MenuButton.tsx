@@ -4,14 +4,16 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 
 interface Props extends IButtonProps {
   active: boolean
+  // disabled: boolean
   icon: string
-  children: React.ReactNode
+  title: string
 }
 
 export default function MenuButton({
   active,
+  // disabled,
   icon,
-  children,
+  title,
   ...props
 }: Props) {
   return (
@@ -26,22 +28,14 @@ export default function MenuButton({
           color: active ? 'white' : 'primary',
         },
       }}
-      _dark={{
-        colorScheme: 'primary',
-        _pressed: {
-          bg: '#FFFFFF',
-        },
-        _text: {
-          color: active ? 'primary' : undefined,
-        },
-      }}
       bg={active ? undefined : 'transparent'}
       variant='solid'
       justifyContent='flex-start'
       leftIcon={<Icon as={Ionicons} name={icon} size='sm' opacity={0.75} />}
       {...props}
+      // disabled={disabled}
     >
-      {children}
+      {title}
     </Button>
   )
 }
