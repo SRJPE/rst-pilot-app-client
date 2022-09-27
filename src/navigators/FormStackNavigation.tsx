@@ -15,12 +15,15 @@ import { useEffect, useState } from 'react'
 import { LogBox } from 'react-native'
 import { AppDispatch } from '../redux/store'
 import { saveVisitSetup } from '../redux/reducers/visitSetupSlice'
+import { saveTrapStatus } from '../redux/reducers/trapStatusSlice'
+import { saveTrapOperations } from '../redux/reducers/trapOperationsSlice'
+import { saveFishProcessing } from '../redux/reducers/fishProcessingSlice'
 
 const FormStack = createStackNavigator()
 
 export default function FormStackNavigation() {
-  const [stepToSubmit, setStepToSubmit] = useState(0)
-  const [activeFormState, setActiveFormState] = useState({})
+  const [stepToSubmit, setStepToSubmit] = useState(0 as number)
+  const [activeFormState, setActiveFormState] = useState({} as any)
   const navigationState = useSelector((state: any) => state.navigation)
   const dispatch = useDispatch<AppDispatch>()
   LogBox.ignoreLogs([
@@ -29,6 +32,9 @@ export default function FormStackNavigation() {
 
   const stepToActions = {
     1: saveVisitSetup, // visitSetupSlice
+    2: saveTrapStatus,
+    3: saveTrapOperations,
+    4: saveFishProcessing,
   }
 
   useEffect(() => {
