@@ -32,9 +32,9 @@ export default function FormStackNavigation() {
 
   const stepToActions = {
     1: saveVisitSetup, // visitSetupSlice
-    2: saveTrapStatus,
-    3: saveTrapOperations,
-    4: saveFishProcessing,
+    // 2: saveTrapStatus,
+    // 3: saveTrapOperations,
+    // 4: saveFishProcessing,
   }
 
   useEffect(() => {
