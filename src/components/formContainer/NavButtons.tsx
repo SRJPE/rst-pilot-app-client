@@ -1,49 +1,50 @@
 import { useCallback, useEffect } from 'react'
 import { Box, HStack, Text, Button } from 'native-base'
-import { goForward, goBack } from '../../services/utils'
+// import { goForward, goBack } from '../../services/utils'
 import { ParamListBase, RouteProp, useRoute } from '@react-navigation/native'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
-import { updateActiveStep } from '../../redux/reducers/navigationSlice'
+import {
+  updateActiveStep,
+  markStepCompleted,
+} from '../../redux/reducers/navigationSlice'
 
 export default function NavButtons({ navigation }: { navigation: any }) {
-  const route: RouteProp<ParamListBase, string> = useRoute()
-  // @ts-ignore-next-line
-  const currentPage = route?.params?.screen
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
-
-  const handleSave = () => {
-    console.log('save-placeholder')
-  }
+  const trapStatusState = useSelector((state: any) => state.trapStatus)
+  const activePage = navigationState.steps[navigationState.activeStep].name
+  // console.log('🚀 ~ NavButtons ~ activePage', activePage)
 
   const handleRightButton = useCallback(() => {
-    if (currentPage === ' Non Functional Trap' || currentPage === 'HighFlows') {
-      navigation.navigate('Trap Visit Form', { screen: 'End Trapping' })
-      return
-    }
-    handleSave()
-    navigation.navigate('Trap Visit Form', { screen: goForward(currentPage) })
+    // if (navigationState.activeStep === 2) {
+    //   console.log('STEP 2')
+    // navigateFlow(trapStatusState.values)
+    // }
+    navigation.navigate('Trap Visit Form', {
+      screen: navigationState.steps[navigationState.activeStep + 1].name,
+    })
     dispatch({
       type: updateActiveStep,
       payload: navigationState.activeStep + 1,
     })
-  }, [currentPage])
+  }, [activePage])
 
   const handleLeftButton = useCallback(() => {
-    navigation.navigate('Trap Visit Form', { screen: goBack(currentPage) })
-    if (navigationState.activeStep !== 1)
-      dispatch({
-        type: updateActiveStep,
-        payload: navigationState.activeStep - 1,
-      })
-  }, [currentPage])
+    navigation.navigate('Trap Visit Form', {
+      screen: navigationState.steps[navigationState.activeStep - 1].name,
+    })
+    dispatch({
+      type: updateActiveStep,
+      payload: navigationState.activeStep - 1,
+    })
+  }, [activePage])
 
-  const renderButtonText = (currentPage: string) => {
+  const renderButtonText = (activePage: string) => {
     let buttonText
-    if (currentPage === 'HighFlows' || currentPage === 'Non Functional Trap') {
+    if (activePage === 'HighFlows' || activePage === 'Non Functional Trap') {
       buttonText = 'End Trapping'
-    } else if (currentPage === 'High Temperatures') {
+    } else if (activePage === 'High Temperatures') {
       buttonText = 'Move on to Fish Processing'
     } else {
       buttonText = 'Next'
@@ -51,30 +52,43 @@ export default function NavButtons({ navigation }: { navigation: any }) {
     return buttonText
   }
 
-  const isDisabled = (currentPage: string) => {
-    return currentPage === 'Visit Setup' ||
-      currentPage === 'High Flows' ||
-      currentPage === 'High Temperatures' ||
-      currentPage === 'Non Functional Trap'
+  const isDisabled = (activePage: string) => {
+    return activePage === 'Visit Setup' ||
+      activePage === 'High Flows' ||
+      activePage === 'High Temperatures' ||
+      activePage === 'Non Functional Trap'
       ? true
       : false
   }
 
-  useEffect(() => {}, [])
-  // console.log('🚀 ~ NavButtons ~ currentPage', currentPage)
-  // console.log('🚀 ~ NavButtons ~ navigationState', navigationState)
+  const navigateFlow = (values: any) => {
+    if (values.trapStatus === 'Trap stopped functioning') {
+      navigation.navigate('Trap Visit Form', {
+        screen: 'Non Functional Trap',
+      })
+    } else if (values.flowMeasure > 1000) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
+    } else if (values.waterTemperature > 30) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
+    } else {
+      navigation.navigate('Trap Visit Form', {
+        screen: navigationState.steps[navigationState.activeStep + 1].name,
+      })
+    }
+  }
 
   return (
-    <Box bg='themeGrey' py='5' px='3' maxWidth='100%'>
-      <HStack justifyContent='space-between'>
+    <Box bg='themeGrey' py='5' maxWidth='100%'>
+      <HStack justifyContent='space-evenly'>
         <Button
           rounded='xs'
           bg='secondary'
           alignSelf='flex-start'
           py='3'
-          px='175'
+          // px='175'
+          width='45%'
           borderRadius='5'
-          isDisabled={isDisabled(currentPage)}
+          isDisabled={isDisabled(activePage)}
           onPress={handleLeftButton}
         >
           <Text fontSize='sm' fontWeight='bold' color='primary'>
@@ -86,12 +100,13 @@ export default function NavButtons({ navigation }: { navigation: any }) {
           bg='primary'
           alignSelf='flex-start'
           py='3'
-          px='175'
+          // px='175'
+          width='45%'
           borderRadius='5'
           onPress={handleRightButton}
         >
           <Text fontSize='sm' fontWeight='bold' color='white'>
-            {renderButtonText(currentPage)}
+            {renderButtonText(activePage)}
           </Text>
         </Button>
       </HStack>
