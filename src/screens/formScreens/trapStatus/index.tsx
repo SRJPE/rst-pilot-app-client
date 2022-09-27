@@ -182,8 +182,8 @@ export default function TrapStatus({
         onPress={() => console.log(dropdownValues)}
       />
       <RNButton
-        title='Log all of visitSetup redux state'
-        onPress={() => console.log(reduxState.visitSetup)}
+        title='Log all of  redux state'
+        onPress={() => console.log('redux state: ', reduxState)}
       />
       <RNButton
         title='Empty "markType" from redux state'
