@@ -22,26 +22,29 @@ export default function TrapOperations({
 }) {
   const step = route.params.step
   const activeFormState = route.params.activeFormState
-  console.log('🚀 ~ activeFormState', activeFormState)
   const passToActiveFormState = route.params.passToActiveFormState
   const initialFormState = {
     coneDepth: '',
     coneSetting: '',
-    totalRevolutions: '',
     checked: false,
-    rpm1: 0,
-    rpm2: 0,
-    rpm3: 0,
+    totalRevolutions: null,
+    rpm1: null,
+    rpm2: null,
+    rpm3: null,
   } as TrapOperationsValuesI
 
-  const [coneDepth, setConeDepth] = useState('' as string)
-  const [coneSetting, setConeSetting] = useState('full' as string)
-  const [totalRevolutions, setTotalRevolutions] = useState('' as string)
-  const [checked, setChecked] = useState([] as any)
+  const [coneSetting, setConeSetting] = useState('' as string)
+  const [checked, setChecked] = useState(false as boolean)
 
   useEffect(() => {
     passToActiveFormState(navigation, step, initialFormState, step)
   }, [])
+  useEffect(() => {
+    passToActiveFormState(navigation, step, { ...activeFormState, coneSetting })
+  }, [coneSetting])
+  useEffect(() => {
+    passToActiveFormState(navigation, step, { ...activeFormState, checked })
+  }, [checked])
 
   return (
     <Box h='full' bg='#fff' p='10%'>
@@ -66,14 +69,10 @@ export default function TrapOperations({
           <Radio.Group
             name='coneSetting'
             accessibilityLabel='cone setting'
-            value={activeFormState.coneSetting}
+            value={coneSetting}
             onChange={(nextValue: any) => {
-              passToActiveFormState(navigation, step, {
-                ...activeFormState,
-                coneSetting: nextValue,
-              })
-              // setConeSetting(nextValue)
-            }}
+              setConeSetting(nextValue)
+            }} // TODO: change to primary color
           >
             <Radio colorScheme='primary' value='Full' my={1}>
               Full
@@ -104,15 +103,10 @@ export default function TrapOperations({
           <FormControl w='1/2'>
             <HStack space={4} alignItems='center' pt='6'>
               <Checkbox
-                // isChecked={checked}
-                onChange={(currentText: any) =>
-                  passToActiveFormState(navigation, step, {
-                    ...activeFormState,
-                    checked: currentText,
-                  })
-                }
-                colorScheme='primary'
-                value={checked}
+                shadow={2}
+                onChange={(currentText: any) => setChecked(currentText)}
+                colorScheme='emerald' // TODO: change to primary color
+                value='checked'
                 accessibilityLabel='Collect total revolutions after fish processing Checkbox'
               />
               <FormControl.Label>
