@@ -6,6 +6,11 @@ const formSteps = {
   3: { name: 'Trap Operations', completed: false },
   4: { name: 'Fish Processing', completed: false },
   5: { name: 'Fish Input', completed: false },
+  6: { name: 'High Flows', completed: false },
+  7: { name: 'High Temperatures', completed: false },
+  8: { name: 'Non Functional Trap', completed: false },
+  9: { name: 'No Fish Caught', completed: false },
+  10: { name: 'End Trapping', completed: false },
 } as any
 
 interface NavigationStateI {
@@ -27,9 +32,11 @@ export const navigationSlice = createSlice({
     updateActiveStep: (state, action) => {
       state.activeStep = action.payload
     },
+    markStepCompleted: (state, action) => {},
+    navigateFlow: (state, action) => {},
   },
 })
 
-export const { updateActiveStep } = navigationSlice.actions
+export const { updateActiveStep, markStepCompleted } = navigationSlice.actions
 
 export default navigationSlice.reducer
