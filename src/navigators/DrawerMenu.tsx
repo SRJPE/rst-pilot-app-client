@@ -27,8 +27,8 @@ export default function DrawerMenu(props: DrawerContentComponentProps) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
   const { steps, activeStep } = navigationState
-  console.log('🚀 ~ DrawerMenu ~ activeStep', activeStep)
-  console.log('🚀 ~ DrawerMenu ~ steps', steps)
+  // console.log('🚀 ~ DrawerMenu ~ activeStep', activeStep)
+  // console.log('🚀 ~ DrawerMenu ~ steps', steps)
   // const activePageTitle = steps[activeStep].name
   const stepsArray = Object.values(steps)
 

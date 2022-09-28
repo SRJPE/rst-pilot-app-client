@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 export default function ProgressHeader(props: any) {
   const navigationState = useSelector((state: any) => state.navigation)
   const { steps, activeStep } = navigationState
-  const activePageTitle = steps[activeStep].name
+  const activePageTitle = steps[activeStep]?.name
 
   return (
     <Box>

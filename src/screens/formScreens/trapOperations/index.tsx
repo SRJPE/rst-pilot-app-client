@@ -12,6 +12,7 @@ import {
   WarningOutlineIcon,
 } from 'native-base'
 import { TrapOperationsValuesI } from '../../../redux/reducers/trapOperationsSlice'
+import { useSelector } from 'react-redux'
 
 export default function TrapOperations({
   route,
@@ -35,6 +36,9 @@ export default function TrapOperations({
 
   const [coneSetting, setConeSetting] = useState('' as string)
   const [checked, setChecked] = useState(false as boolean)
+
+  const reduxState = useSelector((state: any) => state)
+  console.log('🚀 ~ reduxState', reduxState.visitSetup.values)
 
   useEffect(() => {
     passToActiveFormState(navigation, step, initialFormState, step)

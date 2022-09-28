@@ -11,6 +11,7 @@ import {
 } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import { TrapVisitInitialValues } from '../../../services/utils/interfaces'
+import { useSelector } from 'react-redux'
 
 export default function VisitSetup({
   route,
@@ -30,14 +31,16 @@ export default function VisitSetup({
   } as TrapVisitInitialValues
   const [crew, setCrew] = useState([] as Array<any>)
 
+  const reduxState = useSelector((state: any) => state)
+  console.log('🚀 ~ reduxState visitSetup.values', reduxState.visitSetup.values)
+
   useEffect(() => {
-    passToActiveFormState(navigation, step, initialFormState, step)
+    passToActiveFormState(navigation, step, initialFormState)
   }, [])
 
   useEffect(() => {
     passToActiveFormState(navigation, step, { ...activeFormState, crew })
   }, [crew])
-
 
   return (
     <View>
