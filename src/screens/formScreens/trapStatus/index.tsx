@@ -44,28 +44,16 @@ export default function TrapStatus({
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const reduxState = useSelector((state: any) => state)
+  console.log('🚀 ~ reduxState trapStatus.values', reduxState.trapStatus.values)
 
   useEffect(() => {
     passToActiveFormState(navigation, step, initialFormState, step)
   }, [])
 
   useEffect(() => {
-    // console.log('dropdown values on initial load: ', dropdownValues)
-    // Dispatch reducers' actions to make changes to that reducer's state
-    // Parameters can be passed to these actions and will be recognized as the 'action.payload'
     dispatch(getTrapVisitDropdownValues())
   }, [])
   const { trapFunctionality } = dropdownValues.values
-
-  const navigateFlow = (values: any) => {
-    if (values.trapStatus === 'Trap stopped functioning') {
-      navigation.navigate('Trap Visit Form', { screen: 'Non Functional Trap' })
-    } else if (values.flowMeasure > 1000) {
-      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
-    } else if (values.waterTemperature > 30) {
-      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
-    }
-  }
 
   return (
     <Box h='full' bg='#fff' p='10%'>
@@ -198,15 +186,3 @@ const reasonsForTrapNotFunctioning = [
   { label: 'Broken Trap', value: 'Broken Trap' },
   { label: 'Debris in Trap', value: 'Debris in Trap' },
 ]
-
-//  <Button
-//               mt='300'
-//               /*
-//               // @ts-ignore */
-//               onPress={handleSubmit}
-//               title='Submit'
-//               variant='solid'
-//               backgroundColor='primary'
-//             >
-//               SUBMIT
-//             </Button>

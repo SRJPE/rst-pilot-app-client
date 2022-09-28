@@ -6,12 +6,21 @@ const formSteps = {
   3: { name: 'Trap Operations', completed: false },
   4: { name: 'Fish Processing', completed: false },
   5: { name: 'Fish Input', completed: false },
-  6: { name: 'High Flows', completed: false },
-  7: { name: 'High Temperatures', completed: false },
-  8: { name: 'Non Functional Trap', completed: false },
-  9: { name: 'No Fish Caught', completed: false },
-  10: { name: 'End Trapping', completed: false },
+  // 6: { name: 'High Flows', completed: false },
+  // 7: { name: 'High Temperatures', completed: false },
+  // 8: { name: 'Non Functional Trap', completed: false },
+  // 9: { name: 'No Fish Caught', completed: false },
+  // 10: { name: 'End Trapping', completed: false },
 } as any
+
+//display these pages in a differnt structure
+const test = {
+  1: { name: 'High Flows', completed: false },
+  2: { name: 'High Temperatures', completed: false },
+  3: { name: 'Non Functional Trap', completed: false },
+  4: { name: 'No Fish Caught', completed: false },
+  5: { name: 'End Trapping', completed: false },
+}
 
 interface NavigationStateI {
   activeStep: number

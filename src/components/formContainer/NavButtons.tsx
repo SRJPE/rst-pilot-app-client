@@ -1,6 +1,5 @@
 import { useCallback, useEffect } from 'react'
 import { Box, HStack, Text, Button } from 'native-base'
-// import { goForward, goBack } from '../../services/utils'
 import { ParamListBase, RouteProp, useRoute } from '@react-navigation/native'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
@@ -13,17 +12,40 @@ export default function NavButtons({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
   const trapStatusState = useSelector((state: any) => state.trapStatus)
-  const activePage = navigationState.steps[navigationState.activeStep].name
+  const activePage = navigationState.steps[navigationState.activeStep]?.name
+  console.log(
+    '🚀 ~ NavButtons ~ navigationState',
+    typeof navigationState.activeStep
+  )
   // console.log('🚀 ~ NavButtons ~ activePage', activePage)
 
+  const navigateFlow = (values: any) => {
+    if (values.trapStatus === 'Trap stopped functioning') {
+      navigation.navigate('Trap Visit Form', {
+        screen: 'Non Functional Trap',
+      })
+    } else if (values.flowMeasure > 1000) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
+    } else if (values.waterTemperature > 30) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
+    } else {
+      navigation.navigate('Trap Visit Form', {
+        screen: navigationState.steps[navigationState.activeStep + 1].name,
+      })
+    }
+  }
+
   const handleRightButton = useCallback(() => {
-    // if (navigationState.activeStep === 2) {
-    //   console.log('STEP 2')
-    // navigateFlow(trapStatusState.values)
-    // }
+    if (navigationState.activeStep === 2) {
+      console.log('STEP 2')
+      // navigateFlow(trapStatusState.values)
+    }
     navigation.navigate('Trap Visit Form', {
       screen: navigationState.steps[navigationState.activeStep + 1].name,
     })
+
+    //only make this dispatch if the navigation state needs to be updated
+
     dispatch({
       type: updateActiveStep,
       payload: navigationState.activeStep + 1,
@@ -59,22 +81,6 @@ export default function NavButtons({ navigation }: { navigation: any }) {
       activePage === 'Non Functional Trap'
       ? true
       : false
-  }
-
-  const navigateFlow = (values: any) => {
-    if (values.trapStatus === 'Trap stopped functioning') {
-      navigation.navigate('Trap Visit Form', {
-        screen: 'Non Functional Trap',
-      })
-    } else if (values.flowMeasure > 1000) {
-      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
-    } else if (values.waterTemperature > 30) {
-      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
-    } else {
-      navigation.navigate('Trap Visit Form', {
-        screen: navigationState.steps[navigationState.activeStep + 1].name,
-      })
-    }
   }
 
   return (
