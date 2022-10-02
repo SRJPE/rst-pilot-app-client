@@ -24,18 +24,23 @@ export default function FishProcessing({
 }) {
   const step = route.params.step
   const activeFormState = route.params.activeFormState
+  console.log('🚀 ~ activeFormState', activeFormState)
   const passToActiveFormState = route.params.passToActiveFormState
-  const initialFormState = {
-    fishProcessed: '',
-    reasonForNotProcessing: '',
-  } as any
+  const previousFormState = useSelector(
+    (state: any) => state.values?.fishProcessing
+  )
+
+  // const initialFormState = {
+  //   fishProcessed: '',
+  //   reasonForNotProcessing: '',
+  // } as any
 
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const reduxState = useSelector((state: any) => state)
 
   useEffect(() => {
-    passToActiveFormState(navigation, step, initialFormState, step)
+    passToActiveFormState(navigation, step, activeFormState)
   }, [])
 
   useEffect(() => {
@@ -50,7 +55,7 @@ export default function FishProcessing({
         <FormControl>
           <FormControl.Label>Fish Processed</FormControl.Label>
           <Select
-            selectedValue={activeFormState.fishProcessed}
+            selectedValue={previousFormState?.fishProcessed}
             minWidth='200'
             accessibilityLabel='Fish Processed'
             placeholder='Status'
@@ -80,7 +85,7 @@ export default function FishProcessing({
           <FormControl>
             <FormControl.Label>Reason For Not Processing</FormControl.Label>
             <Select
-              selectedValue={activeFormState.reasonForNotProcessing}
+              selectedValue={previousFormState?.reasonForNotProcessing}
               minWidth='200'
               accessibilityLabel='reasonForNotProcessing'
               placeholder='Reason'

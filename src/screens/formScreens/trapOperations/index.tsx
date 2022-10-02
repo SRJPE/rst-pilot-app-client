@@ -23,26 +23,30 @@ export default function TrapOperations({
 }) {
   const step = route.params.step
   const activeFormState = route.params.activeFormState
+  console.log('🚀 ~ activeFormState Operations', activeFormState)
   const passToActiveFormState = route.params.passToActiveFormState
-  const initialFormState = {
-    coneDepth: '',
-    coneSetting: '',
-    checked: false,
-    totalRevolutions: null,
-    rpm1: null,
-    rpm2: null,
-    rpm3: null,
-  } as TrapOperationsValuesI
+  const previousFormState = useSelector(
+    (state: any) => state.values?.trapOperations
+  )
+  // const initialFormState = {
+  //   coneDepth: '',
+  //   coneSetting: '',
+  //   checked: false,
+  //   totalRevolutions: null,
+  //   rpm1: null,
+  //   rpm2: null,
+  //   rpm3: null,
+  // } as TrapOperationsValuesI
 
   const [coneSetting, setConeSetting] = useState('' as string)
   const [checked, setChecked] = useState(false as boolean)
 
-  const reduxState = useSelector((state: any) => state)
-  console.log('🚀 ~ reduxState', reduxState.visitSetup.values)
-
   useEffect(() => {
-    passToActiveFormState(navigation, step, initialFormState, step)
+    passToActiveFormState(navigation, step, activeFormState)
   }, [])
+  // useEffect(() => {
+  //   passToActiveFormState(navigation, step, previousFormState)
+  // }, [previousFormState])
   useEffect(() => {
     passToActiveFormState(navigation, step, { ...activeFormState, coneSetting })
   }, [coneSetting])
@@ -63,7 +67,7 @@ export default function TrapOperations({
                 coneDepth: currentText,
               })
             }
-            value={activeFormState.coneDepth}
+            value={previousFormState?.coneDepth}
             placeholder='Numeric Value'
             keyboardType='numeric'
           />
@@ -99,7 +103,7 @@ export default function TrapOperations({
                   totalRevolutions: currentText,
                 })
               }
-              value={activeFormState.totalRevolutions}
+              value={previousFormState?.totalRevolutions}
               placeholder='Numeric Value'
               keyboardType='numeric'
             />
@@ -131,7 +135,7 @@ export default function TrapOperations({
                     rpm1asd: currentText,
                   })
                 }
-                value={activeFormState.rpm1}
+                value={previousFormState?.rpm1}
                 placeholder='Numeric Value'
                 keyboardType='numeric'
               ></Input>
@@ -145,7 +149,7 @@ export default function TrapOperations({
                     rpm2: currentText,
                   })
                 }
-                value={activeFormState.rpm2}
+                value={previousFormState?.rpm2}
                 placeholder='Numeric Value'
                 keyboardType='numeric'
               ></Input>
@@ -159,7 +163,7 @@ export default function TrapOperations({
                     rpm3: currentText,
                   })
                 }
-                value={activeFormState.rpm3}
+                value={previousFormState?.rpm3}
                 placeholder='Numeric Value'
                 keyboardType='numeric'
               ></Input>

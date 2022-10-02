@@ -22,20 +22,24 @@ export default function VisitSetup({
 }) {
   const step = route.params.step
   const activeFormState = route.params.activeFormState
+  console.log('🚀 ~ activeFormState visitSetup', activeFormState)
   const passToActiveFormState = route.params.passToActiveFormState
-  const initialFormState = {
-    stream: '',
-    trapSite: '',
-    trapSubSite: '',
-    crew: [],
-  } as TrapVisitInitialValues
   const [crew, setCrew] = useState([] as Array<any>)
-
-  const reduxState = useSelector((state: any) => state)
-  console.log('🚀 ~ reduxState visitSetup.values', reduxState.visitSetup.values)
+  const previousFormState = useSelector(
+    (state: any) => state.values?.visitSetup
+  )
+  // const [formState, setFormState] = useState(previousFormState)
+  // const initialFormState = previousFormState
+  // ||
+  // ({
+  //   stream: '',
+  //   trapSite: '',
+  //   trapSubSite: '',
+  //   crew: [],
+  // } as TrapVisitInitialValues)
 
   useEffect(() => {
-    passToActiveFormState(navigation, step, initialFormState)
+    passToActiveFormState(navigation, step, activeFormState)
   }, [])
 
   useEffect(() => {
@@ -51,7 +55,7 @@ export default function VisitSetup({
             <FormControl>
               <FormControl.Label>Stream</FormControl.Label>
               <Select
-                selectedValue={activeFormState?.stream}
+                selectedValue={previousFormState?.stream}
                 accessibilityLabel='Stream'
                 placeholder='Stream'
                 _selectedItem={{
@@ -75,41 +79,41 @@ export default function VisitSetup({
                 ))}
               </Select>
             </FormControl>
-            {activeFormState.stream && (
-              <>
-                <Heading fontSize='lg'>Confirm the following values</Heading>
-                <FormControl>
-                  <FormControl.Label>Trap Site</FormControl.Label>
-                  <Input
-                    value={activeFormState.trapSite}
-                    placeholder='Default Trap Site value'
-                    onChangeText={(currentText: any) =>
-                      passToActiveFormState(navigation, step, {
-                        ...activeFormState,
-                        trapSite: currentText,
-                      })
-                    }
-                  ></Input>
-                </FormControl>
-                <FormControl>
-                  <FormControl.Label>Trap Sub Site</FormControl.Label>
-                  <Input
-                    value={activeFormState.trapSubSite}
-                    placeholder='Default Trap Site value'
-                    onChangeText={(currentText: any) =>
-                      passToActiveFormState(navigation, step, {
-                        ...activeFormState,
-                        trapSubSite: currentText,
-                      })
-                    }
-                  ></Input>
-                </FormControl>
-                <FormControl>
-                  <FormControl.Label>Crew</FormControl.Label>
-                  <CrewDropDown setCrew={setCrew} />
-                </FormControl>
-              </>
-            )}
+            {/* {(previousFormState?.stream || activeFormState?.stream) && ( */}
+            <>
+              <Heading fontSize='lg'>Confirm the following values</Heading>
+              <FormControl>
+                <FormControl.Label>Trap Site</FormControl.Label>
+                <Input
+                  value={previousFormState?.trapSite}
+                  placeholder='Default Trap Site value'
+                  onChangeText={(currentText: any) =>
+                    passToActiveFormState(navigation, step, {
+                      ...activeFormState,
+                      trapSite: currentText,
+                    })
+                  }
+                ></Input>
+              </FormControl>
+              <FormControl>
+                <FormControl.Label>Trap Sub Site</FormControl.Label>
+                <Input
+                  value={previousFormState?.trapSubSite}
+                  placeholder='Default Trap Site value'
+                  onChangeText={(currentText: any) =>
+                    passToActiveFormState(navigation, step, {
+                      ...activeFormState,
+                      trapSubSite: currentText,
+                    })
+                  }
+                ></Input>
+              </FormControl>
+              <FormControl>
+                <FormControl.Label>Crew</FormControl.Label>
+                <CrewDropDown setCrew={setCrew} />
+              </FormControl>
+            </>
+            {/* )} */}
           </VStack>
         </Box>
       </>

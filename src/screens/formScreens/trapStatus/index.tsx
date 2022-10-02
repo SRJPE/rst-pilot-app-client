@@ -32,28 +32,36 @@ export default function TrapStatus({
 }) {
   const step = route.params.step
   const activeFormState = route.params.activeFormState
+  console.log('🚀 ~ activeFormState trap status', activeFormState)
   const passToActiveFormState = route.params.passToActiveFormState
-  const initialFormState = {
-    trapStatus: '',
-    reasonNotFunc: '',
-    flowMeasure: '',
-    waterTemperature: '',
-    waterTurbidity: '',
-  } as TrapStatusInitialValues
+  const previousFormState = useSelector(
+    (state: any) => state.values?.trapStatus
+  )
+  // const initialFormState = {
+  //   trapStatus: '',
+  //   reasonNotFunc: '',
+  //   flowMeasure: '',
+  //   waterTemperature: '',
+  //   waterTurbidity: '',
+  // } as TrapStatusInitialValues
 
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const reduxState = useSelector((state: any) => state)
-  console.log('🚀 ~ reduxState trapStatus.values', reduxState.trapStatus.values)
+  // console.log('🚀 ~ reduxState trapStatus.values', reduxState.trapStatus.values)
 
+  //need to make this on fire when the navigation changes.
   useEffect(() => {
-    passToActiveFormState(navigation, step, initialFormState, step)
+    // passToActiveFormState(navigation, step, initialFormState, step)
+    passToActiveFormState(navigation, step, activeFormState)
   }, [])
 
   useEffect(() => {
     dispatch(getTrapVisitDropdownValues())
   }, [])
   const { trapFunctionality } = dropdownValues.values
+  console.log('🚀 ~ trapFunctionality', trapFunctionality)
+  // console.log('🚀 ~ trapFunctionality', trapFunctionality)
 
   return (
     <Box h='full' bg='#fff' p='10%'>
@@ -62,7 +70,7 @@ export default function TrapStatus({
         <FormControl>
           <FormControl.Label>Trap Status</FormControl.Label>
           <Select
-            selectedValue={activeFormState?.status}
+            selectedValue={previousFormState?.status}
             accessibilityLabel='Status'
             placeholder='Status'
             _selectedItem={{
@@ -86,85 +94,83 @@ export default function TrapStatus({
             ))}
           </Select>
         </FormControl>
-        {activeFormState?.trapStatus ===
-          'Trap functioning, but not normally' && (
-          <FormControl>
-            <FormControl.Label>
-              Reason For Trap Not Functioning
-            </FormControl.Label>
-            <Select
-              selectedValue={activeFormState?.reasonNotFunc}
-              accessibilityLabel='Reason Not Functioning.'
-              placeholder='Reason'
-              _selectedItem={{
-                bg: 'secondary',
-                endIcon: <CheckIcon size='5' />,
-              }}
-              mt={1}
-              onValueChange={(selectedValue: any) =>
-                passToActiveFormState(navigation, step, {
-                  ...activeFormState,
-                  reasonNotFunc: selectedValue,
-                })
-              }
-            >
-              {reasonsForTrapNotFunctioning.map((item, idx) => (
-                <Select.Item key={idx} label={item.label} value={item.value} />
-              ))}
-            </Select>
-          </FormControl>
-        )}
-        {activeFormState?.trapStatus?.length > 0 && (
-          <>
-            <Heading fontSize='lg'>Environmental Conditions</Heading>
-            <HStack space={5} width='125%'>
-              <FormControl w='1/4'>
-                <FormControl.Label>Flow Measure</FormControl.Label>
-                <Input
-                  value={activeFormState.flowMeasure}
-                  placeholder='Populated from CDEC'
-                  keyboardType='numeric'
-                  onChangeText={(currentText: any) =>
-                    passToActiveFormState(navigation, step, {
-                      ...activeFormState,
-                      flowMeasure: currentText,
-                    })
-                  }
-                />
-              </FormControl>
-              <FormControl w='1/4'>
-                <FormControl.Label>Water Temperature</FormControl.Label>
-                <Input
-                  value={activeFormState.waterTemperature}
-                  placeholder='Numeric Value'
-                  keyboardType='numeric'
-                  onChangeText={(currentText: any) =>
-                    passToActiveFormState(navigation, step, {
-                      ...activeFormState,
-                      waterTemperature: currentText,
-                    })
-                  }
-                />
-              </FormControl>
-              <FormControl w='1/4'>
-                <FormControl.Label>Water Turbidity</FormControl.Label>
-                <Input
-                  value={activeFormState.waterTurbidity}
-                  placeholder='Numeric Value'
-                  keyboardType='numeric'
-                  onChangeText={(currentText: any) =>
-                    passToActiveFormState(navigation, step, {
-                      ...activeFormState,
-                      waterTurbidity: currentText,
-                    })
-                  }
-                />
-              </FormControl>
-            </HStack>
-          </>
-        )}
+        {/* {activeFormState?.trapStatus ===
+          'Trap functioning, but not normally' && ( */}
+        <FormControl>
+          <FormControl.Label>Reason For Trap Not Functioning</FormControl.Label>
+          <Select
+            selectedValue={previousFormState?.reasonNotFunc}
+            accessibilityLabel='Reason Not Functioning.'
+            placeholder='Reason'
+            _selectedItem={{
+              bg: 'secondary',
+              endIcon: <CheckIcon size='5' />,
+            }}
+            mt={1}
+            onValueChange={(selectedValue: any) =>
+              passToActiveFormState(navigation, step, {
+                ...activeFormState,
+                reasonNotFunc: selectedValue,
+              })
+            }
+          >
+            {reasonsForTrapNotFunctioning.map((item, idx) => (
+              <Select.Item key={idx} label={item.label} value={item.value} />
+            ))}
+          </Select>
+        </FormControl>
+        {/* )} */}
+        {/* {activeFormState?.trapStatus?.length > 0 && ( */}
+        <>
+          <Heading fontSize='lg'>Environmental Conditions</Heading>
+          <HStack space={5} width='125%'>
+            <FormControl w='1/4'>
+              <FormControl.Label>Flow Measure</FormControl.Label>
+              <Input
+                value={previousFormState?.flowMeasure}
+                placeholder='Populated from CDEC'
+                keyboardType='numeric'
+                onChangeText={(currentText: any) =>
+                  passToActiveFormState(navigation, step, {
+                    ...activeFormState,
+                    flowMeasure: currentText,
+                  })
+                }
+              />
+            </FormControl>
+            <FormControl w='1/4'>
+              <FormControl.Label>Water Temperature</FormControl.Label>
+              <Input
+                value={previousFormState?.waterTemperature}
+                placeholder='Numeric Value'
+                keyboardType='numeric'
+                onChangeText={(currentText: any) =>
+                  passToActiveFormState(navigation, step, {
+                    ...activeFormState,
+                    waterTemperature: currentText,
+                  })
+                }
+              />
+            </FormControl>
+            <FormControl w='1/4'>
+              <FormControl.Label>Water Turbidity</FormControl.Label>
+              <Input
+                value={previousFormState?.waterTurbidity}
+                placeholder='Numeric Value'
+                keyboardType='numeric'
+                onChangeText={(currentText: any) =>
+                  passToActiveFormState(navigation, step, {
+                    ...activeFormState,
+                    waterTurbidity: currentText,
+                  })
+                }
+              />
+            </FormControl>
+          </HStack>
+        </>
+        {/* )} */}
       </VStack>
-
+      {/* 
       <RNButton
         title='Log dropdown values from redux'
         onPress={() => console.log(dropdownValues)}
@@ -176,7 +182,7 @@ export default function TrapStatus({
       <RNButton
         title='Empty "markType" from redux state'
         onPress={() => dispatch(clearValuesFromDropdown('markType'))}
-      />
+      /> */}
     </Box>
   )
 }
