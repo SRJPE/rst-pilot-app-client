@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Box, HStack, Text, Button } from 'native-base'
 import { ParamListBase, RouteProp, useRoute } from '@react-navigation/native'
 import { useSelector, useDispatch } from 'react-redux'
@@ -11,13 +11,11 @@ import {
 export default function NavButtons({ navigation }: { navigation: any }) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
-  const trapStatusState = useSelector((state: any) => state.trapStatus)
-  const activePage = navigationState.steps[navigationState.activeStep]?.name
-  console.log(
-    '🚀 ~ NavButtons ~ navigationState',
-    typeof navigationState.activeStep
-  )
+  const activeStep = navigationState.activeStep
+  const activePage = navigationState.steps[activeStep]?.name
   // console.log('🚀 ~ NavButtons ~ activePage', activePage)
+
+  const reduxState = useSelector((state: any) => state)
 
   const navigateFlow = (values: any) => {
     if (values.trapStatus === 'Trap stopped functioning') {
@@ -30,18 +28,18 @@ export default function NavButtons({ navigation }: { navigation: any }) {
       navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
     } else {
       navigation.navigate('Trap Visit Form', {
-        screen: navigationState.steps[navigationState.activeStep + 1].name,
+        screen: navigationState.steps[activeStep + 1]?.name,
       })
     }
   }
 
-  const handleRightButton = useCallback(() => {
-    if (navigationState.activeStep === 2) {
-      console.log('STEP 2')
-      // navigateFlow(trapStatusState.values)
-    }
+  const handleRightButton = () => {
+    // if (navigationState.activeStep === 2) {
+    //   console.log('STEP 2')
+    //   // navigateFlow(trapStatusState.values)
+    // }
     navigation.navigate('Trap Visit Form', {
-      screen: navigationState.steps[navigationState.activeStep + 1].name,
+      screen: navigationState.steps[activeStep + 1]?.name,
     })
 
     //only make this dispatch if the navigation state needs to be updated
@@ -50,17 +48,16 @@ export default function NavButtons({ navigation }: { navigation: any }) {
       type: updateActiveStep,
       payload: navigationState.activeStep + 1,
     })
-  }, [activePage])
-
-  const handleLeftButton = useCallback(() => {
+  }
+  const handleLeftButton = () => {
     navigation.navigate('Trap Visit Form', {
-      screen: navigationState.steps[navigationState.activeStep - 1].name,
+      screen: navigationState.steps[activeStep - 1]?.name,
     })
     dispatch({
       type: updateActiveStep,
       payload: navigationState.activeStep - 1,
     })
-  }, [activePage])
+  }
 
   const renderButtonText = (activePage: string) => {
     let buttonText
@@ -93,11 +90,26 @@ export default function NavButtons({ navigation }: { navigation: any }) {
           py='3'
           width='45%'
           borderRadius='5'
-          isDisabled={isDisabled(activePage)}
+          // isDisabled={isDisabled(activePage)}
           onPress={handleLeftButton}
         >
           <Text fontSize='sm' fontWeight='bold' color='primary'>
             Back
+          </Text>
+        </Button>
+        <Button
+          rounded='xs'
+          bg='primary'
+          alignSelf='flex-start'
+          py='3'
+          width='5%'
+          borderRadius='5'
+          onPress={() =>
+            console.log('🚀 ~ reduxState trapStatus.values', reduxState)
+          }
+        >
+          <Text fontSize='sm' fontWeight='bold' color='white'>
+            redux state
           </Text>
         </Button>
         <Button
