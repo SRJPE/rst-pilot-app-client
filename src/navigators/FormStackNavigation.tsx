@@ -32,9 +32,9 @@ export default function FormStackNavigation() {
 
   const stepToActions = {
     1: saveVisitSetup, // visitSetupSlice
-    // 2: saveTrapStatus,
-    // 3: saveTrapOperations,
-    // 4: saveFishProcessing,
+    2: saveTrapStatus,
+    3: saveTrapOperations,
+    4: saveFishProcessing,
   }
 
   useEffect(() => {
@@ -47,11 +47,23 @@ export default function FormStackNavigation() {
 
     if (actionForStep) {
       dispatch(actionForStep(activeFormState))
+      setStepToSubmit(0)
+      setActiveFormState({})
+    } else {
+      console.log('*********** ActionForStep Undefined ***********')
     }
 
     //then reset for next screen
     setStepToSubmit(0)
     setActiveFormState({})
+    console.log(
+      '🚀 ~ FormStackNavigation ~ stepToSubmit IN USE EFFECT',
+      stepToSubmit
+    )
+    console.log(
+      '🚀 ~ FormStackNavigation ~ activeFormState IN USE EFFECT',
+      activeFormState
+    )
   }, [navigationState.activeStep])
 
   const passToActiveFormState = (
