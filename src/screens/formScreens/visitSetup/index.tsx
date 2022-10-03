@@ -40,25 +40,20 @@ export default function VisitSetup({
   const [crew, setCrew] = useState([] as Array<any>)
   const reduxState = useSelector((state: any) => state.values?.trapVisit)
 
-  console.log('🚀 ~ reduxFormState #####', reduxFormState)
-  const reduxFormState2 = useSelector((state: any) => state.values?.visitSetup)
-  console.log('🚀 ~ reduxFormState2', reduxFormState2)
-
-  console.log('🚀 ~ activeFormState Visit Setup', activeFormState)
-  console.log('🚀 ~ route PARAMS Visit Setup', route.params)
-
   // useEffect(() => {
   //   resetActiveFormState(navigation, reduxState)
-  //   console.log('🚀 ~ activeFormState &&&&&&&', activeFormState)
+  //   console.log('🚀 ~ activeFormState useEffect', activeFormState)
   // }, [])
 
   useEffect(() => {
-    // if (Object.keys(activeFormState).length > 1) {
+    //if form is marked completed??
+    //
+    // if () {
     //   navigation.setParams({
     //     activeFormState: reduxFormState,
     //   })
     // }
-    // if (Object.keys(activeFormState).length > 1) {
+    // if () {
     //   passToActiveFormState(navigation, step, reduxState)
     // } else {
     //   passToActiveFormState(navigation, step, initialFormValues)

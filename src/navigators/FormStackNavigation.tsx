@@ -33,40 +33,39 @@ import {
 
 const FormStack = createStackNavigator()
 
+const stepToActionsLookup = {
+  1: {
+    name: 'Visit Setup',
+    save: saveVisitSetup,
+    completed: markVisitSetupCompleted,
+  },
+  2: {
+    name: 'Trap Status',
+    save: saveTrapStatus,
+    completed: markTrapStatusCompleted,
+  },
+  3: {
+    name: 'Trap Operations',
+    save: saveTrapOperations,
+    completed: markTrapOperationsCompleted,
+  },
+  4: {
+    name: 'Fish Processing',
+    save: saveFishProcessing,
+    completed: markFishProcessingCompleted,
+  },
+}
+
 export default function FormStackNavigation() {
   const [stepToSubmit, setStepToSubmit] = useState(0 as number)
   const [activeFormState, setActiveFormState] = useState({} as any)
   const [reduxFormState, setReduxFormState] = useState({} as any)
   const navigationState = useSelector((state: any) => state.navigation)
   const reduxState = useSelector((state: any) => state?.values)
-  // console.log('🚀 ~ FormStackNavigation ~ reduxState', reduxState)
   const dispatch = useDispatch<AppDispatch>()
   LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
   ])
-
-  const stepToActionsLookup = {
-    1: {
-      name: 'Visit Setup',
-      save: saveVisitSetup,
-      completed: markVisitSetupCompleted,
-    },
-    2: {
-      name: 'Trap Status',
-      save: saveTrapStatus,
-      completed: markTrapStatusCompleted,
-    },
-    3: {
-      name: 'Trap Operations',
-      save: saveTrapOperations,
-      completed: markTrapOperationsCompleted,
-    },
-    4: {
-      name: 'Fish Processing',
-      save: saveFishProcessing,
-      completed: markFishProcessingCompleted,
-    },
-  }
 
   useEffect(() => {
     console.log('call dispatch for respective step: ', stepToSubmit)
@@ -80,11 +79,11 @@ export default function FormStackNavigation() {
       dispatch(actionsForStep?.save(activeFormState))
       dispatch(actionsForStep?.completed(true))
     } else {
-      console.log('*********** ActionForStep Undefined ***********')
+      console.log('*********** ActionForStep currently Undefined ***********')
     }
 
     //then reset for next screen
-    //NOT RESETTING
+    //###### NOT RESETTING PROPERLY ##########
     setStepToSubmit(0)
     setActiveFormState({})
     console.log(
@@ -109,7 +108,7 @@ export default function FormStackNavigation() {
     setActiveFormState(formData)
 
     //check for?
-    // if (Object.keys(formData).length > 1) {
+    // if () {
     //   navigation.setParams({
     //     activeFormState: reduxStore,
     //   })
@@ -134,10 +133,6 @@ export default function FormStackNavigation() {
   //   navigation.setParams({
   //     activeFormState: reduxStore,
   //   })
-
-  //   // navigation.setParams({
-  //   //   reduxFormState: reduxStore,
-  //   // })
   // }
 
   return (
