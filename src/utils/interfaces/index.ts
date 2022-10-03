@@ -9,16 +9,21 @@ export interface TrapVisitInitialValues {
 export interface TrapStatusInitialValues {
   trapStatus: string
   reasonNotFunc: string
-  flowMeasure: string
-  waterTemperature: string
-  waterTurbidity: string
+  flowMeasure: number | null
+  waterTemperature: number | null
+  waterTurbidity: number | null
 }
 export interface TrapOperationsInitialValues {
   coneDepth: string
   coneSetting: string
-  totalRevolutions: string
-  checked: any
-  rpm1: number
-  rpm2: number
-  rpm3: number
+  totalRevolutions: number | null
+  checked: boolean
+  rpm1: number | null
+  rpm2: number | null
+  rpm3: number | null
+}
+
+export interface FishProcessingInitialValues {
+  fishProcessed: string
+  reasonForNotProcessing: string
 }
