@@ -65,6 +65,8 @@ export default function NavButtons({ navigation }: { navigation: any }) {
       buttonText = 'End Trapping'
     } else if (activePage === 'High Temperatures') {
       buttonText = 'Move on to Fish Processing'
+    } else if (activePage === 'Trap Status') {
+      buttonText = 'trap Status'
     } else {
       buttonText = 'Next'
     }
@@ -104,9 +106,7 @@ export default function NavButtons({ navigation }: { navigation: any }) {
           py='3'
           width='5%'
           borderRadius='5'
-          onPress={() =>
-            console.log('🚀 ~ reduxState trapStatus.values', reduxState)
-          }
+          onPress={() => console.log('🚀 ~ reduxState', reduxState)}
         >
           <Text fontSize='sm' fontWeight='bold' color='white'>
             redux state
