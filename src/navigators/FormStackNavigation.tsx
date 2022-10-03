@@ -14,8 +14,14 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 import { LogBox } from 'react-native'
 import { AppDispatch } from '../redux/store'
-import { saveVisitSetup } from '../redux/reducers/visitSetupSlice'
-import { saveTrapStatus } from '../redux/reducers/trapStatusSlice'
+import {
+  markVisitSetupCompleted,
+  saveVisitSetup,
+} from '../redux/reducers/visitSetupSlice'
+import {
+  markTrapStatusCompleted,
+  saveTrapStatus,
+} from '../redux/reducers/trapStatusSlice'
 import { saveTrapOperations } from '../redux/reducers/trapOperationsSlice'
 import { saveFishProcessing } from '../redux/reducers/fishProcessingSlice'
 
@@ -24,17 +30,36 @@ const FormStack = createStackNavigator()
 export default function FormStackNavigation() {
   const [stepToSubmit, setStepToSubmit] = useState(0 as number)
   const [activeFormState, setActiveFormState] = useState({} as any)
+  const [reduxFormState, setReduxFormState] = useState({} as any)
   const navigationState = useSelector((state: any) => state.navigation)
+  const reduxState = useSelector((state: any) => state?.values)
+  // console.log('🚀 ~ FormStackNavigation ~ reduxState', reduxState)
   const dispatch = useDispatch<AppDispatch>()
   LogBox.ignoreLogs([
     'Non-serializable values were found in the navigation state',
   ])
 
-  const stepToActions = {
-    1: saveVisitSetup, // visitSetupSlice
-    2: saveTrapStatus,
-    3: saveTrapOperations,
-    4: saveFishProcessing,
+  const stepToActionsLookup = {
+    1: {
+      name: 'Visit Setup',
+      save: saveVisitSetup,
+      completed: markVisitSetupCompleted,
+    },
+    2: {
+      name: 'Trap Status',
+      save: saveTrapStatus,
+      completed: markTrapStatusCompleted,
+    },
+    3: {
+      name: 'Trap Operations',
+      save: saveTrapOperations,
+      completed: markVisitSetupCompleted,
+    },
+    4: {
+      name: 'Fish Processing',
+      save: saveFishProcessing,
+      completed: markVisitSetupCompleted,
+    },
   }
 
   useEffect(() => {
@@ -42,18 +67,18 @@ export default function FormStackNavigation() {
     console.log('payload for dispatch: ', activeFormState)
 
     // Dispatch
-    const actionForStep =
-      stepToActions[stepToSubmit as keyof typeof stepToActions]
+    const actionsForStep =
+      stepToActionsLookup[stepToSubmit as keyof typeof stepToActionsLookup]
 
-    if (actionForStep) {
-      dispatch(actionForStep(activeFormState))
-      setStepToSubmit(0)
-      setActiveFormState({})
+    if (actionsForStep) {
+      dispatch(actionsForStep?.save(activeFormState))
+      dispatch(actionsForStep?.completed(true))
     } else {
       console.log('*********** ActionForStep Undefined ***********')
     }
 
     //then reset for next screen
+    //NOT RESETTING
     setStepToSubmit(0)
     setActiveFormState({})
     console.log(
@@ -77,11 +102,37 @@ export default function FormStackNavigation() {
     setStepToSubmit(step)
     setActiveFormState(formData)
 
+    //check for?
+    // if (Object.keys(formData).length > 1) {
+    //   navigation.setParams({
+    //     activeFormState: reduxStore,
+    //   })
+    // }
     // call 'setOptions' to update screen params (params will not change otherwise)
     navigation.setParams({
       activeFormState: formData,
     })
   }
+
+  // const resetActiveFormState = (
+  //   navigation: any,
+  //   // step: number,
+  //   reduxStore: any
+  // ) => {
+  //   console.log(
+  //     '🚀 ~ FormStackNavigation ~ RESET ACTIVE FORM STATE',
+  //     activeFormState
+  //   )
+  //   setActiveFormState(reduxStore)
+
+  //   navigation.setParams({
+  //     activeFormState: reduxStore,
+  //   })
+
+  //   // navigation.setParams({
+  //   //   reduxFormState: reduxStore,
+  //   // })
+  // }
 
   return (
     <FormStack.Navigator
@@ -91,52 +142,92 @@ export default function FormStackNavigation() {
       <FormStack.Screen
         name='Visit Setup'
         component={VisitSetup}
-        initialParams={{ step: 1, passToActiveFormState, activeFormState }}
+        initialParams={{
+          step: 1,
+          passToActiveFormState,
+          activeFormState,
+        }}
       />
       <FormStack.Screen
         name='Trap Status'
         component={TrapStatus}
-        initialParams={{ step: 2, passToActiveFormState, activeFormState }}
+        initialParams={{
+          step: 2,
+          passToActiveFormState,
+          activeFormState,
+        }}
       />
       <FormStack.Screen
         name='Trap Operations'
         component={TrapOperations}
-        initialParams={{ step: 3, passToActiveFormState, activeFormState }}
+        initialParams={{
+          step: 3,
+          passToActiveFormState,
+          activeFormState,
+        }}
       />
       <FormStack.Screen
         name='Fish Input'
         component={FishInput}
-        initialParams={{ step: 4, passToActiveFormState, activeFormState }}
+        initialParams={{
+          step: 4,
+          passToActiveFormState,
+          activeFormState,
+        }}
       />
       <FormStack.Screen
         name='Fish Processing'
         component={FishProcessing}
-        initialParams={{ step: 5, passToActiveFormState, activeFormState }}
+        initialParams={{
+          step: 5,
+          passToActiveFormState,
+          activeFormState,
+        }}
       />
       <FormStack.Screen
         name='High Flows'
         component={HighFlows}
-        initialParams={{ step: 6, passToActiveFormState, activeFormState }}
+        initialParams={{
+          step: 6,
+          passToActiveFormState,
+          activeFormState,
+        }}
       />
       <FormStack.Screen
         name='High Temperatures'
         component={HighTemperatures}
-        initialParams={{ step: 7, passToActiveFormState, activeFormState }}
+        initialParams={{
+          step: 7,
+          passToActiveFormState,
+          activeFormState,
+        }}
       />
       <FormStack.Screen
         name='Non Functional Trap'
         component={NonFunctionalTrap}
-        initialParams={{ step: 8, passToActiveFormState, activeFormState }}
+        initialParams={{
+          step: 8,
+          passToActiveFormState,
+          activeFormState,
+        }}
       />
       <FormStack.Screen
         name='No Fish Caught'
         component={NoFishCaught}
-        initialParams={{ step: 9, passToActiveFormState, activeFormState }}
+        initialParams={{
+          step: 9,
+          passToActiveFormState,
+          activeFormState,
+        }}
       />
       <FormStack.Screen
         name='End Trapping'
         component={EndTrapping}
-        initialParams={{ step: 10, passToActiveFormState, activeFormState }}
+        initialParams={{
+          step: 10,
+          passToActiveFormState,
+          activeFormState,
+        }}
       />
     </FormStack.Navigator>
   )
