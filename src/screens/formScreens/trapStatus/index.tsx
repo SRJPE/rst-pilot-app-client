@@ -30,29 +30,50 @@ export default function TrapStatus({
   route: any
   navigation: any
 }) {
-  const step = route.params.step
-  const activeFormState = route.params.activeFormState
-  console.log('🚀 ~ activeFormState trap status', activeFormState)
-  const passToActiveFormState = route.params.passToActiveFormState
+  const {
+    step,
+    activeFormState,
+    passToActiveFormState,
+    resetActiveFormState,
+    reduxFormState,
+  } = route.params
   const previousFormState = useSelector(
     (state: any) => state.values?.trapStatus
   )
-  // const initialFormState = {
-  //   trapStatus: '',
-  //   reasonNotFunc: '',
-  //   flowMeasure: '',
-  //   waterTemperature: '',
-  //   waterTurbidity: '',
-  // } as TrapStatusInitialValues
+  const initialFormValues = {
+    trapStatus: '',
+    reasonNotFunc: '',
+    flowMeasure: '',
+    waterTemperature: '',
+    waterTurbidity: '',
+  } as TrapStatusInitialValues
 
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const reduxState = useSelector((state: any) => state)
   // console.log('🚀 ~ reduxState trapStatus.values', reduxState.trapStatus.values)
 
-  //need to make this on fire when the navigation changes.
+  console.log('🚀 ~ activeFormState trap status', activeFormState)
+  console.log('🚀 ~ route PARAMS Trap Status', route.params)
+
+  // useEffect(() => {
+  //   resetActiveFormState(navigation, previousFormState)
+  //   console.log('🚀 ~ activeFormState &&&&&&&', activeFormState)
+  //   console.log('🚀 ~ reduxFormState &^(*^(*^*(^', reduxFormState)
+  // }, [])
+
   useEffect(() => {
     // passToActiveFormState(navigation, step, initialFormState, step)
+    // if (Object.keys(activeFormState).length > 1) {
+    //   navigation.setParams({
+    //     activeFormState: previousFormState,
+    //   })
+    // }
+    // if (Object.keys(activeFormState).length > 1) {
+    //   passToActiveFormState(navigation, step, previousFormState)
+    // } else {
+    //   passToActiveFormState(navigation, step, initialFormValues)
+    // }
     passToActiveFormState(navigation, step, activeFormState)
   }, [])
 
@@ -70,7 +91,7 @@ export default function TrapStatus({
         <FormControl>
           <FormControl.Label>Trap Status</FormControl.Label>
           <Select
-            selectedValue={previousFormState?.status}
+            selectedValue={activeFormState?.status}
             accessibilityLabel='Status'
             placeholder='Status'
             _selectedItem={{
@@ -99,7 +120,7 @@ export default function TrapStatus({
         <FormControl>
           <FormControl.Label>Reason For Trap Not Functioning</FormControl.Label>
           <Select
-            selectedValue={previousFormState?.reasonNotFunc}
+            selectedValue={activeFormState?.reasonNotFunc}
             accessibilityLabel='Reason Not Functioning.'
             placeholder='Reason'
             _selectedItem={{
@@ -127,7 +148,7 @@ export default function TrapStatus({
             <FormControl w='1/4'>
               <FormControl.Label>Flow Measure</FormControl.Label>
               <Input
-                value={previousFormState?.flowMeasure}
+                value={activeFormState?.flowMeasure}
                 placeholder='Populated from CDEC'
                 keyboardType='numeric'
                 onChangeText={(currentText: any) =>
@@ -141,7 +162,7 @@ export default function TrapStatus({
             <FormControl w='1/4'>
               <FormControl.Label>Water Temperature</FormControl.Label>
               <Input
-                value={previousFormState?.waterTemperature}
+                value={activeFormState?.waterTemperature}
                 placeholder='Numeric Value'
                 keyboardType='numeric'
                 onChangeText={(currentText: any) =>
@@ -155,7 +176,7 @@ export default function TrapStatus({
             <FormControl w='1/4'>
               <FormControl.Label>Water Turbidity</FormControl.Label>
               <Input
-                value={previousFormState?.waterTurbidity}
+                value={activeFormState?.waterTurbidity}
                 placeholder='Numeric Value'
                 keyboardType='numeric'
                 onChangeText={(currentText: any) =>

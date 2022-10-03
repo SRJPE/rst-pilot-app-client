@@ -20,31 +20,54 @@ export default function VisitSetup({
   route: any
   navigation: any
 }) {
-  const step = route.params.step
-  const activeFormState = route.params.activeFormState
-  console.log('🚀 ~ activeFormState visitSetup', activeFormState)
-  const passToActiveFormState = route.params.passToActiveFormState
+  // const step = route.params.step
+  // const activeFormState = route.params.activeFormState
+  // const passToActiveFormState = route.params.passToActiveFormState
+  const {
+    step,
+    activeFormState,
+    passToActiveFormState,
+    resetActiveFormState,
+    reduxFormState,
+  } = route.params
   const [crew, setCrew] = useState([] as Array<any>)
-  const previousFormState = useSelector(
-    (state: any) => state.values?.visitSetup
-  )
-  // const [formState, setFormState] = useState(previousFormState)
-  // const initialFormState = previousFormState
-  // ||
-  // ({
-  //   stream: '',
-  //   trapSite: '',
-  //   trapSubSite: '',
-  //   crew: [],
-  // } as TrapVisitInitialValues)
+  const previousFormState = useSelector((state: any) => state.values?.trapVisit)
+  const initialFormValues = {
+    stream: '',
+    trapSite: '',
+    trapSubSite: '',
+    crew: Array<string>,
+  }
+
+  console.log('🚀 ~ reduxFormState #####', reduxFormState)
+  const reduxFormState2 = useSelector((state: any) => state.values?.visitSetup)
+  console.log('🚀 ~ reduxFormState2', reduxFormState2)
+
+  console.log('🚀 ~ activeFormState Visit Setup', activeFormState)
+  console.log('🚀 ~ route PARAMS Visit Setup', route.params)
+
+  // useEffect(() => {
+  //   resetActiveFormState(navigation, previousFormState)
+  //   console.log('🚀 ~ activeFormState &&&&&&&', activeFormState)
+  // }, [])
 
   useEffect(() => {
+    // if (Object.keys(activeFormState).length > 1) {
+    //   navigation.setParams({
+    //     activeFormState: reduxFormState,
+    //   })
+    // }
+    // if (Object.keys(activeFormState).length > 1) {
+    //   passToActiveFormState(navigation, step, previousFormState)
+    // } else {
+    //   passToActiveFormState(navigation, step, initialFormValues)
+    // }
     passToActiveFormState(navigation, step, activeFormState)
   }, [])
 
   useEffect(() => {
     passToActiveFormState(navigation, step, { ...activeFormState, crew })
-  }, [crew])
+  }, [crew, navigation.activeStep])
 
   return (
     <View>
@@ -55,7 +78,7 @@ export default function VisitSetup({
             <FormControl>
               <FormControl.Label>Stream</FormControl.Label>
               <Select
-                selectedValue={previousFormState?.stream}
+                selectedValue={activeFormState?.stream}
                 accessibilityLabel='Stream'
                 placeholder='Stream'
                 _selectedItem={{
@@ -79,13 +102,13 @@ export default function VisitSetup({
                 ))}
               </Select>
             </FormControl>
-            {/* {(previousFormState?.stream || activeFormState?.stream) && ( */}
+            {/* {(reduxFormState?.stream || activeFormState?.stream) && ( */}
             <>
               <Heading fontSize='lg'>Confirm the following values</Heading>
               <FormControl>
                 <FormControl.Label>Trap Site</FormControl.Label>
                 <Input
-                  value={previousFormState?.trapSite}
+                  value={activeFormState?.trapSite}
                   placeholder='Default Trap Site value'
                   onChangeText={(currentText: any) =>
                     passToActiveFormState(navigation, step, {
@@ -98,7 +121,7 @@ export default function VisitSetup({
               <FormControl>
                 <FormControl.Label>Trap Sub Site</FormControl.Label>
                 <Input
-                  value={previousFormState?.trapSubSite}
+                  value={activeFormState?.trapSubSite}
                   placeholder='Default Trap Site value'
                   onChangeText={(currentText: any) =>
                     passToActiveFormState(navigation, step, {
@@ -110,6 +133,7 @@ export default function VisitSetup({
               </FormControl>
               <FormControl>
                 <FormControl.Label>Crew</FormControl.Label>
+
                 <CrewDropDown setCrew={setCrew} />
               </FormControl>
             </>
