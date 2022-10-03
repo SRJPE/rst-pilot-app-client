@@ -10,8 +10,10 @@ import {
   View,
 } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
-import { TrapVisitInitialValues } from '../../../services/utils/interfaces'
+
 import { useSelector } from 'react-redux'
+import { trapVisitFormValuesI } from '../../../redux/reducers/formSlice'
+import { TrapVisitInitialValues } from '../../../utils/interfaces'
 
 export default function VisitSetup({
   route,
@@ -20,9 +22,6 @@ export default function VisitSetup({
   route: any
   navigation: any
 }) {
-  // const step = route.params.step
-  // const activeFormState = route.params.activeFormState
-  // const passToActiveFormState = route.params.passToActiveFormState
   const {
     step,
     activeFormState,
@@ -30,14 +29,16 @@ export default function VisitSetup({
     resetActiveFormState,
     reduxFormState,
   } = route.params
-  const [crew, setCrew] = useState([] as Array<any>)
-  const previousFormState = useSelector((state: any) => state.values?.trapVisit)
+
   const initialFormValues = {
     stream: '',
     trapSite: '',
     trapSubSite: '',
-    crew: Array<string>,
-  }
+    crew: [],
+  } as TrapVisitInitialValues
+
+  const [crew, setCrew] = useState([] as Array<any>)
+  const reduxState = useSelector((state: any) => state.values?.trapVisit)
 
   console.log('🚀 ~ reduxFormState #####', reduxFormState)
   const reduxFormState2 = useSelector((state: any) => state.values?.visitSetup)
@@ -47,7 +48,7 @@ export default function VisitSetup({
   console.log('🚀 ~ route PARAMS Visit Setup', route.params)
 
   // useEffect(() => {
-  //   resetActiveFormState(navigation, previousFormState)
+  //   resetActiveFormState(navigation, reduxState)
   //   console.log('🚀 ~ activeFormState &&&&&&&', activeFormState)
   // }, [])
 
@@ -58,7 +59,7 @@ export default function VisitSetup({
     //   })
     // }
     // if (Object.keys(activeFormState).length > 1) {
-    //   passToActiveFormState(navigation, step, previousFormState)
+    //   passToActiveFormState(navigation, step, reduxState)
     // } else {
     //   passToActiveFormState(navigation, step, initialFormValues)
     // }
@@ -108,7 +109,7 @@ export default function VisitSetup({
               <FormControl>
                 <FormControl.Label>Trap Site</FormControl.Label>
                 <Input
-                  value={activeFormState?.trapSite}
+                  value={reduxState?.trapSite}
                   placeholder='Default Trap Site value'
                   onChangeText={(currentText: any) =>
                     passToActiveFormState(navigation, step, {
@@ -121,7 +122,7 @@ export default function VisitSetup({
               <FormControl>
                 <FormControl.Label>Trap Sub Site</FormControl.Label>
                 <Input
-                  value={activeFormState?.trapSubSite}
+                  value={reduxState?.trapSubSite}
                   placeholder='Default Trap Site value'
                   onChangeText={(currentText: any) =>
                     passToActiveFormState(navigation, step, {

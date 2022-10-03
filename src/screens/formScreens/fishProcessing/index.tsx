@@ -14,6 +14,7 @@ import { useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
 import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSlice'
 import { AppDispatch } from '../../../redux/store'
+import { FishProcessingInitialValues } from '../../../utils/interfaces'
 
 export default function FishProcessing({
   route,
@@ -30,10 +31,10 @@ export default function FishProcessing({
     (state: any) => state.values?.fishProcessing
   )
 
-  // const initialFormState = {
-  //   fishProcessed: '',
-  //   reasonForNotProcessing: '',
-  // } as any
+  const initialFormState = {
+    fishProcessed: '',
+    reasonForNotProcessing: '',
+  } as FishProcessingInitialValues
 
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)

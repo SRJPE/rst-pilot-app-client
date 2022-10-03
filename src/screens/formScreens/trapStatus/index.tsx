@@ -13,8 +13,8 @@ import {
   Text,
   View,
 } from 'native-base'
-import { trapStatusSchema } from '../../../services/utils/helpers/yupValidations'
-import { TrapStatusInitialValues } from '../../../services/utils/interfaces'
+import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
+import { TrapStatusInitialValues } from '../../../utils/interfaces'
 import { Button as RNButton } from 'react-native'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../../redux/store'
@@ -37,30 +37,20 @@ export default function TrapStatus({
     resetActiveFormState,
     reduxFormState,
   } = route.params
-  const previousFormState = useSelector(
-    (state: any) => state.values?.trapStatus
-  )
+
   const initialFormValues = {
     trapStatus: '',
     reasonNotFunc: '',
-    flowMeasure: '',
-    waterTemperature: '',
-    waterTurbidity: '',
+    flowMeasure: null,
+    waterTemperature: null,
+    waterTurbidity: null,
   } as TrapStatusInitialValues
 
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-  const reduxState = useSelector((state: any) => state)
-  // console.log('🚀 ~ reduxState trapStatus.values', reduxState.trapStatus.values)
-
+  const reduxState = useSelector((state: any) => state.values?.trapStatus)
   console.log('🚀 ~ activeFormState trap status', activeFormState)
   console.log('🚀 ~ route PARAMS Trap Status', route.params)
-
-  // useEffect(() => {
-  //   resetActiveFormState(navigation, previousFormState)
-  //   console.log('🚀 ~ activeFormState &&&&&&&', activeFormState)
-  //   console.log('🚀 ~ reduxFormState &^(*^(*^*(^', reduxFormState)
-  // }, [])
 
   useEffect(() => {
     // passToActiveFormState(navigation, step, initialFormState, step)
@@ -81,7 +71,6 @@ export default function TrapStatus({
     dispatch(getTrapVisitDropdownValues())
   }, [])
   const { trapFunctionality } = dropdownValues.values
-  console.log('🚀 ~ trapFunctionality', trapFunctionality)
   // console.log('🚀 ~ trapFunctionality', trapFunctionality)
 
   return (
@@ -91,7 +80,7 @@ export default function TrapStatus({
         <FormControl>
           <FormControl.Label>Trap Status</FormControl.Label>
           <Select
-            selectedValue={activeFormState?.status}
+            selectedValue={reduxState?.status}
             accessibilityLabel='Status'
             placeholder='Status'
             _selectedItem={{
@@ -120,7 +109,7 @@ export default function TrapStatus({
         <FormControl>
           <FormControl.Label>Reason For Trap Not Functioning</FormControl.Label>
           <Select
-            selectedValue={activeFormState?.reasonNotFunc}
+            selectedValue={reduxState?.reasonNotFunc}
             accessibilityLabel='Reason Not Functioning.'
             placeholder='Reason'
             _selectedItem={{
@@ -148,7 +137,7 @@ export default function TrapStatus({
             <FormControl w='1/4'>
               <FormControl.Label>Flow Measure</FormControl.Label>
               <Input
-                value={activeFormState?.flowMeasure}
+                value={reduxState?.flowMeasure}
                 placeholder='Populated from CDEC'
                 keyboardType='numeric'
                 onChangeText={(currentText: any) =>
@@ -162,7 +151,7 @@ export default function TrapStatus({
             <FormControl w='1/4'>
               <FormControl.Label>Water Temperature</FormControl.Label>
               <Input
-                value={activeFormState?.waterTemperature}
+                value={reduxState?.waterTemperature}
                 placeholder='Numeric Value'
                 keyboardType='numeric'
                 onChangeText={(currentText: any) =>
@@ -176,7 +165,7 @@ export default function TrapStatus({
             <FormControl w='1/4'>
               <FormControl.Label>Water Turbidity</FormControl.Label>
               <Input
-                value={activeFormState?.waterTurbidity}
+                value={reduxState?.waterTurbidity}
                 placeholder='Numeric Value'
                 keyboardType='numeric'
                 onChangeText={(currentText: any) =>
