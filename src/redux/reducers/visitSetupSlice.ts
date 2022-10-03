@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
+  completed: boolean
   values: VisitSetupValuesI
 }
 
@@ -12,6 +13,7 @@ interface VisitSetupValuesI {
 }
 
 const initialState: InitialStateI = {
+  completed: false,
   values: {
     stream: '',
     trapSite: '',
@@ -27,9 +29,13 @@ export const visitSetupSlice = createSlice({
     saveVisitSetup: (state, action) => {
       state.values = action.payload
     },
+    markVisitSetupCompleted: (state, action) => {
+      state.completed = action.payload
+    },
   },
 })
 
-export const { saveVisitSetup } = visitSetupSlice.actions
+export const { saveVisitSetup, markVisitSetupCompleted } =
+  visitSetupSlice.actions
 
 export default visitSetupSlice.reducer
