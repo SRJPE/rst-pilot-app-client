@@ -1,4 +1,20 @@
+import { useEffect, useState } from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
+import { useDispatch, useSelector } from 'react-redux'
+import { LogBox } from 'react-native'
+import { AppDispatch } from '../redux/store'
+import {
+  markVisitSetupCompleted,
+  saveVisitSetup,
+} from '../redux/reducers/visitSetupSlice'
+import {
+  markTrapStatusCompleted,
+  saveTrapStatus,
+} from '../redux/reducers/trapStatusSlice'
+import {
+  markTrapOperationsCompleted,
+  saveTrapOperations,
+} from '../redux/reducers/trapOperationsSlice'
 import FishInput from '../screens/formScreens/fishInput'
 import FishProcessing from '../screens/formScreens/fishProcessing'
 import VisitSetup from '../screens/formScreens/visitSetup'
@@ -10,20 +26,10 @@ import ProgressHeader from '../components/formContainer/ProgressHeader'
 import NonFunctionalTrap from '../screens/formScreens/trapStatus/NonFunctionalTrap'
 import NoFishCaught from '../screens/formScreens/fishProcessing/NoFishCaught'
 import EndTrapping from '../screens/formScreens/endTrapping'
-import { useDispatch, useSelector } from 'react-redux'
-import { useEffect, useState } from 'react'
-import { LogBox } from 'react-native'
-import { AppDispatch } from '../redux/store'
 import {
-  markVisitSetupCompleted,
-  saveVisitSetup,
-} from '../redux/reducers/visitSetupSlice'
-import {
-  markTrapStatusCompleted,
-  saveTrapStatus,
-} from '../redux/reducers/trapStatusSlice'
-import { saveTrapOperations } from '../redux/reducers/trapOperationsSlice'
-import { saveFishProcessing } from '../redux/reducers/fishProcessingSlice'
+  markFishProcessingCompleted,
+  saveFishProcessing,
+} from '../redux/reducers/fishProcessingSlice'
 
 const FormStack = createStackNavigator()
 
@@ -53,12 +59,12 @@ export default function FormStackNavigation() {
     3: {
       name: 'Trap Operations',
       save: saveTrapOperations,
-      completed: markVisitSetupCompleted,
+      completed: markTrapOperationsCompleted,
     },
     4: {
       name: 'Fish Processing',
       save: saveFishProcessing,
-      completed: markVisitSetupCompleted,
+      completed: markFishProcessingCompleted,
     },
   }
 
