@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
+  completed: boolean
   values: fishProcessingValuesI
 }
 
@@ -10,6 +11,7 @@ interface fishProcessingValuesI {
 }
 
 const initialState: InitialStateI = {
+  completed: false,
   values: {
     fishProcessed: '',
     reasonForNotProcessing: '',
@@ -23,9 +25,13 @@ export const fishProcessingSlice = createSlice({
     saveFishProcessing: (state, action) => {
       state.values = action.payload
     },
+    markFishProcessingCompleted: (state, action) => {
+      state.completed = action.payload
+    },
   },
 })
 
-export const { saveFishProcessing } = fishProcessingSlice.actions
+export const { saveFishProcessing, markFishProcessingCompleted } =
+  fishProcessingSlice.actions
 
 export default fishProcessingSlice.reducer

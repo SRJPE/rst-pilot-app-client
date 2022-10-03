@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
+  completed: boolean
   values: TrapOperationsValuesI
 }
 
@@ -15,6 +16,7 @@ export interface TrapOperationsValuesI {
 }
 
 const initialState: InitialStateI = {
+  completed: false,
   values: {
     coneDepth: '',
     coneSetting: '',
@@ -33,9 +35,13 @@ export const trapOperationsSlice = createSlice({
     saveTrapOperations: (state, action) => {
       state.values = action.payload
     },
+    markTrapOperationsCompleted: (state, action) => {
+      state.completed = action.payload
+    },
   },
 })
 
-export const { saveTrapOperations } = trapOperationsSlice.actions
+export const { saveTrapOperations, markTrapOperationsCompleted } =
+  trapOperationsSlice.actions
 
 export default trapOperationsSlice.reducer
