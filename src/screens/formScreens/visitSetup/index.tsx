@@ -13,10 +13,15 @@ import {
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import { Formik } from 'formik'
 
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { trapVisitFormValuesI } from '../../../redux/reducers/formSlice'
 import { TrapVisitInitialValues } from '../../../utils/interfaces'
 import NavButtons from '../../../components/formContainer/NavButtons'
+import { AppDispatch } from '../../../redux/store'
+import {
+  markVisitSetupCompleted,
+  saveVisitSetup,
+} from '../../../redux/reducers/visitSetupSlice'
 
 export default function VisitSetup({
   route,
@@ -25,26 +30,28 @@ export default function VisitSetup({
   route: any
   navigation: any
 }) {
-  const {
-    step,
-    activeFormState,
-    passToActiveFormState,
-    resetActiveFormState,
-    reduxFormState,
-  } = route.params
+  const dispatch = useDispatch<AppDispatch>()
   const reduxState = useSelector((state: any) => state.values?.trapVisit)
+  const [initialFormValues, setInitialFormValues] = useState({} as any)
   const [stream, setStream] = useState('' as string)
   const [crew, setCrew] = useState([] as Array<any>)
-  const [initialFormValues, setInitialFormValues] = useState({
-    stream: '',
-    trapSite: '',
-    trapSubSite: '',
-    crew: [],
-  } as TrapVisitInitialValues)
+
+  //sets initial values to redux state on load
+  useEffect(() => {
+    setInitialFormValues(reduxState)
+  }, [])
+
+  useEffect(() => {
+    console.log('🚀 ~ useEffect ~ initialFormValues Visit', initialFormValues)
+  }, [initialFormValues])
 
   const handleSubmit = (values: any) => {
+    //add in additional values not using handleChange
     values.stream = stream
     values.crew = [...crew]
+    //dispatch to redux
+    dispatch(saveVisitSetup(values))
+    dispatch(markVisitSetupCompleted(true))
     console.log('🚀 ~ handleSubmit ~ values', values)
   }
 
@@ -64,7 +71,7 @@ export default function VisitSetup({
               <FormControl>
                 <FormControl.Label>Stream</FormControl.Label>
                 <Select
-                  selectedValue={stream}
+                  selectedValue={reduxState?.stream}
                   accessibilityLabel='Stream'
                   placeholder='Stream'
                   _selectedItem={{
@@ -126,6 +133,14 @@ const testStreams = [
   { label: 'Default Stream 4', value: 'DS4' },
   { label: 'Default Stream 5', value: 'DS5' },
 ]
+
+// const {
+//   step,
+//   activeFormState,
+//   passToActiveFormState,
+//   resetActiveFormState,
+//   reduxFormState,
+// } = route.params
 
 // useEffect(() => {
 //   resetActiveFormState(navigation, reduxState)
