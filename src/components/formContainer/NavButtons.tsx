@@ -8,7 +8,13 @@ import {
   markStepCompleted,
 } from '../../redux/reducers/navigationSlice'
 
-export default function NavButtons({ navigation }: { navigation: any }) {
+export default function NavButtons({
+  navigation,
+  handleSubmit,
+}: {
+  navigation: any
+  handleSubmit: any
+}) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
@@ -34,6 +40,7 @@ export default function NavButtons({ navigation }: { navigation: any }) {
   }
 
   const handleRightButton = () => {
+    handleSubmit()
     // if (navigationState.activeStep === 2) {
     //   console.log('STEP 2')
     //   // navigateFlow(trapStatusState.values)
@@ -83,14 +90,14 @@ export default function NavButtons({ navigation }: { navigation: any }) {
   }
 
   return (
-    <Box bg='themeGrey' py='5' maxWidth='100%'>
-      <HStack justifyContent='space-evenly'>
+    <Box bg='themeGrey' py='5' px='3' maxWidth='100%'>
+      <HStack justifyContent='space-between'>
         <Button
           rounded='xs'
           bg='secondary'
           alignSelf='flex-start'
           py='3'
-          width='45%'
+          width='30%'
           borderRadius='5'
           // isDisabled={isDisabled(activePage)}
           onPress={handleLeftButton}
@@ -104,7 +111,7 @@ export default function NavButtons({ navigation }: { navigation: any }) {
           bg='primary'
           alignSelf='flex-start'
           py='3'
-          width='5%'
+          width='10%'
           borderRadius='5'
           onPress={() => console.log('🚀 ~ reduxState', reduxState)}
         >
@@ -117,7 +124,7 @@ export default function NavButtons({ navigation }: { navigation: any }) {
           bg='primary'
           alignSelf='flex-start'
           py='3'
-          width='45%'
+          width='30%'
           borderRadius='5'
           onPress={handleRightButton}
         >
