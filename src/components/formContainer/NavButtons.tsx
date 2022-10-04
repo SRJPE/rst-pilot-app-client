@@ -23,22 +23,6 @@ export default function NavButtons({
 
   const reduxState = useSelector((state: any) => state)
 
-  const navigateFlow = (values: any) => {
-    if (values.trapStatus === 'Trap stopped functioning') {
-      navigation.navigate('Trap Visit Form', {
-        screen: 'Non Functional Trap',
-      })
-    } else if (values.flowMeasure > 1000) {
-      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
-    } else if (values.waterTemperature > 30) {
-      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
-    } else {
-      navigation.navigate('Trap Visit Form', {
-        screen: navigationState.steps[activeStep + 1]?.name,
-      })
-    }
-  }
-
   const handleRightButton = () => {
     handleSubmit()
     // if (navigationState.activeStep === 2) {
