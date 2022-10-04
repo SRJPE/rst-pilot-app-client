@@ -67,34 +67,34 @@ export default function FormStackNavigation() {
     'Non-serializable values were found in the navigation state',
   ])
 
-  useEffect(() => {
-    console.log('call dispatch for respective step: ', stepToSubmit)
-    console.log('payload for dispatch: ', activeFormState)
+  // useEffect(() => {
+  //   console.log('call dispatch for respective step: ', stepToSubmit)
+  //   console.log('payload for dispatch: ', activeFormState)
 
-    // Dispatch
-    const actionsForStep =
-      stepToActionsLookup[stepToSubmit as keyof typeof stepToActionsLookup]
+  //   // Dispatch
+  //   const actionsForStep =
+  //     stepToActionsLookup[stepToSubmit as keyof typeof stepToActionsLookup]
 
-    if (actionsForStep) {
-      dispatch(actionsForStep?.save(activeFormState))
-      dispatch(actionsForStep?.completed(true))
-    } else {
-      console.log('*********** ActionForStep currently Undefined ***********')
-    }
+  //   if (actionsForStep) {
+  //     dispatch(actionsForStep?.save(activeFormState))
+  //     dispatch(actionsForStep?.completed(true))
+  //   } else {
+  //     console.log('*********** ActionForStep currently Undefined ***********')
+  //   }
 
-    //then reset for next screen
-    //###### NOT RESETTING PROPERLY ##########
-    setStepToSubmit(0)
-    setActiveFormState({})
-    console.log(
-      '🚀 ~ FormStackNavigation ~ stepToSubmit IN USE EFFECT',
-      stepToSubmit
-    )
-    console.log(
-      '🚀 ~ FormStackNavigation ~ activeFormState IN USE EFFECT',
-      activeFormState
-    )
-  }, [navigationState.activeStep])
+  //   //then reset for next screen
+  //   //###### NOT RESETTING PROPERLY ##########
+  //   setStepToSubmit(0)
+  //   setActiveFormState({})
+  //   console.log(
+  //     '🚀 ~ FormStackNavigation ~ stepToSubmit IN USE EFFECT',
+  //     stepToSubmit
+  //   )
+  //   console.log(
+  //     '🚀 ~ FormStackNavigation ~ activeFormState IN USE EFFECT',
+  //     activeFormState
+  //   )
+  // }, [navigationState.activeStep])
 
   const passToActiveFormState = (
     navigation: any,
