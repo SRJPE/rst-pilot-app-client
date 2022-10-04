@@ -8,6 +8,7 @@ import {
   Input,
   VStack,
   View,
+  Button,
 } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import { Formik } from 'formik'
@@ -15,6 +16,7 @@ import { Formik } from 'formik'
 import { useSelector } from 'react-redux'
 import { trapVisitFormValuesI } from '../../../redux/reducers/formSlice'
 import { TrapVisitInitialValues } from '../../../utils/interfaces'
+import NavButtons from '../../../components/formContainer/NavButtons'
 
 export default function VisitSetup({
   route,
@@ -30,61 +32,39 @@ export default function VisitSetup({
     resetActiveFormState,
     reduxFormState,
   } = route.params
-
-  const initialFormValues = {
+  const reduxState = useSelector((state: any) => state.values?.trapVisit)
+  const [stream, setStream] = useState('' as string)
+  const [crew, setCrew] = useState([] as Array<any>)
+  const [initialFormValues, setInitialFormValues] = useState({
     stream: '',
     trapSite: '',
     trapSubSite: '',
     crew: [],
-  } as TrapVisitInitialValues
+  } as TrapVisitInitialValues)
 
-  const [crew, setCrew] = useState([] as Array<any>)
-  const reduxState = useSelector((state: any) => state.values?.trapVisit)
-
-  // useEffect(() => {
-  //   resetActiveFormState(navigation, reduxState)
-  //   console.log('🚀 ~ activeFormState useEffect', activeFormState)
-  // }, [])
-
-  useEffect(() => {
-    //if form is marked completed??
-    //
-    // if () {
-    //   navigation.setParams({
-    //     activeFormState: reduxFormState,
-    //   })
-    // }
-    // if () {
-    //   passToActiveFormState(navigation, step, reduxState)
-    // } else {
-    //   passToActiveFormState(navigation, step, initialFormValues)
-    // }
-    passToActiveFormState(navigation, step, activeFormState)
-  }, [])
-
-  useEffect(() => {
-    passToActiveFormState(navigation, step, { ...activeFormState, crew })
-  }, [crew, navigation.activeStep])
-
-  const handleSubmit = () => {}
+  const handleSubmit = (values: any) => {
+    values.stream = stream
+    values.crew = [...crew]
+    console.log('🚀 ~ handleSubmit ~ values', values)
+  }
 
   return (
-    <View>
-      <Formik
-        validationSchema={{ test: '' }}
-        initialValues={{ test: '' }}
-        onSubmit={async values => {
-          // handleSubmit(values)
-        }}
-      >
-        {({ handleChange, handleBlur, handleSubmit, values }) => (
-          <Box h='full' bg='#fff' p='10%'>
+    <Formik
+      // validationSchema={{ test: '' }}
+      initialValues={initialFormValues}
+      onSubmit={async values => {
+        handleSubmit(values)
+      }}
+    >
+      {({ handleChange, handleBlur, handleSubmit, values }) => (
+        <>
+          <Box h='90%' bg='#fff' p='10%'>
             <VStack space={8}>
               <Heading>Which stream are you trapping on?</Heading>
               <FormControl>
                 <FormControl.Label>Stream</FormControl.Label>
                 <Select
-                  selectedValue={activeFormState?.stream}
+                  selectedValue={stream}
                   accessibilityLabel='Stream'
                   placeholder='Stream'
                   _selectedItem={{
@@ -92,12 +72,7 @@ export default function VisitSetup({
                     endIcon: <CheckIcon size='6' />,
                   }}
                   mt={1}
-                  onValueChange={(selectedValue: any) =>
-                    passToActiveFormState(navigation, step, {
-                      ...activeFormState,
-                      stream: selectedValue,
-                    })
-                  }
+                  onValueChange={itemValue => setStream(itemValue)}
                 >
                   {testStreams.map((item, idx) => (
                     <Select.Item
@@ -108,46 +83,39 @@ export default function VisitSetup({
                   ))}
                 </Select>
               </FormControl>
-              {/* {(reduxFormState?.stream || activeFormState?.stream) && ( */}
-              <>
-                <Heading fontSize='lg'>Confirm the following values</Heading>
-                <FormControl>
-                  <FormControl.Label>Trap Site</FormControl.Label>
-                  <Input
-                    value={reduxState?.trapSite}
-                    placeholder='Default Trap Site value'
-                    onChangeText={(currentText: any) =>
-                      passToActiveFormState(navigation, step, {
-                        ...activeFormState,
-                        trapSite: currentText,
-                      })
-                    }
-                  ></Input>
-                </FormControl>
-                <FormControl>
-                  <FormControl.Label>Trap Sub Site</FormControl.Label>
-                  <Input
-                    value={reduxState?.trapSubSite}
-                    placeholder='Default Trap Site value'
-                    onChangeText={(currentText: any) =>
-                      passToActiveFormState(navigation, step, {
-                        ...activeFormState,
-                        trapSubSite: currentText,
-                      })
-                    }
-                  ></Input>
-                </FormControl>
-                <FormControl>
-                  <FormControl.Label>Crew</FormControl.Label>
-                  <CrewDropDown setCrew={setCrew} />
-                </FormControl>
-              </>
-              {/* )} */}
+              {stream && (
+                <>
+                  <Heading fontSize='lg'>Confirm the following values</Heading>
+                  <FormControl>
+                    <FormControl.Label>Trap Site</FormControl.Label>
+                    <Input
+                      placeholder='Default Trap Site value'
+                      value={values.trapSite}
+                      onChangeText={handleChange('trapSite')}
+                      onBlur={handleBlur('trapSite')}
+                    ></Input>
+                  </FormControl>
+                  <FormControl>
+                    <FormControl.Label>Trap Sub Site</FormControl.Label>
+                    <Input
+                      placeholder='Default Trap Site value'
+                      value={values.trapSubSite}
+                      onChangeText={handleChange('trapSubSite')}
+                      onBlur={handleBlur('trapSubSite')}
+                    ></Input>
+                  </FormControl>
+                  <FormControl>
+                    <FormControl.Label>Crew</FormControl.Label>
+                    <CrewDropDown setCrew={setCrew} />
+                  </FormControl>
+                </>
+              )}
             </VStack>
           </Box>
-        )}
-      </Formik>
-    </View>
+          <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
+        </>
+      )}
+    </Formik>
   )
 }
 
@@ -158,3 +126,28 @@ const testStreams = [
   { label: 'Default Stream 4', value: 'DS4' },
   { label: 'Default Stream 5', value: 'DS5' },
 ]
+
+// useEffect(() => {
+//   resetActiveFormState(navigation, reduxState)
+//   console.log('🚀 ~ activeFormState useEffect', activeFormState)
+// }, [])
+
+// useEffect(() => {
+//if form is marked completed??
+//
+// if () {
+//   navigation.setParams({
+//     activeFormState: reduxFormState,
+//   })
+// }
+// if () {
+//   passToActiveFormState(navigation, step, reduxState)
+// } else {
+//   passToActiveFormState(navigation, step, initialFormValues)
+// }
+//   passToActiveFormState(navigation, step, activeFormState)
+// }, [])
+
+// useEffect(() => {
+//   passToActiveFormState(navigation, step, { ...activeFormState, crew })
+// }, [crew, navigation.activeStep])
