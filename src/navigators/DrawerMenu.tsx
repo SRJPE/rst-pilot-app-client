@@ -27,6 +27,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
   const { state, navigation } = props
   const currentRoute = state.routeNames[state.index]
   const stepsArray = Object.values(steps) as Array<any>
+  console.log('🚀 ~ DrawerMenu ~ steps', steps)
 
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {
@@ -50,6 +51,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
     dispatch({
       type: updateActiveStep,
       payload: stepPayload,
+      // payload: steps[buttonTitle],
     })
   }, [])
 

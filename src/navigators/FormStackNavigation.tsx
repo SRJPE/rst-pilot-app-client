@@ -22,8 +22,8 @@ export default function FormStackNavigation() {
       <FormStack.Screen name='Visit Setup' component={VisitSetup} />
       <FormStack.Screen name='Trap Status' component={TrapStatus} />
       <FormStack.Screen name='Trap Operations' component={TrapOperations} />
-      <FormStack.Screen name='Fish Input' component={FishInput} />
       <FormStack.Screen name='Fish Processing' component={FishProcessing} />
+      <FormStack.Screen name='Fish Input' component={FishInput} />
       <FormStack.Screen name='High Flows' component={HighFlows} />
       <FormStack.Screen name='High Temperatures' component={HighTemperatures} />
       <FormStack.Screen
