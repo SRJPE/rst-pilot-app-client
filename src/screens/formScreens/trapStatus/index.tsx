@@ -118,7 +118,7 @@ const TrapStatus = ({
                       endIcon: <CheckIcon size='5' />,
                     }}
                     mt={1}
-                    onValueChange={itemValue => handleChange('reasonNotFunc')}
+                    onValueChange={handleChange('reasonNotFunc')}
                   >
                     {reasonsForTrapNotFunctioning.map((item, idx) => (
                       <Select.Item
