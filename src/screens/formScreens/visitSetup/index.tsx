@@ -16,9 +16,11 @@ import {
   VStack,
   View,
   Button,
+  Text,
 } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import NavButtons from '../../../components/formContainer/NavButtons'
+import { trapVisitSchema } from '../../../utils/helpers/yupValidations'
 
 const testStreams = [
   { label: 'Default Stream 1', value: 'DS1' },
@@ -42,28 +44,33 @@ const VisitSetup = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [stream, setStream] = useState(reduxState.values.stream as string)
   const [crew, setCrew] = useState(reduxState.values.crew as Array<any>)
 
   const handleSubmit = (values: any) => {
     //add in additional values not using handleChange
-    values.stream = stream
     values.crew = [...crew]
     //dispatch to redux
     dispatch(saveVisitSetup(values))
     dispatch(markVisitSetupCompleted(true))
-    console.log('🚀 ~ handleSubmit ~ values', values)
+    console.log('🚀 ~ handleSubmit ~ Visit', values)
   }
 
   return (
     <Formik
-      // validationSchema={{ test: '' }}
+      validationSchema={trapVisitSchema}
       initialValues={reduxState.values}
       onSubmit={values => {
         handleSubmit(values)
       }}
     >
-      {({ handleChange, handleBlur, handleSubmit, values }) => (
+      {({
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        touched,
+        errors,
+        values,
+      }) => (
         <>
           <Box h='90%' bg='#fff' p='10%'>
             <VStack space={8}>
@@ -71,7 +78,7 @@ const VisitSetup = ({
               <FormControl>
                 <FormControl.Label>Stream</FormControl.Label>
                 <Select
-                  selectedValue={stream}
+                  selectedValue={values.stream}
                   accessibilityLabel='Stream'
                   placeholder='Stream'
                   _selectedItem={{
@@ -79,7 +86,7 @@ const VisitSetup = ({
                     endIcon: <CheckIcon size='6' />,
                   }}
                   mt={1}
-                  onValueChange={itemValue => setStream(itemValue)}
+                  onValueChange={handleChange('stream')}
                 >
                   {testStreams.map((item, idx) => (
                     <Select.Item
@@ -89,8 +96,13 @@ const VisitSetup = ({
                     />
                   ))}
                 </Select>
+                {touched.stream && errors.stream && (
+                  <Text style={{ fontSize: 12, color: 'red' }}>
+                    {errors.stream as string}
+                  </Text>
+                )}
               </FormControl>
-              {stream && (
+              {values.stream && (
                 <>
                   <Heading fontSize='lg'>Confirm the following values</Heading>
                   <FormControl>
@@ -101,6 +113,11 @@ const VisitSetup = ({
                       onChangeText={handleChange('trapSite')}
                       onBlur={handleBlur('trapSite')}
                     ></Input>
+                    {touched.trapSite && errors.trapSite && (
+                      <Text style={{ fontSize: 12, color: 'red' }}>
+                        {errors.trapSite as string}
+                      </Text>
+                    )}
                   </FormControl>
                   <FormControl>
                     <FormControl.Label>Trap Sub Site</FormControl.Label>
@@ -113,13 +130,26 @@ const VisitSetup = ({
                   </FormControl>
                   <FormControl>
                     <FormControl.Label>Crew</FormControl.Label>
-                    <CrewDropDown setCrew={setCrew} />
+                    <CrewDropDown
+                      setCrew={setCrew}
+                      // handleChange={handleChange}
+                    />
+                    {/* {touched.crew && errors.crew && (
+                      <Text style={{ fontSize: 12, color: 'red' }}>
+                        {errors.crew as string}
+                      </Text>
+                    )} */}
                   </FormControl>
                 </>
               )}
             </VStack>
           </Box>
-          <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
+          <NavButtons
+            navigation={navigation}
+            handleSubmit={handleSubmit}
+            errors={errors}
+            touched={touched}
+          />
         </>
       )}
     </Formik>

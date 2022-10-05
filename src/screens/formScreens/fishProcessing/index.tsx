@@ -20,6 +20,7 @@ import {
   saveFishProcessing,
 } from '../../../redux/reducers/fishProcessingSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
+import { fishInputSchema } from '../../../utils/helpers/yupValidations'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -58,13 +59,20 @@ const FishProcessing = ({
 
   return (
     <Formik
-      // validationSchema={{ test: '' }}
+      validationSchema={fishInputSchema}
       initialValues={reduxState.values}
       onSubmit={values => {
         handleSubmit(values)
       }}
     >
-      {({ handleChange, handleBlur, handleSubmit, values }) => (
+      {({
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        touched,
+        errors,
+        values,
+      }) => (
         <>
           <Box height='90%' bg='#fff' p='10%'>
             <VStack space={8}>
@@ -80,8 +88,8 @@ const FishProcessing = ({
                     endIcon: <CheckIcon size='5' />,
                   }}
                   mt={1}
-                  selectedValue={fishProcessed}
-                  onValueChange={itemValue => setFishProcessed(itemValue)}
+                  selectedValue={values.fishProcessed}
+                  onValueChange={handleChange('fishProcessed')}
                 >
                   {fishProcessedDropdowns.map((item: any) => (
                     <Select.Item
@@ -91,14 +99,20 @@ const FishProcessing = ({
                     />
                   ))}
                 </Select>
+                {touched.fishProcessed && errors.fishProcessed && (
+                  <Text style={{ fontSize: 12, color: 'red' }}>
+                    {errors.fishProcessed as string}
+                  </Text>
+                )}
               </FormControl>
-              {fishProcessed === 'No catch data; fish left in live box' && (
+              {values.fishProcessed ===
+                'No catch data; fish left in live box' && (
                 <FormControl>
                   <FormControl.Label>
                     Reason For Not Processing
                   </FormControl.Label>
                   <Select
-                    selectedValue={reasonForNotProcessing}
+                    selectedValue={values.reasonForNotProcessing}
                     minWidth='200'
                     accessibilityLabel='reasonForNotProcessing'
                     placeholder='Reason'
@@ -107,9 +121,7 @@ const FishProcessing = ({
                       endIcon: <CheckIcon size='5' />,
                     }}
                     mt={1}
-                    onValueChange={itemValue =>
-                      setReasonForNotProcessing(itemValue)
-                    }
+                    onValueChange={handleChange('reasonForNotProcessing')}
                   >
                     {reasonsForNotProcessing.map((item: any) => (
                       <Select.Item
@@ -119,6 +131,12 @@ const FishProcessing = ({
                       />
                     ))}
                   </Select>
+                  {touched.reasonForNotProcessing &&
+                    errors.reasonForNotProcessing && (
+                      <Text style={{ fontSize: 12, color: 'red' }}>
+                        {errors.reasonForNotProcessing as string}
+                      </Text>
+                    )}
                 </FormControl>
               )}
 
@@ -134,7 +152,12 @@ const FishProcessing = ({
               )}
             </VStack>
           </Box>
-          <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
+          <NavButtons
+            navigation={navigation}
+            handleSubmit={handleSubmit}
+            errors={errors}
+            touched={touched}
+          />
         </>
       )}
     </Formik>

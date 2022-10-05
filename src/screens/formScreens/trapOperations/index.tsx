@@ -19,6 +19,7 @@ import {
   WarningOutlineIcon,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
+import { trapOperationsSchema } from '../../../utils/helpers/yupValidations'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -44,18 +45,25 @@ const TrapOperations = ({
     values.coneSetting = coneSetting
     dispatch(saveTrapOperations(values))
     dispatch(markTrapOperationsCompleted(true))
-    console.log('🚀 ~ TrapStatus ~ values', values)
+    console.log('🚀 ~ handleSubmit ~ Operations', values)
   }
 
   return (
     <Formik
-      // validationSchema={{ test: '' }}
+      validationSchema={trapOperationsSchema}
       initialValues={reduxState.values}
       onSubmit={values => {
         handleSubmit(values)
       }}
     >
-      {({ handleChange, handleBlur, handleSubmit, values }) => (
+      {({
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        touched,
+        errors,
+        values,
+      }) => (
         <>
           <Box h='90%' bg='#fff' p='10%'>
             <VStack space={8}>
@@ -69,6 +77,11 @@ const TrapOperations = ({
                   onBlur={handleBlur('coneDepth')}
                   value={values.coneDepth}
                 />
+                {touched.coneDepth && errors.coneDepth && (
+                  <Text style={{ fontSize: 12, color: 'red' }}>
+                    {errors.coneDepth as string}
+                  </Text>
+                )}
               </FormControl>
               <FormControl w='1/4'>
                 <FormControl.Label>Cone Setting</FormControl.Label>
@@ -130,7 +143,12 @@ const TrapOperations = ({
                       onChangeText={handleChange('rpm1')}
                       onBlur={handleBlur('rpm1')}
                       value={values.rpm1}
-                    ></Input>
+                    />
+                    {touched.rpm1 && errors.rpm1 && (
+                      <Text style={{ fontSize: 12, color: 'red' }}>
+                        {errors.rpm1 as string}
+                      </Text>
+                    )}
                   </FormControl>
                   <FormControl w='1/4'>
                     <FormControl.Label>Measurement 2</FormControl.Label>
@@ -140,7 +158,12 @@ const TrapOperations = ({
                       onChangeText={handleChange('rpm2')}
                       onBlur={handleBlur('rpm2')}
                       value={values.rpm2}
-                    ></Input>
+                    />
+                    {touched.rpm2 && errors.rpm2 && (
+                      <Text style={{ fontSize: 12, color: 'red' }}>
+                        {errors.rpm2 as string}
+                      </Text>
+                    )}
                   </FormControl>
                   <FormControl w='1/4'>
                     <FormControl.Label>Measurement 3</FormControl.Label>
@@ -150,7 +173,12 @@ const TrapOperations = ({
                       onChangeText={handleChange('rpm3')}
                       onBlur={handleBlur('rpm3')}
                       value={values.rpm3}
-                    ></Input>
+                    />
+                    {touched.rpm3 && errors.rpm3 && (
+                      <Text style={{ fontSize: 12, color: 'red' }}>
+                        {errors.rpm3 as string}
+                      </Text>
+                    )}
                   </FormControl>
                 </HStack>
               </FormControl>
@@ -159,11 +187,16 @@ const TrapOperations = ({
                 before cleaning the trap.
               </Text>
             </VStack>
-            <Heading alignSelf='center' fontSize='lg' mt='300'>
+            <Heading alignSelf='center' fontSize='lg' mt='200'>
               Remove debris and begin fish processing
             </Heading>
           </Box>
-          <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
+          <NavButtons
+            navigation={navigation}
+            handleSubmit={handleSubmit}
+            errors={errors}
+            touched={touched}
+          />
         </>
       )}
     </Formik>

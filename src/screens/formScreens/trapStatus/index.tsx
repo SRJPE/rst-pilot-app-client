@@ -21,6 +21,7 @@ import {
   View,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
+import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Rain', value: 'High Rain' },
@@ -43,12 +44,6 @@ const TrapStatus = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-  const [trapStatus, setTrapStatus] = useState(
-    reduxState.values.trapStatus as string
-  )
-  const [reasonNotFunc, setReasonNotFunc] = useState(
-    reduxState.values.reasonNotFunc as string
-  )
 
   useEffect(() => {
     dispatch(getTrapVisitDropdownValues())
@@ -68,23 +63,28 @@ const TrapStatus = ({
   }
 
   const handleSubmit = (values: any) => {
-    values.trapStatus = trapStatus
-    values.reasonNotFunc = reasonNotFunc
     dispatch(saveTrapStatus(values))
     dispatch(markTrapStatusCompleted(true))
-    console.log('🚀 ~ TrapStatus ~ values', values)
+    console.log('🚀 ~ handleSubmit ~ Status', values)
     navigateFlow(values)
   }
 
   return (
     <Formik
-      // validationSchema={{ test: '' }}
+      validationSchema={trapStatusSchema}
       initialValues={reduxState.values}
       onSubmit={values => {
         handleSubmit(values)
       }}
     >
-      {({ handleChange, handleBlur, handleSubmit, values }) => (
+      {({
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        touched,
+        errors,
+        values,
+      }) => (
         <>
           <Box h='90%' bg='#fff' p='10%'>
             <VStack space={8}>
@@ -92,7 +92,7 @@ const TrapStatus = ({
               <FormControl>
                 <FormControl.Label>Trap Status</FormControl.Label>
                 <Select
-                  selectedValue={trapStatus}
+                  selectedValue={values.trapStatus}
                   accessibilityLabel='Trap Status'
                   placeholder='Trap Status'
                   _selectedItem={{
@@ -100,7 +100,7 @@ const TrapStatus = ({
                     endIcon: <CheckIcon size='5' />,
                   }}
                   mt={1}
-                  onValueChange={itemValue => setTrapStatus(itemValue)}
+                  onValueChange={handleChange('trapStatus')}
                 >
                   {trapFunctionality.map((item: any) => (
                     <Select.Item
@@ -110,14 +110,19 @@ const TrapStatus = ({
                     />
                   ))}
                 </Select>
+                {touched.trapStatus && errors.trapStatus && (
+                  <Text style={{ fontSize: 12, color: 'red' }}>
+                    {errors.trapStatus as string}
+                  </Text>
+                )}
               </FormControl>
-              {trapStatus === 'Trap functioning, but not normally' && (
+              {values.trapStatus === 'Trap functioning, but not normally' && (
                 <FormControl>
                   <FormControl.Label>
                     Reason For Trap Not Functioning
                   </FormControl.Label>
                   <Select
-                    selectedValue={reasonNotFunc}
+                    selectedValue={values.reasonNotFunc}
                     accessibilityLabel='Reason Not Functioning.'
                     placeholder='Reason'
                     _selectedItem={{
@@ -125,7 +130,7 @@ const TrapStatus = ({
                       endIcon: <CheckIcon size='5' />,
                     }}
                     mt={1}
-                    onValueChange={itemValue => setReasonNotFunc(itemValue)}
+                    onValueChange={itemValue => handleChange('reasonNotFunc')}
                   >
                     {reasonsForTrapNotFunctioning.map((item, idx) => (
                       <Select.Item
@@ -135,9 +140,14 @@ const TrapStatus = ({
                       />
                     ))}
                   </Select>
+                  {touched.reasonNotFunc && errors.reasonNotFunc && (
+                    <Text style={{ fontSize: 12, color: 'red' }}>
+                      {errors.reasonNotFunc as string}
+                    </Text>
+                  )}
                 </FormControl>
               )}
-              {trapStatus.length > 0 && (
+              {values.trapStatus.length > 0 && (
                 <>
                   <Heading fontSize='lg'>Environmental Conditions</Heading>
                   <HStack space={5} width='125%'>
@@ -150,6 +160,11 @@ const TrapStatus = ({
                         onBlur={handleBlur('flowMeasure')}
                         value={values.flowMeasure}
                       />
+                      {touched.flowMeasure && errors.flowMeasure && (
+                        <Text style={{ fontSize: 12, color: 'red' }}>
+                          {errors.flowMeasure as string}
+                        </Text>
+                      )}
                     </FormControl>
                     <FormControl w='1/4'>
                       <FormControl.Label>Water Temperature</FormControl.Label>
@@ -160,6 +175,11 @@ const TrapStatus = ({
                         onBlur={handleBlur('waterTemperature')}
                         value={values.waterTemperature}
                       />
+                      {touched.waterTemperature && errors.waterTemperature && (
+                        <Text style={{ fontSize: 12, color: 'red' }}>
+                          {errors.waterTemperature as string}
+                        </Text>
+                      )}
                     </FormControl>
                     <FormControl w='1/4'>
                       <FormControl.Label>Water Turbidity</FormControl.Label>
@@ -170,13 +190,23 @@ const TrapStatus = ({
                         onBlur={handleBlur('waterTurbidity')}
                         value={values.waterTurbidity}
                       />
+                      {touched.waterTurbidity && errors.waterTurbidity && (
+                        <Text style={{ fontSize: 12, color: 'red' }}>
+                          {errors.waterTurbidity as string}
+                        </Text>
+                      )}
                     </FormControl>
                   </HStack>
                 </>
               )}
             </VStack>
           </Box>
-          <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
+          <NavButtons
+            navigation={navigation}
+            handleSubmit={handleSubmit}
+            errors={errors}
+            touched={touched}
+          />
         </>
       )}
     </Formik>
