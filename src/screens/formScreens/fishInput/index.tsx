@@ -43,9 +43,9 @@ const FishInput = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addFishModalOpen, setAddFishModalOpen] = useState(false)
-  const [tableData, setTableData] = useState(reduxState.values.tableData)
+  const [tableData, setTableData] = useState(reduxState.values.tableData as any)
   const [checkboxGroupValue, setCheckboxGroupValue] = useState(
-    reduxState.values.speciesCaptured
+    reduxState.values.speciesCaptured as Array<string>
   )
   const tableHead = [
     'Species',
@@ -60,6 +60,7 @@ const FishInput = ({
   ]
 
   const handleSubmit = (values: any) => {
+    console.log('🚀 ~ handleSubmit ~ checkboxGroupValue', checkboxGroupValue)
     values.speciesCaptured = checkboxGroupValue
     dispatch(saveFishInput(values))
     dispatch(markFishInputCompleted(true))
@@ -71,7 +72,6 @@ const FishInput = ({
       // validationSchema={fishInputSchema}
       initialValues={reduxState}
       onSubmit={values => {
-        console.log('🚀 ~ values', values)
         handleSubmit(values)
       }}
     >
@@ -88,12 +88,12 @@ const FishInput = ({
             <VStack space={8}>
               <Heading>Which species were captured?</Heading>
               <FormControl w='1/4'>
-                <Checkbox.Group
+                <Checkbox.Group //https://github.com/GeekyAnts/NativeBase/issues/5073
                   colorScheme='green'
                   defaultValue={checkboxGroupValue}
                   accessibilityLabel='pick an item'
                   onChange={values => {
-                    setCheckboxGroupValue(values || [])
+                    setCheckboxGroupValue(values)
                   }}
                 >
                   <Checkbox value='YOY Chinook' my='1'>
