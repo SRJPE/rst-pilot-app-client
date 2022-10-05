@@ -49,12 +49,12 @@ export default function NavButtons({
   }
 
   const handleRightButton = () => {
-    console.log('🚀 ~ handleRightButton ~ values', values)
-    if (activeStep === 5) return
+    // console.log('🚀 ~ handleRightButton ~ values', values)
+    if (activeStep === 7) return
     navigateFlow(values)
 
-    console.log('🚀 ~ touched form Form', touched)
-    console.log('🚀 ~ errors from Form', errors)
+    // console.log('🚀 ~ touched form Form', touched)
+    // console.log('🚀 ~ errors from Form', errors)
     //submit form to check for errors
     handleSubmit()
     //if form has not been touched OR there are errors => return out, otherwise navigate
