@@ -1,34 +1,19 @@
-import { useEffect, useState } from 'react'
 import { Box, HStack, VStack, Text, Progress } from 'native-base'
-import { getHeaderTitle } from '@react-navigation/elements'
-import { getPosition, formStepLength } from '../../services/utils'
+import { useSelector } from 'react-redux'
 
 export default function ProgressHeader(props: any) {
-  const [position, setPosition] = useState(0 as number)
-  const [title, setTitle] = useState('' as string)
-
-  useEffect(() => {
-    const title = getHeaderTitle(props.options, props.route.name)
-    let currentPosition
-    //if the title is not high flows or non func
-    //getposition()
-    //otherwise  position is formStepLength
-    if (title !== 'HighFlows' && title !== 'Non Functional Trap') {
-      currentPosition = getPosition(title) || 1
-    } else {
-      currentPosition = formStepLength
-    }
-
-    setTitle(title)
-    setPosition(currentPosition)
-  }, [props])
+  const navigationState = useSelector((state: any) => state.navigation)
+  const { steps, activeStep } = navigationState
+  const activePageTitle = steps[activeStep]?.name
 
   return (
     <Box>
       <VStack space={4}>
         <HStack w='100%' justifyContent='space-between' px='4'>
-          <Text fontSize='lg'>{title || ''}</Text>
-          <Text>{`Step ${position} of ${formStepLength}`}</Text>
+          <Text fontSize='lg'>{activePageTitle || ''}</Text>
+          <Text>{`Step ${navigationState.activeStep} of ${
+            Object.keys(navigationState.steps).length
+          }`}</Text>
         </HStack>
         <Box w='100%'>
           <Progress
@@ -36,7 +21,7 @@ export default function ProgressHeader(props: any) {
             _filledTrack={{
               bg: 'primary',
             }}
-            value={(position / formStepLength) * 100}
+            value={(activeStep / Object.keys(steps).length) * 100}
             mx='4'
           />
         </Box>

@@ -1,49 +1,94 @@
-import { useCallback, useEffect } from 'react'
 import { Box, HStack, Text, Button } from 'native-base'
-import { goForward, goBack } from '../../services/utils'
-import { ParamListBase, RouteProp, useRoute } from '@react-navigation/native'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/navigationSlice'
 
-export default function NavButtons({ navigation }: { navigation: any }) {
-  const route: RouteProp<ParamListBase, string> = useRoute()
-  // @ts-ignore-next-line
-  const currentPage = route?.params?.screen
+export default function NavButtons({
+  navigation,
+  handleSubmit,
+  errors,
+  touched,
+  values,
+}: // validation,
+{
+  navigation?: any
+  handleSubmit?: any
+  errors?: any
+  touched?: any
+  values?: any
+  // validation: any
+}) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
+  const activeStep = navigationState.activeStep
+  const activePage = navigationState.steps[activeStep]?.name
+  const reduxState = useSelector((state: any) => state)
 
-  const handleSave = () => {
-    console.log('save-placeholder')
-  }
-
-  const handleRightButton = useCallback(() => {
-    if (currentPage === ' Non Functional Trap' || currentPage === 'HighFlows') {
-      navigation.navigate('Trap Visit Form', { screen: 'End Trapping' })
-      return
-    }
-    handleSave()
-    navigation.navigate('Trap Visit Form', { screen: goForward(currentPage) })
-    dispatch({
-      type: updateActiveStep,
-      payload: navigationState.activeStep + 1,
-    })
-  }, [currentPage])
-
-  const handleLeftButton = useCallback(() => {
-    navigation.navigate('Trap Visit Form', { screen: goBack(currentPage) })
-    if (navigationState.activeStep !== 1)
+  const navigateFlow = (values: any) => {
+    if (values?.trapStatus === 'Trap stopped functioning') {
+      navigation.navigate('Trap Visit Form', {
+        screen: 'Non Functional Trap',
+      })
       dispatch({
         type: updateActiveStep,
-        payload: navigationState.activeStep - 1,
+        payload: 8,
       })
-  }, [currentPage])
+    } else if (values?.flowMeasure > 1000) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
+      dispatch({
+        type: updateActiveStep,
+        payload: 6,
+      })
+    } else if (values?.waterTemperature > 30) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
+      dispatch({
+        type: updateActiveStep,
+        payload: 7,
+      })
+    }
+  }
 
-  const renderButtonText = (currentPage: string) => {
+  const handleRightButton = () => {
+    // console.log('🚀 ~ handleRightButton ~ values', values)
+    if (activeStep === 7) return
+    navigateFlow(values)
+
+    // console.log('🚀 ~ touched form Form', touched)
+    // console.log('🚀 ~ errors from Form', errors)
+    //submit form to check for errors
+    handleSubmit()
+    //if form has not been touched OR there are errors => return out, otherwise navigate
+    if (Object.keys(touched).length === 0 || Object.keys(errors).length > 0) {
+      return
+    } else {
+      navigation.navigate('Trap Visit Form', {
+        screen: navigationState.steps[activeStep + 1]?.name,
+      })
+      dispatch({
+        type: updateActiveStep,
+        payload: navigationState.activeStep + 1,
+      })
+    }
+  }
+
+  const handleLeftButton = () => {
+    // console.log('🚀 ~ handleLeftButton ~ validation', validation)
+    handleSubmit()
+
+    navigation.navigate('Trap Visit Form', {
+      screen: navigationState.steps[activeStep - 1]?.name,
+    })
+    dispatch({
+      type: updateActiveStep,
+      payload: navigationState.activeStep - 1,
+    })
+  }
+
+  const renderButtonText = (activePage: string) => {
     let buttonText
-    if (currentPage === 'HighFlows' || currentPage === 'Non Functional Trap') {
+    if (activePage === 'HighFlows' || activePage === 'Non Functional Trap') {
       buttonText = 'End Trapping'
-    } else if (currentPage === 'High Temperatures') {
+    } else if (activePage === 'High Temperatures') {
       buttonText = 'Move on to Fish Processing'
     } else {
       buttonText = 'Next'
@@ -51,18 +96,14 @@ export default function NavButtons({ navigation }: { navigation: any }) {
     return buttonText
   }
 
-  const isDisabled = (currentPage: string) => {
-    return currentPage === 'Visit Setup' ||
-      currentPage === 'High Flows' ||
-      currentPage === 'High Temperatures' ||
-      currentPage === 'Non Functional Trap'
+  const isDisabled = (activePage: string) => {
+    return activePage === 'Visit Setup' ||
+      activePage === 'High Flows' ||
+      activePage === 'High Temperatures' ||
+      activePage === 'Non Functional Trap'
       ? true
       : false
   }
-
-  useEffect(() => {}, [])
-  // console.log('🚀 ~ NavButtons ~ currentPage', currentPage)
-  // console.log('🚀 ~ NavButtons ~ navigationState', navigationState)
 
   return (
     <Box bg='themeGrey' py='5' px='3' maxWidth='100%'>
@@ -72,9 +113,9 @@ export default function NavButtons({ navigation }: { navigation: any }) {
           bg='secondary'
           alignSelf='flex-start'
           py='3'
-          px='175'
+          width='30%'
           borderRadius='5'
-          isDisabled={isDisabled(currentPage)}
+          isDisabled={isDisabled(activePage)}
           onPress={handleLeftButton}
         >
           <Text fontSize='sm' fontWeight='bold' color='primary'>
@@ -86,12 +127,25 @@ export default function NavButtons({ navigation }: { navigation: any }) {
           bg='primary'
           alignSelf='flex-start'
           py='3'
-          px='175'
+          width='10%'
+          borderRadius='5'
+          onPress={() => console.log('🚀 ~ reduxState', reduxState)}
+        >
+          <Text fontSize='sm' fontWeight='bold' color='white'>
+            redux state
+          </Text>
+        </Button>
+        <Button
+          rounded='xs'
+          bg='primary'
+          alignSelf='flex-start'
+          py='3'
+          width='30%'
           borderRadius='5'
           onPress={handleRightButton}
         >
           <Text fontSize='sm' fontWeight='bold' color='white'>
-            {renderButtonText(currentPage)}
+            {renderButtonText(activePage)}
           </Text>
         </Button>
       </HStack>

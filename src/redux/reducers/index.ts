@@ -5,6 +5,8 @@ import dropdownsSlice from './dropdownsSlice'
 import navigationSlice from './navigationSlice'
 import visitSetupSlice from './visitSetupSlice'
 import trapStatusSlice from './trapStatusSlice'
+import trapOperationsSlice from './trapOperationsSlice'
+import fishProcessingSlice from './fishProcessingSlice'
 
 const persistConfig = {
   key: 'root',
@@ -17,4 +19,6 @@ export default combineReducers({
   navigation: navigationSlice,
   visitSetup: visitSetupSlice,
   trapStatus: trapStatusSlice,
+  trapOperations: trapOperationsSlice,
+  fishProcessing: fishProcessingSlice,
 })

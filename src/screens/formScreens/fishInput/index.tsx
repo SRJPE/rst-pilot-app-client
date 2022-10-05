@@ -120,4 +120,5 @@ const FishInput = () => {
     </Box>
   )
 }
+
 export default FishInput

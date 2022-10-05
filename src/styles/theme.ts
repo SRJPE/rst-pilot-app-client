@@ -6,6 +6,11 @@ const theme = extendTheme({
     secondary: '#D1E8F0',
     themeGrey: 'rgba(218, 218, 218, 0.26)',
   },
+  components: {
+    defaultProps: {
+      colorScheme: '#007C7C',
+    },
+  },
 })
 
 // Get the type of the CustomTheme
