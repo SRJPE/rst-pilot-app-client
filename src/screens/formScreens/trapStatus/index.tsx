@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Formik } from 'formik'
+import { useSelector, useDispatch, connect } from 'react-redux'
+import { AppDispatch, RootState } from '../../../redux/store'
+import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSlice'
+import {
+  markTrapStatusCompleted,
+  saveTrapStatus,
+} from '../../../redux/reducers/trapStatusSlice'
 import {
   Box,
   Select,
@@ -13,60 +20,66 @@ import {
   Text,
   View,
 } from 'native-base'
-import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
-import { TrapStatusInitialValues } from '../../../utils/interfaces'
-import { Button as RNButton } from 'react-native'
-import { useSelector, useDispatch } from 'react-redux'
-import { AppDispatch } from '../../../redux/store'
-import {
-  getTrapVisitDropdownValues,
-  clearValuesFromDropdown,
-} from '../../../redux/reducers/dropdownsSlice'
-
 import NavButtons from '../../../components/formContainer/NavButtons'
-import {
-  markTrapStatusCompleted,
-  saveTrapStatus,
-} from '../../../redux/reducers/trapStatusSlice'
 
-export default function TrapStatus({
-  route,
+const reasonsForTrapNotFunctioning = [
+  { label: 'High Rain', value: 'High Rain' },
+  { label: 'Broken Trap', value: 'Broken Trap' },
+  { label: 'Debris in Trap', value: 'Debris in Trap' },
+]
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    reduxState: state.trapStatus,
+  }
+}
+
+const TrapStatus = ({
   navigation,
+  reduxState,
 }: {
-  route: any
   navigation: any
-}) {
+  reduxState: any
+}) => {
   const dispatch = useDispatch<AppDispatch>()
-  const reduxState = useSelector((state: any) => state.values?.trapStatus)
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-  const [initialFormValues, setInitialFormValues] = useState({} as any)
-  const [status, setStatus] = useState('' as string)
-  const [reasonNotFunc, setReasonNotFunc] = useState('' as string)
-
-  useEffect(() => {
-    if (reduxState) setInitialFormValues(reduxState)
-  }, [])
-  useEffect(() => {
-    console.log('🚀 ~ useEffect ~ initialFormValues Status', initialFormValues)
-  }, [initialFormValues])
+  const [trapStatus, setTrapStatus] = useState(
+    reduxState.values.trapStatus as string
+  )
+  const [reasonNotFunc, setReasonNotFunc] = useState(
+    reduxState.values.reasonNotFunc as string
+  )
 
   useEffect(() => {
     dispatch(getTrapVisitDropdownValues())
   }, [])
   const { trapFunctionality } = dropdownValues.values
 
+  const navigateFlow = (values: any) => {
+    if (values.trapStatus === 'Trap stopped functioning') {
+      navigation.navigate('Trap Visit Form', {
+        screen: 'Non Functional Trap',
+      })
+    } else if (values.flowMeasure > 1000) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
+    } else if (values.waterTemperature > 30) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
+    }
+  }
+
   const handleSubmit = (values: any) => {
-    values.trapStatus = status
+    values.trapStatus = trapStatus
     values.reasonNotFunc = reasonNotFunc
     dispatch(saveTrapStatus(values))
     dispatch(markTrapStatusCompleted(true))
     console.log('🚀 ~ TrapStatus ~ values', values)
+    navigateFlow(values)
   }
 
   return (
     <Formik
       // validationSchema={{ test: '' }}
-      initialValues={initialFormValues}
+      initialValues={reduxState.values}
       onSubmit={values => {
         handleSubmit(values)
       }}
@@ -79,15 +92,15 @@ export default function TrapStatus({
               <FormControl>
                 <FormControl.Label>Trap Status</FormControl.Label>
                 <Select
-                  selectedValue={reduxState?.status}
-                  accessibilityLabel='Status'
-                  placeholder='Status'
+                  selectedValue={trapStatus}
+                  accessibilityLabel='Trap Status'
+                  placeholder='Trap Status'
                   _selectedItem={{
                     bg: 'secondary',
                     endIcon: <CheckIcon size='5' />,
                   }}
                   mt={1}
-                  onValueChange={itemValue => setStatus(itemValue)}
+                  onValueChange={itemValue => setTrapStatus(itemValue)}
                 >
                   {trapFunctionality.map((item: any) => (
                     <Select.Item
@@ -98,13 +111,13 @@ export default function TrapStatus({
                   ))}
                 </Select>
               </FormControl>
-              {status === 'Trap functioning, but not normally' && (
+              {trapStatus === 'Trap functioning, but not normally' && (
                 <FormControl>
                   <FormControl.Label>
                     Reason For Trap Not Functioning
                   </FormControl.Label>
                   <Select
-                    selectedValue={reduxState?.reasonNotFunc}
+                    selectedValue={reasonNotFunc}
                     accessibilityLabel='Reason Not Functioning.'
                     placeholder='Reason'
                     _selectedItem={{
@@ -124,7 +137,7 @@ export default function TrapStatus({
                   </Select>
                 </FormControl>
               )}
-              {status?.length > 0 && (
+              {trapStatus.length > 0 && (
                 <>
                   <Heading fontSize='lg'>Environmental Conditions</Heading>
                   <HStack space={5} width='125%'>
@@ -170,48 +183,4 @@ export default function TrapStatus({
   )
 }
 
-const reasonsForTrapNotFunctioning = [
-  { label: 'High Rain', value: 'High Rain' },
-  { label: 'Broken Trap', value: 'Broken Trap' },
-  { label: 'Debris in Trap', value: 'Debris in Trap' },
-]
-
-// const {
-//   step,
-//   activeFormState,
-//   passToActiveFormState,
-//   resetActiveFormState,
-//   reduxFormState,
-// } = route.params
-
-/* 
-      <RNButton
-        title='Log dropdown values from redux'
-        onPress={() => console.log(dropdownValues)}
-      />
-      <RNButton
-        title='Log all of  redux state'
-        onPress={() => console.log('redux state: ', reduxState)}
-      />
-      <RNButton
-        title='Empty "markType" from redux state'
-        onPress={() => dispatch(clearValuesFromDropdown('markType'))}
-      /> */
-
-// console.log('🚀 ~ activeFormState trap status', activeFormState)
-// console.log('🚀 ~ route PARAMS Trap Status', route.params)
-
-// useEffect(() => {
-// passToActiveFormState(navigation, step, initialFormState, step)
-// if (Object.keys(activeFormState).length > 1) {
-//   navigation.setParams({
-//     activeFormState: previousFormState,
-//   })
-// }
-// if (Object.keys(activeFormState).length > 1) {
-//   passToActiveFormState(navigation, step, previousFormState)
-// } else {
-//   passToActiveFormState(navigation, step, initialFormValues)
-// }
-//   passToActiveFormState(navigation, step, activeFormState)
-// }, [])
+export default connect(mapStateToProps)(TrapStatus)

@@ -11,7 +11,7 @@ import {
   Select,
 } from 'native-base'
 import { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSlice'
@@ -19,35 +19,29 @@ import {
   markFishProcessingCompleted,
   saveFishProcessing,
 } from '../../../redux/reducers/fishProcessingSlice'
-import { AppDispatch } from '../../../redux/store'
-import { FishProcessingInitialValues } from '../../../utils/interfaces'
+import { AppDispatch, RootState } from '../../../redux/store'
 
-export default function FishProcessing({
-  route,
+const mapStateToProps = (state: RootState) => {
+  return {
+    reduxState: state.fishProcessing,
+  }
+}
+
+const FishProcessing = ({
   navigation,
+  reduxState,
 }: {
-  route: any
   navigation: any
-}) {
+  reduxState: any
+}) => {
   const dispatch = useDispatch<AppDispatch>()
-  const reduxState = useSelector((state: any) => state.values?.fishProcessing)
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-  const [initialFormValues, setInitialFormValues] = useState({} as any)
-  const [fishProcessed, setFishProcessed] = useState({} as any)
-  const [reasonForNotProcessing, setReasonForNotProcessing] = useState(
-    {} as any
+  const [fishProcessed, setFishProcessed] = useState(
+    reduxState.values.fishProcessed as any
   )
-
-  useEffect(() => {
-    setInitialFormValues(reduxState)
-  }, [])
-
-  useEffect(() => {
-    console.log(
-      '🚀 ~ useEffect ~ initialFormValues processing Fish',
-      initialFormValues
-    )
-  }, [initialFormValues])
+  const [reasonForNotProcessing, setReasonForNotProcessing] = useState(
+    reduxState.values.reasonNotProcessing as any
+  )
 
   useEffect(() => {
     dispatch(getTrapVisitDropdownValues())
@@ -65,7 +59,7 @@ export default function FishProcessing({
   return (
     <Formik
       // validationSchema={{ test: '' }}
-      initialValues={initialFormValues}
+      initialValues={reduxState.values}
       onSubmit={values => {
         handleSubmit(values)
       }}
@@ -86,7 +80,7 @@ export default function FishProcessing({
                     endIcon: <CheckIcon size='5' />,
                   }}
                   mt={1}
-                  selectedValue={reduxState?.fishProcessed}
+                  selectedValue={fishProcessed}
                   onValueChange={itemValue => setFishProcessed(itemValue)}
                 >
                   {fishProcessedDropdowns.map((item: any) => (
@@ -104,7 +98,7 @@ export default function FishProcessing({
                     Reason For Not Processing
                   </FormControl.Label>
                   <Select
-                    selectedValue={reduxState?.reasonForNotProcessing}
+                    selectedValue={reasonForNotProcessing}
                     minWidth='200'
                     accessibilityLabel='reasonForNotProcessing'
                     placeholder='Reason'
@@ -146,6 +140,8 @@ export default function FishProcessing({
     </Formik>
   )
 }
+
+export default connect(mapStateToProps)(FishProcessing)
 
 const reasonsForNotProcessing = [
   { id: 0, definition: 'Safety Precautions' },

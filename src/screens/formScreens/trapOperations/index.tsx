@@ -1,4 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { Formik } from 'formik'
+import {
+  markTrapOperationsCompleted,
+  saveTrapOperations,
+} from '../../../redux/reducers/trapOperationsSlice'
+import { connect, useDispatch } from 'react-redux'
+import { AppDispatch, RootState } from '../../../redux/store'
 import {
   Box,
   Text,
@@ -11,44 +18,30 @@ import {
   Checkbox,
   WarningOutlineIcon,
 } from 'native-base'
-import {
-  markTrapOperationsCompleted,
-  saveTrapOperations,
-  TrapOperationsValuesI,
-} from '../../../redux/reducers/trapOperationsSlice'
-import { useDispatch, useSelector } from 'react-redux'
-import { TrapOperationsInitialValues } from '../../../utils/interfaces'
-import { AppDispatch } from '../../../redux/store'
-import { Formik } from 'formik'
 import NavButtons from '../../../components/formContainer/NavButtons'
 
-export default function TrapOperations({
-  route,
+const mapStateToProps = (state: RootState) => {
+  return {
+    reduxState: state.trapOperations,
+  }
+}
+
+const TrapOperations = ({
   navigation,
+  reduxState,
 }: {
-  route: any
   navigation: any
-}) {
+  reduxState: any
+}) => {
   const dispatch = useDispatch<AppDispatch>()
-  const reduxState = useSelector((state: any) => state.values?.trapOperations)
-  const [initialFormValues, setInitialFormValues] = useState({} as any)
-  const [coneSetting, setConeSetting] = useState('' as string)
-  const [checked, setChecked] = useState(false as boolean)
-
-  useEffect(() => {
-    setInitialFormValues(reduxState)
-  }, [])
-
-  useEffect(() => {
-    console.log(
-      '🚀 ~ useEffect ~ initialFormValues Operations',
-      initialFormValues
-    )
-  }, [initialFormValues])
+  const [checked, setChecked] = useState(reduxState.values.checked as string)
+  const [coneSetting, setConeSetting] = useState(
+    reduxState.values.coneSetting as string
+  )
 
   const handleSubmit = (values: any) => {
-    values.trapStatus = checked
-    values.reasonNotFunc = coneSetting
+    values.checked = checked
+    values.coneSetting = coneSetting
     dispatch(saveTrapOperations(values))
     dispatch(markTrapOperationsCompleted(true))
     console.log('🚀 ~ TrapStatus ~ values', values)
@@ -57,7 +50,7 @@ export default function TrapOperations({
   return (
     <Formik
       // validationSchema={{ test: '' }}
-      initialValues={initialFormValues}
+      initialValues={reduxState.values}
       onSubmit={values => {
         handleSubmit(values)
       }}
@@ -82,7 +75,7 @@ export default function TrapOperations({
                 <Radio.Group
                   name='coneSetting'
                   accessibilityLabel='cone setting'
-                  value={reduxState?.coneSetting}
+                  value={coneSetting}
                   onChange={(nextValue: any) => {
                     setConeSetting(nextValue)
                   }} // TODO: change to primary color
@@ -113,11 +106,11 @@ export default function TrapOperations({
                 </FormControl>
                 <FormControl w='1/2'>
                   <HStack space={4} alignItems='center' pt='6'>
-                    <Checkbox
+                    <Checkbox //this component currently has bugs
                       shadow={2}
-                      onChange={(currentText: any) => setChecked(currentText)}
+                      onChange={(newValue: any) => setChecked(newValue)}
                       colorScheme='emerald' // TODO: change to primary color
-                      value='checked'
+                      value={checked}
                       accessibilityLabel='Collect total revolutions after fish processing Checkbox'
                     />
                     <FormControl.Label>
@@ -177,30 +170,4 @@ export default function TrapOperations({
   )
 }
 
-//  const step = route.params.step
-//  const activeFormState = route.params.activeFormState
-//  console.log('🚀 ~ activeFormState Operations', activeFormState)
-//  const passToActiveFormState = route.params.passToActiveFormState
-
-// const initialFormValues = {
-//   coneDepth: '',
-//   coneSetting: '',
-//   checked: false,
-//   totalRevolutions: null,
-//   rpm1: null,
-//   rpm2: null,
-//   rpm3: null,
-// } as TrapOperationsInitialValues
-
-// useEffect(() => {
-//   passToActiveFormState(navigation, step, activeFormState)
-// }, [])
-// // useEffect(() => {
-// //   passToActiveFormState(navigation, step, previousFormState)
-// // }, [previousFormState])
-// useEffect(() => {
-//   passToActiveFormState(navigation, step, { ...activeFormState, coneSetting })
-// }, [coneSetting])
-// useEffect(() => {
-//   passToActiveFormState(navigation, step, { ...activeFormState, checked })
-// }, [checked])
+export default connect(mapStateToProps)(TrapOperations)

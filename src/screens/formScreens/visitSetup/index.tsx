@@ -1,4 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { Formik } from 'formik'
+import { connect, useDispatch } from 'react-redux'
+import { AppDispatch, RootState } from '../../../redux/store'
+import {
+  markVisitSetupCompleted,
+  saveVisitSetup,
+} from '../../../redux/reducers/visitSetupSlice'
 import {
   Box,
   Select,
@@ -11,39 +18,32 @@ import {
   Button,
 } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
-import { Formik } from 'formik'
-
-import { useDispatch, useSelector } from 'react-redux'
-import { trapVisitFormValuesI } from '../../../redux/reducers/formSlice'
-import { TrapVisitInitialValues } from '../../../utils/interfaces'
 import NavButtons from '../../../components/formContainer/NavButtons'
-import { AppDispatch } from '../../../redux/store'
-import {
-  markVisitSetupCompleted,
-  saveVisitSetup,
-} from '../../../redux/reducers/visitSetupSlice'
 
-export default function VisitSetup({
-  route,
+const testStreams = [
+  { label: 'Default Stream 1', value: 'DS1' },
+  { label: 'Default Stream 2', value: 'DS2' },
+  { label: 'Default Stream 3', value: 'DS3' },
+  { label: 'Default Stream 4', value: 'DS4' },
+  { label: 'Default Stream 5', value: 'DS5' },
+]
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    reduxState: state.visitSetup,
+  }
+}
+
+const VisitSetup = ({
   navigation,
+  reduxState,
 }: {
-  route: any
   navigation: any
-}) {
+  reduxState: any
+}) => {
   const dispatch = useDispatch<AppDispatch>()
-  const reduxState = useSelector((state: any) => state.values?.trapVisit)
-  const [initialFormValues, setInitialFormValues] = useState({} as any)
-  const [stream, setStream] = useState('' as string)
-  const [crew, setCrew] = useState([] as Array<any>)
-
-  //sets initial values to redux state on load
-  useEffect(() => {
-    setInitialFormValues(reduxState)
-  }, [])
-
-  useEffect(() => {
-    console.log('🚀 ~ useEffect ~ initialFormValues Visit', initialFormValues)
-  }, [initialFormValues])
+  const [stream, setStream] = useState(reduxState.values.stream as string)
+  const [crew, setCrew] = useState(reduxState.values.crew as Array<any>)
 
   const handleSubmit = (values: any) => {
     //add in additional values not using handleChange
@@ -58,8 +58,8 @@ export default function VisitSetup({
   return (
     <Formik
       // validationSchema={{ test: '' }}
-      initialValues={initialFormValues}
-      onSubmit={async values => {
+      initialValues={reduxState.values}
+      onSubmit={values => {
         handleSubmit(values)
       }}
     >
@@ -71,7 +71,7 @@ export default function VisitSetup({
               <FormControl>
                 <FormControl.Label>Stream</FormControl.Label>
                 <Select
-                  selectedValue={reduxState?.stream}
+                  selectedValue={stream}
                   accessibilityLabel='Stream'
                   placeholder='Stream'
                   _selectedItem={{
@@ -126,43 +126,4 @@ export default function VisitSetup({
   )
 }
 
-const testStreams = [
-  { label: 'Default Stream 1', value: 'DS1' },
-  { label: 'Default Stream 2', value: 'DS2' },
-  { label: 'Default Stream 3', value: 'DS3' },
-  { label: 'Default Stream 4', value: 'DS4' },
-  { label: 'Default Stream 5', value: 'DS5' },
-]
-
-// const {
-//   step,
-//   activeFormState,
-//   passToActiveFormState,
-//   resetActiveFormState,
-//   reduxFormState,
-// } = route.params
-
-// useEffect(() => {
-//   resetActiveFormState(navigation, reduxState)
-//   console.log('🚀 ~ activeFormState useEffect', activeFormState)
-// }, [])
-
-// useEffect(() => {
-//if form is marked completed??
-//
-// if () {
-//   navigation.setParams({
-//     activeFormState: reduxFormState,
-//   })
-// }
-// if () {
-//   passToActiveFormState(navigation, step, reduxState)
-// } else {
-//   passToActiveFormState(navigation, step, initialFormValues)
-// }
-//   passToActiveFormState(navigation, step, activeFormState)
-// }, [])
-
-// useEffect(() => {
-//   passToActiveFormState(navigation, step, { ...activeFormState, crew })
-// }, [crew, navigation.activeStep])
+export default connect(mapStateToProps)(VisitSetup)
