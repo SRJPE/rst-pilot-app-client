@@ -1,17 +1,18 @@
 import { Box, HStack, Text, Button } from 'native-base'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
-import {
-  updateActiveStep,
-  markStepCompleted,
-} from '../../redux/reducers/navigationSlice'
+import { updateActiveStep } from '../../redux/reducers/navigationSlice'
 
 export default function NavButtons({
   navigation,
   handleSubmit,
+  errors,
+  touched,
 }: {
   navigation: any
   handleSubmit: any
+  errors: any
+  touched: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -20,15 +21,24 @@ export default function NavButtons({
   const reduxState = useSelector((state: any) => state)
 
   const handleRightButton = () => {
+    console.log('🚀 ~ touched form Form', touched)
+    console.log('🚀 ~ errors from Form', errors)
+    //submit form to check for errors
     handleSubmit()
-    navigation.navigate('Trap Visit Form', {
-      screen: navigationState.steps[activeStep + 1]?.name,
-    })
-    dispatch({
-      type: updateActiveStep,
-      payload: navigationState.activeStep + 1,
-    })
+    //if form has not been touched OR there are errors => return out, otherwise navigate
+    if (Object.keys(touched).length === 0 || Object.keys(errors).length > 0) {
+      return
+    } else {
+      navigation.navigate('Trap Visit Form', {
+        screen: navigationState.steps[activeStep + 1]?.name,
+      })
+      dispatch({
+        type: updateActiveStep,
+        payload: navigationState.activeStep + 1,
+      })
+    }
   }
+
   const handleLeftButton = () => {
     navigation.navigate('Trap Visit Form', {
       screen: navigationState.steps[activeStep - 1]?.name,
