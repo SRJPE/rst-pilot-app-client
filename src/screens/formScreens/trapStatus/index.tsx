@@ -50,23 +50,10 @@ const TrapStatus = ({
   }, [])
   const { trapFunctionality } = dropdownValues.values
 
-  const navigateFlow = (values: any) => {
-    if (values.trapStatus === 'Trap stopped functioning') {
-      navigation.navigate('Trap Visit Form', {
-        screen: 'Non Functional Trap',
-      })
-    } else if (values.flowMeasure > 1000) {
-      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
-    } else if (values.waterTemperature > 30) {
-      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
-    }
-  }
-
   const handleSubmit = (values: any) => {
     dispatch(saveTrapStatus(values))
     dispatch(markTrapStatusCompleted(true))
     console.log('🚀 ~ handleSubmit ~ Status', values)
-    navigateFlow(values)
   }
 
   return (
@@ -207,6 +194,7 @@ const TrapStatus = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
+            values={values}
             // validation={validateForm(values)}
           />
         </>

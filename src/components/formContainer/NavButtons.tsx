@@ -8,12 +8,14 @@ export default function NavButtons({
   handleSubmit,
   errors,
   touched,
+  values,
 }: // validation,
 {
-  navigation: any
-  handleSubmit: any
-  errors: any
-  touched: any
+  navigation?: any
+  handleSubmit?: any
+  errors?: any
+  touched?: any
+  values?: any
   // validation: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
@@ -22,7 +24,35 @@ export default function NavButtons({
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
 
+  const navigateFlow = (values: any) => {
+    if (values.trapStatus === 'Trap stopped functioning') {
+      navigation.navigate('Trap Visit Form', {
+        screen: 'Non Functional Trap',
+      })
+      dispatch({
+        type: updateActiveStep,
+        payload: 8,
+      })
+    } else if (values.flowMeasure > 1000) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
+      dispatch({
+        type: updateActiveStep,
+        payload: 6,
+      })
+    } else if (values.waterTemperature > 30) {
+      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
+      dispatch({
+        type: updateActiveStep,
+        payload: 7,
+      })
+    }
+  }
+
   const handleRightButton = () => {
+    console.log('🚀 ~ handleRightButton ~ values', values)
+    if (activeStep === 5) return
+    navigateFlow(values)
+
     console.log('🚀 ~ touched form Form', touched)
     console.log('🚀 ~ errors from Form', errors)
     //submit form to check for errors
