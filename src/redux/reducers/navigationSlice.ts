@@ -10,6 +10,7 @@ const formSteps = {
   7: { name: 'High Temperatures', propName: 'highTemperatures' },
   8: { name: 'Non Functional Trap', propName: 'nonFunctionalTrap' },
   9: { name: 'No Fish Caught', propName: 'noFishCaught' },
+  10: { name: 'End Trapping', propName: 'endTrapping' },
 }
 
 interface NavigationStateI {
