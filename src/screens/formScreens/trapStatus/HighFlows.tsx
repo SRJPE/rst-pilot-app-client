@@ -2,7 +2,7 @@ import { Button, Heading, Icon, Image, Text, View, VStack } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import NavButtons from '../../../components/formContainer/NavButtons'
 
-export default function HighFlows() {
+export default function HighFlows({ navigation }: { navigation: any }) {
   const handlePressCallTeamLead = () => {
     console.log('🚀 ~ pressed')
   }
@@ -63,11 +63,11 @@ export default function HighFlows() {
         </Button>
       </VStack>
       <NavButtons
-      // navigation={navigation}
-      // handleSubmit={handleSubmit}
-      // errors={errors}
-      // touched={touched}
-      // validation={validateForm(values)}
+        navigation={navigation}
+        // handleSubmit={handleSubmit}
+        // errors={errors}
+        // touched={touched}
+        // validation={validateForm(values)}
       />
     </View>
   )

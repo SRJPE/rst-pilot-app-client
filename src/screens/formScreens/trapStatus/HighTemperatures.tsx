@@ -1,7 +1,8 @@
 import { Button, Heading, Image, Text, View, VStack } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import NavButtons from '../../../components/formContainer/NavButtons'
 
-export default function HighFlows() {
+export default function HighFlows({ navigation }: { navigation: any }) {
   const handlePressViewMonitoringProtocols = () => {
     console.log('🚀 ~ pressed')
   }
@@ -36,6 +37,13 @@ export default function HighFlows() {
             View Monitoring Protocols
           </Text>
         </Button>
+        <NavButtons
+          navigation={navigation}
+          // handleSubmit={handleSubmit}
+          // errors={errors}
+          // touched={touched}
+          // validation={validateForm(values)}
+        />
       </VStack>
     </View>
   )

@@ -10,8 +10,9 @@ import {
   VStack,
 } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import NavButtons from '../../../components/formContainer/NavButtons'
 
-export default function NonFunctionalTrap() {
+export default function NonFunctionalTrap({ navigation }: { navigation: any }) {
   const handlePressViewMonitoringProtocols = () => {
     console.log('🚀 ~ pressed')
   }
@@ -62,6 +63,13 @@ export default function NonFunctionalTrap() {
             Call Team Lead
           </Text>
         </Button>
+        <NavButtons
+          navigation={navigation}
+          // handleSubmit={handleSubmit}
+          // errors={errors}
+          // touched={touched}
+          // validation={validateForm(values)}
+        />
       </VStack>
     </View>
   )
