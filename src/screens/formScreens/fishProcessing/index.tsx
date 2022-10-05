@@ -37,12 +37,6 @@ const FishProcessing = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-  const [fishProcessed, setFishProcessed] = useState(
-    reduxState.values.fishProcessed as any
-  )
-  const [reasonForNotProcessing, setReasonForNotProcessing] = useState(
-    reduxState.values.reasonNotProcessing as any
-  )
 
   useEffect(() => {
     dispatch(getTrapVisitDropdownValues())
@@ -50,11 +44,9 @@ const FishProcessing = ({
   const { fishProcessed: fishProcessedDropdowns } = dropdownValues.values
 
   const handleSubmit = (values: any) => {
-    values.fishProcessed = fishProcessed
-    values.reasonForNotProcessing = reasonForNotProcessing
     dispatch(saveFishProcessing(values))
     dispatch(markFishProcessingCompleted(true))
-    console.log('🚀 ~ TrapStatus ~ values', values)
+    console.log('🚀 ~ Fish Processing ~ values', values)
   }
 
   return (
@@ -140,12 +132,12 @@ const FishProcessing = ({
                 </FormControl>
               )}
 
-              {fishProcessed === 'Processed fish' && (
+              {values.fishProcessed === 'Processed fish' && (
                 <VStack>
                   <Heading>Please sort fish by category:</Heading>
 
                   <Text>Chinook salmon (by run when possible),</Text>
-                  <Text> Steelhead</Text>
+                  <Text>Steelhead</Text>
                   <Text>recaptured</Text>
                   <Text>non-salmonid species</Text>
                 </VStack>
