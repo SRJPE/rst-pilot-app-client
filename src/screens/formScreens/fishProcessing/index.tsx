@@ -123,12 +123,12 @@ const FishProcessing = ({
                       />
                     ))}
                   </Select>
-                  {touched.reasonForNotProcessing &&
+                  {/* {touched.reasonForNotProcessing &&
                     errors.reasonForNotProcessing && (
                       <Text style={{ fontSize: 12, color: 'red' }}>
                         {errors.reasonForNotProcessing as string}
                       </Text>
-                    )}
+                    )} */}
                 </FormControl>
               )}
 

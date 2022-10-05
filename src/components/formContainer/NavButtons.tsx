@@ -50,7 +50,7 @@ export default function NavButtons({
 
   const handleRightButton = () => {
     // console.log('🚀 ~ handleRightButton ~ values', values)
-    if (activeStep === 7) return
+    if (activeStep === 5) return
     navigateFlow(values)
 
     // console.log('🚀 ~ touched form Form', touched)

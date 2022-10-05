@@ -7,7 +7,6 @@ const formSteps = {
   4: { name: 'Fish Processing', propName: 'fishProcessing' },
   5: { name: 'Fish Input', propName: 'fishInput' },
   6: { name: 'High Flows', propName: 'highFlows' },
-
   7: { name: 'High Temperatures', propName: 'highTemperatures' },
   8: { name: 'Non Functional Trap', propName: 'nonFunctionalTrap' },
   9: { name: 'No Fish Caught', propName: 'noFishCaught' },
