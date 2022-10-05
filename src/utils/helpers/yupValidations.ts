@@ -51,3 +51,9 @@ export const trapOperationsSchema = yup.object().shape({
     .required('Measurement 3 required')
     .typeError('Input must be a number'),
 })
+
+export const fishInputSchema = yup.object().shape({
+  fishProcessed: yup.string().required('Fish Processed status required'),
+  reasonForNotProcessing: yup.string().required(),
+  // .required('Reason for not processing required'),
+})
