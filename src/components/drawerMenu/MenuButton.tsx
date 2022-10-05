@@ -4,14 +4,14 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 
 interface Props extends IButtonProps {
   active: boolean
-  // disabled: boolean
+  isDisabled?: boolean
   icon: string
   title: string
 }
 
 export default function MenuButton({
   active,
-  // disabled,
+  isDisabled,
   icon,
   title,
   ...props
@@ -33,7 +33,7 @@ export default function MenuButton({
       justifyContent='flex-start'
       leftIcon={<Icon as={Ionicons} name={icon} size='sm' opacity={0.75} />}
       {...props}
-      // disabled={disabled}
+      isDisabled={isDisabled}
     >
       {title}
     </Button>

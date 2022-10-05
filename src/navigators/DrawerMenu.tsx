@@ -10,21 +10,14 @@ import {
 } from 'native-base'
 import {
   DrawerContentScrollView,
-  DrawerItemList,
   DrawerContentComponentProps,
 } from '@react-navigation/drawer'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MenuButton from '../components/drawerMenu/MenuButton'
-import { connect, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../redux/store'
+import { useSelector } from 'react-redux'
+import { AppDispatch } from '../redux/store'
 import { useDispatch } from 'react-redux'
 import { updateActiveStep } from '../redux/reducers/navigationSlice'
-
-const mapStateToProps = (state: RootState) => {
-  return {
-    reduxState: state,
-  }
-}
 
 const DrawerMenu = (props: DrawerContentComponentProps) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -34,7 +27,6 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
   const { state, navigation } = props
   const currentRoute = state.routeNames[state.index]
   const stepsArray = Object.values(steps) as Array<any>
-  console.log('🚀 ~ DrawerMenu ~ stepsArray', stepsArray)
 
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {
@@ -42,9 +34,6 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
     },
     [navigation]
   )
-  useEffect(() => {
-    console.log('🚀 ~ DrawerMenu ~ reduxState', reduxState.visitSetup)
-  }, [])
 
   const handlePressFormButton = useCallback((buttonTitle: string) => {
     navigation.navigate('Trap Visit Form', { screen: buttonTitle })
@@ -117,19 +106,16 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
           <Divider />
           {stepsArray &&
             stepsArray.map((step: any, index: any) => {
-              console.log('🚀 ~ stepsArray.map ~ step', step.propName)
-
               return (
                 <VStack ml='8' key={index}>
                   <MenuButton
                     active={currentRoute === step.name}
-                    disabled={
+                    isDisabled={
                       reduxState[step.propName]?.completed ? false : true
                     }
                     onPress={() => handlePressFormButton(step.name)}
                     icon='clipboard'
                     title={step.name}
-                    // disabled={step.completed}
                   />
                 </VStack>
               )
@@ -140,5 +126,4 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
   )
 }
 
-// export default connect(mapStateToProps)(DrawerMenu)
 export default DrawerMenu
