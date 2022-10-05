@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
 })
 
 const FishInput = () => {
+  const [addFishModalOpen, setAddFishModalOpen] = useState(false)
   const [checkboxGroupValue, setCheckboxGroupValue] = useState(['YOY Chinook'])
   const tableHead = [
     'Species',
@@ -76,7 +77,7 @@ const FishInput = () => {
             p='3'
             borderRadius='5'
             flex='1'
-            onPress={() => {}}
+            onPress={() => setAddFishModalOpen(true)}
           >
             <Text fontSize='sm' fontWeight='bold' color='white'>
               Input Fish Measurements
@@ -109,7 +110,11 @@ const FishInput = () => {
         </Box>
       </VStack>
       {/* --------- Modals --------- */}
-      <CustomModal header={'Add Fish'} isOpen={true} onClose={undefined}>
+      <CustomModal
+        header={'Add Fish'}
+        isOpen={addFishModalOpen}
+        onClose={() => setAddFishModalOpen(false)}
+      >
         <AddFishModalContent />
       </CustomModal>
     </Box>
