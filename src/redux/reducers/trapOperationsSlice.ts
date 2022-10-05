@@ -6,7 +6,7 @@ interface InitialStateI {
 }
 
 export interface TrapOperationsValuesI {
-  coneDepth: string
+  coneDepth: number | null
   coneSetting: string
   checked: string | boolean
   totalRevolutions: number | null
@@ -18,7 +18,7 @@ export interface TrapOperationsValuesI {
 const initialState: InitialStateI = {
   completed: false,
   values: {
-    coneDepth: '',
+    coneDepth: null,
     coneSetting: '',
     checked: '',
     totalRevolutions: null,
