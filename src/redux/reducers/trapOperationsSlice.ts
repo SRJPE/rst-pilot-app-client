@@ -8,7 +8,7 @@ interface InitialStateI {
 export interface TrapOperationsValuesI {
   coneDepth: string
   coneSetting: string
-  checked: any
+  checked: string | boolean
   totalRevolutions: number | null
   rpm1: number | null
   rpm2: number | null
@@ -20,7 +20,7 @@ const initialState: InitialStateI = {
   values: {
     coneDepth: '',
     coneSetting: '',
-    checked: false,
+    checked: '',
     totalRevolutions: null,
     rpm1: null,
     rpm2: null,
