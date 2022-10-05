@@ -1,6 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
 import { Box, HStack, Text, Button } from 'native-base'
-import { ParamListBase, RouteProp, useRoute } from '@react-navigation/native'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import {
@@ -19,22 +17,13 @@ export default function NavButtons({
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
-  // console.log('🚀 ~ NavButtons ~ activePage', activePage)
-
   const reduxState = useSelector((state: any) => state)
 
   const handleRightButton = () => {
     handleSubmit()
-    // if (navigationState.activeStep === 2) {
-    //   console.log('STEP 2')
-    //   // navigateFlow(trapStatusState.values)
-    // }
     navigation.navigate('Trap Visit Form', {
       screen: navigationState.steps[activeStep + 1]?.name,
     })
-
-    //only make this dispatch if the navigation state needs to be updated
-
     dispatch({
       type: updateActiveStep,
       payload: navigationState.activeStep + 1,
@@ -83,7 +72,7 @@ export default function NavButtons({
           py='3'
           width='30%'
           borderRadius='5'
-          // isDisabled={isDisabled(activePage)}
+          isDisabled={isDisabled(activePage)}
           onPress={handleLeftButton}
         >
           <Text fontSize='sm' fontWeight='bold' color='primary'>
