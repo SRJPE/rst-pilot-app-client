@@ -73,7 +73,7 @@ const TrapStatus = ({
     <Formik
       validationSchema={trapStatusSchema}
       initialValues={reduxState.values}
-      onSubmit={values => {
+      onSubmit={(values: any) => {
         handleSubmit(values)
       }}
     >
@@ -81,6 +81,7 @@ const TrapStatus = ({
         handleChange,
         handleBlur,
         handleSubmit,
+        validateForm,
         touched,
         errors,
         values,
@@ -206,6 +207,7 @@ const TrapStatus = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
+            // validation={validateForm(values)}
           />
         </>
       )}

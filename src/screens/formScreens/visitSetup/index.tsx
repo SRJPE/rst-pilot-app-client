@@ -14,8 +14,6 @@ import {
   Heading,
   Input,
   VStack,
-  View,
-  Button,
   Text,
 } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
@@ -67,6 +65,7 @@ const VisitSetup = ({
         handleChange,
         handleBlur,
         handleSubmit,
+        validateForm,
         touched,
         errors,
         values,
@@ -149,6 +148,7 @@ const VisitSetup = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
+            // validation={validateForm(values)}
           />
         </>
       )}

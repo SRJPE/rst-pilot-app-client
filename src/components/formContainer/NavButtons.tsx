@@ -8,11 +8,13 @@ export default function NavButtons({
   handleSubmit,
   errors,
   touched,
-}: {
+}: // validation,
+{
   navigation: any
   handleSubmit: any
   errors: any
   touched: any
+  // validation: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -40,6 +42,9 @@ export default function NavButtons({
   }
 
   const handleLeftButton = () => {
+    // console.log('🚀 ~ handleLeftButton ~ validation', validation)
+    handleSubmit()
+
     navigation.navigate('Trap Visit Form', {
       screen: navigationState.steps[activeStep - 1]?.name,
     })
@@ -55,8 +60,6 @@ export default function NavButtons({
       buttonText = 'End Trapping'
     } else if (activePage === 'High Temperatures') {
       buttonText = 'Move on to Fish Processing'
-    } else if (activePage === 'Trap Status') {
-      buttonText = 'trap Status'
     } else {
       buttonText = 'Next'
     }
