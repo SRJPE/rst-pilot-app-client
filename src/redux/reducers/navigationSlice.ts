@@ -6,20 +6,6 @@ const formSteps = {
   3: { name: 'Trap Operations', propName: 'trapOperations' },
   4: { name: 'Fish Processing', propName: 'fishProcessing' },
   5: { name: 'Fish Input', propName: 'fishInput' },
-  // 6: { name: 'High Flows', completed: false },
-  // 7: { name: 'High Temperatures', completed: false },
-  // 8: { name: 'Non Functional Trap', completed: false },
-  // 9: { name: 'No Fish Caught', completed: false },
-  // 10: { name: 'End Trapping', completed: false },
-} as any
-
-//display these pages in a differnt structure
-const test = {
-  1: { name: 'High Flows', completed: false },
-  2: { name: 'High Temperatures', completed: false },
-  3: { name: 'Non Functional Trap', completed: false },
-  4: { name: 'No Fish Caught', completed: false },
-  5: { name: 'End Trapping', completed: false },
 }
 
 interface NavigationStateI {
@@ -41,11 +27,9 @@ export const navigationSlice = createSlice({
     updateActiveStep: (state, action) => {
       state.activeStep = action.payload
     },
-    markStepCompleted: (state, action) => {},
-    navigateFlow: (state, action) => {},
   },
 })
 
-export const { updateActiveStep, markStepCompleted } = navigationSlice.actions
+export const { updateActiveStep } = navigationSlice.actions
 
 export default navigationSlice.reducer

@@ -5,7 +5,6 @@ export default function ProgressHeader(props: any) {
   const navigationState = useSelector((state: any) => state.navigation)
   const { steps, activeStep } = navigationState
   const activePageTitle = steps[activeStep]?.name
-  // console.log('🚀 ~ ProgressHeader ~ activePageTitle', activePageTitle)
 
   return (
     <Box>
