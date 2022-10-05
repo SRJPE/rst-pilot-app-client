@@ -112,9 +112,9 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
                 <VStack ml='8' key={index}>
                   <MenuButton
                     active={currentRoute === step.name}
-                    isDisabled={
-                      reduxState[step.propName]?.completed ? false : true
-                    }
+                    // isDisabled={
+                    //   reduxState[step.propName]?.completed ? false : true
+                    // }
                     onPress={() => handlePressFormButton(step.name)}
                     icon='clipboard'
                     title={step.name}
