@@ -1,5 +1,6 @@
 import { Button, Heading, Icon, Image, Text, View, VStack } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import NavButtons from '../../../components/formContainer/NavButtons'
 
 export default function HighFlows() {
   const handlePressCallTeamLead = () => {
@@ -61,6 +62,13 @@ export default function HighFlows() {
           </Text>
         </Button>
       </VStack>
+      <NavButtons
+      // navigation={navigation}
+      // handleSubmit={handleSubmit}
+      // errors={errors}
+      // touched={touched}
+      // validation={validateForm(values)}
+      />
     </View>
   )
 }

@@ -7,12 +7,19 @@ const CrewAvatar = () => {
   return <Avatar bg='primary' mr='1' alignSelf='center' size='sm'></Avatar>
 }
 
-export default function CrewDropDown({ setCrew }: { setCrew: any }) {
+export default function CrewDropDown({
+  setCrew,
+}: // handleChange,
+{
+  setCrew: any
+  // handleChange: any
+}) {
   const [open, setOpen] = useState(false as boolean)
   const [value, setValue] = useState([] as Array<any>)
 
   useEffect(() => {
     setCrew(value)
+    // handleChange(value as Array<string>)
   }, [value])
 
   const [items, setItems] = useState([

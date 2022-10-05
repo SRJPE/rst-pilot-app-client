@@ -1,6 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
+  completed: boolean
   values: TrapStatusValuesI
 }
 
@@ -13,6 +14,7 @@ export interface TrapStatusValuesI {
 }
 
 const initialState: InitialStateI = {
+  completed: false,
   values: {
     trapStatus: '',
     reasonNotFunc: '',
@@ -29,9 +31,13 @@ export const trapStatusSlice = createSlice({
     saveTrapStatus: (state, action) => {
       state.values = action.payload
     },
+    markTrapStatusCompleted: (state, action) => {
+      state.completed = action.payload
+    },
   },
 })
 
-export const { saveTrapStatus } = trapStatusSlice.actions
+export const { saveTrapStatus, markTrapStatusCompleted } =
+  trapStatusSlice.actions
 
 export default trapStatusSlice.reducer
