@@ -1,11 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const formSteps = {
-  1: { name: 'Visit Setup', completed: false },
-  2: { name: 'Trap Status', completed: false },
-  3: { name: 'Trap Operations', completed: false },
-  4: { name: 'Fish Processing', completed: false },
-  5: { name: 'Fish Input', completed: false },
+  1: { name: 'Visit Setup', propName: 'visitSetup' },
+  2: { name: 'Trap Status', propName: 'trapStatus' },
+  3: { name: 'Trap Operations', propName: 'trapOperations' },
+  4: { name: 'Fish Processing', propName: 'fishProcessing' },
+  5: { name: 'Fish Input', propName: 'fishInput' },
   // 6: { name: 'High Flows', completed: false },
   // 7: { name: 'High Temperatures', completed: false },
   // 8: { name: 'Non Functional Trap', completed: false },

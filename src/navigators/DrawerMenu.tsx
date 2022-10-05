@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import {
   HStack,
   VStack,
@@ -15,22 +15,26 @@ import {
 } from '@react-navigation/drawer'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MenuButton from '../components/drawerMenu/MenuButton'
-import { useSelector } from 'react-redux'
-import { AppDispatch } from '../redux/store'
+import { connect, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../redux/store'
 import { useDispatch } from 'react-redux'
 import { updateActiveStep } from '../redux/reducers/navigationSlice'
 
-export default function DrawerMenu(props: DrawerContentComponentProps) {
-  const { state, navigation } = props
-  const currentRoute = state.routeNames[state.index]
+const mapStateToProps = (state: RootState) => {
+  return {
+    reduxState: state,
+  }
+}
 
+const DrawerMenu = (props: DrawerContentComponentProps) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
+  const reduxState = useSelector((state: any) => state)
   const { steps, activeStep } = navigationState
-  // console.log('🚀 ~ DrawerMenu ~ activeStep', activeStep)
-  // console.log('🚀 ~ DrawerMenu ~ steps', steps)
-  // const activePageTitle = steps[activeStep].name
-  const stepsArray = Object.values(steps)
+  const { state, navigation } = props
+  const currentRoute = state.routeNames[state.index]
+  const stepsArray = Object.values(steps) as Array<any>
+  console.log('🚀 ~ DrawerMenu ~ stepsArray', stepsArray)
 
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {
@@ -38,12 +42,25 @@ export default function DrawerMenu(props: DrawerContentComponentProps) {
     },
     [navigation]
   )
+  useEffect(() => {
+    console.log('🚀 ~ DrawerMenu ~ reduxState', reduxState.visitSetup)
+  }, [])
 
   const handlePressFormButton = useCallback((buttonTitle: string) => {
     navigation.navigate('Trap Visit Form', { screen: buttonTitle })
+    //for each object in the steps Array
+    //if the Object contain the name property that matched button title
+    //assign the index top stepPayload
+    //navigate to the index + 1
+    let stepPayload
+    for (let i = 0; i < stepsArray.length; i++) {
+      if (stepsArray[i].name === buttonTitle) {
+        stepPayload = i + 1
+      }
+    }
     dispatch({
       type: updateActiveStep,
-      payload: navigationState[buttonTitle],
+      payload: stepPayload,
     })
   }, [])
 
@@ -100,10 +117,15 @@ export default function DrawerMenu(props: DrawerContentComponentProps) {
           <Divider />
           {stepsArray &&
             stepsArray.map((step: any, index: any) => {
+              console.log('🚀 ~ stepsArray.map ~ step', step.propName)
+
               return (
                 <VStack ml='8' key={index}>
                   <MenuButton
                     active={currentRoute === step.name}
+                    disabled={
+                      reduxState[step.propName]?.completed ? false : true
+                    }
                     onPress={() => handlePressFormButton(step.name)}
                     icon='clipboard'
                     title={step.name}
@@ -117,3 +139,6 @@ export default function DrawerMenu(props: DrawerContentComponentProps) {
     </Box>
   )
 }
+
+// export default connect(mapStateToProps)(DrawerMenu)
+export default DrawerMenu
