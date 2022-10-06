@@ -5,9 +5,17 @@ export default ({ config }) => {
     ...config,
     name: 'rst-pilot-app',
     slug: 'rst-pilot-app',
+    runtimeVersion: {
+      policy: 'sdkVersion',
+    },
     extra: {
       REACT_APP_BASE_URL: process.env.REACT_APP_BASE_URL,
-      test_var: 'bruh',
+      eas: {
+        projectId: 'a6f6224b-3c38-4476-ad72-6cbea4d1bdc6',
+      },
+    },
+    updates: {
+      url: 'https://u.expo.dev/a6f6224b-3c38-4476-ad72-6cbea4d1bdc6',
     },
   }
 }
