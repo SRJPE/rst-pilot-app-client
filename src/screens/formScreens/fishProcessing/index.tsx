@@ -34,7 +34,6 @@ const FishProcessing = ({
   navigation: any
   reduxState: any
 }) => {
-  console.log('🚀 ~ reduxState', reduxState)
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
 
@@ -168,8 +167,3 @@ const reasonsForNotProcessing = [
   { id: 0, definition: 'Safety Precautions' },
   { id: 1, definition: 'Staffing Shortages' },
 ]
-
-// const step = route.params.step
-// const activeFormState = route.params.activeFormState
-// console.log('🚀 ~ activeFormState', activeFormState)
-// const passToActiveFormState = route.params.passToActiveFormState
