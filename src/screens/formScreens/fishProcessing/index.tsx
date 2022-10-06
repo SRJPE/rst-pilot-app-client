@@ -162,8 +162,3 @@ const reasonsForNotProcessing = [
   { id: 0, definition: 'Safety Precautions' },
   { id: 0, definition: 'Staffing Shortages' },
 ]
-
-// const step = route.params.step
-// const activeFormState = route.params.activeFormState
-// console.log('🚀 ~ activeFormState', activeFormState)
-// const passToActiveFormState = route.params.passToActiveFormState

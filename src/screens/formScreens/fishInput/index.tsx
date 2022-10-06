@@ -61,7 +61,7 @@ const FishInput = ({
   ]
 
   const handleSubmit = (values: any) => {
-    console.log('🚀 ~ handleSubmit ~ checkboxGroupValue', checkboxGroupValue)
+    // console.log('🚀 ~ handleSubmit ~ checkboxGroupValue', checkboxGroupValue)
     values.speciesCaptured = checkboxGroupValue
     dispatch(saveFishInput(values))
     dispatch(markFishInputCompleted(true))
