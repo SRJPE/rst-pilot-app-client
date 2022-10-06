@@ -8,6 +8,7 @@ import {
   HStack,
   VStack,
   Text,
+  View,
 } from 'native-base'
 import { Table, Row, Rows } from 'react-native-table-component'
 import { StyleSheet } from 'react-native'
@@ -84,7 +85,13 @@ const FishInput = ({
         values,
       }) => (
         <>
-          <Box h='90%' bg='#fff' p='10%'>
+          <View
+            flex={1}
+            bg='#fff'
+            p='10%'
+            borderColor='themeGrey'
+            borderWidth='15'
+          >
             <VStack space={8}>
               <Heading>Which species were captured?</Heading>
               <FormControl w='1/4'>
@@ -160,7 +167,7 @@ const FishInput = ({
             >
               <AddFishModalContent />
             </CustomModal>
-          </Box>
+          </View>
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}
