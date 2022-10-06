@@ -74,7 +74,13 @@ const TrapStatus = ({
         values,
       }) => (
         <>
-          <Box h='90%' bg='#fff' p='10%'>
+          <View
+            flex={1}
+            bg='#fff'
+            p='10%'
+            borderColor='themeGrey'
+            borderWidth='15'
+          >
             <VStack space={8}>
               <Heading>Is the Trap functioning normally?</Heading>
               <FormControl>
@@ -188,7 +194,7 @@ const TrapStatus = ({
                 </>
               )}
             </VStack>
-          </Box>
+          </View>
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}

@@ -2,6 +2,7 @@ import { Box, HStack, Text, Button } from 'native-base'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/navigationSlice'
+import { useEffect } from 'react'
 
 export default function NavButtons({
   navigation,
@@ -9,14 +10,14 @@ export default function NavButtons({
   errors,
   touched,
   values,
-}: // validation,
-{
+  validation,
+}: {
   navigation?: any
   handleSubmit?: any
   errors?: any
   touched?: any
   values?: any
-  // validation: any
+  validation?: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -24,41 +25,72 @@ export default function NavButtons({
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
 
-  const navigateFlow = (values: any) => {
-    if (values?.trapStatus === 'Trap stopped functioning') {
-      navigation.navigate('Trap Visit Form', {
-        screen: 'Non Functional Trap',
-      })
-      dispatch({
-        type: updateActiveStep,
-        payload: 8,
-      })
-    } else if (values?.flowMeasure > 1000) {
-      navigation.navigate('Trap Visit Form', { screen: 'High Flows' })
-      dispatch({
-        type: updateActiveStep,
-        payload: 6,
-      })
-    } else if (values?.waterTemperature > 30) {
-      navigation.navigate('Trap Visit Form', { screen: 'High Temperatures' })
-      dispatch({
-        type: updateActiveStep,
-        payload: 7,
-      })
+  const navigateHelper = (destination: string, payload: number) => {
+    navigation.navigate('Trap Visit Form', { screen: destination })
+    dispatch({
+      type: updateActiveStep,
+      payload: payload,
+    })
+  }
+
+  const navigateFlowRightButton = (values: any) => {
+    switch (activePage) {
+      case 'Trap Status':
+        if (values?.trapStatus === 'Trap stopped functioning') {
+          navigateHelper('Non Functional Trap', 8)
+        } else if (values?.flowMeasure > 1000) {
+          navigateHelper('High Flows', 6)
+        } else if (values?.waterTemperature > 30) {
+          navigateHelper('High Temperatures', 7)
+        }
+        break
+      case 'Fish Processing':
+        if (values?.fishProcessed === 'No fish were caught') {
+          navigateHelper('No Fish Caught', 9)
+        }
+        break
+      case 'High Flows':
+        navigateHelper('End Trapping', 10)
+        break
+      case 'High Temperatures':
+        navigateHelper('Fish Processing', 4)
+        break
+      default:
+        break
     }
   }
 
-  const handleRightButton = () => {
-    // console.log('🚀 ~ handleRightButton ~ values', values)
-    if (activeStep === 5) return
-    navigateFlow(values)
 
-    // console.log('🚀 ~ touched form Form', touched)
-    // console.log('🚀 ~ errors from Form', errors)
-    //submit form to check for errors
-    handleSubmit()
+  const navigateFlowLeftButton = () => {
+    switch (activePage) {
+      case 'High Flows':
+        navigateHelper('Trap Status', 2)
+        break
+      case 'High Temperatures':
+        navigateHelper('Trap Status', 2)
+        break
+      case 'Non Functional Trap':
+        navigateHelper('Trap Status', 2)
+        break
+      case 'No Fish Caught':
+        navigateHelper('Fish Processing', 4)
+        break
+      default:
+        break
+    }
+  }
+
+
+  const handleRightButton = () => {
+    //if function truthy, submit form to check for errors and save to redux
+    if (handleSubmit) {
+      handleSubmit()
+    }
     //if form has not been touched OR there are errors => return out, otherwise navigate
-    if (Object.keys(touched).length === 0 || Object.keys(errors).length > 0) {
+    if (
+      (touched && Object.keys(touched).length === 0) ||
+      (errors && Object.keys(errors).length > 0)
+    ) {
       return
     } else {
       navigation.navigate('Trap Visit Form', {
@@ -68,13 +100,17 @@ export default function NavButtons({
         type: updateActiveStep,
         payload: navigationState.activeStep + 1,
       })
+      //navigate various flows
+      navigateFlowRightButton(values)
     }
   }
 
   const handleLeftButton = () => {
-    // console.log('🚀 ~ handleLeftButton ~ validation', validation)
-    handleSubmit()
-
+    //if function truthy, submit form to save to redux
+    if (handleSubmit) {
+      handleSubmit()
+    }
+    //navigate left
     navigation.navigate('Trap Visit Form', {
       screen: navigationState.steps[activeStep - 1]?.name,
     })
@@ -82,40 +118,40 @@ export default function NavButtons({
       type: updateActiveStep,
       payload: navigationState.activeStep - 1,
     })
+    //navigate various flows
+    navigateFlowLeftButton()
   }
 
   const renderButtonText = (activePage: string) => {
     let buttonText
-    if (activePage === 'HighFlows' || activePage === 'Non Functional Trap') {
-      buttonText = 'End Trapping'
-    } else if (activePage === 'High Temperatures') {
-      buttonText = 'Move on to Fish Processing'
-    } else {
-      buttonText = 'Next'
+    switch (activePage) {
+      case 'High Flows':
+        buttonText = 'End Trapping'
+        break
+      case 'Non Functional Trap':
+        buttonText = 'End Trapping'
+        break
+      case 'High Temperatures':
+        buttonText = 'Move on to Fish Processing'
+        break
+      default:
+        buttonText = 'Next'
+        break
     }
     return buttonText
   }
 
-  const isDisabled = (activePage: string) => {
-    return activePage === 'Visit Setup' ||
-      activePage === 'High Flows' ||
-      activePage === 'High Temperatures' ||
-      activePage === 'Non Functional Trap'
-      ? true
-      : false
-  }
-
   return (
-    <Box bg='themeGrey' py='5' px='3' maxWidth='100%'>
-      <HStack justifyContent='space-between'>
+    <Box bg='themeGrey' py='6' px='3' maxWidth='100%'>
+      <HStack justifyContent='space-evenly'>
         <Button
           rounded='xs'
           bg='secondary'
           alignSelf='flex-start'
-          py='3'
-          width='30%'
+          width='1/3'
           borderRadius='5'
-          isDisabled={isDisabled(activePage)}
+          shadow='5'
+          isDisabled={activePage === 'Visit Setup'}
           onPress={handleLeftButton}
         >
           <Text fontSize='sm' fontWeight='bold' color='primary'>
@@ -126,9 +162,10 @@ export default function NavButtons({
           rounded='xs'
           bg='primary'
           alignSelf='flex-start'
-          py='3'
-          width='10%'
+          // py='3'
+          width='1/4'
           borderRadius='5'
+          shadow='5'
           onPress={() => console.log('🚀 ~ reduxState', reduxState)}
         >
           <Text fontSize='sm' fontWeight='bold' color='white'>
@@ -139,9 +176,10 @@ export default function NavButtons({
           rounded='xs'
           bg='primary'
           alignSelf='flex-start'
-          py='3'
-          width='30%'
+          width='1/3'
           borderRadius='5'
+          shadow='5'
+          // isDisabled={}
           onPress={handleRightButton}
         >
           <Text fontSize='sm' fontWeight='bold' color='white'>

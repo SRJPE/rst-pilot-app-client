@@ -15,6 +15,7 @@ import {
   Input,
   VStack,
   Text,
+  View,
 } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import NavButtons from '../../../components/formContainer/NavButtons'
@@ -71,7 +72,13 @@ const VisitSetup = ({
         values,
       }) => (
         <>
-          <Box h='90%' bg='#fff' p='10%'>
+          <View
+            flex={1}
+            bg='#fff'
+            p='10%'
+            borderColor='themeGrey'
+            borderWidth='15'
+          >
             <VStack space={8}>
               <Heading>Which stream are you trapping on?</Heading>
               <FormControl>
@@ -135,14 +142,14 @@ const VisitSetup = ({
                     />
                     {/* {touched.crew && errors.crew && (
                       <Text style={{ fontSize: 12, color: 'red' }}>
-                        {errors.crew as string}
+                      {errors.crew as string}
                       </Text>
                     )} */}
                   </FormControl>
                 </>
               )}
             </VStack>
-          </Box>
+          </View>
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}
