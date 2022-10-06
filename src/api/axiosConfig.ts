@@ -1,8 +1,8 @@
 import axios, { AxiosResponse } from 'axios'
 import { camelizeKeys } from 'humps'
-import { API_BASE_URL } from '@env'
+import Constants from 'expo-constants'
 
-const baseURL = API_BASE_URL
+const baseURL = Constants.manifest?.extra?.REACT_APP_BASE_URL
 const api = axios.create({ baseURL })
 
 // Axios middleware to convert all api responses to camelCase
