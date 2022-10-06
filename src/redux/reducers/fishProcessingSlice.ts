@@ -6,14 +6,14 @@ interface InitialStateI {
 }
 
 interface fishProcessingValuesI {
-  fishProcessed: string
+  fishProcessedResult: string
   reasonForNotProcessing: string
 }
 
 const initialState: InitialStateI = {
   completed: false,
   values: {
-    fishProcessed: '',
+    fishProcessedResult: '',
     reasonForNotProcessing: '',
   },
 }

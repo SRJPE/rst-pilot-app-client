@@ -3,9 +3,7 @@ import {
   Box,
   FormControl,
   Heading,
-  Input,
   Text,
-  View,
   VStack,
   CheckIcon,
   Select,
@@ -35,6 +33,7 @@ const FishProcessing = ({
   navigation: any
   reduxState: any
 }) => {
+  console.log('🚀 ~ reduxState', reduxState)
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
 
@@ -76,12 +75,12 @@ const FishProcessing = ({
                   accessibilityLabel='Fish Processed'
                   placeholder='Status'
                   _selectedItem={{
-                    bg: 'primary',
+                    bg: 'secondary',
                     endIcon: <CheckIcon size='5' />,
                   }}
                   mt={1}
-                  selectedValue={values.fishProcessed}
-                  onValueChange={handleChange('fishProcessed')}
+                  selectedValue={values.fishProcessedResult}
+                  onValueChange={handleChange('fishProcessedResult')}
                 >
                   {fishProcessedDropdowns.map((item: any) => (
                     <Select.Item
@@ -109,7 +108,7 @@ const FishProcessing = ({
                     accessibilityLabel='reasonForNotProcessing'
                     placeholder='Reason'
                     _selectedItem={{
-                      bg: 'primary',
+                      bg: 'secondary',
                       endIcon: <CheckIcon size='5' />,
                     }}
                     mt={1}
@@ -132,7 +131,7 @@ const FishProcessing = ({
                 </FormControl>
               )}
 
-              {values.fishProcessed === 'Processed fish' && (
+              {values.fishProcessedResult === 'Processed fish' && (
                 <VStack>
                   <Heading>Please sort fish by category:</Heading>
 
@@ -160,7 +159,7 @@ export default connect(mapStateToProps)(FishProcessing)
 
 const reasonsForNotProcessing = [
   { id: 0, definition: 'Safety Precautions' },
-  { id: 0, definition: 'Staffing Shortages' },
+  { id: 1, definition: 'Staffing Shortages' },
 ]
 
 // const step = route.params.step
