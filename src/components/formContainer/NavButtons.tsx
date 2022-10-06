@@ -60,6 +60,7 @@ export default function NavButtons({
     }
   }
 
+
   const navigateFlowLeftButton = () => {
     switch (activePage) {
       case 'High Flows':
@@ -78,6 +79,7 @@ export default function NavButtons({
         break
     }
   }
+
 
   const handleRightButton = () => {
     //if function truthy, submit form to check for errors and save to redux
