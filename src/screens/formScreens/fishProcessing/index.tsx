@@ -3,12 +3,11 @@ import {
   Box,
   FormControl,
   Heading,
-  Input,
   Text,
-  View,
   VStack,
   CheckIcon,
   Select,
+  View,
 } from 'native-base'
 import { useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
@@ -66,7 +65,13 @@ const FishProcessing = ({
         values,
       }) => (
         <>
-          <Box height='90%' bg='#fff' p='10%'>
+          <View
+            flex={1}
+            bg='#fff'
+            p='10%'
+            borderColor='themeGrey'
+            borderWidth='15'
+          >
             <VStack space={8}>
               <Heading>Will you be processing fish today?</Heading>
               <FormControl>
@@ -76,12 +81,12 @@ const FishProcessing = ({
                   accessibilityLabel='Fish Processed'
                   placeholder='Status'
                   _selectedItem={{
-                    bg: 'primary',
+                    bg: 'secondary',
                     endIcon: <CheckIcon size='5' />,
                   }}
                   mt={1}
-                  selectedValue={values.fishProcessed}
-                  onValueChange={handleChange('fishProcessed')}
+                  selectedValue={values.fishProcessedResult}
+                  onValueChange={handleChange('fishProcessedResult')}
                 >
                   {fishProcessedDropdowns.map((item: any) => (
                     <Select.Item
@@ -109,7 +114,7 @@ const FishProcessing = ({
                     accessibilityLabel='reasonForNotProcessing'
                     placeholder='Reason'
                     _selectedItem={{
-                      bg: 'primary',
+                      bg: 'secondary',
                       endIcon: <CheckIcon size='5' />,
                     }}
                     mt={1}
@@ -132,7 +137,7 @@ const FishProcessing = ({
                 </FormControl>
               )}
 
-              {values.fishProcessed === 'Processed fish' && (
+              {values.fishProcessedResult === 'Processed fish' && (
                 <VStack>
                   <Heading>Please sort fish by category:</Heading>
 
@@ -143,7 +148,7 @@ const FishProcessing = ({
                 </VStack>
               )}
             </VStack>
-          </Box>
+          </View>
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}
@@ -160,5 +165,5 @@ export default connect(mapStateToProps)(FishProcessing)
 
 const reasonsForNotProcessing = [
   { id: 0, definition: 'Safety Precautions' },
-  { id: 0, definition: 'Staffing Shortages' },
+  { id: 1, definition: 'Staffing Shortages' },
 ]
