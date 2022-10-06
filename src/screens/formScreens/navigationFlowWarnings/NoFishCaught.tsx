@@ -4,7 +4,13 @@ import NavButtons from '../../../components/formContainer/NavButtons'
 export default function NoFishCaught({ navigation }: { navigation: any }) {
   return (
     <>
-      <View flex={1} justifyContent='center' alignItems='center'>
+      <View
+        flex={1}
+        justifyContent='center'
+        alignItems='center'
+        borderColor='themeGrey'
+        borderWidth='15'
+      >
         <VStack space={10} p='10'>
           <Image
             alignSelf='center'

@@ -7,6 +7,7 @@ import {
   VStack,
   CheckIcon,
   Select,
+  View,
 } from 'native-base'
 import { useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
@@ -65,7 +66,13 @@ const FishProcessing = ({
         values,
       }) => (
         <>
-          <Box height='90%' bg='#fff' p='10%'>
+          <View
+            flex={1}
+            bg='#fff'
+            p='10%'
+            borderColor='themeGrey'
+            borderWidth='15'
+          >
             <VStack space={8}>
               <Heading>Will you be processing fish today?</Heading>
               <FormControl>
@@ -142,7 +149,7 @@ const FishProcessing = ({
                 </VStack>
               )}
             </VStack>
-          </Box>
+          </View>
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}

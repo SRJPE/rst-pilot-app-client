@@ -17,6 +17,7 @@ import {
   Radio,
   Checkbox,
   WarningOutlineIcon,
+  View,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../../utils/helpers/yupValidations'
@@ -65,7 +66,13 @@ const TrapOperations = ({
         values,
       }) => (
         <>
-          <Box h='90%' bg='#fff' p='10%'>
+          <View
+            flex={1}
+            bg='#fff'
+            p='10%'
+            borderColor='themeGrey'
+            borderWidth='15'
+          >
             <VStack space={8}>
               <Heading>Trap Pre-Processing</Heading>
               <FormControl w='1/2'>
@@ -190,7 +197,7 @@ const TrapOperations = ({
             <Heading alignSelf='center' fontSize='lg' mt='200'>
               Remove debris and begin fish processing
             </Heading>
-          </Box>
+          </View>
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}

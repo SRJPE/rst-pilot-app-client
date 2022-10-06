@@ -22,7 +22,13 @@ export default function NonFunctionalTrap({ navigation }: { navigation: any }) {
 
   return (
     <>
-      <View flex={1} justifyContent='center' alignItems='center'>
+      <View
+        flex={1}
+        justifyContent='center'
+        alignItems='center'
+        borderColor='themeGrey'
+        borderWidth='15'
+      >
         <VStack space={10} p='10'>
           <Heading textAlign='center'>
             {
