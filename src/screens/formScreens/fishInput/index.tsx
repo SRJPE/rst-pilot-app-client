@@ -12,7 +12,7 @@ import {
 } from 'native-base'
 import { Table, Row, Rows } from 'react-native-table-component'
 import { StyleSheet } from 'react-native'
-import CustomModal from '../../../components/Shared/CustomModal'
+import CustomModal, { AddFishModalButton } from '../../../components/Shared/CustomModal'
 import AddFishModalContent from '../../../components/form/AddFishModalContent'
 import { Formik } from 'formik'
 import NavButtons from '../../../components/formContainer/NavButtons'
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state: RootState) => {
   return {
-    reduxState: state.fishInput,
+    reduxState: state.fishInput
   }
 }
 
@@ -161,9 +161,11 @@ const FishInput = ({
             </VStack>
             {/* --------- Modals --------- */}
             <CustomModal
-              header={'Add Fish'}
+              headerText={'Add Fish'}
               isOpen={addFishModalOpen}
               onClose={() => setAddFishModalOpen(false)}
+              showHeaderButon={true}
+              headerButton={AddFishModalButton({activeTab: 'Individual'})}
             >
               <AddFishModalContent />
             </CustomModal>
