@@ -72,13 +72,6 @@ export default function NonFunctionalTrap({ navigation }: { navigation: any }) {
               Call Team Lead
             </Text>
           </Button>
-          <NavButtons
-            navigation={navigation}
-            // handleSubmit={handleSubmit}
-            // errors={errors}
-            // touched={touched}
-            // validation={validateForm(values)}
-          />
         </VStack>
       </View>
       <NavButtons navigation={navigation} />
