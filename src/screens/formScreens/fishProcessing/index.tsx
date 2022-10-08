@@ -42,6 +42,11 @@ const FishProcessing = ({
   }, [])
   const { fishProcessed: fishProcessedDropdowns } = dropdownValues.values
 
+  useEffect(() => {
+    console.log('🚀 ~ dropdownValues', dropdownValues)
+    console.log('🚀 ~ fishProcessedDropdowns', fishProcessedDropdowns)
+  }, [])
+
   const handleSubmit = (values: any) => {
     dispatch(saveFishProcessing(values))
     dispatch(markFishProcessingCompleted(true))
@@ -102,7 +107,7 @@ const FishProcessing = ({
                   </Text>
                 )}
               </FormControl>
-              {values.fishProcessed ===
+              {values.fishProcessedResult ===
                 'No catch data; fish left in live box' && (
                 <FormControl>
                   <FormControl.Label>
