@@ -5,7 +5,7 @@ export default function TopIcons() {
   return (
     <Flex>
       <HStack space={700}>
-        <IconButton
+        {/* <IconButton
           onPress={() => console.log('pressed home')}
           _icon={{
             as: Ionicons,
@@ -13,7 +13,7 @@ export default function TopIcons() {
             size: 8,
             color: 'primary',
           }}
-        />
+        />*/}
         <IconButton
           onPress={() => console.log('pressed Profile')}
           _icon={{
