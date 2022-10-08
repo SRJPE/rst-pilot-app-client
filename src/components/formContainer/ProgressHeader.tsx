@@ -8,10 +8,10 @@ export default function ProgressHeader(props: any) {
 
   return (
     <Box>
-      <VStack space={4}>
-        <HStack w='100%' justifyContent='space-between' px='4'>
-          <Text fontSize='lg'>{activePageTitle || ''}</Text>
-          <Text>{`Step ${navigationState.activeStep} of ${
+      <VStack>
+        <HStack w='100%' justifyContent='space-between' p='4'>
+          <Text fontSize='2xl'>{activePageTitle || ''}</Text>
+          <Text fontSize='xl'>{`Step ${navigationState.activeStep} of ${
             Object.keys(navigationState.steps).length
           }`}</Text>
         </HStack>
