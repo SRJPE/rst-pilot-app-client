@@ -28,6 +28,11 @@ const testStreams = [
   { label: 'Default Stream 4', value: 'DS4' },
   { label: 'Default Stream 5', value: 'DS5' },
 ]
+const testSites = [
+  { label: 'Default Site 1', value: 'DS1' },
+  { label: 'Default Site 2', value: 'DS2' },
+  { label: 'Default Site 3', value: 'DS3' },
+]
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -72,18 +77,29 @@ const VisitSetup = ({
         values,
       }) => (
         <>
-          <View
+          {/* <View */}
+          <Box
             flex={1}
             bg='#fff'
-            p='10%'
+            p='6%'
             borderColor='themeGrey'
             borderWidth='15'
+            safeArea
           >
-            <VStack space={8}>
-              <Heading>Which stream are you trapping on?</Heading>
+            <VStack space={12}>
+              <Heading mt='2'>Which stream are you trapping on?</Heading>
               <FormControl>
-                <FormControl.Label>Stream</FormControl.Label>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Stream
+                  </Text>
+                </FormControl.Label>
                 <Select
+                  height='50px'
+                  size='lg'
+                  // _text={{
+                  //   size: 'lg',
+                  // }}
                   selectedValue={values.stream}
                   accessibilityLabel='Stream'
                   placeholder='Stream'
@@ -92,6 +108,7 @@ const VisitSetup = ({
                     endIcon: <CheckIcon size='6' />,
                   }}
                   mt={1}
+                  onClose={handleBlur('trapSite')}
                   onValueChange={handleChange('stream')}
                 >
                   {testStreams.map((item, idx) => (
@@ -110,15 +127,39 @@ const VisitSetup = ({
               </FormControl>
               {values.stream && (
                 <>
-                  <Heading fontSize='lg'>Confirm the following values</Heading>
+                  <Heading fontSize='lg'>Confirm the following values:</Heading>
                   <FormControl>
-                    <FormControl.Label>Trap Site</FormControl.Label>
-                    <Input
-                      placeholder='Default Trap Site value'
-                      value={values.trapSite}
-                      onChangeText={handleChange('trapSite')}
-                      onBlur={handleBlur('trapSite')}
-                    ></Input>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Trap Site
+                      </Text>
+                    </FormControl.Label>
+                    <Select
+                      height='50px'
+                      size='lg'
+                      // height='50px'
+                      // _text={{
+                      //   size: 'lg',
+                      // }}
+                      selectedValue={values.trapSite}
+                      accessibilityLabel='Trap Site'
+                      placeholder='Trap Site'
+                      _selectedItem={{
+                        bg: 'secondary',
+                        endIcon: <CheckIcon size='6' />,
+                      }}
+                      mt={1}
+                      onClose={handleBlur('trapSite')}
+                      onValueChange={handleChange('trapSite')}
+                    >
+                      {testSites.map((item, idx) => (
+                        <Select.Item
+                          key={idx}
+                          label={item.label}
+                          value={item.value}
+                        />
+                      ))}
+                    </Select>
                     {touched.trapSite && errors.trapSite && (
                       <Text style={{ fontSize: 12, color: 'red' }}>
                         {errors.trapSite as string}
@@ -126,16 +167,11 @@ const VisitSetup = ({
                     )}
                   </FormControl>
                   <FormControl>
-                    <FormControl.Label>Trap Sub Site</FormControl.Label>
-                    <Input
-                      placeholder='Default Trap Site value'
-                      value={values.trapSubSite}
-                      onChangeText={handleChange('trapSubSite')}
-                      onBlur={handleBlur('trapSubSite')}
-                    ></Input>
-                  </FormControl>
-                  <FormControl>
-                    <FormControl.Label>Crew</FormControl.Label>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Crew
+                      </Text>
+                    </FormControl.Label>
                     <CrewDropDown
                       setCrew={setCrew}
                       // handleChange={handleChange}
@@ -149,7 +185,8 @@ const VisitSetup = ({
                 </>
               )}
             </VStack>
-          </View>
+          </Box>
+          {/* </View> */}
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}
