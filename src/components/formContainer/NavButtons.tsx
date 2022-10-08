@@ -161,50 +161,57 @@ export default function NavButtons({
   }
 
   return (
-    <Box bg='themeGrey' py='6' px='3' maxWidth='100%'>
+    <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>
       <HStack justifyContent='space-evenly'>
         <Button
-          rounded='xs'
-          bg='secondary'
           alignSelf='flex-start'
-          width='1/3'
+          bg='secondary'
+          width='40%'
+          height='20'
+          rounded='xs'
           borderRadius='5'
           shadow='5'
-          // isDisabled={activePage === 'Visit Setup'}
           leftIcon={
-            <Icon as={Ionicons} name='home' size='sm' color='primary' />
+            activePage === 'Visit Setup' ? (
+              <Icon as={Ionicons} name='home' size='sm' color='primary' />
+            ) : (
+              <></>
+            )
           }
+          // isDisabled={activePage === 'Visit Setup'}
           onPress={handleLeftButton}
         >
-          <Text fontSize='sm' fontWeight='bold' color='primary'>
+          <Text fontSize='lg' fontWeight='bold' color='primary'>
             {activePage === 'Visit Setup' ? 'Return Home' : 'Back'}
           </Text>
         </Button>
-        <Button
+        {/* <Button
+          height='20'
           rounded='xs'
           bg='primary'
           alignSelf='flex-start'
           // py='3'
-          width='1/4'
+          width='10%'
           borderRadius='5'
           shadow='5'
           onPress={() => console.log('🚀 ~ reduxState', reduxState)}
         >
-          <Text fontSize='sm' fontWeight='bold' color='white'>
+          <Text fontWeight='bold' color='white'>
             redux state
           </Text>
-        </Button>
+        </Button> */}
         <Button
-          rounded='xs'
-          bg='primary'
           alignSelf='flex-start'
-          width='1/3'
+          bg='primary'
+          width='40%'
+          height='20'
+          rounded='xs'
           borderRadius='5'
           shadow='5'
           isDisabled={disableRightButton()}
           onPress={handleRightButton}
         >
-          <Text fontSize='sm' fontWeight='bold' color='white'>
+          <Text fontSize='lg' fontWeight='bold' color='white'>
             {renderRightButtonText(activePage)}
           </Text>
         </Button>
