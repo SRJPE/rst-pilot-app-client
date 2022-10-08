@@ -15,7 +15,11 @@ export default function DrawerNavigator() {
       screenOptions={{ drawerType: 'front' }}
       drawerContent={props => <DrawerMenu {...props} />}
     >
-      <Drawer.Screen name='Home' component={Home} />
+      <Drawer.Screen
+        name='Home'
+        component={Home}
+        options={{ headerShown: false }}
+      />
       <Drawer.Screen name='Generate Report' component={GenerateReport} />
       <Drawer.Screen
         name='Data Quality Control'
