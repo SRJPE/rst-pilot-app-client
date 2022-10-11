@@ -57,3 +57,18 @@ export const fishInputSchema = yup.object().shape({
   // reasonForNotProcessing: yup.string().required(),
   // .required('Reason for not processing required'),
 })
+
+export const addIndividualFishSchema = yup.object().shape({
+  species: yup.string().required('Fish species required'),
+  forkLength: yup.number().required('Fish fork length required'),
+  weight: yup.number(),
+  lifestage: yup.string().required('Fish lifestage required'),
+  adiposeClipped: yup
+    .boolean()
+    .required('Fish adipose clipped status required'),
+  existingMark: yup.string(),
+  dead: yup.boolean().required('Fish mortality required'),
+  willBeUsedInRecapture: yup
+    .boolean()
+    .required('Marked for recapture required'),
+})

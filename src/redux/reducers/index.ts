@@ -8,6 +8,7 @@ import trapStatusSlice from './trapStatusSlice'
 import trapOperationsSlice from './trapOperationsSlice'
 import fishProcessingSlice from './fishProcessingSlice'
 import fishInputSlice from './fishInputSlice'
+import addIndividualFishSlice from './addIndividualFishSlice'
 
 const persistConfig = {
   key: 'root',
@@ -23,4 +24,5 @@ export default combineReducers({
   trapOperations: trapOperationsSlice,
   fishProcessing: fishProcessingSlice,
   fishInput: fishInputSlice,
+  addIndividualFish: addIndividualFishSlice,
 })

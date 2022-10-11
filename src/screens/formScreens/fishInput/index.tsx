@@ -12,7 +12,9 @@ import {
 } from 'native-base'
 import { Table, Row, Rows } from 'react-native-table-component'
 import { StyleSheet } from 'react-native'
-import CustomModal from '../../../components/Shared/CustomModal'
+import CustomModal, {
+  AddFishModalHeaderButton,
+} from '../../../components/Shared/CustomModal'
 import AddFishModalContent from '../../../components/form/AddFishModalContent'
 import { Formik } from 'formik'
 import NavButtons from '../../../components/formContainer/NavButtons'
@@ -44,6 +46,9 @@ const FishInput = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addFishModalOpen, setAddFishModalOpen] = useState(false)
+  const [addFishModalTab, setAddFishModalTab] = useState<
+    'Individual' | 'Batch'
+  >('Individual')
   const [tableData, setTableData] = useState(reduxState.values.tableData as any)
   const [checkboxGroupValue, setCheckboxGroupValue] = useState(
     reduxState.values.speciesCaptured as Array<string>
@@ -72,9 +77,7 @@ const FishInput = ({
     <Formik
       // validationSchema={fishInputSchema}
       initialValues={reduxState}
-      onSubmit={values => {
-        handleSubmit(values)
-      }}
+      onSubmit={(values) => handleSubmit(values)}
     >
       {({
         handleChange,
@@ -98,10 +101,8 @@ const FishInput = ({
                 <Checkbox.Group //https://github.com/GeekyAnts/NativeBase/issues/5073
                   colorScheme='green'
                   defaultValue={checkboxGroupValue}
-                  accessibilityLabel='pick an item'
-                  onChange={values => {
-                    setCheckboxGroupValue(values)
-                  }}
+                  accessibilityLabel='Select the species captured'
+                  onChange={(values) => setCheckboxGroupValue(values)}
                 >
                   <Checkbox value='YOY Chinook' my='1'>
                     YOY Chinook
@@ -161,11 +162,16 @@ const FishInput = ({
             </VStack>
             {/* --------- Modals --------- */}
             <CustomModal
-              header={'Add Fish'}
+              headerText={'Add Fish'}
               isOpen={addFishModalOpen}
               onClose={() => setAddFishModalOpen(false)}
+              showHeaderButon={true}
+              headerButton={AddFishModalHeaderButton({
+                activeTab: addFishModalTab,
+                setActiveTab: setAddFishModalTab,
+              })}
             >
-              <AddFishModalContent />
+              <AddFishModalContent onClose={() => setAddFishModalOpen(false)} />
             </CustomModal>
           </View>
           <NavButtons
