@@ -42,10 +42,10 @@ const FishProcessing = ({
   }, [])
   const { fishProcessed: fishProcessedDropdowns } = dropdownValues.values
 
-  useEffect(() => {
-    console.log('🚀 ~ dropdownValues', dropdownValues)
-    console.log('🚀 ~ fishProcessedDropdowns', fishProcessedDropdowns)
-  }, [])
+  // useEffect(() => {
+  //   console.log('🚀 ~ dropdownValues', dropdownValues)
+  //   console.log('🚀 ~ fishProcessedDropdowns', fishProcessedDropdowns)
+  // }, [])
 
   const handleSubmit = (values: any) => {
     dispatch(saveFishProcessing(values))
