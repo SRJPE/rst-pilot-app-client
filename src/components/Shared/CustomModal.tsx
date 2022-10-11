@@ -57,14 +57,17 @@ interface ModalPropsI {
 
 interface AddFishModalButtonI {
   activeTab: 'Individual' | 'Batch'
+  setActiveTab: any
 }
 
-export const AddFishModalButton: React.FC<AddFishModalButtonI> = ({
+export const AddFishModalHeaderButton: React.FC<AddFishModalButtonI> = ({
   activeTab,
+  setActiveTab,
 }) => {
   return (
     <View style={addFishModalButtonStyles.individiualOrBatchButton}>
       <Box
+        onTouchStart={() => setActiveTab('Individual')}
         style={
           activeTab === 'Individual'
             ? [
@@ -79,6 +82,7 @@ export const AddFishModalButton: React.FC<AddFishModalButtonI> = ({
         </Text>
       </Box>
       <Box
+        onTouchStart={() => setActiveTab('Batch')}
         style={
           activeTab === 'Batch'
             ? [
@@ -130,27 +134,7 @@ export default function CustomModal(props: ModalPropsI) {
             </>
           )}
         </HStack>
-        <Modal.Body>{props.children}</Modal.Body>
-        <Modal.Footer>
-          <Button.Group space={2}>
-            <Button
-              variant='ghost'
-              colorScheme='blueGray'
-              onPress={() => {
-                console.log('click')
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onPress={() => {
-                console.log('click')
-              }}
-            >
-              Save
-            </Button>
-          </Button.Group>
-        </Modal.Footer>
+        <Modal.Body p='0'>{props.children}</Modal.Body>
       </Modal.Content>
     </Modal>
   )
