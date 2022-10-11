@@ -167,7 +167,7 @@ export default function NavButtons({
         <Button
           alignSelf='flex-start'
           bg='secondary'
-          width='40%'
+          width='45%'
           height='20'
           rounded='xs'
           borderRadius='5'
@@ -191,8 +191,7 @@ export default function NavButtons({
           rounded='xs'
           bg='primary'
           alignSelf='flex-start'
-          // py='3'
-          width='10%'
+          width='5%'
           borderRadius='5'
           shadow='5'
           onPress={() => console.log('🚀 ~ reduxState', reduxState)}
@@ -204,7 +203,7 @@ export default function NavButtons({
         <Button
           alignSelf='flex-start'
           bg='primary'
-          width='40%'
+          width='45%'
           height='20'
           rounded='xs'
           borderRadius='5'
