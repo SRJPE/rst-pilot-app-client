@@ -64,9 +64,9 @@ export default function NavButtons({
 
   const navigateFlowLeftButton = () => {
     switch (activePage) {
-      case 'Home':
-        navigation.navigate('Home')
-        break
+      // case 'Visit Setup':
+      //   navigation.navigate('Home')
+      //   break
       case 'High Flows':
         navigateHelper('Trap Status', 2)
         break
