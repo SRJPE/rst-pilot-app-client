@@ -212,26 +212,51 @@ const AddFishModalContent = ({
                 <FormControl.Label>Add Existing Mark</FormControl.Label>
                 <HStack>
                   <Button
-                    bg='secondary'
-                    color='#007C7C'
+                    bg={
+                      values.existingMark === 'E - Y - F'
+                        ? 'primary'
+                        : 'secondary'
+                    }
                     py='1'
                     px='12'
                     shadow='3'
                     borderRadius='5'
                     marginRight='10'
+                    onPress={() => setFieldValue('existingMark', 'E - Y - F')}
                   >
-                    <Text color='primary'>E - Y - F</Text>
+                    <Text
+                      color={
+                        values.existingMark === 'E - Y - F'
+                          ? 'white'
+                          : 'primary'
+                      }
+                    >
+                      E - Y - F
+                    </Text>
                   </Button>
                   <Button
-                    bg='secondary'
+                    bg={
+                      values.existingMark === 'Bis Brown'
+                        ? 'primary'
+                        : 'secondary'
+                    }
                     color='#007C7C'
                     py='1'
                     px='12'
                     shadow='3'
                     borderRadius='5'
                     marginRight='10'
+                    onPress={() => setFieldValue('existingMark', 'Bis Brown')}
                   >
-                    <Text color='primary'>Bis Brown</Text>
+                    <Text
+                      color={
+                        values.existingMark === 'Bis Brown'
+                          ? 'white'
+                          : 'primary'
+                      }
+                    >
+                      Bis Brown
+                    </Text>
                   </Button>
                   <HStack alignItems='center'>
                     <Icon
