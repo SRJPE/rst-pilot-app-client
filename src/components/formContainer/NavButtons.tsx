@@ -113,10 +113,11 @@ export default function NavButtons({
   }
 
   const handleLeftButton = () => {
-    // if (activePage === ' Visit Setup') {
-    //   navigation.navigate('Home')
-    //   return
-    // }
+    //navigate back to home screen from visit setup screen
+    if (activePage === 'Visit Setup') {
+      navigation.navigate('Home')
+      return
+    }
 
     //if function truthy, submit form to save to redux
     if (handleSubmit) {
@@ -173,7 +174,7 @@ export default function NavButtons({
           shadow='5'
           leftIcon={
             activePage === 'Visit Setup' ? (
-              <Icon as={Ionicons} name='home' size='sm' color='primary' />
+              <Icon as={Ionicons} name='home' size='lg' color='primary' />
             ) : (
               <></>
             )
@@ -181,11 +182,11 @@ export default function NavButtons({
           // isDisabled={activePage === 'Visit Setup'}
           onPress={handleLeftButton}
         >
-          <Text fontSize='lg' fontWeight='bold' color='primary'>
+          <Text fontSize='xl' fontWeight='bold' color='primary'>
             {activePage === 'Visit Setup' ? 'Return Home' : 'Back'}
           </Text>
         </Button>
-        {/* <Button
+        <Button
           height='20'
           rounded='xs'
           bg='primary'
@@ -199,7 +200,7 @@ export default function NavButtons({
           <Text fontWeight='bold' color='white'>
             redux state
           </Text>
-        </Button> */}
+        </Button>
         <Button
           alignSelf='flex-start'
           bg='primary'
@@ -208,10 +209,10 @@ export default function NavButtons({
           rounded='xs'
           borderRadius='5'
           shadow='5'
-          isDisabled={disableRightButton()}
+          // isDisabled={disableRightButton()}
           onPress={handleRightButton}
         >
-          <Text fontSize='lg' fontWeight='bold' color='white'>
+          <Text fontSize='xl' fontWeight='bold' color='white'>
             {renderRightButtonText(activePage)}
           </Text>
         </Button>
