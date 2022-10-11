@@ -71,7 +71,7 @@ const VisitSetup = ({
           name='alert-circle-outline'
           color='error'
         />
-        <Text style={{ fontSize: 14, color: 'error' }}>
+        <Text style={{ fontSize: 14, color: 'red' }}>
           {errors[inputName] as string}
         </Text>
       </HStack>
@@ -111,6 +111,8 @@ const VisitSetup = ({
                     Stream
                   </Text>
                 </FormControl.Label>
+                {/* 
+// @ts-ignore */}
                 <Select
                   height='50px'
                   size='lg'
@@ -149,6 +151,8 @@ const VisitSetup = ({
                         Trap Site
                       </Text>
                     </FormControl.Label>
+                    {/* 
+// @ts-ignore */}
                     <Select
                       height='50px'
                       size='lg'
