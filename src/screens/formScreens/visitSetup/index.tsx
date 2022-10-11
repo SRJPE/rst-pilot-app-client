@@ -16,10 +16,13 @@ import {
   VStack,
   Text,
   View,
+  Icon,
+  HStack,
 } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../../utils/helpers/yupValidations'
+import { Ionicons } from '@expo/vector-icons'
 
 const testStreams = [
   { label: 'Default Stream 1', value: 'DS1' },
@@ -59,6 +62,22 @@ const VisitSetup = ({
     console.log('🚀 ~ handleSubmit ~ Visit', values)
   }
 
+  const renderErrorMessage = (errors: any, inputName: string) => {
+    return (
+      <HStack space={1}>
+        <Icon
+          marginTop={'.5'}
+          as={Ionicons}
+          name='alert-circle-outline'
+          color='error'
+        />
+        <Text style={{ fontSize: 14, color: 'error' }}>
+          {errors[inputName] as string}
+        </Text>
+      </HStack>
+    )
+  }
+
   return (
     <Formik
       validationSchema={trapVisitSchema}
@@ -77,14 +96,12 @@ const VisitSetup = ({
         values,
       }) => (
         <>
-          {/* <View */}
-          <Box
+          <View
             flex={1}
             bg='#fff'
             p='6%'
             borderColor='themeGrey'
             borderWidth='15'
-            safeArea
           >
             <VStack space={12}>
               <Heading mt='2'>Which stream are you trapping on?</Heading>
@@ -107,7 +124,7 @@ const VisitSetup = ({
                     bg: 'secondary',
                     endIcon: <CheckIcon size='6' />,
                   }}
-                  mt={1}
+                  my={1}
                   onClose={handleBlur('trapSite')}
                   onValueChange={handleChange('stream')}
                 >
@@ -119,11 +136,9 @@ const VisitSetup = ({
                     />
                   ))}
                 </Select>
-                {touched.stream && errors.stream && (
-                  <Text style={{ fontSize: 12, color: 'red' }}>
-                    {errors.stream as string}
-                  </Text>
-                )}
+                {touched.stream &&
+                  errors.stream &&
+                  renderErrorMessage(errors, 'stream')}
               </FormControl>
               {values.stream && (
                 <>
@@ -160,11 +175,9 @@ const VisitSetup = ({
                         />
                       ))}
                     </Select>
-                    {touched.trapSite && errors.trapSite && (
-                      <Text style={{ fontSize: 12, color: 'red' }}>
-                        {errors.trapSite as string}
-                      </Text>
-                    )}
+                    {touched.trapSite &&
+                      errors.trapSite &&
+                      renderErrorMessage(errors, 'trapSite')}
                   </FormControl>
                   <FormControl>
                     <FormControl.Label>
@@ -185,8 +198,7 @@ const VisitSetup = ({
                 </>
               )}
             </VStack>
-          </Box>
-          {/* </View> */}
+          </View>
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}
