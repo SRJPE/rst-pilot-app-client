@@ -57,7 +57,7 @@ export default function NavButtons({
         navigateHelper('Fish Processing', 4)
         break
       default:
-        console.log('default')
+        console.log('default navigation')
         break
     }
   }
@@ -80,7 +80,7 @@ export default function NavButtons({
         navigateHelper('Fish Processing', 4)
         break
       default:
-        console.log('default')
+        console.log('default navigation')
         break
     }
   }
