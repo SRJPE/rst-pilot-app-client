@@ -156,6 +156,12 @@ const TrapOperations = ({
                         {errors.rpm1 as string}
                       </Text>
                     )}
+                    {/* {touched.rpm2 &&
+                      (values.rpm2 > 2000 || values.rpm2 < 50) && (
+                        <Text style={{ fontSize: 12, color: 'orange' }}>
+                          VALUE OUT OF RANGE
+                        </Text>
+                      )} */}
                   </FormControl>
                   <FormControl w='1/4'>
                     <FormControl.Label>Measurement 2</FormControl.Label>
