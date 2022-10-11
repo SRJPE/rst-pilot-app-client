@@ -10,6 +10,7 @@ import ProgressHeader from '../components/formContainer/ProgressHeader'
 import NonFunctionalTrap from '../screens/formScreens/navigationFlowWarnings/NonFunctionalTrap'
 import NoFishCaught from '../screens/formScreens/navigationFlowWarnings/NoFishCaught'
 import EndTrapping from '../screens/formScreens/endTrapping'
+import IncompleteSections from '../screens/formScreens/incompleteSections'
 
 const FormStack = createStackNavigator()
 
@@ -32,6 +33,10 @@ export default function FormStackNavigation() {
       />
       <FormStack.Screen name='No Fish Caught' component={NoFishCaught} />
       <FormStack.Screen name='End Trapping' component={EndTrapping} />
+      <FormStack.Screen
+        name='Incomplete Sections'
+        component={IncompleteSections}
+      />
     </FormStack.Navigator>
   )
 }
