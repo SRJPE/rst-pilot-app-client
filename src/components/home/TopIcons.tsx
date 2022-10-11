@@ -14,7 +14,7 @@ export default function TopIcons() {
             color: 'primary',
           }}
         />*/}
-        <IconButton
+        {/* <IconButton
           onPress={() => console.log('pressed Profile')}
           _icon={{
             as: Ionicons,
@@ -22,7 +22,7 @@ export default function TopIcons() {
             size: 8,
             color: 'primary',
           }}
-        />
+        /> */}
       </HStack>
     </Flex>
   )
