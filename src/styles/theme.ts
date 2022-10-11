@@ -5,6 +5,7 @@ const theme = extendTheme({
     primary: '#007C7C',
     secondary: '#D1E8F0',
     themeGrey: 'rgba(218, 218, 218, 0.26)',
+    error: 'red',
   },
   components: {
     defaultProps: {
