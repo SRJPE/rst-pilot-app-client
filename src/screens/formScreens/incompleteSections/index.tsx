@@ -3,6 +3,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { connect } from 'react-redux'
 import { RootState } from '../../../redux/store'
+import IncompleteSectionButton from '../../../components/form/IncompleteSectionButton'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -18,10 +19,15 @@ const IncompleteSections = ({
   navigation: any
 }) => {
   console.log('🚀 ~ reduxState ISections', reduxState)
+
+  const stepsArray = Object.values(reduxState.steps).slice(0, 5)
+  console.log('🚀 ~ stepsArray', stepsArray)
+
   return (
     <>
       <View
         flex={1}
+        bg='#fff'
         justifyContent='center'
         alignItems='center'
         borderColor='themeGrey'
@@ -32,30 +38,17 @@ const IncompleteSections = ({
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>
 
-          <Button
-            rounded='xs'
-            bg='primary'
-            alignSelf='center'
-            py='3'
-            px='16'
-            borderRadius='5'
-            // onPress={handlePressCallTeamLead}
-            leftIcon={
-              <Icon as={Ionicons} name='checkmark-circle-outline' size='2xl' />
-            }
-            endIcon={
-              <Button onPress={() => console.log('presssssed')}>Test</Button>
-            }
-          >
-            <Text
-              textTransform='uppercase'
-              fontSize='sm'
-              fontWeight='bold'
-              color='#FFFFFF'
-            >
-              Call Team Lead
-            </Text>
-          </Button>
+          {stepsArray.map((step: any, idx: number) => {
+            return (
+              <IncompleteSectionButton
+                name={step.name}
+                completed={step.completed}
+                navigation={navigation}
+                key={idx}
+                step={idx + 1}
+              />
+            )
+          })}
         </VStack>
       </View>
       <NavButtons navigation={navigation} />
