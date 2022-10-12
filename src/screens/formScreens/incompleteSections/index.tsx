@@ -17,7 +17,7 @@ const IncompleteSections = ({
   reduxState: any
   navigation: any
 }) => {
-  console.log('🚀 ~ reduxState', reduxState)
+  console.log('🚀 ~ reduxState ISections', reduxState)
   return (
     <>
       <View

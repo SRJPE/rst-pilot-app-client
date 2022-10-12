@@ -18,6 +18,7 @@ import {
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../../utils/helpers/yupValidations'
+import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
 
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 
@@ -56,6 +57,7 @@ const VisitSetup = ({
     //dispatch to redux
     dispatch(saveVisitSetup(values))
     dispatch(markVisitSetupCompleted(true))
+    dispatch(markStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ Visit', values)
   }
 
