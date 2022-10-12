@@ -18,10 +18,7 @@ const IncompleteSections = ({
   reduxState: any
   navigation: any
 }) => {
-  console.log('🚀 ~ reduxState ISections', reduxState)
-
   const stepsArray = Object.values(reduxState.steps).slice(0, 5)
-  console.log('🚀 ~ stepsArray', stepsArray)
 
   return (
     <>
