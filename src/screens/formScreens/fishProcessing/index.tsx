@@ -20,7 +20,7 @@ import {
 } from '../../../redux/reducers/fishProcessingSlice'
 import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { fishInputSchema } from '../../../utils/helpers/yupValidations'
+import { fishProcessingSchema } from '../../../utils/helpers/yupValidations'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -52,7 +52,7 @@ const FishProcessing = ({
 
   return (
     <Formik
-      validationSchema={fishInputSchema}
+      validationSchema={fishProcessingSchema}
       initialValues={reduxState.values}
       onSubmit={values => {
         handleSubmit(values)
@@ -159,6 +159,7 @@ const FishProcessing = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
+            values={values}
           />
         </>
       )}
