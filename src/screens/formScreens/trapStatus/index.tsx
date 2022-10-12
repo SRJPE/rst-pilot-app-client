@@ -21,8 +21,6 @@ import {
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
-import { Keyboard } from 'react-native'
 import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
 
 const reasonsForTrapNotFunctioning = [
@@ -63,6 +61,7 @@ const TrapStatus = ({
     <Formik
       validationSchema={trapStatusSchema}
       initialValues={reduxState.values}
+      initialTouched={{ trapStatus: true }}
       onSubmit={(values: any) => {
         handleSubmit(values)
       }}
@@ -71,7 +70,6 @@ const TrapStatus = ({
         handleChange,
         handleBlur,
         handleSubmit,
-        validateForm,
         touched,
         errors,
         values,
@@ -223,7 +221,6 @@ const TrapStatus = ({
             errors={errors}
             touched={touched}
             values={values}
-            // validation={validateForm(values)}
           />
         </>
       )}

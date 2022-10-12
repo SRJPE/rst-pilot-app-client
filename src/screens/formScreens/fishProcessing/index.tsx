@@ -54,6 +54,9 @@ const FishProcessing = ({
     <Formik
       validationSchema={fishProcessingSchema}
       initialValues={reduxState.values}
+      //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
+      initialTouched={{ fishProcessedResult: true }}
+      initialErrors={{ fishProcessedResult: '' }}
       onSubmit={values => {
         handleSubmit(values)
       }}

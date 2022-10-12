@@ -57,6 +57,7 @@ const TrapOperations = ({
     <Formik
       validationSchema={trapOperationsSchema}
       initialValues={reduxState.values}
+      initialTouched={{ coneDepth: true }}
       onSubmit={values => {
         handleSubmit(values)
       }}
@@ -123,11 +124,6 @@ const TrapOperations = ({
                       Half
                     </Radio>
                   </Radio.Group>
-                  <FormControl.ErrorMessage
-                    leftIcon={<WarningOutlineIcon size='xs' />}
-                  >
-                    You must select a Prize.
-                  </FormControl.ErrorMessage>
                 </FormControl>
                 <HStack space={6} alignItems='center'>
                   <FormControl w='1/2'>
@@ -169,10 +165,6 @@ const TrapOperations = ({
                       RPM Before Cleaning
                     </Text>
                   </FormControl.Label>
-                  {/* <Text color='grey' my='5' fontSize='17'>
-                    Please take 3 separate measures of cone rotations per minute
-                    before cleaning the trap.
-                  </Text> */}
                   <HStack space={8} justifyContent='space-between'>
                     <FormControl w='30%'>
                       <Input
