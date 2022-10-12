@@ -46,7 +46,7 @@ export default function NavButtons({
         }
         break
       case 'Fish Processing':
-        if (values?.fishProcessed === 'No fish were caught') {
+        if (values?.fishProcessedResult === 'No fish were caught') {
           navigateHelper('No Fish Caught', 9)
         }
         break
@@ -89,16 +89,7 @@ export default function NavButtons({
 
       handleSubmit()
     }
-    //if form has not been touched OR there are errors => return out, otherwise navigate
-    // if (
-    //   ((touched && Object.keys(touched).length === 0) ||
-    //     (errors && Object.keys(errors).length > 0)) &&
-    //   activePage !== 'Fish Processing'
-    // ) {
-    //   return
-    // } else {
-    //navigate various flows
-    navigateFlowRightButton(values)
+    //navigate Right
     navigation.navigate('Trap Visit Form', {
       screen: navigationState.steps[activeStep + 1]?.name,
     })
@@ -106,7 +97,8 @@ export default function NavButtons({
       type: updateActiveStep,
       payload: navigationState.activeStep + 1,
     })
-    // }
+    //navigate various flows
+    navigateFlowRightButton(values)
   }
 
   const handleLeftButton = () => {
@@ -176,7 +168,6 @@ export default function NavButtons({
               <></>
             )
           }
-          // isDisabled={activePage === 'Visit Setup'}
           onPress={handleLeftButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='primary'>
