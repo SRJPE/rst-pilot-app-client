@@ -1,4 +1,4 @@
-import { Button, Heading, Icon, Image, Text, View, VStack } from 'native-base'
+import { Button, HStack, Icon, Text } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
@@ -24,17 +24,23 @@ const IncompleteSectionButton = ({
   return (
     <Button
       rounded='xs'
-      bg={completed ? 'primary' : 'white'}
-      // bg='primary'
       alignSelf='center'
-      justifyContent='space-evenly'
-      minWidth='1/2'
+      minWidth='60%'
       borderRadius='5'
       variant={'outline'}
+      bg={completed ? 'primary' : 'white'}
       _stack={{
-        space: '3.5',
+        //this accesses the the HStack inside the button
+        space: '20',
         alignItems: 'center',
+        // justifyContent: 'spaceBetween',
+        // marginX: '5',
       }}
+      _icon={
+        {
+          // mx: '5',
+        }
+      }
       leftIcon={
         completed ? (
           <Icon
@@ -61,6 +67,26 @@ const IncompleteSectionButton = ({
       }
       onPress={handleButtonPress}
     >
+      {/* <HStack space={20} alignItems='center'> //this is a manual attempt
+        <Icon
+          as={Ionicons}
+          name={completed ? 'checkmark-circle-outline' : 'warning-outline'}
+          size='2xl'
+          color={completed ? '#FFFFFF' : 'primary'}
+        />
+        <Text
+          fontSize='md'
+          fontWeight='bold'
+          color={completed ? '#FFFFFF' : 'primary'}
+        >
+          {name}
+        </Text>
+        <Button justifyContent='flex-end' onPress={handleButtonPress}>
+          <Text color={completed ? '#FFFFFF' : 'primary'}>
+            {completed ? 'Completed' : 'Edit'}
+          </Text>
+        </Button>
+      </HStack> */}
       <Text
         fontSize='md'
         fontWeight='bold'
