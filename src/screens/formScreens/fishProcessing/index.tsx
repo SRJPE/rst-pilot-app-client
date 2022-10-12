@@ -1,6 +1,5 @@
 import { Formik } from 'formik'
 import {
-  Box,
   FormControl,
   Heading,
   Text,
@@ -12,6 +11,7 @@ import {
 import { useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
+import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSlice'
 import {
@@ -42,11 +42,6 @@ const FishProcessing = ({
   }, [])
   const { fishProcessed: fishProcessedDropdowns } = dropdownValues.values
 
-  // useEffect(() => {
-  //   console.log('🚀 ~ dropdownValues', dropdownValues)
-  //   console.log('🚀 ~ fishProcessedDropdowns', fishProcessedDropdowns)
-  // }, [])
-
   const handleSubmit = (values: any) => {
     dispatch(saveFishProcessing(values))
     dispatch(markFishProcessingCompleted(true))
@@ -73,16 +68,21 @@ const FishProcessing = ({
           <View
             flex={1}
             bg='#fff'
-            p='10%'
+            p='6%'
             borderColor='themeGrey'
             borderWidth='15'
           >
             <VStack space={8}>
               <Heading>Will you be processing fish today?</Heading>
               <FormControl>
-                <FormControl.Label>Fish Processed</FormControl.Label>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Fish Processed
+                  </Text>
+                </FormControl.Label>
                 <Select
-                  minWidth='200'
+                  height='50px'
+                  fontSize='16'
                   accessibilityLabel='Fish Processed'
                   placeholder='Status'
                   _selectedItem={{
@@ -101,21 +101,21 @@ const FishProcessing = ({
                     />
                   ))}
                 </Select>
-                {touched.fishProcessed && errors.fishProcessed && (
-                  <Text style={{ fontSize: 12, color: 'red' }}>
-                    {errors.fishProcessed as string}
-                  </Text>
-                )}
+                {touched.fishProcessed &&
+                  errors.fishProcessed &&
+                  renderErrorMessage(errors, 'fishProcessed')}
               </FormControl>
               {values.fishProcessedResult ===
                 'No catch data; fish left in live box' && (
                 <FormControl>
                   <FormControl.Label>
-                    Reason For Not Processing
+                    <Text color='black' fontSize='xl'>
+                      Reason For Not Processing
+                    </Text>
                   </FormControl.Label>
                   <Select
-                    selectedValue={values.reasonForNotProcessing}
-                    minWidth='200'
+                    height='50px'
+                    fontSize='16'
                     accessibilityLabel='reasonForNotProcessing'
                     placeholder='Reason'
                     _selectedItem={{
@@ -123,6 +123,7 @@ const FishProcessing = ({
                       endIcon: <CheckIcon size='5' />,
                     }}
                     mt={1}
+                    selectedValue={values.reasonForNotProcessing}
                     onValueChange={handleChange('reasonForNotProcessing')}
                   >
                     {reasonsForNotProcessing.map((item: any) => (
@@ -134,11 +135,8 @@ const FishProcessing = ({
                     ))}
                   </Select>
                   {/* {touched.reasonForNotProcessing &&
-                    errors.reasonForNotProcessing && (
-                      <Text style={{ fontSize: 12, color: 'red' }}>
-                        {errors.reasonForNotProcessing as string}
-                      </Text>
-                    )} */}
+                    errors.reasonForNotProcessing &&
+                    renderErrorMessage(errors, 'reasonForNotProcessing')} */}
                 </FormControl>
               )}
 

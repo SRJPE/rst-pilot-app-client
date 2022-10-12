@@ -7,7 +7,6 @@ import {
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
 import {
-  Box,
   Text,
   FormControl,
   Heading,
@@ -23,6 +22,7 @@ import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../../utils/helpers/yupValidations'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Keyboard } from 'react-native'
+import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -71,7 +71,7 @@ const TrapOperations = ({
           <View
             flex={1}
             bg='#fff'
-            p='10%'
+            p='6%'
             borderColor='themeGrey'
             borderWidth='15'
           >
@@ -79,25 +79,33 @@ const TrapOperations = ({
               onPress={Keyboard.dismiss}
               accessible={false}
             >
-              <VStack space={8}>
+              <VStack space={10}>
                 <Heading>Trap Pre-Processing</Heading>
                 <FormControl w='1/2'>
-                  <FormControl.Label>Cone Depth</FormControl.Label>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Cone Depth
+                    </Text>
+                  </FormControl.Label>
                   <Input
+                    height='50px'
+                    fontSize='16'
                     placeholder='Numeric Value'
                     keyboardType='numeric'
                     onChangeText={handleChange('coneDepth')}
                     onBlur={handleBlur('coneDepth')}
                     value={values.coneDepth}
                   />
-                  {touched.coneDepth && errors.coneDepth && (
-                    <Text style={{ fontSize: 12, color: 'red' }}>
-                      {errors.coneDepth as string}
-                    </Text>
-                  )}
+                  {touched.coneDepth &&
+                    errors.coneDepth &&
+                    renderErrorMessage(errors, 'coneDepth')}
                 </FormControl>
-                <FormControl w='1/4'>
-                  <FormControl.Label>Cone Setting</FormControl.Label>
+                <FormControl w='30%'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Cone Setting
+                    </Text>
+                  </FormControl.Label>
                   <Radio.Group
                     name='coneSetting'
                     accessibilityLabel='cone setting'
@@ -121,8 +129,14 @@ const TrapOperations = ({
                 </FormControl>
                 <HStack space={6} alignItems='center'>
                   <FormControl w='1/2'>
-                    <FormControl.Label>Total Revolutions</FormControl.Label>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Total Revolutions
+                      </Text>
+                    </FormControl.Label>
                     <Input
+                      height='50px'
+                      fontSize='16'
                       placeholder='Numeric Value'
                       keyboardType='numeric'
                       onChangeText={handleChange('totalRevolutions')}
@@ -140,28 +154,37 @@ const TrapOperations = ({
                         accessibilityLabel='Collect total revolutions after fish processing Checkbox'
                       />
                       <FormControl.Label>
-                        Collect total revolutions after fish processing
+                        <Text color='black' fontSize='14'>
+                          Collect total revolutions after fish processing
+                        </Text>
                       </FormControl.Label>
                     </HStack>
                   </FormControl>
                 </HStack>
                 <FormControl>
-                  <FormControl.Label>RPM Before Cleaning</FormControl.Label>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      RPM Before Cleaning
+                    </Text>
+                  </FormControl.Label>
+                  {/* <Text color='grey' my='5' fontSize='17'>
+                    Please take 3 separate measures of cone rotations per minute
+                    before cleaning the trap.
+                  </Text> */}
                   <HStack space={8} justifyContent='space-between'>
-                    <FormControl w='1/4'>
-                      <FormControl.Label>Measurement 1</FormControl.Label>
+                    <FormControl w='30%'>
                       <Input
+                        height='50px'
+                        fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
                         onChangeText={handleChange('rpm1')}
                         onBlur={handleBlur('rpm1')}
                         value={values.rpm1}
                       />
-                      {touched.rpm1 && errors.rpm1 && (
-                        <Text style={{ fontSize: 12, color: 'red' }}>
-                          {errors.rpm1 as string}
-                        </Text>
-                      )}
+                      {touched.rpm1 &&
+                        errors.rpm1 &&
+                        renderErrorMessage(errors, 'rpm1')}
                       {/* {touched.rpm2 &&
                       (values.rpm2 > 2000 || values.rpm2 < 50) && (
                         <Text style={{ fontSize: 12, color: 'orange' }}>
@@ -169,46 +192,44 @@ const TrapOperations = ({
                         </Text>
                       )} */}
                     </FormControl>
-                    <FormControl w='1/4'>
-                      <FormControl.Label>Measurement 2</FormControl.Label>
+                    <FormControl w='30%'>
                       <Input
+                        height='50px'
+                        fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
                         onChangeText={handleChange('rpm2')}
                         onBlur={handleBlur('rpm2')}
                         value={values.rpm2}
                       />
-                      {touched.rpm2 && errors.rpm2 && (
-                        <Text style={{ fontSize: 12, color: 'red' }}>
-                          {errors.rpm2 as string}
-                        </Text>
-                      )}
+                      {touched.rpm2 &&
+                        errors.rpm2 &&
+                        renderErrorMessage(errors, 'rpm2')}
                     </FormControl>
-                    <FormControl w='1/4'>
-                      <FormControl.Label>Measurement 3</FormControl.Label>
+                    <FormControl w='30%'>
                       <Input
+                        height='50px'
+                        fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
                         onChangeText={handleChange('rpm3')}
                         onBlur={handleBlur('rpm3')}
                         value={values.rpm3}
                       />
-                      {touched.rpm3 && errors.rpm3 && (
-                        <Text style={{ fontSize: 12, color: 'red' }}>
-                          {errors.rpm3 as string}
-                        </Text>
-                      )}
+                      {touched.rpm3 &&
+                        errors.rpm3 &&
+                        renderErrorMessage(errors, 'rpm3')}
                     </FormControl>
                   </HStack>
+                  <Text color='grey' my='5' fontSize='17'>
+                    Please take 3 separate measures of cone rotations per minute
+                    before cleaning the trap.
+                  </Text>
                 </FormControl>
-                <Text color='grey'>
-                  Please take 3 separate measures of cone rotations per minute
-                  before cleaning the trap.
+                <Text color='black' fontSize='xl' alignSelf='center'>
+                  - Remove debris and begin fish processing -
                 </Text>
               </VStack>
-              <Heading alignSelf='center' fontSize='lg' mt='200'>
-                Remove debris and begin fish processing
-              </Heading>
             </TouchableWithoutFeedback>
           </View>
           <NavButtons

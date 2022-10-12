@@ -7,22 +7,19 @@ import {
   saveVisitSetup,
 } from '../../../redux/reducers/visitSetupSlice'
 import {
-  Box,
   Select,
   FormControl,
   CheckIcon,
   Heading,
-  Input,
   VStack,
   Text,
   View,
-  Icon,
-  HStack,
 } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../../utils/helpers/yupValidations'
-import { Ionicons } from '@expo/vector-icons'
+
+import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 
 const testStreams = [
   { label: 'Default Stream 1', value: 'DS1' },
@@ -62,22 +59,6 @@ const VisitSetup = ({
     console.log('🚀 ~ handleSubmit ~ Visit', values)
   }
 
-  const renderErrorMessage = (errors: any, inputName: string) => {
-    return (
-      <HStack space={1}>
-        <Icon
-          marginTop={'.5'}
-          as={Ionicons}
-          name='alert-circle-outline'
-          color='error'
-        />
-        <Text style={{ fontSize: 14, color: 'red' }}>
-          {errors[inputName] as string}
-        </Text>
-      </HStack>
-    )
-  }
-
   return (
     <Formik
       validationSchema={trapVisitSchema}
@@ -111,14 +92,9 @@ const VisitSetup = ({
                     Stream
                   </Text>
                 </FormControl.Label>
-                {/* 
-// @ts-ignore */}
                 <Select
                   height='50px'
-                  size='lg'
-                  // _text={{
-                  //   size: 'lg',
-                  // }}
+                  fontSize='16'
                   selectedValue={values.stream}
                   accessibilityLabel='Stream'
                   placeholder='Stream'
@@ -127,7 +103,7 @@ const VisitSetup = ({
                     endIcon: <CheckIcon size='6' />,
                   }}
                   my={1}
-                  onClose={handleBlur('trapSite')}
+                  onClose={handleBlur('stream')}
                   onValueChange={handleChange('stream')}
                 >
                   {testStreams.map((item, idx) => (
@@ -151,15 +127,9 @@ const VisitSetup = ({
                         Trap Site
                       </Text>
                     </FormControl.Label>
-                    {/* 
-// @ts-ignore */}
                     <Select
                       height='50px'
-                      size='lg'
-                      // height='50px'
-                      // _text={{
-                      //   size: 'lg',
-                      // }}
+                      fontSize='16'
                       selectedValue={values.trapSite}
                       accessibilityLabel='Trap Site'
                       placeholder='Trap Site'
@@ -193,11 +163,9 @@ const VisitSetup = ({
                       setCrew={setCrew}
                       // handleChange={handleChange}
                     />
-                    {/* {touched.crew && errors.crew && (
-                      <Text style={{ fontSize: 12, color: 'red' }}>
-                      {errors.crew as string}
-                      </Text>
-                    )} */}
+                    {/* {touched.crew &&
+                      errors.crew &&
+                      renderErrorMessage(errors, 'crew')} */}
                   </FormControl>
                 </>
               )}
