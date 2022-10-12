@@ -30,7 +30,7 @@ const IncompleteSectionButton = ({
       variant={'outline'}
       bg={completed ? 'primary' : 'white'}
       _stack={{
-        //this accesses the the HStack inside the button
+        //this property accesses the the HStack inside the button
         space: '20',
         alignItems: 'center',
         // justifyContent: 'spaceBetween',
@@ -67,7 +67,7 @@ const IncompleteSectionButton = ({
       }
       onPress={handleButtonPress}
     >
-      {/* <HStack space={20} alignItems='center'> //this is a manual attempt
+      {/* <HStack space={20} alignItems='center'>
         <Icon
           as={Ionicons}
           name={completed ? 'checkmark-circle-outline' : 'warning-outline'}

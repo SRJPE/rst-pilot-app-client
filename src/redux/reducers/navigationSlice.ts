@@ -34,6 +34,7 @@ export const navigationSlice = createSlice({
       state.activeStep = action.payload
     },
     markStepCompleted: (state, action) => {
+      //currently working: "state.activeStep - 1" could be refactored in the future
       state.steps[state.activeStep - 1]['completed'] = action.payload
     },
   },
