@@ -23,6 +23,7 @@ import { trapOperationsSchema } from '../../../utils/helpers/yupValidations'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Keyboard } from 'react-native'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
+import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -48,6 +49,7 @@ const TrapOperations = ({
     values.coneSetting = coneSetting
     dispatch(saveTrapOperations(values))
     dispatch(markTrapOperationsCompleted(true))
+    dispatch(markStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ Operations', values)
   }
 
