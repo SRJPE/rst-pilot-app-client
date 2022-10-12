@@ -50,7 +50,8 @@ const TrapStatus = ({
   }, [])
   const { trapFunctionality } = dropdownValues.values
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = (values: any, errors: any) => {
+    console.log('🚀 ~ handleSubmit ~ errors', errors.trapStatus)
     dispatch(saveTrapStatus(values))
     dispatch(markTrapStatusCompleted(true))
     dispatch(markStepCompleted(true))
@@ -62,8 +63,10 @@ const TrapStatus = ({
       validationSchema={trapStatusSchema}
       initialValues={reduxState.values}
       initialTouched={{ trapStatus: true }}
-      onSubmit={(values: any) => {
-        handleSubmit(values)
+      //only create initial error when form is not completed
+      initialErrors={reduxState.completed ? undefined : { trapStatus: '' }}
+      onSubmit={(values: any, errors: any) => {
+        handleSubmit(values, errors)
       }}
     >
       {({

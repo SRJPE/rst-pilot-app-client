@@ -58,6 +58,7 @@ const TrapOperations = ({
       validationSchema={trapOperationsSchema}
       initialValues={reduxState.values}
       initialTouched={{ coneDepth: true }}
+      initialErrors={reduxState.completed ? undefined : { coneDepth: '' }}
       onSubmit={values => {
         handleSubmit(values)
       }}
