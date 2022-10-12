@@ -85,8 +85,6 @@ export default function NavButtons({
   const handleRightButton = () => {
     //if function truthy, submit form to check for errors and save to redux
     if (handleSubmit) {
-      console.log('🚀 ~ handleRightButton ~ handleSubmit')
-
       handleSubmit()
     }
     //navigate Right
@@ -97,7 +95,7 @@ export default function NavButtons({
       type: updateActiveStep,
       payload: navigationState.activeStep + 1,
     })
-    //navigate various flows
+    //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
     navigateFlowRightButton(values)
   }
 
@@ -120,13 +118,20 @@ export default function NavButtons({
       type: updateActiveStep,
       payload: navigationState.activeStep - 1,
     })
-    //navigate various flows
+    //navigate various flows if needed (This seems to not be causing performance issues even though it is kind of redundant to place it here)
     navigateFlowLeftButton()
   }
 
   const disableRightButton = () => {
     return (
-      (touched && Object.keys(touched).length === 0) ||
+      //**temp conditional for fish input**
+
+      //if current screen uses formik && if form has first NOT been touched
+      // OR
+      //if current screen uses formik && there are errors
+      (activePage !== 'Fish Input' &&
+        touched &&
+        Object.keys(touched).length === 0) ||
       (errors && Object.keys(errors).length > 0)
     )
   }
@@ -196,7 +201,7 @@ export default function NavButtons({
           rounded='xs'
           borderRadius='5'
           shadow='5'
-          // isDisabled={disableRightButton()}
+          isDisabled={disableRightButton()}
           onPress={handleRightButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
