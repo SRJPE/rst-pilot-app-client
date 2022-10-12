@@ -67,7 +67,7 @@ const VisitSetup = ({
       initialValues={reduxState.values}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       initialTouched={{ stream: true }}
-      initialErrors={{ stream: '' }}
+      initialErrors={reduxState.completed ? undefined : { stream: '' }}
       onSubmit={values => {
         handleSubmit(values)
       }}

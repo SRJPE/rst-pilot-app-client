@@ -56,7 +56,9 @@ const FishProcessing = ({
       initialValues={reduxState.values}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       initialTouched={{ fishProcessedResult: true }}
-      initialErrors={{ fishProcessedResult: '' }}
+      initialErrors={
+        reduxState.completed ? undefined : { fishProcessedResult: '' }
+      }
       onSubmit={values => {
         handleSubmit(values)
       }}
