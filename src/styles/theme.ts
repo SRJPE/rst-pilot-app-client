@@ -4,8 +4,14 @@ const theme = extendTheme({
   colors: {
     primary: '#007C7C',
     secondary: '#D1E8F0',
+    // primary: '#4c642f',
+    // secondary: '#842f3f',
     themeGrey: '#dadada42',
-    error: 'red',
+
+    error: '#b71c1c',
+    warning: '#eec227',
+    info: '#6c9a93',
+    success: '#7e9752',
   },
   components: {
     defaultProps: {
