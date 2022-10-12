@@ -16,7 +16,7 @@ export default function HighFlows({ navigation }: { navigation: any }) {
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={10} p='10'>
+        <VStack space={12} p='10'>
           <Heading textAlign='center'>
             {
               'Temperatures are high. Please process and \n release fish first. '
@@ -32,7 +32,7 @@ export default function HighFlows({ navigation }: { navigation: any }) {
             rounded='xs'
             bg='primary'
             alignSelf='center'
-            py='3'
+            py='5'
             px='16'
             borderRadius='5'
             onPress={handlePressViewMonitoringProtocols}

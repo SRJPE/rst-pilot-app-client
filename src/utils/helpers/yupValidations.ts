@@ -3,7 +3,6 @@ import * as yup from 'yup'
 export const trapVisitSchema = yup.object().shape({
   stream: yup.string().required('Stream required'),
   trapSite: yup.string().required('Trap site required'),
-  trapSubSite: yup.string(),
   crew: yup.array(),
   // .min(1).required('Crew cannot be blank.'),
 })
