@@ -23,6 +23,7 @@ import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Keyboard } from 'react-native'
+import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Rain', value: 'High Rain' },
@@ -54,6 +55,7 @@ const TrapStatus = ({
   const handleSubmit = (values: any) => {
     dispatch(saveTrapStatus(values))
     dispatch(markTrapStatusCompleted(true))
+    dispatch(markStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ Status', values)
   }
 

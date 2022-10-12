@@ -25,6 +25,7 @@ import {
   markFishInputCompleted,
   saveFishInput,
 } from '../../../redux/reducers/fishInputSlice'
+import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
 
 const styles = StyleSheet.create({
   tableHead: { height: 40, backgroundColor: '#f1f8ff' },
@@ -70,6 +71,7 @@ const FishInput = ({
     values.speciesCaptured = checkboxGroupValue
     dispatch(saveFishInput(values))
     dispatch(markFishInputCompleted(true))
+    dispatch(markStepCompleted(true))
     console.log('🚀 ~ Fish Input ~ values', values)
   }
 
@@ -77,7 +79,7 @@ const FishInput = ({
     <Formik
       // validationSchema={fishInputSchema}
       initialValues={reduxState}
-      onSubmit={(values) => handleSubmit(values)}
+      onSubmit={values => handleSubmit(values)}
     >
       {({
         handleChange,
@@ -102,7 +104,7 @@ const FishInput = ({
                   colorScheme='green'
                   defaultValue={checkboxGroupValue}
                   accessibilityLabel='Select the species captured'
-                  onChange={(values) => setCheckboxGroupValue(values)}
+                  onChange={values => setCheckboxGroupValue(values)}
                 >
                   <Checkbox value='YOY Chinook' my='1'>
                     YOY Chinook

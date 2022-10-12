@@ -18,6 +18,7 @@ import {
   markFishProcessingCompleted,
   saveFishProcessing,
 } from '../../../redux/reducers/fishProcessingSlice'
+import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
 import { fishInputSchema } from '../../../utils/helpers/yupValidations'
 
@@ -45,6 +46,7 @@ const FishProcessing = ({
   const handleSubmit = (values: any) => {
     dispatch(saveFishProcessing(values))
     dispatch(markFishProcessingCompleted(true))
+    dispatch(markStepCompleted(true))
     console.log('🚀 ~ Fish Processing ~ values', values)
   }
 
