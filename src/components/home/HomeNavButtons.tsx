@@ -39,6 +39,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     marginBottom: -89,
+    // opacity: '100!important',
+    // opacity: '100 !important',
   },
 
   buttonBackground: {
@@ -52,7 +54,15 @@ const styles = StyleSheet.create({
   },
 })
 
-export default function BottomNavigation({ navigation }: { navigation: any }) {
+export default function BottomNavigation({
+  navigation,
+  setStaggerOpen,
+  staggerOpen,
+}: {
+  navigation: any
+  setStaggerOpen: any
+  staggerOpen: boolean
+}) {
   const { isOpen, onToggle, onClose } = useDisclose()
 
   const handlePressQCData = useCallback(() => {
@@ -71,6 +81,10 @@ export default function BottomNavigation({ navigation }: { navigation: any }) {
     navigation.navigate('Generate Report')
     onClose()
   }, [navigation])
+  const handlePressStagger = () => {
+    onToggle()
+    // setStaggerOpen(!staggerOpen)
+  }
 
   return (
     <Flex align='center'>
@@ -184,7 +198,7 @@ export default function BottomNavigation({ navigation }: { navigation: any }) {
               colorScheme='primary'
               borderRadius='full'
               size='lg'
-              onPress={onToggle}
+              onPress={handlePressStagger}
               icon={
                 <Icon
                   as={isOpen ? Feather : Entypo}
