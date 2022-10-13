@@ -11,14 +11,12 @@ export default function NavButtons({
   errors,
   touched,
   values,
-  validation,
 }: {
   navigation?: any
   handleSubmit?: any
   errors?: any
   touched?: any
   values?: any
-  validation?: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -38,20 +36,20 @@ export default function NavButtons({
     switch (activePage) {
       case 'Trap Status':
         if (values?.trapStatus === 'Trap stopped functioning') {
-          navigateHelper('Non Functional Trap', 8)
+          navigateHelper('Non Functional Trap', 9)
         } else if (values?.flowMeasure > 1000) {
           navigateHelper('High Flows', 6)
         } else if (values?.waterTemperature > 30) {
-          navigateHelper('High Temperatures', 7)
+          navigateHelper('High Temperatures', 8)
         }
         break
       case 'Fish Processing':
         if (values?.fishProcessedResult === 'No fish were caught') {
-          navigateHelper('No Fish Caught', 9)
+          navigateHelper('No Fish Caught', 10)
         }
         break
       case 'High Flows':
-        navigateHelper('End Trapping', 10)
+        navigateHelper('End Trapping', 11)
         break
       case 'High Temperatures':
         navigateHelper('Fish Processing', 4)
