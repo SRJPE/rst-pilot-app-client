@@ -18,7 +18,7 @@ const IncompleteSections = ({
   reduxState: any
   navigation: any
 }) => {
-  const stepsArray = Object.values(reduxState.steps).slice(0, 5)
+  const stepsArray = Object.values(reduxState.steps).slice(0, 6)
 
   return (
     <>
