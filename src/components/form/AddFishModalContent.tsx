@@ -21,7 +21,7 @@ import { connect } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { addIndividualFishSchema } from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { saveAddFishModalData } from '../../redux/reducers/addIndividualFishSlice'
+import { saveAddFishModalData } from '../../redux/reducers/formSlices/addIndividualFishSlice'
 
 const speciesDictionary = [{ label: 'Chinook', value: 'Chinook' }]
 const lifestageDictionary = [
@@ -72,7 +72,7 @@ const AddFishModalContent = ({
   saveAddFishModalData: any
   onClose: any
 }) => {
-  const CustomSelect: React.FC<CustomSelectI> = (props) => {
+  const CustomSelect: React.FC<CustomSelectI> = props => {
     return (
       <Select
         selectedValue={props.selectedValue}
@@ -84,7 +84,7 @@ const AddFishModalContent = ({
           endIcon: <CheckIcon size='5' />,
         }}
         mt={1}
-        onValueChange={(itemValue) => props.onValueChange(itemValue)}
+        onValueChange={itemValue => props.onValueChange(itemValue)}
       >
         {props.selectOptions.map((item, idx) => (
           <Select.Item key={idx} label={item.label} value={item.value} />
@@ -103,7 +103,7 @@ const AddFishModalContent = ({
       <Formik
         validationSchema={addIndividualFishSchema}
         initialValues={reduxState.values}
-        onSubmit={(values) => {
+        onSubmit={values => {
           handleFormSubmit(values)
         }}
       >

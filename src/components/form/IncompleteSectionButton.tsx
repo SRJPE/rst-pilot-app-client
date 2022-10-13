@@ -2,7 +2,7 @@ import { Button, HStack, Icon, Text } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
-import { updateActiveStep } from '../../redux/reducers/navigationSlice'
+import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 
 const IncompleteSectionButton = ({
   name,

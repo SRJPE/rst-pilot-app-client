@@ -24,8 +24,8 @@ import { connect, useDispatch } from 'react-redux'
 import {
   markFishInputCompleted,
   saveFishInput,
-} from '../../../redux/reducers/fishInputSlice'
-import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
+} from '../../../redux/reducers/formSlices/fishInputSlice'
+import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 
 const styles = StyleSheet.create({
   tableHead: { height: 40, backgroundColor: '#f1f8ff' },
