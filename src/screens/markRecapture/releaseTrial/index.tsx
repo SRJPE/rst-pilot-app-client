@@ -1,18 +1,7 @@
-import {
-  Button,
-  Heading,
-  Icon,
-  Image,
-  KeyboardAvoidingView,
-  Text,
-  View,
-  VStack,
-} from 'native-base'
-import Ionicons from '@expo/vector-icons/Ionicons'
+import { KeyboardAvoidingView, View, VStack } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import ReleaseTrialWild from './ReleaseTrialWild'
 import ReleaseTrialHatchery from './ReleaseTrialHatchery'
-import { Platform } from 'react-native'
 
 export default function ReleaseTrial({ navigation }: { navigation: any }) {
   return (
