@@ -25,7 +25,7 @@ export const trapStatusSchema = yup.object().shape({
     .typeError('Input must be a number'),
 })
 
-export const trapOperationsSchema = yup.object().shape({
+export const trapPreProcessingSchema = yup.object().shape({
   coneDepth: yup
     .number()
     .required('Stream required')
@@ -37,6 +37,24 @@ export const trapOperationsSchema = yup.object().shape({
   //   .number()
   //   .required('Water Turbidity Required')
   //   .typeError('Input must be a number'),
+  rpm1: yup
+    .number()
+    .required('Measurement 1 required')
+    .typeError('Input must be a number'),
+  rpm2: yup
+    .number()
+    .required('Measurement 2 required')
+    .typeError('Input must be a number'),
+  rpm3: yup
+    .number()
+    .required('Measurement 3 required')
+    .typeError('Input must be a number'),
+})
+export const trapPostProcessingSchema = yup.object().shape({
+  debrisVolume: yup
+    .number()
+    .required('Stream required')
+    .typeError('Input must be a number'),
   rpm1: yup
     .number()
     .required('Measurement 1 required')
