@@ -12,7 +12,7 @@ const formSteps = {
   9: { name: 'No Fish Caught', propName: 'noFishCaught' },
   10: { name: 'End Trapping', propName: 'endTrapping' },
   11: { name: 'Incomplete Sections', propName: 'incompleteSections' },
-  12: { name: 'Start Mark Recapture', propName: 'StartMarkRecapture' },
+  12: { name: 'Start Mark Recapture', propName: 'startMarkRecapture' },
 }
 
 interface NavigationStateI {
