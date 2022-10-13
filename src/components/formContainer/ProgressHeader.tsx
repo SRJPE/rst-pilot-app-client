@@ -34,7 +34,7 @@ export default function ProgressHeader(props: any) {
             _filledTrack={{
               bg: 'primary',
             }}
-            value={(activeStep / 6 || Object.keys(steps).length) * 100}
+            value={(activeStep / 6) * 100}
             mx='4'
           />
         </Box>
