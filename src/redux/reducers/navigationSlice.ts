@@ -21,6 +21,7 @@ const formSteps = {
   10: { name: 'No Fish Caught', propName: 'noFishCaught' },
   11: { name: 'End Trapping', propName: 'endTrapping' },
   12: { name: 'Incomplete Sections', propName: 'incompleteSections' },
+  12: { name: 'Start Mark Recapture', propName: 'StartMarkRecapture' },
 }
 
 interface NavigationStateI {

@@ -10,6 +10,7 @@ import NonFunctionalTrap from '../screens/formScreens/navigationFlowWarnings/Non
 import NoFishCaught from '../screens/formScreens/navigationFlowWarnings/NoFishCaught'
 import EndTrapping from '../screens/formScreens/endTrapping'
 import IncompleteSections from '../screens/formScreens/incompleteSections'
+import StartMarkRecapture from '../screens/markRecapture/StartMarkRecapture'
 import TrapPreProcessing from '../screens/formScreens/trapOperations/TrapPreProcessing'
 import TrapPostProcessing from '../screens/formScreens/trapOperations/TrapPostProcessing'
 
@@ -44,6 +45,11 @@ export default function FormStackNavigation() {
       <FormStack.Screen
         name='Incomplete Sections'
         component={IncompleteSections}
+      />
+      <FormStack.Screen
+        name='Start Mark Recapture'
+        component={StartMarkRecapture}
+        options={{ headerShown: false }}
       />
     </FormStack.Navigator>
   )
