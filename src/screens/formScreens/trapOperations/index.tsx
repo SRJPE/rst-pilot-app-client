@@ -3,7 +3,7 @@ import { Formik } from 'formik'
 import {
   markTrapOperationsCompleted,
   saveTrapOperations,
-} from '../../../redux/reducers/trapOperationsSlice'
+} from '../../../redux/reducers/formSlices/trapOperationsSlice'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
 import {
@@ -23,7 +23,7 @@ import { trapOperationsSchema } from '../../../utils/helpers/yupValidations'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Keyboard } from 'react-native'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
+import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
