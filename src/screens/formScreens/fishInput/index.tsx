@@ -78,7 +78,7 @@ const FishInput = ({
   return (
     <Formik
       // validationSchema={fishInputSchema}
-      initialValues={reduxState}
+      initialValues={reduxState.values}
       onSubmit={values => handleSubmit(values)}
     >
       {({
@@ -181,6 +181,7 @@ const FishInput = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
+            values={values}
           />
         </>
       )}

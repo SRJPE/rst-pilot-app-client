@@ -65,6 +65,9 @@ const VisitSetup = ({
     <Formik
       validationSchema={trapVisitSchema}
       initialValues={reduxState.values}
+      //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
+      initialTouched={{ stream: true }}
+      initialErrors={reduxState.completed ? undefined : { stream: '' }}
       onSubmit={values => {
         handleSubmit(values)
       }}
@@ -73,7 +76,6 @@ const VisitSetup = ({
         handleChange,
         handleBlur,
         handleSubmit,
-        validateForm,
         touched,
         errors,
         values,
@@ -105,7 +107,6 @@ const VisitSetup = ({
                     endIcon: <CheckIcon size='6' />,
                   }}
                   my={1}
-                  onClose={handleBlur('stream')}
                   onValueChange={handleChange('stream')}
                 >
                   {testStreams.map((item, idx) => (
@@ -140,7 +141,6 @@ const VisitSetup = ({
                         endIcon: <CheckIcon size='6' />,
                       }}
                       mt={1}
-                      onClose={handleBlur('trapSite')}
                       onValueChange={handleChange('trapSite')}
                     >
                       {testSites.map((item, idx) => (
@@ -178,7 +178,6 @@ const VisitSetup = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
-            // validation={validateForm(values)}
           />
         </>
       )}
