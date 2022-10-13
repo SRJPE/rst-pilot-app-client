@@ -93,6 +93,12 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             title='Home'
           />
           <MenuButton
+            active={currentRoute === 'Mark Recapture'}
+            onPress={() => handlePressMainNavButton('Mark Recapture')}
+            icon='clipboard'
+            title='Mark Recapture'
+          />
+          <MenuButton
             active={currentRoute === 'Generate Report'}
             onPress={() => handlePressMainNavButton('Generate Report')}
             icon='podium'
