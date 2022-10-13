@@ -1,6 +1,5 @@
 import { Box, HStack, VStack, Text, Progress } from 'native-base'
 import { useSelector } from 'react-redux'
-import TrapPostProcessing from '../../screens/formScreens/trapOperations/TrapPostProcessing'
 
 export default function ProgressHeader(props: any) {
   const navigationState = useSelector((state: any) => state.navigation)
@@ -15,14 +14,20 @@ export default function ProgressHeader(props: any) {
       : (title = activePageTitle)
     return title
   }
+
+  const renderCurrentStepOfTotalSteps = () => {
+    const currentStep =
+      navigationState.activeStep > 6 ? '6' : navigationState.activeStep
+    const totalSteps = '6'
+
+    return `Step ${currentStep} of ${totalSteps}`
+  }
   return (
     <Box>
       <VStack>
         <HStack w='100%' justifyContent='space-between' p='4'>
           <Text fontSize='2xl'>{renderPageTitle()}</Text>
-          <Text fontSize='xl'>{`Step ${navigationState.activeStep} of ${
-            Object.keys(navigationState.steps).length
-          }`}</Text>
+          <Text fontSize='xl'>{renderCurrentStepOfTotalSteps()}</Text>
         </HStack>
         <Box w='100%'>
           <Progress
@@ -30,7 +35,7 @@ export default function ProgressHeader(props: any) {
             _filledTrack={{
               bg: 'primary',
             }}
-            value={(activeStep / Object.keys(steps).length) * 100}
+            value={(activeStep / 6 || Object.keys(steps).length) * 100}
             mx='4'
           />
         </Box>
