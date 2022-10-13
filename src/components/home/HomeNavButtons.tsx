@@ -14,8 +14,7 @@ import {
   Badge,
 } from 'native-base'
 import { StyleSheet } from 'react-native'
-import { Entypo } from '@expo/vector-icons'
-import { MaterialIcons } from '@expo/vector-icons'
+import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 const styles = StyleSheet.create({
@@ -188,9 +187,9 @@ export default function BottomNavigation({ navigation }: { navigation: any }) {
               onPress={onToggle}
               icon={
                 <Icon
-                  as={isOpen ? MaterialIcons : Entypo}
+                  as={isOpen ? Feather : Entypo}
                   size='12'
-                  name={isOpen ? 'cancel' : 'plus'}
+                  name={isOpen ? 'x' : 'plus'}
                   color='warmGray.50'
                 />
               }
