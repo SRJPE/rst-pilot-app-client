@@ -24,7 +24,7 @@ const IncompleteSectionButton = ({
   return (
     <Button
       rounded='xs'
-      alignSelf='center'
+      // alignSelf='center'
       minWidth='60%'
       borderRadius='5'
       variant={'outline'}
