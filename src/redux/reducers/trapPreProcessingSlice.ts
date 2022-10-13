@@ -2,10 +2,10 @@ import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
   completed: boolean
-  values: TrapOperationsValuesI
+  values: TrapPreProcessingValuesI
 }
 
-export interface TrapOperationsValuesI {
+export interface TrapPreProcessingValuesI {
   coneDepth: number | null
   coneSetting: string
   checked: string | boolean
@@ -28,20 +28,20 @@ const initialState: InitialStateI = {
   },
 }
 
-export const trapOperationsSlice = createSlice({
-  name: 'trapOperations',
+export const trapPreProcessingSlice = createSlice({
+  name: 'trapPreProcessing',
   initialState: initialState,
   reducers: {
-    saveTrapOperations: (state, action) => {
+    saveTrapPreProcessing: (state, action) => {
       state.values = action.payload
     },
-    markTrapOperationsCompleted: (state, action) => {
+    markTrapPreProcessingCompleted: (state, action) => {
       state.completed = action.payload
     },
   },
 })
 
-export const { saveTrapOperations, markTrapOperationsCompleted } =
-  trapOperationsSlice.actions
+export const { saveTrapPreProcessing, markTrapPreProcessingCompleted } =
+  trapPreProcessingSlice.actions
 
-export default trapOperationsSlice.reducer
+export default trapPreProcessingSlice.reducer
