@@ -1,7 +1,7 @@
 import { KeyboardAvoidingView, View, VStack } from 'native-base'
-import NavButtons from '../../../components/formContainer/NavButtons'
 import ReleaseTrialWild from './ReleaseTrialWild'
 import ReleaseTrialHatchery from './ReleaseTrialHatchery'
+import MarkRecaptureNavButtons from '../../../components/markRecapture/MarkRecaptureNavButtons'
 
 export default function ReleaseTrial({ navigation }: { navigation: any }) {
   return (
@@ -16,7 +16,7 @@ export default function ReleaseTrial({ navigation }: { navigation: any }) {
           <ReleaseTrialHatchery />
         </VStack>
       </KeyboardAvoidingView>
-      <NavButtons navigation={navigation} />
+      <MarkRecaptureNavButtons navigation={navigation} />
     </>
   )
 }
