@@ -16,8 +16,7 @@ export default function ProgressHeader(props: any) {
   }
 
   const renderCurrentStepOfTotalSteps = () => {
-    const currentStep =
-      navigationState.activeStep > 6 ? '6' : navigationState.activeStep
+    const currentStep = activeStep > 6 ? '6' : activeStep
     const totalSteps = '6'
 
     return `Step ${currentStep} of ${totalSteps}`
