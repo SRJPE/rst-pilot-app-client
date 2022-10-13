@@ -10,6 +10,10 @@ import {
   Text,
   VStack,
 } from 'native-base'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSlice'
+import { AppDispatch } from '../../../redux/store'
 const testRunIDs = [
   { label: 'Spring', value: 'Spring' },
   { label: 'Summer', value: 'Summer' },
@@ -18,6 +22,15 @@ const testRunIDs = [
 ]
 
 const ReleaseTrialHatchery = () => {
+  const dispatch = useDispatch<AppDispatch>()
+  const dropdownValues = useSelector((state: any) => state.dropdowns)
+  console.log('🚀 ~ dropdownValues', dropdownValues)
+
+  useEffect(() => {
+    dispatch(getTrapVisitDropdownValues())
+  }, [])
+  const { run } = dropdownValues.values
+
   return (
     <KeyboardAvoidingView bg='#FFF'>
       <Center
@@ -75,11 +88,11 @@ const ReleaseTrialHatchery = () => {
             mt={1}
             // onValueChange={handleChange('trapStatus')}
           >
-            {testRunIDs.map((item: any) => (
+            {run.map((item: any) => (
               <Select.Item
                 key={item.id}
-                label={item.label}
-                value={item.value}
+                label={item.definition}
+                value={item.definition}
               />
             ))}
           </Select>
