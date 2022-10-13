@@ -38,7 +38,7 @@ export default function NavButtons({
         if (values?.trapStatus === 'Trap stopped functioning') {
           navigateHelper('Non Functional Trap', 9)
         } else if (values?.flowMeasure > 1000) {
-          navigateHelper('High Flows', 6)
+          navigateHelper('High Flows', 7)
         } else if (values?.waterTemperature > 30) {
           navigateHelper('High Temperatures', 8)
         }
