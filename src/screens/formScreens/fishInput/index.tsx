@@ -12,10 +12,7 @@ import {
 } from 'native-base'
 import { Table, Row, Rows } from 'react-native-table-component'
 import { StyleSheet } from 'react-native'
-import CustomModal, {
-  AddFishModalHeaderButton,
-} from '../../../components/Shared/CustomModal'
-import AddFishModalContent from '../../../components/form/AddFishModalContent'
+import CustomModal from '../../../components/Shared/CustomModal'
 import { Formik } from 'formik'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { AppDispatch, RootState } from '../../../redux/store'
@@ -25,6 +22,7 @@ import {
   markFishInputCompleted,
   saveFishInput,
 } from '../../../redux/reducers/fishInputSlice'
+import AddFishModalContent from '../../../components/form/AddFishModalContent'
 
 const styles = StyleSheet.create({
   tableHead: { height: 40, backgroundColor: '#f1f8ff' },
@@ -162,16 +160,14 @@ const FishInput = ({
             </VStack>
             {/* --------- Modals --------- */}
             <CustomModal
-              headerText={'Add Fish'}
               isOpen={addFishModalOpen}
-              onClose={() => setAddFishModalOpen(false)}
-              showHeaderButon={true}
-              headerButton={AddFishModalHeaderButton({
-                activeTab: addFishModalTab,
-                setActiveTab: setAddFishModalTab,
-              })}
+              closeModal={() => setAddFishModalOpen(false)}
             >
-              <AddFishModalContent onClose={() => setAddFishModalOpen(false)} />
+              <AddFishModalContent
+                closeModal={() => setAddFishModalOpen(false)}
+                activeTab={addFishModalTab}
+                setActiveTab={setAddFishModalTab}
+              />
             </CustomModal>
           </View>
           <NavButtons
