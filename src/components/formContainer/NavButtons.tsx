@@ -1,8 +1,9 @@
-import { Box, HStack, Text, Button } from 'native-base'
+import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/navigationSlice'
 import { useEffect } from 'react'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function NavButtons({
   navigation,
@@ -10,14 +11,12 @@ export default function NavButtons({
   errors,
   touched,
   values,
-  validation,
 }: {
   navigation?: any
   handleSubmit?: any
   errors?: any
   touched?: any
   values?: any
-  validation?: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -37,29 +36,29 @@ export default function NavButtons({
     switch (activePage) {
       case 'Trap Status':
         if (values?.trapStatus === 'Trap stopped functioning') {
-          navigateHelper('Non Functional Trap', 8)
+          navigateHelper('Non Functional Trap', 9)
         } else if (values?.flowMeasure > 1000) {
-          navigateHelper('High Flows', 6)
+          navigateHelper('High Flows', 7)
         } else if (values?.waterTemperature > 30) {
-          navigateHelper('High Temperatures', 7)
+          navigateHelper('High Temperatures', 8)
         }
         break
       case 'Fish Processing':
-        if (values?.fishProcessed === 'No fish were caught') {
-          navigateHelper('No Fish Caught', 9)
+        if (values?.fishProcessedResult === 'No fish were caught') {
+          navigateHelper('No Fish Caught', 10)
         }
         break
       case 'High Flows':
-        navigateHelper('End Trapping', 10)
+        navigateHelper('End Trapping', 11)
         break
       case 'High Temperatures':
         navigateHelper('Fish Processing', 4)
         break
       default:
+        console.log('default navigation')
         break
     }
   }
-
 
   const navigateFlowLeftButton = () => {
     switch (activePage) {
@@ -76,36 +75,35 @@ export default function NavButtons({
         navigateHelper('Fish Processing', 4)
         break
       default:
+        console.log('default navigation')
         break
     }
   }
-
 
   const handleRightButton = () => {
     //if function truthy, submit form to check for errors and save to redux
     if (handleSubmit) {
       handleSubmit()
     }
-    //if form has not been touched OR there are errors => return out, otherwise navigate
-    if (
-      (touched && Object.keys(touched).length === 0) ||
-      (errors && Object.keys(errors).length > 0)
-    ) {
-      return
-    } else {
-      navigation.navigate('Trap Visit Form', {
-        screen: navigationState.steps[activeStep + 1]?.name,
-      })
-      dispatch({
-        type: updateActiveStep,
-        payload: navigationState.activeStep + 1,
-      })
-      //navigate various flows
-      navigateFlowRightButton(values)
-    }
+    //navigate Right
+    navigation.navigate('Trap Visit Form', {
+      screen: navigationState.steps[activeStep + 1]?.name,
+    })
+    dispatch({
+      type: updateActiveStep,
+      payload: navigationState.activeStep + 1,
+    })
+    //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
+    navigateFlowRightButton(values)
   }
 
   const handleLeftButton = () => {
+    //navigate back to home screen from visit setup screen
+    if (activePage === 'Visit Setup') {
+      navigation.navigate('Home')
+      return
+    }
+
     //if function truthy, submit form to save to redux
     if (handleSubmit) {
       handleSubmit()
@@ -118,11 +116,25 @@ export default function NavButtons({
       type: updateActiveStep,
       payload: navigationState.activeStep - 1,
     })
-    //navigate various flows
+    //navigate various flows if needed (This seems to not be causing performance issues even though it is kind of redundant to place it here)
     navigateFlowLeftButton()
   }
 
-  const renderButtonText = (activePage: string) => {
+  const disableRightButton = () => {
+    return (
+      //**temp conditional for fish input**
+
+      //if current screen uses formik && if form has first NOT been touched
+      // OR
+      //if current screen uses formik && there are errors
+      (activePage !== 'Fish Input' &&
+        touched &&
+        Object.keys(touched).length === 0) ||
+      (errors && Object.keys(errors).length > 0)
+    )
+  }
+
+  const renderRightButtonText = (activePage: string) => {
     let buttonText
     switch (activePage) {
       case 'High Flows':
@@ -142,48 +154,56 @@ export default function NavButtons({
   }
 
   return (
-    <Box bg='themeGrey' py='6' px='3' maxWidth='100%'>
+    <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>
       <HStack justifyContent='space-evenly'>
         <Button
-          rounded='xs'
-          bg='secondary'
           alignSelf='flex-start'
-          width='1/3'
+          bg='secondary'
+          width='45%'
+          height='20'
+          rounded='xs'
           borderRadius='5'
           shadow='5'
-          isDisabled={activePage === 'Visit Setup'}
+          leftIcon={
+            activePage === 'Visit Setup' ? (
+              <Icon as={Ionicons} name='home' size='lg' color='primary' />
+            ) : (
+              <></>
+            )
+          }
           onPress={handleLeftButton}
         >
-          <Text fontSize='sm' fontWeight='bold' color='primary'>
-            Back
+          <Text fontSize='xl' fontWeight='bold' color='primary'>
+            {activePage === 'Visit Setup' ? 'Return Home' : 'Back'}
           </Text>
         </Button>
         <Button
+          height='20'
           rounded='xs'
           bg='primary'
           alignSelf='flex-start'
-          // py='3'
-          width='1/4'
+          width='5%'
           borderRadius='5'
           shadow='5'
           onPress={() => console.log('🚀 ~ reduxState', reduxState)}
         >
-          <Text fontSize='sm' fontWeight='bold' color='white'>
+          <Text fontWeight='bold' color='white'>
             redux state
           </Text>
         </Button>
         <Button
-          rounded='xs'
-          bg='primary'
           alignSelf='flex-start'
-          width='1/3'
+          bg='primary'
+          width='45%'
+          height='20'
+          rounded='xs'
           borderRadius='5'
           shadow='5'
-          // isDisabled={}
+          isDisabled={disableRightButton()}
           onPress={handleRightButton}
         >
-          <Text fontSize='sm' fontWeight='bold' color='white'>
-            {renderButtonText(activePage)}
+          <Text fontSize='xl' fontWeight='bold' color='white'>
+            {renderRightButtonText(activePage)}
           </Text>
         </Button>
       </HStack>

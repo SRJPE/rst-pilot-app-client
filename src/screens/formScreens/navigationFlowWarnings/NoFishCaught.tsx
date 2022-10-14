@@ -11,7 +11,7 @@ export default function NoFishCaught({ navigation }: { navigation: any }) {
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={10} p='10'>
+        <VStack space={12} p='10'>
           <Image
             alignSelf='center'
             source={require('../../../assets/checkmark_outline.png')}

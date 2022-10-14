@@ -8,7 +8,6 @@ import {
   saveTrapStatus,
 } from '../../../redux/reducers/trapStatusSlice'
 import {
-  Box,
   Select,
   FormControl,
   CheckIcon,
@@ -16,12 +15,13 @@ import {
   Input,
   VStack,
   HStack,
-  Button,
   Text,
   View,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
+import renderErrorMessage from '../../../components/form/RenderErrorMessage'
+import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Rain', value: 'High Rain' },
@@ -50,9 +50,11 @@ const TrapStatus = ({
   }, [])
   const { trapFunctionality } = dropdownValues.values
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = (values: any, errors: any) => {
+    console.log('🚀 ~ handleSubmit ~ errors', errors.trapStatus)
     dispatch(saveTrapStatus(values))
     dispatch(markTrapStatusCompleted(true))
+    dispatch(markStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ Status', values)
   }
 
@@ -60,15 +62,17 @@ const TrapStatus = ({
     <Formik
       validationSchema={trapStatusSchema}
       initialValues={reduxState.values}
-      onSubmit={(values: any) => {
-        handleSubmit(values)
+      initialTouched={{ trapStatus: true }}
+      //only create initial error when form is not completed
+      initialErrors={reduxState.completed ? undefined : { trapStatus: '' }}
+      onSubmit={(values: any, errors: any) => {
+        handleSubmit(values, errors)
       }}
     >
       {({
         handleChange,
         handleBlur,
         handleSubmit,
-        validateForm,
         touched,
         errors,
         values,
@@ -77,15 +81,21 @@ const TrapStatus = ({
           <View
             flex={1}
             bg='#fff'
-            p='10%'
+            p='6%'
             borderColor='themeGrey'
             borderWidth='15'
           >
-            <VStack space={8}>
+            <VStack space={12}>
               <Heading>Is the Trap functioning normally?</Heading>
               <FormControl>
-                <FormControl.Label>Trap Status</FormControl.Label>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Trap Status
+                  </Text>
+                </FormControl.Label>
                 <Select
+                  height='50px'
+                  fontSize='16'
                   selectedValue={values.trapStatus}
                   accessibilityLabel='Trap Status'
                   placeholder='Trap Status'
@@ -104,18 +114,20 @@ const TrapStatus = ({
                     />
                   ))}
                 </Select>
-                {touched.trapStatus && errors.trapStatus && (
-                  <Text style={{ fontSize: 12, color: 'red' }}>
-                    {errors.trapStatus as string}
-                  </Text>
-                )}
+                {touched.trapStatus &&
+                  errors.trapStatus &&
+                  renderErrorMessage(errors, 'trapStatus')}
               </FormControl>
               {values.trapStatus === 'Trap functioning, but not normally' && (
                 <FormControl>
                   <FormControl.Label>
-                    Reason For Trap Not Functioning
+                    <Text color='black' fontSize='xl'>
+                      Reason For Trap Not Functioning
+                    </Text>
                   </FormControl.Label>
                   <Select
+                    height='50px'
+                    fontSize='16'
                     selectedValue={values.reasonNotFunc}
                     accessibilityLabel='Reason Not Functioning.'
                     placeholder='Reason'
@@ -134,61 +146,72 @@ const TrapStatus = ({
                       />
                     ))}
                   </Select>
-                  {touched.reasonNotFunc && errors.reasonNotFunc && (
-                    <Text style={{ fontSize: 12, color: 'red' }}>
-                      {errors.reasonNotFunc as string}
-                    </Text>
-                  )}
+                  {touched.reasonNotFunc &&
+                    errors.reasonNotFunc &&
+                    renderErrorMessage(errors, 'reasonNotFunc')}
                 </FormControl>
               )}
               {values.trapStatus.length > 0 && (
                 <>
-                  <Heading fontSize='lg'>Environmental Conditions</Heading>
+                  <Heading fontSize='2xl'>Environmental Conditions:</Heading>
+
                   <HStack space={5} width='125%'>
                     <FormControl w='1/4'>
-                      <FormControl.Label>Flow Measure</FormControl.Label>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Flow Measure
+                        </Text>
+                      </FormControl.Label>
                       <Input
+                        height='50px'
+                        fontSize='16'
                         placeholder='Populated from CDEC'
                         keyboardType='numeric'
                         onChangeText={handleChange('flowMeasure')}
                         onBlur={handleBlur('flowMeasure')}
                         value={values.flowMeasure}
                       />
-                      {touched.flowMeasure && errors.flowMeasure && (
-                        <Text style={{ fontSize: 12, color: 'red' }}>
-                          {errors.flowMeasure as string}
-                        </Text>
-                      )}
+                      {touched.flowMeasure &&
+                        errors.flowMeasure &&
+                        renderErrorMessage(errors, 'flowMeasure')}
                     </FormControl>
                     <FormControl w='1/4'>
-                      <FormControl.Label>Water Temperature</FormControl.Label>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Water Temperature
+                        </Text>
+                      </FormControl.Label>
                       <Input
+                        height='50px'
+                        fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
                         onChangeText={handleChange('waterTemperature')}
                         onBlur={handleBlur('waterTemperature')}
                         value={values.waterTemperature}
                       />
-                      {touched.waterTemperature && errors.waterTemperature && (
-                        <Text style={{ fontSize: 12, color: 'red' }}>
-                          {errors.waterTemperature as string}
-                        </Text>
-                      )}
+                      {touched.waterTemperature &&
+                        errors.waterTemperature &&
+                        renderErrorMessage(errors, 'waterTemperature')}
                     </FormControl>
                     <FormControl w='1/4'>
-                      <FormControl.Label>Water Turbidity</FormControl.Label>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Water Turbidity
+                        </Text>
+                      </FormControl.Label>
                       <Input
+                        height='50px'
+                        fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
                         onChangeText={handleChange('waterTurbidity')}
                         onBlur={handleBlur('waterTurbidity')}
                         value={values.waterTurbidity}
                       />
-                      {touched.waterTurbidity && errors.waterTurbidity && (
-                        <Text style={{ fontSize: 12, color: 'red' }}>
-                          {errors.waterTurbidity as string}
-                        </Text>
-                      )}
+                      {touched.waterTurbidity &&
+                        errors.waterTurbidity &&
+                        renderErrorMessage(errors, 'waterTurbidity')}
                     </FormControl>
                   </HStack>
                 </>
@@ -201,7 +224,6 @@ const TrapStatus = ({
             errors={errors}
             touched={touched}
             values={values}
-            // validation={validateForm(values)}
           />
         </>
       )}

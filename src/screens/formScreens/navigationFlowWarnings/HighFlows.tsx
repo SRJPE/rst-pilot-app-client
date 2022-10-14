@@ -18,7 +18,7 @@ export default function HighFlows({ navigation }: { navigation: any }) {
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={10} p='10'>
+        <VStack space={12} p='10'>
           <Heading textAlign='center'>
             {
               'Flow is high and unsafe. Please remove your \n trap from the water.'
@@ -34,7 +34,7 @@ export default function HighFlows({ navigation }: { navigation: any }) {
             rounded='xs'
             bg='primary'
             alignSelf='center'
-            py='3'
+            py='5'
             px='16'
             borderRadius='5'
             onPress={handlePressCallTeamLead}
@@ -53,7 +53,7 @@ export default function HighFlows({ navigation }: { navigation: any }) {
             rounded='xs'
             bg='primary'
             alignSelf='center'
-            py='3'
+            py='5'
             px='20'
             borderRadius='5'
             onPress={handlePressTakePhoto}

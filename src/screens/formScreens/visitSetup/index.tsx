@@ -7,12 +7,10 @@ import {
   saveVisitSetup,
 } from '../../../redux/reducers/visitSetupSlice'
 import {
-  Box,
   Select,
   FormControl,
   CheckIcon,
   Heading,
-  Input,
   VStack,
   Text,
   View,
@@ -20,6 +18,9 @@ import {
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../../utils/helpers/yupValidations'
+import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
+
+import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 
 const testStreams = [
   { label: 'Default Stream 1', value: 'DS1' },
@@ -27,6 +28,11 @@ const testStreams = [
   { label: 'Default Stream 3', value: 'DS3' },
   { label: 'Default Stream 4', value: 'DS4' },
   { label: 'Default Stream 5', value: 'DS5' },
+]
+const testSites = [
+  { label: 'Default Site 1', value: 'DS1' },
+  { label: 'Default Site 2', value: 'DS2' },
+  { label: 'Default Site 3', value: 'DS3' },
 ]
 
 const mapStateToProps = (state: RootState) => {
@@ -51,6 +57,7 @@ const VisitSetup = ({
     //dispatch to redux
     dispatch(saveVisitSetup(values))
     dispatch(markVisitSetupCompleted(true))
+    dispatch(markStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ Visit', values)
   }
 
@@ -58,6 +65,9 @@ const VisitSetup = ({
     <Formik
       validationSchema={trapVisitSchema}
       initialValues={reduxState.values}
+      //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
+      initialTouched={{ stream: true }}
+      initialErrors={reduxState.completed ? undefined : { stream: '' }}
       onSubmit={values => {
         handleSubmit(values)
       }}
@@ -66,7 +76,6 @@ const VisitSetup = ({
         handleChange,
         handleBlur,
         handleSubmit,
-        validateForm,
         touched,
         errors,
         values,
@@ -75,15 +84,21 @@ const VisitSetup = ({
           <View
             flex={1}
             bg='#fff'
-            p='10%'
+            p='6%'
             borderColor='themeGrey'
             borderWidth='15'
           >
-            <VStack space={8}>
-              <Heading>Which stream are you trapping on?</Heading>
+            <VStack space={12}>
+              <Heading mt='2'>Which stream are you trapping on?</Heading>
               <FormControl>
-                <FormControl.Label>Stream</FormControl.Label>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Stream
+                  </Text>
+                </FormControl.Label>
                 <Select
+                  height='50px'
+                  fontSize='16'
                   selectedValue={values.stream}
                   accessibilityLabel='Stream'
                   placeholder='Stream'
@@ -91,7 +106,7 @@ const VisitSetup = ({
                     bg: 'secondary',
                     endIcon: <CheckIcon size='6' />,
                   }}
-                  mt={1}
+                  my={1}
                   onValueChange={handleChange('stream')}
                 >
                   {testStreams.map((item, idx) => (
@@ -102,49 +117,57 @@ const VisitSetup = ({
                     />
                   ))}
                 </Select>
-                {touched.stream && errors.stream && (
-                  <Text style={{ fontSize: 12, color: 'red' }}>
-                    {errors.stream as string}
-                  </Text>
-                )}
+                {touched.stream &&
+                  errors.stream &&
+                  renderErrorMessage(errors, 'stream')}
               </FormControl>
               {values.stream && (
                 <>
-                  <Heading fontSize='lg'>Confirm the following values</Heading>
+                  <Heading fontSize='lg'>Confirm the following values:</Heading>
                   <FormControl>
-                    <FormControl.Label>Trap Site</FormControl.Label>
-                    <Input
-                      placeholder='Default Trap Site value'
-                      value={values.trapSite}
-                      onChangeText={handleChange('trapSite')}
-                      onBlur={handleBlur('trapSite')}
-                    ></Input>
-                    {touched.trapSite && errors.trapSite && (
-                      <Text style={{ fontSize: 12, color: 'red' }}>
-                        {errors.trapSite as string}
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Trap Site
                       </Text>
-                    )}
+                    </FormControl.Label>
+                    <Select
+                      height='50px'
+                      fontSize='16'
+                      selectedValue={values.trapSite}
+                      accessibilityLabel='Trap Site'
+                      placeholder='Trap Site'
+                      _selectedItem={{
+                        bg: 'secondary',
+                        endIcon: <CheckIcon size='6' />,
+                      }}
+                      mt={1}
+                      onValueChange={handleChange('trapSite')}
+                    >
+                      {testSites.map((item, idx) => (
+                        <Select.Item
+                          key={idx}
+                          label={item.label}
+                          value={item.value}
+                        />
+                      ))}
+                    </Select>
+                    {touched.trapSite &&
+                      errors.trapSite &&
+                      renderErrorMessage(errors, 'trapSite')}
                   </FormControl>
                   <FormControl>
-                    <FormControl.Label>Trap Sub Site</FormControl.Label>
-                    <Input
-                      placeholder='Default Trap Site value'
-                      value={values.trapSubSite}
-                      onChangeText={handleChange('trapSubSite')}
-                      onBlur={handleBlur('trapSubSite')}
-                    ></Input>
-                  </FormControl>
-                  <FormControl>
-                    <FormControl.Label>Crew</FormControl.Label>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Crew
+                      </Text>
+                    </FormControl.Label>
                     <CrewDropDown
                       setCrew={setCrew}
                       // handleChange={handleChange}
                     />
-                    {/* {touched.crew && errors.crew && (
-                      <Text style={{ fontSize: 12, color: 'red' }}>
-                      {errors.crew as string}
-                      </Text>
-                    )} */}
+                    {/* {touched.crew &&
+                      errors.crew &&
+                      renderErrorMessage(errors, 'crew')} */}
                   </FormControl>
                 </>
               )}
@@ -155,7 +178,6 @@ const VisitSetup = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
-            // validation={validateForm(values)}
           />
         </>
       )}

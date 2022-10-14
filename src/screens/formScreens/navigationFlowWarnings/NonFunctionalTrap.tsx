@@ -29,7 +29,7 @@ export default function NonFunctionalTrap({ navigation }: { navigation: any }) {
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={10} p='10'>
+        <VStack space={12} p='10'>
           <Heading textAlign='center'>
             {
               'Please refer to monitoring protocols to \n safely handle the trap.'
@@ -39,7 +39,7 @@ export default function NonFunctionalTrap({ navigation }: { navigation: any }) {
             rounded='xs'
             bg='primary'
             alignSelf='center'
-            py='3'
+            py='5'
             px='16'
             borderRadius='5'
             onPress={handlePressViewMonitoringProtocols}
@@ -57,7 +57,7 @@ export default function NonFunctionalTrap({ navigation }: { navigation: any }) {
             rounded='xs'
             bg='primary'
             alignSelf='center'
-            py='3'
+            py='5'
             px='16'
             borderRadius='5'
             onPress={handlePressCallTeamLead}
@@ -72,13 +72,6 @@ export default function NonFunctionalTrap({ navigation }: { navigation: any }) {
               Call Team Lead
             </Text>
           </Button>
-          <NavButtons
-            navigation={navigation}
-            // handleSubmit={handleSubmit}
-            // errors={errors}
-            // touched={touched}
-            // validation={validateForm(values)}
-          />
         </VStack>
       </View>
       <NavButtons navigation={navigation} />

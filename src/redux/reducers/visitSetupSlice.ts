@@ -8,7 +8,6 @@ interface InitialStateI {
 interface VisitSetupValuesI {
   stream: string
   trapSite: string
-  trapSubSite: string
   crew: Array<string>
 }
 
@@ -17,7 +16,6 @@ const initialState: InitialStateI = {
   values: {
     stream: '',
     trapSite: '',
-    trapSubSite: '',
     crew: [],
   },
 }
