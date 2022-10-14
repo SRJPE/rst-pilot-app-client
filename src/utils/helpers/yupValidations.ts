@@ -114,3 +114,22 @@ export const releaseTrialSchema = yup.object().shape({
     .required('Hatchery dead count is required')
     .typeError('Input must be a number'),
 })
+export const addMarksOrTagsSchema = yup.object().shape({
+  type: yup.string().required('Mark Type is required'),
+  number: yup.string().required('Mark Number is required'),
+  position: yup.string().required('Mark Position is required'),
+  crewMemberTagging: yup.string().required('Crew Member is required'),
+  comments: yup.string(),
+})
+
+export const addGeneticsSampleSchema = yup.object().shape({
+  sampleIdNumber: yup.string().required('Sample ID Number required'),
+  mucusSwabCollected: yup
+    .boolean()
+    .required('Mucus Swab collection status required'),
+  finClipCollected: yup
+    .boolean()
+    .required('Fin Clip collection status required'),
+  crewMemberCollectingSample: yup.string().required('Crew Member required'),
+  comments: yup.string(),
+})

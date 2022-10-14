@@ -12,6 +12,15 @@ import addIndividualFishSlice from './formSlices/addIndividualFishSlice'
 import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
 import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
 import markRecaptureNavigationSlice from './markRecaptureSlices/markRecaptureNavigationSlice'
+// import navigationSlice from './navigationSlice'
+// import visitSetupSlice from './visitSetupSlice'
+// import trapStatusSlice from './trapStatusSlice'
+// import trapOperationsSlice from './trapOperationsSlice'
+// import fishProcessingSlice from './fishProcessingSlice'
+// import fishInputSlice from './fishInputSlice'
+// import addIndividualFishSlice from './addIndividualFishSlice'
+import addMarksOrTagsSlice from './addMarksOrTagsSlice'
+import addGeneticSamplesSlice from './addGeneticSamplesSlice'
 
 const persistConfig = {
   key: 'root',
@@ -31,4 +40,6 @@ export default combineReducers({
   trapPostProcessing: trapPostProcessingSlice,
   markRecaptureNavigation: markRecaptureNavigationSlice,
   releaseTrial: releaseTrialSlice,
+  addMarksOrTags: addMarksOrTagsSlice,
+  addGeneticSamples: addGeneticSamplesSlice,
 })
