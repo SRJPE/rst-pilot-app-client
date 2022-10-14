@@ -10,7 +10,7 @@ import fishProcessingSlice from './formSlices/fishProcessingSlice'
 import fishInputSlice from './formSlices/fishInputSlice'
 import addIndividualFishSlice from './formSlices/addIndividualFishSlice'
 import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
-import trapPostProcessingSlice from './trapPostProcessingSlice'
+import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
 
 const persistConfig = {
   key: 'root',
