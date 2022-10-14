@@ -14,12 +14,6 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSlice'
 import { AppDispatch } from '../../../redux/store'
-const testRunIDs = [
-  { label: 'Spring', value: 'Spring' },
-  { label: 'Summer', value: 'Summer' },
-  { label: 'Fall', value: 'Fall' },
-  { label: 'Winter', value: 'Winter' },
-]
 
 const ReleaseTrialHatchery = () => {
   const dispatch = useDispatch<AppDispatch>()
