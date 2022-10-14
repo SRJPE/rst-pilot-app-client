@@ -39,8 +39,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     marginBottom: -89,
-    // opacity: '100!important',
-    // opacity: '100 !important',
+    // opacity: `${100}px !important`,
+    //  opacity: {[100,'!important']},
   },
 
   buttonBackground: {
@@ -60,8 +60,8 @@ export default function BottomNavigation({
   staggerOpen,
 }: {
   navigation: any
-  setStaggerOpen: any
-  staggerOpen: boolean
+  setStaggerOpen?: any
+  staggerOpen?: boolean
 }) {
   const { isOpen, onToggle, onClose } = useDisclose()
 
