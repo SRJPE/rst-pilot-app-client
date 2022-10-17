@@ -9,6 +9,8 @@ import trapPreProcessingSlice from './trapPreProcessingSlice'
 import fishProcessingSlice from './fishProcessingSlice'
 import fishInputSlice from './fishInputSlice'
 import addIndividualFishSlice from './addIndividualFishSlice'
+import addMarksOrTagsSlice from './addMarksOrTagsSlice'
+import addGeneticSamplesSlice from './addGeneticSamplesSlice'
 import trapPostProcessingSlice from './trapPostProcessingSlice'
 
 const persistConfig = {
@@ -26,5 +28,7 @@ export default combineReducers({
   fishProcessing: fishProcessingSlice,
   fishInput: fishInputSlice,
   addIndividualFish: addIndividualFishSlice,
+  addMarksOrTags: addMarksOrTagsSlice,
+  addGeneticSamples: addGeneticSamplesSlice,
   trapPostProcessing: trapPostProcessingSlice,
 })
