@@ -31,9 +31,9 @@ export default combineReducers({
   fishProcessing: fishProcessingSlice,
   fishInput: fishInputSlice,
   addIndividualFish: addIndividualFishSlice,
+  addMarksOrTags: addMarksOrTagsSlice,
+  addGeneticSamples: addGeneticSamplesSlice,
   trapPostProcessing: trapPostProcessingSlice,
   markRecaptureNavigation: markRecaptureNavigationSlice,
   releaseTrial: releaseTrialSlice,
-  addMarksOrTags: addMarksOrTagsSlice,
-  addGeneticSamples: addGeneticSamplesSlice,
 })
