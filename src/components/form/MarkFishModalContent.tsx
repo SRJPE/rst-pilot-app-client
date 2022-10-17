@@ -80,7 +80,7 @@ const MarkFishModalContent = ({
           <>
             <CustomModalHeader
               headerText={'Mark or Tag a Fish'}
-              showHeaderButon={true}
+              showHeaderButton={true}
               closeModal={closeModal}
               headerButton={
                 <Button

@@ -62,7 +62,7 @@ const AddGeneticsModalContent = ({
           <>
             <CustomModalHeader
               headerText={'Collect a genetic sample'}
-              showHeaderButon={true}
+              showHeaderButton={true}
               closeModal={closeModal}
               headerButton={
                 <Button

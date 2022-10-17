@@ -116,7 +116,7 @@ const AddFishModalContent = ({
           <>
             <CustomModalHeader
               headerText={'Add Fish'}
-              showHeaderButon={true}
+              showHeaderButton={true}
               closeModal={closeModal}
               headerButton={AddFishModalHeaderButton({
                 activeTab,

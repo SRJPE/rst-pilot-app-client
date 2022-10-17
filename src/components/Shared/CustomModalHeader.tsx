@@ -5,18 +5,18 @@ import React from 'react'
 
 const CustomModalHeader = ({
   headerText,
-  showHeaderButon,
+  showHeaderButton,
   headerButton,
   closeModal,
   onCloseAction,
 }: {
   headerText: string
-  showHeaderButon: boolean
+  showHeaderButton: boolean
   headerButton?: any
   closeModal?: any
   onCloseAction?: any
 }) => {
-  if (showHeaderButon) {
+  if (showHeaderButton) {
     return (
       <>
         <HStack justifyContent='space-between' alignItems='center' marginTop={2}>
@@ -65,7 +65,7 @@ const CustomModalHeader = ({
 }
 
 const addFishModalButtonStyles = StyleSheet.create({
-  individiualOrBatchButton: {
+  individualOrBatchButton: {
     backgroundColor: '#D1E8F0',
     borderRadius: 50,
     width: 200,
@@ -107,7 +107,7 @@ export const AddFishModalHeaderButton: React.FC<AddFishModalButtonI> = ({
   setActiveTab,
 }) => {
   return (
-    <View style={addFishModalButtonStyles.individiualOrBatchButton}>
+    <View style={addFishModalButtonStyles.individualOrBatchButton}>
       <Box
         onTouchStart={() => setActiveTab('Individual')}
         style={
