@@ -1,17 +1,5 @@
-import React, { useState } from 'react'
-import { StyleSheet } from 'react-native'
-import {
-  Box,
-  Button,
-  Heading,
-  HStack,
-  Icon,
-  Modal,
-  ScrollView,
-  Text,
-  View,
-} from 'native-base'
-import Ionicons from '@expo/vector-icons/Ionicons'
+import React from 'react'
+import { Modal } from 'native-base'
 
 interface ModalPropsI {
   isOpen: boolean
@@ -19,8 +7,6 @@ interface ModalPropsI {
   children: JSX.Element
   height?: string
 }
-
-
 
 export default function CustomModal(props: ModalPropsI) {
   return (
