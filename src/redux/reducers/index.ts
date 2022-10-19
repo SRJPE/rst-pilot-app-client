@@ -12,7 +12,6 @@ import addIndividualFishSlice from './formSlices/addIndividualFishSlice'
 import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
 import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
 import markRecaptureNavigationSlice from './markRecaptureSlices/markRecaptureNavigationSlice'
-
 import addMarksOrTagsSlice from './addMarksOrTagsSlice'
 import addGeneticSamplesSlice from './addGeneticSamplesSlice'
 

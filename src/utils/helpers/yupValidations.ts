@@ -90,6 +90,7 @@ export const addIndividualFishSchema = yup.object().shape({
     .required('Marked for recapture required'),
 })
 
+
 export const releaseTrialSchema = yup.object().shape({
   wildCount: yup
     .number()
@@ -114,6 +115,7 @@ export const releaseTrialSchema = yup.object().shape({
     .required('Hatchery dead count is required')
     .typeError('Input must be a number'),
 })
+
 export const addMarksOrTagsSchema = yup.object().shape({
   type: yup.string().required('Mark Type is required'),
   number: yup.string().required('Mark Number is required'),

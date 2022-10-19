@@ -25,6 +25,7 @@ import {
 import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 import AddFishModalContent from '../../../components/form/AddFishModalContent'
 
+
 const styles = StyleSheet.create({
   tableHead: { height: 40, backgroundColor: '#f1f8ff' },
   tableText: { marginVertical: 6, marginLeft: 3 },
