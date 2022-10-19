@@ -6,7 +6,7 @@ const theme = extendTheme({
     secondary: '#D1E8F0',
     // primary: '#4c642f',
     // secondary: '#842f3f',
-    themeGrey: '#dadada42',
+    themeGrey: '#DADADA42',
 
     error: '#b71c1c',
     warning: '#eec227',
@@ -14,9 +14,9 @@ const theme = extendTheme({
     success: '#7e9752',
   },
   components: {
-    defaultProps: {
-      colorScheme: '#007C7C',
-    },
+    // defaultProps: {
+    //   colorScheme: '#007C7C',
+    // },
   },
 })
 
