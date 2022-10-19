@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const formSteps = {
-  1: { name: 'Release Trial', propName: 'markRecapture', completed: false },
+  1: { name: 'Release Trial', propName: 'ReleaseTrial', completed: false },
   2: {
     name: 'Release Data Entry',
     propName: 'releaseDataEntry',

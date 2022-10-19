@@ -107,7 +107,7 @@ export const releaseTrialSchema = yup.object().shape({
     .number()
     .required('Hatchery count is required')
     .typeError('Input must be a number'),
-  runID: yup.string().required('Hatchery Count is required'),
+  runIDHatchery: yup.string().required('Hatchery Count is required'),
   runWeightHatchery: yup
     .number()
     .required('Hatchery run weight is required')
