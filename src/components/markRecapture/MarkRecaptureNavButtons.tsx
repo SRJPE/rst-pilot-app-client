@@ -27,14 +27,6 @@ export default function MarkRecaptureNavButtons({
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
 
-  const navigateHelper = (destination: string, payload: number) => {
-    navigation.navigate('Mark Recapture', { screen: destination })
-    dispatch({
-      type: updateActiveStep,
-      payload: payload,
-    })
-  }
-
   const handleRightButton = () => {
     //   //if function truthy, submit form to check for errors and save to redux
     if (handleSubmit) {
@@ -131,7 +123,7 @@ export default function MarkRecaptureNavButtons({
           rounded='xs'
           borderRadius='5'
           shadow='5'
-          // isDisabled={disableRightButton()}
+          isDisabled={disableRightButton()}
           onPress={handleRightButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
