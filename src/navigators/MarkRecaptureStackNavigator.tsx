@@ -8,7 +8,6 @@ export default function MarkRecaptureStackNavigator() {
   return (
     <MarkRecapture.Navigator
       initialRouteName='Release Trial'
-      // initialRouteName='Release Data Entry'
       screenOptions={{ headerShown: false }}
       // screenOptions={{ header: props => <ProgressHeader {...props} /> }}
     >
