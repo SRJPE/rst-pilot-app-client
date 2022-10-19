@@ -38,11 +38,8 @@ const ReleaseTrial = ({
   navigation: any
   reduxState: any
 }) => {
-  console.log('🚀 ~ Release Trial ~ reduxState', reduxState)
-
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-  console.log('🚀 ~ dropdownValues', dropdownValues)
 
   useEffect(() => {
     dispatch(getTrapVisitDropdownValues())
@@ -58,11 +55,11 @@ const ReleaseTrial = ({
 
   return (
     <Formik
-      // validationSchema={releaseTrialSchema}
+      validationSchema={releaseTrialSchema}
       initialValues={reduxState.values}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
-      // initialTouched={{ stream: true }}
-      // initialErrors={reduxState.completed ? undefined : { stream: '' }}
+      initialTouched={{ wildCount: true }}
+      initialErrors={reduxState.completed ? undefined : { wildCount: '' }}
       onSubmit={values => {
         handleSubmit(values)
       }}
