@@ -11,6 +11,7 @@ import fishInputSlice from './formSlices/fishInputSlice'
 import addIndividualFishSlice from './formSlices/addIndividualFishSlice'
 import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
 import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
+import markRecaptureNavigationSlice from './markRecaptureSlices/markRecaptureNavigationSlice'
 
 const persistConfig = {
   key: 'root',
@@ -27,6 +28,7 @@ export default combineReducers({
   fishProcessing: fishProcessingSlice,
   fishInput: fishInputSlice,
   addIndividualFish: addIndividualFishSlice,
-  releaseTrial: releaseTrialSlice,
   trapPostProcessing: trapPostProcessingSlice,
+  markRecaptureNavigation: markRecaptureNavigationSlice,
+  releaseTrial: releaseTrialSlice,
 })
