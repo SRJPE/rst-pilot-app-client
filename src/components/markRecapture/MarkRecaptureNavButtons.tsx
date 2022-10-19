@@ -4,6 +4,7 @@ import { AppDispatch } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
+import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
 
 export default function MarkRecaptureNavButtons({
   navigation,
@@ -18,139 +19,70 @@ export default function MarkRecaptureNavButtons({
   touched?: any
   values?: any
 }) {
-  // const dispatch = useDispatch<AppDispatch>()
-  // const navigationState = useSelector((state: any) => state.navigation)
-  // const activeStep = navigationState.activeStep
-  // const activePage = navigationState.steps[activeStep]?.name
+  const dispatch = useDispatch<AppDispatch>()
+  const navigationState = useSelector(
+    (state: any) => state.markRecaptureNavigation
+  )
+  const activeStep = navigationState.activeStep
+  const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
 
-  // const navigateHelper = (destination: string, payload: number) => {
-  //   navigation.navigate('Trap Visit Form', { screen: destination })
-  //   dispatch({
-  //     type: updateActiveStep,
-  //     payload: payload,
-  //   })
-  // }
+  const navigateHelper = (destination: string, payload: number) => {
+    navigation.navigate('Mark Recapture', { screen: destination })
+    dispatch({
+      type: updateActiveStep,
+      payload: payload,
+    })
+  }
 
-  // const navigateFlowRightButton = (values: any) => {
-  //   switch (activePage) {
-  //     case 'Trap Status':
-  //       if (values?.trapStatus === 'Trap stopped functioning') {
-  //         navigateHelper('Non Functional Trap', 8)
-  //       } else if (values?.flowMeasure > 1000) {
-  //         navigateHelper('High Flows', 6)
-  //       } else if (values?.waterTemperature > 30) {
-  //         navigateHelper('High Temperatures', 7)
-  //       }
-  //       break
-  //     case 'Fish Processing':
-  //       if (values?.fishProcessedResult === 'No fish were caught') {
-  //         navigateHelper('No Fish Caught', 9)
-  //       }
-  //       break
-  //     case 'High Flows':
-  //       navigateHelper('End Trapping', 10)
-  //       break
-  //     case 'High Temperatures':
-  //       navigateHelper('Fish Processing', 4)
-  //       break
-  //     default:
-  //       console.log('default navigation')
-  //       break
-  //   }
-  // }
+  const handleRightButton = () => {
+    //   //if function truthy, submit form to check for errors and save to redux
+    if (handleSubmit) {
+      handleSubmit()
+    }
+    //navigate Right
+    navigation.navigate('Mark Recapture', {
+      screen: navigationState.steps[activeStep + 1]?.name,
+    })
+    dispatch({
+      type: updateActiveMarkRecaptureStep,
+      payload: navigationState.activeStep + 1,
+    })
+  }
 
-  // const navigateFlowLeftButton = () => {
-  //   switch (activePage) {
-  //     case 'High Flows':
-  //       navigateHelper('Trap Status', 2)
-  //       break
-  //     case 'High Temperatures':
-  //       navigateHelper('Trap Status', 2)
-  //       break
-  //     case 'Non Functional Trap':
-  //       navigateHelper('Trap Status', 2)
-  //       break
-  //     case 'No Fish Caught':
-  //       navigateHelper('Fish Processing', 4)
-  //       break
-  //     default:
-  //       console.log('default navigation')
-  //       break
-  //   }
-  // }
+  const handleLeftButton = () => {
+    //   //navigate back to home screen from visit setup screen
+    if (activePage === 'Release Trial') {
+      navigation.navigate('Home')
+      return
+    }
 
-  // const handleRightButton = () => {
-  //   //if function truthy, submit form to check for errors and save to redux
-  //   if (handleSubmit) {
-  //     handleSubmit()
-  //   }
-  //   //navigate Right
-  //   navigation.navigate('Trap Visit Form', {
-  //     screen: navigationState.steps[activeStep + 1]?.name,
-  //   })
-  //   dispatch({
-  //     type: updateActiveStep,
-  //     payload: navigationState.activeStep + 1,
-  //   })
-  //   //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
-  //   navigateFlowRightButton(values)
-  // }
+    //   //if function truthy, submit form to save to redux
+    if (handleSubmit) {
+      handleSubmit()
+    }
+    //navigate left
+    navigation.navigate('Mark Recapture', {
+      screen: navigationState.steps[activeStep - 1]?.name,
+    })
+    dispatch({
+      type: updateActiveMarkRecaptureStep,
+      payload: navigationState.activeStep - 1,
+    })
+  }
 
-  // const handleLeftButton = () => {
-  //   //navigate back to home screen from visit setup screen
-  //   if (activePage === 'Visit Setup') {
-  //     navigation.navigate('Home')
-  //     return
-  //   }
-
-  //   //if function truthy, submit form to save to redux
-  //   if (handleSubmit) {
-  //     handleSubmit()
-  //   }
-  //   //navigate left
-  //   navigation.navigate('Trap Visit Form', {
-  //     screen: navigationState.steps[activeStep - 1]?.name,
-  //   })
-  //   dispatch({
-  //     type: updateActiveStep,
-  //     payload: navigationState.activeStep - 1,
-  //   })
-  //   //navigate various flows if needed (This seems to not be causing performance issues even though it is kind of redundant to place it here)
-  //   navigateFlowLeftButton()
-  // }
-
-  // const disableRightButton = () => {
-  //   return (
-  //     //**temp conditional for fish input**
-
-  //     //if current screen uses formik && if form has first NOT been touched
-  //     // OR
-  //     //if current screen uses formik && there are errors
-  //     (activePage !== 'Fish Input' &&
-  //       touched &&
-  //       Object.keys(touched).length === 0) ||
-  //     (errors && Object.keys(errors).length > 0)
-  //   )
-  // }
+  const disableRightButton = () => {
+    return (
+      //if current screen uses formik && if form has first NOT been touched
+      // OR
+      //if current screen uses formik && there are errors
+      (touched && Object.keys(touched).length === 0) ||
+      (errors && Object.keys(errors).length > 0)
+    )
+  }
 
   // const renderRightButtonText = (activePage: string) => {
-  //   let buttonText
-  //   switch (activePage) {
-  //     case 'High Flows':
-  //       buttonText = 'End Trapping'
-  //       break
-  //     case 'Non Functional Trap':
-  //       buttonText = 'End Trapping'
-  //       break
-  //     case 'High Temperatures':
-  //       buttonText = 'Move on to Fish Processing'
-  //       break
-  //     default:
-  //       buttonText = 'Next'
-  //       break
-  //   }
-  //   return buttonText
+
   // }
 
   return (
@@ -164,18 +96,17 @@ export default function MarkRecaptureNavButtons({
           rounded='xs'
           borderRadius='5'
           shadow='5'
-          // leftIcon={
-          //   activePage === 'Visit Setup' ? (
-          //     <Icon as={Ionicons} name='home' size='lg' color='primary' />
-          //   ) : (
-          //     <></>
-          //   )
-          // }
-          // onPress={handleLeftButton}
+          leftIcon={
+            activePage === 'Release Trial' ? (
+              <Icon as={Ionicons} name='home' size='lg' color='primary' />
+            ) : (
+              <></>
+            )
+          }
+          onPress={handleLeftButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='primary'>
-            {/* {activePage === 'Visit Setup' ? 'Return Home' : 'Back'} */}
-            TEST
+            {activePage === 'Release Trial' ? 'Return Home' : 'Back'}
           </Text>
         </Button>
         <Button
@@ -201,11 +132,11 @@ export default function MarkRecaptureNavButtons({
           borderRadius='5'
           shadow='5'
           // isDisabled={disableRightButton()}
-          // onPress={handleRightButton}
+          onPress={handleRightButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
             {/* {renderRightButtonText(activePage)} */}
-            TEST
+            Next
           </Text>
         </Button>
       </HStack>
