@@ -89,3 +89,31 @@ export const addIndividualFishSchema = yup.object().shape({
     .boolean()
     .required('Marked for recapture required'),
 })
+
+export const releaseTrialSchema = yup.object().shape({
+  wildCount: yup
+    .number()
+    .required('Wild count is required')
+    .typeError('Input must be a number'),
+  deadWildCount: yup
+    .number()
+    .required('Dead wild count is required')
+    .typeError('Input must be a number'),
+  // willSupplement: yup
+  //   .number()
+  //   .required('Dead Wild Count is required')
+  //   .typeError('Input must be a number'),
+  hatcheryCount: yup
+    .number()
+    .required('Hatchery count is required')
+    .typeError('Input must be a number'),
+  runID: yup.string().required('Hatchery Count is required'),
+  runWeightHatchery: yup
+    .number()
+    .required('Hatchery run weight is required')
+    .typeError('Input must be a number'),
+  deadHatcheryCount: yup
+    .number()
+    .required('Hatchery dead count is required')
+    .typeError('Input must be a number'),
+})
