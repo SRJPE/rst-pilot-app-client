@@ -2,61 +2,47 @@ import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
   completed: boolean
-  values: {
-    wild: ReleaseTrialWildValuesI
-    hatchery: ReleaseTrialHatcheryValuesI
-  }
+  values: ReleaseTrialValuesI
 }
 
-export interface ReleaseTrialWildValuesI {
+export interface ReleaseTrialValuesI {
   wildCount: number | null
   deadWildCount: number | null
-  willSupplement: string
-}
-export interface ReleaseTrialHatcheryValuesI {
+  willSupplement: string | boolean
   hatcheryCount: number | null
-  runID: string
-  runWeight: number | null
+  runIDHatchery: string
+  runWeightHatchery: number | null
   deadHatcheryCount: number | null
 }
 
 const initialState: InitialStateI = {
   completed: false,
   values: {
-    wild: {
-      wildCount: null,
-      deadWildCount: null,
-      willSupplement: '',
-    },
-    hatchery: {
-      hatcheryCount: null,
-      runID: '',
-      runWeight: null,
-      deadHatcheryCount: null,
-    },
+    wildCount: null,
+    deadWildCount: null,
+    willSupplement: '',
+    hatcheryCount: null,
+    runIDHatchery: '',
+    runWeightHatchery: null,
+    deadHatcheryCount: null,
   },
 }
 
 export const releaseTrialSlice = createSlice({
-  name: ' releaseTrial',
+  name: 'releaseTrial',
   initialState: initialState,
   reducers: {
-    saveReleaseTrialWild: (state, action) => {
-      state.values.wild = action.payload
+    saveReleaseTrial: (state, action) => {
+      state.values = action.payload
     },
-    saveReleaseTrialHatchery: (state, action) => {
-      state.values.hatchery = action.payload
-    },
+
     markReleaseTrialCompleted: (state, action) => {
       state.completed = action.payload
     },
   },
 })
 
-export const {
-  saveReleaseTrialWild,
-  saveReleaseTrialHatchery,
-  markReleaseTrialCompleted,
-} = releaseTrialSlice.actions
+export const { saveReleaseTrial, markReleaseTrialCompleted } =
+  releaseTrialSlice.actions
 
 export default releaseTrialSlice.reducer
