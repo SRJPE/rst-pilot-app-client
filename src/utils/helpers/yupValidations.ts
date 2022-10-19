@@ -99,10 +99,7 @@ export const releaseTrialSchema = yup.object().shape({
     .number()
     .required('Dead wild count is required')
     .typeError('Input must be a number'),
-  // willSupplement: yup
-  //   .number()
-  //   .required('Dead Wild Count is required')
-  //   .typeError('Input must be a number'),
+  willSupplement: yup.boolean().required('Field required'),
   hatcheryCount: yup
     .number()
     .required('Hatchery count is required')

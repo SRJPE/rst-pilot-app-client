@@ -68,16 +68,13 @@ const ReleaseTrial = ({
         handleChange,
         handleBlur,
         handleSubmit,
+        setFieldValue,
         touched,
         errors,
         values,
       }) => (
         <>
-          <KeyboardAvoidingView
-            //this can help with keyboard overlay
-            flex={1}
-            bg='themeGrey'
-          >
+          <View flex={1} bg='themeGrey'>
             <VStack space={8} p='10'>
               <Box bg='#FFF'>
                 <Center
@@ -88,7 +85,6 @@ const ReleaseTrial = ({
                     fontWeight: '700',
                     fontSize: 'xl',
                   }}
-                  // position='absolute'
                   bottom='0'
                   px='3'
                   py='1.5'
@@ -143,24 +139,28 @@ const ReleaseTrial = ({
                     </FormControl.Label>
                     <Radio.Group
                       w='30%'
-                      name='coneSetting'
-                      accessibilityLabel='cone setting'
-                      // value={coneSetting}
-                      // onChange={(nextValue: any) => {
-                      //   setConeSetting(nextValue)
-                      // }} // TODO: change to primary color
+                      name='willSupplement'
+                      accessibilityLabel='Will supplement with hatchery?'
+                      value={`${values.willSupplement}`}
+                      onChange={(value: any) => {
+                        if (value === 'true') {
+                          setFieldValue('willSupplement', true)
+                        } else {
+                          setFieldValue('willSupplement', false)
+                        }
+                      }}
                     >
-                      <Radio colorScheme='primary' value='Yes' my={1}>
+                      <Radio colorScheme='primary' value='true' my={1}>
                         Yes
                       </Radio>
-                      <Radio colorScheme='primary' value='No' my={1}>
+                      <Radio colorScheme='primary' value='false' my={1}>
                         No
                       </Radio>
                     </Radio.Group>
                   </FormControl>
                 </VStack>
               </Box>
-              <KeyboardAvoidingView bg='#FFF'>
+              <Box bg='#FFF'>
                 <Center
                   bg='primary'
                   _text={{
@@ -169,7 +169,6 @@ const ReleaseTrial = ({
                     fontWeight: '700',
                     fontSize: 'xl',
                   }}
-                  // position='absolute'
                   bottom='0'
                   px='3'
                   py='1.5'
@@ -268,9 +267,9 @@ const ReleaseTrial = ({
                       renderErrorMessage(errors, 'deadHatcheryCount')}
                   </FormControl>
                 </VStack>
-              </KeyboardAvoidingView>
+              </Box>
             </VStack>
-          </KeyboardAvoidingView>
+          </View>
           <MarkRecaptureNavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}

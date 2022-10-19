@@ -20,7 +20,7 @@ const initialState: InitialStateI = {
   values: {
     wildCount: null,
     deadWildCount: null,
-    willSupplement: '',
+    willSupplement: false,
     hatcheryCount: null,
     runIDHatchery: '',
     runWeightHatchery: null,
