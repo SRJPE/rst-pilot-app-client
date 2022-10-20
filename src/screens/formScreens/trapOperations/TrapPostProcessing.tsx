@@ -17,11 +17,11 @@ import { trapPostProcessingSchema } from '../../../utils/helpers/yupValidations'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Keyboard } from 'react-native'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
+import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
-} from '../../../redux/reducers/trapPostProcessingSlice'
+} from '../../../redux/reducers/formSlices/trapPostProcessingSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {

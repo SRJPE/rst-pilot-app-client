@@ -17,8 +17,8 @@ import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSli
 import {
   markFishProcessingCompleted,
   saveFishProcessing,
-} from '../../../redux/reducers/fishProcessingSlice'
-import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
+} from '../../../redux/reducers/formSlices/fishProcessingSlice'
+import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
 import { fishProcessingSchema } from '../../../utils/helpers/yupValidations'
 

@@ -5,7 +5,7 @@ import { AppDispatch, RootState } from '../../../redux/store'
 import {
   markVisitSetupCompleted,
   saveVisitSetup,
-} from '../../../redux/reducers/visitSetupSlice'
+} from '../../../redux/reducers/formSlices/visitSetupSlice'
 import {
   Select,
   FormControl,
@@ -18,7 +18,7 @@ import {
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../../utils/helpers/yupValidations'
-import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
+import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 
