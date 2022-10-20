@@ -3,10 +3,7 @@ import { Formik } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
 import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSlice'
-import {
-  markTrapStatusCompleted,
-  saveTrapStatus,
-} from '../../../redux/reducers/formSlices/trapStatusSlice'
+
 import {
   Select,
   FormControl,
@@ -21,20 +18,23 @@ import {
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
+import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
+import CustomSelect from '../../../components/Shared/CustomSelect'
+import {
+  markTrapStatusCompleted,
+  saveTrapStatus,
+} from '../../../redux/reducers/formSlices/trapStatusSlice'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Rain', value: 'High Rain' },
   { label: 'Broken Trap', value: 'Broken Trap' },
   { label: 'Debris in Trap', value: 'Debris in Trap' },
 ]
-
 const mapStateToProps = (state: RootState) => {
   return {
     reduxState: state.trapStatus,
   }
 }
-
 const TrapStatus = ({
   navigation,
   reduxState,
@@ -44,12 +44,10 @@ const TrapStatus = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-
   useEffect(() => {
     dispatch(getTrapVisitDropdownValues())
   }, [])
   const { trapFunctionality } = dropdownValues.values
-
   const handleSubmit = (values: any, errors: any) => {
     console.log('🚀 ~ handleSubmit ~ errors', errors.trapStatus)
     dispatch(saveTrapStatus(values))
@@ -57,14 +55,13 @@ const TrapStatus = ({
     dispatch(markStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ Status', values)
   }
-
   return (
     <Formik
       validationSchema={trapStatusSchema}
       initialValues={reduxState.values}
       initialTouched={{ trapStatus: true }}
-      //only create initial error when form is not completed
-      initialErrors={reduxState.completed ? undefined : { trapStatus: '' }}
+      // //only create initial error when form is not completed
+      // initialErrors={reduxState.completed ? undefined : { trapStatus: '' }}
       onSubmit={(values: any, errors: any) => {
         handleSubmit(values, errors)
       }}
@@ -73,6 +70,7 @@ const TrapStatus = ({
         handleChange,
         handleBlur,
         handleSubmit,
+        setFieldTouched,
         touched,
         errors,
         values,
@@ -93,27 +91,13 @@ const TrapStatus = ({
                     Trap Status
                   </Text>
                 </FormControl.Label>
-                <Select
-                  height='50px'
-                  fontSize='16'
+                <CustomSelect
                   selectedValue={values.trapStatus}
-                  accessibilityLabel='Trap Status'
                   placeholder='Trap Status'
-                  _selectedItem={{
-                    bg: 'secondary',
-                    endIcon: <CheckIcon size='5' />,
-                  }}
-                  mt={1}
                   onValueChange={handleChange('trapStatus')}
-                >
-                  {trapFunctionality.map((item: any) => (
-                    <Select.Item
-                      key={item.id}
-                      label={item.definition}
-                      value={item.definition}
-                    />
-                  ))}
-                </Select>
+                  setFieldTouched={setFieldTouched}
+                  selectOptions={trapFunctionality}
+                />
                 {touched.trapStatus &&
                   errors.trapStatus &&
                   renderErrorMessage(errors, 'trapStatus')}
@@ -125,27 +109,13 @@ const TrapStatus = ({
                       Reason For Trap Not Functioning
                     </Text>
                   </FormControl.Label>
-                  <Select
-                    height='50px'
-                    fontSize='16'
+                  <CustomSelect
                     selectedValue={values.reasonNotFunc}
-                    accessibilityLabel='Reason Not Functioning.'
-                    placeholder='Reason'
-                    _selectedItem={{
-                      bg: 'secondary',
-                      endIcon: <CheckIcon size='5' />,
-                    }}
-                    mt={1}
+                    placeholder='Trap Status'
                     onValueChange={handleChange('reasonNotFunc')}
-                  >
-                    {reasonsForTrapNotFunctioning.map((item, idx) => (
-                      <Select.Item
-                        key={idx}
-                        label={item.label}
-                        value={item.value}
-                      />
-                    ))}
-                  </Select>
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={reasonsForTrapNotFunctioning}
+                  />
                   {touched.reasonNotFunc &&
                     errors.reasonNotFunc &&
                     renderErrorMessage(errors, 'reasonNotFunc')}
@@ -154,7 +124,6 @@ const TrapStatus = ({
               {values.trapStatus.length > 0 && (
                 <>
                   <Heading fontSize='2xl'>Environmental Conditions:</Heading>
-
                   <HStack space={5} width='125%'>
                     <FormControl w='1/4'>
                       <FormControl.Label>
@@ -230,5 +199,4 @@ const TrapStatus = ({
     </Formik>
   )
 }
-
 export default connect(mapStateToProps)(TrapStatus)
