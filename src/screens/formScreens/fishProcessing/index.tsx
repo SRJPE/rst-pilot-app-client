@@ -1,18 +1,11 @@
 import { Formik } from 'formik'
-import {
-  FormControl,
-  Heading,
-  Text,
-  VStack,
-  CheckIcon,
-  Select,
-  View,
-} from 'native-base'
+import { FormControl, Heading, Text, VStack, View } from 'native-base'
 import { useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 import NavButtons from '../../../components/formContainer/NavButtons'
+import CustomSelect from '../../../components/Shared/CustomSelect'
 import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSlice'
 import {
   markFishProcessingCompleted,
@@ -21,6 +14,11 @@ import {
 import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
 import { fishProcessingSchema } from '../../../utils/helpers/yupValidations'
+
+const reasonsForNotProcessing = [
+  { id: 0, definition: 'Safety Precautions' },
+  { id: 1, definition: 'Staffing Shortages' },
+]
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -65,8 +63,8 @@ const FishProcessing = ({
     >
       {({
         handleChange,
-        handleBlur,
         handleSubmit,
+        setFieldTouched,
         touched,
         errors,
         values,
@@ -87,27 +85,13 @@ const FishProcessing = ({
                     Fish Processed
                   </Text>
                 </FormControl.Label>
-                <Select
-                  height='50px'
-                  fontSize='16'
-                  accessibilityLabel='Fish Processed'
-                  placeholder='Status'
-                  _selectedItem={{
-                    bg: 'secondary',
-                    endIcon: <CheckIcon size='5' />,
-                  }}
-                  mt={1}
+                <CustomSelect
                   selectedValue={values.fishProcessedResult}
+                  placeholder='Fish Processed'
                   onValueChange={handleChange('fishProcessedResult')}
-                >
-                  {fishProcessedDropdowns.map((item: any) => (
-                    <Select.Item
-                      key={item.id}
-                      label={item.definition}
-                      value={item.definition}
-                    />
-                  ))}
-                </Select>
+                  setFieldTouched={setFieldTouched}
+                  selectOptions={fishProcessedDropdowns}
+                />
                 {touched.fishProcessed &&
                   errors.fishProcessed &&
                   renderErrorMessage(errors, 'fishProcessed')}
@@ -120,30 +104,16 @@ const FishProcessing = ({
                       Reason For Not Processing
                     </Text>
                   </FormControl.Label>
-                  <Select
-                    height='50px'
-                    fontSize='16'
-                    accessibilityLabel='reasonForNotProcessing'
-                    placeholder='Reason'
-                    _selectedItem={{
-                      bg: 'secondary',
-                      endIcon: <CheckIcon size='5' />,
-                    }}
-                    mt={1}
+                  <CustomSelect
                     selectedValue={values.reasonForNotProcessing}
+                    placeholder='Reason'
                     onValueChange={handleChange('reasonForNotProcessing')}
-                  >
-                    {reasonsForNotProcessing.map((item: any) => (
-                      <Select.Item
-                        key={item.id}
-                        label={item.definition}
-                        value={item.definition}
-                      />
-                    ))}
-                  </Select>
-                  {/* {touched.reasonForNotProcessing &&
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={reasonsForNotProcessing}
+                  />
+                  {touched.reasonForNotProcessing &&
                     errors.reasonForNotProcessing &&
-                    renderErrorMessage(errors, 'reasonForNotProcessing')} */}
+                    renderErrorMessage(errors, 'reasonForNotProcessing')}
                 </FormControl>
               )}
 
@@ -173,8 +143,3 @@ const FishProcessing = ({
 }
 
 export default connect(mapStateToProps)(FishProcessing)
-
-const reasonsForNotProcessing = [
-  { id: 0, definition: 'Safety Precautions' },
-  { id: 1, definition: 'Staffing Shortages' },
-]
