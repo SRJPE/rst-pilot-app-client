@@ -14,7 +14,6 @@ import {
   VStack,
   HStack,
   Radio,
-  Checkbox,
   View,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
@@ -38,14 +37,8 @@ const TrapPreProcessing = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [checked, setChecked] = useState(reduxState.values.checked as string)
-  const [coneSetting, setConeSetting] = useState(
-    reduxState.values.coneSetting as string
-  )
 
   const handleSubmit = (values: any) => {
-    values.checked = checked
-    values.coneSetting = coneSetting
     dispatch(saveTrapPreProcessing(values))
     dispatch(markTrapPreProcessingCompleted(true))
     dispatch(markStepCompleted(true))
@@ -66,6 +59,8 @@ const TrapPreProcessing = ({
         handleChange,
         handleBlur,
         handleSubmit,
+        setFieldValue,
+        setFieldTouched,
         touched,
         errors,
         values,
@@ -112,53 +107,43 @@ const TrapPreProcessing = ({
                 <Radio.Group
                   name='coneSetting'
                   accessibilityLabel='cone setting'
-                  value={coneSetting}
-                  onChange={(nextValue: any) => {
-                    setConeSetting(nextValue)
-                  }} // TODO: change to primary color
+                  value={`${values.coneSetting}`}
+                  onChange={(value: any) => {
+                    setFieldTouched('coneSetting', true)
+                    if (value === 'full') {
+                      setFieldValue('coneSetting', 'full')
+                    } else {
+                      setFieldValue('coneSetting', 'half')
+                    }
+                  }}
                 >
-                  <Radio colorScheme='primary' value='Full' my={1}>
+                  <Radio colorScheme='primary' value='full' my={1}>
                     Full
                   </Radio>
-                  <Radio colorScheme='primary' value='Half' my={1}>
+                  <Radio colorScheme='primary' value='half' my={1}>
                     Half
                   </Radio>
                 </Radio.Group>
               </FormControl>
-              <HStack space={6} alignItems='center'>
-                <FormControl w='1/2'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Total Revolutions
-                    </Text>
-                  </FormControl.Label>
-                  <Input
-                    height='50px'
-                    fontSize='16'
-                    placeholder='Numeric Value'
-                    keyboardType='numeric'
-                    onChangeText={handleChange('totalRevolutions')}
-                    onBlur={handleBlur('totalRevolutions')}
-                    value={values.totalRevolutions}
-                  />
-                </FormControl>
-                <FormControl w='1/2'>
-                  <HStack space={4} alignItems='center' pt='6'>
-                    <Checkbox //this component currently has bugs
-                      shadow={2}
-                      onChange={(newValue: any) => setChecked(newValue)}
-                      colorScheme='emerald' // TODO: change to primary color
-                      value={checked}
-                      accessibilityLabel='Collect total revolutions after fish processing Checkbox'
-                    />
-                    <FormControl.Label>
-                      <Text color='black' fontSize='14'>
-                        Collect total revolutions after fish processing
-                      </Text>
-                    </FormControl.Label>
-                  </HStack>
-                </FormControl>
-              </HStack>
+              <FormControl w='1/2'>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Total Revolutions
+                  </Text>
+                </FormControl.Label>
+                <Input
+                  height='50px'
+                  fontSize='16'
+                  placeholder='Numeric Value'
+                  keyboardType='numeric'
+                  onChangeText={handleChange('totalRevolutions')}
+                  onBlur={handleBlur('totalRevolutions')}
+                  value={values.totalRevolutions}
+                />
+                {touched.totalRevolutions &&
+                  errors.totalRevolutions &&
+                  renderErrorMessage(errors, 'totalRevolutions')}
+              </FormControl>
               <FormControl>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>

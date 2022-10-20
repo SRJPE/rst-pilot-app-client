@@ -30,13 +30,11 @@ export const trapPreProcessingSchema = yup.object().shape({
     .number()
     .required('Stream required')
     .typeError('Input must be a number'),
-
-  // coneSetting: yup.string().required('Trap site required'),
-  // checked: yup.string(),
-  // totalRevolutions: yup
-  //   .number()
-  //   .required('Water Turbidity Required')
-  //   .typeError('Input must be a number'),
+  coneSetting: yup.string().required('Trap site required'),
+  totalRevolutions: yup
+    .number()
+    .required('Total Revolutions Required')
+    .typeError('Input must be a number'),
   rpm1: yup
     .number()
     .required('Measurement 1 required')
@@ -89,7 +87,6 @@ export const addIndividualFishSchema = yup.object().shape({
     .boolean()
     .required('Marked for recapture required'),
 })
-
 
 export const releaseTrialSchema = yup.object().shape({
   wildCount: yup
