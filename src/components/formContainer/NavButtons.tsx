@@ -35,23 +35,23 @@ export default function NavButtons({
     switch (activePage) {
       case 'Trap Status':
         if (values?.trapStatus === 'Trap stopped functioning') {
-          navigateHelper('Non Functional Trap', 9)
+          navigateHelper('Non Functional Trap', 10)
         } else if (values?.flowMeasure > 1000) {
-          navigateHelper('High Flows', 7)
+          navigateHelper('High Flows', 8)
         } else if (values?.waterTemperature > 30) {
-          navigateHelper('High Temperatures', 8)
+          navigateHelper('High Temperatures', 9)
         }
         break
       case 'Fish Processing':
         if (values?.fishProcessedResult === 'No fish were caught') {
-          navigateHelper('No Fish Caught', 10)
+          navigateHelper('No Fish Caught', 11)
         }
         break
       case 'High Flows':
-        navigateHelper('End Trapping', 11)
+        navigateHelper('End Trapping', 8)
         break
       case 'High Temperatures':
-        navigateHelper('Fish Processing', 4)
+        navigateHelper('Fish Processing', 3)
         break
       default:
         console.log('default navigation')
@@ -144,6 +144,9 @@ export default function NavButtons({
         break
       case 'High Temperatures':
         buttonText = 'Move on to Fish Processing'
+        break
+      case 'Incomplete Sections':
+        buttonText = 'Save'
         break
       default:
         buttonText = 'Next'
