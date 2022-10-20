@@ -4,7 +4,7 @@ import { CheckIcon, Select } from 'native-base'
 interface CustomSelectI {
   selectedValue: string
   placeholder: string
-  setFieldTouched?: any
+  setFieldTouched: any
   onValueChange: any
   selectOptions: any[]
 }

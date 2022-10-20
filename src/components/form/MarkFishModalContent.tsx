@@ -66,13 +66,14 @@ const MarkFishModalContent = ({
       <Formik
         validationSchema={addMarksOrTagsSchema}
         initialValues={initialFormValues}
-        onSubmit={(values) => handleFormSubmit(values)}
+        onSubmit={values => handleFormSubmit(values)}
       >
         {({
           handleChange,
           handleBlur,
           handleSubmit,
           setFieldValue,
+          setFieldTouched,
           touched,
           errors,
           values,
@@ -106,6 +107,7 @@ const MarkFishModalContent = ({
                     selectedValue={values.type}
                     placeholder={'Type'}
                     onValueChange={handleChange('type')}
+                    setFieldTouched={setFieldTouched}
                     selectOptions={markTypeDictionary}
                   />
                 </FormControl>
@@ -131,6 +133,7 @@ const MarkFishModalContent = ({
                     selectedValue={values.position}
                     placeholder={'Mark Position'}
                     onValueChange={handleChange('position')}
+                    setFieldTouched={setFieldTouched}
                     selectOptions={markTypeDictionary}
                   />
                 </FormControl>
@@ -157,6 +160,7 @@ const MarkFishModalContent = ({
                     selectedValue={values.crewMemberTagging}
                     placeholder={'Crew Member'}
                     onValueChange={handleChange('crewMemberTagging')}
+                    setFieldTouched={setFieldTouched}
                     selectOptions={crewMemberDropdownOptions}
                   />
                 </FormControl>
