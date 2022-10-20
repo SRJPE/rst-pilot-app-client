@@ -14,9 +14,12 @@ export default function CustomModal(props: ModalPropsI) {
       isOpen={props.isOpen}
       onClose={props.closeModal}
       size={'full'}
-      h={props.height ? props.height : 'full'}
+      // h={props.height ? props.height : 'full'}
+      h={'full'}
       style={{ marginBottom: 0, marginTop: 'auto' }}
-      justifyContent={props.height ? 'center' : 'flex-end'}
+      // justifyContent={props.height ? 'center' : 'flex-end'}
+      // justifyContent='flex-end'
+      // alignItems='flex-end'
     >
       <Modal.Content height={'full'}>
         <Modal.Body p='0'>{props.children}</Modal.Body>

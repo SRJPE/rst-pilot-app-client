@@ -13,10 +13,14 @@ import IncompleteSections from '../screens/formScreens/incompleteSections'
 import StartMarkRecapture from '../screens/markRecapture/StartMarkRecapture'
 import TrapPreProcessing from '../screens/formScreens/trapOperations/TrapPreProcessing'
 import TrapPostProcessing from '../screens/formScreens/trapOperations/TrapPostProcessing'
+import { useSelector } from 'react-redux'
 
 const FormStack = createStackNavigator()
 
 export default function FormStackNavigation() {
+  const fishInputModalOpen = useSelector(
+    (state: any) => state.fishInput.modalOpen
+  )
   return (
     <FormStack.Navigator
       initialRouteName='Visit Setup'
@@ -29,7 +33,11 @@ export default function FormStackNavigation() {
         component={TrapPreProcessing}
       />
       <FormStack.Screen name='Fish Processing' component={FishProcessing} />
-      <FormStack.Screen name='Fish Input' component={FishInput} />
+      <FormStack.Screen
+        name='Fish Input'
+        component={FishInput}
+        options={{ headerShown: fishInputModalOpen ? false : true }}
+      />
       <FormStack.Screen
         name='Trap Post-Processing'
         component={TrapPostProcessing}

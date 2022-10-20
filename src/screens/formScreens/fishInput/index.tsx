@@ -20,11 +20,11 @@ import { AppDispatch, RootState } from '../../../redux/store'
 import { connect, useDispatch } from 'react-redux'
 import {
   markFishInputCompleted,
+  markFishInputModalOpen,
   saveFishInput,
 } from '../../../redux/reducers/formSlices/fishInputSlice'
 import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 import AddFishModalContent from '../../../components/form/AddFishModalContent'
-
 
 const styles = StyleSheet.create({
   tableHead: { height: 40, backgroundColor: '#f1f8ff' },
@@ -129,7 +129,10 @@ const FishInput = ({
                   p='3'
                   borderRadius='5'
                   flex='1'
-                  onPress={() => setAddFishModalOpen(true)}
+                  onPress={() => {
+                    setAddFishModalOpen(true)
+                    dispatch(markFishInputModalOpen(true))
+                  }}
                 >
                   <Text fontSize='sm' fontWeight='bold' color='white'>
                     Input Fish Measurements
@@ -164,10 +167,16 @@ const FishInput = ({
             {/* --------- Modals --------- */}
             <CustomModal
               isOpen={addFishModalOpen}
-              closeModal={() => setAddFishModalOpen(false)}
+              closeModal={() => {
+                setAddFishModalOpen(false)
+                dispatch(markFishInputModalOpen(false))
+              }}
             >
               <AddFishModalContent
-                closeModal={() => setAddFishModalOpen(false)}
+                closeModal={() => {
+                  setAddFishModalOpen(false)
+                  dispatch(markFishInputModalOpen(false))
+                }}
                 activeTab={addFishModalTab}
                 setActiveTab={setAddFishModalTab}
               />
