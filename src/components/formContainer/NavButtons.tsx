@@ -1,8 +1,7 @@
 import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
-import { updateActiveStep } from '../../redux/reducers/navigationSlice'
-import { useEffect } from 'react'
+import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 
 export default function NavButtons({

@@ -90,6 +90,32 @@ export const addIndividualFishSchema = yup.object().shape({
     .required('Marked for recapture required'),
 })
 
+
+export const releaseTrialSchema = yup.object().shape({
+  wildCount: yup
+    .number()
+    .required('Wild count is required')
+    .typeError('Input must be a number'),
+  deadWildCount: yup
+    .number()
+    .required('Dead wild count is required')
+    .typeError('Input must be a number'),
+  willSupplement: yup.boolean().required('Field required'),
+  hatcheryCount: yup
+    .number()
+    .required('Hatchery count is required')
+    .typeError('Input must be a number'),
+  runIDHatchery: yup.string().required('Hatchery Count is required'),
+  runWeightHatchery: yup
+    .number()
+    .required('Hatchery run weight is required')
+    .typeError('Input must be a number'),
+  deadHatcheryCount: yup
+    .number()
+    .required('Hatchery dead count is required')
+    .typeError('Input must be a number'),
+})
+
 export const addMarksOrTagsSchema = yup.object().shape({
   type: yup.string().required('Mark Type is required'),
   number: yup.string().required('Mark Number is required'),
@@ -100,8 +126,12 @@ export const addMarksOrTagsSchema = yup.object().shape({
 
 export const addGeneticsSampleSchema = yup.object().shape({
   sampleIdNumber: yup.string().required('Sample ID Number required'),
-  mucusSwabCollected: yup.boolean().required('Mucus Swab collection status required'),
-  finClipCollected: yup.boolean().required('Fin Clip collection status required'),
+  mucusSwabCollected: yup
+    .boolean()
+    .required('Mucus Swab collection status required'),
+  finClipCollected: yup
+    .boolean()
+    .required('Fin Clip collection status required'),
   crewMemberCollectingSample: yup.string().required('Crew Member required'),
   comments: yup.string(),
 })

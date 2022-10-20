@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Text, VStack, CircleIcon, Heading, View } from 'native-base'
 import Logo from '../../components/Shared/Logo'
 import BottomNavigation from '../../components/home/HomeNavButtons'
@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
 })
 
 export default function Home({ navigation }: { navigation: any }) {
+  const [staggerOpen, setStaggerOpen] = useState(false as boolean)
   const recentItemsCard = ({
     title,
     date,
@@ -69,7 +70,12 @@ export default function Home({ navigation }: { navigation: any }) {
   }
 
   return (
-    <VStack height='full' alignItems='center' justifyContent='space-between'>
+    <VStack
+      height='full'
+      alignItems='center'
+      justifyContent='space-between'
+      opacity={staggerOpen ? 30 : 100}
+    >
       <TopIcons />
 
       <View style={styles.landingContent}>
@@ -93,7 +99,11 @@ export default function Home({ navigation }: { navigation: any }) {
         </View>
       </View>
 
-      <BottomNavigation navigation={navigation} />
+      <BottomNavigation
+        navigation={navigation}
+        setStaggerOpen={setStaggerOpen}
+        staggerOpen={staggerOpen}
+      />
     </VStack>
   )
 }

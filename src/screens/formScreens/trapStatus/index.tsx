@@ -5,7 +5,7 @@ import { AppDispatch, RootState } from '../../../redux/store'
 import {
   markTrapStatusCompleted,
   saveTrapStatus,
-} from '../../../redux/reducers/trapStatusSlice'
+} from '../../../redux/reducers/formSlices/trapStatusSlice'
 import {
   Select,
   FormControl,
@@ -20,7 +20,7 @@ import {
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
+import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Rain', value: 'High Rain' },

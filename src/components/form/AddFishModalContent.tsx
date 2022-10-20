@@ -17,10 +17,12 @@ import { connect } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { addIndividualFishSchema } from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { saveAddFishModalData } from '../../redux/reducers/addIndividualFishSlice'
+import { saveAddFishModalData } from '../../redux/reducers/formSlices/addIndividualFishSlice'
 import CustomModal from '../Shared/CustomModal'
 import CustomSelect from '../Shared/CustomSelect'
-import CustomModalHeader, { AddFishModalHeaderButton } from '../Shared/CustomModalHeader'
+import CustomModalHeader, {
+  AddFishModalHeaderButton,
+} from '../Shared/CustomModalHeader'
 import MarkFishModalContent from './MarkFishModalContent'
 import AddGeneticsModalContent from './AddGeneticsModalContent'
 import { saveGeneticSampleData } from '../../redux/reducers/addGeneticSamplesSlice'
@@ -98,7 +100,7 @@ const AddFishModalContent = ({
       <Formik
         validationSchema={addIndividualFishSchema}
         initialValues={addIndividualFishSliceState.values}
-        onSubmit={(values) => {
+        onSubmit={values => {
           handleFormSubmit(values)
         }}
       >
@@ -423,7 +425,7 @@ const AddFishModalContent = ({
 const mapStateToProps = (state: RootState) => {
   return {
     addIndividualFishSliceState: state.addIndividualFish,
-    reduxState: state
+    reduxState: state,
   }
 }
 

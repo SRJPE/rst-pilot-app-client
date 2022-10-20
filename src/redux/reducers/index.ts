@@ -2,16 +2,18 @@ import { combineReducers } from 'redux'
 import { persistReducer } from 'redux-persist'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import dropdownsSlice from './dropdownsSlice'
-import navigationSlice from './navigationSlice'
-import visitSetupSlice from './visitSetupSlice'
-import trapStatusSlice from './trapStatusSlice'
-import trapPreProcessingSlice from './trapPreProcessingSlice'
-import fishProcessingSlice from './fishProcessingSlice'
-import fishInputSlice from './fishInputSlice'
-import addIndividualFishSlice from './addIndividualFishSlice'
+import navigationSlice from './formSlices/navigationSlice'
+import visitSetupSlice from './formSlices/visitSetupSlice'
+import trapStatusSlice from './formSlices/trapStatusSlice'
+import trapPreProcessingSlice from './formSlices/trapPreProcessingSlice'
+import fishProcessingSlice from './formSlices/fishProcessingSlice'
+import fishInputSlice from './formSlices/fishInputSlice'
+import addIndividualFishSlice from './formSlices/addIndividualFishSlice'
+import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
+import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
+import markRecaptureNavigationSlice from './markRecaptureSlices/markRecaptureNavigationSlice'
 import addMarksOrTagsSlice from './addMarksOrTagsSlice'
 import addGeneticSamplesSlice from './addGeneticSamplesSlice'
-import trapPostProcessingSlice from './trapPostProcessingSlice'
 
 const persistConfig = {
   key: 'root',
@@ -31,4 +33,6 @@ export default combineReducers({
   addMarksOrTags: addMarksOrTagsSlice,
   addGeneticSamples: addGeneticSamplesSlice,
   trapPostProcessing: trapPostProcessingSlice,
+  markRecaptureNavigation: markRecaptureNavigationSlice,
+  releaseTrial: releaseTrialSlice,
 })

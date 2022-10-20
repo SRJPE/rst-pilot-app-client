@@ -17,7 +17,7 @@ import MenuButton from '../components/drawerMenu/MenuButton'
 import { useSelector } from 'react-redux'
 import { AppDispatch } from '../redux/store'
 import { useDispatch } from 'react-redux'
-import { updateActiveStep } from '../redux/reducers/navigationSlice'
+import { updateActiveStep } from '../redux/reducers/formSlices/navigationSlice'
 
 const DrawerMenu = (props: DrawerContentComponentProps) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -91,6 +91,12 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             onPress={() => handlePressMainNavButton('Home')}
             icon='home'
             title='Home'
+          />
+          <MenuButton
+            active={currentRoute === 'Mark Recapture'}
+            onPress={() => handlePressMainNavButton('Mark Recapture')}
+            icon='clipboard'
+            title='Mark Recapture'
           />
           <MenuButton
             active={currentRoute === 'Generate Report'}
