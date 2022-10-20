@@ -109,6 +109,7 @@ const AddFishModalContent = ({
           handleBlur,
           handleSubmit,
           setFieldValue,
+          setFieldTouched,
           touched,
           errors,
           values,
@@ -132,6 +133,7 @@ const AddFishModalContent = ({
                       selectedValue={values.species}
                       placeholder={'Species'}
                       onValueChange={handleChange('species')}
+                      setFieldTouched={setFieldTouched}
                       selectOptions={speciesDictionary}
                     />
                   </FormControl>
@@ -187,6 +189,7 @@ const AddFishModalContent = ({
                       selectedValue={values.lifestage}
                       placeholder={'Lifestage'}
                       onValueChange={handleChange('lifestage')}
+                      setFieldTouched={setFieldTouched}
                       selectOptions={lifestageDictionary}
                     />
                   </FormControl>
