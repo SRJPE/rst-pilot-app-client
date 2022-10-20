@@ -75,8 +75,8 @@ const VisitSetup = ({
     >
       {({
         handleChange,
-        handleBlur,
         handleSubmit,
+        setFieldValue,
         setFieldTouched,
         touched,
         errors,
@@ -137,7 +137,8 @@ const VisitSetup = ({
                     </FormControl.Label>
                     <CrewDropDown
                       setCrew={setCrew}
-                      // handleChange={handleChange}
+                      setFieldValue={setFieldValue}
+                      setFieldTouched={setFieldTouched}
                     />
                     {/* {touched.crew &&
                       errors.crew &&
