@@ -43,7 +43,7 @@ const TrapStatus = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
-    (state: RootState) => state.dropdowns.values.trapFunctionality
+    (state: RootState) => state.dropdowns.values
   )
 
   const handleSubmit = (values: any, errors: any) => {
@@ -102,7 +102,7 @@ const TrapStatus = ({
                   mt={1}
                   onValueChange={handleChange('trapStatus')}
                 >
-                  {dropdownValues.map((item: any) => (
+                  {dropdownValues.trapFunctionality.map((item: any) => (
                     <Select.Item
                       key={item.id}
                       label={item.definition}
