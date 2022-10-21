@@ -13,7 +13,7 @@ import {
   VStack,
 } from 'native-base'
 import { Formik } from 'formik'
-import { connect } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { addIndividualFishSchema } from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -82,6 +82,9 @@ const AddFishModalContent = ({
 }) => {
   const [markFishModalOpen, setMarkFishModalOpen] = useState(false)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(false)
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
 
   const handleFormSubmit = (values: any) => {
     saveAddFishModalData(values)
@@ -100,7 +103,7 @@ const AddFishModalContent = ({
       <Formik
         validationSchema={addIndividualFishSchema}
         initialValues={addIndividualFishSliceState.values}
-        onSubmit={values => {
+        onSubmit={(values) => {
           handleFormSubmit(values)
         }}
       >
@@ -190,7 +193,12 @@ const AddFishModalContent = ({
                       placeholder={'Lifestage'}
                       onValueChange={handleChange('lifestage')}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={lifestageDictionary}
+                      selectOptions={dropdownValues.lifeStage.map(
+                        (item: any) => ({
+                          label: item.definition,
+                          value: item.definition,
+                        })
+                      )}
                     />
                   </FormControl>
                 </VStack>

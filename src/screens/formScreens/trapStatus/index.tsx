@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { Formik } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSlice'
-
 import {
   Select,
   FormControl,
@@ -43,11 +41,10 @@ const TrapStatus = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const dropdownValues = useSelector((state: any) => state.dropdowns)
-  useEffect(() => {
-    dispatch(getTrapVisitDropdownValues())
-  }, [])
-  const { trapFunctionality } = dropdownValues.values
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
+
   const handleSubmit = (values: any, errors: any) => {
     console.log('🚀 ~ handleSubmit ~ errors', errors.trapStatus)
     dispatch(saveTrapStatus(values))
@@ -95,8 +92,12 @@ const TrapStatus = ({
                   selectedValue={values.trapStatus}
                   placeholder='Trap Status'
                   onValueChange={handleChange('trapStatus')}
+
                   setFieldTouched={setFieldTouched}
-                  selectOptions={trapFunctionality}
+                    selectOptions={dropdownValues.trapFunctionality.map((item: any) => ({
+                      label: item.definition,
+                      value: item.definition,
+                    }))}
                 />
                 {touched.trapStatus &&
                   errors.trapStatus &&
