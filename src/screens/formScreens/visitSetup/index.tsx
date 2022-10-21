@@ -67,8 +67,9 @@ const VisitSetup = ({
       validationSchema={trapVisitSchema}
       initialValues={reduxState.values}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
-      initialTouched={{ stream: true }}
-      initialErrors={reduxState.completed ? undefined : { stream: '' }}
+      // maybe this is not needed for first step in form?
+      // initialTouched={{ trapSite: crew }}
+      // initialErrors={reduxState.completed ? undefined : { crew: '' }}
       onSubmit={values => {
         handleSubmit(values)
       }}
