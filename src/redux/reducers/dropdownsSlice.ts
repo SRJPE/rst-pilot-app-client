@@ -19,6 +19,7 @@ interface ValuesI {
   lifeStage: any[]
   markType: any[]
   markColor: any[]
+  bodyPart: any[]
   run: any[]
   releasePurpose: any[]
   coneDebrisVolume: any[]
@@ -39,6 +40,7 @@ const initialState: InitialStateI = {
     lifeStage: [],
     markType: [],
     markColor: [],
+    bodyPart: [],
     run: [],
     releasePurpose: [],
     coneDebrisVolume: [],
@@ -56,7 +58,7 @@ export const getTrapVisitDropdownValues = createAsyncThunk(
   }
 )
 
-// @reduxjs/toolkit Slice - New & Reccomended way of writing redux reducers
+// @reduxjs/toolkit Slice - New & Recommended way of writing redux reducers
 // allows us to:
 // * write actions under reducers: {...}
 // * write async actions under extraReducers: {...}

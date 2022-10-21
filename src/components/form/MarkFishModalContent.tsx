@@ -11,6 +11,8 @@ import {
   Button,
 } from 'native-base'
 import React from 'react'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../redux/store'
 import { addMarksOrTagsSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
@@ -60,6 +62,9 @@ const MarkFishModalContent = ({
   closeModal: any
 }) => {
   const handleFormSubmit = (values: any) => handleMarkFishFormSubmit(values)
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
 
   return (
     <ScrollView>
@@ -106,7 +111,10 @@ const MarkFishModalContent = ({
                     selectedValue={values.type}
                     placeholder={'Type'}
                     onValueChange={handleChange('type')}
-                    selectOptions={markTypeDictionary}
+                    selectOptions={dropdownValues.markType.map((item: any) => ({
+                      label: item.definition,
+                      value: item.definition,
+                    }))}
                   />
                 </FormControl>
               </VStack>
@@ -131,7 +139,14 @@ const MarkFishModalContent = ({
                     selectedValue={values.position}
                     placeholder={'Mark Position'}
                     onValueChange={handleChange('position')}
-                    selectOptions={markTypeDictionary}
+                    selectOptions={
+                      dropdownValues.bodyPart
+                        ? dropdownValues.bodyPart.map((item: any) => ({
+                            label: item.definition,
+                            value: item.definition,
+                          }))
+                        : []
+                    }
                   />
                 </FormControl>
               </VStack>
