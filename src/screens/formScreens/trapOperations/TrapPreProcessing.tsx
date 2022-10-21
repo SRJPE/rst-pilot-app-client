@@ -124,6 +124,9 @@ const TrapPreProcessing = ({
                     Half
                   </Radio>
                 </Radio.Group>
+                {touched.coneSetting &&
+                  errors.coneSetting &&
+                  renderErrorMessage(errors, 'coneSetting')}
               </FormControl>
               <FormControl w='1/2'>
                 <FormControl.Label>
