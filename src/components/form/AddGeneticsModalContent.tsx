@@ -48,13 +48,14 @@ const AddGeneticsModalContent = ({
       <Formik
         validationSchema={addGeneticsSampleSchema}
         initialValues={initialFormValues}
-        onSubmit={(values) => handleFormSubmit(values)}
+        onSubmit={values => handleFormSubmit(values)}
       >
         {({
           handleChange,
           handleBlur,
           handleSubmit,
           setFieldValue,
+          setFieldTouched,
           touched,
           errors,
           values,
@@ -165,6 +166,7 @@ const AddGeneticsModalContent = ({
                         onValueChange={handleChange(
                           'crewMemberCollectingSample'
                         )}
+                        setFieldTouched={setFieldTouched}
                         selectOptions={crewMemberDropdownOptions}
                       />
                     </FormControl>

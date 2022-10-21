@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
   completed: boolean
+  modalOpen: boolean
   values: FishInputValuesI
 }
 
@@ -12,6 +13,7 @@ export interface FishInputValuesI {
 
 const initialState: InitialStateI = {
   completed: false,
+  modalOpen: false,
   values: {
     speciesCaptured: ['YOY Chinook'],
     tableData: [
@@ -33,9 +35,13 @@ export const saveFishSlice = createSlice({
     markFishInputCompleted: (state, action) => {
       state.completed = action.payload
     },
+    markFishInputModalOpen: (state, action) => {
+      state.modalOpen = action.payload
+    },
   },
 })
 
-export const { saveFishInput, markFishInputCompleted } = saveFishSlice.actions
+export const { saveFishInput, markFishInputCompleted, markFishInputModalOpen } =
+  saveFishSlice.actions
 
 export default saveFishSlice.reducer

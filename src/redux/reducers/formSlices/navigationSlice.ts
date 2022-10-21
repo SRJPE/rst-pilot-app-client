@@ -15,13 +15,13 @@ const formSteps = {
     propName: 'trapPostProcessing',
     completed: false,
   },
-  7: { name: 'High Flows', propName: 'highFlows', completed: false },
-  8: { name: 'High Temperatures', propName: 'highTemperatures' },
-  9: { name: 'Non Functional Trap', propName: 'nonFunctionalTrap' },
-  10: { name: 'No Fish Caught', propName: 'noFishCaught' },
-  11: { name: 'End Trapping', propName: 'endTrapping' },
-  12: { name: 'Incomplete Sections', propName: 'incompleteSections' },
-  13: { name: 'Start Mark Recapture', propName: 'StartMarkRecapture' },
+  7: { name: 'Incomplete Sections', propName: 'incompleteSections' },
+  8: { name: 'Start Mark Recapture', propName: 'StartMarkRecapture' },
+  9: { name: 'High Flows', propName: 'highFlows' },
+  10: { name: 'High Temperatures', propName: 'highTemperatures' },
+  11: { name: 'Non Functional Trap', propName: 'nonFunctionalTrap' },
+  12: { name: 'No Fish Caught', propName: 'noFishCaught' },
+  13: { name: 'End Trapping', propName: 'endTrapping' },
 }
 
 interface NavigationStateI {

@@ -21,6 +21,7 @@ import { trapVisitSchema } from '../../../utils/helpers/yupValidations'
 import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
+import CustomSelect from '../../../components/Shared/CustomSelect'
 
 const testStreams = [
   { label: 'Default Stream 1', value: 'DS1' },
@@ -66,16 +67,18 @@ const VisitSetup = ({
       validationSchema={trapVisitSchema}
       initialValues={reduxState.values}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
-      initialTouched={{ stream: true }}
-      initialErrors={reduxState.completed ? undefined : { stream: '' }}
+      // maybe this is not needed for first step in form?
+      // initialTouched={{ trapSite: crew }}
+      // initialErrors={reduxState.completed ? undefined : { crew: '' }}
       onSubmit={values => {
         handleSubmit(values)
       }}
     >
       {({
         handleChange,
-        handleBlur,
         handleSubmit,
+        setFieldValue,
+        setFieldTouched,
         touched,
         errors,
         values,
@@ -96,27 +99,13 @@ const VisitSetup = ({
                     Stream
                   </Text>
                 </FormControl.Label>
-                <Select
-                  height='50px'
-                  fontSize='16'
+                <CustomSelect
                   selectedValue={values.stream}
-                  accessibilityLabel='Stream'
                   placeholder='Stream'
-                  _selectedItem={{
-                    bg: 'secondary',
-                    endIcon: <CheckIcon size='6' />,
-                  }}
-                  my={1}
                   onValueChange={handleChange('stream')}
-                >
-                  {testStreams.map((item, idx) => (
-                    <Select.Item
-                      key={idx}
-                      label={item.label}
-                      value={item.value}
-                    />
-                  ))}
-                </Select>
+                  setFieldTouched={setFieldTouched}
+                  selectOptions={testStreams}
+                />
                 {touched.stream &&
                   errors.stream &&
                   renderErrorMessage(errors, 'stream')}
@@ -130,27 +119,13 @@ const VisitSetup = ({
                         Trap Site
                       </Text>
                     </FormControl.Label>
-                    <Select
-                      height='50px'
-                      fontSize='16'
+                    <CustomSelect
                       selectedValue={values.trapSite}
-                      accessibilityLabel='Trap Site'
                       placeholder='Trap Site'
-                      _selectedItem={{
-                        bg: 'secondary',
-                        endIcon: <CheckIcon size='6' />,
-                      }}
-                      mt={1}
                       onValueChange={handleChange('trapSite')}
-                    >
-                      {testSites.map((item, idx) => (
-                        <Select.Item
-                          key={idx}
-                          label={item.label}
-                          value={item.value}
-                        />
-                      ))}
-                    </Select>
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={testSites}
+                    />
                     {touched.trapSite &&
                       errors.trapSite &&
                       renderErrorMessage(errors, 'trapSite')}
@@ -163,7 +138,8 @@ const VisitSetup = ({
                     </FormControl.Label>
                     <CrewDropDown
                       setCrew={setCrew}
-                      // handleChange={handleChange}
+                      setFieldValue={setFieldValue}
+                      setFieldTouched={setFieldTouched}
                     />
                     {/* {touched.crew &&
                       errors.crew &&

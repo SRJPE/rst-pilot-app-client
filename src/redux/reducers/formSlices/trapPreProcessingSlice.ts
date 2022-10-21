@@ -7,8 +7,7 @@ interface InitialStateI {
 
 export interface TrapPreProcessingValuesI {
   coneDepth: number | null
-  coneSetting: string
-  checked: string | boolean
+  coneSetting: string | null
   totalRevolutions: number | null
   rpm1: number | null
   rpm2: number | null
@@ -19,8 +18,7 @@ const initialState: InitialStateI = {
   completed: false,
   values: {
     coneDepth: null,
-    coneSetting: '',
-    checked: '',
+    coneSetting: null,
     totalRevolutions: null,
     rpm1: null,
     rpm2: null,

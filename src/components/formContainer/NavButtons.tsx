@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
+import { useEffect, useState } from 'react'
 
 export default function NavButtons({
   navigation,
@@ -22,6 +23,27 @@ export default function NavButtons({
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
+  const stepsArray = Object.values(navigationState.steps).slice(0, 6)
+  // const [trapVisitIsIncomplete, setTrapVisitIsIncomplete] = useState(
+  //   true as boolean
+  // )
+  // console.log('🚀 ~ trapVisitIsIncomplete', trapVisitIsIncomplete)
+
+  // useEffect(() => {
+  //   console.log(
+  //     'TEST',
+  //     stepsArray.some((step: any) => {
+  //       console.log('step: ', step.name, step.completed)
+  //       step.completed === false
+  //     })
+  //   )
+  //   setTrapVisitIsIncomplete(
+  //     stepsArray.some((step: any) => {
+  //       console.log('step: ', step.name, step.completed)
+  //       step.completed === false
+  //     })
+  //   )
+  // }, [activePage])
 
   const navigateHelper = (destination: string, payload: number) => {
     navigation.navigate('Trap Visit Form', { screen: destination })
@@ -35,23 +57,23 @@ export default function NavButtons({
     switch (activePage) {
       case 'Trap Status':
         if (values?.trapStatus === 'Trap stopped functioning') {
-          navigateHelper('Non Functional Trap', 9)
+          navigateHelper('Non Functional Trap', 11)
         } else if (values?.flowMeasure > 1000) {
-          navigateHelper('High Flows', 7)
+          navigateHelper('High Flows', 9)
         } else if (values?.waterTemperature > 30) {
-          navigateHelper('High Temperatures', 8)
+          navigateHelper('High Temperatures', 10)
         }
         break
       case 'Fish Processing':
         if (values?.fishProcessedResult === 'No fish were caught') {
-          navigateHelper('No Fish Caught', 10)
+          navigateHelper('No Fish Caught', 12)
         }
         break
       case 'High Flows':
-        navigateHelper('End Trapping', 11)
+        navigateHelper('End Trapping', 9)
         break
       case 'High Temperatures':
-        navigateHelper('Fish Processing', 4)
+        navigateHelper('Trap Pre-Processing', 3)
         break
       default:
         console.log('default navigation')
@@ -120,17 +142,21 @@ export default function NavButtons({
   }
 
   const disableRightButton = () => {
-    return (
-      //**temp conditional for fish input**
+    if (activePage === 'Incomplete Sections') {
+      // return trapVisitIsIncomplete
+    } else {
+      return (
+        //**temp conditional for fish input**
 
-      //if current screen uses formik && if form has first NOT been touched
-      // OR
-      //if current screen uses formik && there are errors
-      (activePage !== 'Fish Input' &&
-        touched &&
-        Object.keys(touched).length === 0) ||
-      (errors && Object.keys(errors).length > 0)
-    )
+        //if current screen uses formik && if form has first NOT been touched
+        // OR
+        //if current screen uses formik && there are errors
+        (activePage !== 'Fish Input' &&
+          touched &&
+          Object.keys(touched).length === 0) ||
+        (errors && Object.keys(errors).length > 0)
+      )
+    }
   }
 
   const renderRightButtonText = (activePage: string) => {
@@ -144,6 +170,9 @@ export default function NavButtons({
         break
       case 'High Temperatures':
         buttonText = 'Move on to Fish Processing'
+        break
+      case 'Incomplete Sections':
+        buttonText = 'Save'
         break
       default:
         buttonText = 'Next'

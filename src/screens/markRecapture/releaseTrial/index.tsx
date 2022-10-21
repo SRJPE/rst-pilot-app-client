@@ -24,6 +24,7 @@ import {
 } from '../../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 import { markActiveMarkRecaptureStepCompleted } from '../../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
+import CustomSelect from '../../../components/Shared/CustomSelect'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -69,6 +70,7 @@ const ReleaseTrial = ({
         handleBlur,
         handleSubmit,
         setFieldValue,
+        setFieldTouched,
         touched,
         errors,
         values,
@@ -202,27 +204,13 @@ const ReleaseTrial = ({
                         Run ID of Hatchery Fish
                       </Text>
                     </FormControl.Label>
-                    <Select
-                      height='50px'
-                      fontSize='16'
+                    <CustomSelect
                       selectedValue={values.runIDHatchery}
-                      accessibilityLabel='Trap Status'
-                      placeholder='Trap Status'
-                      _selectedItem={{
-                        bg: 'secondary',
-                        endIcon: <CheckIcon size='5' />,
-                      }}
-                      mt={1}
+                      placeholder='Run ID'
                       onValueChange={handleChange('runIDHatchery')}
-                    >
-                      {run.map((item: any) => (
-                        <Select.Item
-                          key={item.id}
-                          label={item.definition}
-                          value={item.definition}
-                        />
-                      ))}
-                    </Select>
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={run}
+                    />
                     {touched.runIDHatchery &&
                       errors.runIDHatchery &&
                       renderErrorMessage(errors, 'runIDHatchery')}
