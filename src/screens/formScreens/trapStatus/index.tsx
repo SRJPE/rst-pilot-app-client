@@ -60,7 +60,7 @@ const TrapStatus = ({
       validationSchema={trapStatusSchema}
       initialValues={reduxState.values}
       initialTouched={{ trapStatus: true }}
-      // //only create initial error when form is not completed
+      // only create initial error when form is not completed
       initialErrors={reduxState.completed ? undefined : { trapStatus: '' }}
       onSubmit={(values: any, errors: any) => {
         handleSubmit(values, errors)
