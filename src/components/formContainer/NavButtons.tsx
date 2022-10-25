@@ -58,6 +58,8 @@ export default function NavButtons({
       case 'Trap Status':
         if (values?.trapStatus === 'Trap stopped functioning') {
           navigateHelper('Non Functional Trap', 11)
+        } else if (values?.trapStatus === 'trap not in service') {
+          navigateHelper('No Fish Caught', 12)
         } else if (values?.flowMeasure > 1000) {
           navigateHelper('High Flows', 9)
         } else if (values?.waterTemperature > 30) {

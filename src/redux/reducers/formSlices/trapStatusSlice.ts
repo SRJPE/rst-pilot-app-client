@@ -9,8 +9,11 @@ export interface TrapStatusValuesI {
   trapStatus: string
   reasonNotFunc: string
   flowMeasure: number | null
+  flowMeasureUnit: string
   waterTemperature: number | null
+  waterTemperatureUnit: string
   waterTurbidity: number | null
+  waterTurbidityUnit: string
 }
 
 const initialState: InitialStateI = {
@@ -19,8 +22,11 @@ const initialState: InitialStateI = {
     trapStatus: '',
     reasonNotFunc: '',
     flowMeasure: null,
+    flowMeasureUnit: 'cfs',
     waterTemperature: null,
+    waterTemperatureUnit: '°F',
     waterTurbidity: null,
+    waterTurbidityUnit: 'ntu'
   },
 }
 

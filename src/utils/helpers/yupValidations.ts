@@ -15,14 +15,17 @@ export const trapStatusSchema = yup.object().shape({
     .number()
     .required('Flow Measure Required')
     .typeError('Input must be a number'),
+  flowMeasureUnit: yup.string(),
   waterTemperature: yup
     .number()
     .required('Water Temperature Required')
     .typeError('Input must be a number'),
+  waterTemperatureUnit: yup.string(),
   waterTurbidity: yup
     .number()
     .required('Water Turbidity Required')
     .typeError('Input must be a number'),
+  waterTurbidityUnit: yup.string(),
 })
 
 export const trapPreProcessingSchema = yup.object().shape({
