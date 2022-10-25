@@ -52,6 +52,29 @@ const TrapStatus = ({
     dispatch(markStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ Status', values)
   }
+
+  const inputUnit = (text: string, setFieldValue?: any) => {
+    return (
+      <Text
+        color='#A1A1A1'
+        position='absolute'
+        top={50}
+        right={2}
+        onPress={() => {
+          if (setFieldValue) {
+            if (text === '°F') {
+              setFieldValue('waterTemperatureUnit', '°C')
+            } else {
+              setFieldValue('waterTemperatureUnit', '°F')
+            }
+          }
+        }}
+      >
+        {text}
+      </Text>
+    )
+  }
+
   return (
     <Formik
       validationSchema={trapStatusSchema}
@@ -67,6 +90,7 @@ const TrapStatus = ({
         handleChange,
         handleBlur,
         handleSubmit,
+        setFieldValue,
         setFieldTouched,
         touched,
         errors,
@@ -92,12 +116,13 @@ const TrapStatus = ({
                   selectedValue={values.trapStatus}
                   placeholder='Trap Status'
                   onValueChange={handleChange('trapStatus')}
-
                   setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues.trapFunctionality.map((item: any) => ({
+                  selectOptions={dropdownValues.trapFunctionality.map(
+                    (item: any) => ({
                       label: item.definition,
                       value: item.definition,
-                    }))}
+                    })
+                  )}
                 />
                 {touched.trapStatus &&
                   errors.trapStatus &&
@@ -141,6 +166,7 @@ const TrapStatus = ({
                         onBlur={handleBlur('flowMeasure')}
                         value={values.flowMeasure}
                       />
+                      {inputUnit(values.flowMeasureUnit)}
                       {touched.flowMeasure &&
                         errors.flowMeasure &&
                         renderErrorMessage(errors, 'flowMeasure')}
@@ -160,6 +186,7 @@ const TrapStatus = ({
                         onBlur={handleBlur('waterTemperature')}
                         value={values.waterTemperature}
                       />
+                      {inputUnit(values.waterTemperatureUnit, setFieldValue)}
                       {touched.waterTemperature &&
                         errors.waterTemperature &&
                         renderErrorMessage(errors, 'waterTemperature')}
@@ -179,6 +206,7 @@ const TrapStatus = ({
                         onBlur={handleBlur('waterTurbidity')}
                         value={values.waterTurbidity}
                       />
+                      {inputUnit(values.waterTurbidityUnit)}
                       {touched.waterTurbidity &&
                         errors.waterTurbidity &&
                         renderErrorMessage(errors, 'waterTurbidity')}
