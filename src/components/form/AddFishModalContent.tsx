@@ -6,7 +6,9 @@ import {
   FormControl,
   HStack,
   Icon,
+  IconButton,
   Input,
+  Popover,
   Radio,
   ScrollView,
   Text,
@@ -27,6 +29,7 @@ import MarkFishModalContent from './MarkFishModalContent'
 import AddGeneticsModalContent from './AddGeneticsModalContent'
 import { saveGeneticSampleData } from '../../redux/reducers/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/addMarksOrTagsSlice'
+import { MaterialIcons } from '@expo/vector-icons'
 
 const speciesDictionary = [{ label: 'Chinook', value: 'Chinook' }]
 const lifestageDictionary = [
@@ -103,7 +106,7 @@ const AddFishModalContent = ({
       <Formik
         validationSchema={addIndividualFishSchema}
         initialValues={addIndividualFishSliceState.values}
-        onSubmit={(values) => {
+        onSubmit={values => {
           handleFormSubmit(values)
         }}
       >
@@ -128,9 +131,13 @@ const AddFishModalContent = ({
               })}
             />
             <ScrollView>
-              <VStack paddingX='10' paddingTop='7' paddingBottom='3'>
+              <VStack paddingX='10' paddingTop='2' paddingBottom='3'>
                 <VStack w='1/2' paddingRight={5}>
-                  <FormControl.Label>Species</FormControl.Label>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Species
+                    </Text>
+                  </FormControl.Label>
                   <FormControl>
                     <CustomSelect
                       selectedValue={values.species}
@@ -146,9 +153,15 @@ const AddFishModalContent = ({
 
                 <HStack marginBottom={5}>
                   <VStack w='1/2' paddingRight={5}>
-                    <FormControl.Label>Fork Length</FormControl.Label>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Fork Length
+                      </Text>
+                    </FormControl.Label>
                     <FormControl w='full'>
                       <Input
+                        height='50px'
+                        fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
                         onChangeText={handleChange('forkLength')}
@@ -159,9 +172,15 @@ const AddFishModalContent = ({
                   </VStack>
 
                   <VStack w='1/2' paddingLeft={5}>
-                    <FormControl.Label>Run</FormControl.Label>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Run
+                      </Text>
+                    </FormControl.Label>
                     <FormControl w='full'>
                       <Input
+                        height='50px'
+                        fontSize='16'
                         placeholder='Calculated from fork length (disabled)'
                         keyboardType='numeric'
                         onChangeText={handleChange('run')}
@@ -173,9 +192,15 @@ const AddFishModalContent = ({
                 </HStack>
 
                 <VStack w='1/2' marginBottom={5} paddingRight='5'>
-                  <FormControl.Label>Weight (optional)</FormControl.Label>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Weight (optional)
+                    </Text>
+                  </FormControl.Label>
                   <FormControl w='full'>
                     <Input
+                      height='50px'
+                      fontSize='16'
                       placeholder='Numeric Value'
                       keyboardType='numeric'
                       onChangeText={handleChange('weight')}
@@ -186,7 +211,43 @@ const AddFishModalContent = ({
                 </VStack>
 
                 <VStack w='1/2' marginBottom={5} paddingRight='5'>
-                  <FormControl.Label>Lifestage</FormControl.Label>
+                  <HStack space={2} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Lifestage
+                      </Text>
+                    </FormControl.Label>
+
+                    <Popover
+                      trigger={triggerProps => {
+                        return (
+                          <IconButton
+                            {...triggerProps}
+                            icon={
+                              <Icon
+                                as={MaterialIcons}
+                                name='info-outline'
+                                size='xl'
+                              />
+                            }
+                          ></IconButton>
+                        )
+                      }}
+                    >
+                      <Popover.Content
+                        accessibilityLabel='Existing Mark Info'
+                        w='56'
+                      >
+                        <Popover.Arrow />
+                        <Popover.CloseButton />
+                        <Popover.Header>Lifestage</Popover.Header>
+                        <Popover.Body>
+                          <Text>{''}</Text>
+                        </Popover.Body>
+                      </Popover.Content>
+                    </Popover>
+                  </HStack>
+
                   <FormControl w='full'>
                     <CustomSelect
                       selectedValue={values.lifestage}
@@ -204,7 +265,12 @@ const AddFishModalContent = ({
                 </VStack>
 
                 <VStack w='full' marginBottom={5}>
-                  <FormControl.Label>Adipose Clipped</FormControl.Label>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Adipose Clipped
+                    </Text>
+                  </FormControl.Label>
+
                   <Radio.Group
                     name='adiposeClipped'
                     accessibilityLabel='adipose clipped'
@@ -227,7 +293,45 @@ const AddFishModalContent = ({
                 </VStack>
 
                 <VStack w='full' marginBottom={5}>
-                  <FormControl.Label>Add Existing Mark</FormControl.Label>
+                  <HStack space={2} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Add Existing Mark
+                      </Text>
+                    </FormControl.Label>
+                    <Popover
+                      trigger={triggerProps => {
+                        return (
+                          <IconButton
+                            {...triggerProps}
+                            icon={
+                              <Icon
+                                as={MaterialIcons}
+                                name='info-outline'
+                                size='xl'
+                              />
+                            }
+                          ></IconButton>
+                        )
+                      }}
+                    >
+                      <Popover.Content
+                        accessibilityLabel='Existing Mark  Info'
+                        w='56'
+                      >
+                        <Popover.Arrow />
+                        <Popover.CloseButton />
+                        <Popover.Header>Existing Mark </Popover.Header>
+                        <Popover.Body>
+                          <Text>{`The buttons below are abbreviated versions of marks recently used for efficiency trials. If you catch a fish with any other existing marks please use the select another mark type. This will open up a window where you can specify mark type, color, position, and code if applicable. 
+
+Abbreviations follow a consistent format “mark type abbreviation - color abbreviation - position abbreviation” 
+`}</Text>
+                        </Popover.Body>
+                      </Popover.Content>
+                    </Popover>
+                  </HStack>
+
                   <HStack>
                     <Button
                       bg={
@@ -293,7 +397,11 @@ const AddFishModalContent = ({
                 </VStack>
 
                 <VStack w='full' marginBottom={5}>
-                  <FormControl.Label>Dead</FormControl.Label>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Dead
+                    </Text>
+                  </FormControl.Label>
                   <Radio.Group
                     name='dead'
                     accessibilityLabel='dead'
@@ -317,7 +425,9 @@ const AddFishModalContent = ({
 
                 <VStack w='full' marginBottom={5}>
                   <FormControl.Label>
-                    Will this fish be used in your next mark recapture trial?
+                    <Text color='black' fontSize='xl'>
+                      Will this fish be used in your next mark recapture trial?
+                    </Text>
                   </FormControl.Label>
                   <Radio.Group
                     name='willBeUsedInRecapture'

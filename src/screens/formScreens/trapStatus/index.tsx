@@ -88,30 +88,8 @@ const TrapStatus = ({
             borderWidth='15'
           >
             <VStack space={12}>
-              <Heading>Is the Trap functioning normally?</Heading>
-              <HStack space={10}>
-                <FormControl w='90%'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Trap Status
-                    </Text>
-                  </FormControl.Label>
-                  <CustomSelect
-                    selectedValue={values.trapStatus}
-                    placeholder='Trap Status'
-                    onValueChange={handleChange('trapStatus')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues.trapFunctionality.map(
-                      (item: any) => ({
-                        label: item.definition,
-                        value: item.definition,
-                      })
-                    )}
-                  />
-                  {touched.trapStatus &&
-                    errors.trapStatus &&
-                    renderErrorMessage(errors, 'trapStatus')}
-                </FormControl>
+              <HStack space={2} alignItems='center'>
+                <Heading>Is the Trap functioning normally?</Heading>
                 <Popover
                   trigger={triggerProps => {
                     return (
@@ -128,7 +106,7 @@ const TrapStatus = ({
                     )
                   }}
                 >
-                  <Popover.Content accessibilityLabel='Delete Customerd' w='56'>
+                  <Popover.Content accessibilityLabel='Trap Stats Info' w='56'>
                     <Popover.Arrow />
                     <Popover.CloseButton />
                     <Popover.Header>Trap Status</Popover.Header>
@@ -145,6 +123,28 @@ Trap Not in Service: Trap not set up for fishing upon arrival.
                   </Popover.Content>
                 </Popover>
               </HStack>
+              <FormControl w='90%'>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Trap Status
+                  </Text>
+                </FormControl.Label>
+                <CustomSelect
+                  selectedValue={values.trapStatus}
+                  placeholder='Trap Status'
+                  onValueChange={handleChange('trapStatus')}
+                  setFieldTouched={setFieldTouched}
+                  selectOptions={dropdownValues.trapFunctionality.map(
+                    (item: any) => ({
+                      label: item.definition,
+                      value: item.definition,
+                    })
+                  )}
+                />
+                {touched.trapStatus &&
+                  errors.trapStatus &&
+                  renderErrorMessage(errors, 'trapStatus')}
+              </FormControl>
               {values.trapStatus === 'Trap functioning, but not normally' && (
                 <FormControl>
                   <FormControl.Label>
