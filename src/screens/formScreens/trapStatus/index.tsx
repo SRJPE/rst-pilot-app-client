@@ -12,6 +12,12 @@ import {
   HStack,
   Text,
   View,
+  Tooltip,
+  IconButton,
+  Icon,
+  Button,
+  Popover,
+  Center,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
@@ -22,6 +28,7 @@ import {
   markTrapStatusCompleted,
   saveTrapStatus,
 } from '../../../redux/reducers/formSlices/trapStatusSlice'
+import { MaterialIcons } from '@expo/vector-icons'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Rain', value: 'High Rain' },
@@ -82,27 +89,62 @@ const TrapStatus = ({
           >
             <VStack space={12}>
               <Heading>Is the Trap functioning normally?</Heading>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Trap Status
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={values.trapStatus}
-                  placeholder='Trap Status'
-                  onValueChange={handleChange('trapStatus')}
+              <HStack space={10}>
+                <FormControl w='90%'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Trap Status
+                    </Text>
+                  </FormControl.Label>
+                  <CustomSelect
+                    selectedValue={values.trapStatus}
+                    placeholder='Trap Status'
+                    onValueChange={handleChange('trapStatus')}
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={dropdownValues.trapFunctionality.map(
+                      (item: any) => ({
+                        label: item.definition,
+                        value: item.definition,
+                      })
+                    )}
+                  />
+                  {touched.trapStatus &&
+                    errors.trapStatus &&
+                    renderErrorMessage(errors, 'trapStatus')}
+                </FormControl>
+                <Popover
+                  trigger={triggerProps => {
+                    return (
+                      <IconButton
+                        {...triggerProps}
+                        icon={
+                          <Icon
+                            as={MaterialIcons}
+                            name='info-outline'
+                            size='xl'
+                          />
+                        }
+                      ></IconButton>
+                    )
+                  }}
+                >
+                  <Popover.Content accessibilityLabel='Delete Customerd' w='56'>
+                    <Popover.Arrow />
+                    <Popover.CloseButton />
+                    <Popover.Header>Trap Status</Popover.Header>
+                    <Popover.Body>
+                      <Text>{`Please select one of the trap functioning dropdowns based on a visual inspection of the trap. 
+Trap Functioning Normally: Trap rotating normally in the expected location in river
+Trap Not Functioning: Trap not rotating or displaced in the river. 
+Trap Functioning but not normally: The trap appears to be rotating but not consistently. There may be high flows or high debris levels that are affecting the trap. 
+Trap Not in Service: Trap not set up for fishing upon arrival. 
 
-                  setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues.trapFunctionality.map((item: any) => ({
-                      label: item.definition,
-                      value: item.definition,
-                    }))}
-                />
-                {touched.trapStatus &&
-                  errors.trapStatus &&
-                  renderErrorMessage(errors, 'trapStatus')}
-              </FormControl>
+
+`}</Text>
+                    </Popover.Body>
+                  </Popover.Content>
+                </Popover>
+              </HStack>
               {values.trapStatus === 'Trap functioning, but not normally' && (
                 <FormControl>
                   <FormControl.Label>
@@ -117,6 +159,7 @@ const TrapStatus = ({
                     setFieldTouched={setFieldTouched}
                     selectOptions={reasonsForTrapNotFunctioning}
                   />
+
                   {touched.reasonNotFunc &&
                     errors.reasonNotFunc &&
                     renderErrorMessage(errors, 'reasonNotFunc')}
@@ -170,6 +213,7 @@ const TrapStatus = ({
                           Water Turbidity
                         </Text>
                       </FormControl.Label>
+
                       <Input
                         height='50px'
                         fontSize='16'
