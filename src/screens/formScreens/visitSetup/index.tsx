@@ -23,54 +23,51 @@ import { markStepCompleted } from '../../../redux/reducers/formSlices/navigation
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 import CustomSelect from '../../../components/Shared/CustomSelect'
 
-const testStreams = [
-  { label: 'Default Stream 1', value: 'DS1' },
-  { label: 'Default Stream 2', value: 'DS2' },
-  { label: 'Default Stream 3', value: 'DS3' },
-  { label: 'Default Stream 4', value: 'DS4' },
-  { label: 'Default Stream 5', value: 'DS5' },
-]
-const testSites = [
-  { label: 'Default Site 1', value: 'DS1' },
-  { label: 'Default Site 2', value: 'DS2' },
-  { label: 'Default Site 3', value: 'DS3' },
-]
-
 const mapStateToProps = (state: RootState) => {
   return {
-    reduxState: state.visitSetup,
+    visitSetupState: state.visitSetup,
+    visitSetupDefaultsState: state.visitSetupDefaults,
   }
 }
 
 const VisitSetup = ({
   navigation,
-  reduxState,
+  visitSetupState,
+  visitSetupDefaultsState,
 }: {
   navigation: any
-  reduxState: any
+  visitSetupState: any
+  visitSetupDefaultsState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [crew, setCrew] = useState(reduxState.values.crew as Array<any>)
+  const [selectedProgramId, setSelectedProgramId] = useState<number | null>(
+    null
+  )
 
   const handleSubmit = (values: any) => {
-    //add in additional values not using handleChange
-    values.crew = [...crew]
-    //dispatch to redux
     dispatch(saveVisitSetup(values))
     dispatch(markVisitSetupCompleted(true))
     dispatch(markStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ Visit', values)
   }
 
+  const updateSelectedProgram = (streamName: string) => {
+    let programId = null
+    visitSetupDefaultsState?.programs.forEach((program: any) => {
+      if (program.streamName === streamName) programId = program.id
+    })
+    setSelectedProgramId(programId)
+  }
+
   return (
     <Formik
       validationSchema={trapVisitSchema}
-      initialValues={reduxState.values}
+      initialValues={visitSetupState.values}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       // maybe this is not needed for first step in form?
       // initialTouched={{ trapSite: crew }}
-      // initialErrors={reduxState.completed ? undefined : { crew: '' }}
-      onSubmit={values => {
+      // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
+      onSubmit={(values) => {
         handleSubmit(values)
       }}
     >
@@ -102,9 +99,17 @@ const VisitSetup = ({
                 <CustomSelect
                   selectedValue={values.stream}
                   placeholder='Stream'
-                  onValueChange={handleChange('stream')}
+                  onValueChange={(itemValue: string) => {
+                    setFieldValue('stream', itemValue)
+                    updateSelectedProgram(itemValue)
+                  }}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={testStreams}
+                  selectOptions={visitSetupDefaultsState?.programs?.map(
+                    (program: any) => ({
+                      label: program?.streamName,
+                      value: program?.streamName,
+                    })
+                  )}
                 />
                 {touched.stream &&
                   errors.stream &&
@@ -124,7 +129,12 @@ const VisitSetup = ({
                       placeholder='Trap Site'
                       onValueChange={handleChange('trapSite')}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={testSites}
+                      selectOptions={visitSetupDefaultsState?.trapLocations?.map(
+                        (trapLocation: any) => ({
+                          label: trapLocation?.siteName,
+                          value: trapLocation?.siteName,
+                        })
+                      )}
                     />
                     {touched.trapSite &&
                       errors.trapSite &&
@@ -137,7 +147,12 @@ const VisitSetup = ({
                       </Text>
                     </FormControl.Label>
                     <CrewDropDown
-                      setCrew={setCrew}
+                      crewList={visitSetupDefaultsState?.crewMembers[
+                        selectedProgramId ? selectedProgramId - 1 : 0
+                      ].map((crewMember: any) => ({
+                        label: `${crewMember?.firstName} ${crewMember?.lastName}`,
+                        value: `${crewMember?.firstName} ${crewMember?.lastName}`,
+                      }))}
                       setFieldValue={setFieldValue}
                       setFieldTouched={setFieldTouched}
                     />
