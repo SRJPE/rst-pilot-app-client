@@ -74,7 +74,7 @@ export default function Home({ navigation }: { navigation: any }) {
       height='full'
       alignItems='center'
       justifyContent='space-between'
-      opacity={staggerOpen ? 30 : 100}
+      opacity={staggerOpen ? 0.25 : 1.0}
     >
       <TopIcons />
 
