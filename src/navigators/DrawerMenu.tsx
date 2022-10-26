@@ -26,7 +26,8 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
   const { steps, activeStep } = navigationState
   const { state, navigation } = props
   const currentRoute = state.routeNames[state.index]
-  const stepsArray = Object.values(steps).slice(0, 7) as Array<any>
+  const stepsArray = Object.values(steps) as Array<any>
+  // const stepsArray = Object.values(steps).slice(0, 7) as Array<any>
   // console.log('🚀 ~ DrawerMenu ~ steps', steps)
 
   const handlePressMainNavButton = useCallback(
@@ -118,9 +119,9 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
                 <VStack ml='8' key={index}>
                   <MenuButton
                     active={currentRoute === step.name}
-                    isDisabled={
-                      reduxState[step.propName]?.completed ? false : true
-                    }
+                    // isDisabled={
+                    //   reduxState[step.propName]?.completed ? false : true
+                    // }
                     onPress={() => handlePressFormButton(step.name)}
                     icon='clipboard'
                     title={step.name}
