@@ -24,6 +24,7 @@ const persistConfig = {
 
 export default combineReducers({
   dropdowns: persistReducer(persistConfig, dropdownsSlice),
+  visitSetupDefaults: persistReducer(persistConfig, visitSetupDefaultsSlice),
   navigation: navigationSlice,
   visitSetup: visitSetupSlice,
   trapStatus: trapStatusSlice,
@@ -36,5 +37,4 @@ export default combineReducers({
   trapPostProcessing: trapPostProcessingSlice,
   markRecaptureNavigation: markRecaptureNavigationSlice,
   releaseTrial: releaseTrialSlice,
-  visitSetupDefaults: visitSetupDefaultsSlice,
 })
