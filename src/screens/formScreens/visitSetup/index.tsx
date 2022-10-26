@@ -50,11 +50,8 @@ const VisitSetup = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [crew, setCrew] = useState(reduxState.values.crew as Array<any>)
 
   const handleSubmit = (values: any) => {
-    //add in additional values not using handleChange
-    values.crew = [...crew]
     //dispatch to redux
     dispatch(saveVisitSetup(values))
     dispatch(markVisitSetupCompleted(true))
@@ -137,7 +134,6 @@ const VisitSetup = ({
                       </Text>
                     </FormControl.Label>
                     <CrewDropDown
-                      setCrew={setCrew}
                       setFieldValue={setFieldValue}
                       setFieldTouched={setFieldTouched}
                     />

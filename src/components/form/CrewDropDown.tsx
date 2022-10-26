@@ -8,24 +8,18 @@ const CrewAvatar = () => {
 }
 
 export default function CrewDropDown({
-  setCrew,
   setFieldValue,
   setFieldTouched,
-}: // handleChange,
-{
-  setCrew: any
+}: {
   setFieldValue: any
   setFieldTouched: any
-  // handleChange: any
 }) {
   const [open, setOpen] = useState(false as boolean)
   const [value, setValue] = useState([] as Array<any>)
 
   useEffect(() => {
-    // setCrew(value)
     setFieldValue('crew', [...value])
     setFieldTouched('crew', true)
-    // handleChange(value as Array<string>)
   }, [value])
 
   const [items, setItems] = useState([
