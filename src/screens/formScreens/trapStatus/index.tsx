@@ -12,6 +12,12 @@ import {
   HStack,
   Text,
   View,
+  Tooltip,
+  IconButton,
+  Icon,
+  Button,
+  Popover,
+  Center,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
@@ -22,6 +28,7 @@ import {
   markTrapStatusCompleted,
   saveTrapStatus,
 } from '../../../redux/reducers/formSlices/trapStatusSlice'
+import { MaterialIcons } from '@expo/vector-icons'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Rain', value: 'High Rain' },
@@ -105,8 +112,42 @@ const TrapStatus = ({
             borderWidth='15'
           >
             <VStack space={12}>
-              <Heading>Is the Trap functioning normally?</Heading>
-              <FormControl>
+              <HStack space={2} alignItems='center'>
+                <Heading>Is the Trap functioning normally?</Heading>
+                <Popover
+                  trigger={triggerProps => {
+                    return (
+                      <IconButton
+                        {...triggerProps}
+                        icon={
+                          <Icon
+                            as={MaterialIcons}
+                            name='info-outline'
+                            size='xl'
+                          />
+                        }
+                      ></IconButton>
+                    )
+                  }}
+                >
+                  <Popover.Content accessibilityLabel='Trap Stats Info' w='56'>
+                    <Popover.Arrow />
+                    <Popover.CloseButton />
+                    <Popover.Header>Trap Status</Popover.Header>
+                    <Popover.Body>
+                      <Text>{`Please select one of the trap functioning dropdowns based on a visual inspection of the trap. 
+Trap Functioning Normally: Trap rotating normally in the expected location in river
+Trap Not Functioning: Trap not rotating or displaced in the river. 
+Trap Functioning but not normally: The trap appears to be rotating but not consistently. There may be high flows or high debris levels that are affecting the trap. 
+Trap Not in Service: Trap not set up for fishing upon arrival. 
+
+
+`}</Text>
+                    </Popover.Body>
+                  </Popover.Content>
+                </Popover>
+              </HStack>
+              <FormControl w='90%'>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
                     Trap Status
@@ -142,6 +183,7 @@ const TrapStatus = ({
                     setFieldTouched={setFieldTouched}
                     selectOptions={reasonsForTrapNotFunctioning}
                   />
+
                   {touched.reasonNotFunc &&
                     errors.reasonNotFunc &&
                     renderErrorMessage(errors, 'reasonNotFunc')}
@@ -197,6 +239,7 @@ const TrapStatus = ({
                           Water Turbidity
                         </Text>
                       </FormControl.Label>
+
                       <Input
                         height='50px'
                         fontSize='16'

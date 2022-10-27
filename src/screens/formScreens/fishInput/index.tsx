@@ -25,6 +25,7 @@ import {
 } from '../../../redux/reducers/formSlices/fishInputSlice'
 import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 import AddFishModalContent from '../../../components/form/AddFishModalContent'
+import PlusCountModalContent from '../../../components/form/PlusCountModalContent'
 
 const styles = StyleSheet.create({
   tableHead: { height: 40, backgroundColor: '#f1f8ff' },
@@ -45,7 +46,10 @@ const FishInput = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [addFishModalOpen, setAddFishModalOpen] = useState(false)
+  const [addFishModalOpen, setAddFishModalOpen] = useState(false as boolean)
+  const [addPlusCountModalOpen, setAddPlusCountModalOpen] = useState(
+    false as boolean
+  )
   const [addFishModalTab, setAddFishModalTab] = useState<
     'Individual' | 'Batch'
   >('Individual')
@@ -144,7 +148,9 @@ const FishInput = ({
                   p='3'
                   flex='1'
                   borderRadius='5'
-                  onPress={() => {}}
+                  onPress={() => {
+                    setAddPlusCountModalOpen(true)
+                  }}
                 >
                   <Text fontSize='sm' fontWeight='bold' color='white'>
                     Add Plus Counts
@@ -179,6 +185,20 @@ const FishInput = ({
                 }}
                 activeTab={addFishModalTab}
                 setActiveTab={setAddFishModalTab}
+              />
+            </CustomModal>
+            <CustomModal
+              isOpen={addPlusCountModalOpen}
+              closeModal={() => {
+                setAddPlusCountModalOpen(false)
+                dispatch(markFishInputModalOpen(false))
+              }}
+              height='1/2'
+            >
+              <PlusCountModalContent
+                closeModal={() => {
+                  setAddPlusCountModalOpen(false)
+                }}
               />
             </CustomModal>
           </View>

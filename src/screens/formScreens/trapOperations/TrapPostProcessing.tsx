@@ -37,21 +37,13 @@ const TrapPreProcessing = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [endingTrapStatus, setEndingTrapStatus] = useState(
-    reduxState.values.endingTrapStatus as string
-  )
 
   const handleSubmit = (values: any) => {
-    values.endingTrapStatus = endingTrapStatus
     dispatch(saveTrapPostProcessing(values))
     dispatch(markTrapPostProcessingCompleted(true))
     dispatch(markStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ TrapPostProcessing', values)
   }
-
-  useEffect(() => {
-    console.log('🚀 ~ endingTrapStatus', endingTrapStatus)
-  }, [endingTrapStatus])
 
   return (
     <Formik
@@ -67,6 +59,8 @@ const TrapPreProcessing = ({
         handleChange,
         handleBlur,
         handleSubmit,
+        setFieldTouched,
+        setFieldValue,
         touched,
         errors,
         values,
@@ -178,10 +172,15 @@ const TrapPreProcessing = ({
                 <Radio.Group
                   name='endingTrapStatus'
                   accessibilityLabel='Ending Trap Status'
-                  value={endingTrapStatus}
+                  value={`${values.endingTrapStatus}`}
                   onChange={(nextValue: any) => {
-                    setEndingTrapStatus(nextValue)
-                  }} // TODO: change to primary color
+                    setFieldTouched('endingTrapStatus', true)
+                    if (nextValue === 'Reset Trap') {
+                      setFieldValue('endingTrapStatus', 'Reset Trap')
+                    } else {
+                      setFieldValue('endingTrapStatus', 'End Trapping')
+                    }
+                  }}
                 >
                   <Radio colorScheme='primary' value='Reset Trap' my={1}>
                     Reset Trap

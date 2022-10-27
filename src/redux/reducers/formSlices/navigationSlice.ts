@@ -27,13 +27,13 @@ const formSteps = {
 interface NavigationStateI {
   activeStep: number
   steps: any
-  formIsValid?: boolean
+  isFormComplete?: boolean
 }
 
 const initialState: NavigationStateI = {
   activeStep: 1,
   steps: formSteps,
-  formIsValid: false,
+  isFormComplete: false,
 }
 
 export const navigationSlice = createSlice({
@@ -49,9 +49,42 @@ export const navigationSlice = createSlice({
         state.steps[state.activeStep - 1].completed = action.payload
       }
     },
+    checkIfFormIsComplete: state => {
+      //if all steps are completed,
+      //iterate over the first 6 step and check if all steps are completed
+      if (state.steps) {
+        const stepsArray = Object.values(state.steps).slice(0, 6)
+        console.log('🚀 ~ stepsArray', stepsArray)
+        const isFormComplete = stepsArray.some((step: any) => {
+          console.log('step: ', step.name, step.completed)
+          step.completed === false
+        })
+        console.log('🚀 ~ isFormComplete ~ isFormComplete', isFormComplete)
+
+        //mark form IsCompleted as True
+        state.isFormComplete = isFormComplete
+
+        // console.log(
+        //   'TEST',
+        //   Object.values(state.steps)
+        //     .slice(0, 6)
+        //     .some((step: any) => {
+        //       console.log('step: ', step.name, step.completed)
+        //       step.completed === false
+        //     })
+        // )
+        // state.isFormComplete = Object.values(state.steps)
+        //   .slice(0, 6)
+        //   .some((step: any) => {
+        //     console.log('step: ', step.name, step.completed)
+        //     step.completed === false
+        //   })
+      }
+    },
   },
 })
 
-export const { updateActiveStep, markStepCompleted } = navigationSlice.actions
+export const { updateActiveStep, markStepCompleted, checkIfFormIsComplete } =
+  navigationSlice.actions
 
 export default navigationSlice.reducer
