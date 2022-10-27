@@ -40,7 +40,7 @@ export const trapStatusSchema = yup.object().shape({
 export const trapPreProcessingSchema = yup.object().shape({
   coneDepth: yup
     .number()
-    .required('Stream required')
+    .required('Cone depth required')
     .typeError('Input must be a number'),
 
   totalRevolutions: yup
@@ -87,9 +87,16 @@ export const fishProcessingSchema = yup.object().shape({
 
 export const addIndividualFishSchema = yup.object().shape({
   species: yup.string().required('Fish species required'),
-  forkLength: yup.number().required('Fish fork length required'),
-  weight: yup.number(),
-  lifestage: yup.string().required('Fish lifestage required'),
+  forkLength: yup
+    .number()
+    .required('Fish fork length required')
+    .typeError('Input must be a number'),
+  run: yup
+    .number()
+    .required('Fish fork length required')
+    .typeError('Input must be a number'),
+  weight: yup.number().typeError('Input must be a number'),
+  lifeStage: yup.string().required('Fish life stage required'),
   adiposeClipped: yup
     .boolean()
     .required('Fish adipose clipped status required'),

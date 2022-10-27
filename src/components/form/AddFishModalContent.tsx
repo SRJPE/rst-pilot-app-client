@@ -32,39 +32,9 @@ import AddGeneticsModalContent from './AddGeneticsModalContent'
 import { saveGeneticSampleData } from '../../redux/reducers/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/addMarksOrTagsSlice'
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import renderErrorMessage from './RenderErrorMessage'
 
 const speciesDictionary = [{ label: 'Chinook', value: 'Chinook' }]
-const lifestageDictionary = [
-  { label: 'Yolk sac fry (alevin)', value: 'Yolk sac fry (alevin)' },
-  { label: 'YOY (young of the year)', value: 'YOY (young of the year)' },
-  { label: 'Fry', value: 'Fry' },
-  { label: 'Parr', value: 'Parr' },
-  { label: 'Silvery parr', value: 'Silvery parr' },
-  { label: 'Age I+', value: 'Age I+' },
-  { label: 'Pre-smolt', value: 'Pre-smolt' },
-  { label: 'Smolt', value: 'Smolt' },
-  { label: 'Yearling', value: 'Yearling' },
-  { label: 'Juvenile', value: 'Juvenile' },
-  { label: 'Adult', value: 'Adult' },
-  { label: 'Ammocoete', value: 'Ammocoete' },
-  {
-    label: 'Macropthalmia (transformer lamprey)',
-    value: 'Macropthalmia (transformer lamprey)',
-  },
-  { label: 'Mixed', value: 'Mixed' },
-  { label: 'Grilse / jack', value: 'Grilse / jack' },
-  { label: 'Larva', value: 'Larva' },
-  { label: 'Button-up fry', value: 'Button-up fry' },
-  { label: 'Unbuttoned fry', value: 'Unbuttoned fry' },
-  { label: 'Seamed fry', value: 'Seamed fry' },
-  { label: 'Subadult', value: 'Subadult' },
-  { label: 'Other', value: 'Other' },
-  { label: 'Not recorded', value: 'Not recorded' },
-  { label: 'Not applicable (n/a)', value: 'Not applicable (n/a)' },
-  { label: 'Unknown', value: 'Unknown' },
-  { label: 'See Comments', value: 'See Comments' },
-  { label: 'Not yet assigned', value: 'Not yet assigned' },
-]
 
 const AddFishModalContent = ({
   reduxState,
@@ -90,6 +60,7 @@ const AddFishModalContent = ({
     false as boolean
   )
   const [isSlideOpen, setIsSlideOpen] = React.useState(false as boolean)
+  console.log('🚀 ~ isSlideOpen', isSlideOpen)
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
@@ -106,17 +77,30 @@ const AddFishModalContent = ({
     saveGeneticSampleData(values)
   }
 
+  const handleSaveButtonDisable = (touched: any, errors: any) => {
+    return (
+      // (touched && Object.keys(touched).length === 0) ||
+      errors && Object.keys(errors).length > 0
+    )
+  }
+
+  const waitThenCloseSlide = () => {
+    setTimeout(() => {
+      setIsSlideOpen(false)
+    }, 3000)
+  }
+
   return (
     <>
       <Formik
         validationSchema={addIndividualFishSchema}
         initialValues={addIndividualFishSliceState.values}
+        initialTouched={{ species: true }}
+        initialErrors={reduxState.completed ? undefined : { species: '' }}
         onSubmit={values => {
           handleFormSubmit(values)
           setIsSlideOpen(!isSlideOpen)
-          setTimeout(() => {
-            setIsSlideOpen(!isSlideOpen)
-          }, 200)
+          waitThenCloseSlide()
         }}
       >
         {({
@@ -125,6 +109,7 @@ const AddFishModalContent = ({
           handleSubmit,
           setFieldValue,
           setFieldTouched,
+          resetForm,
           touched,
           errors,
           values,
@@ -141,33 +126,76 @@ const AddFishModalContent = ({
             />
             <ScrollView>
               <VStack paddingX='10' paddingTop='2' paddingBottom='3'>
-                <VStack w='1/2' paddingRight={5}>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Species
-                    </Text>
-                  </FormControl.Label>
+                <HStack marginBottom={5} alignItems='center'>
+                  <VStack w='1/2' paddingRight={5}>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Species
+                        </Text>
+                      </FormControl.Label>
+
+                      {touched.species &&
+                        errors.species &&
+                        renderErrorMessage(errors, 'species')}
+                    </HStack>
+                    <FormControl>
+                      <CustomSelect
+                        selectedValue={values.species}
+                        placeholder={'Species'}
+                        onValueChange={handleChange('species')}
+                        setFieldTouched={setFieldTouched}
+                        selectOptions={speciesDictionary}
+                      />
+                    </FormControl>
+                  </VStack>
                   <FormControl>
-                    <CustomSelect
-                      selectedValue={values.species}
-                      placeholder={'Species'}
-                      onValueChange={handleChange('species')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={speciesDictionary}
-                    />
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Reset Form
+                      </Text>
+                    </FormControl.Label>
+                    <Button
+                      h='50'
+                      w='1/2'
+                      bg='primary'
+                      onPress={() =>
+                        resetForm({
+                          values: {
+                            species: '',
+                            forkLength: 0,
+                            run: '',
+                            weight: 0,
+                            lifeStage: '',
+                            adiposeClipped: false,
+                            existingMark: '',
+                            dead: false,
+                            willBeUsedInRecapture: false,
+                          },
+                        })
+                      }
+                    >
+                      Clear All Values
+                    </Button>
                   </FormControl>
-                </VStack>
+                </HStack>
 
                 <Divider my={5} />
 
                 <HStack marginBottom={5}>
                   <VStack w='1/2' paddingRight={5}>
                     <FormControl w='full'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Fork Length
-                        </Text>
-                      </FormControl.Label>
+                      <HStack space={4} alignItems='center'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Fork Length
+                          </Text>
+                        </FormControl.Label>
+
+                        {touched.forkLength &&
+                          errors.forkLength &&
+                          renderErrorMessage(errors, 'forkLength')}
+                      </HStack>
                       <Input
                         height='50px'
                         fontSize='16'
@@ -190,11 +218,17 @@ const AddFishModalContent = ({
                   </VStack>
 
                   <VStack w='1/2' paddingLeft={5}>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Run
-                      </Text>
-                    </FormControl.Label>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Run
+                        </Text>
+                      </FormControl.Label>
+
+                      {touched.run &&
+                        errors.run &&
+                        renderErrorMessage(errors, 'run')}
+                    </HStack>
                     <FormControl w='full'>
                       <Input
                         height='50px'
@@ -214,7 +248,7 @@ const AddFishModalContent = ({
                     <HStack space={2} alignItems='center'>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
-                          Lifestage
+                          Life Stage
                         </Text>
                       </FormControl.Label>
 
@@ -240,19 +274,22 @@ const AddFishModalContent = ({
                         >
                           <Popover.Arrow />
                           <Popover.CloseButton />
-                          <Popover.Header>Lifestage</Popover.Header>
+                          <Popover.Header>Life Stage</Popover.Header>
                           <Popover.Body>
                             <Text>{''}</Text>
                           </Popover.Body>
                         </Popover.Content>
                       </Popover>
+                      {touched.lifeStage &&
+                        errors.lifeStage &&
+                        renderErrorMessage(errors, 'lifeStage')}
                     </HStack>
 
                     <FormControl w='full'>
                       <CustomSelect
-                        selectedValue={values.lifestage}
-                        placeholder={'Lifestage'}
-                        onValueChange={handleChange('lifestage')}
+                        selectedValue={values.lifeStage}
+                        placeholder={'Life Stage'}
+                        onValueChange={handleChange('lifeStage')}
                         setFieldTouched={setFieldTouched}
                         selectOptions={dropdownValues.lifeStage.map(
                           (item: any) => ({
@@ -265,11 +302,17 @@ const AddFishModalContent = ({
                   </VStack>
                   <VStack w='1/2' paddingLeft='5'>
                     <FormControl w='full'>
-                      <FormControl.Label pb='3'>
-                        <Text color='black' fontSize='xl'>
-                          Weight (optional)
-                        </Text>
-                      </FormControl.Label>
+                      <HStack space={4} alignItems='center'>
+                        <FormControl.Label pb='3'>
+                          <Text color='black' fontSize='xl'>
+                            Weight (optional)
+                          </Text>
+                        </FormControl.Label>
+
+                        {touched.weight &&
+                          errors.weight &&
+                          renderErrorMessage(errors, 'weight')}
+                      </HStack>
                       <Input
                         height='50px'
                         fontSize='16'
@@ -519,6 +562,7 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
                     py='5'
                     mx='2'
                     bg='#F9A38C'
+                    isDisabled={handleSaveButtonDisable(touched, errors)}
                     onPress={() => {
                       handleSubmit()
                       closeModal()
@@ -536,6 +580,7 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
                     py='5'
                     mx='2'
                     bg='primary'
+                    isDisabled={handleSaveButtonDisable(touched, errors)}
                     onPress={() => handleSubmit()}
                   >
                     <Text fontWeight='bold' color='white' fontSize='xl'>
@@ -567,7 +612,11 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
               />
             </CustomModal>
             {/* --------- Slide --------- */}
-            <Slide in={isSlideOpen} placement='top' duration={200}>
+            <Slide
+              in={isSlideOpen}
+              placement='top'
+              //  duration={200}
+            >
               <Box
                 w='100%'
                 position='absolute'

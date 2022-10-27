@@ -9,8 +9,8 @@ export interface IndividualFishValuesI {
   species: string
   forkLength: number
   run: string
-  weight?: number
-  lifestage: string
+  weight?: number | null
+  lifeStage: string
   adiposeClipped: boolean
   existingMark: string
   dead: boolean
@@ -23,8 +23,8 @@ const initialState: InitialStateI = {
     species: '',
     forkLength: 0,
     run: '',
-    weight: 0,
-    lifestage: '',
+    weight: null,
+    lifeStage: '',
     adiposeClipped: false,
     existingMark: '',
     dead: false,
