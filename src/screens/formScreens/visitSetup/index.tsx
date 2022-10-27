@@ -101,6 +101,12 @@ const VisitSetup = ({
                   placeholder='Stream'
                   onValueChange={(itemValue: string) => {
                     setFieldValue('stream', itemValue)
+                    setFieldValue(
+                      'trapSite',
+                      itemValue === 'Mill Creek'
+                        ? 'Mill Creek RST'
+                        : 'Deer Creek RST'
+                    )
                     updateSelectedProgram(itemValue)
                   }}
                   setFieldTouched={setFieldTouched}
@@ -129,7 +135,16 @@ const VisitSetup = ({
                     <CustomSelect
                       selectedValue={values.trapSite}
                       placeholder='Trap Site'
-                      onValueChange={handleChange('trapSite')}
+                      onValueChange={(itemValue: string) => {
+                        setFieldValue('trapSite', itemValue)
+                        setFieldValue(
+                          'stream',
+                          itemValue === 'Mill Creek RST'
+                            ? 'Mill Creek'
+                            : 'Deer Creek'
+                        )
+                        updateSelectedProgram(itemValue)
+                      }}
                       setFieldTouched={setFieldTouched}
                       selectOptions={visitSetupDefaultsState?.trapLocations?.map(
                         (trapLocation: any) => ({
