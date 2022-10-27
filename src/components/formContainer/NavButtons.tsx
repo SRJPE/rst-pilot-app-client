@@ -74,9 +74,16 @@ export default function NavButtons({
           navigateHelper('No Fish Caught', 12)
         } else if (values?.flowMeasure > 1000) {
           navigateHelper('High Flows', 9)
-        } else if (values?.waterTemperature > 30) {
-          navigateHelper('High Temperatures', 10)
+        } else if (values.waterTemperatureUnit === '°C') {
+          if (values?.waterTemperature > 30) {
+            navigateHelper('High Temperatures', 10)
+          }
+        } else if (values.waterTemperatureUnit === '°F') {
+          if (values?.waterTemperature > 86) {
+            navigateHelper('High Temperatures', 10)
+          }
         }
+
         break
       case 'Fish Processing':
         if (values?.fishProcessedResult === 'no fish caught') {
