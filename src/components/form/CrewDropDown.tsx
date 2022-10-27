@@ -8,9 +8,12 @@ const CrewAvatar = () => {
 }
 
 export default function CrewDropDown({
+  crewList,
   setFieldValue,
   setFieldTouched,
-}: {
+}:
+{
+  crewList: any
   setFieldValue: any
   setFieldTouched: any
 }) {
@@ -22,28 +25,7 @@ export default function CrewDropDown({
     setFieldTouched('crew', true)
   }, [value])
 
-  const [items, setItems] = useState([
-    {
-      label: 'Ben Pintel',
-      value: 'Ben Pintel',
-      icon: CrewAvatar,
-    },
-    {
-      label: 'Jordan Hoang',
-      value: 'Jordan Hoang',
-      icon: CrewAvatar,
-    },
-    {
-      label: 'Willie Whitfield',
-      value: 'Willie Whitfield',
-      icon: CrewAvatar,
-    },
-    {
-      label: 'Sadie Gill',
-      value: 'Sadie Gill',
-      icon: CrewAvatar,
-    },
-  ] as Array<any>)
+  const [items, setItems] = useState([...crewList])
 
   return (
     <View

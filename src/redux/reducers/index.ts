@@ -14,6 +14,7 @@ import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
 import markRecaptureNavigationSlice from './markRecaptureSlices/markRecaptureNavigationSlice'
 import addMarksOrTagsSlice from './addMarksOrTagsSlice'
 import addGeneticSamplesSlice from './addGeneticSamplesSlice'
+import visitSetupDefaultsSlice from './visitSetupDefaults'
 
 const persistConfig = {
   key: 'root',
@@ -23,6 +24,7 @@ const persistConfig = {
 
 export default combineReducers({
   dropdowns: persistReducer(persistConfig, dropdownsSlice),
+  visitSetupDefaults: persistReducer(persistConfig, visitSetupDefaultsSlice),
   navigation: navigationSlice,
   visitSetup: visitSetupSlice,
   trapStatus: trapStatusSlice,

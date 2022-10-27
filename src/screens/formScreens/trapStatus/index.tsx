@@ -59,6 +59,29 @@ const TrapStatus = ({
     dispatch(markStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ Status', values)
   }
+
+  const inputUnit = (text: string, setFieldValue?: any) => {
+    return (
+      <Text
+        color='#A1A1A1'
+        position='absolute'
+        top={50}
+        right={2}
+        onPress={() => {
+          if (setFieldValue) {
+            if (text === '°F') {
+              setFieldValue('waterTemperatureUnit', '°C')
+            } else {
+              setFieldValue('waterTemperatureUnit', '°F')
+            }
+          }
+        }}
+      >
+        {text}
+      </Text>
+    )
+  }
+
   return (
     <Formik
       validationSchema={trapStatusSchema}
@@ -74,6 +97,7 @@ const TrapStatus = ({
         handleChange,
         handleBlur,
         handleSubmit,
+        setFieldValue,
         setFieldTouched,
         touched,
         errors,
@@ -184,6 +208,7 @@ Trap Not in Service: Trap not set up for fishing upon arrival.
                         onBlur={handleBlur('flowMeasure')}
                         value={values.flowMeasure}
                       />
+                      {inputUnit(values.flowMeasureUnit)}
                       {touched.flowMeasure &&
                         errors.flowMeasure &&
                         renderErrorMessage(errors, 'flowMeasure')}
@@ -203,6 +228,7 @@ Trap Not in Service: Trap not set up for fishing upon arrival.
                         onBlur={handleBlur('waterTemperature')}
                         value={values.waterTemperature}
                       />
+                      {inputUnit(values.waterTemperatureUnit, setFieldValue)}
                       {touched.waterTemperature &&
                         errors.waterTemperature &&
                         renderErrorMessage(errors, 'waterTemperature')}
@@ -223,6 +249,7 @@ Trap Not in Service: Trap not set up for fishing upon arrival.
                         onBlur={handleBlur('waterTurbidity')}
                         value={values.waterTurbidity}
                       />
+                      {inputUnit(values.waterTurbidityUnit)}
                       {touched.waterTurbidity &&
                         errors.waterTurbidity &&
                         renderErrorMessage(errors, 'waterTurbidity')}

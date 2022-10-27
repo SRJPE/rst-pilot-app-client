@@ -12,19 +12,19 @@ export const trapStatusSchema = yup.object().shape({
   // .required('Reason Not Functioning Required'),
   flowMeasure: yup
     .number()
-    .typeError('Input must be a number')
-    .transform(value => (isNaN(value) ? undefined : value))
-    .required('Flow Measure Required'),
+    .required('Flow Measure Required')
+    .typeError('Input must be a number'),
+  flowMeasureUnit: yup.string(),
   waterTemperature: yup
     .number()
-    .typeError('Input must be a number')
-    .transform(value => (isNaN(value) ? undefined : value))
-    .required('Water Temperature Required'),
+    .required('Water Temperature Required')
+    .typeError('Input must be a number'),
+  waterTemperatureUnit: yup.string(),
   waterTurbidity: yup
     .number()
-    .typeError('Input must be a number')
-    .transform(value => (isNaN(value) ? undefined : value))
-    .required('Water Turbidity Required'),
+    .required('Water Turbidity Required')
+    .typeError('Input must be a number'),
+  waterTurbidityUnit: yup.string(),
 })
 
 export const trapPreProcessingSchema = yup.object().shape({
