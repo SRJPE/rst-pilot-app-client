@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import {
   Box,
   Button,
+  CheckIcon,
   Divider,
   FormControl,
   HStack,
@@ -11,6 +12,7 @@ import {
   Popover,
   Radio,
   ScrollView,
+  Slide,
   Text,
   VStack,
 } from 'native-base'
@@ -29,7 +31,7 @@ import MarkFishModalContent from './MarkFishModalContent'
 import AddGeneticsModalContent from './AddGeneticsModalContent'
 import { saveGeneticSampleData } from '../../redux/reducers/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/addMarksOrTagsSlice'
-import { MaterialIcons } from '@expo/vector-icons'
+import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 
 const speciesDictionary = [{ label: 'Chinook', value: 'Chinook' }]
 const lifestageDictionary = [
@@ -83,8 +85,11 @@ const AddFishModalContent = ({
   setActiveTab: any
   closeModal: any
 }) => {
-  const [markFishModalOpen, setMarkFishModalOpen] = useState(false)
-  const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(false)
+  const [markFishModalOpen, setMarkFishModalOpen] = useState(false as boolean)
+  const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
+    false as boolean
+  )
+  const [isSlideOpen, setIsSlideOpen] = React.useState(false as boolean)
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
@@ -108,6 +113,10 @@ const AddFishModalContent = ({
         initialValues={addIndividualFishSliceState.values}
         onSubmit={values => {
           handleFormSubmit(values)
+          setIsSlideOpen(!isSlideOpen)
+          setTimeout(() => {
+            setIsSlideOpen(!isSlideOpen)
+          }, 200)
         }}
       >
         {({
@@ -467,12 +476,7 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
                       False
                     </Radio>
                   </Radio.Group>
-                  <Text
-                    color='#A19C9C'
-                    marginTop='2'
-                    // color='black'
-                    fontSize='xl'
-                  >
+                  <Text color='#A19C9C' marginTop='2' fontSize='xl'>
                     Place in a seperate bucket
                   </Text>
                 </VStack>
@@ -562,6 +566,37 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
                 closeModal={() => setAddGeneticModalOpen(false)}
               />
             </CustomModal>
+            {/* --------- Slide --------- */}
+            <Slide in={isSlideOpen} placement='top' duration={200}>
+              <Box
+                w='100%'
+                position='absolute'
+                p='2'
+                borderRadius='xs'
+                bg='emerald.100'
+                alignItems='center'
+                justifyContent='center'
+                safeArea
+              >
+                <HStack space={4} alignItems='center'>
+                  <CheckIcon size='6' color='emerald.600' mt='1' />
+                  {/* <Icon
+                    as={FontAwesome5}
+                    name='fish'
+                    size='8'
+                    color='emerald.600'
+                  /> */}
+                  <Text
+                    fontSize={16}
+                    color='emerald.600'
+                    textAlign='center'
+                    fontWeight='medium'
+                  >
+                    Fish added successfully
+                  </Text>
+                </HStack>
+              </Box>
+            </Slide>
           </>
         )}
       </Formik>
