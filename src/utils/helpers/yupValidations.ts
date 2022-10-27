@@ -32,7 +32,7 @@ export const trapPreProcessingSchema = yup.object().shape({
     .number()
     .required('Stream required')
     .typeError('Input must be a number'),
-  coneSetting: yup.string().required('Trap site required'),
+
   totalRevolutions: yup
     .number()
     .required('Total Revolutions Required')
