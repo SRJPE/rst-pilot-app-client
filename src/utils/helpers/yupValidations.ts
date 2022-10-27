@@ -8,8 +8,18 @@ export const trapVisitSchema = yup.object().shape({
 
 export const trapStatusSchema = yup.object().shape({
   trapStatus: yup.string().required('Trap Status Required'),
-  reasonNotFunc: yup.string(),
-  // .required('Reason Not Functioning Required'),
+  // reasonNotFunc: yup
+  //   .string()
+  //   .test('test', 'message', function (value: any) {
+  //     const { trapStatus } = this.parent
+  //     console.log('🚀 ~ trapStatus', trapStatus)
+  //     return (
+  //       trapStatus === 'trap functioning but not normally' ||
+  //       trapStatus === 'trap not functioning'
+  //     )
+  //   })
+  //   .required('test message'),
+
   // flowMeasure: yup
   //   .number()
   //   .required('Flow Measure Required')
