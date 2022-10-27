@@ -60,7 +60,7 @@ const AddFishModalContent = ({
     false as boolean
   )
   const [isSlideOpen, setIsSlideOpen] = React.useState(false as boolean)
-  console.log('🚀 ~ isSlideOpen', isSlideOpen)
+
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
