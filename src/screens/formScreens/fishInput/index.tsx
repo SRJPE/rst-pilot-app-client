@@ -10,13 +10,11 @@ import {
   Text,
   View,
 } from 'native-base'
-import { Table, Row, Rows } from 'react-native-table-component'
 import { StyleSheet } from 'react-native'
 import CustomModal from '../../../components/Shared/CustomModal'
 import { Formik } from 'formik'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { AppDispatch, RootState } from '../../../redux/store'
-
 import { connect, useDispatch } from 'react-redux'
 import {
   markFishInputCompleted,
@@ -25,6 +23,7 @@ import {
 } from '../../../redux/reducers/formSlices/fishInputSlice'
 import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 import AddFishModalContent from '../../../components/form/AddFishModalContent'
+import FishInputDataTable from '../../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../../components/form/PlusCountModalContent'
 
 const styles = StyleSheet.create({
@@ -160,14 +159,7 @@ const FishInput = ({
 
               <Box>
                 <Heading pb='8'>Catch Table</Heading>
-                <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-                  <Row
-                    data={tableHead}
-                    style={styles.tableHead}
-                    textStyle={styles.tableText}
-                  />
-                  <Rows data={tableData} textStyle={styles.tableText} />
-                </Table>
+                <FishInputDataTable />
               </Box>
             </VStack>
             {/* --------- Modals --------- */}
