@@ -191,80 +191,81 @@ const AddFishModalContent = ({
                   </VStack>
                 </HStack>
 
-                <VStack w='1/2' marginBottom={5} paddingRight='5'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Weight (optional)
-                    </Text>
-                  </FormControl.Label>
-                  <FormControl w='full'>
-                    <Input
-                      height='50px'
-                      fontSize='16'
-                      placeholder='Numeric Value'
-                      keyboardType='numeric'
-                      onChangeText={handleChange('weight')}
-                      onBlur={handleBlur('weight')}
-                      value={values.weight}
-                    />
-                  </FormControl>
-                </VStack>
+                <HStack marginBottom={5}>
+                  <VStack w='1/2' paddingRight='5'>
+                    <HStack space={2} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Lifestage
+                        </Text>
+                      </FormControl.Label>
 
-                <VStack w='1/2' marginBottom={5} paddingRight='5'>
-                  <HStack space={2} alignItems='center'>
-                    <FormControl.Label>
+                      <Popover
+                        trigger={triggerProps => {
+                          return (
+                            <IconButton
+                              {...triggerProps}
+                              icon={
+                                <Icon
+                                  as={MaterialIcons}
+                                  name='info-outline'
+                                  size='xl'
+                                />
+                              }
+                            ></IconButton>
+                          )
+                        }}
+                      >
+                        <Popover.Content
+                          accessibilityLabel='Existing Mark Info'
+                          w='56'
+                        >
+                          <Popover.Arrow />
+                          <Popover.CloseButton />
+                          <Popover.Header>Lifestage</Popover.Header>
+                          <Popover.Body>
+                            <Text>{''}</Text>
+                          </Popover.Body>
+                        </Popover.Content>
+                      </Popover>
+                    </HStack>
+
+                    <FormControl w='full'>
+                      <CustomSelect
+                        selectedValue={values.lifestage}
+                        placeholder={'Lifestage'}
+                        onValueChange={handleChange('lifestage')}
+                        setFieldTouched={setFieldTouched}
+                        selectOptions={dropdownValues.lifeStage.map(
+                          (item: any) => ({
+                            label: item.definition,
+                            value: item.definition,
+                          })
+                        )}
+                      />
+                    </FormControl>
+                  </VStack>
+                  <VStack w='1/2' paddingLeft='5'>
+                    <FormControl.Label pb='3'>
                       <Text color='black' fontSize='xl'>
-                        Lifestage
+                        Weight (optional)
                       </Text>
                     </FormControl.Label>
+                    <FormControl w='full'>
+                      <Input
+                        height='50px'
+                        fontSize='16'
+                        placeholder='Numeric Value'
+                        keyboardType='numeric'
+                        onChangeText={handleChange('weight')}
+                        onBlur={handleBlur('weight')}
+                        value={values.weight}
+                      />
+                    </FormControl>
+                  </VStack>
+                </HStack>
 
-                    <Popover
-                      trigger={triggerProps => {
-                        return (
-                          <IconButton
-                            {...triggerProps}
-                            icon={
-                              <Icon
-                                as={MaterialIcons}
-                                name='info-outline'
-                                size='xl'
-                              />
-                            }
-                          ></IconButton>
-                        )
-                      }}
-                    >
-                      <Popover.Content
-                        accessibilityLabel='Existing Mark Info'
-                        w='56'
-                      >
-                        <Popover.Arrow />
-                        <Popover.CloseButton />
-                        <Popover.Header>Lifestage</Popover.Header>
-                        <Popover.Body>
-                          <Text>{''}</Text>
-                        </Popover.Body>
-                      </Popover.Content>
-                    </Popover>
-                  </HStack>
-
-                  <FormControl w='full'>
-                    <CustomSelect
-                      selectedValue={values.lifestage}
-                      placeholder={'Lifestage'}
-                      onValueChange={handleChange('lifestage')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={dropdownValues.lifeStage.map(
-                        (item: any) => ({
-                          label: item.definition,
-                          value: item.definition,
-                        })
-                      )}
-                    />
-                  </FormControl>
-                </VStack>
-
-                <VStack w='full' marginBottom={5}>
+                <VStack w='full'>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Adipose Clipped
@@ -448,13 +449,20 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
                       False
                     </Radio>
                   </Radio.Group>
-                  <Text color='#A19C9C' marginTop='2'>
+                  <Text
+                    color='#A19C9C'
+                    marginTop='2'
+                    // color='black'
+                    fontSize='xl'
+                  >
                     Place in a seperate bucket
                   </Text>
                 </VStack>
 
                 <HStack>
                   <Button
+                    height='50px'
+                    fontSize='16'
                     bg='secondary'
                     color='#007C7C'
                     py='1'
@@ -519,7 +527,7 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
             <CustomModal
               isOpen={markFishModalOpen}
               closeModal={() => setMarkFishModalOpen(false)}
-              height='1/2'
+              height='2/3'
             >
               <MarkFishModalContent
                 handleMarkFishFormSubmit={handleMarkFishFormSubmit}
@@ -529,7 +537,7 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
             <CustomModal
               isOpen={addGeneticModalOpen}
               closeModal={() => setAddGeneticModalOpen(false)}
-              height='1/2'
+              height='2/3'
             >
               <AddGeneticsModalContent
                 handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}

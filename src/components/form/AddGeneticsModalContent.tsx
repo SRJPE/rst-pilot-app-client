@@ -83,21 +83,43 @@ const AddGeneticsModalContent = ({
             />
             <VStack paddingX='10' paddingTop='7' paddingBottom='10'>
               <HStack justifyContent='space-between' marginBottom='5'>
-                <Button bg='primary' flex={1} marginRight={5}>
-                  <Text color='white'>View Genetic Sampling Protocols</Text>
+                <Button
+                  bg='primary'
+                  flex={1}
+                  marginRight={5}
+                  height='50px'
+                  fontSize='16'
+                >
+                  <Text fontSize='xl' color='white'>
+                    View Genetic Sampling Protocols
+                  </Text>
                 </Button>
 
-                <Button bg='secondary' flex={1} marginLeft={5}>
-                  <Text color='primary'>Watch Video</Text>
+                <Button
+                  bg='secondary'
+                  flex={1}
+                  marginLeft={5}
+                  height='50px'
+                  fontSize='16'
+                >
+                  <Text fontSize='xl' color='primary'>
+                    Watch Video
+                  </Text>
                 </Button>
               </HStack>
 
               <HStack>
                 <VStack w='1/2' paddingRight='5'>
                   <VStack w='full' marginBottom={5}>
-                    <FormControl.Label>Sample ID Number:</FormControl.Label>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Sample ID Number:
+                      </Text>
+                    </FormControl.Label>
                     <FormControl>
                       <Input
+                        height='50px'
+                        fontSize='16'
                         placeholder='Write a comment'
                         keyboardType='default'
                         onChangeText={handleChange('sampleIdNumber')}
@@ -109,7 +131,9 @@ const AddGeneticsModalContent = ({
 
                   <VStack w='full' marginBottom={5}>
                     <FormControl.Label>
-                      Confirm Mucus Swab Collected
+                      <Text color='black' fontSize='xl'>
+                        Confirm Mucus Swab Collected
+                      </Text>
                     </FormControl.Label>
                     <Radio.Group
                       name='mucusSwabCollected'
@@ -133,7 +157,11 @@ const AddGeneticsModalContent = ({
                   </VStack>
 
                   <VStack w='full' marginBottom={5}>
-                    <FormControl.Label>Fin Clip Collected</FormControl.Label>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Fin Clip Collected
+                      </Text>
+                    </FormControl.Label>
                     <Radio.Group
                       name='finClipCollected'
                       accessibilityLabel='Fin Clip Collected'
@@ -155,9 +183,11 @@ const AddGeneticsModalContent = ({
                     </Radio.Group>
                   </VStack>
 
-                  <VStack w='full'>
+                  <VStack w='full' marginBottom={5}>
                     <FormControl.Label>
-                      Crew Member Collecting Samples
+                      <Text color='black' fontSize='xl'>
+                        Crew Member Collecting Samples
+                      </Text>
                     </FormControl.Label>
                     <FormControl>
                       <CustomSelect
@@ -186,9 +216,15 @@ const AddGeneticsModalContent = ({
               </HStack>
 
               <VStack w='full'>
-                <FormControl.Label>Comments</FormControl.Label>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Comments
+                  </Text>
+                </FormControl.Label>
                 <FormControl>
                   <Input
+                    height='50px'
+                    fontSize='16'
                     placeholder='Write a comment'
                     keyboardType='default'
                     onChangeText={handleChange('comments')}
