@@ -4,11 +4,11 @@ import { DataTable } from 'react-native-paper'
 const numberOfItemsPerPageList = [2, 3, 4]
 
 const data = {
-  headers: ['species', 'fork length', 'weight', 'run', 'adipose clipped'], // length = 5
+  headers: ['species', 'fork length', 'weight', 'run', 'clipped', 'mark code', 'cwt code', 'mort'], // length = 8
   rows: [
-    ['chinook', 100, 10, '', ''],
-    ['chinook', 100, 10, '', ''],
-    ['chinook', 100, 10, '', ''],
+    ['chinook', 100, 10, '', '', '', '', ''],
+    ['chinook', 100, 10, '', '', '', '', ''],
+    ['chinook', 100, 10, '', '', '', '', ''],
   ]
 }
 
@@ -44,7 +44,7 @@ const FishInputDataTable = () => {
       <DataTable.Pagination
         page={page}
         numberOfPages={Math.ceil(data.rows.length / numberOfItemsPerPage)}
-        onPageChange={(page) => setPage(page)}
+        onPageChange={(page: number) => setPage(page)}
         label={`${from + 1}-${to} of ${data.rows.length}`}
         showFastPaginationControls
         numberOfItemsPerPageList={numberOfItemsPerPageList}
