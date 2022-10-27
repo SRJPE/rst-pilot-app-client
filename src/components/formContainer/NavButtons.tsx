@@ -28,7 +28,7 @@ export default function NavButtons({
   const reduxState = useSelector((state: any) => state)
   const stepsArray = Object.values(navigationState.steps).slice(0, 6)
   const isFormComplete = navigationState.isFormComplete
-  console.log('🚀 ~ isFormComplete', isFormComplete)
+  // console.log('🚀 ~ isFormComplete', isFormComplete)
 
   // useEffect(() => {
   //   dispatch(checkIfFormIsComplete())
@@ -156,7 +156,7 @@ export default function NavButtons({
   const disableRightButton = () => {
     if (activePage === 'Incomplete Sections') {
       //if form is complete, then do not disable button
-      return isFormComplete ? false : true
+      // return isFormComplete ? false : true
     } else {
       return (
         //**temp conditional for fish input**
