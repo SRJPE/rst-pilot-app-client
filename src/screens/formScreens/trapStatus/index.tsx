@@ -66,7 +66,8 @@ const TrapStatus = ({
         color='#A1A1A1'
         position='absolute'
         top={50}
-        right={2}
+        right={4}
+        fontSize={16}
         onPress={() => {
           if (setFieldValue) {
             if (text === '°F') {

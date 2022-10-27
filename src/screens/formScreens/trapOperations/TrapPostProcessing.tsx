@@ -94,6 +94,15 @@ const TrapPreProcessing = ({
                   onBlur={handleBlur('debrisVolume')}
                   value={values.debrisVolume}
                 />
+                <Text
+                  color='#A1A1A1'
+                  position='absolute'
+                  top={50}
+                  right={4}
+                  fontSize={16}
+                >
+                  {'L'}
+                </Text>
                 {touched.debrisVolume &&
                   errors.debrisVolume &&
                   renderErrorMessage(errors, 'debrisVolume')}
