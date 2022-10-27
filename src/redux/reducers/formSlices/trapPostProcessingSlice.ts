@@ -22,7 +22,7 @@ const initialState: InitialStateI = {
     rpm2: null,
     rpm3: null,
     trapLocation: '',
-    endingTrapStatus: '',
+    endingTrapStatus: 'Reset Trap',
   },
 }
 
