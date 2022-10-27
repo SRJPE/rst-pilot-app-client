@@ -527,7 +527,7 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
             <CustomModal
               isOpen={markFishModalOpen}
               closeModal={() => setMarkFishModalOpen(false)}
-              height='2/3'
+              height='3/4'
             >
               <MarkFishModalContent
                 handleMarkFishFormSubmit={handleMarkFishFormSubmit}
@@ -537,7 +537,7 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
             <CustomModal
               isOpen={addGeneticModalOpen}
               closeModal={() => setAddGeneticModalOpen(false)}
-              height='2/3'
+              height='3/4'
             >
               <AddGeneticsModalContent
                 handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}

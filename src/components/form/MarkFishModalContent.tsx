@@ -104,7 +104,7 @@ const MarkFishModalContent = ({
                 </Button>
               }
             />
-            <VStack space={5} paddingX='20' paddingTop='7' paddingBottom='3'>
+            <VStack space={5} paddingX='10' paddingTop='7' paddingBottom='3'>
               <VStack w='full'>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
