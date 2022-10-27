@@ -15,6 +15,7 @@ import {
   HStack,
   Radio,
   View,
+  Icon,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapPreProcessingSchema } from '../../../utils/helpers/yupValidations'
@@ -22,6 +23,7 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Keyboard } from 'react-native'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
+import { Ionicons } from '@expo/vector-icons'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -80,11 +82,16 @@ const TrapPreProcessing = ({
             <VStack space={10}>
               <Heading>Trap Pre-Processing</Heading>
               <FormControl w='1/2'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Cone Depth
-                  </Text>
-                </FormControl.Label>
+                <HStack space={4} alignItems='center'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Cone Depth
+                    </Text>
+                  </FormControl.Label>
+                  {touched.coneDepth &&
+                    errors.coneDepth &&
+                    renderErrorMessage(errors, 'coneDepth')}
+                </HStack>
                 <Input
                   height='50px'
                   fontSize='16'
@@ -103,9 +110,6 @@ const TrapPreProcessing = ({
                 >
                   {'in'}
                 </Text>
-                {touched.coneDepth &&
-                  errors.coneDepth &&
-                  renderErrorMessage(errors, 'coneDepth')}
               </FormControl>
               <FormControl w='30%'>
                 <FormControl.Label>
@@ -135,11 +139,16 @@ const TrapPreProcessing = ({
                 </Radio.Group>
               </FormControl>
               <FormControl w='1/2'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Total Revolutions
-                  </Text>
-                </FormControl.Label>
+                <HStack space={4} alignItems='center'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Total Revolutions
+                    </Text>
+                  </FormControl.Label>
+                  {touched.totalRevolutions &&
+                    errors.totalRevolutions &&
+                    renderErrorMessage(errors, 'totalRevolutions')}
+                </HStack>
                 <Input
                   height='50px'
                   fontSize='16'
@@ -149,16 +158,30 @@ const TrapPreProcessing = ({
                   onBlur={handleBlur('totalRevolutions')}
                   value={values.totalRevolutions}
                 />
-                {touched.totalRevolutions &&
-                  errors.totalRevolutions &&
-                  renderErrorMessage(errors, 'totalRevolutions')}
               </FormControl>
               <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    RPM Before Cleaning
-                  </Text>
-                </FormControl.Label>
+                <HStack space={4} alignItems='center'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      RPM Before Cleaning
+                    </Text>
+                  </FormControl.Label>
+                  {((touched.rpm1 && errors.rpm1) ||
+                    (touched.rpm2 && errors.rpm2) ||
+                    (touched.rpm3 && errors.rpm3)) && (
+                    <HStack space={1}>
+                      <Icon
+                        marginTop={'.5'}
+                        as={Ionicons}
+                        name='alert-circle-outline'
+                        color='error'
+                      />
+                      <Text style={{ fontSize: 14, color: '#b71c1c' }}>
+                        All Three measurements are required
+                      </Text>
+                    </HStack>
+                  )}
+                </HStack>
                 <HStack space={8} justifyContent='space-between'>
                   <FormControl w='30%'>
                     <Input
@@ -170,15 +193,6 @@ const TrapPreProcessing = ({
                       onBlur={handleBlur('rpm1')}
                       value={values.rpm1}
                     />
-                    {touched.rpm1 &&
-                      errors.rpm1 &&
-                      renderErrorMessage(errors, 'rpm1')}
-                    {/* {touched.rpm2 &&
-                      (values.rpm2 > 2000 || values.rpm2 < 50) && (
-                        <Text style={{ fontSize: 12, color: 'orange' }}>
-                          VALUE OUT OF RANGE
-                        </Text>
-                      )} */}
                   </FormControl>
                   <FormControl w='30%'>
                     <Input
@@ -190,9 +204,6 @@ const TrapPreProcessing = ({
                       onBlur={handleBlur('rpm2')}
                       value={values.rpm2}
                     />
-                    {touched.rpm2 &&
-                      errors.rpm2 &&
-                      renderErrorMessage(errors, 'rpm2')}
                   </FormControl>
                   <FormControl w='30%'>
                     <Input
@@ -204,9 +215,6 @@ const TrapPreProcessing = ({
                       onBlur={handleBlur('rpm3')}
                       value={values.rpm3}
                     />
-                    {touched.rpm3 &&
-                      errors.rpm3 &&
-                      renderErrorMessage(errors, 'rpm3')}
                   </FormControl>
                 </HStack>
                 <Text color='grey' my='5' fontSize='17'>
