@@ -19,10 +19,14 @@ import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 
 const initialFormValues = {
+  species: '',
+  lifeStage: '',
+  run: '',
   count: '',
   plusCountMethod: '',
 }
 
+const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
 const plusCountMethods = [
   { label: 'Method 1', value: 'Method 1', definition: 'Method 1' },
   { label: 'Method 2', value: ' Method 2', definition: 'Method 2' },
@@ -44,7 +48,7 @@ const PlusCountModalContent = ({
   return (
     <ScrollView>
       <Formik
-        validationSchema={addMarksOrTagsSchema}
+        // validationSchema={addMarksOrTagsSchema}
         initialValues={initialFormValues}
         onSubmit={values => handleFormSubmit(values)}
       >
@@ -86,6 +90,54 @@ const PlusCountModalContent = ({
               <FormControl>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
+                    Species
+                  </Text>
+                </FormControl.Label>
+                <CustomSelect
+                  selectedValue={values.species}
+                  placeholder={'Species'}
+                  onValueChange={handleChange('species')}
+                  setFieldTouched={setFieldTouched}
+                  selectOptions={speciesDictionary}
+                />
+              </FormControl>
+              <FormControl>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Life Stage
+                  </Text>
+                </FormControl.Label>
+                <CustomSelect
+                  selectedValue={values.lifeStage}
+                  placeholder={'Life stage'}
+                  onValueChange={handleChange('lifeStage')}
+                  setFieldTouched={setFieldTouched}
+                  selectOptions={dropdownValues.lifeStage.map((item: any) => ({
+                    label: item.definition,
+                    value: item.definition,
+                  }))}
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Run
+                  </Text>
+                </FormControl.Label>
+                <Input
+                  height='50px'
+                  fontSize='16'
+                  placeholder='Enter run'
+                  keyboardType='numeric'
+                  onChangeText={handleChange('run')}
+                  onBlur={handleBlur('run')}
+                  value={values.count}
+                />
+              </FormControl>
+              <FormControl>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
                     Count
                   </Text>
                 </FormControl.Label>
@@ -108,7 +160,7 @@ const PlusCountModalContent = ({
                 </FormControl.Label>
                 <CustomSelect
                   selectedValue={values.plusCountMethod}
-                  placeholder={'Type'}
+                  placeholder={'Method'}
                   onValueChange={handleChange('plusCountMethod')}
                   setFieldTouched={setFieldTouched}
                   selectOptions={plusCountMethods.map((item: any) => ({
