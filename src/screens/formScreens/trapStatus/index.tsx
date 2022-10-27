@@ -148,7 +148,7 @@ Trap Not in Service: Trap not set up for fishing upon arrival.
                   </Popover.Content>
                 </Popover>
               </HStack>
-              <FormControl w='90%'>
+              <FormControl>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
                     Trap Status
@@ -170,7 +170,8 @@ Trap Not in Service: Trap not set up for fishing upon arrival.
                   errors.trapStatus &&
                   renderErrorMessage(errors, 'trapStatus')}
               </FormControl>
-              {values.trapStatus === 'Trap functioning, but not normally' && (
+              {(values.trapStatus === 'trap functioning but not normally' ||
+                values.trapStatus === 'trap not functioning') && (
                 <FormControl>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
@@ -210,9 +211,9 @@ Trap Not in Service: Trap not set up for fishing upon arrival.
                         value={values.flowMeasure}
                       />
                       {inputUnit(values.flowMeasureUnit)}
-                      {touched.flowMeasure &&
+                      {/* {touched.flowMeasure &&
                         errors.flowMeasure &&
-                        renderErrorMessage(errors, 'flowMeasure')}
+                        renderErrorMessage(errors, 'flowMeasure')} */}
                     </FormControl>
                     <FormControl w='1/4'>
                       <FormControl.Label>
