@@ -10,10 +10,10 @@ export const trapStatusSchema = yup.object().shape({
   trapStatus: yup.string().required('Trap Status Required'),
   reasonNotFunc: yup.string(),
   // .required('Reason Not Functioning Required'),
-  flowMeasure: yup
-    .number()
-    .required('Flow Measure Required')
-    .typeError('Input must be a number'),
+  // flowMeasure: yup
+  //   .number()
+  //   .required('Flow Measure Required')
+  //   .typeError('Input must be a number'),
   flowMeasureUnit: yup.string(),
   waterTemperature: yup
     .number()
