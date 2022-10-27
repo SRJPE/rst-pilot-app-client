@@ -11,8 +11,7 @@ export default function CrewDropDown({
   crewList,
   setFieldValue,
   setFieldTouched,
-}:
-{
+}: {
   crewList: any
   setFieldValue: any
   setFieldTouched: any
@@ -44,12 +43,12 @@ export default function CrewDropDown({
         setValue={setValue}
         setItems={setItems}
         multiple={true}
-        searchable={true}
+        // searchable={true}
         mode='BADGE'
         badgeDotColors={['#007C7C']}
         placeholder='Select your crew'
         searchPlaceholder='Search...'
-        maxHeight={400}
+        maxHeight={350}
 
         // renderListItem={props => <CrewListItem {...props} />}
       />

@@ -67,7 +67,7 @@ const VisitSetup = ({
       // maybe this is not needed for first step in form?
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
-      onSubmit={(values) => {
+      onSubmit={values => {
         handleSubmit(values)
       }}
     >
@@ -88,7 +88,7 @@ const VisitSetup = ({
             borderColor='themeGrey'
             borderWidth='15'
           >
-            <VStack space={12}>
+            <VStack space={10}>
               <Heading mt='2'>Which stream are you trapping on?</Heading>
               <FormControl>
                 <FormControl.Label>
@@ -117,8 +117,10 @@ const VisitSetup = ({
               </FormControl>
               {values.stream && (
                 <>
-                  <Heading fontSize='lg'>Confirm the following values:</Heading>
                   <FormControl>
+                    <Heading fontSize='lg' mb='4'>
+                      Confirm the following values:
+                    </Heading>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
                         Trap Site
@@ -147,7 +149,6 @@ const VisitSetup = ({
                       </Text>
                     </FormControl.Label>
                     <CrewDropDown
-
                       crewList={visitSetupDefaultsState?.crewMembers[
                         selectedProgramId ? selectedProgramId - 1 : 0
                       ].map((crewMember: any) => ({
