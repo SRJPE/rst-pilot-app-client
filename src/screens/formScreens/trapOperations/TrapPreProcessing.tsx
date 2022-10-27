@@ -94,6 +94,15 @@ const TrapPreProcessing = ({
                   onBlur={handleBlur('coneDepth')}
                   value={values.coneDepth}
                 />
+                <Text
+                  color='#A1A1A1'
+                  position='absolute'
+                  top={50}
+                  right={4}
+                  fontSize={16}
+                >
+                  {'in'}
+                </Text>
                 {touched.coneDepth &&
                   errors.coneDepth &&
                   renderErrorMessage(errors, 'coneDepth')}

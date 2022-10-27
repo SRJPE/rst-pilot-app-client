@@ -153,12 +153,12 @@ const AddFishModalContent = ({
 
                 <HStack marginBottom={5}>
                   <VStack w='1/2' paddingRight={5}>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Fork Length
-                      </Text>
-                    </FormControl.Label>
                     <FormControl w='full'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Fork Length
+                        </Text>
+                      </FormControl.Label>
                       <Input
                         height='50px'
                         fontSize='16'
@@ -168,6 +168,15 @@ const AddFishModalContent = ({
                         onBlur={handleBlur('forkLength')}
                         value={values.forkLength}
                       />
+                      <Text
+                        color='#A1A1A1'
+                        position='absolute'
+                        top={50}
+                        right={4}
+                        fontSize={16}
+                      >
+                        {'mm'}
+                      </Text>
                     </FormControl>
                   </VStack>
 
@@ -246,12 +255,12 @@ const AddFishModalContent = ({
                     </FormControl>
                   </VStack>
                   <VStack w='1/2' paddingLeft='5'>
-                    <FormControl.Label pb='3'>
-                      <Text color='black' fontSize='xl'>
-                        Weight (optional)
-                      </Text>
-                    </FormControl.Label>
                     <FormControl w='full'>
+                      <FormControl.Label pb='3'>
+                        <Text color='black' fontSize='xl'>
+                          Weight (optional)
+                        </Text>
+                      </FormControl.Label>
                       <Input
                         height='50px'
                         fontSize='16'
@@ -261,6 +270,15 @@ const AddFishModalContent = ({
                         onBlur={handleBlur('weight')}
                         value={values.weight}
                       />
+                      <Text
+                        color='#A1A1A1'
+                        position='absolute'
+                        top={60}
+                        right={4}
+                        fontSize={16}
+                      >
+                        {'g'}
+                      </Text>
                     </FormControl>
                   </VStack>
                 </HStack>
