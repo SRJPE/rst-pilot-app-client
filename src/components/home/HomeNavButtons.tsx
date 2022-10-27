@@ -39,7 +39,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     marginBottom: -89,
-    // opacity: `${100}px !important`,
+    // opacity: 1,
+    // opacity: `${100} !important`,
     //  opacity: {[100,'!important']},
   },
 
@@ -83,7 +84,7 @@ export default function BottomNavigation({
   }, [navigation])
   const handlePressStagger = () => {
     onToggle()
-    // setStaggerOpen(!staggerOpen)
+    setStaggerOpen(!staggerOpen)
   }
 
   return (

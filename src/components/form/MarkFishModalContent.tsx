@@ -104,15 +104,18 @@ const MarkFishModalContent = ({
                 </Button>
               }
             />
-            <VStack paddingX='20' paddingTop='7' paddingBottom='3'>
+            <VStack space={5} paddingX='10' paddingTop='7' paddingBottom='3'>
               <VStack w='full'>
-                <FormControl.Label>Type</FormControl.Label>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Type
+                  </Text>
+                </FormControl.Label>
                 <FormControl>
                   <CustomSelect
                     selectedValue={values.type}
                     placeholder={'Type'}
                     onValueChange={handleChange('type')}
-
                     setFieldTouched={setFieldTouched}
                     selectOptions={dropdownValues.markType.map((item: any) => ({
                       label: item.definition,
@@ -123,9 +126,15 @@ const MarkFishModalContent = ({
               </VStack>
 
               <VStack w='full'>
-                <FormControl.Label>Number</FormControl.Label>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Number
+                  </Text>
+                </FormControl.Label>
                 <FormControl>
                   <Input
+                    height='50px'
+                    fontSize='16'
                     placeholder='Enter number'
                     keyboardType='numeric'
                     onChangeText={handleChange('number')}
@@ -136,13 +145,16 @@ const MarkFishModalContent = ({
               </VStack>
 
               <VStack w='full'>
-                <FormControl.Label>Position</FormControl.Label>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Position
+                  </Text>
+                </FormControl.Label>
                 <FormControl>
                   <CustomSelect
                     selectedValue={values.position}
                     placeholder={'Mark Position'}
                     onValueChange={handleChange('position')}
-
                     setFieldTouched={setFieldTouched}
                     selectOptions={
                       dropdownValues.bodyPart
@@ -165,13 +177,17 @@ const MarkFishModalContent = ({
                   color='primary'
                   marginRight='1'
                 />
-                <Text color='primary' fontSize='lg'>
+                <Text color='primary' fontSize='xl'>
                   Add another tag
                 </Text>
               </HStack>
 
               <VStack w='full'>
-                <FormControl.Label>Crew Member Tagging</FormControl.Label>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Crew Member Tagging
+                  </Text>
+                </FormControl.Label>
                 <FormControl>
                   <CustomSelect
                     selectedValue={values.crewMemberTagging}
@@ -184,9 +200,15 @@ const MarkFishModalContent = ({
               </VStack>
 
               <VStack w='full'>
-                <FormControl.Label>Comments</FormControl.Label>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Comments
+                  </Text>
+                </FormControl.Label>
                 <FormControl>
                   <Input
+                    height='50px'
+                    fontSize='16'
                     placeholder='Write a comment'
                     keyboardType='default'
                     onChangeText={handleChange('comments')}

@@ -18,7 +18,7 @@ const initialState: InitialStateI = {
   completed: false,
   values: {
     coneDepth: null,
-    coneSetting: null,
+    coneSetting: 'full',
     totalRevolutions: null,
     rpm1: null,
     rpm2: null,

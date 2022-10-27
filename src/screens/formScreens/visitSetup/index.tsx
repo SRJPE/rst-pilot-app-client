@@ -147,6 +147,7 @@ const VisitSetup = ({
                       </Text>
                     </FormControl.Label>
                     <CrewDropDown
+
                       crewList={visitSetupDefaultsState?.crewMembers[
                         selectedProgramId ? selectedProgramId - 1 : 0
                       ].map((crewMember: any) => ({

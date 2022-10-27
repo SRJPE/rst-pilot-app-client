@@ -19,7 +19,7 @@ export default function DrawerNavigator() {
       <Drawer.Screen
         name='Home'
         component={Home}
-        options={{ headerShown: false }}
+        // options={{ headerShown: false }}
       />
       <Drawer.Screen name='Generate Report' component={GenerateReport} />
       <Drawer.Screen

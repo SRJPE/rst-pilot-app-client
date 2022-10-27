@@ -3,8 +3,7 @@ import * as yup from 'yup'
 export const trapVisitSchema = yup.object().shape({
   stream: yup.string().required('Stream required'),
   trapSite: yup.string().required('Trap site required'),
-  crew: yup.array(),
-  // .min(1).required('Crew cannot be blank.'),
+  crew: yup.array().min(1).required('Crew cannot be blank.'),
 })
 
 export const trapStatusSchema = yup.object().shape({
@@ -33,7 +32,7 @@ export const trapPreProcessingSchema = yup.object().shape({
     .number()
     .required('Stream required')
     .typeError('Input must be a number'),
-  coneSetting: yup.string().required('Trap site required'),
+
   totalRevolutions: yup
     .number()
     .required('Total Revolutions Required')
