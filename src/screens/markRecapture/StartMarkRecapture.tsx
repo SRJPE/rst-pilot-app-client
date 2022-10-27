@@ -21,7 +21,7 @@ export default function StartMarkRecapture({
       <View flex={1} justifyContent='center' alignItems='center' bg='#FFF'>
         <VStack space={12} p='10'>
           <Heading textAlign='center' mb='10'>
-            {'Are you read to start mark recapture trial?'}
+            {'Are you ready to start mark recapture trial?'}
           </Heading>
           <Button
             bg='primary'
