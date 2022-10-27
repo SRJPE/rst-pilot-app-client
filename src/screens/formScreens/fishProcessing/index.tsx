@@ -1,6 +1,6 @@
 import { Formik } from 'formik'
 import { FormControl, Heading, Text, VStack, View } from 'native-base'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'

@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react'
-import { View, Avatar, HStack } from 'native-base'
+import { View } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
 import CrewListItem from './CrewListItem'
-
-const CrewAvatar = () => {
-  return <Avatar bg='primary' mr='1' alignSelf='center' size='sm'></Avatar>
-}
 
 export default function CrewDropDown({
   crewList,
@@ -43,7 +39,6 @@ export default function CrewDropDown({
         setValue={setValue}
         setItems={setItems}
         multiple={true}
-        // searchable={true}
         mode='BADGE'
         badgeDotColors={['#007C7C']}
         placeholder='Select your crew'

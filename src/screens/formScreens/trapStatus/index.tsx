@@ -3,21 +3,16 @@ import { Formik } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
 import {
-  Select,
   FormControl,
-  CheckIcon,
   Heading,
   Input,
   VStack,
   HStack,
   Text,
   View,
-  Tooltip,
   IconButton,
   Icon,
-  Button,
   Popover,
-  Center,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../../utils/helpers/yupValidations'

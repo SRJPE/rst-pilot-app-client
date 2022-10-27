@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { Image } from 'native-base'
 export default function Logo() {
   return (

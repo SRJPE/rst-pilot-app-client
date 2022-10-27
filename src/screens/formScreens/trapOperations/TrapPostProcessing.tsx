@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
@@ -11,7 +10,6 @@ import {
   HStack,
   Radio,
   View,
-  IconButton,
   Icon,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'

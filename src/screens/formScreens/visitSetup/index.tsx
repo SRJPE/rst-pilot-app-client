@@ -6,15 +6,7 @@ import {
   markVisitSetupCompleted,
   saveVisitSetup,
 } from '../../../redux/reducers/formSlices/visitSetupSlice'
-import {
-  Select,
-  FormControl,
-  CheckIcon,
-  Heading,
-  VStack,
-  Text,
-  View,
-} from 'native-base'
+import { FormControl, Heading, VStack, Text, View } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../../utils/helpers/yupValidations'
