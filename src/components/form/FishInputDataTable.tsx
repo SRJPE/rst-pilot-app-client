@@ -1,69 +1,102 @@
 import React from 'react'
 import { DataTable } from 'react-native-paper'
+import { connect } from 'react-redux'
+import { RootState } from '../../redux/store'
 
-const numberOfItemsPerPageList = [2, 3, 4]
+const headers = [
+  'species',
+  'fork len.',
+  'run',
+  'weight',
+  'life stage',
+  'adipose clipped',
+  'existing mark',
+  'dead',
+  'recapture',
+]
 
-const data = {
-  headers: [
-    'species',
-    'fork length',
-    'weight',
-    'run',
-    'clipped',
-    'mark code',
-    'cwt code',
-    'mort',
-  ], // length = 8
-  rows: [
-    ['chinook', 100, 10, '', '', '', '', ''],
-    ['chinook', 100, 10, '', '', '', '', ''],
-    ['chinook', 100, 10, '', '', '', '', ''],
-  ],
+const emptyTableData = {
+  1: '---',
+  2: '---',
+  3: '---',
+  4: '---',
+  5: '---',
+  6: '---',
+  7: '---',
+  8: '---',
 }
 
-const FishInputDataTable = () => {
+const FishInputDataTable = ({
+  individualFishList,
+}: {
+  individualFishList: any
+}) => {
+  const numberOfItemsPerPage = 5
   const [page, setPage] = React.useState(0)
-  const [numberOfItemsPerPage, onItemsPerPageChange] = React.useState(
-    numberOfItemsPerPageList[0]
-  )
-  const from = page * numberOfItemsPerPage
-  const to = Math.min((page + 1) * numberOfItemsPerPage, data.rows.length)
+  const [pageRows, setPageRows] = React.useState([
+    ...individualFishList.slice(0, numberOfItemsPerPage),
+  ])
 
   React.useEffect(() => {
-    setPage(0)
-  }, [numberOfItemsPerPage])
+    const rowsForPage = generateRowsForPage()
+    setPageRows(rowsForPage)
+  }, [individualFishList])
+
+  React.useEffect(() => {
+    const rowsForPage = generateRowsForPage()
+    setPageRows(rowsForPage)
+  }, [page])
+
+  const generateRowsForPage = () => {
+    const rowsForPage = individualFishList.slice(
+      page * numberOfItemsPerPage,
+      page * numberOfItemsPerPage + numberOfItemsPerPage
+    )
+    while (rowsForPage.length < 5) {
+      rowsForPage.push(emptyTableData)
+    }
+    return rowsForPage
+  }
 
   return (
     <DataTable>
       <DataTable.Header>
-        {data.headers.map((header: string, idx: number) => (
-          <DataTable.Title key={idx}>{header}</DataTable.Title>
+        {headers.map((header: string, idx: number) => (
+          <DataTable.Title key={`${header}-${idx}`}>{header}</DataTable.Title>
         ))}
       </DataTable.Header>
 
-      {data.rows.map((row: any[]) => {
+      {pageRows.map((obj, rowIdx: number) => {
         return (
-          <DataTable.Row>
-            {row.map((item: string | number) => (
-              <DataTable.Cell>{item}</DataTable.Cell>
-            ))}
+          <DataTable.Row key={Object.keys(obj)[rowIdx]}>
+            {Object.keys(obj).map((key: string | number, itemIdx: number) => {
+              return (
+                <DataTable.Cell key={`${key}-${obj[key]}-${itemIdx}`}>
+                  {`${obj[key]}` ? `${obj[key]}` : '---'}
+                </DataTable.Cell>
+              )
+            })}
           </DataTable.Row>
         )
       })}
 
       <DataTable.Pagination
         page={page}
-        numberOfPages={Math.ceil(data.rows.length / numberOfItemsPerPage)}
+        numberOfPages={Math.ceil(
+          individualFishList.length / numberOfItemsPerPage
+        )}
+        label={`Page ${page + 1}`}
         onPageChange={(page: number) => setPage(page)}
-        label={`${from + 1}-${to} of ${data.rows.length}`}
-        showFastPaginationControls
-        numberOfItemsPerPageList={numberOfItemsPerPageList}
         numberOfItemsPerPage={numberOfItemsPerPage}
-        onItemsPerPageChange={onItemsPerPageChange}
-        selectPageDropdownLabel={'Rows per page'}
       />
     </DataTable>
   )
 }
 
-export default FishInputDataTable
+const mapStateToProps = (state: RootState) => {
+  return {
+    individualFishList: state.fishInput.individualFish,
+  }
+}
+
+export default connect(mapStateToProps)(FishInputDataTable)

@@ -26,23 +26,18 @@ import AddFishModalContent from '../../../components/form/AddFishModalContent'
 import FishInputDataTable from '../../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../../components/form/PlusCountModalContent'
 
-const styles = StyleSheet.create({
-  tableHead: { height: 40, backgroundColor: '#f1f8ff' },
-  tableText: { marginVertical: 6, marginLeft: 3 },
-})
-
 const mapStateToProps = (state: RootState) => {
   return {
-    reduxState: state.fishInput,
+    fishInputSliceState: state.fishInput,
   }
 }
 
 const FishInput = ({
   navigation,
-  reduxState,
+  fishInputSliceState,
 }: {
   navigation: any
-  reduxState: any
+  fishInputSliceState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addFishModalOpen, setAddFishModalOpen] = useState(false as boolean)
@@ -52,21 +47,9 @@ const FishInput = ({
   const [addFishModalTab, setAddFishModalTab] = useState<
     'Individual' | 'Batch'
   >('Individual')
-  const [tableData, setTableData] = useState(reduxState.values.tableData as any)
   const [checkboxGroupValue, setCheckboxGroupValue] = useState(
-    reduxState.values.speciesCaptured as Array<string>
+    fishInputSliceState.values.speciesCaptured as Array<string>
   )
-  const tableHead = [
-    'Species',
-    'Fork Length',
-    'Weight',
-    'Run',
-    'Adipose Clipped',
-    'Mark Type',
-    'Mark Color',
-    'CWT Code',
-    'Mort',
-  ]
 
   const handleSubmit = (values: any) => {
     // console.log('🚀 ~ handleSubmit ~ checkboxGroupValue', checkboxGroupValue)
@@ -80,8 +63,8 @@ const FishInput = ({
   return (
     <Formik
       // validationSchema={fishInputSchema}
-      initialValues={reduxState.values}
-      onSubmit={values => handleSubmit(values)}
+      initialValues={fishInputSliceState.values}
+      onSubmit={(values) => handleSubmit(values)}
     >
       {({
         handleChange,
@@ -106,7 +89,7 @@ const FishInput = ({
                   colorScheme='green'
                   defaultValue={checkboxGroupValue}
                   accessibilityLabel='Select the species captured'
-                  onChange={values => setCheckboxGroupValue(values)}
+                  onChange={(values) => setCheckboxGroupValue(values)}
                 >
                   <Checkbox value='YOY Chinook' my='1'>
                     YOY Chinook

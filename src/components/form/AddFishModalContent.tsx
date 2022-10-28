@@ -21,7 +21,6 @@ import { connect, useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { addIndividualFishSchema } from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { saveAddFishModalData } from '../../redux/reducers/formSlices/addIndividualFishSlice'
 import CustomModal from '../Shared/CustomModal'
 import CustomSelect from '../Shared/CustomSelect'
 import CustomModalHeader, {
@@ -29,6 +28,10 @@ import CustomModalHeader, {
 } from '../Shared/CustomModalHeader'
 import MarkFishModalContent from './MarkFishModalContent'
 import AddGeneticsModalContent from './AddGeneticsModalContent'
+import {
+  individualFishInitialState,
+  saveIndividualFish,
+} from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveGeneticSampleData } from '../../redux/reducers/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/addMarksOrTagsSlice'
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
@@ -37,18 +40,14 @@ import renderErrorMessage from './RenderErrorMessage'
 const speciesDictionary = [{ label: 'Chinook', value: 'Chinook' }]
 
 const AddFishModalContent = ({
-  reduxState,
-  addIndividualFishSliceState,
-  saveAddFishModalData,
+  saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
   activeTab,
   setActiveTab,
   closeModal,
 }: {
-  reduxState: any
-  addIndividualFishSliceState: any
-  saveAddFishModalData: any
+  saveIndividualFish: any
   saveMarkOrTagData: any
   saveGeneticSampleData: any
   activeTab: any
@@ -66,7 +65,7 @@ const AddFishModalContent = ({
   )
 
   const handleFormSubmit = (values: any) => {
-    saveAddFishModalData(values)
+    saveIndividualFish(values)
   }
 
   const handleMarkFishFormSubmit = (values: any) => {
@@ -94,9 +93,9 @@ const AddFishModalContent = ({
     <>
       <Formik
         validationSchema={addIndividualFishSchema}
-        initialValues={addIndividualFishSliceState.values}
+        initialValues={individualFishInitialState}
         initialTouched={{ species: true }}
-        initialErrors={reduxState.completed ? undefined : { species: '' }}
+        // initialErrors={reduxState.completed ? undefined : { species: '' }}
         onSubmit={values => {
           handleFormSubmit(values)
           setIsSlideOpen(!isSlideOpen)
@@ -161,10 +160,10 @@ const AddFishModalContent = ({
                         resetForm({
                           values: {
                             species: '',
-                            forkLength: 0,
+                            forkLength: '',
                             run: '',
-                            weight: 0,
-                            lifeStage: '',
+                            weight: '',
+                            lifestage: '',
                             adiposeClipped: false,
                             existingMark: '',
                             dead: false,
@@ -252,7 +251,7 @@ const AddFishModalContent = ({
                       </FormControl.Label>
 
                       <Popover
-                        trigger={triggerProps => {
+                        trigger={(triggerProps) => {
                           return (
                             <IconButton
                               {...triggerProps}
@@ -279,15 +278,15 @@ const AddFishModalContent = ({
                           </Popover.Body>
                         </Popover.Content>
                       </Popover>
-                      {touched.lifeStage &&
-                        errors.lifeStage &&
-                        renderErrorMessage(errors, 'lifeStage')}
+                      {touched.lifestage &&
+                        errors.lifestage &&
+                        renderErrorMessage(errors, 'lifestage')}
                     </HStack>
 
                     <CustomSelect
-                      selectedValue={values.lifeStage}
+                      selectedValue={values.lifestage}
                       placeholder={'Life Stage'}
-                      onValueChange={handleChange('lifeStage')}
+                      onValueChange={handleChange('lifestage')}
                       setFieldTouched={setFieldTouched}
                       selectOptions={dropdownValues.lifeStage.map(
                         (item: any) => ({
@@ -368,7 +367,7 @@ const AddFishModalContent = ({
                       </Text>
                     </FormControl.Label>
                     <Popover
-                      trigger={triggerProps => {
+                      trigger={(triggerProps) => {
                         return (
                           <IconButton
                             {...triggerProps}
@@ -652,14 +651,11 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
 }
 
 const mapStateToProps = (state: RootState) => {
-  return {
-    addIndividualFishSliceState: state.addIndividualFish,
-    reduxState: state,
-  }
+  return {}
 }
 
 export default connect(mapStateToProps, {
-  saveAddFishModalData,
+  saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
 })(AddFishModalContent)
