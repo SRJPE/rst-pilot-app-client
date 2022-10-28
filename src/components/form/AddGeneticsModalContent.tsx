@@ -114,33 +114,31 @@ const AddGeneticsModalContent = ({
               </HStack>
 
               <HStack>
-                <VStack w='1/2' paddingRight='5'>
-                  <VStack w='full' marginBottom={5}>
-                    <FormControl>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Sample ID Number:
-                          </Text>
-                        </FormControl.Label>
+                <VStack space={5} w='1/2' paddingRight='5'>
+                  <FormControl>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Sample ID Number:
+                        </Text>
+                      </FormControl.Label>
 
-                        {touched.sampleIdNumber &&
-                          errors.sampleIdNumber &&
-                          renderErrorMessage(errors, 'sampleIdNumber')}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Write a comment'
-                        keyboardType='default'
-                        onChangeText={handleChange('sampleIdNumber')}
-                        onBlur={handleBlur('sampleIdNumber')}
-                        value={values.sampleIdNumber}
-                      />
-                    </FormControl>
-                  </VStack>
+                      {touched.sampleIdNumber &&
+                        errors.sampleIdNumber &&
+                        renderErrorMessage(errors, 'sampleIdNumber')}
+                    </HStack>
+                    <Input
+                      height='50px'
+                      fontSize='16'
+                      placeholder='Write a comment'
+                      keyboardType='default'
+                      onChangeText={handleChange('sampleIdNumber')}
+                      onBlur={handleBlur('sampleIdNumber')}
+                      value={values.sampleIdNumber}
+                    />
+                  </FormControl>
 
-                  <VStack w='full' marginBottom={5}>
+                  <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
                         Confirm Mucus Swab Collected
@@ -165,9 +163,9 @@ const AddGeneticsModalContent = ({
                         False
                       </Radio>
                     </Radio.Group>
-                  </VStack>
+                  </FormControl>
 
-                  <VStack w='full' marginBottom={5}>
+                  <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
                         Fin Clip Collected
@@ -192,35 +190,31 @@ const AddGeneticsModalContent = ({
                         False
                       </Radio>
                     </Radio.Group>
-                  </VStack>
+                  </FormControl>
 
-                  <VStack w='full' marginBottom={5}>
-                    <FormControl>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Crew Member Collecting Samples
-                          </Text>
-                        </FormControl.Label>
+                  <FormControl>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Crew Member Collecting Samples
+                        </Text>
+                      </FormControl.Label>
 
-                        {touched.crewMemberCollectingSample &&
-                          errors.crewMemberCollectingSample &&
-                          renderErrorMessage(
-                            errors,
-                            'crewMemberCollectingSample'
-                          )}
-                      </HStack>
-                      <CustomSelect
-                        selectedValue={values.crewMemberCollectingSample}
-                        placeholder={'Crew Member'}
-                        onValueChange={handleChange(
+                      {touched.crewMemberCollectingSample &&
+                        errors.crewMemberCollectingSample &&
+                        renderErrorMessage(
+                          errors,
                           'crewMemberCollectingSample'
                         )}
-                        setFieldTouched={setFieldTouched}
-                        selectOptions={crewMemberDropdownOptions}
-                      />
-                    </FormControl>
-                  </VStack>
+                    </HStack>
+                    <CustomSelect
+                      selectedValue={values.crewMemberCollectingSample}
+                      placeholder={'Crew Member'}
+                      onValueChange={handleChange('crewMemberCollectingSample')}
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={crewMemberDropdownOptions}
+                    />
+                  </FormControl>
                 </VStack>
 
                 <View w='1/2' h='full' paddingLeft='5'>
@@ -235,24 +229,22 @@ const AddGeneticsModalContent = ({
                 </View>
               </HStack>
 
-              <VStack w='full'>
+              <FormControl mt='5'>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
                     Comments
                   </Text>
                 </FormControl.Label>
-                <FormControl>
-                  <Input
-                    height='50px'
-                    fontSize='16'
-                    placeholder='Write a comment'
-                    keyboardType='default'
-                    onChangeText={handleChange('comments')}
-                    onBlur={handleBlur('comments')}
-                    value={values.comments}
-                  />
-                </FormControl>
-              </VStack>
+                <Input
+                  height='50px'
+                  fontSize='16'
+                  placeholder='Write a comment'
+                  keyboardType='default'
+                  onChangeText={handleChange('comments')}
+                  onBlur={handleBlur('comments')}
+                  value={values.comments}
+                />
+              </FormControl>
             </VStack>
           </>
         )}

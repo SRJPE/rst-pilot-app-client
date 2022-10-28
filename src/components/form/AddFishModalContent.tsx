@@ -127,7 +127,7 @@ const AddFishModalContent = ({
             <ScrollView>
               <VStack paddingX='10' paddingTop='2' paddingBottom='3'>
                 <HStack marginBottom={5} alignItems='center'>
-                  <VStack w='1/2' paddingRight={5}>
+                  <FormControl w='1/2' pr='5'>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
@@ -139,16 +139,14 @@ const AddFishModalContent = ({
                         errors.species &&
                         renderErrorMessage(errors, 'species')}
                     </HStack>
-                    <FormControl>
-                      <CustomSelect
-                        selectedValue={values.species}
-                        placeholder={'Species'}
-                        onValueChange={handleChange('species')}
-                        setFieldTouched={setFieldTouched}
-                        selectOptions={speciesDictionary}
-                      />
-                    </FormControl>
-                  </VStack>
+                    <CustomSelect
+                      selectedValue={values.species}
+                      placeholder={'Species'}
+                      onValueChange={handleChange('species')}
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={speciesDictionary}
+                    />
+                  </FormControl>
                   <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
@@ -183,41 +181,42 @@ const AddFishModalContent = ({
                 <Divider my={5} />
 
                 <HStack marginBottom={5}>
-                  <VStack w='1/2' paddingRight={5}>
-                    <FormControl w='full'>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Fork Length
-                          </Text>
-                        </FormControl.Label>
+                  {/* <VStack w='1/2' paddingRight={5}> */}
+                  <FormControl w='1/2' pr='5'>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Fork Length
+                        </Text>
+                      </FormControl.Label>
 
-                        {touched.forkLength &&
-                          errors.forkLength &&
-                          renderErrorMessage(errors, 'forkLength')}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('forkLength')}
-                        onBlur={handleBlur('forkLength')}
-                        value={values.forkLength}
-                      />
-                      <Text
-                        color='#A1A1A1'
-                        position='absolute'
-                        top={50}
-                        right={4}
-                        fontSize={16}
-                      >
-                        {'mm'}
-                      </Text>
-                    </FormControl>
-                  </VStack>
+                      {touched.forkLength &&
+                        errors.forkLength &&
+                        renderErrorMessage(errors, 'forkLength')}
+                    </HStack>
+                    <Input
+                      height='50px'
+                      fontSize='16'
+                      placeholder='Numeric Value'
+                      keyboardType='numeric'
+                      onChangeText={handleChange('forkLength')}
+                      onBlur={handleBlur('forkLength')}
+                      value={values.forkLength}
+                    />
+                    <Text
+                      color='#A1A1A1'
+                      position='absolute'
+                      top={50}
+                      right={8}
+                      fontSize={16}
+                    >
+                      {'mm'}
+                    </Text>
+                  </FormControl>
+                  {/* </VStack> */}
 
-                  <VStack w='1/2' paddingLeft={5}>
+                  {/* <VStack w='1/2' paddingLeft={5}> */}
+                  <FormControl w='1/2' paddingLeft={5}>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
@@ -229,22 +228,22 @@ const AddFishModalContent = ({
                         errors.run &&
                         renderErrorMessage(errors, 'run')}
                     </HStack>
-                    <FormControl w='full'>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Calculated from fork length (disabled)'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('run')}
-                        onBlur={handleBlur('run')}
-                        value={values.run}
-                      />
-                    </FormControl>
-                  </VStack>
+                    <Input
+                      height='50px'
+                      fontSize='16'
+                      placeholder='Calculated from fork length (disabled)'
+                      keyboardType='numeric'
+                      onChangeText={handleChange('run')}
+                      onBlur={handleBlur('run')}
+                      value={values.run}
+                    />
+                  </FormControl>
+                  {/* </VStack> */}
                 </HStack>
 
                 <HStack marginBottom={5}>
-                  <VStack w='1/2' paddingRight='5'>
+                  {/* <VStack w='1/2' paddingRight='5'> */}
+                  <FormControl w='1/2' paddingRight='5'>
                     <HStack space={2} alignItems='center'>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
@@ -285,63 +284,61 @@ const AddFishModalContent = ({
                         renderErrorMessage(errors, 'lifeStage')}
                     </HStack>
 
-                    <FormControl w='full'>
-                      <CustomSelect
-                        selectedValue={values.lifeStage}
-                        placeholder={'Life Stage'}
-                        onValueChange={handleChange('lifeStage')}
-                        setFieldTouched={setFieldTouched}
-                        selectOptions={dropdownValues.lifeStage.map(
-                          (item: any) => ({
-                            label: item.definition,
-                            value: item.definition,
-                          })
-                        )}
-                      />
-                    </FormControl>
-                  </VStack>
-                  <VStack w='1/2' paddingLeft='5'>
-                    <FormControl w='full'>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label pb='3'>
-                          <Text color='black' fontSize='xl'>
-                            Weight (optional)
-                          </Text>
-                        </FormControl.Label>
+                    <CustomSelect
+                      selectedValue={values.lifeStage}
+                      placeholder={'Life Stage'}
+                      onValueChange={handleChange('lifeStage')}
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={dropdownValues.lifeStage.map(
+                        (item: any) => ({
+                          label: item.definition,
+                          value: item.definition,
+                        })
+                      )}
+                    />
+                  </FormControl>
+                  {/* </VStack> */}
+                  {/* <VStack w='1/2' paddingLeft='5'> */}
+                  <FormControl w='1/2' paddingLeft='5'>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label pb='3'>
+                        <Text color='black' fontSize='xl'>
+                          Weight (optional)
+                        </Text>
+                      </FormControl.Label>
 
-                        {touched.weight &&
-                          errors.weight &&
-                          renderErrorMessage(errors, 'weight')}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('weight')}
-                        onBlur={handleBlur('weight')}
-                        value={values.weight}
-                      />
-                      <Text
-                        color='#A1A1A1'
-                        position='absolute'
-                        top={60}
-                        right={4}
-                        fontSize={16}
-                      >
-                        {'g'}
-                      </Text>
-                    </FormControl>
-                  </VStack>
+                      {touched.weight &&
+                        errors.weight &&
+                        renderErrorMessage(errors, 'weight')}
+                    </HStack>
+                    <Input
+                      height='50px'
+                      fontSize='16'
+                      placeholder='Numeric Value'
+                      keyboardType='numeric'
+                      onChangeText={handleChange('weight')}
+                      onBlur={handleBlur('weight')}
+                      value={values.weight}
+                    />
+                    <Text
+                      color='#A1A1A1'
+                      position='absolute'
+                      top={60}
+                      right={4}
+                      fontSize={16}
+                    >
+                      {'g'}
+                    </Text>
+                  </FormControl>
+                  {/* </VStack> */}
                 </HStack>
 
-                <VStack w='full'>
+                <FormControl w='1/2'>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Adipose Clipped
                     </Text>
                   </FormControl.Label>
-
                   <Radio.Group
                     name='adiposeClipped'
                     accessibilityLabel='adipose clipped'
@@ -361,9 +358,9 @@ const AddFishModalContent = ({
                       False
                     </Radio>
                   </Radio.Group>
-                </VStack>
+                </FormControl>
 
-                <VStack w='full' marginBottom={5}>
+                <FormControl w='full' marginBottom={5}>
                   <HStack space={2} alignItems='center'>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
@@ -465,9 +462,10 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
                       </Text>
                     </HStack>
                   </HStack>
-                </VStack>
+                </FormControl>
 
-                <VStack w='full' marginBottom={5}>
+                {/* <VStack w='full' marginBottom={5}> */}
+                <FormControl w='full' marginBottom={5}>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Dead
@@ -492,9 +490,9 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
                       False
                     </Radio>
                   </Radio.Group>
-                </VStack>
+                </FormControl>
 
-                <VStack w='full' marginBottom={5}>
+                <FormControl w='full' marginBottom={5}>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Will this fish be used in your next mark recapture trial?
@@ -522,7 +520,7 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
                   <Text color='#A19C9C' marginTop='2' fontSize='xl'>
                     Place in a seperate bucket
                   </Text>
-                </VStack>
+                </FormControl>
 
                 <HStack>
                   <Button
