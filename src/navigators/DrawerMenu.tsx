@@ -26,9 +26,8 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
   const { steps, activeStep } = navigationState
   const { state, navigation } = props
   const currentRoute = state.routeNames[state.index]
-  const stepsArray = Object.values(steps) as Array<any>
-  // const stepsArray = Object.values(steps).slice(0, 7) as Array<any>
-  // console.log('🚀 ~ DrawerMenu ~ steps', steps)
+  // const stepsArray = Object.values(steps) as Array<any>
+  const stepsArray = Object.values(steps).slice(0, 7) as Array<any>
 
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {
@@ -82,8 +81,9 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
           mb={6}
           borderColor='secondary.500'
           borderWidth={3}
+          ml='2'
         />
-        <Heading mb={4} size='xl'>
+        <Heading mb={4} ml='2' size='xl'>
           Data Tackle
         </Heading>
         <DrawerContentScrollView>
@@ -94,41 +94,62 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             title='Home'
           />
           <MenuButton
+            active={currentRoute === 'Profile'}
+            onPress={() => {
+              handlePressMainNavButton('Profile')
+            }}
+            icon='person'
+            title='Profile'
+          />
+          <MenuButton
+            active={currentRoute === 'Permit Info'}
+            onPress={() => {
+              handlePressMainNavButton('Permit Info')
+            }}
+            icon='information-circle'
+            title='Permit Info'
+          />
+          <MenuButton
+            active={currentRoute === 'Generate Report'}
+            onPress={() => handlePressMainNavButton('Generate Report')}
+            icon='bar-chart'
+            title='Generate Report'
+          />
+          <MenuButton
             active={currentRoute === 'Mark Recapture'}
             onPress={() => handlePressMainNavButton('Mark Recapture')}
             icon='clipboard'
             title='Mark Recapture'
           />
           <MenuButton
-            active={currentRoute === 'Generate Report'}
-            onPress={() => handlePressMainNavButton('Generate Report')}
-            icon='podium'
-            title='Generate Report'
-          />
-
-          <MenuButton
             active={currentRoute === 'Trap Visit Form'}
             onPress={() => handlePressMainNavButton('Trap Visit Form')}
             icon='clipboard'
             title='Trap Visit Form'
+            completed={true}
           />
-          <Divider />
-          {stepsArray &&
-            stepsArray.map((step: any, index: any) => {
-              return (
-                <VStack ml='8' key={index}>
-                  <MenuButton
-                    active={currentRoute === step.name}
-                    // isDisabled={
-                    //   reduxState[step.propName]?.completed ? false : true
-                    // }
-                    onPress={() => handlePressFormButton(step.name)}
-                    icon='clipboard'
-                    title={step.name}
-                  />
-                </VStack>
-              )
-            })}
+          {stepsArray && currentRoute === 'Trap Visit Form' && (
+            <>
+              <Divider mt='2' />
+              {stepsArray.map((step: any, index: any) => {
+                return (
+                  <VStack ml='4' key={index}>
+                    <MenuButton
+                      active={currentRoute === step.name}
+                      // isDisabled={
+                      //   reduxState[step.propName]?.completed ? false : true
+                      // }
+                      completed={step.completed}
+                      onPress={() => handlePressFormButton(step.name)}
+                      icon='ellipse'
+                      listItem={true}
+                      title={step.name}
+                    />
+                  </VStack>
+                )
+              })}
+            </>
+          )}
         </DrawerContentScrollView>
       </VStack>
     </Box>

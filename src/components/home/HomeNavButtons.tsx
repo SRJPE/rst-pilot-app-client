@@ -39,9 +39,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     marginBottom: -89,
-    // opacity: 1,
-    // opacity: `${100} !important`,
-    //  opacity: {[100,'!important']},
   },
 
   buttonBackground: {
@@ -72,10 +69,12 @@ export default function BottomNavigation({
   }, [navigation])
   const handlePressTrapVisit = useCallback(() => {
     navigation.navigate('Trap Visit Form')
+    setStaggerOpen(false)
     onClose()
   }, [navigation])
   const handlePressMarkRecapture = useCallback(() => {
     navigation.navigate('Mark Recapture')
+    setStaggerOpen(false)
     onClose()
   }, [navigation])
   const handlePressGenerateReport = useCallback(() => {
@@ -143,8 +142,16 @@ export default function BottomNavigation({
                 justifyContent='flex-end'
                 style={[{ transform: [{ translateX: -94.5 }] }]}
               >
-                <Badge alignSelf='center' variant={'solid'} bg='themeGrey'>
-                  <Text fontSize={23}>Standard Trap Visit</Text>
+                <Badge
+                  alignSelf='center'
+                  variant={'solid'}
+                  bg='secondary'
+                  opacity='0.8'
+                  borderRadius='5'
+                >
+                  <Text fontSize={23} fontWeight='450'>
+                    Standard Trap Visit
+                  </Text>
                 </Badge>
                 <IconButton
                   mb='4'
@@ -169,8 +176,16 @@ export default function BottomNavigation({
                 alignItems='center'
                 style={[{ transform: [{ translateX: -173 }] }]}
               >
-                <Badge alignSelf='center' variant='solid' bg='themeGrey'>
-                  <Text fontSize={23}>Mark Recapture Release</Text>
+                <Badge
+                  alignSelf='center'
+                  variant='solid'
+                  bg='secondary'
+                  opacity='0.8'
+                  borderRadius='5'
+                >
+                  <Text fontSize={23} fontWeight='450'>
+                    Mark Recapture Release
+                  </Text>
                 </Badge>
                 <IconButton
                   mb='4'

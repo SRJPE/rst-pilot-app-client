@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Text, VStack, CircleIcon, Heading, View } from 'native-base'
 import BottomNavigation from '../../components/home/HomeNavButtons'
 import TopIcons from '../../components/home/TopIcons'
@@ -48,6 +48,12 @@ const styles = StyleSheet.create({
 
 export default function Home({ navigation }: { navigation: any }) {
   const [staggerOpen, setStaggerOpen] = useState(false as boolean)
+  const [opacity, setOpacity] = useState(1 as number)
+
+  useEffect(() => {
+    staggerOpen ? setOpacity(0.25) : setOpacity(1)
+  }, [staggerOpen])
+
   const recentItemsCard = ({
     title,
     date,
@@ -80,14 +86,14 @@ export default function Home({ navigation }: { navigation: any }) {
       <View style={styles.landingContent}>
         <CircleIcon size='300' color='primary' />
         <Heading fontWeight={300} fontSize={50} marginTop={5}>
-          Welcome back, Jordan!
+          Welcome back, Ryan!
         </Heading>
         <Text fontWeight={300} fontSize={23} marginTop={5}>
-          Select the action you would like to preform.
+          Select the action you would like to perform.
         </Text>
       </View>
 
-      <View style={styles.recentItemsContainer}>
+      <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
         <Text fontWeight={300} fontSize={20} marginBottom={5}>
           Recent Items
         </Text>

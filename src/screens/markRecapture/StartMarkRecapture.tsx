@@ -1,10 +1,14 @@
 import { Button, Heading, Text, View, VStack } from 'native-base'
+import { useDispatch } from 'react-redux'
+import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
+import { AppDispatch } from '../../redux/store'
 
 export default function StartMarkRecapture({
   navigation,
 }: {
   navigation: any
 }) {
+  const dispatch = useDispatch<AppDispatch>()
   const handlePressBeginMarkRecapture = () => {
     navigation.navigate('Mark Recapture')
   }
@@ -12,8 +16,11 @@ export default function StartMarkRecapture({
     navigation.navigate('Home')
   }
   const handlePressQCData = () => {
-    console.log('🚀 ~ pressed')
     navigation.navigate('Data Quality Control')
+  }
+  const handlePressReturnToTrapVisit = () => {
+    navigation.navigate('Trap Visit Form', { screen: 'Incomplete Sections' })
+    dispatch(updateActiveStep(7))
   }
 
   return (
@@ -37,7 +44,7 @@ export default function StartMarkRecapture({
             </Text>
           </Button>
           <Button
-            bg='secondary'
+            bg='primary'
             rounded='xs'
             alignSelf='center'
             py='5'
@@ -45,12 +52,12 @@ export default function StartMarkRecapture({
             borderRadius='5'
             onPress={handlePressReturnToHomepage}
           >
-            <Text fontWeight='bold' fontSize='lg' color='primary'>
+            <Text fontWeight='bold' fontSize='lg' color='#FFF'>
               Return To Homepage
             </Text>
           </Button>
           <Button
-            bg='secondary'
+            bg='primary'
             rounded='xs'
             alignSelf='center'
             py='5'
@@ -58,8 +65,21 @@ export default function StartMarkRecapture({
             borderRadius='5'
             onPress={handlePressQCData}
           >
-            <Text fontWeight='bold' fontSize='lg' color='primary'>
+            <Text fontWeight='bold' fontSize='lg' color='#FFF'>
               QC Data
+            </Text>
+          </Button>
+          <Button
+            bg='primary'
+            rounded='xs'
+            alignSelf='center'
+            py='5'
+            minWidth='50%'
+            borderRadius='5'
+            onPress={handlePressReturnToTrapVisit}
+          >
+            <Text fontWeight='bold' fontSize='lg' color='#FFF'>
+              Return To Trap Visit
             </Text>
           </Button>
         </VStack>
