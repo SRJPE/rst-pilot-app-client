@@ -95,13 +95,17 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
           />
           <MenuButton
             active={currentRoute === 'Profile'}
-            onPress={() => {}}
+            onPress={() => {
+              handlePressMainNavButton('Profile')
+            }}
             icon='person'
             title='Profile'
           />
           <MenuButton
             active={currentRoute === 'Permit Info'}
-            onPress={() => {}}
+            onPress={() => {
+              handlePressMainNavButton('Permit Info')
+            }}
             icon='information-circle'
             title='Permit Info'
           />
@@ -124,26 +128,28 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             title='Trap Visit Form'
             completed={true}
           />
-          <Divider />
-          {stepsArray &&
-            currentRoute === 'Trap Visit Form' &&
-            stepsArray.map((step: any, index: any) => {
-              return (
-                <VStack ml='4' key={index}>
-                  <MenuButton
-                    active={currentRoute === step.name}
-                    // isDisabled={
-                    //   reduxState[step.propName]?.completed ? false : true
-                    // }
-                    completed={step.completed}
-                    onPress={() => handlePressFormButton(step.name)}
-                    icon='ellipse'
-                    listItem={true}
-                    title={step.name}
-                  />
-                </VStack>
-              )
-            })}
+          {stepsArray && currentRoute === 'Trap Visit Form' && (
+            <>
+              <Divider mt='2' />
+              {stepsArray.map((step: any, index: any) => {
+                return (
+                  <VStack ml='4' key={index}>
+                    <MenuButton
+                      active={currentRoute === step.name}
+                      // isDisabled={
+                      //   reduxState[step.propName]?.completed ? false : true
+                      // }
+                      completed={step.completed}
+                      onPress={() => handlePressFormButton(step.name)}
+                      icon='ellipse'
+                      listItem={true}
+                      title={step.name}
+                    />
+                  </VStack>
+                )
+              })}
+            </>
+          )}
         </DrawerContentScrollView>
       </VStack>
     </Box>

@@ -5,6 +5,8 @@ import TrapVisitForm from '../screens/trapVisitForm'
 import GenerateReport from '../screens/generateReport'
 import DataQualityControl from '../screens/QCData'
 import MarkRecaptureForm from '../screens/markRecaptureForm'
+import Profile from '../screens/profile'
+import PermitInfo from '../screens/permitInfo'
 
 const Drawer = createDrawerNavigator()
 
@@ -28,6 +30,8 @@ export default function DrawerNavigator() {
       <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
 
       <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
+      <Drawer.Screen name='Profile' component={Profile} />
+      <Drawer.Screen name='Permit Info' component={PermitInfo} />
     </Drawer.Navigator>
   )
 }
