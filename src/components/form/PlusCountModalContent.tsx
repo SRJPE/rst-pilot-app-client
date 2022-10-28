@@ -90,72 +90,78 @@ const PlusCountModalContent = ({
               <Heading fontSize='2xl'>
                 {`You Counted ${'{#}'}${'{species}'}${'{run}'}.`}
               </Heading>
-              <FormControl>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Species
-                    </Text>
-                  </FormControl.Label>
+              <HStack space={6}>
+                <FormControl w='31%'>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Species
+                      </Text>
+                    </FormControl.Label>
 
-                  {touched.species &&
-                    errors.species &&
-                    renderErrorMessage(errors, 'species')}
-                </HStack>
-                <CustomSelect
-                  selectedValue={values.species}
-                  placeholder={'Species'}
-                  onValueChange={handleChange('species')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={speciesDictionary}
-                />
-              </FormControl>
-              <FormControl>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Life Stage
-                    </Text>
-                  </FormControl.Label>
+                    {touched.species &&
+                      errors.species &&
+                      renderErrorMessage(errors, 'species')}
+                  </HStack>
+                  <CustomSelect
+                    selectedValue={values.species}
+                    placeholder={'Species'}
+                    onValueChange={handleChange('species')}
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={speciesDictionary}
+                  />
+                </FormControl>
+                <FormControl w='31%'>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Life Stage
+                      </Text>
+                    </FormControl.Label>
 
-                  {touched.lifeStage &&
-                    errors.lifeStage &&
-                    renderErrorMessage(errors, 'lifeStage')}
-                </HStack>
-                <CustomSelect
-                  selectedValue={values.lifeStage}
-                  placeholder={'Life stage'}
-                  onValueChange={handleChange('lifeStage')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={dropdownValues.lifeStage.map((item: any) => ({
-                    label: item.definition,
-                    value: item.definition,
-                  }))}
-                />
-              </FormControl>
+                    {touched.lifeStage &&
+                      errors.lifeStage &&
+                      renderErrorMessage(errors, 'lifeStage')}
+                  </HStack>
+                  <CustomSelect
+                    selectedValue={values.lifeStage}
+                    placeholder={'Life stage'}
+                    onValueChange={handleChange('lifeStage')}
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={dropdownValues.lifeStage.map(
+                      (item: any) => ({
+                        label: item.definition,
+                        value: item.definition,
+                      })
+                    )}
+                  />
+                </FormControl>
 
-              <FormControl>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Run
-                    </Text>
-                  </FormControl.Label>
+                <FormControl w='31%'>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Run
+                      </Text>
+                    </FormControl.Label>
 
-                  {touched.run &&
-                    errors.run &&
-                    renderErrorMessage(errors, 'run')}
-                </HStack>
-                <Input
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Calculated from fork length (disabled)'
-                  keyboardType='numeric'
-                  onChangeText={handleChange('run')}
-                  onBlur={handleBlur('run')}
-                  value={values.run}
-                />
-              </FormControl>
+                    {touched.run &&
+                      errors.run &&
+                      renderErrorMessage(errors, 'run')}
+                  </HStack>
+
+                  <CustomSelect
+                    selectedValue={values.run}
+                    placeholder={'Run'}
+                    onValueChange={handleChange('run')}
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={dropdownValues.run.map((item: any) => ({
+                      label: item.definition,
+                      value: item.definition,
+                    }))}
+                  />
+                </FormControl>
+              </HStack>
               <FormControl>
                 <HStack space={4} alignItems='center'>
                   <FormControl.Label>

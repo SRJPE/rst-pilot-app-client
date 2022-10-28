@@ -185,7 +185,7 @@ const FishInput = ({
                 setAddPlusCountModalOpen(false)
                 dispatch(markFishInputModalOpen(false))
               }}
-              height='3/4'
+              height='1/2'
             >
               <PlusCountModalContent
                 closeModal={() => {
