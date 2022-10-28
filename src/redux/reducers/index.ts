@@ -8,7 +8,6 @@ import trapStatusSlice from './formSlices/trapStatusSlice'
 import trapPreProcessingSlice from './formSlices/trapPreProcessingSlice'
 import fishProcessingSlice from './formSlices/fishProcessingSlice'
 import fishInputSlice from './formSlices/fishInputSlice'
-import addIndividualFishSlice from './formSlices/addIndividualFishSlice'
 import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
 import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
 import markRecaptureNavigationSlice from './markRecaptureSlices/markRecaptureNavigationSlice'
@@ -31,7 +30,6 @@ export default combineReducers({
   trapPreProcessing: trapPreProcessingSlice,
   fishProcessing: fishProcessingSlice,
   fishInput: fishInputSlice,
-  addIndividualFish: addIndividualFishSlice,
   addMarksOrTags: addMarksOrTagsSlice,
   addGeneticSamples: addGeneticSamplesSlice,
   trapPostProcessing: trapPostProcessingSlice,

@@ -19,7 +19,6 @@ import { connect, useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { addIndividualFishSchema } from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { saveAddFishModalData } from '../../redux/reducers/formSlices/addIndividualFishSlice'
 import CustomModal from '../Shared/CustomModal'
 import CustomSelect from '../Shared/CustomSelect'
 import CustomModalHeader, {
@@ -27,56 +26,25 @@ import CustomModalHeader, {
 } from '../Shared/CustomModalHeader'
 import MarkFishModalContent from './MarkFishModalContent'
 import AddGeneticsModalContent from './AddGeneticsModalContent'
+import {
+  individualFishInitialState,
+  saveIndividualFish,
+} from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveGeneticSampleData } from '../../redux/reducers/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/addMarksOrTagsSlice'
 import { MaterialIcons } from '@expo/vector-icons'
 
 const speciesDictionary = [{ label: 'Chinook', value: 'Chinook' }]
-const lifestageDictionary = [
-  { label: 'Yolk sac fry (alevin)', value: 'Yolk sac fry (alevin)' },
-  { label: 'YOY (young of the year)', value: 'YOY (young of the year)' },
-  { label: 'Fry', value: 'Fry' },
-  { label: 'Parr', value: 'Parr' },
-  { label: 'Silvery parr', value: 'Silvery parr' },
-  { label: 'Age I+', value: 'Age I+' },
-  { label: 'Pre-smolt', value: 'Pre-smolt' },
-  { label: 'Smolt', value: 'Smolt' },
-  { label: 'Yearling', value: 'Yearling' },
-  { label: 'Juvenile', value: 'Juvenile' },
-  { label: 'Adult', value: 'Adult' },
-  { label: 'Ammocoete', value: 'Ammocoete' },
-  {
-    label: 'Macropthalmia (transformer lamprey)',
-    value: 'Macropthalmia (transformer lamprey)',
-  },
-  { label: 'Mixed', value: 'Mixed' },
-  { label: 'Grilse / jack', value: 'Grilse / jack' },
-  { label: 'Larva', value: 'Larva' },
-  { label: 'Button-up fry', value: 'Button-up fry' },
-  { label: 'Unbuttoned fry', value: 'Unbuttoned fry' },
-  { label: 'Seamed fry', value: 'Seamed fry' },
-  { label: 'Subadult', value: 'Subadult' },
-  { label: 'Other', value: 'Other' },
-  { label: 'Not recorded', value: 'Not recorded' },
-  { label: 'Not applicable (n/a)', value: 'Not applicable (n/a)' },
-  { label: 'Unknown', value: 'Unknown' },
-  { label: 'See Comments', value: 'See Comments' },
-  { label: 'Not yet assigned', value: 'Not yet assigned' },
-]
 
 const AddFishModalContent = ({
-  reduxState,
-  addIndividualFishSliceState,
-  saveAddFishModalData,
+  saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
   activeTab,
   setActiveTab,
   closeModal,
 }: {
-  reduxState: any
-  addIndividualFishSliceState: any
-  saveAddFishModalData: any
+  saveIndividualFish: any
   saveMarkOrTagData: any
   saveGeneticSampleData: any
   activeTab: any
@@ -90,7 +58,7 @@ const AddFishModalContent = ({
   )
 
   const handleFormSubmit = (values: any) => {
-    saveAddFishModalData(values)
+    saveIndividualFish(values)
   }
 
   const handleMarkFishFormSubmit = (values: any) => {
@@ -105,8 +73,8 @@ const AddFishModalContent = ({
     <>
       <Formik
         validationSchema={addIndividualFishSchema}
-        initialValues={addIndividualFishSliceState.values}
-        onSubmit={values => {
+        initialValues={individualFishInitialState}
+        onSubmit={(values) => {
           handleFormSubmit(values)
         }}
       >
@@ -210,7 +178,7 @@ const AddFishModalContent = ({
                       </FormControl.Label>
 
                       <Popover
-                        trigger={triggerProps => {
+                        trigger={(triggerProps) => {
                           return (
                             <IconButton
                               {...triggerProps}
@@ -319,7 +287,7 @@ const AddFishModalContent = ({
                       </Text>
                     </FormControl.Label>
                     <Popover
-                      trigger={triggerProps => {
+                      trigger={(triggerProps) => {
                         return (
                           <IconButton
                             {...triggerProps}
@@ -570,14 +538,11 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
 }
 
 const mapStateToProps = (state: RootState) => {
-  return {
-    addIndividualFishSliceState: state.addIndividualFish,
-    reduxState: state,
-  }
+  return {}
 }
 
 export default connect(mapStateToProps, {
-  saveAddFishModalData,
+  saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
 })(AddFishModalContent)
