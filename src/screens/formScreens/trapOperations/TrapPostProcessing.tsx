@@ -11,6 +11,8 @@ import {
   Radio,
   View,
   Icon,
+  Button,
+  Spinner,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapPostProcessingSchema } from '../../../utils/helpers/yupValidations'
@@ -23,6 +25,8 @@ import {
   saveTrapPostProcessing,
 } from '../../../redux/reducers/formSlices/trapPostProcessingSlice'
 import { Ionicons } from '@expo/vector-icons'
+import { useState } from 'react'
+import * as Location from 'expo-location'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -38,6 +42,25 @@ const TrapPreProcessing = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const [currentLocation, setCurrentLocation] = useState(null as any)
+  const [errorMessage, setErrorMessage] = useState(null as null | string)
+
+  const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
+    ;(async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted') {
+        setErrorMessage('Permission to access location was denied')
+        return
+      }
+
+      let currentLocation = await Location.getCurrentPositionAsync({})
+      setCurrentLocation(currentLocation)
+      setFieldValue('trapLatitude', currentLocation.coords.latitude)
+      setFieldValue('trapLongitude', currentLocation.coords.longitude)
+      setFieldTouched('trapLatitude', true)
+      setFieldTouched('trapLongitude', true)
+    })()
+  }
 
   const handleSubmit = (values: any) => {
     dispatch(saveTrapPostProcessing(values))
@@ -177,6 +200,30 @@ const TrapPreProcessing = ({
                 <Text color='grey' my='5' fontSize='17'>
                   SET TRAP LOCATION PLACEHOLDER
                 </Text>
+                <HStack space={3} alignItems='center'>
+                  <Button
+                    w='1/2'
+                    bg='primary'
+                    px='10'
+                    onPress={() => {
+                      getCurrentLocation(setFieldTouched, setFieldValue)
+                    }}
+                  >
+                    <Text fontSize='xl' color='white'>
+                      Drop Pin at Current Location
+                    </Text>
+                  </Button>
+                  {values.trapLatitude && (
+                    <HStack space={3}>
+                      <Text fontSize='xl' color='black'>
+                        {`Lat: ${values.trapLatitude}`}
+                      </Text>
+                      <Text fontSize='xl' color='black'>
+                        {`Long: ${values.trapLongitude}`}
+                      </Text>
+                    </HStack>
+                  )}
+                </HStack>
               </FormControl>
               <FormControl w='30%'>
                 <FormControl.Label>
