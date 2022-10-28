@@ -192,10 +192,8 @@ const TrapPreProcessing = ({
                   Please take 3 separate measures of cone rotations per minute
                   before cleaning the trap.
                 </Text>
-                <Text color='grey' my='5' fontSize='17'>
-                  SET TRAP LOCATION PLACEHOLDER
-                </Text>
-                <HStack space={3} alignItems='center'>
+
+                <HStack space={3} alignItems='center' mt='5'>
                   <Button
                     w='1/2'
                     bg='primary'
