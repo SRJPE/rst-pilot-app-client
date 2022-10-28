@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Text, VStack, CircleIcon, Heading, View } from 'native-base'
 import BottomNavigation from '../../components/home/HomeNavButtons'
 import TopIcons from '../../components/home/TopIcons'
@@ -48,6 +48,12 @@ const styles = StyleSheet.create({
 
 export default function Home({ navigation }: { navigation: any }) {
   const [staggerOpen, setStaggerOpen] = useState(false as boolean)
+  const [opacity, setOpacity] = useState(1 as number)
+
+  useEffect(() => {
+    staggerOpen ? setOpacity(0.25) : setOpacity(1)
+  }, [staggerOpen])
+
   const recentItemsCard = ({
     title,
     date,
@@ -87,7 +93,7 @@ export default function Home({ navigation }: { navigation: any }) {
         </Text>
       </View>
 
-      <View style={styles.recentItemsContainer}>
+      <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
         <Text fontWeight={300} fontSize={20} marginBottom={5}>
           Recent Items
         </Text>
