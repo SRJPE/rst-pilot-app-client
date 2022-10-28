@@ -86,10 +86,10 @@ export default function Home({ navigation }: { navigation: any }) {
       <View style={styles.landingContent}>
         <CircleIcon size='300' color='primary' />
         <Heading fontWeight={300} fontSize={50} marginTop={5}>
-          Welcome back, Jordan!
+          Welcome back, Ryan!
         </Heading>
         <Text fontWeight={300} fontSize={23} marginTop={5}>
-          Select the action you would like to preform.
+          Select the action you would like to perform.
         </Text>
       </View>
 
