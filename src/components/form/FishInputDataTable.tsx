@@ -72,7 +72,7 @@ const FishInputDataTable = ({
             {Object.keys(obj).map((key: string | number, itemIdx: number) => {
               return (
                 <DataTable.Cell key={`${key}-${obj[key]}-${itemIdx}`}>
-                  {obj[key] ? `${obj[key]}` : '---'}
+                  {`${obj[key]}` ? `${obj[key]}` : '---'}
                 </DataTable.Cell>
               )
             })}

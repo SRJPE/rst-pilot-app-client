@@ -280,13 +280,13 @@ const AddFishModalContent = ({
                       </Popover>
                       {touched.lifestage &&
                         errors.lifestage &&
-                        renderErrorMessage(errors, 'lifeStage')}
+                        renderErrorMessage(errors, 'lifestage')}
                     </HStack>
 
                     <CustomSelect
                       selectedValue={values.lifestage}
                       placeholder={'Life Stage'}
-                      onValueChange={handleChange('lifeStage')}
+                      onValueChange={handleChange('lifestage')}
                       setFieldTouched={setFieldTouched}
                       selectOptions={dropdownValues.lifeStage.map(
                         (item: any) => ({
