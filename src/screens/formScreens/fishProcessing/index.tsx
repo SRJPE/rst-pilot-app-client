@@ -97,25 +97,27 @@ const FishProcessing = ({
                   renderErrorMessage(errors, 'fishProcessed')}
               </FormControl>
               {values.fishProcessedResult ===
-                'no catch data, fish left in live box' && (
-                <FormControl>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Reason For Not Processing
-                    </Text>
-                  </FormControl.Label>
-                  <CustomSelect
-                    selectedValue={values.reasonForNotProcessing}
-                    placeholder='Reason'
-                    onValueChange={handleChange('reasonForNotProcessing')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={reasonsForNotProcessing}
-                  />
-                  {touched.reasonForNotProcessing &&
-                    errors.reasonForNotProcessing &&
-                    renderErrorMessage(errors, 'reasonForNotProcessing')}
-                </FormControl>
-              )}
+                'no catch data, fish left in live box' ||
+                (values.fishProcessedResult ===
+                  'no catch data, fish released' && (
+                  <FormControl>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Reason For Not Processing
+                      </Text>
+                    </FormControl.Label>
+                    <CustomSelect
+                      selectedValue={values.reasonForNotProcessing}
+                      placeholder='Reason'
+                      onValueChange={handleChange('reasonForNotProcessing')}
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={reasonsForNotProcessing}
+                    />
+                    {touched.reasonForNotProcessing &&
+                      errors.reasonForNotProcessing &&
+                      renderErrorMessage(errors, 'reasonForNotProcessing')}
+                  </FormControl>
+                ))}
 
               {values.fishProcessedResult === 'processed fish' && (
                 <VStack>
