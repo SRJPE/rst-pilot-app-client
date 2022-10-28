@@ -1,4 +1,4 @@
-import { Button, Heading, Icon, Image, Text, View, VStack } from 'native-base'
+import { Heading, Image, View, VStack } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 
 export default function NoFishCaught({ navigation }: { navigation: any }) {

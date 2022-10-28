@@ -1,5 +1,4 @@
 import { createDrawerNavigator } from '@react-navigation/drawer'
-// import { RootStackParamList } from './types'
 import DrawerMenu from './DrawerMenu'
 import Home from '../screens/home'
 import TrapVisitForm from '../screens/trapVisitForm'

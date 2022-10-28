@@ -68,19 +68,32 @@ export default function NavButtons({
   const navigateFlowRightButton = (values: any) => {
     switch (activePage) {
       case 'Trap Status':
-        if (values?.trapStatus === 'Trap stopped functioning') {
+        if (values?.trapStatus === 'trap not functioning') {
           navigateHelper('Non Functional Trap', 11)
         } else if (values?.trapStatus === 'trap not in service') {
           navigateHelper('No Fish Caught', 12)
         } else if (values?.flowMeasure > 1000) {
           navigateHelper('High Flows', 9)
-        } else if (values?.waterTemperature > 30) {
-          navigateHelper('High Temperatures', 10)
+        } else if (values.waterTemperatureUnit === '°C') {
+          if (values?.waterTemperature > 30) {
+            navigateHelper('High Temperatures', 10)
+          }
+        } else if (values.waterTemperatureUnit === '°F') {
+          if (values?.waterTemperature > 86) {
+            navigateHelper('High Temperatures', 10)
+          }
         }
+
         break
       case 'Fish Processing':
-        if (values?.fishProcessedResult === 'No fish were caught') {
+        if (values?.fishProcessedResult === 'no fish caught') {
           navigateHelper('No Fish Caught', 12)
+        } else if (
+          values?.fishProcessedResult ===
+            'no catch data, fish left in live box' ||
+          values?.fishProcessedResult === 'no catch data, fish released'
+        ) {
+          navigateHelper('Trap Post-Processing', 6)
         }
         break
       case 'High Flows':
@@ -88,6 +101,9 @@ export default function NavButtons({
         break
       case 'High Temperatures':
         navigateHelper('Trap Pre-Processing', 3)
+        break
+      case 'No Fish Caught':
+        navigateHelper('Trap Post-Processing', 6)
         break
       default:
         console.log('default navigation')

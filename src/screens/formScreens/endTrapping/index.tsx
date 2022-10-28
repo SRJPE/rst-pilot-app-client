@@ -1,4 +1,4 @@
-import { Text, View, VStack } from 'native-base'
+import { Text, View } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 
 export default function EndTrapping({ navigation }: { navigation: any }) {

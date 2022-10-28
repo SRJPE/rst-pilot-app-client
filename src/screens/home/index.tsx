@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Text, VStack, CircleIcon, Heading, View } from 'native-base'
-import Logo from '../../components/Shared/Logo'
 import BottomNavigation from '../../components/home/HomeNavButtons'
 import TopIcons from '../../components/home/TopIcons'
 import { StyleSheet } from 'react-native'
