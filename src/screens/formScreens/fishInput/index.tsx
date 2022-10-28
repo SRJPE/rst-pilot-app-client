@@ -142,7 +142,7 @@ const FishInput = ({
 
               <Box>
                 <Heading pb='8'>Catch Table</Heading>
-                <FishInputDataTable fishInputSliceState={fishInputSliceState} />
+                <FishInputDataTable />
               </Box>
             </VStack>
             {/* --------- Modals --------- */}

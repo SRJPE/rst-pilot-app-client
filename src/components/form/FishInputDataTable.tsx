@@ -1,5 +1,7 @@
 import React from 'react'
 import { DataTable } from 'react-native-paper'
+import { connect } from 'react-redux'
+import { RootState } from '../../redux/store'
 
 const headers = [
   'species',
@@ -24,29 +26,37 @@ const emptyTableData = {
   8: '---',
 }
 
-interface FishInputDataTableI {
-  fishInputSliceState: any
-}
-
-const FishInputDataTable = (props: FishInputDataTableI) => {
+const FishInputDataTable = ({
+  individualFishList,
+}: {
+  individualFishList: any
+}) => {
   const numberOfItemsPerPage = 5
   const [page, setPage] = React.useState(0)
   const [pageRows, setPageRows] = React.useState([
-    ...props.fishInputSliceState.individualFish.slice(0, numberOfItemsPerPage),
+    ...individualFishList.slice(0, numberOfItemsPerPage),
   ])
 
   React.useEffect(() => {
-    const rowsForPage = props.fishInputSliceState.individualFish.slice(
+    const rowsForPage = generateRowsForPage()
+    setPageRows(rowsForPage)
+  }, [individualFishList])
+
+  React.useEffect(() => {
+    const rowsForPage = generateRowsForPage()
+    setPageRows(rowsForPage)
+  }, [page])
+
+  const generateRowsForPage = () => {
+    const rowsForPage = individualFishList.slice(
       page * numberOfItemsPerPage,
       page * numberOfItemsPerPage + numberOfItemsPerPage
     )
-
     while (rowsForPage.length < 5) {
       rowsForPage.push(emptyTableData)
     }
-
-    setPageRows(rowsForPage)
-  }, [page])
+    return rowsForPage
+  }
 
   return (
     <DataTable>
@@ -58,11 +68,10 @@ const FishInputDataTable = (props: FishInputDataTableI) => {
 
       {pageRows.map((obj, rowIdx: number) => {
         return (
-          <DataTable.Row>
+          <DataTable.Row key={Object.keys(obj)[rowIdx]}>
             {Object.keys(obj).map((key: string | number, itemIdx: number) => {
-              console.log(key)
               return (
-                <DataTable.Cell>
+                <DataTable.Cell key={`${key}-${obj[key]}-${itemIdx}`}>
                   {obj[key] ? `${obj[key]}` : '---'}
                 </DataTable.Cell>
               )
@@ -74,7 +83,7 @@ const FishInputDataTable = (props: FishInputDataTableI) => {
       <DataTable.Pagination
         page={page}
         numberOfPages={Math.ceil(
-          props.fishInputSliceState.individualFish.length / numberOfItemsPerPage
+          individualFishList.length / numberOfItemsPerPage
         )}
         label={`Page ${page + 1}`}
         onPageChange={(page: number) => setPage(page)}
@@ -84,4 +93,10 @@ const FishInputDataTable = (props: FishInputDataTableI) => {
   )
 }
 
-export default FishInputDataTable
+const mapStateToProps = (state: RootState) => {
+  return {
+    individualFishList: state.fishInput.individualFish,
+  }
+}
+
+export default connect(mapStateToProps)(FishInputDataTable)

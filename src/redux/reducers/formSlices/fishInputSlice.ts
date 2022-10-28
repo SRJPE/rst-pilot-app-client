@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { cloneDeep } from 'lodash'
 
 interface InitialStateI {
   completed: boolean
@@ -52,7 +53,7 @@ export const saveFishSlice = createSlice({
       state.values = action.payload
     },
     saveIndividualFish: (state, action) => {
-      let individualFishCopy = [...state.individualFish]
+      let individualFishCopy = cloneDeep(state.individualFish)
       individualFishCopy.push(action.payload)
       state.individualFish = individualFishCopy
     },
@@ -65,7 +66,11 @@ export const saveFishSlice = createSlice({
   },
 })
 
-export const { saveFishInput, saveIndividualFish, markFishInputCompleted, markFishInputModalOpen } =
-  saveFishSlice.actions
+export const {
+  saveFishInput,
+  saveIndividualFish,
+  markFishInputCompleted,
+  markFishInputModalOpen,
+} = saveFishSlice.actions
 
 export default saveFishSlice.reducer
