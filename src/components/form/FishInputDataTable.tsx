@@ -4,12 +4,21 @@ import { DataTable } from 'react-native-paper'
 const numberOfItemsPerPageList = [2, 3, 4]
 
 const data = {
-  headers: ['species', 'fork length', 'weight', 'run', 'clipped', 'mark code', 'cwt code', 'mort'], // length = 8
+  headers: [
+    'species',
+    'fork length',
+    'weight',
+    'run',
+    'clipped',
+    'mark code',
+    'cwt code',
+    'mort',
+  ], // length = 8
   rows: [
     ['chinook', 100, 10, '', '', '', '', ''],
     ['chinook', 100, 10, '', '', '', '', ''],
     ['chinook', 100, 10, '', '', '', '', ''],
-  ]
+  ],
 }
 
 const FishInputDataTable = () => {
@@ -27,9 +36,10 @@ const FishInputDataTable = () => {
   return (
     <DataTable>
       <DataTable.Header>
-        {data.headers.map((header: string) => <DataTable.Title>{header}</DataTable.Title>)}
+        {data.headers.map((header: string, idx: number) => (
+          <DataTable.Title key={idx}>{header}</DataTable.Title>
+        ))}
       </DataTable.Header>
-
 
       {data.rows.map((row: any[]) => {
         return (

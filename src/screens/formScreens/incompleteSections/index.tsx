@@ -1,11 +1,10 @@
-import { Button, Heading, Icon, Image, Text, View, VStack } from 'native-base'
-import Ionicons from '@expo/vector-icons/Ionicons'
-import NavButtons from '../../../components/formContainer/NavButtons'
+import { useEffect } from 'react'
+import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
-import IncompleteSectionButton from '../../../components/form/IncompleteSectionButton'
-import { useEffect } from 'react'
 import { checkIfFormIsComplete } from '../../../redux/reducers/formSlices/navigationSlice'
+import NavButtons from '../../../components/formContainer/NavButtons'
+import IncompleteSectionButton from '../../../components/form/IncompleteSectionButton'
 
 const mapStateToProps = (state: RootState) => {
   return {

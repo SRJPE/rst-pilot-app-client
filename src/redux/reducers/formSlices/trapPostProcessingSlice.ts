@@ -10,7 +10,8 @@ export interface trapPostProcessingValuesI {
   rpm1: number | null
   rpm2: number | null
   rpm3: number | null
-  trapLocation: any
+  trapLatitude: number | null
+  trapLongitude: number | null
   endingTrapStatus: string
 }
 
@@ -21,7 +22,8 @@ const initialState: InitialStateI = {
     rpm1: null,
     rpm2: null,
     rpm3: null,
-    trapLocation: '',
+    trapLatitude: null,
+    trapLongitude: null,
     endingTrapStatus: 'Reset Trap',
   },
 }

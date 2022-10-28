@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
@@ -11,6 +10,9 @@ import {
   HStack,
   Radio,
   View,
+  Icon,
+  Button,
+  Spinner,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapPostProcessingSchema } from '../../../utils/helpers/yupValidations'
@@ -22,6 +24,9 @@ import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
 } from '../../../redux/reducers/formSlices/trapPostProcessingSlice'
+import { Ionicons } from '@expo/vector-icons'
+import { useState } from 'react'
+import * as Location from 'expo-location'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -37,6 +42,20 @@ const TrapPreProcessing = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+
+  const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
+    ;(async () => {
+      try {
+        let currentLocation = await Location.getCurrentPositionAsync({})
+        setFieldValue('trapLatitude', currentLocation.coords.latitude)
+        setFieldValue('trapLongitude', currentLocation.coords.longitude)
+        setFieldTouched('trapLatitude', true)
+        setFieldTouched('trapLongitude', true)
+      } catch (error) {
+        console.error(error)
+      }
+    })()
+  }
 
   const handleSubmit = (values: any) => {
     dispatch(saveTrapPostProcessing(values))
@@ -80,11 +99,16 @@ const TrapPreProcessing = ({
             <VStack space={10}>
               <Heading>Trap Post-Processing</Heading>
               <FormControl w='1/2'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Debris Volume
-                  </Text>
-                </FormControl.Label>
+                <HStack space={4} alignItems='center'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Debris Volume
+                    </Text>
+                  </FormControl.Label>
+                  {touched.debrisVolume &&
+                    errors.debrisVolume &&
+                    renderErrorMessage(errors, 'debrisVolume')}
+                </HStack>
                 <Input
                   height='50px'
                   fontSize='16'
@@ -103,17 +127,32 @@ const TrapPreProcessing = ({
                 >
                   {'L'}
                 </Text>
-                {touched.debrisVolume &&
-                  errors.debrisVolume &&
-                  renderErrorMessage(errors, 'debrisVolume')}
               </FormControl>
 
               <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    RPM After Cleaning
-                  </Text>
-                </FormControl.Label>
+                <HStack space={4} alignItems='center'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      RPM After Cleaning
+                    </Text>
+                  </FormControl.Label>
+                  {((touched.rpm1 && errors.rpm1) ||
+                    (touched.rpm2 && errors.rpm2) ||
+                    (touched.rpm3 && errors.rpm3)) && (
+                    <HStack space={1}>
+                      <Icon
+                        marginTop={'.5'}
+                        as={Ionicons}
+                        name='alert-circle-outline'
+                        color='error'
+                      />
+                      <Text style={{ fontSize: 14, color: '#b71c1c' }}>
+                        All Three measurements are required
+                      </Text>
+                    </HStack>
+                  )}
+                </HStack>
+
                 <HStack space={8} justifyContent='space-between'>
                   <FormControl w='30%'>
                     <Input
@@ -125,15 +164,6 @@ const TrapPreProcessing = ({
                       onBlur={handleBlur('rpm1')}
                       value={values.rpm1}
                     />
-                    {touched.rpm1 &&
-                      errors.rpm1 &&
-                      renderErrorMessage(errors, 'rpm1')}
-                    {/* {touched.rpm2 &&
-                      (values.rpm2 > 2000 || values.rpm2 < 50) && (
-                        <Text style={{ fontSize: 12, color: 'orange' }}>
-                          VALUE OUT OF RANGE
-                        </Text>
-                      )} */}
                   </FormControl>
                   <FormControl w='30%'>
                     <Input
@@ -145,9 +175,6 @@ const TrapPreProcessing = ({
                       onBlur={handleBlur('rpm2')}
                       value={values.rpm2}
                     />
-                    {touched.rpm2 &&
-                      errors.rpm2 &&
-                      renderErrorMessage(errors, 'rpm2')}
                   </FormControl>
                   <FormControl w='30%'>
                     <Input
@@ -159,18 +186,37 @@ const TrapPreProcessing = ({
                       onBlur={handleBlur('rpm3')}
                       value={values.rpm3}
                     />
-                    {touched.rpm3 &&
-                      errors.rpm3 &&
-                      renderErrorMessage(errors, 'rpm3')}
                   </FormControl>
                 </HStack>
                 <Text color='grey' my='5' fontSize='17'>
                   Please take 3 separate measures of cone rotations per minute
                   before cleaning the trap.
                 </Text>
-                <Text color='grey' my='5' fontSize='17'>
-                  SET TRAP LOCATION PLACEHOLDER
-                </Text>
+
+                <HStack space={3} alignItems='center' mt='5'>
+                  <Button
+                    w='1/2'
+                    bg='primary'
+                    px='10'
+                    onPress={() => {
+                      getCurrentLocation(setFieldTouched, setFieldValue)
+                    }}
+                  >
+                    <Text fontSize='xl' color='white'>
+                      Drop Pin at Current Location
+                    </Text>
+                  </Button>
+                  {values.trapLatitude && (
+                    <HStack space={3}>
+                      <Text fontSize='xl' color='black'>
+                        {`Lat: ${values.trapLatitude}`}
+                      </Text>
+                      <Text fontSize='xl' color='black'>
+                        {`Long: ${values.trapLongitude}`}
+                      </Text>
+                    </HStack>
+                  )}
+                </HStack>
               </FormControl>
               <FormControl w='30%'>
                 <FormControl.Label>

@@ -6,15 +6,7 @@ import {
   markVisitSetupCompleted,
   saveVisitSetup,
 } from '../../../redux/reducers/formSlices/visitSetupSlice'
-import {
-  Select,
-  FormControl,
-  CheckIcon,
-  Heading,
-  VStack,
-  Text,
-  View,
-} from 'native-base'
+import { FormControl, Heading, VStack, Text, View } from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../../utils/helpers/yupValidations'
@@ -67,7 +59,7 @@ const VisitSetup = ({
       // maybe this is not needed for first step in form?
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
-      onSubmit={(values) => {
+      onSubmit={values => {
         handleSubmit(values)
       }}
     >
@@ -88,7 +80,7 @@ const VisitSetup = ({
             borderColor='themeGrey'
             borderWidth='15'
           >
-            <VStack space={12}>
+            <VStack space={10}>
               <Heading mt='2'>Which stream are you trapping on?</Heading>
               <FormControl>
                 <FormControl.Label>
@@ -101,6 +93,12 @@ const VisitSetup = ({
                   placeholder='Stream'
                   onValueChange={(itemValue: string) => {
                     setFieldValue('stream', itemValue)
+                    setFieldValue(
+                      'trapSite',
+                      itemValue === 'Mill Creek'
+                        ? 'Mill Creek RST'
+                        : 'Deer Creek RST'
+                    )
                     updateSelectedProgram(itemValue)
                   }}
                   setFieldTouched={setFieldTouched}
@@ -117,8 +115,10 @@ const VisitSetup = ({
               </FormControl>
               {values.stream && (
                 <>
-                  <Heading fontSize='lg'>Confirm the following values:</Heading>
                   <FormControl>
+                    <Heading fontSize='lg' mb='4'>
+                      Confirm the following values:
+                    </Heading>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
                         Trap Site
@@ -127,7 +127,16 @@ const VisitSetup = ({
                     <CustomSelect
                       selectedValue={values.trapSite}
                       placeholder='Trap Site'
-                      onValueChange={handleChange('trapSite')}
+                      onValueChange={(itemValue: string) => {
+                        setFieldValue('trapSite', itemValue)
+                        setFieldValue(
+                          'stream',
+                          itemValue === 'Mill Creek RST'
+                            ? 'Mill Creek'
+                            : 'Deer Creek'
+                        )
+                        updateSelectedProgram(itemValue)
+                      }}
                       setFieldTouched={setFieldTouched}
                       selectOptions={visitSetupDefaultsState?.trapLocations?.map(
                         (trapLocation: any) => ({
@@ -147,7 +156,6 @@ const VisitSetup = ({
                       </Text>
                     </FormControl.Label>
                     <CrewDropDown
-
                       crewList={visitSetupDefaultsState?.crewMembers[
                         selectedProgramId ? selectedProgramId - 1 : 0
                       ].map((crewMember: any) => ({

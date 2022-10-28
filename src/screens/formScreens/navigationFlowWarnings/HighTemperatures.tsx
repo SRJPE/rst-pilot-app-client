@@ -1,5 +1,4 @@
 import { Button, Heading, Image, Text, View, VStack } from 'native-base'
-import Ionicons from '@expo/vector-icons/Ionicons'
 import NavButtons from '../../../components/formContainer/NavButtons'
 
 export default function HighFlows({ navigation }: { navigation: any }) {

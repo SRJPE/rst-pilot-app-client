@@ -8,12 +8,22 @@ export const trapVisitSchema = yup.object().shape({
 
 export const trapStatusSchema = yup.object().shape({
   trapStatus: yup.string().required('Trap Status Required'),
-  reasonNotFunc: yup.string(),
-  // .required('Reason Not Functioning Required'),
-  flowMeasure: yup
-    .number()
-    .required('Flow Measure Required')
-    .typeError('Input must be a number'),
+  // reasonNotFunc: yup
+  //   .string()
+  //   .test('test', 'message', function (value: any) {
+  //     const { trapStatus } = this.parent
+  //     console.log('🚀 ~ trapStatus', trapStatus)
+  //     return (
+  //       trapStatus === 'trap functioning but not normally' ||
+  //       trapStatus === 'trap not functioning'
+  //     )
+  //   })
+  //   .required('test message'),
+
+  // flowMeasure: yup
+  //   .number()
+  //   .required('Flow Measure Required')
+  //   .typeError('Input must be a number'),
   flowMeasureUnit: yup.string(),
   waterTemperature: yup
     .number()
@@ -30,7 +40,7 @@ export const trapStatusSchema = yup.object().shape({
 export const trapPreProcessingSchema = yup.object().shape({
   coneDepth: yup
     .number()
-    .required('Stream required')
+    .required('Cone depth required')
     .typeError('Input must be a number'),
 
   totalRevolutions: yup
@@ -77,9 +87,16 @@ export const fishProcessingSchema = yup.object().shape({
 
 export const addIndividualFishSchema = yup.object().shape({
   species: yup.string().required('Fish species required'),
-  forkLength: yup.number().required('Fish fork length required'),
-  weight: yup.number(),
-  lifestage: yup.string().required('Fish lifestage required'),
+  forkLength: yup
+    .number()
+    .required('Fish fork length required')
+    .typeError('Input must be a number'),
+  run: yup
+    .number()
+    .required('Fish fork length required')
+    .typeError('Input must be a number'),
+  weight: yup.number().typeError('Input must be a number'),
+  lifeStage: yup.string().required('Fish life stage required'),
   adiposeClipped: yup
     .boolean()
     .required('Fish adipose clipped status required'),
@@ -133,4 +150,18 @@ export const addGeneticsSampleSchema = yup.object().shape({
     .required('Fin Clip collection status required'),
   crewMemberCollectingSample: yup.string().required('Crew Member required'),
   comments: yup.string(),
+})
+
+export const addPlusCountsSchema = yup.object().shape({
+  species: yup.string().required('Species required'),
+  lifeStage: yup.string().required('Life stage required'),
+  run: yup
+    .number()
+    .required('Fish fork length required')
+    .typeError('Input must be a number'),
+  count: yup
+    .number()
+    .required('Fish fork length required')
+    .typeError('Input must be a number'),
+  plusCountMethod: yup.string().required('Plus count method required'),
 })
