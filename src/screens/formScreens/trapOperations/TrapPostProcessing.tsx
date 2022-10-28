@@ -42,23 +42,18 @@ const TrapPreProcessing = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [currentLocation, setCurrentLocation] = useState(null as any)
-  const [errorMessage, setErrorMessage] = useState(null as null | string)
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
     ;(async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync()
-      if (status !== 'granted') {
-        setErrorMessage('Permission to access location was denied')
-        return
+      try {
+        let currentLocation = await Location.getCurrentPositionAsync({})
+        setFieldValue('trapLatitude', currentLocation.coords.latitude)
+        setFieldValue('trapLongitude', currentLocation.coords.longitude)
+        setFieldTouched('trapLatitude', true)
+        setFieldTouched('trapLongitude', true)
+      } catch (error) {
+        console.error(error)
       }
-
-      let currentLocation = await Location.getCurrentPositionAsync({})
-      setCurrentLocation(currentLocation)
-      setFieldValue('trapLatitude', currentLocation.coords.latitude)
-      setFieldValue('trapLongitude', currentLocation.coords.longitude)
-      setFieldTouched('trapLatitude', true)
-      setFieldTouched('trapLongitude', true)
     })()
   }
 
