@@ -32,6 +32,7 @@ export default function NonFunctionalTrap({ navigation }: { navigation: any }) {
             py='5'
             px='16'
             borderRadius='5'
+            isDisabled={true}
             onPress={handlePressViewMonitoringProtocols}
           >
             <Text
@@ -50,6 +51,7 @@ export default function NonFunctionalTrap({ navigation }: { navigation: any }) {
             py='5'
             px='16'
             borderRadius='5'
+            isDisabled={true}
             onPress={handlePressCallTeamLead}
             leftIcon={<Icon as={Ionicons} name='call' size='sm' />}
           >
