@@ -16,6 +16,7 @@ import React from 'react'
 import { addGeneticsSampleSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
+import renderErrorMessage from './RenderErrorMessage'
 
 const initialFormValues = {
   sampleIdNumber: '',
@@ -70,6 +71,10 @@ const AddGeneticsModalContent = ({
                   bg='primary'
                   mx='2'
                   px='10'
+                  isDisabled={
+                    (touched && Object.keys(touched).length === 0) ||
+                    (errors && Object.keys(errors).length > 0)
+                  }
                   onPress={() => {
                     handleSubmit()
                     closeModal()
@@ -111,12 +116,18 @@ const AddGeneticsModalContent = ({
               <HStack>
                 <VStack w='1/2' paddingRight='5'>
                   <VStack w='full' marginBottom={5}>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Sample ID Number:
-                      </Text>
-                    </FormControl.Label>
                     <FormControl>
+                      <HStack space={4} alignItems='center'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Sample ID Number:
+                          </Text>
+                        </FormControl.Label>
+
+                        {touched.sampleIdNumber &&
+                          errors.sampleIdNumber &&
+                          renderErrorMessage(errors, 'sampleIdNumber')}
+                      </HStack>
                       <Input
                         height='50px'
                         fontSize='16'
@@ -184,12 +195,21 @@ const AddGeneticsModalContent = ({
                   </VStack>
 
                   <VStack w='full' marginBottom={5}>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Crew Member Collecting Samples
-                      </Text>
-                    </FormControl.Label>
                     <FormControl>
+                      <HStack space={4} alignItems='center'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Crew Member Collecting Samples
+                          </Text>
+                        </FormControl.Label>
+
+                        {touched.crewMemberCollectingSample &&
+                          errors.crewMemberCollectingSample &&
+                          renderErrorMessage(
+                            errors,
+                            'crewMemberCollectingSample'
+                          )}
+                      </HStack>
                       <CustomSelect
                         selectedValue={values.crewMemberCollectingSample}
                         placeholder={'Crew Member'}

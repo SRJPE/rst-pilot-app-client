@@ -16,6 +16,7 @@ import { RootState } from '../../redux/store'
 import { addMarksOrTagsSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
+import renderErrorMessage from './RenderErrorMessage'
 
 const initialFormValues = {
   type: '',
@@ -93,6 +94,10 @@ const MarkFishModalContent = ({
                   bg='primary'
                   mx='2'
                   px='10'
+                  isDisabled={
+                    (touched && Object.keys(touched).length === 0) ||
+                    (errors && Object.keys(errors).length > 0)
+                  }
                   onPress={() => {
                     handleSubmit()
                     closeModal()
@@ -106,12 +111,18 @@ const MarkFishModalContent = ({
             />
             <VStack space={5} paddingX='10' paddingTop='7' paddingBottom='3'>
               <VStack w='full'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Type
-                  </Text>
-                </FormControl.Label>
                 <FormControl>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Type
+                      </Text>
+                    </FormControl.Label>
+
+                    {touched.type &&
+                      errors.type &&
+                      renderErrorMessage(errors, 'type')}
+                  </HStack>
                   <CustomSelect
                     selectedValue={values.type}
                     placeholder={'Type'}
@@ -126,12 +137,18 @@ const MarkFishModalContent = ({
               </VStack>
 
               <VStack w='full'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Number
-                  </Text>
-                </FormControl.Label>
                 <FormControl>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Number
+                      </Text>
+                    </FormControl.Label>
+
+                    {touched.number &&
+                      errors.number &&
+                      renderErrorMessage(errors, 'number')}
+                  </HStack>
                   <Input
                     height='50px'
                     fontSize='16'
@@ -145,12 +162,19 @@ const MarkFishModalContent = ({
               </VStack>
 
               <VStack w='full'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Position
-                  </Text>
-                </FormControl.Label>
                 <FormControl>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Position
+                      </Text>
+                    </FormControl.Label>
+
+                    {touched.position &&
+                      errors.position &&
+                      renderErrorMessage(errors, 'position')}
+                  </HStack>
+
                   <CustomSelect
                     selectedValue={values.position}
                     placeholder={'Mark Position'}
@@ -183,12 +207,18 @@ const MarkFishModalContent = ({
               </HStack>
 
               <VStack w='full'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Crew Member Tagging
-                  </Text>
-                </FormControl.Label>
                 <FormControl>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Crew Member Tagging
+                      </Text>
+                    </FormControl.Label>
+
+                    {touched.crewMemberTagging &&
+                      errors.crewMemberTagging &&
+                      renderErrorMessage(errors, 'crewMemberTagging')}
+                  </HStack>
                   <CustomSelect
                     selectedValue={values.crewMemberTagging}
                     placeholder={'Crew Member'}

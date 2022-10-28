@@ -7,12 +7,15 @@ import {
   Text,
   Button,
   Heading,
+  HStack,
 } from 'native-base'
 import React from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
+import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
+import renderErrorMessage from './RenderErrorMessage'
 
 const initialFormValues = {
   species: '',
@@ -36,7 +39,7 @@ const PlusCountModalContent = ({
   handleMarkFishFormSubmit?: any
   closeModal: any
 }) => {
-  const handleFormSubmit = (values: any) => handleMarkFishFormSubmit(values)
+  const handleFormSubmit = (values: any) => console.log('Values: ', values)
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
@@ -44,7 +47,7 @@ const PlusCountModalContent = ({
   return (
     <ScrollView>
       <Formik
-        // validationSchema={addMarksOrTagsSchema}
+        validationSchema={addPlusCountsSchema}
         initialValues={initialFormValues}
         onSubmit={values => handleFormSubmit(values)}
       >
@@ -68,6 +71,10 @@ const PlusCountModalContent = ({
                   bg='primary'
                   mx='2'
                   px='10'
+                  isDisabled={
+                    (touched && Object.keys(touched).length === 0) ||
+                    (errors && Object.keys(errors).length > 0)
+                  }
                   onPress={() => {
                     handleSubmit()
                     closeModal()
@@ -84,11 +91,17 @@ const PlusCountModalContent = ({
                 {`You Counted ${'{#}'}${'{species}'}${'{run}'}.`}
               </Heading>
               <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Species
-                  </Text>
-                </FormControl.Label>
+                <HStack space={4} alignItems='center'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Species
+                    </Text>
+                  </FormControl.Label>
+
+                  {touched.species &&
+                    errors.species &&
+                    renderErrorMessage(errors, 'species')}
+                </HStack>
                 <CustomSelect
                   selectedValue={values.species}
                   placeholder={'Species'}
@@ -98,11 +111,17 @@ const PlusCountModalContent = ({
                 />
               </FormControl>
               <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Life Stage
-                  </Text>
-                </FormControl.Label>
+                <HStack space={4} alignItems='center'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Life Stage
+                    </Text>
+                  </FormControl.Label>
+
+                  {touched.lifeStage &&
+                    errors.lifeStage &&
+                    renderErrorMessage(errors, 'lifeStage')}
+                </HStack>
                 <CustomSelect
                   selectedValue={values.lifeStage}
                   placeholder={'Life stage'}
@@ -116,27 +135,39 @@ const PlusCountModalContent = ({
               </FormControl>
 
               <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Run
-                  </Text>
-                </FormControl.Label>
+                <HStack space={4} alignItems='center'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Run
+                    </Text>
+                  </FormControl.Label>
+
+                  {touched.run &&
+                    errors.run &&
+                    renderErrorMessage(errors, 'run')}
+                </HStack>
                 <Input
                   height='50px'
                   fontSize='16'
-                  placeholder='Enter run'
+                  placeholder='Calculated from fork length (disabled)'
                   keyboardType='numeric'
                   onChangeText={handleChange('run')}
                   onBlur={handleBlur('run')}
-                  value={values.count}
+                  value={values.run}
                 />
               </FormControl>
               <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Count
-                  </Text>
-                </FormControl.Label>
+                <HStack space={4} alignItems='center'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Count
+                    </Text>
+                  </FormControl.Label>
+
+                  {touched.count &&
+                    errors.count &&
+                    renderErrorMessage(errors, 'count')}
+                </HStack>
                 <Input
                   height='50px'
                   fontSize='16'
@@ -149,11 +180,17 @@ const PlusCountModalContent = ({
               </FormControl>
 
               <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Plus Count Method
-                  </Text>
-                </FormControl.Label>
+                <HStack space={4} alignItems='center'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Plus Count Method
+                    </Text>
+                  </FormControl.Label>
+
+                  {touched.plusCountMethod &&
+                    errors.plusCountMethod &&
+                    renderErrorMessage(errors, 'plusCountMethod')}
+                </HStack>
                 <CustomSelect
                   selectedValue={values.plusCountMethod}
                   placeholder={'Method'}
