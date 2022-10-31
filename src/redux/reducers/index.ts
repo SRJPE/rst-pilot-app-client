@@ -11,9 +11,9 @@ import fishInputSlice from './formSlices/fishInputSlice'
 import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
 import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
 import markRecaptureNavigationSlice from './markRecaptureSlices/markRecaptureNavigationSlice'
-import addMarksOrTagsSlice from './addMarksOrTagsSlice'
-import addGeneticSamplesSlice from './addGeneticSamplesSlice'
-import visitSetupDefaultsSlice from './visitSetupDefaults'
+import addMarksOrTagsSlice from './formSlices/addMarksOrTagsSlice'
+import addGeneticSamplesSlice from './formSlices/addGeneticSamplesSlice'
+import visitSetupDefaultsSlice from './formSlices/addGeneticSamplesSlice'
 
 const persistConfig = {
   key: 'root',

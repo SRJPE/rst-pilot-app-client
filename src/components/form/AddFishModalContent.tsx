@@ -32,8 +32,8 @@ import {
   individualFishInitialState,
   saveIndividualFish,
 } from '../../redux/reducers/formSlices/fishInputSlice'
-import { saveGeneticSampleData } from '../../redux/reducers/addGeneticSamplesSlice'
-import { saveMarkOrTagData } from '../../redux/reducers/addMarksOrTagsSlice'
+import { saveGeneticSampleData } from '../../redux/reducers/formSlices/addGeneticSamplesSlice'
+import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import renderErrorMessage from './RenderErrorMessage'
 
@@ -251,7 +251,7 @@ const AddFishModalContent = ({
                       </FormControl.Label>
 
                       <Popover
-                        trigger={(triggerProps) => {
+                        trigger={triggerProps => {
                           return (
                             <IconButton
                               {...triggerProps}
@@ -367,7 +367,7 @@ const AddFishModalContent = ({
                       </Text>
                     </FormControl.Label>
                     <Popover
-                      trigger={(triggerProps) => {
+                      trigger={triggerProps => {
                         return (
                           <IconButton
                             {...triggerProps}
