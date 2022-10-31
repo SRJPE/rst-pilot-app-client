@@ -28,19 +28,33 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
         props.onValueChange(itemValue)
       }}
     >
-      {props.selectOptions.map((item, idx) => {
-        if (item.value) {
-          return <Select.Item key={item.id ?? idx} label={item.label} value={item.value} />
-        } else if (item.definition) {
-          return (
-            <Select.Item
-              key={item.id}
-              label={item.definition}
-              value={item.definition}
-            />
-          )
-        }
-      })}
+      {props.selectOptions ? (
+        props?.selectOptions.map((item, idx) => {
+          if (item.value) {
+            return (
+              <Select.Item
+                key={item.id ?? idx}
+                label={item.label}
+                value={item.value}
+              />
+            )
+          } else if (item.definition) {
+            return (
+              <Select.Item
+                key={item.id}
+                label={item.definition}
+                value={item.definition}
+              />
+            )
+          }
+        })
+      ) : (
+        <Select.Item
+          key={'not received from api'}
+          label={'No options found... connect to wifi!'}
+          value={'No options found... connect to wifi!'}
+        />
+      )}
     </Select>
   )
 }
