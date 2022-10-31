@@ -17,7 +17,7 @@ import {
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import { markStepCompleted } from '../../../redux/reducers/navigationSlice'
+import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
 import CustomSelect from '../../../components/Shared/CustomSelect'
 import {
   markTrapStatusCompleted,
