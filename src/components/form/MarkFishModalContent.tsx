@@ -11,7 +11,7 @@ import {
   Button,
 } from 'native-base'
 import React from 'react'
-import { useSelector } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { addMarksOrTagsSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
@@ -34,34 +34,22 @@ const crewMemberDropdownOptions = [
   { label: 'Crew Member 5', value: 'Crew Member 5' },
 ]
 
-const markTypeDictionary = [
-  { label: 'No marks or tags', value: 'No marks or tags' },
-  { label: 'Elastomer', value: 'Elastomer' },
-  { label: 'Fin clip', value: 'Fin clip' },
-  { label: 'Pigment / dye', value: 'Pigment / dye' },
-  { label: 'Coded wire tag (CWT)', value: 'Coded wire tag (CWT)' },
-  { label: 'Freeze brand (bar)', value: 'Freeze brand (bar)' },
-  { label: 'Freeze brand (dot)', value: 'Freeze brand (dot)' },
-  { label: 'PIT tag', value: 'PIT tag' },
-  { label: 'Acoustic telemetry tag', value: 'Acoustic telemetry tag' },
-  { label: 'Radio telemetry tag', value: 'Radio telemetry tag' },
-  { label: 'Floy tag', value: 'Floy tag' },
-  { label: 'Photonic Dye', value: 'Photonic Dye' },
-  { label: 'Other', value: 'Other' },
-  { label: 'Not recorded', value: 'Not recorded' },
-  { label: 'Not applicable (n/a)', value: 'Not applicable (n/a)' },
-  { label: 'Unknown', value: 'Unknown' },
-  { label: 'See Comments', value: 'See Comments' },
-  { label: 'Not yet assigned', value: 'Not yet assigned' },
-]
+const mapStateToProps = (state: RootState) => {
+  return {
+    crewMembers: state.visitSetup.values.crew,
+  }
+}
 
 const MarkFishModalContent = ({
   handleMarkFishFormSubmit,
   closeModal,
+  crewMembers,
 }: {
   handleMarkFishFormSubmit: any
   closeModal: any
+  crewMembers: any
 }) => {
+  console.log('🚀 ~ crewMembers', crewMembers)
   const handleFormSubmit = (values: any) => handleMarkFishFormSubmit(values)
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -217,7 +205,10 @@ const MarkFishModalContent = ({
                   placeholder={'Crew Member'}
                   onValueChange={handleChange('crewMemberTagging')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={crewMemberDropdownOptions}
+                  selectOptions={crewMembers.map((item: any) => ({
+                    label: item,
+                    value: item,
+                  }))}
                 />
               </FormControl>
 
@@ -245,4 +236,4 @@ const MarkFishModalContent = ({
   )
 }
 
-export default MarkFishModalContent
+export default connect(mapStateToProps)(MarkFishModalContent)
