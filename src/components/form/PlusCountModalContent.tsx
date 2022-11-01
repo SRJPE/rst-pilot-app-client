@@ -28,9 +28,9 @@ const initialFormValues = {
 
 const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
 const plusCountMethods = [
-  { label: 'Method 1', value: 'Method 1', definition: 'Method 1' },
-  { label: 'Method 2', value: ' Method 2', definition: 'Method 2' },
-  { label: 'Method 3', value: ' Method 3', definition: 'Method 3' },
+  { label: 'method 1', value: 'method 1', definition: 'method 1' },
+  { label: 'method 2', value: ' Method 2', definition: 'method 2' },
+  { label: 'method 3', value: ' Method 3', definition: 'method 3' },
 ]
 
 const PlusCountModalContent = ({

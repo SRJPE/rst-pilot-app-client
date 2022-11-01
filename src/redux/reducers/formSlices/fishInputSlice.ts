@@ -57,7 +57,6 @@ export const saveFishSlice = createSlice({
     saveIndividualFish: (state, action) => {
       let individualFishCopy = cloneDeep(state.individualFish)
       individualFishCopy.push(action.payload)
-      console.log('🚀 ~ action', action.payload)
       state.individualFish = individualFishCopy
     },
     savePlusCount: (state, action) => {

@@ -39,7 +39,7 @@ import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTag
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import renderErrorMessage from './RenderErrorMessage'
 
-const speciesDictionary = [{ label: 'Chinook', value: 'Chinook' }]
+const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
 
 const AddFishModalContent = ({
   saveIndividualFish,
