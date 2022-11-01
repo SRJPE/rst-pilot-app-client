@@ -21,19 +21,40 @@ const IncompleteSectionButton = ({
     dispatch(updateActiveStep(step))
   }
 
+  const calculateMargin = () => {
+    switch (name) {
+      case 'Visit Setup':
+        return 220
+      case 'Trap Status':
+        return 213
+      case 'Trap Pre-Processing':
+        return 144
+      case 'Fish Processing':
+        return 181
+      case 'Fish Input':
+        return 228
+      case 'Trap Post-Processing':
+        return 135
+      default:
+        break
+    }
+  }
+
   return (
     <Button
       rounded='xs'
-      // alignSelf='center'
-      minWidth='60%'
+      alignSelf='center'
+      w='75%'
       borderRadius='5'
       variant={'outline'}
       bg={completed ? 'primary' : 'white'}
+      justifyContent='space-between'
       _stack={{
         //this property accesses the the HStack inside the button
-        space: '20',
+        space: '10',
         alignItems: 'center',
-        // justifyContent: 'spaceBetween',
+        // alignSelf: 'flex-end',
+        // justifyContent: 'space-between',
         // marginX: '5',
       }}
       _icon={
@@ -60,37 +81,22 @@ const IncompleteSectionButton = ({
       }
       endIcon={
         <Button onPress={handleButtonPress}>
-          <Text color={completed ? '#FFFFFF' : 'primary'}>
+          <Text
+            fontSize='16'
+            color={completed ? '#FFFFFF' : 'primary'}
+            alignSelf='flex-end'
+          >
             {completed ? 'Completed' : 'Edit'}
           </Text>
         </Button>
       }
       onPress={handleButtonPress}
     >
-      {/* <HStack space={20} alignItems='center'>
-        <Icon
-          as={Ionicons}
-          name={completed ? 'checkmark-circle-outline' : 'warning-outline'}
-          size='2xl'
-          color={completed ? '#FFFFFF' : 'primary'}
-        />
-        <Text
-          fontSize='md'
-          fontWeight='bold'
-          color={completed ? '#FFFFFF' : 'primary'}
-        >
-          {name}
-        </Text>
-        <Button justifyContent='flex-end' onPress={handleButtonPress}>
-          <Text color={completed ? '#FFFFFF' : 'primary'}>
-            {completed ? 'Completed' : 'Edit'}
-          </Text>
-        </Button>
-      </HStack> */}
       <Text
         fontSize='md'
         fontWeight='bold'
         color={completed ? '#FFFFFF' : 'primary'}
+        mr={calculateMargin()}
       >
         {name}
       </Text>

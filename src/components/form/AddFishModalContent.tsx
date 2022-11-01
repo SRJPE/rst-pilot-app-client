@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import {
+  Avatar,
   Box,
   Button,
   CheckIcon,
@@ -8,6 +9,7 @@ import {
   HStack,
   Icon,
   IconButton,
+  Image,
   Input,
   Popover,
   Radio,
@@ -37,7 +39,7 @@ import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTag
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import renderErrorMessage from './RenderErrorMessage'
 
-const speciesDictionary = [{ label: 'Chinook', value: 'Chinook' }]
+const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
 
 const AddFishModalContent = ({
   saveIndividualFish,
@@ -78,8 +80,8 @@ const AddFishModalContent = ({
 
   const handleSaveButtonDisable = (touched: any, errors: any) => {
     return (
-      // (touched && Object.keys(touched).length === 0) ||
-      errors && Object.keys(errors).length > 0
+      (touched && Object.keys(touched).length === 0) ||
+      (errors && Object.keys(errors).length > 0)
     )
   }
 
@@ -94,8 +96,8 @@ const AddFishModalContent = ({
       <Formik
         validationSchema={addIndividualFishSchema}
         initialValues={individualFishInitialState}
-        initialTouched={{ species: true }}
-        // initialErrors={reduxState.completed ? undefined : { species: '' }}
+        // initialTouched={{ adiposeClipped: true }}
+        // initialErrors={{ adiposeClipped: '' }}
         onSubmit={values => {
           handleFormSubmit(values)
           setIsSlideOpen(!isSlideOpen)
@@ -163,11 +165,12 @@ const AddFishModalContent = ({
                             forkLength: '',
                             run: '',
                             weight: '',
-                            lifestage: '',
+                            lifeStage: '',
                             adiposeClipped: false,
                             existingMark: '',
                             dead: false,
                             willBeUsedInRecapture: false,
+                            plusCountMethod: '',
                           },
                         })
                       }
@@ -180,7 +183,6 @@ const AddFishModalContent = ({
                 <Divider my={5} />
 
                 <HStack marginBottom={5}>
-                  {/* <VStack w='1/2' paddingRight={5}> */}
                   <FormControl w='1/2' pr='5'>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
@@ -212,22 +214,22 @@ const AddFishModalContent = ({
                       {'mm'}
                     </Text>
                   </FormControl>
-                  {/* </VStack> */}
 
-                  {/* <VStack w='1/2' paddingLeft={5}> */}
                   <FormControl w='1/2' paddingLeft={5}>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
-                          Run
+                          Run:
                         </Text>
                       </FormControl.Label>
-
-                      {touched.run &&
+                      <Text color='grey' fontSize='sm'>
+                        (currently disabled)
+                      </Text>
+                      {/* {touched.run &&
                         errors.run &&
-                        renderErrorMessage(errors, 'run')}
+                        renderErrorMessage(errors, 'run')} */}
                     </HStack>
-                    <Input
+                    {/* <Input
                       height='50px'
                       fontSize='16'
                       placeholder='Calculated from fork length (disabled)'
@@ -235,13 +237,11 @@ const AddFishModalContent = ({
                       onChangeText={handleChange('run')}
                       onBlur={handleBlur('run')}
                       value={values.run}
-                    />
+                    /> */}
                   </FormControl>
-                  {/* </VStack> */}
                 </HStack>
 
                 <HStack marginBottom={5}>
-                  {/* <VStack w='1/2' paddingRight='5'> */}
                   <FormControl w='1/2' paddingRight='5'>
                     <HStack space={2} alignItems='center'>
                       <FormControl.Label>
@@ -251,6 +251,7 @@ const AddFishModalContent = ({
                       </FormControl.Label>
 
                       <Popover
+                        placement='bottom right'
                         trigger={triggerProps => {
                           return (
                             <IconButton
@@ -267,26 +268,38 @@ const AddFishModalContent = ({
                         }}
                       >
                         <Popover.Content
+                          ml='10'
                           accessibilityLabel='Existing Mark Info'
-                          w='56'
+                          w='720'
+                          h='600'
                         >
                           <Popover.Arrow />
                           <Popover.CloseButton />
-                          <Popover.Header>Life Stage</Popover.Header>
-                          <Popover.Body>
-                            <Text>{''}</Text>
+                          <Popover.Body p={0}>
+                            <ScrollView>
+                              <Image
+                                source={require('../../assets/life_stage_image.png')}
+                                alt='Life Stage Image'
+                                // style={{ position: 'absolute' }}
+                                width='720'
+                              />
+                              <Image
+                                source={require('../../assets/life_stage_table.png')}
+                                alt='Life Stage Image'
+                              />
+                            </ScrollView>
                           </Popover.Body>
                         </Popover.Content>
                       </Popover>
-                      {touched.lifestage &&
-                        errors.lifestage &&
-                        renderErrorMessage(errors, 'lifestage')}
+                      {touched.lifeStage &&
+                        errors.lifeStage &&
+                        renderErrorMessage(errors, 'lifeStage')}
                     </HStack>
 
                     <CustomSelect
-                      selectedValue={values.lifestage}
+                      selectedValue={values.lifeStage}
                       placeholder={'Life Stage'}
-                      onValueChange={handleChange('lifestage')}
+                      onValueChange={handleChange('lifeStage')}
                       setFieldTouched={setFieldTouched}
                       selectOptions={dropdownValues.lifeStage.map(
                         (item: any) => ({
@@ -296,8 +309,7 @@ const AddFishModalContent = ({
                       )}
                     />
                   </FormControl>
-                  {/* </VStack> */}
-                  {/* <VStack w='1/2' paddingLeft='5'> */}
+
                   <FormControl w='1/2' paddingLeft='5'>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label pb='3'>
@@ -329,7 +341,6 @@ const AddFishModalContent = ({
                       {'g'}
                     </Text>
                   </FormControl>
-                  {/* </VStack> */}
                 </HStack>
 
                 <FormControl w='1/2'>
@@ -338,6 +349,7 @@ const AddFishModalContent = ({
                       Adipose Clipped
                     </Text>
                   </FormControl.Label>
+
                   <Radio.Group
                     name='adiposeClipped'
                     accessibilityLabel='adipose clipped'
@@ -367,6 +379,7 @@ const AddFishModalContent = ({
                       </Text>
                     </FormControl.Label>
                     <Popover
+                      placement='top right'
                       trigger={triggerProps => {
                         return (
                           <IconButton
@@ -384,16 +397,53 @@ const AddFishModalContent = ({
                     >
                       <Popover.Content
                         accessibilityLabel='Existing Mark  Info'
-                        w='56'
+                        w='600'
+                        ml='10'
                       >
                         <Popover.Arrow />
                         <Popover.CloseButton />
-                        <Popover.Header>Existing Mark </Popover.Header>
-                        <Popover.Body>
-                          <Text>{`The buttons below are abbreviated versions of marks recently used for efficiency trials. If you catch a fish with any other existing marks please use the select another mark type. This will open up a window where you can specify mark type, color, position, and code if applicable. 
+                        <Popover.Header>
+                          Click on one more existing mark buttons to add marks.
+                        </Popover.Header>
+                        <Popover.Body p={4}>
+                          <VStack space={2}>
+                            <Text fontSize='md'>
+                              The existing mark buttons display abbreviated
+                              versions of marks recently used for efficiency
+                              trials. If you catch a fish with other existing
+                              marks, please click on “select another mark type”.
+                              This will open up a window where you can specify
+                              mark type, color, position, and code if
+                              applicable.
+                            </Text>
+                            <Divider />
 
-Abbreviations follow a consistent format “mark type abbreviation - color abbreviation - position abbreviation” 
-`}</Text>
+                            <Text fontSize='md'>
+                              Abbreviations follow a consistent format “mark
+                              type abbreviation - color abbreviation - position
+                              abbreviation”. All of these fields are only
+                              applicable to some mark types. Any fields that are
+                              not applicable to a particular mark type are left
+                              blank.
+                            </Text>
+                            <Text fontSize='md'>
+                              Below are some examples of common marks:
+                            </Text>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Avatar size={'2'} mt={'2'} />
+                              <Text fontSize='md'>BIS-BR: Bismarck Brown</Text>
+                            </HStack>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Avatar size={'2'} mt={'2'} />
+                              <Text fontSize='md'>
+                                ELA-PUR-FIN: Elastomer Yellow Fin
+                              </Text>
+                            </HStack>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Avatar size={'2'} mt={'2'} />
+                              <Text fontSize='md'>CWT: Coded wire tag</Text>
+                            </HStack>
+                          </VStack>
                         </Popover.Body>
                       </Popover.Content>
                     </Popover>
@@ -463,7 +513,6 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
                   </HStack>
                 </FormControl>
 
-                {/* <VStack w='full' marginBottom={5}> */}
                 <FormControl w='full' marginBottom={5}>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>

@@ -10,8 +10,9 @@ import {
   HStack,
 } from 'native-base'
 import React from 'react'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../redux/store'
+import { useDispatch, useSelector } from 'react-redux'
+import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
+import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
@@ -27,22 +28,21 @@ const initialFormValues = {
 
 const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
 const plusCountMethods = [
-  { label: 'Method 1', value: 'Method 1', definition: 'Method 1' },
-  { label: 'Method 2', value: ' Method 2', definition: 'Method 2' },
-  { label: 'Method 3', value: ' Method 3', definition: 'Method 3' },
+  { label: 'method 1', value: 'method 1', definition: 'method 1' },
+  { label: 'method 2', value: ' Method 2', definition: 'method 2' },
+  { label: 'method 3', value: ' Method 3', definition: 'method 3' },
 ]
 
-const PlusCountModalContent = ({
-  handleMarkFishFormSubmit,
-  closeModal,
-}: {
-  handleMarkFishFormSubmit?: any
-  closeModal: any
-}) => {
-  const handleFormSubmit = (values: any) => console.log('Values: ', values)
+const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
+  const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+
+  const handleFormSubmit = (values: any) => {
+    dispatch(savePlusCount(values))
+    console.log('🚀 ~ Plus Count Values: ', values)
+  }
 
   return (
     <ScrollView>
@@ -87,9 +87,9 @@ const PlusCountModalContent = ({
               }
             />
             <VStack space={5} paddingX='20' paddingTop='7' paddingBottom='3'>
-              <Heading fontSize='2xl'>
+              {/* <Heading fontSize='2xl'>
                 {`You Counted ${'{#}'}${'{species}'}${'{run}'}.`}
-              </Heading>
+              </Heading> */}
               <HStack space={6}>
                 <FormControl w='31%'>
                   <HStack space={4} alignItems='center'>

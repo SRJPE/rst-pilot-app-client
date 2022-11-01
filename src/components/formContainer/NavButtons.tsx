@@ -1,10 +1,7 @@
 import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
-import {
-  checkIfFormIsComplete,
-  updateActiveStep,
-} from '../../redux/reducers/formSlices/navigationSlice'
+import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useState } from 'react'
 
@@ -26,36 +23,7 @@ export default function NavButtons({
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
-  const stepsArray = Object.values(navigationState.steps).slice(0, 6)
   const isFormComplete = navigationState.isFormComplete
-  // console.log('🚀 ~ isFormComplete', isFormComplete)
-
-  // useEffect(() => {
-  //   dispatch(checkIfFormIsComplete())
-  // }, [])
-
-  // const trapVisitIsIncomplete = false as boolean
-  // const [trapVisitIsIncomplete, setTrapVisitIsIncomplete] = useState(
-  //   true as boolean
-  // )
-
-  // useEffect(() => {
-  //   console.log(
-  //     'TEST',
-  //     stepsArray.some((step: any) => {
-  //       console.log('step: ', step.name, step.completed)
-  //       step.completed === false
-  //     })
-  //   )
-  //   //   console.log('🚀 ~ trapVisitIsIncomplete', trapVisitIsIncomplete)
-  //   setTrapVisitIsIncomplete(
-  //     //if any of the steps are not completed => return false
-  //     !stepsArray.some((step: any) => {
-  //       console.log('step: ', step.name, step.completed)
-  //       step.completed === false
-  //     })
-  //   )
-  // }, [stepsArray])
 
   const navigateHelper = (destination: string, payload: number) => {
     navigation.navigate('Trap Visit Form', { screen: destination })
@@ -174,7 +142,7 @@ export default function NavButtons({
   const disableRightButton = () => {
     if (activePage === 'Incomplete Sections') {
       //if form is complete, then do not disable button
-      // return isFormComplete ? false : true
+      return isFormComplete ? false : true
     } else {
       return (
         //**temp conditional for fish input**

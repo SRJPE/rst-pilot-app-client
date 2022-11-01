@@ -24,7 +24,7 @@ const IncompleteSections = ({
 
   useEffect(() => {
     dispatch(checkIfFormIsComplete())
-  }, [])
+  }, [reduxState])
 
   return (
     <>
@@ -32,7 +32,7 @@ const IncompleteSections = ({
         flex={1}
         bg='#fff'
         justifyContent='center'
-        alignItems='center'
+        // alignItems='center'
         borderColor='themeGrey'
         borderWidth='15'
       >
