@@ -13,6 +13,7 @@ export default function CustomModal(props: ModalPropsI) {
     <Modal
       isOpen={props.isOpen}
       onClose={props.closeModal}
+      avoidKeyboard
       size={'full'}
       h={props.height ? props.height : 'full'}
       style={{ marginBottom: 0, marginTop: 'auto' }}
