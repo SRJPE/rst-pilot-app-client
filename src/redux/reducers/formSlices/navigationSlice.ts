@@ -50,35 +50,16 @@ export const navigationSlice = createSlice({
       }
     },
     checkIfFormIsComplete: state => {
-      //if all steps are completed,
       //iterate over the first 6 step and check if all steps are completed
       if (state.steps) {
-        const stepsArray = Object.values(state.steps).slice(0, 6)
-        console.log('🚀 ~ stepsArray', stepsArray)
-        const isFormComplete = stepsArray.some((step: any) => {
-          console.log('step: ', step.name, step.completed)
-          step.completed === false
-        })
-        console.log('🚀 ~ isFormComplete ~ isFormComplete', isFormComplete)
-
-        //mark form IsCompleted as True
-        state.isFormComplete = isFormComplete
-
-        // console.log(
-        //   'TEST',
-        //   Object.values(state.steps)
-        //     .slice(0, 6)
-        //     .some((step: any) => {
-        //       console.log('step: ', step.name, step.completed)
-        //       step.completed === false
-        //     })
-        // )
-        // state.isFormComplete = Object.values(state.steps)
-        //   .slice(0, 6)
-        //   .some((step: any) => {
-        //     console.log('step: ', step.name, step.completed)
-        //     step.completed === false
-        //   })
+        const stepsArray = Object.values(state.steps).slice(0, 6) as Array<any>
+        const incompleteSteps = [] as Array<any>
+        for (let step of stepsArray) {
+          if (step.completed === false) {
+            incompleteSteps.push(step.completed)
+          }
+        }
+        state.isFormComplete = incompleteSteps.length === 0
       }
     },
   },
