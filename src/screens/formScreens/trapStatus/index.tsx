@@ -26,7 +26,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons'
 
 const reasonsForTrapNotFunctioning = [
-  { label: 'High Rain', value: 'High Rain' },
+  { label: 'High Flows', value: 'High Flows' },
   { label: 'Broken Trap', value: 'Broken Trap' },
   { label: 'Debris in Trap', value: 'Debris in Trap' },
 ]
@@ -48,7 +48,6 @@ const TrapStatus = ({
   )
 
   const handleSubmit = (values: any, errors: any) => {
-    console.log('🚀 ~ handleSubmit ~ errors', errors.trapStatus)
     dispatch(saveTrapStatus(values))
     dispatch(markTrapStatusCompleted(true))
     dispatch(markStepCompleted(true))
