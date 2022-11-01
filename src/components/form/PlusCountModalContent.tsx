@@ -33,13 +33,7 @@ const plusCountMethods = [
   { label: 'method 3', value: ' Method 3', definition: 'method 3' },
 ]
 
-const PlusCountModalContent = ({
-  handleMarkFishFormSubmit,
-  closeModal,
-}: {
-  handleMarkFishFormSubmit?: any
-  closeModal: any
-}) => {
+const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
