@@ -91,10 +91,10 @@ export const addIndividualFishSchema = yup.object().shape({
     .number()
     .required('Fish fork length required')
     .typeError('Input must be a number'),
-  run: yup
-    .number()
-    .required('Fish fork length required')
-    .typeError('Input must be a number'),
+  // run: yup
+  //   .number()
+  //   .required('Fish fork length required')
+  //   .typeError('Input must be a number'),
   weight: yup.number().typeError('Input must be a number'),
   lifeStage: yup.string().required('Fish life stage required'),
   adiposeClipped: yup
