@@ -49,7 +49,6 @@ const MarkFishModalContent = ({
   closeModal: any
   crewMembers: any
 }) => {
-  console.log('🚀 ~ crewMembers', crewMembers)
   const handleFormSubmit = (values: any) => handleMarkFishFormSubmit(values)
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values

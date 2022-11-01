@@ -170,6 +170,7 @@ const AddFishModalContent = ({
                             existingMark: '',
                             dead: false,
                             willBeUsedInRecapture: false,
+                            plusCountMethod: '',
                           },
                         })
                       }

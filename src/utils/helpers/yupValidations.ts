@@ -154,8 +154,8 @@ export const addGeneticsSampleSchema = yup.object().shape({
 
 export const addPlusCountsSchema = yup.object().shape({
   species: yup.string().required('Species required'),
-  lifeStage: yup.string().required('Life stage required'),
-  run: yup.string().required('Run required'),
+  // lifeStage: yup.string().required('Life stage required'),
+  // run: yup.string().required('Run required'),
   count: yup
     .number()
     .required('Fish fork length required')
