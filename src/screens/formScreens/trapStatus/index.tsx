@@ -13,6 +13,8 @@ import {
   IconButton,
   Icon,
   Popover,
+  Divider,
+  Avatar,
 } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
@@ -110,6 +112,7 @@ const TrapStatus = ({
               <HStack space={2} alignItems='center'>
                 <Heading>Is the Trap functioning normally?</Heading>
                 <Popover
+                  placement='bottom left'
                   trigger={triggerProps => {
                     return (
                       <IconButton
@@ -125,19 +128,50 @@ const TrapStatus = ({
                     )
                   }}
                 >
-                  <Popover.Content accessibilityLabel='Trap Stats Info' w='56'>
+                  <Popover.Content
+                    accessibilityLabel='Trap Stats Info'
+                    w='600'
+                    mr='10'
+                  >
                     <Popover.Arrow />
                     <Popover.CloseButton />
-                    <Popover.Header>Trap Status</Popover.Header>
-                    <Popover.Body>
-                      <Text>{`Please select one of the trap functioning dropdowns based on a visual inspection of the trap. 
-Trap Functioning Normally: Trap rotating normally in the expected location in river
-Trap Not Functioning: Trap not rotating or displaced in the river. 
-Trap Functioning but not normally: The trap appears to be rotating but not consistently. There may be high flows or high debris levels that are affecting the trap. 
-Trap Not in Service: Trap not set up for fishing upon arrival. 
-
-
-`}</Text>
+                    <Popover.Header>
+                      Please select one of the trap functioning dropdowns based
+                      on a\nvisual inspection of the trap.
+                    </Popover.Header>
+                    <Popover.Body p={4}>
+                      <VStack space={2}>
+                        <HStack space={2} alignItems='flex-start'>
+                          <Avatar size={'2'} mt={'2'} />
+                          <Text fontSize='md'>
+                            Trap Functioning Normally: Trap rotating normally in
+                            the expected location in river.
+                          </Text>
+                        </HStack>
+                        <HStack space={2} alignItems='flex-start'>
+                          <Avatar size={'2'} mt={'2'} />
+                          <Text fontSize='md'>
+                            Trap Not Functioning: Trap not rotating or displaced
+                            in the river.
+                          </Text>
+                        </HStack>
+                        <HStack space={2} alignItems='flex-start'>
+                          <Avatar size={'2'} mt={'2'} />
+                          <Text fontSize='md'>
+                            Trap Functioning but not normally: The trap appears
+                            to be rotating but not consistently. There may be
+                            high flows or high debris levels that are affecting
+                            the trap.
+                          </Text>
+                        </HStack>
+                        <HStack space={2} alignItems='flex-start'>
+                          <Avatar size={'2'} mt={'2'} />
+                          <Text fontSize='md'>
+                            Trap Not in Service: Trap not set up for fishing
+                            upon arrival.
+                          </Text>
+                        </HStack>
+                      </VStack>
                     </Popover.Body>
                   </Popover.Content>
                 </Popover>
