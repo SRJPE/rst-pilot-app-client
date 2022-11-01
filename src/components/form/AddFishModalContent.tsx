@@ -78,8 +78,8 @@ const AddFishModalContent = ({
 
   const handleSaveButtonDisable = (touched: any, errors: any) => {
     return (
-      // (touched && Object.keys(touched).length === 0) ||
-      errors && Object.keys(errors).length > 0
+      (touched && Object.keys(touched).length === 0) ||
+      (errors && Object.keys(errors).length > 0)
     )
   }
 
@@ -94,8 +94,8 @@ const AddFishModalContent = ({
       <Formik
         validationSchema={addIndividualFishSchema}
         initialValues={individualFishInitialState}
-        initialTouched={{ species: true }}
-        // initialErrors={reduxState.completed ? undefined : { species: '' }}
+        // initialTouched={{ adiposeClipped: true }}
+        // initialErrors={{ adiposeClipped: '' }}
         onSubmit={values => {
           handleFormSubmit(values)
           setIsSlideOpen(!isSlideOpen)
@@ -163,7 +163,7 @@ const AddFishModalContent = ({
                             forkLength: '',
                             run: '',
                             weight: '',
-                            lifestage: '',
+                            lifeStage: '',
                             adiposeClipped: false,
                             existingMark: '',
                             dead: false,
@@ -180,7 +180,6 @@ const AddFishModalContent = ({
                 <Divider my={5} />
 
                 <HStack marginBottom={5}>
-                  {/* <VStack w='1/2' paddingRight={5}> */}
                   <FormControl w='1/2' pr='5'>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
@@ -212,22 +211,22 @@ const AddFishModalContent = ({
                       {'mm'}
                     </Text>
                   </FormControl>
-                  {/* </VStack> */}
 
-                  {/* <VStack w='1/2' paddingLeft={5}> */}
                   <FormControl w='1/2' paddingLeft={5}>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
-                          Run
+                          Run:
                         </Text>
                       </FormControl.Label>
-
-                      {touched.run &&
+                      <Text color='grey' fontSize='sm'>
+                        (currently disabled)
+                      </Text>
+                      {/* {touched.run &&
                         errors.run &&
-                        renderErrorMessage(errors, 'run')}
+                        renderErrorMessage(errors, 'run')} */}
                     </HStack>
-                    <Input
+                    {/* <Input
                       height='50px'
                       fontSize='16'
                       placeholder='Calculated from fork length (disabled)'
@@ -235,13 +234,11 @@ const AddFishModalContent = ({
                       onChangeText={handleChange('run')}
                       onBlur={handleBlur('run')}
                       value={values.run}
-                    />
+                    /> */}
                   </FormControl>
-                  {/* </VStack> */}
                 </HStack>
 
                 <HStack marginBottom={5}>
-                  {/* <VStack w='1/2' paddingRight='5'> */}
                   <FormControl w='1/2' paddingRight='5'>
                     <HStack space={2} alignItems='center'>
                       <FormControl.Label>
@@ -278,15 +275,15 @@ const AddFishModalContent = ({
                           </Popover.Body>
                         </Popover.Content>
                       </Popover>
-                      {touched.lifestage &&
-                        errors.lifestage &&
-                        renderErrorMessage(errors, 'lifestage')}
+                      {touched.lifeStage &&
+                        errors.lifeStage &&
+                        renderErrorMessage(errors, 'lifeStage')}
                     </HStack>
 
                     <CustomSelect
-                      selectedValue={values.lifestage}
+                      selectedValue={values.lifeStage}
                       placeholder={'Life Stage'}
-                      onValueChange={handleChange('lifestage')}
+                      onValueChange={handleChange('lifeStage')}
                       setFieldTouched={setFieldTouched}
                       selectOptions={dropdownValues.lifeStage.map(
                         (item: any) => ({
@@ -296,8 +293,7 @@ const AddFishModalContent = ({
                       )}
                     />
                   </FormControl>
-                  {/* </VStack> */}
-                  {/* <VStack w='1/2' paddingLeft='5'> */}
+
                   <FormControl w='1/2' paddingLeft='5'>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label pb='3'>
@@ -329,7 +325,6 @@ const AddFishModalContent = ({
                       {'g'}
                     </Text>
                   </FormControl>
-                  {/* </VStack> */}
                 </HStack>
 
                 <FormControl w='1/2'>
@@ -338,6 +333,7 @@ const AddFishModalContent = ({
                       Adipose Clipped
                     </Text>
                   </FormControl.Label>
+
                   <Radio.Group
                     name='adiposeClipped'
                     accessibilityLabel='adipose clipped'
@@ -463,7 +459,6 @@ Abbreviations follow a consistent format “mark type abbreviation - color abbre
                   </HStack>
                 </FormControl>
 
-                {/* <VStack w='full' marginBottom={5}> */}
                 <FormControl w='full' marginBottom={5}>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
