@@ -18,7 +18,7 @@ export interface IndividualFishValuesI {
   existingMark: string
   dead: boolean
   willBeUsedInRecapture: boolean
-  plusCountMethod: string
+  plusCountMethod?: string
 }
 
 export const individualFishInitialState = {
