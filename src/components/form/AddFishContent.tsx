@@ -37,13 +37,13 @@ import {
 } from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveGeneticSampleData } from '../../redux/reducers/formSlices/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
-import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import { MaterialIcons } from '@expo/vector-icons'
 import renderErrorMessage from './RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 
 const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
 
-const AddFishModalContent = ({
+const AddFishContent = ({
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
@@ -605,7 +605,7 @@ const AddFishModalContent = ({
                   </Text>
                 </FormControl>
 
-                <HStack>
+                <HStack mb={'4'}>
                   <Button
                     height='50px'
                     fontSize='16'
@@ -738,4 +738,4 @@ export default connect(mapStateToProps, {
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
-})(AddFishModalContent)
+})(AddFishContent)
