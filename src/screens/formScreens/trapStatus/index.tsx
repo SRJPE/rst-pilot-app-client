@@ -137,7 +137,7 @@ const TrapStatus = ({
                     <Popover.CloseButton />
                     <Popover.Header>
                       Please select one of the trap functioning dropdowns based
-                      on a\nvisual inspection of the trap.
+                      on a visual inspection of the trap.
                     </Popover.Header>
                     <Popover.Body p={4}>
                       <VStack space={2}>
