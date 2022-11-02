@@ -129,10 +129,20 @@ const TrapPreProcessing = ({
                     }
                   }}
                 >
-                  <Radio colorScheme='primary' value='full' my={1}>
+                  <Radio
+                    colorScheme='primary'
+                    value='full'
+                    my={1}
+                    _icon={{ color: 'primary' }}
+                  >
                     Full
                   </Radio>
-                  <Radio colorScheme='primary' value='half' my={1}>
+                  <Radio
+                    colorScheme='primary'
+                    value='half'
+                    my={1}
+                    _icon={{ color: 'primary' }}
+                  >
                     Half
                   </Radio>
                 </Radio.Group>
