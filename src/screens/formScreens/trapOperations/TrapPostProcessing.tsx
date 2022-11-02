@@ -60,7 +60,7 @@ const TrapPreProcessing = ({
   const handleSubmit = (values: any) => {
     dispatch(saveTrapPostProcessing(values))
     dispatch(markTrapPostProcessingCompleted(true))
-    dispatch(markStepCompleted(true))
+    dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ TrapPostProcessing', values)
   }
 
@@ -237,10 +237,20 @@ const TrapPreProcessing = ({
                     }
                   }}
                 >
-                  <Radio colorScheme='primary' value='Reset Trap' my={1}>
+                  <Radio
+                    colorScheme='primary'
+                    value='Reset Trap'
+                    my={1}
+                    _icon={{ color: 'primary' }}
+                  >
                     Reset Trap
                   </Radio>
-                  <Radio colorScheme='primary' value='End Trapping' my={1}>
+                  <Radio
+                    colorScheme='primary'
+                    value='End Trapping'
+                    my={1}
+                    _icon={{ color: 'primary' }}
+                  >
                     End Trapping
                   </Radio>
                 </Radio.Group>

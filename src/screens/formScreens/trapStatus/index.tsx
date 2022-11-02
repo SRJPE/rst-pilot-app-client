@@ -52,7 +52,7 @@ const TrapStatus = ({
   const handleSubmit = (values: any, errors: any) => {
     dispatch(saveTrapStatus(values))
     dispatch(markTrapStatusCompleted(true))
-    dispatch(markStepCompleted(true))
+    dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ Status', values)
   }
 

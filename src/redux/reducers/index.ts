@@ -13,17 +13,29 @@ import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
 import markRecaptureNavigationSlice from './markRecaptureSlices/markRecaptureNavigationSlice'
 import addMarksOrTagsSlice from './formSlices/addMarksOrTagsSlice'
 import addGeneticSamplesSlice from './formSlices/addGeneticSamplesSlice'
-import visitSetupDefaultsSlice from './formSlices/addGeneticSamplesSlice'
+import visitSetupDefaultsSlice from './visitSetupDefaults'
+import catchRawPostBundler from './postSlices/catchRawPostBundler'
+import trapVisitPostBundler from './postSlices/trapVisitPostBundler'
+import connectivitySlice from './connectivitySlice'
 
-const persistConfig = {
-  key: 'root',
+const dropdownsPersistConfig = {
+  key: 'dropdowns',
+  version: 1,
+  storage: AsyncStorage,
+}
+
+const visitSetupDefaultsPersistConfig = {
+  key: 'visitSetupDefaults',
   version: 1,
   storage: AsyncStorage,
 }
 
 export default combineReducers({
-  dropdowns: persistReducer(persistConfig, dropdownsSlice),
-  visitSetupDefaults: persistReducer(persistConfig, visitSetupDefaultsSlice),
+  dropdowns: persistReducer(dropdownsPersistConfig, dropdownsSlice),
+  visitSetupDefaults: persistReducer(
+    visitSetupDefaultsPersistConfig,
+    visitSetupDefaultsSlice
+  ),
   navigation: navigationSlice,
   visitSetup: visitSetupSlice,
   trapStatus: trapStatusSlice,
@@ -35,4 +47,7 @@ export default combineReducers({
   trapPostProcessing: trapPostProcessingSlice,
   markRecaptureNavigation: markRecaptureNavigationSlice,
   releaseTrial: releaseTrialSlice,
+  catchRawPostBundler,
+  trapVisitPostBundler,
+  connectivity: connectivitySlice,
 })
