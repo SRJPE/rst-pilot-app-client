@@ -512,7 +512,7 @@ const AddFishModalContent = ({
                         Bis Brown
                       </Text>
                     </Button>
-                    <HStack alignItems='center'>
+                    <HStack alignItems='center' opacity={0.25}>
                       <Icon
                         as={Ionicons}
                         name={'add-circle'}

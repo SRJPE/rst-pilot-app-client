@@ -100,6 +100,7 @@ const AddGeneticsModalContent = ({
                   marginRight={5}
                   height='50px'
                   fontSize='16'
+                  isDisabled={true}
                 >
                   <Text fontSize='xl' color='white'>
                     View Genetic Sampling Protocols
@@ -112,6 +113,7 @@ const AddGeneticsModalContent = ({
                   marginLeft={5}
                   height='50px'
                   fontSize='16'
+                  isDisabled={true}
                 >
                   <Text fontSize='xl' color='primary'>
                     Watch Video
@@ -247,7 +249,7 @@ const AddGeneticsModalContent = ({
                 </VStack>
 
                 <View w='1/2' h='full' paddingLeft='5'>
-                  <Box w='full' borderWidth='2' borderColor='black'>
+                  <Box w='full' borderWidth='2' borderColor='grey'>
                     <VStack alignItems='center'>
                       <Text fontSize='xl' marginBottom='2'>
                         Sampling Bin Progress:

@@ -165,7 +165,7 @@ const MarkFishModalContent = ({
                 />
               </FormControl>
 
-              <HStack alignItems='center'>
+              <HStack alignItems='center' opacity={0.25}>
                 <Icon
                   as={Ionicons}
                   name={'add-circle'}

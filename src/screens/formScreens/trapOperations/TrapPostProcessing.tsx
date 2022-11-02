@@ -198,6 +198,7 @@ const TrapPreProcessing = ({
                     w='1/2'
                     bg='primary'
                     px='10'
+                    isDisabled={true}
                     onPress={() => {
                       getCurrentLocation(setFieldTouched, setFieldValue)
                     }}
