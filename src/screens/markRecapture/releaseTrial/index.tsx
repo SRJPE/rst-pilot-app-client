@@ -1,12 +1,9 @@
 import {
   Box,
   Center,
-  CheckIcon,
   FormControl,
   Input,
-  KeyboardAvoidingView,
   Radio,
-  Select,
   Text,
   View,
   VStack,
@@ -15,8 +12,6 @@ import MarkRecaptureNavButtons from '../../../components/markRecapture/MarkRecap
 import { Formik } from 'formik'
 import { AppDispatch, RootState } from '../../../redux/store'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { useEffect } from 'react'
-import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSlice'
 import { releaseTrialSchema } from '../../../utils/helpers/yupValidations'
 import {
   markReleaseTrialCompleted,
@@ -41,10 +36,6 @@ const ReleaseTrial = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-
-  useEffect(() => {
-    dispatch(getTrapVisitDropdownValues())
-  }, [])
   const { run } = dropdownValues.values
 
   const handleSubmit = (values: any) => {
