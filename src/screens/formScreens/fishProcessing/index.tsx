@@ -1,5 +1,13 @@
 import { Formik } from 'formik'
-import { FormControl, Heading, Text, VStack, View } from 'native-base'
+import {
+  FormControl,
+  Heading,
+  Text,
+  VStack,
+  View,
+  Avatar,
+  HStack,
+} from 'native-base'
 import { useEffect } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
@@ -96,37 +104,51 @@ const FishProcessing = ({
                   errors.fishProcessed &&
                   renderErrorMessage(errors, 'fishProcessed')}
               </FormControl>
-              {values.fishProcessedResult ===
+              {(values.fishProcessedResult ===
                 'no catch data, fish left in live box' ||
-                (values.fishProcessedResult ===
-                  'no catch data, fish released' && (
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Reason For Not Processing
-                      </Text>
-                    </FormControl.Label>
-                    <CustomSelect
-                      selectedValue={values.reasonForNotProcessing}
-                      placeholder='Reason'
-                      onValueChange={handleChange('reasonForNotProcessing')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={reasonsForNotProcessing}
-                    />
-                    {touched.reasonForNotProcessing &&
-                      errors.reasonForNotProcessing &&
-                      renderErrorMessage(errors, 'reasonForNotProcessing')}
-                  </FormControl>
-                ))}
+                values.fishProcessedResult ===
+                  'no catch data, fish released') && (
+                <FormControl>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Reason For Not Processing
+                    </Text>
+                  </FormControl.Label>
+                  <CustomSelect
+                    selectedValue={values.reasonForNotProcessing}
+                    placeholder='Reason'
+                    onValueChange={handleChange('reasonForNotProcessing')}
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={reasonsForNotProcessing}
+                  />
+                  {touched.reasonForNotProcessing &&
+                    errors.reasonForNotProcessing &&
+                    renderErrorMessage(errors, 'reasonForNotProcessing')}
+                </FormControl>
+              )}
 
               {values.fishProcessedResult === 'processed fish' && (
                 <VStack>
-                  <Heading>Please sort fish by category:</Heading>
+                  <Heading mb='4'>Please sort fish by category:</Heading>
 
-                  <Text>Chinook salmon (by run when possible),</Text>
-                  <Text>Steelhead</Text>
-                  <Text>recaptured</Text>
-                  <Text>non-salmonid species</Text>
+                  <VStack space={2} alignItems='flex-start'>
+                    <HStack space={2} alignItems='flex-start'>
+                      <Avatar size={'2'} mt={'2'} />
+                      <Text>Chinook salmon (by run when possible)</Text>
+                    </HStack>
+                    <HStack space={2} alignItems='flex-start'>
+                      <Avatar size={'2'} mt={'2'} />
+                      <Text>Steelhead</Text>
+                    </HStack>
+                    <HStack space={2} alignItems='flex-start'>
+                      <Avatar size={'2'} mt={'2'} />
+                      <Text>recaptured</Text>
+                    </HStack>
+                    <HStack space={2} alignItems='flex-start'>
+                      <Avatar size={'2'} mt={'2'} />
+                      <Text>non-salmonid species</Text>
+                    </HStack>
+                  </VStack>
                 </VStack>
               )}
             </VStack>
