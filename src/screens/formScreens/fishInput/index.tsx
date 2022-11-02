@@ -48,9 +48,10 @@ const FishInput = ({
     'Individual' | 'Batch'
   >('Individual')
   const [checkboxGroupValue, setCheckboxGroupValue] = useState(
-    fishInputSliceState.speciesCaptured.length > 1
-      ? (fishInputSliceState.speciesCaptured as Array<string>)
-      : (['YOY Chinook'] as Array<string>)
+    // fishInputSliceState.speciesCaptured.length > 1
+    // ?
+    fishInputSliceState.speciesCaptured as Array<string>
+    // : (['YOY Chinook'] as Array<string>)
   )
 
   useEffect(() => {
@@ -58,10 +59,10 @@ const FishInput = ({
   }, [checkboxGroupValue])
 
   const handleSubmit = () => {
-    if (checkboxGroupValue.length < 1) {
-      setShowError(true)
-      return
-    }
+    // if (checkboxGroupValue.length < 1) {
+    //   setShowError(true)
+
+    // }
     dispatch(saveFishInput(checkboxGroupValue))
     dispatch(markFishInputCompleted(true))
     dispatch(markStepCompleted(true))

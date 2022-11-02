@@ -125,6 +125,7 @@ const AddFishModalContent = ({
               headerText={'Add Fish'}
               showHeaderButton={true}
               closeModal={closeModal}
+              navigateBack={true}
               headerButton={AddFishModalHeaderButton({
                 activeTab,
                 setActiveTab,
@@ -646,7 +647,6 @@ const AddFishModalContent = ({
                     onPress={() => {
                       handleSubmit()
                       navigation.goBack()
-                      // closeModal()
                     }}
                   >
                     <Text fontWeight='bold' color='white' fontSize='xl'>

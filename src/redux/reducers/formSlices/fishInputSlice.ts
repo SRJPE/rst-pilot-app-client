@@ -50,10 +50,10 @@ export const saveFishSlice = createSlice({
   initialState: initialState,
   reducers: {
     saveFishInput: (state, action) => {
+      // let speciesCapturedCopy = cloneDeep(state.speciesCaptured)
+      // speciesCapturedCopy.push(action.payload)
+      // state.speciesCaptured = speciesCapturedCopy
       state.speciesCaptured = action.payload
-      let speciesCapturedCopy = cloneDeep(state.speciesCaptured)
-      speciesCapturedCopy.push(action.payload)
-      state.speciesCaptured = speciesCapturedCopy
     },
     saveIndividualFish: (state, action) => {
       let individualFishCopy = cloneDeep(state.individualFish)

@@ -11,7 +11,6 @@ import {
   Divider,
 } from 'native-base'
 import React from 'react'
-import navigationSlice from '../../redux/reducers/formSlices/navigationSlice'
 import { useNavigation } from '@react-navigation/native'
 
 const CustomModalHeader = ({
@@ -19,13 +18,13 @@ const CustomModalHeader = ({
   showHeaderButton,
   headerButton,
   closeModal,
-  showCloseButton,
+  navigateBack,
 }: {
   headerText: string
   showHeaderButton: boolean
   headerButton?: any
   closeModal?: any
-  showCloseButton?: boolean
+  navigateBack?: any
 }) => {
   const navigation = useNavigation()
   if (showHeaderButton) {
@@ -37,10 +36,13 @@ const CustomModalHeader = ({
           marginTop={2}
         >
           <HStack alignItems='center'>
-            {showCloseButton === true && (
+            {
               <Button
                 size='lg'
                 onPress={() => {
+                  if (navigateBack) {
+                    navigation.goBack()
+                  }
                   if (closeModal) {
                     closeModal()
                   }
@@ -48,7 +50,7 @@ const CustomModalHeader = ({
               >
                 <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
               </Button>
-            )}
+            }
             <Heading marginLeft='10'>{headerText}</Heading>
           </HStack>
           {headerButton ? headerButton : <></>}

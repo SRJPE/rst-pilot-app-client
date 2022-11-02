@@ -72,7 +72,6 @@ const AddGeneticsModalContent = ({
               headerText={'Collect a genetic sample'}
               showHeaderButton={true}
               closeModal={closeModal}
-              showCloseButton={true}
               headerButton={
                 <Button
                   bg='primary'
