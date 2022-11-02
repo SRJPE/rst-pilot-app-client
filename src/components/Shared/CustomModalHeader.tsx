@@ -19,13 +19,13 @@ const CustomModalHeader = ({
   showHeaderButton,
   headerButton,
   closeModal,
-  onCloseAction,
+  showCloseButton,
 }: {
   headerText: string
   showHeaderButton: boolean
   headerButton?: any
   closeModal?: any
-  onCloseAction?: any
+  showCloseButton?: boolean
 }) => {
   const navigation = useNavigation()
   if (showHeaderButton) {
@@ -37,16 +37,18 @@ const CustomModalHeader = ({
           marginTop={2}
         >
           <HStack alignItems='center'>
-            <Button
-              size='lg'
-              onPress={() => {
-                if (onCloseAction) onCloseAction()
-                if (closeModal) closeModal()
-                navigation.goBack()
-              }}
-            >
-              <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
-            </Button>
+            {showCloseButton === true && (
+              <Button
+                size='lg'
+                onPress={() => {
+                  if (closeModal) {
+                    closeModal()
+                  }
+                }}
+              >
+                <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
+              </Button>
+            )}
             <Heading marginLeft='10'>{headerText}</Heading>
           </HStack>
           {headerButton ? headerButton : <></>}
@@ -65,7 +67,6 @@ const CustomModalHeader = ({
           <Button
             size='lg'
             onPress={() => {
-              if (onCloseAction) onCloseAction()
               if (closeModal) closeModal()
             }}
           >

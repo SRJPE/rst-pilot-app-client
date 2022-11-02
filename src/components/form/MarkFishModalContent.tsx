@@ -68,6 +68,7 @@ const MarkFishModalContent = ({
               headerText={'Mark or Tag a Fish'}
               showHeaderButton={true}
               closeModal={closeModal}
+              showCloseButton={true}
               headerButton={
                 <Button
                   bg='primary'

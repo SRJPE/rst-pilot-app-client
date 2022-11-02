@@ -28,14 +28,6 @@ const initialFormValues = {
   comments: '',
 }
 
-const crewMemberDropdownOptions = [
-  { label: 'Crew Member 1', value: 'Crew Member 1' },
-  { label: 'Crew Member 2', value: 'Crew Member 2' },
-  { label: 'Crew Member 3', value: 'Crew Member 3' },
-  { label: 'Crew Member 4', value: 'Crew Member 4' },
-  { label: 'Crew Member 5', value: 'Crew Member 5' },
-]
-
 const mapStateToProps = (state: RootState) => {
   return {
     crewMembers: state.visitSetup.values.crew,
@@ -80,6 +72,7 @@ const AddGeneticsModalContent = ({
               headerText={'Collect a genetic sample'}
               showHeaderButton={true}
               closeModal={closeModal}
+              showCloseButton={true}
               headerButton={
                 <Button
                   bg='primary'
@@ -170,10 +163,20 @@ const AddGeneticsModalContent = ({
                         }
                       }}
                     >
-                      <Radio colorScheme='primary' value='true' my={1}>
+                      <Radio
+                        colorScheme='primary'
+                        value='true'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
                         True
                       </Radio>
-                      <Radio colorScheme='primary' value='false' my={1}>
+                      <Radio
+                        colorScheme='primary'
+                        value='false'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
                         False
                       </Radio>
                     </Radio.Group>
@@ -197,10 +200,20 @@ const AddGeneticsModalContent = ({
                         }
                       }}
                     >
-                      <Radio colorScheme='primary' value='true' my={1}>
+                      <Radio
+                        colorScheme='primary'
+                        value='true'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
                         True
                       </Radio>
-                      <Radio colorScheme='primary' value='false' my={1}>
+                      <Radio
+                        colorScheme='primary'
+                        value='false'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
                         False
                       </Radio>
                     </Radio.Group>
