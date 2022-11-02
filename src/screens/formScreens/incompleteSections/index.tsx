@@ -24,7 +24,7 @@ const IncompleteSections = ({
 
   useEffect(() => {
     dispatch(checkIfFormIsComplete())
-  }, [])
+  }, [navigation])
 
   return (
     <>
