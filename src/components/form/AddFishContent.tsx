@@ -126,10 +126,12 @@ const AddFishContent = ({
               showHeaderButton={true}
               closeModal={closeModal}
               navigateBack={true}
-              headerButton={AddFishModalHeaderButton({
-                activeTab,
-                setActiveTab,
-              })}
+              headerButton={null}
+              //   AddFishModalHeaderButton({
+              //   activeTab,
+              //   setActiveTab,
+              // })
+              // }
             />
             <View bg='#fff'>
               <VStack paddingX='10' paddingTop='2' paddingBottom='3' space={3}>
