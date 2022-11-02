@@ -212,7 +212,7 @@ const NavButtons = ({
             {activePage === 'Visit Setup' ? 'Return Home' : 'Back'}
           </Text>
         </Button>
-
+        {/* 
         <Button
           height='20'
           rounded='xs'
@@ -226,7 +226,8 @@ const NavButtons = ({
           <Text fontWeight='bold' color='white'>
             redux state
           </Text>
-        </Button>
+        </Button> */}
+
         <Button
           alignSelf='flex-start'
           bg='primary'
