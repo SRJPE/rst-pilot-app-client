@@ -1,12 +1,10 @@
 import { Formik } from 'formik'
 import { FormControl, Heading, Text, VStack, View } from 'native-base'
-import { useEffect } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
 import renderErrorMessage from '../../../components/form/RenderErrorMessage'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import CustomSelect from '../../../components/Shared/CustomSelect'
-import { getTrapVisitDropdownValues } from '../../../redux/reducers/dropdownsSlice'
 import {
   markFishProcessingCompleted,
   saveFishProcessing,
@@ -35,10 +33,6 @@ const FishProcessing = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-
-  useEffect(() => {
-    dispatch(getTrapVisitDropdownValues())
-  }, [])
   const { fishProcessed: fishProcessedDropdowns } = dropdownValues.values
 
   const handleSubmit = (values: any) => {
