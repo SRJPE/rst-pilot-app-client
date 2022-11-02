@@ -143,6 +143,12 @@ export default function NavButtons({
     if (activePage === 'Incomplete Sections') {
       //if form is complete, then do not disable button
       return isFormComplete ? false : true
+    } else if (
+      activePage === 'High Flows' ||
+      activePage === 'Non Functional Trap' ||
+      activePage === 'No Fish Caught'
+    ) {
+      return true
     } else {
       return (
         //**temp conditional for fish input**
@@ -204,6 +210,7 @@ export default function NavButtons({
             {activePage === 'Visit Setup' ? 'Return Home' : 'Back'}
           </Text>
         </Button>
+
         <Button
           height='20'
           rounded='xs'
