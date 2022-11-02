@@ -1,20 +1,37 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 interface InitialStateI {
+  type: string
   isConnected: boolean
+  isInternetReachable: boolean
 }
 
+// Connection Types: 
+// - none
+// - unknown
+// - cellular
+// - wifi
+// - bluetooth
+// - ethernet
+// - wimax
+// - vpn
+// - other
 
 const initialState: InitialStateI = {
-  isConnected: false
+  type: 'none',
+  isConnected: false,
+  isInternetReachable: false
 }
 
 export const connectivitySlice = createSlice({
-  name: 'catchRawPostBundler',
+  name: 'connectivitySlice',
   initialState: initialState,
   reducers: {
     connectionChanged: (state, action) => {
-      state.isConnected = action.payload
+      const {type, isConnected, isInternetReachable} = action.payload
+      state.type = type
+      state.isConnected = isConnected
+      state.isInternetReachable = isInternetReachable
     },
   },
 })
