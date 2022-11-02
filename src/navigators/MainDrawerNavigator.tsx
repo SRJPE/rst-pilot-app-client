@@ -1,5 +1,5 @@
 import { createDrawerNavigator } from '@react-navigation/drawer'
-import DrawerMenu from './DrawerMenu'
+import DrawerMenu from '../components/drawerMenu'
 import Home from '../screens/home'
 import TrapVisitForm from '../screens/trapVisitForm'
 import GenerateReport from '../screens/generateReport'
