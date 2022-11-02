@@ -1,13 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import api from '../../api/axiosConfig'
 
-// Constants
 const uninitializedStatus = 'uninitialized'
 const pendingStatus = 'pending'
 const fulfilledStatus = 'fulfilled'
 const rejectedStatus = 'rejected'
 
-// Interfaces
 interface InitialStateI {
   status: string
   programs: ProgramI[]
@@ -68,7 +66,6 @@ interface APIResponseI {
   data: any
 }
 
-// Initial State
 const initialState: InitialStateI = {
   status: uninitializedStatus,
   programs: [],
@@ -87,21 +84,12 @@ export const getVisitSetupDefaults = createAsyncThunk(
   }
 )
 
-// @reduxjs/toolkit Slice - New & Recommended way of writing redux reducers
-// allows us to:
-// * write actions under reducers: {...}
-// * write async actions under extraReducers: {...}
-
 export const visitSetupDefaultsSlice = createSlice({
   name: 'visitSetupDefaults',
   initialState: initialState,
-  // Redux Toolkit allows us to write "mutating" logic in reducers
   reducers: {
-    // Below is just an example, here we could pass 'markType' to 'clearValuesFromDropdown' from the UI and
-    // 'markType' would be recognized as the action.payload below
   },
   extraReducers: {
-    // Add async and additional action types here, and handle loading state as needed
     [getVisitSetupDefaults.pending.type]: (state, action) => {
       state.status = pendingStatus
     },
