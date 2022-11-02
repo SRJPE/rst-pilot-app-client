@@ -48,7 +48,7 @@ const FishProcessing = ({
     dispatch(saveFishProcessing(values))
     dispatch(markFishProcessingCompleted(true))
     dispatch(markStepCompleted([true, 'fishProcessing']))
-    console.log('🚀 ~ Fish Processing ~ values', values)
+    console.log('🚀 ~ handleSubmit~ FishProcessing', values)
   }
 
   return (

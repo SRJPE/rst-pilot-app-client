@@ -39,7 +39,6 @@ const FishInputDataTable = ({
   const [pageRows, setPageRows] = React.useState([
     ...individualFishList.slice(0, numberOfItemsPerPage),
   ])
-  console.log('🚀 ~ pageRows', pageRows)
 
   React.useEffect(() => {
     const rowsForPage = generateRowsForPage()

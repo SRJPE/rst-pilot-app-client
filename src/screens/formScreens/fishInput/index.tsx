@@ -65,7 +65,7 @@ const FishInput = ({
     dispatch(saveFishInput(checkboxGroupValue))
     dispatch(markFishInputCompleted(true))
     dispatch(markStepCompleted([true, 'fishInput']))
-    console.log('🚀 ~ Fish Input ~ values', checkboxGroupValue)
+    console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
   }
 
   return (
