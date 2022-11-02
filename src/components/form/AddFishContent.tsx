@@ -446,12 +446,14 @@ const AddFishContent = ({
                             </Text>
                             <HStack space={2} alignItems='flex-start'>
                               <Avatar size={'2'} mt={'2'} />
-                              <Text fontSize='md'>BIS-BR: Bismarck Brown</Text>
+                              <Text fontSize='md'>
+                                BIS-BROWN: Bismarck Brown
+                              </Text>
                             </HStack>
                             <HStack space={2} alignItems='flex-start'>
                               <Avatar size={'2'} mt={'2'} />
                               <Text fontSize='md'>
-                                ELA-PUR-FIN: Elastomer Yellow Fin
+                                ELA-YEL-FIN: Elastomer Yellow Fin
                               </Text>
                             </HStack>
                             <HStack space={2} alignItems='flex-start'>
@@ -467,7 +469,7 @@ const AddFishContent = ({
                   <HStack>
                     <Button
                       bg={
-                        values.existingMark === 'E - Y - F'
+                        values.existingMark === 'ELA-YEL-FIN'
                           ? 'primary'
                           : 'secondary'
                       }
@@ -476,21 +478,23 @@ const AddFishContent = ({
                       shadow='3'
                       borderRadius='5'
                       marginRight='10'
-                      onPress={() => setFieldValue('existingMark', 'E - Y - F')}
+                      onPress={() =>
+                        setFieldValue('existingMark', 'ELA-YEL-FIN')
+                      }
                     >
                       <Text
                         color={
-                          values.existingMark === 'E - Y - F'
+                          values.existingMark === 'ELA-YEL-FIN'
                             ? 'white'
                             : 'primary'
                         }
                       >
-                        E - Y - F
+                        ELA-YEL-FIN
                       </Text>
                     </Button>
                     <Button
                       bg={
-                        values.existingMark === 'Bis Brown'
+                        values.existingMark === 'BIS-BROWN'
                           ? 'primary'
                           : 'secondary'
                       }
@@ -500,16 +504,16 @@ const AddFishContent = ({
                       shadow='3'
                       borderRadius='5'
                       marginRight='10'
-                      onPress={() => setFieldValue('existingMark', 'Bis Brown')}
+                      onPress={() => setFieldValue('existingMark', 'BIS-BROWN')}
                     >
                       <Text
                         color={
-                          values.existingMark === 'Bis Brown'
+                          values.existingMark === 'BIS-BROWN'
                             ? 'white'
                             : 'primary'
                         }
                       >
-                        Bis Brown
+                        BIS-BROWN
                       </Text>
                     </Button>
                     <HStack alignItems='center' opacity={0.25}>
