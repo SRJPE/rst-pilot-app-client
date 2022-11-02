@@ -6,12 +6,12 @@ import { RootState } from '../../redux/store'
 const headers = [
   'Species',
   'Count',
-  'Fork len.',
+  'Fork Len.',
   'Run',
   'Weight',
-  'Life stage',
-  'A clipped',
-  'E mark',
+  'Life Stage',
+  'Clipped',
+  'Mark',
   'Dead',
   'Recapture',
 ]
