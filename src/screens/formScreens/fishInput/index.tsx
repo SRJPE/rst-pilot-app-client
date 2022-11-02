@@ -70,12 +70,18 @@ const FishInput = ({
 
   return (
     <>
-      <View flex={1} bg='#fff' p='10%' borderColor='themeGrey' borderWidth='15'>
-        <Heading mb={showError ? '3' : '8'}>
+      <View
+        flex={1}
+        bg='#fff'
+        py='10%'
+        borderColor='themeGrey'
+        borderWidth='15'
+      >
+        <Heading mb={showError ? '3' : '8'} px='10%'>
           Which species were captured?
         </Heading>
         <VStack space={8}>
-          <FormControl w='1/4'>
+          <FormControl>
             {showError && (
               <HStack space={1}>
                 <Icon
@@ -91,6 +97,7 @@ const FishInput = ({
             )}
             <Checkbox.Group //https://github.com/GeekyAnts/NativeBase/issues/5073
               colorScheme='green'
+              px='10%'
               defaultValue={checkboxGroupValue}
               accessibilityLabel='Select the species captured'
               onChange={(values: any) => setCheckboxGroupValue(values)}
@@ -133,7 +140,7 @@ const FishInput = ({
             </Checkbox.Group>
           </FormControl>
 
-          <HStack space={10} marginRight='1/4'>
+          <HStack space={10} px='10%'>
             <Button
               bg='primary'
               p='3'
@@ -163,7 +170,7 @@ const FishInput = ({
             </Button>
           </HStack>
 
-          <Box>
+          <Box px='4'>
             <Heading pb='8'>Catch Table</Heading>
             <FishInputDataTable />
           </Box>
