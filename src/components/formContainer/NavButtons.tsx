@@ -24,6 +24,8 @@ export default function NavButtons({
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
   const isFormComplete = navigationState.isFormComplete
+  const { waterTemperature, waterTemperatureUnit } =
+    reduxState.trapStatus.values
 
   const navigateHelper = (destination: string, payload: number) => {
     navigation.navigate('Trap Visit Form', { screen: destination })
