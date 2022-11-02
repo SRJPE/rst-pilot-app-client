@@ -64,7 +64,7 @@ const FishInput = ({
     <Formik
       // validationSchema={fishInputSchema}
       initialValues={fishInputSliceState.values}
-      onSubmit={(values) => handleSubmit(values)}
+      onSubmit={values => handleSubmit(values)}
     >
       {({
         handleChange,
@@ -78,18 +78,19 @@ const FishInput = ({
           <View
             flex={1}
             bg='#fff'
-            p='10%'
+            py='10%'
             borderColor='themeGrey'
             borderWidth='15'
           >
             <VStack space={8}>
-              <Heading>Which species were captured?</Heading>
-              <FormControl w='1/4'>
+              <Heading px='10%'>Which species were captured?</Heading>
+              <FormControl>
                 <Checkbox.Group //https://github.com/GeekyAnts/NativeBase/issues/5073
                   colorScheme='green'
                   defaultValue={checkboxGroupValue}
                   accessibilityLabel='Select the species captured'
-                  onChange={(values) => setCheckboxGroupValue(values)}
+                  onChange={values => setCheckboxGroupValue(values)}
+                  pl='10%'
                 >
                   <Checkbox value='YOY Chinook' my='1'>
                     YOY Chinook
@@ -109,7 +110,7 @@ const FishInput = ({
                 </Checkbox.Group>
               </FormControl>
 
-              <HStack space={10} marginRight='1/4'>
+              <HStack space={10} marginRight='1/4' pl='10%'>
                 <Button
                   bg='primary'
                   p='3'
@@ -140,7 +141,7 @@ const FishInput = ({
                 </Button>
               </HStack>
 
-              <Box>
+              <Box px='4'>
                 <Heading pb='8'>Catch Table</Heading>
                 <FishInputDataTable />
               </Box>

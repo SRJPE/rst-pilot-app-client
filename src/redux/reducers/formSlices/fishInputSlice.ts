@@ -10,28 +10,32 @@ interface InitialStateI {
 
 export interface IndividualFishValuesI {
   species: string
-  forkLength: number
+  forkLength: number | null
   run: string
-  weight?: number
+  weight?: number | null
   lifeStage: string
-  adiposeClipped: boolean
+  adiposeClipped: boolean | null
   existingMark: string
-  dead: boolean
-  willBeUsedInRecapture: boolean
-  plusCountMethod: string
+  dead: boolean | null
+  willBeUsedInRecapture: null
+  plusCountMethod: string // | number
+  numFishCaught?: number | null
+  plusCount?: boolean
 }
 
 export const individualFishInitialState = {
   species: '',
-  forkLength: '',
+  numFishCaught: null,
+  forkLength: null,
   run: '',
-  weight: '',
+  weight: null,
   lifeStage: '',
   adiposeClipped: false,
   existingMark: '',
   dead: false,
   willBeUsedInRecapture: false,
   plusCountMethod: '',
+  plusCount: false,
 }
 
 export interface FishInputValuesI {
@@ -56,30 +60,28 @@ export const saveFishSlice = createSlice({
     },
     saveIndividualFish: (state, action) => {
       let individualFishCopy = cloneDeep(state.individualFish)
-      individualFishCopy.push(action.payload)
+      individualFishCopy.push({ ...action.payload, numFishCaught: 1 })
       state.individualFish = individualFishCopy
     },
     savePlusCount: (state, action) => {
-      //create fish objects according to plus count and add all to individualFish
-      let count = action.payload.count
-      const plusCountFormatted = [] as Array<any>
-      for (let i = 0; i < count; i++) {
-        plusCountFormatted.push({
-          species: action.payload.species,
-          forkLength: '',
-          run: action.payload.run,
-          weight: '',
-          lifeStage: action.payload.lifeStage,
-          adiposeClipped: false,
-          existingMark: '',
-          dead: false,
-          willBeUsedInRecapture: false,
-          plusCountMethod: action.payload.plusCountMethod,
-        } as any)
-      }
+      const plusCountEntry = {
+        species: action.payload.species,
+        numFishCaught: action.payload.count,
+        forkLength: null,
+        run: action.payload.run,
+        weight: null,
+        lifeStage: action.payload.lifeStage,
+        adiposeClipped: null,
+        existingMark: '',
+        dead: null,
+        willBeUsedInRecapture: null,
+        plusCountMethod: action.payload.plusCountMethod,
+        plusCount: true,
+      } as IndividualFishValuesI
+
       let individualFishCopy = cloneDeep(state.individualFish)
-      const combinedArrays = individualFishCopy.concat(plusCountFormatted)
-      state.individualFish = combinedArrays
+      individualFishCopy.push(plusCountEntry)
+      state.individualFish = individualFishCopy
     },
     markFishInputCompleted: (state, action) => {
       state.completed = action.payload
