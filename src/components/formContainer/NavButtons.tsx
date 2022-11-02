@@ -170,6 +170,9 @@ export default function NavButtons({
       case 'Non Functional Trap':
         buttonText = 'End Trapping'
         break
+      case 'No Fish Caught':
+        buttonText = 'End Trapping'
+        break
       case 'High Temperatures':
         buttonText = 'Move on to Fish Processing'
         break
