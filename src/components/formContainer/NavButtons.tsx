@@ -142,7 +142,8 @@ const NavButtons = ({
   const disableRightButton = () => {
     if (activePage === 'Incomplete Sections') {
       //if form is complete, then do not disable button
-      return isFormComplete ? false : true
+      // return isFormComplete ? false : true
+      return isFormComplete ? false : false
     } else if (
       activePage === 'High Flows' ||
       activePage === 'Non Functional Trap' ||
