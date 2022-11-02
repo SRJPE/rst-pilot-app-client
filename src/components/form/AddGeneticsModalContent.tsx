@@ -290,3 +290,4 @@ const AddGeneticsModalContent = ({
 }
 
 export default connect(mapStateToProps)(AddGeneticsModalContent)
+
