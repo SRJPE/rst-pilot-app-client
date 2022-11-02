@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { cloneDeep } from 'lodash'
 import { uid } from 'uid'
 
 interface InitialStateI {
@@ -10,7 +11,7 @@ export interface GeneticSampleValuesI {
   sampleIdNumber: string
   mucusSwabCollected: boolean
   finClipCollected: boolean
-  crewMemberCollectingSample: boolean
+  crewMemberCollectingSample: string
   comments?: string
 }
 
@@ -22,8 +23,12 @@ export const addGeneticSamplesSlice = createSlice({
   name: 'addGeneticSamplesSlice',
   initialState: initialState,
   reducers: {
-    saveGeneticSampleData: (state, action) => {
-      state.values.push({ ...action.payload, id: uid() })
+    saveGeneticSampleData: (state: any, action: any) => {
+      // console.log('🚀 ~ payload Genetic!!!', action.payload)
+      // state.values.push({ ...action.payload, id: uid() })
+      let geneticSamplesCopy = cloneDeep(state.values)
+      geneticSamplesCopy.push({ ...action.payload, id: uid() })
+      state.values = geneticSamplesCopy
     },
   },
 })
