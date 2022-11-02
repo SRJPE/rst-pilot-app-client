@@ -26,8 +26,9 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
   const { steps, activeStep } = navigationState
   const { state, navigation } = props
   const currentRoute = state.routeNames[state.index]
-  const stepsArray = Object.values(steps) as Array<any>
-  // const stepsArray = Object.values(steps).slice(0, 7) as Array<any>
+  //unsliced Array for dev
+  // const stepsArray = Object.values(steps) as Array<any>
+  const stepsArray = Object.values(steps).slice(0, 7) as Array<any>
 
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {
@@ -80,7 +81,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
           borderRadius={100}
           mb={6}
           backgroundColor='primary'
-          borderColor='secondary.500'
+          borderColor='primary'
           borderWidth={3}
           ml='2'
         />
