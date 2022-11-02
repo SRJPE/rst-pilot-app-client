@@ -1,7 +1,18 @@
 import { Ionicons } from '@expo/vector-icons'
 import { StyleSheet } from 'react-native'
-import { Box, Button, Heading, HStack, Icon, View, Text, Divider } from 'native-base'
+import {
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Icon,
+  View,
+  Text,
+  Divider,
+} from 'native-base'
 import React from 'react'
+import navigationSlice from '../../redux/reducers/formSlices/navigationSlice'
+import { useNavigation } from '@react-navigation/native'
 
 const CustomModalHeader = ({
   headerText,
@@ -16,16 +27,22 @@ const CustomModalHeader = ({
   closeModal?: any
   onCloseAction?: any
 }) => {
+  const navigation = useNavigation()
   if (showHeaderButton) {
     return (
       <>
-        <HStack justifyContent='space-between' alignItems='center' marginTop={2}>
+        <HStack
+          justifyContent='space-between'
+          alignItems='center'
+          marginTop={2}
+        >
           <HStack alignItems='center'>
             <Button
               size='lg'
               onPress={() => {
                 if (onCloseAction) onCloseAction()
                 if (closeModal) closeModal()
+                navigation.goBack()
               }}
             >
               <Icon as={Ionicons} name={'close'} size='5xl' color='black' />

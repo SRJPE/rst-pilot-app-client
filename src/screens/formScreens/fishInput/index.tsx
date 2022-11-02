@@ -10,7 +10,6 @@ import {
   Text,
   View,
 } from 'native-base'
-import { StyleSheet } from 'react-native'
 import CustomModal from '../../../components/Shared/CustomModal'
 import { Formik } from 'formik'
 import NavButtons from '../../../components/formContainer/NavButtons'
@@ -22,7 +21,6 @@ import {
   saveFishInput,
 } from '../../../redux/reducers/formSlices/fishInputSlice'
 import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
-import AddFishModalContent from '../../../components/form/AddFishModalContent'
 import FishInputDataTable from '../../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../../components/form/PlusCountModalContent'
 
@@ -40,7 +38,6 @@ const FishInput = ({
   fishInputSliceState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [addFishModalOpen, setAddFishModalOpen] = useState(false as boolean)
   const [addPlusCountModalOpen, setAddPlusCountModalOpen] = useState(
     false as boolean
   )
@@ -52,7 +49,6 @@ const FishInput = ({
   )
 
   const handleSubmit = (values: any) => {
-    // console.log('🚀 ~ handleSubmit ~ checkboxGroupValue', checkboxGroupValue)
     values.speciesCaptured = checkboxGroupValue
     dispatch(saveFishInput(values))
     dispatch(markFishInputCompleted(true))
@@ -64,7 +60,7 @@ const FishInput = ({
     <Formik
       // validationSchema={fishInputSchema}
       initialValues={fishInputSliceState.values}
-      onSubmit={(values) => handleSubmit(values)}
+      onSubmit={values => handleSubmit(values)}
     >
       {({
         handleChange,
@@ -89,7 +85,7 @@ const FishInput = ({
                   colorScheme='green'
                   defaultValue={checkboxGroupValue}
                   accessibilityLabel='Select the species captured'
-                  onChange={(values) => setCheckboxGroupValue(values)}
+                  onChange={values => setCheckboxGroupValue(values)}
                 >
                   <Checkbox value='YOY Chinook' my='1'>
                     YOY Chinook
@@ -116,8 +112,7 @@ const FishInput = ({
                   borderRadius='5'
                   flex='1'
                   onPress={() => {
-                    setAddFishModalOpen(true)
-                    dispatch(markFishInputModalOpen(true))
+                    navigation.navigate('Add Fish')
                   }}
                 >
                   <Text fontSize='sm' fontWeight='bold' color='white'>
@@ -146,22 +141,6 @@ const FishInput = ({
               </Box>
             </VStack>
             {/* --------- Modals --------- */}
-            <CustomModal
-              isOpen={addFishModalOpen}
-              closeModal={() => {
-                setAddFishModalOpen(false)
-                dispatch(markFishInputModalOpen(false))
-              }}
-            >
-              <AddFishModalContent
-                closeModal={() => {
-                  setAddFishModalOpen(false)
-                  dispatch(markFishInputModalOpen(false))
-                }}
-                activeTab={addFishModalTab}
-                setActiveTab={setAddFishModalTab}
-              />
-            </CustomModal>
             <CustomModal
               isOpen={addPlusCountModalOpen}
               closeModal={() => {

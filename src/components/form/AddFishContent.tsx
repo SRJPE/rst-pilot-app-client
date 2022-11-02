@@ -11,6 +11,7 @@ import {
   IconButton,
   Image,
   Input,
+  View,
   Popover,
   Radio,
   ScrollView,
@@ -38,6 +39,7 @@ import { saveGeneticSampleData } from '../../redux/reducers/formSlices/addGeneti
 import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import renderErrorMessage from './RenderErrorMessage'
+import { useNavigation } from '@react-navigation/native'
 
 const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
 
@@ -48,6 +50,7 @@ const AddFishModalContent = ({
   activeTab,
   setActiveTab,
   closeModal,
+  individualFishStore,
 }: {
   saveIndividualFish: any
   saveMarkOrTagData: any
@@ -55,15 +58,17 @@ const AddFishModalContent = ({
   activeTab: any
   setActiveTab: any
   closeModal: any
+  individualFishStore: any
 }) => {
+  const navigation = useNavigation()
+  const lastAddedFish = [...individualFishStore].pop() as any
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
+  const [isSlideOpen, setIsSlideOpen] = React.useState(false as boolean)
   const [markFishModalOpen, setMarkFishModalOpen] = useState(false as boolean)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
     false as boolean
-  )
-  const [isSlideOpen, setIsSlideOpen] = React.useState(false as boolean)
-
-  const dropdownValues = useSelector(
-    (state: RootState) => state.dropdowns.values
   )
 
   const handleFormSubmit = (values: any) => {
@@ -95,7 +100,9 @@ const AddFishModalContent = ({
     <>
       <Formik
         validationSchema={addIndividualFishSchema}
-        initialValues={individualFishInitialState}
+        initialValues={
+          lastAddedFish ? lastAddedFish : individualFishInitialState
+        }
         // initialTouched={{ adiposeClipped: true }}
         // initialErrors={{ adiposeClipped: '' }}
         onSubmit={values => {
@@ -125,9 +132,15 @@ const AddFishModalContent = ({
                 setActiveTab,
               })}
             />
-            <ScrollView>
-              <VStack paddingX='10' paddingTop='2' paddingBottom='3'>
-                <HStack marginBottom={5} alignItems='center'>
+            <View
+              // flex={1}
+              bg='#fff'
+              // p='10%'
+              // borderColor='themeGrey'
+              // borderWidth='15'
+            >
+              <VStack paddingX='10' paddingTop='2' paddingBottom='3' space={3}>
+                <HStack alignItems='center'>
                   <FormControl w='1/2' pr='5'>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
@@ -180,9 +193,9 @@ const AddFishModalContent = ({
                   </FormControl>
                 </HStack>
 
-                <Divider my={5} />
+                <Divider my={2} />
 
-                <HStack marginBottom={5}>
+                <HStack>
                   <FormControl w='1/2' pr='5'>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
@@ -241,7 +254,7 @@ const AddFishModalContent = ({
                   </FormControl>
                 </HStack>
 
-                <HStack marginBottom={5}>
+                <HStack>
                   <FormControl w='1/2' paddingRight='5'>
                     <HStack space={2} alignItems='center'>
                       <FormControl.Label>
@@ -280,7 +293,6 @@ const AddFishModalContent = ({
                               <Image
                                 source={require('../../assets/life_stage_image.png')}
                                 alt='Life Stage Image'
-                                // style={{ position: 'absolute' }}
                                 width='720'
                               />
                               <Image
@@ -371,7 +383,7 @@ const AddFishModalContent = ({
                   </Radio.Group>
                 </FormControl>
 
-                <FormControl w='full' marginBottom={5}>
+                <FormControl w='full'>
                   <HStack space={2} alignItems='center'>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
@@ -513,7 +525,7 @@ const AddFishModalContent = ({
                   </HStack>
                 </FormControl>
 
-                <FormControl w='full' marginBottom={5}>
+                <FormControl w='full'>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Dead
@@ -540,7 +552,7 @@ const AddFishModalContent = ({
                   </Radio.Group>
                 </FormControl>
 
-                <FormControl w='full' marginBottom={5}>
+                <FormControl w='full'>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Will this fish be used in your next mark recapture trial?
@@ -611,7 +623,8 @@ const AddFishModalContent = ({
                     isDisabled={handleSaveButtonDisable(touched, errors)}
                     onPress={() => {
                       handleSubmit()
-                      closeModal()
+                      navigation.goBack()
+                      // closeModal()
                     }}
                   >
                     <Text fontWeight='bold' color='white' fontSize='xl'>
@@ -635,7 +648,7 @@ const AddFishModalContent = ({
                   </Button>
                 </HStack>
               </Box>
-            </ScrollView>
+            </View>
             {/* --------- Modals --------- */}
             <CustomModal
               isOpen={markFishModalOpen}
@@ -658,11 +671,7 @@ const AddFishModalContent = ({
               />
             </CustomModal>
             {/* --------- Slide --------- */}
-            <Slide
-              in={isSlideOpen}
-              placement='top'
-              //  duration={200}
-            >
+            <Slide in={isSlideOpen} placement='top'>
               <Box
                 w='100%'
                 position='absolute'
@@ -700,7 +709,7 @@ const AddFishModalContent = ({
 }
 
 const mapStateToProps = (state: RootState) => {
-  return {}
+  return { individualFishStore: state.fishInput.individualFish }
 }
 
 export default connect(mapStateToProps, {
