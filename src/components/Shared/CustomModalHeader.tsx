@@ -1,35 +1,56 @@
 import { Ionicons } from '@expo/vector-icons'
 import { StyleSheet } from 'react-native'
-import { Box, Button, Heading, HStack, Icon, View, Text, Divider } from 'native-base'
+import {
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Icon,
+  View,
+  Text,
+  Divider,
+} from 'native-base'
 import React from 'react'
+import { useNavigation } from '@react-navigation/native'
 
 const CustomModalHeader = ({
   headerText,
   showHeaderButton,
   headerButton,
   closeModal,
-  onCloseAction,
+  navigateBack,
 }: {
   headerText: string
   showHeaderButton: boolean
   headerButton?: any
   closeModal?: any
-  onCloseAction?: any
+  navigateBack?: any
 }) => {
+  const navigation = useNavigation()
   if (showHeaderButton) {
     return (
       <>
-        <HStack justifyContent='space-between' alignItems='center' marginTop={2}>
+        <HStack
+          justifyContent='space-between'
+          alignItems='center'
+          marginTop={2}
+        >
           <HStack alignItems='center'>
-            <Button
-              size='lg'
-              onPress={() => {
-                if (onCloseAction) onCloseAction()
-                if (closeModal) closeModal()
-              }}
-            >
-              <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
-            </Button>
+            {
+              <Button
+                size='lg'
+                onPress={() => {
+                  if (navigateBack) {
+                    navigation.goBack()
+                  }
+                  if (closeModal) {
+                    closeModal()
+                  }
+                }}
+              >
+                <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
+              </Button>
+            }
             <Heading marginLeft='10'>{headerText}</Heading>
           </HStack>
           {headerButton ? headerButton : <></>}
@@ -48,7 +69,6 @@ const CustomModalHeader = ({
           <Button
             size='lg'
             onPress={() => {
-              if (onCloseAction) onCloseAction()
               if (closeModal) closeModal()
             }}
           >

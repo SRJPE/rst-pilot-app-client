@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash'
 interface InitialStateI {
   completed: boolean
   modalOpen: boolean
-  values: FishInputValuesI
+  speciesCaptured: Array<string>
   individualFish: IndividualFishValuesI[]
 }
 
@@ -18,7 +18,7 @@ export interface IndividualFishValuesI {
   existingMark: string
   dead: boolean
   willBeUsedInRecapture: boolean
-  plusCountMethod: string
+  plusCountMethod?: string
 }
 
 export const individualFishInitialState = {
@@ -41,9 +41,7 @@ export interface FishInputValuesI {
 const initialState: InitialStateI = {
   completed: false,
   modalOpen: false,
-  values: {
-    speciesCaptured: [],
-  },
+  speciesCaptured: [],
   individualFish: [],
 }
 
@@ -52,7 +50,10 @@ export const saveFishSlice = createSlice({
   initialState: initialState,
   reducers: {
     saveFishInput: (state, action) => {
-      state.values = action.payload
+      // let speciesCapturedCopy = cloneDeep(state.speciesCaptured)
+      // speciesCapturedCopy.push(action.payload)
+      // state.speciesCaptured = speciesCapturedCopy
+      state.speciesCaptured = action.payload
     },
     saveIndividualFish: (state, action) => {
       let individualFishCopy = cloneDeep(state.individualFish)

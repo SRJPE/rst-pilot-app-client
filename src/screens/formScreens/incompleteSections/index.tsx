@@ -20,11 +20,11 @@ const IncompleteSections = ({
   navigation: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const stepsArray = Object.values(reduxState.steps).slice(0, 6)
+  const stepsArray = Object.values(reduxState.steps).slice(0, 6) as Array<any>
 
   useEffect(() => {
     dispatch(checkIfFormIsComplete())
-  }, [reduxState])
+  }, [])
 
   return (
     <>
@@ -40,7 +40,6 @@ const IncompleteSections = ({
           <Heading textAlign='center'>
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>
-
           {stepsArray.map((step: any, idx: number) => {
             return (
               <IncompleteSectionButton

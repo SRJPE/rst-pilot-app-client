@@ -42,11 +42,11 @@ export default function NavButtons({
           navigateHelper('No Fish Caught', 12)
         } else if (values?.flowMeasure > 1000) {
           navigateHelper('High Flows', 9)
-        } else if (values.waterTemperatureUnit === '°C') {
+        } else if (values?.waterTemperatureUnit === '°C') {
           if (values?.waterTemperature > 30) {
             navigateHelper('High Temperatures', 10)
           }
-        } else if (values.waterTemperatureUnit === '°F') {
+        } else if (values?.waterTemperatureUnit === '°F') {
           if (values?.waterTemperature > 86) {
             navigateHelper('High Temperatures', 10)
           }
@@ -74,7 +74,6 @@ export default function NavButtons({
         navigateHelper('Trap Post-Processing', 6)
         break
       default:
-        console.log('default navigation')
         break
     }
   }
@@ -94,13 +93,13 @@ export default function NavButtons({
         navigateHelper('Fish Processing', 4)
         break
       default:
-        console.log('default navigation')
         break
     }
   }
 
   const handleRightButton = () => {
     //if function truthy, submit form to check for errors and save to redux
+
     if (handleSubmit) {
       handleSubmit()
     }
@@ -143,16 +142,14 @@ export default function NavButtons({
     if (activePage === 'Incomplete Sections') {
       //if form is complete, then do not disable button
       return isFormComplete ? false : true
+    } else if (activePage === 'Fish Input') {
+      return values?.length < 1 ? true : false
     } else {
+      //if current screen uses formik && if form has first NOT been touched
+      // OR
+      //if current screen uses formik && there are errors
       return (
-        //**temp conditional for fish input**
-
-        //if current screen uses formik && if form has first NOT been touched
-        // OR
-        //if current screen uses formik && there are errors
-        (activePage !== 'Fish Input' &&
-          touched &&
-          Object.keys(touched).length === 0) ||
+        (touched && Object.keys(touched).length === 0) ||
         (errors && Object.keys(errors).length > 0)
       )
     }

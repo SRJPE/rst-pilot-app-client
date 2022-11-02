@@ -13,6 +13,8 @@ import {
   Divider,
 } from 'native-base'
 import React from 'react'
+import { connect } from 'react-redux'
+import { RootState } from '../../redux/store'
 import { addGeneticsSampleSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
@@ -26,30 +28,34 @@ const initialFormValues = {
   comments: '',
 }
 
-const crewMemberDropdownOptions = [
-  { label: 'Crew Member 1', value: 'Crew Member 1' },
-  { label: 'Crew Member 2', value: 'Crew Member 2' },
-  { label: 'Crew Member 3', value: 'Crew Member 3' },
-  { label: 'Crew Member 4', value: 'Crew Member 4' },
-  { label: 'Crew Member 5', value: 'Crew Member 5' },
-]
+const mapStateToProps = (state: RootState) => {
+  return {
+    crewMembers: state.visitSetup.values.crew,
+  }
+}
 
 const AddGeneticsModalContent = ({
   handleGeneticSampleFormSubmit,
   closeModal,
+  crewMembers,
 }: {
   handleGeneticSampleFormSubmit: any
   closeModal: any
+  crewMembers: Array<any>
 }) => {
-  const handleFormSubmit = (values: any) =>
+  const handleFormSubmit = (values: any) => {
     handleGeneticSampleFormSubmit(values)
+  }
 
   return (
     <ScrollView>
       <Formik
         validationSchema={addGeneticsSampleSchema}
         initialValues={initialFormValues}
-        onSubmit={values => handleFormSubmit(values)}
+        onSubmit={values => {
+          console.log('🚀 ~  Genetic Sample values', values)
+          handleFormSubmit(values)
+        }}
       >
         {({
           handleChange,
@@ -156,10 +162,20 @@ const AddGeneticsModalContent = ({
                         }
                       }}
                     >
-                      <Radio colorScheme='primary' value='true' my={1}>
+                      <Radio
+                        colorScheme='primary'
+                        value='true'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
                         True
                       </Radio>
-                      <Radio colorScheme='primary' value='false' my={1}>
+                      <Radio
+                        colorScheme='primary'
+                        value='false'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
                         False
                       </Radio>
                     </Radio.Group>
@@ -183,10 +199,20 @@ const AddGeneticsModalContent = ({
                         }
                       }}
                     >
-                      <Radio colorScheme='primary' value='true' my={1}>
+                      <Radio
+                        colorScheme='primary'
+                        value='true'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
                         True
                       </Radio>
-                      <Radio colorScheme='primary' value='false' my={1}>
+                      <Radio
+                        colorScheme='primary'
+                        value='false'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
                         False
                       </Radio>
                     </Radio.Group>
@@ -212,7 +238,10 @@ const AddGeneticsModalContent = ({
                       placeholder={'Crew Member'}
                       onValueChange={handleChange('crewMemberCollectingSample')}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={crewMemberDropdownOptions}
+                      selectOptions={crewMembers.map((item: any) => ({
+                        label: item,
+                        value: item,
+                      }))}
                     />
                   </FormControl>
                 </VStack>
@@ -253,4 +282,4 @@ const AddGeneticsModalContent = ({
   )
 }
 
-export default AddGeneticsModalContent
+export default connect(mapStateToProps)(AddGeneticsModalContent)

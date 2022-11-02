@@ -22,6 +22,7 @@ const formSteps = {
   11: { name: 'Non Functional Trap', propName: 'nonFunctionalTrap' },
   12: { name: 'No Fish Caught', propName: 'noFishCaught' },
   13: { name: 'End Trapping', propName: 'endTrapping' },
+  14: { name: 'Add Fish', propName: 'addFish' },
 }
 
 interface NavigationStateI {
@@ -45,8 +46,16 @@ export const navigationSlice = createSlice({
     },
     markStepCompleted: (state, action) => {
       //currently working: "state.activeStep - 1" could be refactored in the future
+
+      //super hacky fixes for the demo:
       if (state.steps[state.activeStep - 1]?.completed !== undefined) {
-        state.steps[state.activeStep - 1].completed = action.payload
+        if (action.payload[1] === 'fishInput') {
+          state.steps[state.activeStep].completed = action.payload[0]
+        } else if (action.payload[1] === 'fishProcessing') {
+          state.steps[state.activeStep - 1].completed = action.payload[0]
+        } else {
+          state.steps[state.activeStep - 1].completed = action.payload[0]
+        }
       }
     },
     checkIfFormIsComplete: state => {

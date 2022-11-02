@@ -26,14 +26,6 @@ const initialFormValues = {
   comments: '',
 }
 
-const crewMemberDropdownOptions = [
-  { label: 'Crew Member 1', value: 'Crew Member 1' },
-  { label: 'Crew Member 2', value: 'Crew Member 2' },
-  { label: 'Crew Member 3', value: 'Crew Member 3' },
-  { label: 'Crew Member 4', value: 'Crew Member 4' },
-  { label: 'Crew Member 5', value: 'Crew Member 5' },
-]
-
 const mapStateToProps = (state: RootState) => {
   return {
     crewMembers: state.visitSetup.values.crew,
