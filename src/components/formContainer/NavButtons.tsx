@@ -1,29 +1,30 @@
 import { Box, HStack, Text, Button, Icon } from 'native-base'
-import { useSelector, useDispatch } from 'react-redux'
-import { AppDispatch } from '../../redux/store'
+import { useSelector, useDispatch, connect } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
-import { useEffect, useState } from 'react'
 
-export default function NavButtons({
+const NavButtons = ({
   navigation,
   handleSubmit,
   errors,
   touched,
   values,
+  isFormComplete,
 }: {
   navigation?: any
   handleSubmit?: any
   errors?: any
   touched?: any
   values?: any
-}) {
+  isFormComplete?: boolean
+}) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
-  const isFormComplete = navigationState.isFormComplete
+  // const isFormComplete = navigationState.isFormComplete
   const { waterTemperature, waterTemperatureUnit } =
     reduxState.trapStatus.values
 
@@ -101,7 +102,6 @@ export default function NavButtons({
 
   const handleRightButton = () => {
     //if function truthy, submit form to check for errors and save to redux
-
     if (handleSubmit) {
       handleSubmit()
     }
@@ -123,7 +123,6 @@ export default function NavButtons({
       navigation.navigate('Home')
       return
     }
-
     //if function truthy, submit form to save to redux
     if (handleSubmit) {
       handleSubmit()
@@ -246,3 +245,11 @@ export default function NavButtons({
     </Box>
   )
 }
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    isFormComplete: state.navigation.isFormComplete,
+  }
+}
+
+export default connect(mapStateToProps)(NavButtons)
