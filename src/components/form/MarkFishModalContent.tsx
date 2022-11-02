@@ -9,6 +9,7 @@ import {
   VStack,
   Text,
   Button,
+  Divider,
 } from 'native-base'
 import React from 'react'
 import { connect, useSelector } from 'react-redux'
@@ -88,138 +89,141 @@ const MarkFishModalContent = ({
                 </Button>
               }
             />
-            <VStack space={5} paddingX='10' paddingTop='7' paddingBottom='3'>
-              <FormControl>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Type
-                    </Text>
-                  </FormControl.Label>
+            <>
+              <Divider my={2} thickness='3' />
+              <VStack space={5} paddingX='10' paddingTop='7' paddingBottom='3'>
+                <FormControl>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Type
+                      </Text>
+                    </FormControl.Label>
 
-                  {touched.type &&
-                    errors.type &&
-                    renderErrorMessage(errors, 'type')}
-                </HStack>
-                <CustomSelect
-                  selectedValue={values.type}
-                  placeholder={'Type'}
-                  onValueChange={handleChange('type')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={dropdownValues.markType.map((item: any) => ({
-                    label: item.definition,
-                    value: item.definition,
-                  }))}
-                />
-              </FormControl>
+                    {touched.type &&
+                      errors.type &&
+                      renderErrorMessage(errors, 'type')}
+                  </HStack>
+                  <CustomSelect
+                    selectedValue={values.type}
+                    placeholder={'Type'}
+                    onValueChange={handleChange('type')}
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={dropdownValues.markType.map((item: any) => ({
+                      label: item.definition,
+                      value: item.definition,
+                    }))}
+                  />
+                </FormControl>
 
-              <FormControl>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Number
-                    </Text>
-                  </FormControl.Label>
+                <FormControl>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Number
+                      </Text>
+                    </FormControl.Label>
 
-                  {touched.number &&
-                    errors.number &&
-                    renderErrorMessage(errors, 'number')}
-                </HStack>
-                <Input
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Enter number'
-                  keyboardType='numeric'
-                  onChangeText={handleChange('number')}
-                  onBlur={handleBlur('number')}
-                  value={values.number}
-                />
-              </FormControl>
+                    {touched.number &&
+                      errors.number &&
+                      renderErrorMessage(errors, 'number')}
+                  </HStack>
+                  <Input
+                    height='50px'
+                    fontSize='16'
+                    placeholder='Enter number'
+                    keyboardType='numeric'
+                    onChangeText={handleChange('number')}
+                    onBlur={handleBlur('number')}
+                    value={values.number}
+                  />
+                </FormControl>
 
-              <FormControl>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Position
-                    </Text>
-                  </FormControl.Label>
+                <FormControl>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Position
+                      </Text>
+                    </FormControl.Label>
 
-                  {touched.position &&
-                    errors.position &&
-                    renderErrorMessage(errors, 'position')}
-                </HStack>
+                    {touched.position &&
+                      errors.position &&
+                      renderErrorMessage(errors, 'position')}
+                  </HStack>
 
-                <CustomSelect
-                  selectedValue={values.position}
-                  placeholder={'Mark Position'}
-                  onValueChange={handleChange('position')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={
-                    dropdownValues.bodyPart
-                      ? dropdownValues.bodyPart.map((item: any) => ({
-                          label: item.definition,
-                          value: item.definition,
-                        }))
-                      : []
-                  }
-                />
-              </FormControl>
+                  <CustomSelect
+                    selectedValue={values.position}
+                    placeholder={'Mark Position'}
+                    onValueChange={handleChange('position')}
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={
+                      dropdownValues.bodyPart
+                        ? dropdownValues.bodyPart.map((item: any) => ({
+                            label: item.definition,
+                            value: item.definition,
+                          }))
+                        : []
+                    }
+                  />
+                </FormControl>
 
-              <HStack alignItems='center' opacity={0.25}>
-                <Icon
-                  as={Ionicons}
-                  name={'add-circle'}
-                  size='3xl'
-                  opacity={0.75}
-                  color='primary'
-                  marginRight='1'
-                />
-                <Text color='primary' fontSize='xl'>
-                  Add another tag
-                </Text>
-              </HStack>
-
-              <FormControl>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Crew Member Tagging
-                    </Text>
-                  </FormControl.Label>
-
-                  {touched.crewMemberTagging &&
-                    errors.crewMemberTagging &&
-                    renderErrorMessage(errors, 'crewMemberTagging')}
-                </HStack>
-                <CustomSelect
-                  selectedValue={values.crewMemberTagging}
-                  placeholder={'Crew Member'}
-                  onValueChange={handleChange('crewMemberTagging')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={crewMembers.map((item: any) => ({
-                    label: item,
-                    value: item,
-                  }))}
-                />
-              </FormControl>
-
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Comments
+                <HStack alignItems='center' opacity={0.25}>
+                  <Icon
+                    as={Ionicons}
+                    name={'add-circle'}
+                    size='3xl'
+                    opacity={0.75}
+                    color='primary'
+                    marginRight='1'
+                  />
+                  <Text color='primary' fontSize='xl'>
+                    Add another tag
                   </Text>
-                </FormControl.Label>
-                <Input
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Write a comment'
-                  keyboardType='default'
-                  onChangeText={handleChange('comments')}
-                  onBlur={handleBlur('comments')}
-                  value={values.comments}
-                />
-              </FormControl>
-            </VStack>
+                </HStack>
+
+                <FormControl>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Crew Member Tagging
+                      </Text>
+                    </FormControl.Label>
+
+                    {touched.crewMemberTagging &&
+                      errors.crewMemberTagging &&
+                      renderErrorMessage(errors, 'crewMemberTagging')}
+                  </HStack>
+                  <CustomSelect
+                    selectedValue={values.crewMemberTagging}
+                    placeholder={'Crew Member'}
+                    onValueChange={handleChange('crewMemberTagging')}
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={crewMembers.map((item: any) => ({
+                      label: item,
+                      value: item,
+                    }))}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Comments
+                    </Text>
+                  </FormControl.Label>
+                  <Input
+                    height='50px'
+                    fontSize='16'
+                    placeholder='Write a comment'
+                    keyboardType='default'
+                    onChangeText={handleChange('comments')}
+                    onBlur={handleBlur('comments')}
+                    value={values.comments}
+                  />
+                </FormControl>
+              </VStack>
+            </>
           </>
         )}
       </Formik>

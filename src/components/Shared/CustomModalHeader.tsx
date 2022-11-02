@@ -55,7 +55,6 @@ const CustomModalHeader = ({
           </HStack>
           {headerButton ? headerButton : <></>}
         </HStack>
-        <Divider my={2} thickness='3' />
       </>
     )
   } else {
