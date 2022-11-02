@@ -46,8 +46,16 @@ export const navigationSlice = createSlice({
     },
     markStepCompleted: (state, action) => {
       //currently working: "state.activeStep - 1" could be refactored in the future
+
+      //super hacky fixes for the demo:
       if (state.steps[state.activeStep - 1]?.completed !== undefined) {
-        state.steps[state.activeStep - 1].completed = action.payload
+        if (action.payload[1] === 'fishInput') {
+          state.steps[state.activeStep].completed = action.payload[0]
+        } else if (action.payload[1] === 'fishProcessing') {
+          state.steps[state.activeStep - 1].completed = action.payload[0]
+        } else {
+          state.steps[state.activeStep - 1].completed = action.payload[0]
+        }
       }
     },
     checkIfFormIsComplete: state => {

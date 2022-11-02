@@ -39,7 +39,7 @@ const VisitSetup = ({
   const handleSubmit = (values: any) => {
     dispatch(saveVisitSetup(values))
     dispatch(markVisitSetupCompleted(true))
-    dispatch(markStepCompleted(true))
+    dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ Visit', values)
   }
 

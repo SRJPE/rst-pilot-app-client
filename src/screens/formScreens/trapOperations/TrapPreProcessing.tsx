@@ -42,7 +42,7 @@ const TrapPreProcessing = ({
   const handleSubmit = (values: any) => {
     dispatch(saveTrapPreProcessing(values))
     dispatch(markTrapPreProcessingCompleted(true))
-    dispatch(markStepCompleted(true))
+    dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ TrapPreProcessing', values)
   }
 
