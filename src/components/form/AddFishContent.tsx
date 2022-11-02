@@ -103,8 +103,6 @@ const AddFishModalContent = ({
         initialValues={
           lastAddedFish ? lastAddedFish : individualFishInitialState
         }
-        // initialTouched={{ adiposeClipped: true }}
-        // initialErrors={{ adiposeClipped: '' }}
         onSubmit={values => {
           handleFormSubmit(values)
           setIsSlideOpen(!isSlideOpen)
@@ -132,13 +130,7 @@ const AddFishModalContent = ({
                 setActiveTab,
               })}
             />
-            <View
-              // flex={1}
-              bg='#fff'
-              // p='10%'
-              // borderColor='themeGrey'
-              // borderWidth='15'
-            >
+            <View bg='#fff'>
               <VStack paddingX='10' paddingTop='2' paddingBottom='3' space={3}>
                 <HStack alignItems='center'>
                   <FormControl w='1/2' pr='5'>
@@ -374,10 +366,20 @@ const AddFishModalContent = ({
                       }
                     }}
                   >
-                    <Radio colorScheme='primary' value='true' my={1}>
+                    <Radio
+                      colorScheme='primary'
+                      value='true'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
                       True
                     </Radio>
-                    <Radio colorScheme='primary' value='false' my={1}>
+                    <Radio
+                      colorScheme='primary'
+                      value='false'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
                       False
                     </Radio>
                   </Radio.Group>
@@ -543,10 +545,20 @@ const AddFishModalContent = ({
                       }
                     }}
                   >
-                    <Radio colorScheme='primary' value='true' my={1}>
+                    <Radio
+                      colorScheme='primary'
+                      value='true'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
                       True
                     </Radio>
-                    <Radio colorScheme='primary' value='false' my={1}>
+                    <Radio
+                      colorScheme='primary'
+                      value='false'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
                       False
                     </Radio>
                   </Radio.Group>
@@ -570,10 +582,20 @@ const AddFishModalContent = ({
                       }
                     }}
                   >
-                    <Radio colorScheme='primary' value='true' my={1}>
+                    <Radio
+                      colorScheme='primary'
+                      value='true'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
                       True
                     </Radio>
-                    <Radio colorScheme='primary' value='false' my={1}>
+                    <Radio
+                      colorScheme='primary'
+                      value='false'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
                       False
                     </Radio>
                   </Radio.Group>
