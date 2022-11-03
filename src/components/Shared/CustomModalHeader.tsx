@@ -34,6 +34,7 @@ const CustomModalHeader = ({
           justifyContent='space-between'
           alignItems='center'
           marginTop={2}
+          mr='5'
         >
           <HStack alignItems='center'>
             {
@@ -55,7 +56,6 @@ const CustomModalHeader = ({
           </HStack>
           {headerButton ? headerButton : <></>}
         </HStack>
-        <Divider my={2} thickness='3' />
       </>
     )
   } else {

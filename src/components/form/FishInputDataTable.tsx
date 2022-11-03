@@ -4,15 +4,16 @@ import { connect } from 'react-redux'
 import { RootState } from '../../redux/store'
 
 const headers = [
-  'species',
-  'fork len.',
-  'run',
-  'weight',
-  'life stage',
-  'adipose clipped',
-  'existing mark',
-  'dead',
-  'recapture',
+  'Species',
+  'Count',
+  'Fork Len.',
+  'Run',
+  'Weight',
+  'Life Stage',
+  'Clipped',
+  'Mark',
+  'Dead',
+  'Recapture',
 ]
 
 const emptyTableData = {
@@ -24,6 +25,8 @@ const emptyTableData = {
   6: '---',
   7: '---',
   8: '---',
+  9: '---',
+  10: '---',
 }
 
 const FishInputDataTable = ({
@@ -57,6 +60,16 @@ const FishInputDataTable = ({
     }
     return rowsForPage
   }
+  const renderCell = (obj: any, key: any) => {
+    if (`${obj[key]}` === 'null') {
+      return '---'
+    }
+    if (`${obj[key]}`) {
+      return `${obj[key]}`
+    } else {
+      return '---'
+    }
+  }
 
   return (
     <DataTable>
@@ -69,13 +82,15 @@ const FishInputDataTable = ({
       {pageRows.map((obj, rowIdx: number) => {
         return (
           <DataTable.Row key={Object.keys(obj)[rowIdx]}>
-            {Object.keys(obj).map((key: string | number, itemIdx: number) => {
-              return (
-                <DataTable.Cell key={`${key}-${obj[key]}-${itemIdx}`}>
-                  {`${obj[key]}` ? `${obj[key]}` : '---'}
-                </DataTable.Cell>
-              )
-            })}
+            {Object.keys(obj)
+              .slice(0, 10)
+              .map((key: string | number, itemIdx: number) => {
+                return (
+                  <DataTable.Cell key={`${key}-${obj[key]}-${itemIdx}`}>
+                    {renderCell(obj, key)}
+                  </DataTable.Cell>
+                )
+              })}
           </DataTable.Row>
         )
       })}

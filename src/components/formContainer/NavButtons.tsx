@@ -1,29 +1,32 @@
 import { Box, HStack, Text, Button, Icon } from 'native-base'
-import { useSelector, useDispatch } from 'react-redux'
-import { AppDispatch } from '../../redux/store'
+import { useSelector, useDispatch, connect } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
-import { useEffect, useState } from 'react'
 
-export default function NavButtons({
+const NavButtons = ({
   navigation,
   handleSubmit,
   errors,
   touched,
   values,
+  isFormComplete,
 }: {
   navigation?: any
   handleSubmit?: any
   errors?: any
   touched?: any
   values?: any
-}) {
+  isFormComplete?: boolean
+}) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
-  const isFormComplete = navigationState.isFormComplete
+  // const isFormComplete = navigationState.isFormComplete
+  const { waterTemperature, waterTemperatureUnit } =
+    reduxState.trapStatus.values
 
   const navigateHelper = (destination: string, payload: number) => {
     navigation.navigate('Trap Visit Form', { screen: destination })
@@ -99,7 +102,6 @@ export default function NavButtons({
 
   const handleRightButton = () => {
     //if function truthy, submit form to check for errors and save to redux
-
     if (handleSubmit) {
       handleSubmit()
     }
@@ -121,7 +123,6 @@ export default function NavButtons({
       navigation.navigate('Home')
       return
     }
-
     //if function truthy, submit form to save to redux
     if (handleSubmit) {
       handleSubmit()
@@ -141,7 +142,14 @@ export default function NavButtons({
   const disableRightButton = () => {
     if (activePage === 'Incomplete Sections') {
       //if form is complete, then do not disable button
-      return isFormComplete ? false : true
+      // return isFormComplete ? false : true
+      return isFormComplete ? false : false
+    } else if (
+      activePage === 'High Flows' ||
+      activePage === 'Non Functional Trap' ||
+      activePage === 'No Fish Caught'
+    ) {
+      return true
     } else if (activePage === 'Fish Input') {
       return values?.length < 1 ? true : false
     } else {
@@ -162,6 +170,9 @@ export default function NavButtons({
         buttonText = 'End Trapping'
         break
       case 'Non Functional Trap':
+        buttonText = 'End Trapping'
+        break
+      case 'No Fish Caught':
         buttonText = 'End Trapping'
         break
       case 'High Temperatures':
@@ -201,6 +212,7 @@ export default function NavButtons({
             {activePage === 'Visit Setup' ? 'Return Home' : 'Back'}
           </Text>
         </Button>
+        {/* 
         <Button
           height='20'
           rounded='xs'
@@ -214,7 +226,8 @@ export default function NavButtons({
           <Text fontWeight='bold' color='white'>
             redux state
           </Text>
-        </Button>
+        </Button> */}
+
         <Button
           alignSelf='flex-start'
           bg='primary'
@@ -234,3 +247,11 @@ export default function NavButtons({
     </Box>
   )
 }
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    isFormComplete: state.navigation.isFormComplete,
+  }
+}
+
+export default connect(mapStateToProps)(NavButtons)

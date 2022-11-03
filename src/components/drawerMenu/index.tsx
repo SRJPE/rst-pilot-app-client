@@ -13,11 +13,11 @@ import {
   DrawerContentComponentProps,
 } from '@react-navigation/drawer'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import MenuButton from '../components/drawerMenu/MenuButton'
+import MenuButton from './MenuButton'
 import { useSelector } from 'react-redux'
-import { AppDispatch } from '../redux/store'
+import { AppDispatch } from '../../redux/store'
 import { useDispatch } from 'react-redux'
-import { updateActiveStep } from '../redux/reducers/formSlices/navigationSlice'
+import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 
 const DrawerMenu = (props: DrawerContentComponentProps) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -26,6 +26,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
   const { steps, activeStep } = navigationState
   const { state, navigation } = props
   const currentRoute = state.routeNames[state.index]
+  //unsliced Array for dev
   // const stepsArray = Object.values(steps) as Array<any>
   const stepsArray = Object.values(steps).slice(0, 7) as Array<any>
 
@@ -75,15 +76,16 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
           />
         </HStack>
         <Avatar
-          source={require('../assets/chinook_salmon.jpeg')}
+          // source={require('../assets/chinook_salmon.jpeg')}
           size='xl'
           borderRadius={100}
           mb={6}
-          borderColor='secondary.500'
+          backgroundColor='primary'
+          borderColor='primary'
           borderWidth={3}
           ml='2'
         />
-        <Heading mb={4} ml='2' size='xl'>
+        <Heading ml='2' size='xl' fontWeight='400'>
           Data Tackle
         </Heading>
         <DrawerContentScrollView>

@@ -37,13 +37,13 @@ import {
 } from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveGeneticSampleData } from '../../redux/reducers/formSlices/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
-import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import { MaterialIcons } from '@expo/vector-icons'
 import renderErrorMessage from './RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 
 const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
 
-const AddFishModalContent = ({
+const AddFishContent = ({
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
@@ -126,10 +126,12 @@ const AddFishModalContent = ({
               showHeaderButton={true}
               closeModal={closeModal}
               navigateBack={true}
-              headerButton={AddFishModalHeaderButton({
-                activeTab,
-                setActiveTab,
-              })}
+              headerButton={null}
+              //   AddFishModalHeaderButton({
+              //   activeTab,
+              //   setActiveTab,
+              // })
+              // }
             />
             <View bg='#fff'>
               <VStack paddingX='10' paddingTop='2' paddingBottom='3' space={3}>
@@ -446,12 +448,14 @@ const AddFishModalContent = ({
                             </Text>
                             <HStack space={2} alignItems='flex-start'>
                               <Avatar size={'2'} mt={'2'} />
-                              <Text fontSize='md'>BIS-BR: Bismarck Brown</Text>
+                              <Text fontSize='md'>
+                                BIS-BROWN: Bismarck Brown
+                              </Text>
                             </HStack>
                             <HStack space={2} alignItems='flex-start'>
                               <Avatar size={'2'} mt={'2'} />
                               <Text fontSize='md'>
-                                ELA-PUR-FIN: Elastomer Yellow Fin
+                                ELA-YEL-FIN: Elastomer Yellow Fin
                               </Text>
                             </HStack>
                             <HStack space={2} alignItems='flex-start'>
@@ -467,7 +471,7 @@ const AddFishModalContent = ({
                   <HStack>
                     <Button
                       bg={
-                        values.existingMark === 'E - Y - F'
+                        values.existingMark === 'ELA-YEL-FIN'
                           ? 'primary'
                           : 'secondary'
                       }
@@ -476,21 +480,23 @@ const AddFishModalContent = ({
                       shadow='3'
                       borderRadius='5'
                       marginRight='10'
-                      onPress={() => setFieldValue('existingMark', 'E - Y - F')}
+                      onPress={() =>
+                        setFieldValue('existingMark', 'ELA-YEL-FIN')
+                      }
                     >
                       <Text
                         color={
-                          values.existingMark === 'E - Y - F'
+                          values.existingMark === 'ELA-YEL-FIN'
                             ? 'white'
                             : 'primary'
                         }
                       >
-                        E - Y - F
+                        ELA-YEL-FIN
                       </Text>
                     </Button>
                     <Button
                       bg={
-                        values.existingMark === 'Bis Brown'
+                        values.existingMark === 'BIS-BROWN'
                           ? 'primary'
                           : 'secondary'
                       }
@@ -500,19 +506,19 @@ const AddFishModalContent = ({
                       shadow='3'
                       borderRadius='5'
                       marginRight='10'
-                      onPress={() => setFieldValue('existingMark', 'Bis Brown')}
+                      onPress={() => setFieldValue('existingMark', 'BIS-BROWN')}
                     >
                       <Text
                         color={
-                          values.existingMark === 'Bis Brown'
+                          values.existingMark === 'BIS-BROWN'
                             ? 'white'
                             : 'primary'
                         }
                       >
-                        Bis Brown
+                        BIS-BROWN
                       </Text>
                     </Button>
-                    <HStack alignItems='center'>
+                    <HStack alignItems='center' opacity={0.25}>
                       <Icon
                         as={Ionicons}
                         name={'add-circle'}
@@ -605,7 +611,7 @@ const AddFishModalContent = ({
                   </Text>
                 </FormControl>
 
-                <HStack>
+                <HStack mb={'4'}>
                   <Button
                     height='50px'
                     fontSize='16'
@@ -738,4 +744,4 @@ export default connect(mapStateToProps, {
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
-})(AddFishModalContent)
+})(AddFishContent)

@@ -37,6 +37,7 @@ export default function HighFlows({ navigation }: { navigation: any }) {
             py='5'
             px='16'
             borderRadius='5'
+            isDisabled={true}
             onPress={handlePressCallTeamLead}
             leftIcon={<Icon as={Ionicons} name='call' size='sm' />}
           >
@@ -56,6 +57,7 @@ export default function HighFlows({ navigation }: { navigation: any }) {
             py='5'
             px='20'
             borderRadius='5'
+            isDisabled={true}
             onPress={handlePressTakePhoto}
             leftIcon={<Icon as={Ionicons} name='camera' size='sm' />}
           >

@@ -60,16 +60,15 @@ export const navigationSlice = createSlice({
     },
     checkIfFormIsComplete: state => {
       //iterate over the first 6 step and check if all steps are completed
-      if (state.steps) {
-        const stepsArray = Object.values(state.steps).slice(0, 6) as Array<any>
-        const incompleteSteps = [] as Array<any>
-        for (let step of stepsArray) {
-          if (step.completed === false) {
-            incompleteSteps.push(step.completed)
-          }
+      const stepsArray = Object.values(state.steps).slice(0, 6) as Array<any>
+      const incompleteSteps = [] as Array<any>
+      for (let step of stepsArray) {
+        console.log('🚀 ~ step completed?', step.name, ':', step.completed)
+        if (step.completed === false) {
+          incompleteSteps.push(step.completed)
         }
-        state.isFormComplete = incompleteSteps.length === 0
       }
+      state.isFormComplete = incompleteSteps.length === 0
     },
   },
 })
