@@ -82,15 +82,10 @@ export const trapVisitPostBundler = createSlice({
       const trapVisitPostResult = action.payload
       state.submitted = true
       state.submissionStatus = 'submission-successful'
-      Array.isArray(trapVisitPostResult)
-        ? (state.previousTrapVisitSubmissions = [
-            ...state.previousTrapVisitSubmissions,
-            ...(trapVisitPostResult as TrapVisitSubmissionI[]),
-          ])
-        : (state.previousTrapVisitSubmissions = [
-            ...state.previousTrapVisitSubmissions,
-            trapVisitPostResult as TrapVisitSubmissionI,
-          ])
+      state.previousTrapVisitSubmissions = [
+        ...state.previousTrapVisitSubmissions,
+        ...(trapVisitPostResult as TrapVisitSubmissionI[]),
+      ]
       state.trapVisitSubmissions = []
       console.log('successful post result: ', action.payload)
     },
@@ -107,21 +102,17 @@ export const trapVisitPostBundler = createSlice({
       ) {
         try {
           ;(async () => {
-            const trapVisitPostResult: APIResponseI = await api.post(
+            const trapVisitPostRequest: APIResponseI = await api.post(
               'trap-visit/',
               state.trapVisitSubmissions
             )
+            const trapVisitPostResult = trapVisitPostRequest.data
             state.submitted = true
             state.submissionStatus = 'submission-successful'
-            Array.isArray(trapVisitPostResult)
-              ? (state.previousTrapVisitSubmissions = [
-                  ...state.previousTrapVisitSubmissions,
-                  ...trapVisitPostResult as TrapVisitSubmissionI[],
-                ])
-              : (state.previousTrapVisitSubmissions = [
-                  ...state.previousTrapVisitSubmissions,
-                  trapVisitPostResult as TrapVisitSubmissionI,
-                ])
+            state.previousTrapVisitSubmissions = [
+              ...state.previousTrapVisitSubmissions,
+              ...(trapVisitPostResult as TrapVisitSubmissionI[]),
+            ]
             state.trapVisitSubmissions = []
           })()
         } catch (e) {
