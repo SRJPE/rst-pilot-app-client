@@ -22,11 +22,6 @@ import { markStepCompleted } from '../../../redux/reducers/formSlices/navigation
 import { AppDispatch, RootState } from '../../../redux/store'
 import { fishProcessingSchema } from '../../../utils/helpers/yupValidations'
 
-const reasonsForNotProcessing = [
-  { id: 0, definition: 'Safety Precautions' },
-  { id: 1, definition: 'Staffing Shortages' },
-]
-
 const mapStateToProps = (state: RootState) => {
   return {
     reduxState: state.fishProcessing,
@@ -42,7 +37,10 @@ const FishProcessing = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-  const { fishProcessed: fishProcessedDropdowns } = dropdownValues.values
+  const {
+    fishProcessed: fishProcessedDropdowns,
+    whyFishNotProcessed: whyFishNotProcessedDropdowns,
+  } = dropdownValues.values
 
   const handleSubmit = (values: any) => {
     dispatch(saveFishProcessing(values))
@@ -60,7 +58,7 @@ const FishProcessing = ({
       initialErrors={
         reduxState.completed ? undefined : { fishProcessedResult: '' }
       }
-      onSubmit={values => {
+      onSubmit={(values) => {
         handleSubmit(values)
       }}
     >
@@ -114,7 +112,7 @@ const FishProcessing = ({
                     placeholder='Reason'
                     onValueChange={handleChange('reasonForNotProcessing')}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={reasonsForNotProcessing}
+                    selectOptions={whyFishNotProcessedDropdowns}
                   />
                   {touched.reasonForNotProcessing &&
                     errors.reasonForNotProcessing &&
