@@ -15,7 +15,10 @@ interface InitialStateI {
 
 interface ValuesI {
   trapFunctionality: any[]
+  whyTrapNotFunctioning: any[]
+  trapStatusAtEnd: any[]
   fishProcessed: any[]
+  whyFishNotProcessed: any[]
   lifeStage: any[]
   markType: any[]
   markColor: any[]
@@ -25,6 +28,7 @@ interface ValuesI {
   coneDebrisVolume: any[]
   visitType: any[]
   lightCondition: any[]
+  plusCountMethodology: any[]
 }
 
 interface APIResponseI {
@@ -36,7 +40,10 @@ const initialState: InitialStateI = {
   status: uninitializedStatus,
   values: {
     trapFunctionality: [],
+    whyTrapNotFunctioning: [],
+    trapStatusAtEnd: [],
     fishProcessed: [],
+    whyFishNotProcessed: [],
     lifeStage: [],
     markType: [],
     markColor: [],
@@ -46,6 +53,7 @@ const initialState: InitialStateI = {
     coneDebrisVolume: [],
     visitType: [],
     lightCondition: [],
+    plusCountMethodology: []
   },
 }
 
