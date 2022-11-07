@@ -230,8 +230,8 @@ const TrapPreProcessing = ({
                   value={`${values.endingTrapStatus}`}
                   onChange={(nextValue: any) => {
                     setFieldTouched('endingTrapStatus', true)
-                    if (nextValue === 'Reset Trap') {
-                      setFieldValue('endingTrapStatus', 'Reset Trap')
+                    if (nextValue === 'Restart Trap') {
+                      setFieldValue('endingTrapStatus', 'Restart Trap')
                     } else {
                       setFieldValue('endingTrapStatus', 'End Trapping')
                     }
@@ -239,11 +239,11 @@ const TrapPreProcessing = ({
                 >
                   <Radio
                     colorScheme='primary'
-                    value='Reset Trap'
+                    value='Restart Trap'
                     my={1}
                     _icon={{ color: 'primary' }}
                   >
-                    Reset Trap
+                    Restart Trap
                   </Radio>
                   <Radio
                     colorScheme='primary'
