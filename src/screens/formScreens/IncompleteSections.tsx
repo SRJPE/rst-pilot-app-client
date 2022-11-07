@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
-import { AppDispatch, RootState } from '../../../redux/store'
-import { checkIfFormIsComplete } from '../../../redux/reducers/formSlices/navigationSlice'
-import NavButtons from '../../../components/formContainer/NavButtons'
-import IncompleteSectionButton from '../../../components/form/IncompleteSectionButton'
+import { AppDispatch, RootState } from '../../redux/store'
+import { checkIfFormIsComplete } from '../../redux/reducers/formSlices/navigationSlice'
+import NavButtons from '../../components/formContainer/NavButtons'
+import IncompleteSectionButton from '../../components/form/IncompleteSectionButton'
 
 const mapStateToProps = (state: RootState) => {
   return {

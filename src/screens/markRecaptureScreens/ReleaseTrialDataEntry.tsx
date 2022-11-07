@@ -1,6 +1,6 @@
 import { KeyboardAvoidingView, Text, View, VStack } from 'native-base'
-import NavButtons from '../../../components/formContainer/NavButtons'
-import MarkRecaptureNavButtons from '../../../components/markRecapture/MarkRecaptureNavButtons'
+import NavButtons from '../../components/formContainer/NavButtons'
+import MarkRecaptureNavButtons from '../../components/markRecapture/MarkRecaptureNavButtons'
 
 export default function ReleaseDataEntry({ navigation }: { navigation: any }) {
   return (

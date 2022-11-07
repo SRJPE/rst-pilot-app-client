@@ -1,5 +1,6 @@
 import { Text, View } from 'native-base'
-import NavButtons from '../../../components/formContainer/NavButtons'
+import NavButtons from '../../components/formContainer/NavButtons'
+// import NavButtons from '../../../components/formContainer/NavButtons'
 
 export default function EndTrapping({ navigation }: { navigation: any }) {
   return (

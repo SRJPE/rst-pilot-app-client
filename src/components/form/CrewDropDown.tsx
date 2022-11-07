@@ -44,7 +44,6 @@ export default function CrewDropDown({
         placeholder='Select your crew'
         searchPlaceholder='Search...'
         maxHeight={350}
-
         // renderListItem={props => <CrewListItem {...props} />}
       />
     </View>

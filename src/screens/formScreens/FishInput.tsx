@@ -11,19 +11,19 @@ import {
   View,
   Icon,
 } from 'native-base'
-import CustomModal from '../../../components/Shared/CustomModal'
+import CustomModal from '../../components/Shared/CustomModal'
 import { Formik } from 'formik'
-import NavButtons from '../../../components/formContainer/NavButtons'
-import { AppDispatch, RootState } from '../../../redux/store'
+import NavButtons from '../../components/formContainer/NavButtons'
+import { AppDispatch, RootState } from '../../redux/store'
 import { connect, useDispatch } from 'react-redux'
 import {
   markFishInputCompleted,
   markFishInputModalOpen,
   saveFishInput,
-} from '../../../redux/reducers/formSlices/fishInputSlice'
-import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
-import FishInputDataTable from '../../../components/form/FishInputDataTable'
-import PlusCountModalContent from '../../../components/form/PlusCountModalContent'
+} from '../../redux/reducers/formSlices/fishInputSlice'
+import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import FishInputDataTable from '../../components/form/FishInputDataTable'
+import PlusCountModalContent from '../../components/form/PlusCountModalContent'
 import { Ionicons } from '@expo/vector-icons'
 
 const mapStateToProps = (state: RootState) => {

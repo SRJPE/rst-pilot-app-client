@@ -11,16 +11,16 @@ import {
 import { useEffect } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
-import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import NavButtons from '../../../components/formContainer/NavButtons'
-import CustomSelect from '../../../components/Shared/CustomSelect'
+import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import NavButtons from '../../components/formContainer/NavButtons'
+import CustomSelect from '../../components/Shared/CustomSelect'
 import {
   markFishProcessingCompleted,
   saveFishProcessing,
-} from '../../../redux/reducers/formSlices/fishProcessingSlice'
-import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
-import { AppDispatch, RootState } from '../../../redux/store'
-import { fishProcessingSchema } from '../../../utils/helpers/yupValidations'
+} from '../../redux/reducers/formSlices/fishProcessingSlice'
+import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import { AppDispatch, RootState } from '../../redux/store'
+import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
 
 const reasonsForNotProcessing = [
   { id: 0, definition: 'Safety Precautions' },

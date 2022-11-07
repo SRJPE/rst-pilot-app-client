@@ -14,7 +14,7 @@ export default function NoFishCaught({ navigation }: { navigation: any }) {
         <VStack space={12} p='10'>
           <Image
             alignSelf='center'
-            source={require('../../../assets/checkmark_outline.png')}
+            source={require('../../../../assets/checkmark_outline.png')}
             alt='Warning Icon'
             size='2xl'
             color='themeGrey'

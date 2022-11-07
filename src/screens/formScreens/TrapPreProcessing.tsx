@@ -2,9 +2,9 @@ import { Formik } from 'formik'
 import {
   markTrapPreProcessingCompleted,
   saveTrapPreProcessing,
-} from '../../../redux/reducers/formSlices/trapPreProcessingSlice'
+} from '../../redux/reducers/formSlices/trapPreProcessingSlice'
 import { connect, useDispatch } from 'react-redux'
-import { AppDispatch, RootState } from '../../../redux/store'
+import { AppDispatch, RootState } from '../../redux/store'
 import {
   Text,
   FormControl,
@@ -16,12 +16,12 @@ import {
   View,
   Icon,
 } from 'native-base'
-import NavButtons from '../../../components/formContainer/NavButtons'
-import { trapPreProcessingSchema } from '../../../utils/helpers/yupValidations'
+import NavButtons from '../../components/formContainer/NavButtons'
+import { trapPreProcessingSchema } from '../../utils/helpers/yupValidations'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Keyboard } from 'react-native'
-import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
+import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 
 const mapStateToProps = (state: RootState) => {

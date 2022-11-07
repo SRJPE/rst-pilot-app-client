@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Text, VStack, CircleIcon, Heading, View } from 'native-base'
-import BottomNavigation from '../../components/home/HomeNavButtons'
-import TopIcons from '../../components/home/TopIcons'
+import BottomNavigation from '../components/home/HomeNavButtons'
+import TopIcons from '../components/home/TopIcons'
 import { StyleSheet } from 'react-native'
 
 const styles = StyleSheet.create({

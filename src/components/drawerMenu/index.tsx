@@ -76,7 +76,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
           />
         </HStack>
         <Avatar
-          // source={require('../assets/chinook_salmon.jpeg')}
+          // source={require('../../assets/chinook_salmon.jpeg')}
           size='xl'
           borderRadius={100}
           mb={6}

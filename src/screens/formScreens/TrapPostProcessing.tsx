@@ -1,6 +1,6 @@
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
-import { AppDispatch, RootState } from '../../../redux/store'
+import { AppDispatch, RootState } from '../../redux/store'
 import {
   Text,
   FormControl,
@@ -14,16 +14,16 @@ import {
   Button,
   Spinner,
 } from 'native-base'
-import NavButtons from '../../../components/formContainer/NavButtons'
-import { trapPostProcessingSchema } from '../../../utils/helpers/yupValidations'
+import NavButtons from '../../components/formContainer/NavButtons'
+import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Keyboard } from 'react-native'
-import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
+import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
-} from '../../../redux/reducers/formSlices/trapPostProcessingSlice'
+} from '../../redux/reducers/formSlices/trapPostProcessingSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { useState } from 'react'
 import * as Location from 'expo-location'
