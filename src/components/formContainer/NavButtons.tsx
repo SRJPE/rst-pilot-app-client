@@ -46,7 +46,11 @@ const NavButtons = ({
         }
         break
       case 'Trap Status':
-        if (!!isHistorical) {
+        console.log(
+          '🚀 ~ navigateFlowRightButton ~ isHistoricalStore',
+          isHistoricalStore
+        )
+        if (!isHistoricalStore) {
           if (values?.trapStatus === 'trap not functioning') {
             navigateHelper('Non Functional Trap', 11)
           } else if (values?.trapStatus === 'trap not in service') {
@@ -66,7 +70,7 @@ const NavButtons = ({
 
         break
       case 'Fish Processing':
-        if (!!isHistorical) {
+        if (!isHistoricalStore) {
           if (values?.fishProcessedResult === 'no fish caught') {
             navigateHelper('No Fish Caught', 12)
           } else if (
