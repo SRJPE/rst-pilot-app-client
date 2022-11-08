@@ -2,10 +2,21 @@ import { useEffect } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { checkIfFormIsComplete } from '../../../redux/reducers/formSlices/navigationSlice'
+import { checkIfFormIsComplete, resetNavigationSlice } from '../../../redux/reducers/formSlices/navigationSlice'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import IncompleteSectionButton from '../../../components/form/IncompleteSectionButton'
-import { postTrapVisitSubmissions, saveTrapVisitSubmission } from '../../../redux/reducers/postSlices/trapVisitPostBundler'
+import {
+  postTrapVisitSubmissions,
+  saveTrapVisitSubmission,
+} from '../../../redux/reducers/postSlices/trapVisitPostBundler'
+import { resetGeneticSamplesSlice } from '../../../redux/reducers/formSlices/addGeneticSamplesSlice'
+import { resetMarksOrTagsSlice } from '../../../redux/reducers/formSlices/addMarksOrTagsSlice'
+import { resetFishInputSlice } from '../../../redux/reducers/formSlices/fishInputSlice'
+import { resetFishProcessingSlice } from '../../../redux/reducers/formSlices/fishProcessingSlice'
+import { resetTrapPostProcessingSlice } from '../../../redux/reducers/formSlices/trapPostProcessingSlice'
+import { resetTrapPreProcessingSlice } from '../../../redux/reducers/formSlices/trapPreProcessingSlice'
+import { resetTrapStatusSlice } from '../../../redux/reducers/formSlices/trapStatusSlice'
+import { resetVisitSetupSlice } from '../../../redux/reducers/formSlices/visitSetupSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -51,7 +62,27 @@ const IncompleteSections = ({
     dispatch(checkIfFormIsComplete())
   }, [])
 
-  // HANDLE SUBMIT TRAP VISIT
+  const handleSubmit = () => {
+    submitTrapVisit()
+    resetAllFormSlices()
+
+    if (connectivityState.isConnected) {
+      dispatch(postTrapVisitSubmissions())
+    }
+  }
+
+  const resetAllFormSlices = () => {
+    dispatch(resetNavigationSlice())
+    dispatch(resetGeneticSamplesSlice())
+    dispatch(resetMarksOrTagsSlice())
+    dispatch(resetFishInputSlice())
+    dispatch(resetFishProcessingSlice())
+    dispatch(resetTrapPostProcessingSlice())
+    dispatch(resetTrapPreProcessingSlice())
+    dispatch(resetTrapStatusSlice())
+    dispatch(resetVisitSetupSlice())
+  }
+
   const submitTrapVisit = () => {
     const currentDateTime = new Date()
     const fishProcessedValues = dropdownsState.values.fishProcessed.map(
@@ -115,10 +146,6 @@ const IncompleteSections = ({
     }
 
     dispatch(saveTrapVisitSubmission(trapVisitSubmission))
-
-    if (connectivityState.isConnected) {
-      dispatch(postTrapVisitSubmissions())
-    }
   }
 
   return (
@@ -148,10 +175,7 @@ const IncompleteSections = ({
           })}
         </VStack>
       </View>
-      <NavButtons
-        navigation={navigation}
-        handleSubmit={() => submitTrapVisit()}
-      />
+      <NavButtons navigation={navigation} handleSubmit={() => handleSubmit()} />
     </>
   )
 }
