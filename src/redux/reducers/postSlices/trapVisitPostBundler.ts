@@ -3,7 +3,6 @@ import api from '../../../api/axiosConfig'
 import { connectionChanged } from '../connectivitySlice'
 
 interface InitialStateI {
-  submitted: boolean
   submissionStatus:
     | 'not-submitted'
     | 'submitting...'
@@ -43,7 +42,6 @@ interface APIResponseI {
 }
 
 const initialState: InitialStateI = {
-  submitted: false,
   submissionStatus: 'not-submitted',
   trapVisitSubmissions: [],
   previousTrapVisitSubmissions: [],
@@ -69,18 +67,16 @@ export const trapVisitPostBundler = createSlice({
   reducers: {
     saveTrapVisitSubmission: (state, action) => {
       state.trapVisitSubmissions.push({ ...action.payload })
-      state.submitted = false
+      state.submissionStatus = 'not-submitted'
     },
   },
   extraReducers: {
     [postTrapVisitSubmissions.pending.type]: (state, action) => {
-      state.submitted = false
       state.submissionStatus = 'submitting...'
     },
 
     [postTrapVisitSubmissions.fulfilled.type]: (state, action) => {
       const trapVisitPostResult = action.payload
-      state.submitted = true
       state.submissionStatus = 'submission-successful'
       state.previousTrapVisitSubmissions = [
         ...state.previousTrapVisitSubmissions,
@@ -91,13 +87,12 @@ export const trapVisitPostBundler = createSlice({
     },
 
     [postTrapVisitSubmissions.rejected.type]: (state, action) => {
-      state.submitted = false
       state.submissionStatus = 'submission-failed'
     },
     [connectionChanged.type]: (state, action) => {
       if (
         action.payload.isConnected &&
-        !state.submitted &&
+        state.submissionStatus === 'not-submitted' &&
         state.trapVisitSubmissions.length
       ) {
         try {
@@ -107,7 +102,6 @@ export const trapVisitPostBundler = createSlice({
               state.trapVisitSubmissions
             )
             const trapVisitPostResult = trapVisitPostRequest.data
-            state.submitted = true
             state.submissionStatus = 'submission-successful'
             state.previousTrapVisitSubmissions = [
               ...state.previousTrapVisitSubmissions,
