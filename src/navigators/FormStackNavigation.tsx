@@ -14,6 +14,7 @@ import StartMarkRecapture from '../screens/markRecapture/StartMarkRecapture'
 import TrapPreProcessing from '../screens/formScreens/trapOperations/TrapPreProcessing'
 import TrapPostProcessing from '../screens/formScreens/trapOperations/TrapPostProcessing'
 import AddFishModalContent from '../components/form/AddFishContent'
+import HistoricalData from '../screens/formScreens/historicalData'
 import { useSelector } from 'react-redux'
 
 const FormStack = createStackNavigator()
@@ -64,6 +65,11 @@ export default function FormStackNavigation() {
         name='Start Mark Recapture'
         component={StartMarkRecapture}
         options={{ headerShown: false }}
+      />
+      <FormStack.Screen
+        name='Historical Data'
+        component={HistoricalData}
+        // options={{ headerShown: false }}
       />
     </FormStack.Navigator>
   )

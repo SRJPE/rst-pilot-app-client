@@ -1,12 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
 import {
+  markTrapVisitHistorical,
   markVisitSetupCompleted,
   saveVisitSetup,
 } from '../../../redux/reducers/formSlices/visitSetupSlice'
-import { FormControl, Heading, VStack, Text, View } from 'native-base'
+import {
+  FormControl,
+  Heading,
+  VStack,
+  Text,
+  View,
+  Switch,
+  HStack,
+  Divider,
+} from 'native-base'
 import CrewDropDown from '../../../components/form/CrewDropDown'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../../utils/helpers/yupValidations'
@@ -35,11 +45,17 @@ const VisitSetup = ({
   const [selectedProgramId, setSelectedProgramId] = useState<number | null>(
     null
   )
+  const [isHistorical, setIsHistorical] = useState(false as boolean)
+
+  useEffect(() => {
+    console.log('🚀 ~ isHistorical', isHistorical)
+  }, [isHistorical])
 
   const handleSubmit = (values: any) => {
     dispatch(saveVisitSetup(values))
     dispatch(markVisitSetupCompleted(true))
     dispatch(markStepCompleted([true]))
+    dispatch(markTrapVisitHistorical(isHistorical))
     console.log('🚀 ~ handleSubmit ~ Visit', values)
   }
 
@@ -80,8 +96,24 @@ const VisitSetup = ({
             borderColor='themeGrey'
             borderWidth='15'
           >
-            <VStack space={10}>
-              <Heading mt='2'>Which stream are you trapping on?</Heading>
+            <VStack space={5}>
+              <FormControl>
+                <HStack space={6} alignItems='center'>
+                  <FormControl.Label>
+                    <Heading>Will you be importing historical data?</Heading>
+                  </FormControl.Label>
+                  <Switch
+                    offTrackColor='secondary'
+                    onTrackColor='primary'
+                    size='lg'
+                    value={isHistorical}
+                    accessibilityLabel='Select Historical Data Entry'
+                    onToggle={() => setIsHistorical(!isHistorical)}
+                  />
+                </HStack>
+              </FormControl>
+              <Divider />
+              <Heading>Which stream are you trapping on?</Heading>
               <FormControl>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
@@ -115,10 +147,10 @@ const VisitSetup = ({
               </FormControl>
               {values.stream && (
                 <>
+                  <Text fontSize='lg' fontWeight='500'>
+                    Confirm the following values:
+                  </Text>
                   <FormControl>
-                    <Heading fontSize='lg' mb='4'>
-                      Confirm the following values:
-                    </Heading>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
                         Trap Site
@@ -178,6 +210,7 @@ const VisitSetup = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
+            isHistorical={isHistorical}
           />
         </>
       )}
