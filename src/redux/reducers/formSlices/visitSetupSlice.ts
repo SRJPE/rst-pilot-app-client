@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
   completed: boolean
+  isHistorical: false
   values: VisitSetupValuesI
 }
 
@@ -13,6 +14,7 @@ interface VisitSetupValuesI {
 
 const initialState: InitialStateI = {
   completed: false,
+  isHistorical: false,
   values: {
     stream: '',
     trapSite: '',
@@ -24,16 +26,24 @@ export const visitSetupSlice = createSlice({
   name: 'visitSetup',
   initialState: initialState,
   reducers: {
+    resetVisitSetupSlice: () => initialState,
     saveVisitSetup: (state, action) => {
       state.values = action.payload
     },
     markVisitSetupCompleted: (state, action) => {
       state.completed = action.payload
     },
+    markTrapVisitHistorical: (state, action) => {
+      state.isHistorical = action.payload
+    },
   },
 })
 
-export const { saveVisitSetup, markVisitSetupCompleted } =
-  visitSetupSlice.actions
+export const {
+  resetVisitSetupSlice,
+  saveVisitSetup,
+  markVisitSetupCompleted,
+  markTrapVisitHistorical,
+} = visitSetupSlice.actions
 
 export default visitSetupSlice.reducer

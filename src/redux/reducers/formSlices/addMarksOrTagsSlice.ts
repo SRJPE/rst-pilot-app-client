@@ -22,12 +22,14 @@ export const addMarksOrTagsSlice = createSlice({
   name: 'addMarksOrTagsSlice',
   initialState: initialState,
   reducers: {
+    resetMarksOrTagsSlice: () => initialState,
     saveMarkOrTagData: (state, action) => {
       state.values.push({ ...action.payload, id: uid() })
     },
   },
 })
 
-export const { saveMarkOrTagData } = addMarksOrTagsSlice.actions
+export const { resetMarksOrTagsSlice, saveMarkOrTagData } =
+  addMarksOrTagsSlice.actions
 
 export default addMarksOrTagsSlice.reducer

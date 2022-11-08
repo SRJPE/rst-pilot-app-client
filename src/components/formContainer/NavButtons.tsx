@@ -11,6 +11,7 @@ const NavButtons = ({
   touched,
   values,
   isFormComplete,
+  isHistorical,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -18,6 +19,7 @@ const NavButtons = ({
   touched?: any
   values?: any
   isFormComplete?: boolean
+  isHistorical?: boolean
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -27,7 +29,7 @@ const NavButtons = ({
   // const isFormComplete = navigationState.isFormComplete
   const { waterTemperature, waterTemperatureUnit } =
     reduxState.trapStatus.values
-
+  const isHistoricalStore = reduxState.visitSetup.isHistorical
   const navigateHelper = (destination: string, payload: number) => {
     navigation.navigate('Trap Visit Form', { screen: destination })
     dispatch({
@@ -38,33 +40,42 @@ const NavButtons = ({
 
   const navigateFlowRightButton = (values: any) => {
     switch (activePage) {
+      case 'Visit Setup':
+        if (isHistorical) {
+          navigateHelper('Historical Data', 15)
+        }
+        break
       case 'Trap Status':
-        if (values?.trapStatus === 'trap not functioning') {
-          navigateHelper('Non Functional Trap', 11)
-        } else if (values?.trapStatus === 'trap not in service') {
-          navigateHelper('No Fish Caught', 12)
-        } else if (values?.flowMeasure > 1000) {
-          navigateHelper('High Flows', 9)
-        } else if (values?.waterTemperatureUnit === '°C') {
-          if (values?.waterTemperature > 30) {
-            navigateHelper('High Temperatures', 10)
-          }
-        } else if (values?.waterTemperatureUnit === '°F') {
-          if (values?.waterTemperature > 86) {
-            navigateHelper('High Temperatures', 10)
+        if (!isHistoricalStore) {
+          if (values?.trapStatus === 'trap not functioning') {
+            navigateHelper('Non Functional Trap', 11)
+          } else if (values?.trapStatus === 'trap not in service') {
+            navigateHelper('No Fish Caught', 12)
+          } else if (values?.flowMeasure > 1000) {
+            navigateHelper('High Flows', 9)
+          } else if (values?.waterTemperatureUnit === '°C') {
+            if (values?.waterTemperature > 30) {
+              navigateHelper('High Temperatures', 10)
+            }
+          } else if (values?.waterTemperatureUnit === '°F') {
+            if (values?.waterTemperature > 86) {
+              navigateHelper('High Temperatures', 10)
+            }
           }
         }
 
         break
       case 'Fish Processing':
-        if (values?.fishProcessedResult === 'no fish caught') {
-          navigateHelper('No Fish Caught', 12)
-        } else if (
-          values?.fishProcessedResult ===
-            'no catch data, fish left in live box' ||
-          values?.fishProcessedResult === 'no catch data, fish released'
-        ) {
-          navigateHelper('Trap Post-Processing', 6)
+        if (!isHistoricalStore) {
+          if (values?.fishProcessedResult === 'no fish caught') {
+            navigateHelper('No Fish Caught', 12)
+          } else if (
+            values?.fishProcessedResult ===
+              'no catch data, fish left in live box' ||
+            values?.fishProcessedResult === 'no catch data, fish released'
+          ) {
+            navigateHelper('Trap Post-Processing', 6)
+          }
         }
         break
       case 'High Flows':
@@ -76,6 +87,9 @@ const NavButtons = ({
       case 'No Fish Caught':
         navigateHelper('Trap Post-Processing', 6)
         break
+      case 'Historical Data':
+        navigateHelper('Trap Status', 2)
+        break
       default:
         break
     }
@@ -83,6 +97,9 @@ const NavButtons = ({
 
   const navigateFlowLeftButton = () => {
     switch (activePage) {
+      case 'Trap Status':
+        if (isHistoricalStore) navigateHelper('Historical Data', 15)
+        break
       case 'High Flows':
         navigateHelper('Trap Status', 2)
         break
@@ -94,6 +111,9 @@ const NavButtons = ({
         break
       case 'No Fish Caught':
         navigateHelper('Fish Processing', 4)
+        break
+      case 'Historical Data':
+        navigateHelper('Visit Setup', 1)
         break
       default:
         break
@@ -212,7 +232,7 @@ const NavButtons = ({
             {activePage === 'Visit Setup' ? 'Return Home' : 'Back'}
           </Text>
         </Button>
-        {/* 
+
         <Button
           height='20'
           rounded='xs'
@@ -226,7 +246,7 @@ const NavButtons = ({
           <Text fontWeight='bold' color='white'>
             redux state
           </Text>
-        </Button> */}
+        </Button>
 
         <Button
           alignSelf='flex-start'

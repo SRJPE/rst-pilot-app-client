@@ -27,11 +27,6 @@ const initialFormValues = {
 }
 
 const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
-const plusCountMethods = [
-  { label: 'method 1', value: 'method 1', definition: 'method 1' },
-  { label: 'method 2', value: ' Method 2', definition: 'method 2' },
-  { label: 'method 3', value: ' Method 3', definition: 'method 3' },
-]
 
 const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -49,7 +44,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
       <Formik
         validationSchema={addPlusCountsSchema}
         initialValues={initialFormValues}
-        onSubmit={values => handleFormSubmit(values)}
+        onSubmit={(values) => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -202,7 +197,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
                   placeholder={'Method'}
                   onValueChange={handleChange('plusCountMethod')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={plusCountMethods.map((item: any) => ({
+                  selectOptions={dropdownValues?.plusCountMethodology.map((item: any) => ({
                     label: item.definition,
                     value: item.definition,
                   }))}
