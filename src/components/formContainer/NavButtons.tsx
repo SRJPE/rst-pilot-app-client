@@ -46,10 +46,6 @@ const NavButtons = ({
         }
         break
       case 'Trap Status':
-        console.log(
-          '🚀 ~ navigateFlowRightButton ~ isHistoricalStore',
-          isHistoricalStore
-        )
         if (!isHistoricalStore) {
           if (values?.trapStatus === 'trap not functioning') {
             navigateHelper('Non Functional Trap', 11)
