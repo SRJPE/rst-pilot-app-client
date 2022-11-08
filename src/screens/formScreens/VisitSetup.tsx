@@ -48,6 +48,7 @@ const VisitSetup = ({
   )
 
   const handleSubmit = (values: any) => {
+    // values.crew = ['temp1']
     dispatch(saveVisitSetup(values))
     dispatch(markVisitSetupCompleted(true))
     dispatch(markStepCompleted([true]))
@@ -99,6 +100,7 @@ const VisitSetup = ({
                     <Heading>Will you be importing historical data?</Heading>
                   </FormControl.Label>
                   <Switch
+                    shadow='3'
                     offTrackColor='secondary'
                     onTrackColor='primary'
                     size='lg'

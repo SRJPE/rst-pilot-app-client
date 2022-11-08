@@ -166,6 +166,7 @@ const AddFishContent = ({
                       h='50'
                       w='1/2'
                       bg='primary'
+                      shadow='3'
                       onPress={() =>
                         resetForm({
                           values: {
@@ -183,7 +184,9 @@ const AddFishContent = ({
                         })
                       }
                     >
-                      Clear All Values
+                      <Text color='white' fontSize='lg' fontWeight='600'>
+                        Clear All Values
+                      </Text>
                     </Button>
                   </FormControl>
                 </HStack>
@@ -227,7 +230,7 @@ const AddFishContent = ({
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
-                          Run:
+                          Run
                         </Text>
                       </FormControl.Label>
                       <Text color='grey' fontSize='sm'>
@@ -485,6 +488,8 @@ const AddFishContent = ({
                       }
                     >
                       <Text
+                        fontSize='lg'
+                        fontWeight='600'
                         color={
                           values.existingMark === 'ELA-YEL-FIN'
                             ? 'white'
@@ -509,6 +514,8 @@ const AddFishContent = ({
                       onPress={() => setFieldValue('existingMark', 'BIS-BROWN')}
                     >
                       <Text
+                        fontSize='lg'
+                        fontWeight='600'
                         color={
                           values.existingMark === 'BIS-BROWN'
                             ? 'white'
@@ -625,7 +632,9 @@ const AddFishContent = ({
                     marginRight='10'
                     onPress={() => setMarkFishModalOpen(true)}
                   >
-                    <Text color='primary'>Tag Fish</Text>
+                    <Text color='primary' fontSize='lg' fontWeight='600'>
+                      Tag Fish
+                    </Text>
                   </Button>
                   <Button
                     bg='secondary'
@@ -637,7 +646,9 @@ const AddFishContent = ({
                     maxWidth='40%'
                     onPress={() => setAddGeneticModalOpen(true)}
                   >
-                    <Text color='primary'>Tag Genetic Sample</Text>
+                    <Text color='primary' fontSize='lg' fontWeight='600'>
+                      Tag Genetic Sample
+                    </Text>
                   </Button>
                 </HStack>
               </VStack>
@@ -649,6 +660,7 @@ const AddFishContent = ({
                     py='5'
                     mx='2'
                     bg='#F9A38C'
+                    shadow='3'
                     isDisabled={handleSaveButtonDisable(touched, errors)}
                     onPress={() => {
                       handleSubmit()
@@ -667,6 +679,7 @@ const AddFishContent = ({
                     py='5'
                     mx='2'
                     bg='primary'
+                    shadow='3'
                     isDisabled={handleSaveButtonDisable(touched, errors)}
                     onPress={() => handleSubmit()}
                   >

@@ -44,7 +44,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
       <Formik
         validationSchema={addPlusCountsSchema}
         initialValues={initialFormValues}
-        onSubmit={(values) => handleFormSubmit(values)}
+        onSubmit={values => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -66,6 +66,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
                   bg='primary'
                   mx='2'
                   px='10'
+                  shadow='3'
                   isDisabled={
                     (touched && Object.keys(touched).length === 0) ||
                     (errors && Object.keys(errors).length > 0)
@@ -197,10 +198,12 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
                   placeholder={'Method'}
                   onValueChange={handleChange('plusCountMethod')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={dropdownValues?.plusCountMethodology.map((item: any) => ({
-                    label: item.definition,
-                    value: item.definition,
-                  }))}
+                  selectOptions={dropdownValues?.plusCountMethodology.map(
+                    (item: any) => ({
+                      label: item.definition,
+                      value: item.definition,
+                    })
+                  )}
                 />
               </FormControl>
             </VStack>

@@ -77,6 +77,7 @@ const AddGeneticsModalContent = ({
                   bg='primary'
                   mx='2'
                   px='10'
+                  shadow='3'
                   isDisabled={
                     (touched && Object.keys(touched).length === 0) ||
                     (errors && Object.keys(errors).length > 0)
@@ -102,6 +103,7 @@ const AddGeneticsModalContent = ({
                     marginRight={5}
                     height='50px'
                     fontSize='16'
+                    shadow='3'
                     isDisabled={true}
                   >
                     <Text fontSize='xl' color='white'>
@@ -115,6 +117,7 @@ const AddGeneticsModalContent = ({
                     marginLeft={5}
                     height='50px'
                     fontSize='16'
+                    shadow='3'
                     isDisabled={true}
                   >
                     <Text fontSize='xl' color='primary'>
@@ -290,4 +293,3 @@ const AddGeneticsModalContent = ({
 }
 
 export default connect(mapStateToProps)(AddGeneticsModalContent)
-
