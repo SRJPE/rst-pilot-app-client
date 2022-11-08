@@ -17,6 +17,7 @@ import visitSetupDefaultsSlice from './visitSetupDefaults'
 import catchRawPostBundler from './postSlices/catchRawPostBundler'
 import trapVisitPostBundler from './postSlices/trapVisitPostBundler'
 import connectivitySlice from './connectivitySlice'
+import slideAlertSlice from './slideAlertSlice'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
@@ -36,6 +37,7 @@ export default combineReducers({
     visitSetupDefaultsPersistConfig,
     visitSetupDefaultsSlice
   ),
+  slideAlert: slideAlertSlice,
   navigation: navigationSlice,
   visitSetup: visitSetupSlice,
   trapStatus: trapStatusSlice,
