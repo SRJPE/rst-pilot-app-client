@@ -23,6 +23,7 @@ export const addGeneticSamplesSlice = createSlice({
   name: 'addGeneticSamplesSlice',
   initialState: initialState,
   reducers: {
+    resetGeneticSamplesSlice: () => initialState,
     saveGeneticSampleData: (state: any, action: any) => {
       // console.log('🚀 ~ payload Genetic!!!', action.payload)
       // state.values.push({ ...action.payload, id: uid() })
@@ -33,6 +34,7 @@ export const addGeneticSamplesSlice = createSlice({
   },
 })
 
-export const { saveGeneticSampleData } = addGeneticSamplesSlice.actions
+export const { resetGeneticSamplesSlice, saveGeneticSampleData } =
+  addGeneticSamplesSlice.actions
 
 export default addGeneticSamplesSlice.reducer

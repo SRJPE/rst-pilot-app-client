@@ -24,7 +24,7 @@ const initialState: InitialStateI = {
     rpm3: null,
     trapLatitude: null,
     trapLongitude: null,
-    endingTrapStatus: 'Reset Trap',
+    endingTrapStatus: 'Restart Trap',
   },
 }
 
@@ -32,6 +32,7 @@ export const trapPostProcessingSlice = createSlice({
   name: 'trapPostProcessing',
   initialState: initialState,
   reducers: {
+    resetTrapPostProcessingSlice: () => initialState,
     saveTrapPostProcessing: (state, action) => {
       state.values = action.payload
     },
@@ -41,7 +42,10 @@ export const trapPostProcessingSlice = createSlice({
   },
 })
 
-export const { saveTrapPostProcessing, markTrapPostProcessingCompleted } =
-  trapPostProcessingSlice.actions
+export const {
+  resetTrapPostProcessingSlice,
+  saveTrapPostProcessing,
+  markTrapPostProcessingCompleted,
+} = trapPostProcessingSlice.actions
 
 export default trapPostProcessingSlice.reducer

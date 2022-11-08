@@ -30,6 +30,7 @@ export const trapPreProcessingSlice = createSlice({
   name: 'trapPreProcessing',
   initialState: initialState,
   reducers: {
+    resetTrapPreProcessingSlice: () => initialState,
     saveTrapPreProcessing: (state, action) => {
       state.values = action.payload
     },
@@ -39,7 +40,10 @@ export const trapPreProcessingSlice = createSlice({
   },
 })
 
-export const { saveTrapPreProcessing, markTrapPreProcessingCompleted } =
-  trapPreProcessingSlice.actions
+export const {
+  resetTrapPreProcessingSlice,
+  saveTrapPreProcessing,
+  markTrapPreProcessingCompleted,
+} = trapPreProcessingSlice.actions
 
 export default trapPreProcessingSlice.reducer

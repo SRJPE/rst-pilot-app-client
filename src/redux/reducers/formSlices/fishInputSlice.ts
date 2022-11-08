@@ -53,10 +53,8 @@ export const saveFishSlice = createSlice({
   name: 'fishInput',
   initialState: initialState,
   reducers: {
+    resetFishInputSlice: () => initialState,
     saveFishInput: (state, action) => {
-      // let speciesCapturedCopy = cloneDeep(state.speciesCaptured)
-      // speciesCapturedCopy.push(action.payload)
-      // state.speciesCaptured = speciesCapturedCopy
       state.speciesCaptured = action.payload
     },
     saveIndividualFish: (state, action) => {
@@ -94,6 +92,7 @@ export const saveFishSlice = createSlice({
 })
 
 export const {
+  resetFishInputSlice,
   saveFishInput,
   saveIndividualFish,
   savePlusCount,
