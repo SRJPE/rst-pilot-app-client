@@ -42,14 +42,10 @@ const VisitSetup = ({
   visitSetupDefaultsState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const [isHistorical, setIsHistorical] = useState(false as boolean)
   const [selectedProgramId, setSelectedProgramId] = useState<number | null>(
     null
   )
-  const [isHistorical, setIsHistorical] = useState(false as boolean)
-
-  useEffect(() => {
-    console.log('🚀 ~ isHistorical', isHistorical)
-  }, [isHistorical])
 
   const handleSubmit = (values: any) => {
     dispatch(saveVisitSetup(values))

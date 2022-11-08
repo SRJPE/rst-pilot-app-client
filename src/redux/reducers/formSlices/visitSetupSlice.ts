@@ -40,7 +40,7 @@ export const visitSetupSlice = createSlice({
 })
 
 export const {
- resetVisitSetupSlice,
+  resetVisitSetupSlice,
   saveVisitSetup,
   markVisitSetupCompleted,
   markTrapVisitHistorical,
