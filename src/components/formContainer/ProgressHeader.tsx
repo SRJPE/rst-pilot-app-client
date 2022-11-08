@@ -5,6 +5,7 @@ export default function ProgressHeader(props: any) {
   const navigationState = useSelector((state: any) => state.navigation)
   const { steps, activeStep } = navigationState
   const activePageTitle = steps[activeStep]?.name
+  let currentStep = activeStep > 7 ? '7' : activeStep
 
   const renderPageTitle = () => {
     let title
@@ -16,7 +17,10 @@ export default function ProgressHeader(props: any) {
   }
 
   const renderCurrentStepOfTotalSteps = () => {
-    const currentStep = activeStep > 7 ? '7' : activeStep
+    //if page is Historical Data render step as 1
+    if (activeStep === 15) {
+      currentStep = '1'
+    }
     const totalSteps = '7'
 
     return `Step ${currentStep} of ${totalSteps}`
@@ -34,7 +38,7 @@ export default function ProgressHeader(props: any) {
             _filledTrack={{
               bg: 'primary',
             }}
-            value={(activeStep / 6) * 100}
+            value={(currentStep / 7) * 100}
             mx='4'
           />
         </Box>
