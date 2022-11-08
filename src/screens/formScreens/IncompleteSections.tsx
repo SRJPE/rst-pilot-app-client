@@ -1,22 +1,26 @@
 import { useEffect } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
-import { AppDispatch, RootState } from '../../../redux/store'
-import { checkIfFormIsComplete, resetNavigationSlice } from '../../../redux/reducers/formSlices/navigationSlice'
-import NavButtons from '../../../components/formContainer/NavButtons'
-import IncompleteSectionButton from '../../../components/form/IncompleteSectionButton'
+
+import { AppDispatch, RootState } from '../../redux/store'
+import {
+  checkIfFormIsComplete,
+  resetNavigationSlice,
+} from '../../redux/reducers/formSlices/navigationSlice'
+import NavButtons from '../../components/formContainer/NavButtons'
+import IncompleteSectionButton from '../../components/form/IncompleteSectionButton'
 import {
   postTrapVisitSubmissions,
   saveTrapVisitSubmission,
-} from '../../../redux/reducers/postSlices/trapVisitPostBundler'
-import { resetGeneticSamplesSlice } from '../../../redux/reducers/formSlices/addGeneticSamplesSlice'
-import { resetMarksOrTagsSlice } from '../../../redux/reducers/formSlices/addMarksOrTagsSlice'
-import { resetFishInputSlice } from '../../../redux/reducers/formSlices/fishInputSlice'
-import { resetFishProcessingSlice } from '../../../redux/reducers/formSlices/fishProcessingSlice'
-import { resetTrapPostProcessingSlice } from '../../../redux/reducers/formSlices/trapPostProcessingSlice'
-import { resetTrapPreProcessingSlice } from '../../../redux/reducers/formSlices/trapPreProcessingSlice'
-import { resetTrapStatusSlice } from '../../../redux/reducers/formSlices/trapStatusSlice'
-import { resetVisitSetupSlice } from '../../../redux/reducers/formSlices/visitSetupSlice'
+} from '../../redux/reducers/postSlices/trapVisitPostBundler'
+import { resetGeneticSamplesSlice } from '../../redux/reducers/formSlices/addGeneticSamplesSlice'
+import { resetMarksOrTagsSlice } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
+import { resetFishInputSlice } from '../../redux/reducers/formSlices/fishInputSlice'
+import { resetFishProcessingSlice } from '../../redux/reducers/formSlices/fishProcessingSlice'
+import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
+import { resetTrapPreProcessingSlice } from '../../redux/reducers/formSlices/trapPreProcessingSlice'
+import { resetTrapStatusSlice } from '../../redux/reducers/formSlices/trapStatusSlice'
+import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {

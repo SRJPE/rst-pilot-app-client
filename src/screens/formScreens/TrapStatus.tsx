@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Formik } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
-import { AppDispatch, RootState } from '../../../redux/store'
+import { AppDispatch, RootState } from '../../redux/store'
 import {
   FormControl,
   Heading,
@@ -16,15 +16,15 @@ import {
   Divider,
   Avatar,
 } from 'native-base'
-import NavButtons from '../../../components/formContainer/NavButtons'
-import { trapStatusSchema } from '../../../utils/helpers/yupValidations'
-import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
-import CustomSelect from '../../../components/Shared/CustomSelect'
+import NavButtons from '../../components/formContainer/NavButtons'
+import { trapStatusSchema } from '../../utils/helpers/yupValidations'
+import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import CustomSelect from '../../components/Shared/CustomSelect'
 import {
   markTrapStatusCompleted,
   saveTrapStatus,
-} from '../../../redux/reducers/formSlices/trapStatusSlice'
+} from '../../redux/reducers/formSlices/trapStatusSlice'
 import { MaterialIcons } from '@expo/vector-icons'
 
 const reasonsForTrapNotFunctioning = [

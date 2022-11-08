@@ -24,13 +24,13 @@ import { connect, useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { addIndividualFishSchema } from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import CustomModal from '../Shared/CustomModal'
-import CustomSelect from '../Shared/CustomSelect'
+import CustomModal from '../../components/Shared/CustomModal'
+import CustomSelect from '../../components/Shared/CustomSelect'
 import CustomModalHeader, {
   AddFishModalHeaderButton,
-} from '../Shared/CustomModalHeader'
-import MarkFishModalContent from './MarkFishModalContent'
-import AddGeneticsModalContent from './AddGeneticsModalContent'
+} from '../../components/Shared/CustomModalHeader'
+import MarkFishModalContent from '../../components/form/MarkFishModalContent'
+import AddGeneticsModalContent from '../../components/form/AddGeneticsModalContent'
 import {
   individualFishInitialState,
   saveIndividualFish,
@@ -38,7 +38,7 @@ import {
 import { saveGeneticSampleData } from '../../redux/reducers/formSlices/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
 import { MaterialIcons } from '@expo/vector-icons'
-import renderErrorMessage from './RenderErrorMessage'
+import renderErrorMessage from '../../components/form/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 
 const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
@@ -286,12 +286,12 @@ const AddFishContent = ({
                           <Popover.Body p={0}>
                             <ScrollView>
                               <Image
-                                source={require('../../assets/life_stage_image.png')}
+                                source={require('../../../assets/life_stage_image.png')}
                                 alt='Life Stage Image'
                                 width='720'
                               />
                               <Image
-                                source={require('../../assets/life_stage_table.png')}
+                                source={require('../../../assets/life_stage_table.png')}
                                 alt='Life Stage Image'
                               />
                             </ScrollView>

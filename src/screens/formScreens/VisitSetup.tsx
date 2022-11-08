@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
-import { AppDispatch, RootState } from '../../../redux/store'
+import { AppDispatch, RootState } from '../../redux/store'
 import {
   markTrapVisitHistorical,
   markVisitSetupCompleted,
   saveVisitSetup,
-} from '../../../redux/reducers/formSlices/visitSetupSlice'
+} from '../../redux/reducers/formSlices/visitSetupSlice'
 import {
   FormControl,
   Heading,
@@ -17,13 +17,13 @@ import {
   HStack,
   Divider,
 } from 'native-base'
-import CrewDropDown from '../../../components/form/CrewDropDown'
-import NavButtons from '../../../components/formContainer/NavButtons'
-import { trapVisitSchema } from '../../../utils/helpers/yupValidations'
-import { markStepCompleted } from '../../../redux/reducers/formSlices/navigationSlice'
+import CrewDropDown from '../../components/form/CrewDropDown'
+import NavButtons from '../../components/formContainer/NavButtons'
+import { trapVisitSchema } from '../../utils/helpers/yupValidations'
+import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 
-import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import CustomSelect from '../../../components/Shared/CustomSelect'
+import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import CustomSelect from '../../components/Shared/CustomSelect'
 
 const mapStateToProps = (state: RootState) => {
   return {

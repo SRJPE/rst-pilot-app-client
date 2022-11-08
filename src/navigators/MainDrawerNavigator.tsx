@@ -1,12 +1,12 @@
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import DrawerMenu from '../components/drawerMenu'
-import Home from '../screens/home'
-import TrapVisitForm from '../screens/trapVisitForm'
-import GenerateReport from '../screens/generateReport'
+import Home from '../screens/Home'
+import TrapVisitForm from '../screens/TrapVisitFormRoot'
+import GenerateReport from '../screens/GenerateReport'
 import DataQualityControl from '../screens/QCData'
-import MarkRecaptureForm from '../screens/markRecaptureForm'
-import Profile from '../screens/profile'
-import PermitInfo from '../screens/permitInfo'
+import MarkRecaptureForm from '../screens/MarkRecaptureFormRoot'
+import Profile from '../screens/Profile'
+import PermitInfo from '../screens/PermitInfo'
 
 const Drawer = createDrawerNavigator()
 

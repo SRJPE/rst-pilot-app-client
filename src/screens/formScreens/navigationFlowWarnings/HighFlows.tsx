@@ -26,7 +26,7 @@ export default function HighFlows({ navigation }: { navigation: any }) {
           </Heading>
           <Image
             alignSelf='center'
-            source={require('../../../assets/warning.png')}
+            source={require('../../../../assets/warning.png')}
             alt='Warning Icon'
             size='2xl'
           />

@@ -8,18 +8,18 @@ import {
   View,
   VStack,
 } from 'native-base'
-import MarkRecaptureNavButtons from '../../../components/markRecapture/MarkRecaptureNavButtons'
+import MarkRecaptureNavButtons from '../../components/markRecapture/MarkRecaptureNavButtons'
 import { Formik } from 'formik'
-import { AppDispatch, RootState } from '../../../redux/store'
+import { AppDispatch, RootState } from '../../redux/store'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { releaseTrialSchema } from '../../../utils/helpers/yupValidations'
+import { releaseTrialSchema } from '../../utils/helpers/yupValidations'
 import {
   markReleaseTrialCompleted,
   saveReleaseTrial,
-} from '../../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
-import renderErrorMessage from '../../../components/form/RenderErrorMessage'
-import { markActiveMarkRecaptureStepCompleted } from '../../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
-import CustomSelect from '../../../components/Shared/CustomSelect'
+} from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
+import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import { markActiveMarkRecaptureStepCompleted } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
+import CustomSelect from '../../components/Shared/CustomSelect'
 
 const mapStateToProps = (state: RootState) => {
   return {

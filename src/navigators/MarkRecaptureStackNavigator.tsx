@@ -1,6 +1,6 @@
 import { createStackNavigator } from '@react-navigation/stack'
-import ReleaseDataEntry from '../screens/markRecapture/releaseDataEntry'
-import ReleaseTrial from '../screens/markRecapture/releaseTrial'
+import ReleaseDataEntry from '../screens/markRecaptureScreens/ReleaseTrialDataEntry'
+import ReleaseTrial from '../screens/markRecaptureScreens/ReleaseTrial'
 
 const MarkRecapture = createStackNavigator()
 
