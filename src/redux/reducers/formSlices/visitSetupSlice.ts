@@ -26,6 +26,7 @@ export const visitSetupSlice = createSlice({
   name: 'visitSetup',
   initialState: initialState,
   reducers: {
+    resetVisitSetupSlice: () => initialState,
     saveVisitSetup: (state, action) => {
       state.values = action.payload
     },
@@ -39,6 +40,7 @@ export const visitSetupSlice = createSlice({
 })
 
 export const {
+ resetVisitSetupSlice,
   saveVisitSetup,
   markVisitSetupCompleted,
   markTrapVisitHistorical,

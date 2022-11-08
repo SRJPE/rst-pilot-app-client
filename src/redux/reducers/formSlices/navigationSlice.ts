@@ -42,6 +42,7 @@ export const navigationSlice = createSlice({
   name: 'navigation',
   initialState: initialState,
   reducers: {
+    resetNavigationSlice: () => initialState,
     updateActiveStep: (state, action) => {
       state.activeStep = action.payload
     },
@@ -59,7 +60,7 @@ export const navigationSlice = createSlice({
         }
       }
     },
-    checkIfFormIsComplete: state => {
+    checkIfFormIsComplete: (state) => {
       //iterate over the first 6 step and check if all steps are completed
       const stepsArray = Object.values(state.steps).slice(0, 6) as Array<any>
       const incompleteSteps = [] as Array<any>
@@ -74,7 +75,11 @@ export const navigationSlice = createSlice({
   },
 })
 
-export const { updateActiveStep, markStepCompleted, checkIfFormIsComplete } =
-  navigationSlice.actions
+export const {
+  resetNavigationSlice,
+  updateActiveStep,
+  markStepCompleted,
+  checkIfFormIsComplete,
+} = navigationSlice.actions
 
 export default navigationSlice.reducer

@@ -26,7 +26,7 @@ const initialState: InitialStateI = {
     waterTemperature: null,
     waterTemperatureUnit: '°F',
     waterTurbidity: null,
-    waterTurbidityUnit: 'ntu'
+    waterTurbidityUnit: 'ntu',
   },
 }
 
@@ -34,6 +34,7 @@ export const trapStatusSlice = createSlice({
   name: 'trapStatus',
   initialState: initialState,
   reducers: {
+    resetTrapStatusSlice: () => initialState,
     saveTrapStatus: (state, action) => {
       state.values = action.payload
     },
@@ -43,7 +44,7 @@ export const trapStatusSlice = createSlice({
   },
 })
 
-export const { saveTrapStatus, markTrapStatusCompleted } =
+export const { resetTrapStatusSlice, saveTrapStatus, markTrapStatusCompleted } =
   trapStatusSlice.actions
 
 export default trapStatusSlice.reducer

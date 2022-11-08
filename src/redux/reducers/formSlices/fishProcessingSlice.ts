@@ -22,6 +22,7 @@ export const fishProcessingSlice = createSlice({
   name: 'fishProcessing',
   initialState: initialState,
   reducers: {
+    resetFishProcessingSlice: () => initialState,
     saveFishProcessing: (state, action) => {
       state.values = action.payload
     },
@@ -31,7 +32,10 @@ export const fishProcessingSlice = createSlice({
   },
 })
 
-export const { saveFishProcessing, markFishProcessingCompleted } =
-  fishProcessingSlice.actions
+export const {
+  resetFishProcessingSlice,
+  saveFishProcessing,
+  markFishProcessingCompleted,
+} = fishProcessingSlice.actions
 
 export default fishProcessingSlice.reducer
