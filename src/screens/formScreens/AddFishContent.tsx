@@ -478,7 +478,7 @@ const AddFishContent = ({
                           ? 'primary'
                           : 'secondary'
                       }
-                      py='1'
+                      py='2'
                       px='12'
                       shadow='3'
                       borderRadius='5'
