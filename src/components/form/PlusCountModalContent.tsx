@@ -16,7 +16,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
-import renderErrorMessage from './RenderErrorMessage'
+import renderErrorMessage from '../Shared/RenderErrorMessage'
 
 const initialFormValues = {
   species: '',

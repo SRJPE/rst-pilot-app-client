@@ -11,7 +11,7 @@ import {
 import { useEffect } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
-import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import NavButtons from '../../components/formContainer/NavButtons'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
@@ -58,7 +58,7 @@ const FishProcessing = ({
       initialErrors={
         reduxState.completed ? undefined : { fishProcessedResult: '' }
       }
-      onSubmit={(values) => {
+      onSubmit={values => {
         handleSubmit(values)
       }}
     >

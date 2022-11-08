@@ -22,7 +22,7 @@ import NavButtons from '../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../utils/helpers/yupValidations'
 import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 
-import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import CustomSelect from '../../components/Shared/CustomSelect'
 
 const mapStateToProps = (state: RootState) => {

@@ -32,7 +32,6 @@ const NavButtons = ({
   const isHistoricalStore = reduxState.visitSetup.isHistorical
 
   const navigateHelper = (destination: string) => {
-    // do work to find payload num from destination string
     const formSteps = Object.values(navigationState?.steps) as any
     let payload = null
     for (let i = 0; i < formSteps.length; i++) {

@@ -38,7 +38,7 @@ import {
 import { saveGeneticSampleData } from '../../redux/reducers/formSlices/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
 import { MaterialIcons } from '@expo/vector-icons'
-import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 
 const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
