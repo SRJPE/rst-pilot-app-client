@@ -31,7 +31,7 @@ export const showSlideAlert = (dispatch: any, slideTitle?: string) => {
   dispatch(openSlideAlert())
   setTimeout(() => {
     dispatch(closeSlideAlert())
-  }, 1500)
+  }, 2000)
 }
 
 export const { openSlideAlert, closeSlideAlert, setSlideAlertTitle } =
