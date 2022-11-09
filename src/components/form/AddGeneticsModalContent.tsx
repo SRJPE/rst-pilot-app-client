@@ -13,8 +13,9 @@ import {
   Divider,
 } from 'native-base'
 import React from 'react'
-import { connect } from 'react-redux'
-import { RootState } from '../../redux/store'
+import { connect, useDispatch } from 'react-redux'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { AppDispatch, RootState } from '../../redux/store'
 import { addGeneticsSampleSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
@@ -43,8 +44,11 @@ const AddGeneticsModalContent = ({
   closeModal: any
   crewMembers: Array<any>
 }) => {
+  const dispatch = useDispatch<AppDispatch>()
+
   const handleFormSubmit = (values: any) => {
     handleGeneticSampleFormSubmit(values)
+    showSlideAlert(dispatch, 'Genetic sample')
   }
 
   return (
@@ -290,4 +294,3 @@ const AddGeneticsModalContent = ({
 }
 
 export default connect(mapStateToProps)(AddGeneticsModalContent)
-

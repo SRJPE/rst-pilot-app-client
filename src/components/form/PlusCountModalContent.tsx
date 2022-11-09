@@ -12,6 +12,7 @@ import {
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
@@ -37,6 +38,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
   const handleFormSubmit = (values: any) => {
     dispatch(savePlusCount(values))
     console.log('🚀 ~ Plus Count Values: ', values)
+    showSlideAlert(dispatch, 'Plus count')
   }
 
   return (
@@ -44,7 +46,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
       <Formik
         validationSchema={addPlusCountsSchema}
         initialValues={initialFormValues}
-        onSubmit={(values) => handleFormSubmit(values)}
+        onSubmit={values => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -197,10 +199,12 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
                   placeholder={'Method'}
                   onValueChange={handleChange('plusCountMethod')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={dropdownValues?.plusCountMethodology.map((item: any) => ({
-                    label: item.definition,
-                    value: item.definition,
-                  }))}
+                  selectOptions={dropdownValues?.plusCountMethodology.map(
+                    (item: any) => ({
+                      label: item.definition,
+                      value: item.definition,
+                    })
+                  )}
                 />
               </FormControl>
             </VStack>

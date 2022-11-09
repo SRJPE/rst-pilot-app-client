@@ -20,8 +20,8 @@ import {
   VStack,
 } from 'native-base'
 import { Formik } from 'formik'
-import { connect, useSelector } from 'react-redux'
-import { RootState } from '../../redux/store'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/store'
 import { addIndividualFishSchema } from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import CustomModal from '../../components/Shared/CustomModal'
@@ -40,6 +40,7 @@ import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTag
 import { MaterialIcons } from '@expo/vector-icons'
 import renderErrorMessage from '../../components/form/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
 
@@ -61,14 +62,14 @@ const AddFishContent = ({
   individualFishStore: any
 }) => {
   const navigation = useNavigation()
+  const dispatch = useDispatch<AppDispatch>()
   const lastAddedFish = [...individualFishStore].pop() as any
-  const dropdownValues = useSelector(
-    (state: RootState) => state.dropdowns.values
-  )
-  const [isSlideOpen, setIsSlideOpen] = React.useState(false as boolean)
   const [markFishModalOpen, setMarkFishModalOpen] = useState(false as boolean)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
     false as boolean
+  )
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
   )
 
   const handleFormSubmit = (values: any) => {
@@ -90,12 +91,6 @@ const AddFishContent = ({
     )
   }
 
-  const waitThenCloseSlide = () => {
-    setTimeout(() => {
-      setIsSlideOpen(false)
-    }, 3000)
-  }
-
   return (
     <>
       <Formik
@@ -105,8 +100,7 @@ const AddFishContent = ({
         }
         onSubmit={values => {
           handleFormSubmit(values)
-          setIsSlideOpen(!isSlideOpen)
-          waitThenCloseSlide()
+          showSlideAlert(dispatch, 'Fish')
         }}
       >
         {({
@@ -698,37 +692,6 @@ const AddFishContent = ({
                 closeModal={() => setAddGeneticModalOpen(false)}
               />
             </CustomModal>
-            {/* --------- Slide --------- */}
-            <Slide in={isSlideOpen} placement='top'>
-              <Box
-                w='100%'
-                position='absolute'
-                p='2'
-                borderRadius='xs'
-                bg='emerald.100'
-                alignItems='center'
-                justifyContent='center'
-                safeArea
-              >
-                <HStack space={4} alignItems='center'>
-                  <CheckIcon size='6' color='emerald.600' mt='1' />
-                  {/* <Icon
-                    as={FontAwesome5}
-                    name='fish'
-                    size='8'
-                    color='emerald.600'
-                  /> */}
-                  <Text
-                    fontSize={16}
-                    color='emerald.600'
-                    textAlign='center'
-                    fontWeight='medium'
-                  >
-                    Fish added successfully
-                  </Text>
-                </HStack>
-              </Box>
-            </Slide>
           </>
         )}
       </Formik>
