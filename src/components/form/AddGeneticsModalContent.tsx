@@ -98,7 +98,7 @@ const AddGeneticsModalContent = ({
             />
             <>
               <Divider my={2} thickness='3' />
-              <VStack paddingX='10' paddingTop='7' paddingBottom='10'>
+              <VStack paddingX='10' paddingTop='3' paddingBottom='10'>
                 <HStack justifyContent='space-between' marginBottom='5'>
                   <Button
                     bg='primary'
@@ -128,7 +128,7 @@ const AddGeneticsModalContent = ({
                 </HStack>
 
                 <HStack>
-                  <VStack space={5} w='1/2' paddingRight='5'>
+                  <VStack space={4} w='1/2' paddingRight='5'>
                     <FormControl>
                       <HStack space={4} alignItems='center'>
                         <FormControl.Label>
@@ -268,7 +268,7 @@ const AddGeneticsModalContent = ({
                   </View>
                 </HStack>
 
-                <FormControl mt='5'>
+                <FormControl mt='2'>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Comments
