@@ -2,12 +2,12 @@ import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
   slideAlertOpen: boolean
-  slideAlertInfo?: string
+  slideAlertTitle?: string
 }
 
 const initialState: InitialStateI = {
   slideAlertOpen: false,
-  slideAlertInfo: '',
+  slideAlertTitle: '',
 }
 
 export const slideAlertSlice = createSlice({
@@ -20,21 +20,21 @@ export const slideAlertSlice = createSlice({
     closeSlideAlert: state => {
       state.slideAlertOpen = false
     },
-    setSlideAlertInfo: (state, action) => {
-      state.slideAlertInfo = action.payload
+    setSlideAlertTitle: (state, action) => {
+      state.slideAlertTitle = action.payload
     },
   },
 })
 
-export const showSlideAlert = (dispatch: any, slideInfo: string) => {
-  dispatch(setSlideAlertInfo(slideInfo))
+export const showSlideAlert = (dispatch: any, slideTitle?: string) => {
+  dispatch(setSlideAlertTitle(slideTitle))
   dispatch(openSlideAlert())
   setTimeout(() => {
     dispatch(closeSlideAlert())
   }, 1500)
 }
 
-export const { openSlideAlert, closeSlideAlert, setSlideAlertInfo } =
+export const { openSlideAlert, closeSlideAlert, setSlideAlertTitle } =
   slideAlertSlice.actions
 
 export default slideAlertSlice.reducer

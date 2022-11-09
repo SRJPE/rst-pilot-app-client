@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react'
-import { AppDispatch, RootState } from './store'
-import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from './store'
+import { useSelector } from 'react-redux'
 import { Box, CheckIcon, HStack, Slide, Text } from 'native-base'
 
 type Props = {
@@ -8,12 +7,9 @@ type Props = {
 }
 
 const SlideAlertProvider = (props: Props) => {
-  const { slideAlertOpen, slideAlertInfo } = useSelector(
+  const { slideAlertOpen, slideAlertTitle } = useSelector(
     (state: RootState) => state.slideAlert
   )
-  const dispatch = useDispatch<AppDispatch>()
-
-  useEffect(() => {}, [])
 
   return (
     <>
@@ -30,20 +26,14 @@ const SlideAlertProvider = (props: Props) => {
         >
           <HStack space={4} alignItems='center'>
             <CheckIcon size='6' color='emerald.600' mt='1' />
-            {/* <Icon
-                    as={FontAwesome5}
-                    name='fish'
-                    size='8'
-                    color='emerald.600'
-                  /> */}
             <Text
               fontSize={16}
               color='emerald.600'
               textAlign='center'
               fontWeight='medium'
             >
-              {slideAlertInfo === 'Add Fish'
-                ? 'Fish added successfully'
+              {slideAlertTitle
+                ? `${slideAlertTitle} added successfully`
                 : 'Form Section Saved'}
             </Text>
           </HStack>
