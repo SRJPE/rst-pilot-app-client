@@ -8,22 +8,15 @@ export const trapVisitSchema = yup.object().shape({
 
 export const trapStatusSchema = yup.object().shape({
   trapStatus: yup.string().required('Trap Status Required'),
-  // reasonNotFunc: yup
-  //   .string()
-  //   .test('test', 'message', function (value: any) {
-  //     const { trapStatus } = this.parent
-  //     console.log('🚀 ~ trapStatus', trapStatus)
-  //     return (
-  //       trapStatus === 'trap functioning but not normally' ||
-  //       trapStatus === 'trap not functioning'
-  //     )
-  //   })
-  //   .required('test message'),
-
-  // flowMeasure: yup
-  //   .number()
-  //   .required('Flow Measure Required')
-  //   .typeError('Input must be a number'),
+  reasonNotFunc: yup.string().when('trapStatus', {
+    is: 'trap functioning but not normally' || 'trap not functioning',
+    then: yup.string().required('Reason for not functioning required'),
+  }),
+  flowMeasure: yup
+    .number()
+    // .required('Flow Measure Required')
+    .nullable()
+    .typeError('Input must be a number'),
   flowMeasureUnit: yup.string(),
   waterTemperature: yup
     .number()
@@ -40,11 +33,19 @@ export const trapStatusSchema = yup.object().shape({
 export const trapPreProcessingSchema = yup.object().shape({
   coneDepth: yup
     .number()
+    // .transform(value => (isNaN(value) ? undefined : value))
+    // .transform((value, originalValue) => {
+    //   return originalValue === '' ? undefined : value
+    // })
     .required('Cone depth required')
     .typeError('Input must be a number'),
 
   totalRevolutions: yup
     .number()
+    // .transform(value => (isNaN(value) ? undefined : value))
+    // .transform((value, originalValue) => {
+    //   return originalValue === '' ? undefined : value
+    // })
     .required('Total Revolutions Required')
     .typeError('Input must be a number'),
   rpm1: yup
@@ -75,14 +76,17 @@ export const trapPostProcessingSchema = yup.object().shape({
     .typeError('Input must be a number'),
   rpm3: yup
     .number()
-    .required('Measurement 3 required')
-    .typeError('Input must be a number'),
+    .typeError('Input must be a number')
+    .required('Measurement 3 required'),
 })
 
 export const fishProcessingSchema = yup.object().shape({
   fishProcessedResult: yup.string().required('Fish Processed status required'),
-  // reasonForNotProcessing: yup.string().required(),
-  // .required('Reason for not processing required'),
+  reasonForNotProcessing: yup.string().when('fishProcessedResult', {
+    is:
+      'no catch data, fish left in live box' || 'no catch data, fish released',
+    then: yup.string().required('Reason for not processing required'),
+  }),
 })
 
 export const addIndividualFishSchema = yup.object().shape({
@@ -91,11 +95,12 @@ export const addIndividualFishSchema = yup.object().shape({
     .number()
     .required('Fish fork length required')
     .typeError('Input must be a number'),
-  // run: yup
-  //   .number()
-  //   .required('Fish fork length required')
-  //   .typeError('Input must be a number'),
-  weight: yup.number().typeError('Input must be a number'),
+  run: yup
+    .number()
+    // .required('Fish fork length required')
+    // .nullable()
+    .typeError('Input must be a number'),
+  weight: yup.number().nullable().typeError('Input must be a number'),
   lifeStage: yup.string().required('Fish life stage required'),
   adiposeClipped: yup
     .boolean()
@@ -142,12 +147,12 @@ export const addMarksOrTagsSchema = yup.object().shape({
 
 export const addGeneticsSampleSchema = yup.object().shape({
   sampleIdNumber: yup.number().required('Sample ID Number required'),
-  // mucusSwabCollected: yup
-  //   .boolean()
-  //   .required('Mucus Swab collection status required'),
-  // finClipCollected: yup
-  //   .boolean()
-  //   .required('Fin Clip collection status required'),
+  mucusSwabCollected: yup
+    .boolean()
+    .required('Mucus Swab collection status required'),
+  finClipCollected: yup
+    .boolean()
+    .required('Fin Clip collection status required'),
   crewMemberCollectingSample: yup.string().required('Crew Member required'),
   // comments: yup.string(),
 })

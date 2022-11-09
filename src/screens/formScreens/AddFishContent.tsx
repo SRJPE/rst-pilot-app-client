@@ -202,7 +202,6 @@ const AddFishContent = ({
                               Fork Length
                             </Text>
                           </FormControl.Label>
-
                           {touched.forkLength &&
                             errors.forkLength &&
                             renderErrorMessage(errors, 'forkLength')}

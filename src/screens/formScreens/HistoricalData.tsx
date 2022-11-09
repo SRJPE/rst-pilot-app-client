@@ -10,7 +10,7 @@ import {
 } from 'native-base'
 import { useState } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import NavButtons from '../../../components/formContainer/NavButtons'
+import NavButtons from '../../components/formContainer/NavButtons'
 
 export default function HistoricalData({ navigation }: { navigation: any }) {
   const [startDate, setStartDate] = useState(new Date(1598051730000) as any)

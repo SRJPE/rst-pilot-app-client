@@ -17,7 +17,7 @@ import NavButtons from '../../components/formContainer/NavButtons'
 import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Keyboard } from 'react-native'
-import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 import {
   markTrapPostProcessingCompleted,

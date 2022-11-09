@@ -22,7 +22,7 @@ import NavButtons from '../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../utils/helpers/yupValidations'
 import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 
-import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import CustomSelect from '../../components/Shared/CustomSelect'
 
 const mapStateToProps = (state: RootState) => {
@@ -48,6 +48,7 @@ const VisitSetup = ({
   )
 
   const handleSubmit = (values: any) => {
+    // values.crew = ['temp1']
     dispatch(saveVisitSetup(values))
     dispatch(markVisitSetupCompleted(true))
     dispatch(markStepCompleted([true]))
@@ -99,6 +100,7 @@ const VisitSetup = ({
                     <Heading>Will you be importing historical data?</Heading>
                   </FormControl.Label>
                   <Switch
+                    shadow='3'
                     offTrackColor='secondary'
                     onTrackColor='primary'
                     size='lg'
