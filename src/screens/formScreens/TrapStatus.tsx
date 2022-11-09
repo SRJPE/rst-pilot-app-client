@@ -9,12 +9,11 @@ import {
   VStack,
   HStack,
   Text,
-  View,
   IconButton,
   Icon,
   Popover,
-  Divider,
   Avatar,
+  Pressable,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../utils/helpers/yupValidations'
@@ -26,6 +25,7 @@ import {
   saveTrapStatus,
 } from '../../redux/reducers/formSlices/trapStatusSlice'
 import { MaterialIcons } from '@expo/vector-icons'
+import { Keyboard } from 'react-native'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Flows', value: 'High Flows' },
@@ -101,12 +101,13 @@ const TrapStatus = ({
         values,
       }) => (
         <>
-          <View
+          <Pressable
             flex={1}
             bg='#fff'
             p='6%'
             borderColor='themeGrey'
             borderWidth='15'
+            onPress={Keyboard.dismiss}
           >
             <VStack space={12}>
               <HStack space={2} alignItems='center'>
@@ -288,7 +289,7 @@ const TrapStatus = ({
                 </>
               )}
             </VStack>
-          </View>
+          </Pressable>
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}

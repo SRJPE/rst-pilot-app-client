@@ -3,7 +3,6 @@ import {
   Avatar,
   Box,
   Button,
-  CheckIcon,
   Divider,
   FormControl,
   HStack,
@@ -11,13 +10,12 @@ import {
   IconButton,
   Image,
   Input,
-  View,
   Popover,
   Radio,
   ScrollView,
-  Slide,
   Text,
   VStack,
+  Pressable,
 } from 'native-base'
 import { Formik } from 'formik'
 import { connect, useDispatch, useSelector } from 'react-redux'
@@ -41,6 +39,7 @@ import { MaterialIcons } from '@expo/vector-icons'
 import renderErrorMessage from '../../components/form/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { Keyboard } from 'react-native'
 
 const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
 
@@ -127,7 +126,7 @@ const AddFishContent = ({
               // })
               // }
             />
-            <View bg='#fff'>
+            <Pressable bg='#fff' onPress={Keyboard.dismiss}>
               <VStack paddingX='10' paddingTop='2' paddingBottom='3' space={3}>
                 <HStack alignItems='center'>
                   <FormControl w='1/2' pr='5'>
@@ -670,7 +669,7 @@ const AddFishContent = ({
                   </Button>
                 </HStack>
               </Box>
-            </View>
+            </Pressable>
             {/* --------- Modals --------- */}
             <CustomModal
               isOpen={markFishModalOpen}
