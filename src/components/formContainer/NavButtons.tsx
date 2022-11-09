@@ -227,8 +227,6 @@ const NavButtons = ({
           bg='secondary'
           width='45%'
           height='20'
-          rounded='xs'
-          borderRadius='5'
           shadow='5'
           leftIcon={
             activePage === 'Visit Setup' ? (
@@ -246,11 +244,9 @@ const NavButtons = ({
 
         <Button
           height='20'
-          rounded='xs'
           bg='primary'
           alignSelf='flex-start'
           width='5%'
-          borderRadius='5'
           shadow='5'
           onPress={() => console.log('🚀 ~ reduxState', reduxState)}
         >
@@ -264,8 +260,6 @@ const NavButtons = ({
           bg='primary'
           width='45%'
           height='20'
-          rounded='xs'
-          borderRadius='5'
           shadow='5'
           isDisabled={disableRightButton()}
           onPress={handleRightButton}

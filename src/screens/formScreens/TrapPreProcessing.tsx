@@ -13,8 +13,8 @@ import {
   VStack,
   HStack,
   Radio,
-  View,
   Icon,
+  Pressable,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapPreProcessingSchema } from '../../utils/helpers/yupValidations'
@@ -67,12 +67,13 @@ const TrapPreProcessing = ({
         values,
       }) => (
         <>
-          <View
+          <Pressable
             flex={1}
             bg='#fff'
             p='6%'
             borderColor='themeGrey'
             borderWidth='15'
+            onPress={Keyboard.dismiss}
           >
             {/* <TouchableWithoutFeedback
               onPress={Keyboard.dismiss}
@@ -236,7 +237,7 @@ const TrapPreProcessing = ({
               </Text>
             </VStack>
             {/* </TouchableWithoutFeedback> */}
-          </View>
+          </Pressable>
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}

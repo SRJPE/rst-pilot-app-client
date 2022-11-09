@@ -9,10 +9,9 @@ import {
   VStack,
   HStack,
   Radio,
-  View,
   Icon,
   Button,
-  Spinner,
+  Pressable,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
@@ -25,7 +24,6 @@ import {
   saveTrapPostProcessing,
 } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
 import { Ionicons } from '@expo/vector-icons'
-import { useState } from 'react'
 import * as Location from 'expo-location'
 
 const mapStateToProps = (state: RootState) => {
@@ -85,17 +83,14 @@ const TrapPreProcessing = ({
         values,
       }) => (
         <>
-          <View
+          <Pressable
             flex={1}
             bg='#fff'
             p='6%'
             borderColor='themeGrey'
             borderWidth='15'
+            onPress={Keyboard.dismiss}
           >
-            {/* <TouchableWithoutFeedback
-              onPress={Keyboard.dismiss}
-              // accessible={false}
-            > */}
             <VStack space={10}>
               <Heading>Trap Post-Processing</Heading>
               <FormControl w='1/2'>
@@ -257,8 +252,7 @@ const TrapPreProcessing = ({
                 </Radio.Group>
               </FormControl>
             </VStack>
-            {/* </TouchableWithoutFeedback> */}
-          </View>
+          </Pressable>
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}

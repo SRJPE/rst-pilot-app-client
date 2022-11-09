@@ -8,12 +8,12 @@ type Props = {
 
 const SlideAlertProvider = (props: Props) => {
   const { slideAlertOpen, slideAlertTitle } = useSelector(
-    (state: RootState) => state.slideAlert
+    (state: RootState) => state.slideAlert as any
   )
 
   return (
     <>
-      <Slide in={slideAlertOpen} placement='top' duration={300}>
+      <Slide in={slideAlertOpen} placement='top'>
         <Box
           w='100%'
           position='absolute'
@@ -34,7 +34,7 @@ const SlideAlertProvider = (props: Props) => {
             >
               {slideAlertTitle
                 ? `${slideAlertTitle} added successfully`
-                : 'Form Section Saved'}
+                : 'Save complete'}
             </Text>
           </HStack>
         </Box>
