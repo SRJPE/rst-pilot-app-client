@@ -146,6 +146,7 @@ const FishInput = ({
               p='3'
               borderRadius='5'
               flex='1'
+              shadow='3'
               onPress={() => {
                 navigation.navigate('Add Fish')
               }}
@@ -160,6 +161,7 @@ const FishInput = ({
               p='3'
               flex='1'
               borderRadius='5'
+              shadow='3'
               onPress={() => {
                 setAddPlusCountModalOpen(true)
               }}

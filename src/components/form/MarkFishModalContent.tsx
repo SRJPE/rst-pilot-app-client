@@ -18,7 +18,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { addMarksOrTagsSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
-import renderErrorMessage from './RenderErrorMessage'
+import renderErrorMessage from '../Shared/RenderErrorMessage'
 
 const initialFormValues = {
   type: '',
@@ -79,6 +79,7 @@ const MarkFishModalContent = ({
                   bg='primary'
                   mx='2'
                   px='10'
+                  shadow='3'
                   isDisabled={
                     (touched && Object.keys(touched).length === 0) ||
                     (errors && Object.keys(errors).length > 0)

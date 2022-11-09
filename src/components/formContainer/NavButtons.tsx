@@ -31,7 +31,16 @@ const NavButtons = ({
   const { waterTemperature, waterTemperatureUnit } =
     reduxState.trapStatus.values
   const isHistoricalStore = reduxState.visitSetup.isHistorical
-  const navigateHelper = (destination: string, payload: number) => {
+
+  const navigateHelper = (destination: string) => {
+    const formSteps = Object.values(navigationState?.steps) as any
+    let payload = null
+    for (let i = 0; i < formSteps.length; i++) {
+      if (formSteps[i].name === destination) {
+        payload = i + 1
+      }
+    }
+
     navigation.navigate('Trap Visit Form', { screen: destination })
     dispatch({
       type: updateActiveStep,
@@ -43,24 +52,24 @@ const NavButtons = ({
     switch (activePage) {
       case 'Visit Setup':
         if (isHistorical) {
-          navigateHelper('Historical Data', 15)
+          navigateHelper('Historical Data')
         }
         break
       case 'Trap Status':
         if (!isHistoricalStore) {
           if (values?.trapStatus === 'trap not functioning') {
-            navigateHelper('Non Functional Trap', 11)
+            navigateHelper('Non Functional Trap')
           } else if (values?.trapStatus === 'trap not in service') {
-            navigateHelper('No Fish Caught', 12)
+            navigateHelper('No Fish Caught')
           } else if (values?.flowMeasure > 1000) {
-            navigateHelper('High Flows', 9)
+            navigateHelper('High Flows')
           } else if (values?.waterTemperatureUnit === '°C') {
             if (values?.waterTemperature > 30) {
-              navigateHelper('High Temperatures', 10)
+              navigateHelper('High Temperatures')
             }
           } else if (values?.waterTemperatureUnit === '°F') {
             if (values?.waterTemperature > 86) {
-              navigateHelper('High Temperatures', 10)
+              navigateHelper('High Temperatures')
             }
           }
         }
@@ -69,27 +78,27 @@ const NavButtons = ({
       case 'Fish Processing':
         if (!isHistoricalStore) {
           if (values?.fishProcessedResult === 'no fish caught') {
-            navigateHelper('No Fish Caught', 12)
+            navigateHelper('No Fish Caught')
           } else if (
             values?.fishProcessedResult ===
               'no catch data, fish left in live box' ||
             values?.fishProcessedResult === 'no catch data, fish released'
           ) {
-            navigateHelper('Trap Post-Processing', 6)
+            navigateHelper('Trap Post-Processing')
           }
         }
         break
       case 'High Flows':
-        navigateHelper('End Trapping', 9)
+        navigateHelper('End Trapping')
         break
       case 'High Temperatures':
-        navigateHelper('Trap Pre-Processing', 3)
+        navigateHelper('Trap Pre-Processing')
         break
       case 'No Fish Caught':
-        navigateHelper('Trap Post-Processing', 6)
+        navigateHelper('Trap Post-Processing')
         break
       case 'Historical Data':
-        navigateHelper('Trap Status', 2)
+        navigateHelper('Trap Status')
         break
       default:
         break
@@ -99,22 +108,22 @@ const NavButtons = ({
   const navigateFlowLeftButton = () => {
     switch (activePage) {
       case 'Trap Status':
-        if (isHistoricalStore) navigateHelper('Historical Data', 15)
+        if (isHistoricalStore) navigateHelper('Historical Data')
         break
       case 'High Flows':
-        navigateHelper('Trap Status', 2)
+        navigateHelper('Trap Status')
         break
       case 'High Temperatures':
-        navigateHelper('Trap Status', 2)
+        navigateHelper('Trap Status')
         break
       case 'Non Functional Trap':
-        navigateHelper('Trap Status', 2)
+        navigateHelper('Trap Status')
         break
       case 'No Fish Caught':
-        navigateHelper('Fish Processing', 4)
+        navigateHelper('Fish Processing')
         break
       case 'Historical Data':
-        navigateHelper('Visit Setup', 1)
+        navigateHelper('Visit Setup')
         break
       default:
         break

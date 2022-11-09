@@ -17,7 +17,7 @@ import {
   markReleaseTrialCompleted,
   saveReleaseTrial,
 } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
-import renderErrorMessage from '../../components/form/RenderErrorMessage'
+import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { markActiveMarkRecaptureStepCompleted } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
 import CustomSelect from '../../components/Shared/CustomSelect'
 
