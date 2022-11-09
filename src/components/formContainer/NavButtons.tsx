@@ -3,6 +3,7 @@ import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const NavButtons = ({
   navigation,
@@ -124,6 +125,7 @@ const NavButtons = ({
     //if function truthy, submit form to check for errors and save to redux
     if (handleSubmit) {
       handleSubmit()
+      showSlideAlert(dispatch)
     }
     //navigate Right
     navigation.navigate('Trap Visit Form', {

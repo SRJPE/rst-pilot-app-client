@@ -12,8 +12,9 @@ import {
   Divider,
 } from 'native-base'
 import React from 'react'
-import { connect, useSelector } from 'react-redux'
-import { RootState } from '../../redux/store'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { AppDispatch, RootState } from '../../redux/store'
 import { addMarksOrTagsSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
@@ -42,7 +43,11 @@ const MarkFishModalContent = ({
   closeModal: any
   crewMembers: any
 }) => {
-  const handleFormSubmit = (values: any) => handleMarkFishFormSubmit(values)
+  const dispatch = useDispatch<AppDispatch>()
+  const handleFormSubmit = (values: any) => {
+    handleMarkFishFormSubmit(values)
+    showSlideAlert(dispatch, 'Mark or tag')
+  }
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
