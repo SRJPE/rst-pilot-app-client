@@ -165,12 +165,12 @@ const TrapPostProcessing = ({
                         onBlur={handleBlur('rpm1')}
                         value={values.rpm1}
                       />
-                      {console.log('123123123', Number(values.rpm1))}
+                      {/* {console.log('123123123', Number(values.rpm1))}
                       {console.log('098797890', Number(QARanges.RPM.max))}
                       {console.log(
                         '&&&&&&&&',
                         Number(values.rmp1) > Number(QARanges.RPM.max)
-                      )}
+                      )} */}
                       {Number(values.rmp1) > 30 ? (
                         RenderWarningMessage()
                       ) : (
