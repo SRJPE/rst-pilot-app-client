@@ -1,18 +1,20 @@
 import { Box, HStack, VStack, Text, Progress } from 'native-base'
 import { useSelector } from 'react-redux'
+import { numOfFormSteps } from '../../redux/reducers/formSlices/navigationSlice'
 
 export default function ProgressHeader(props: any) {
   const navigationState = useSelector((state: any) => state.navigation)
   const { steps, activeStep } = navigationState
   const activePageTitle = steps[activeStep]?.name
-  let currentStep = activeStep > 7 ? '7' : activeStep
+  let currentStep =
+    activeStep > numOfFormSteps ? `${numOfFormSteps}` : activeStep
 
   const renderCurrentStepOfTotalSteps = () => {
     //if page is Historical Data render step as 1
     if (activeStep === 15) {
       currentStep = '1'
     }
-    const totalSteps = '7'
+    const totalSteps = `${numOfFormSteps}`
 
     return `Step ${currentStep} of ${totalSteps}`
   }
@@ -29,7 +31,7 @@ export default function ProgressHeader(props: any) {
             _filledTrack={{
               bg: 'primary',
             }}
-            value={(currentStep / 7) * 100}
+            value={(currentStep / numOfFormSteps) * 100}
             mx='4'
           />
         </Box>

@@ -17,7 +17,7 @@ import MenuButton from './MenuButton'
 import { useSelector } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { useDispatch } from 'react-redux'
-import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
+import { numOfFormSteps, updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 
 const DrawerMenu = (props: DrawerContentComponentProps) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -28,7 +28,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
   const currentRoute = state.routeNames[state.index]
   //unsliced Array for dev
   // const stepsArray = Object.values(steps) as Array<any>
-  const stepsArray = Object.values(steps).slice(0, 7) as Array<any>
+  const stepsArray = Object.values(steps).slice(0, numOfFormSteps) as Array<any>
 
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {

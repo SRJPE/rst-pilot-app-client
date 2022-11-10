@@ -103,15 +103,13 @@ const TrapStatus = ({
         values,
       }) => (
         <>
-          <ScrollView>
-            <Pressable
-              flex={1}
-              bg='#fff'
-              p='6%'
-              borderColor='themeGrey'
-              borderWidth='15'
-              onPress={Keyboard.dismiss}
-            >
+          <ScrollView
+            bg='#fff'
+            p='6%'
+            borderColor='themeGrey'
+            borderWidth='15'
+          >
+            <Pressable onPress={Keyboard.dismiss}>
               <VStack space={12}>
                 <HStack space={2} alignItems='center'>
                   <Heading>Is the Trap functioning normally?</Heading>
@@ -441,7 +439,7 @@ const TrapStatus = ({
                         minute before cleaning the trap.
                       </Text>
                     </FormControl>
-                    <Text color='black' fontSize='xl' alignSelf='center'>
+                    <Text color='black' fontSize='xl' alignSelf='center' pb='15%'>
                       - Remove debris and begin fish processing -
                     </Text>
                   </>

@@ -5,6 +5,7 @@ import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
   checkIfFormIsComplete,
+  numOfFormSteps,
   resetNavigationSlice,
 } from '../../redux/reducers/formSlices/navigationSlice'
 import NavButtons from '../../components/formContainer/NavButtons'
@@ -55,7 +56,7 @@ const IncompleteSections = ({
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
     0,
-    6
+    numOfFormSteps - 1
   ) as Array<any>
 
   useEffect(() => {

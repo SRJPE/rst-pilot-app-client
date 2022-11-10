@@ -1,5 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
+export const numOfFormSteps = 6
+
 const formSteps = {
   1: { name: 'Visit Setup', propName: 'visitSetup', completed: false },
   2: { name: 'Trap Status', propName: 'trapStatus', completed: false },
