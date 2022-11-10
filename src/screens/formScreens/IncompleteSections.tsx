@@ -18,7 +18,6 @@ import { resetMarksOrTagsSlice } from '../../redux/reducers/formSlices/addMarksO
 import { resetFishInputSlice } from '../../redux/reducers/formSlices/fishInputSlice'
 import { resetFishProcessingSlice } from '../../redux/reducers/formSlices/fishProcessingSlice'
 import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
-import { resetTrapPreProcessingSlice } from '../../redux/reducers/formSlices/trapPreProcessingSlice'
 import { resetTrapStatusSlice } from '../../redux/reducers/formSlices/trapStatusSlice'
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 
@@ -27,7 +26,6 @@ const mapStateToProps = (state: RootState) => {
     navigationState: state.navigation,
     visitSetupState: state.visitSetup,
     fishProcessingState: state.fishProcessing,
-    trapPreProcessingState: state.trapPreProcessing,
     trapPostProcessingState: state.trapPostProcessing,
     trapStatusState: state.trapStatus,
     dropdownsState: state.dropdowns,
@@ -40,7 +38,6 @@ const IncompleteSections = ({
   navigationState,
   visitSetupState,
   fishProcessingState,
-  trapPreProcessingState,
   trapPostProcessingState,
   trapStatusState,
   dropdownsState,
@@ -50,7 +47,6 @@ const IncompleteSections = ({
   navigationState: any
   visitSetupState: any
   fishProcessingState: any
-  trapPreProcessingState: any
   trapPostProcessingState: any
   trapStatusState: any
   dropdownsState: any
@@ -82,68 +78,86 @@ const IncompleteSections = ({
     dispatch(resetFishInputSlice())
     dispatch(resetFishProcessingSlice())
     dispatch(resetTrapPostProcessingSlice())
-    dispatch(resetTrapPreProcessingSlice())
     dispatch(resetTrapStatusSlice())
     dispatch(resetVisitSetupSlice())
   }
 
   const submitTrapVisit = () => {
     const currentDateTime = new Date()
-    const fishProcessedValues = dropdownsState.values.fishProcessed.map(
-      (dropdownObj: any) => {
-        return dropdownObj.definition
-      }
-    )
-    const whyFishNotProcessedValues =
-      dropdownsState.values.whyFishNotProcessed.map((dropdownObj: any) => {
+    const returnDefinitionArray = (dropdownsArray: any[]) => {
+      return dropdownsArray.map((dropdownObj: any) => {
         return dropdownObj.definition
       })
-    const trapStatusAtEndValues = dropdownsState.values.trapStatusAtEnd.map(
-      (dropdownObj: any) => {
-        return dropdownObj.definition
-      }
+    }
+    const trapFunctioningValues = returnDefinitionArray(
+      dropdownsState.values.trapFunctionality
+    )
+    const whyTrapNotFunctioningValues = returnDefinitionArray(
+      dropdownsState.values.whyTrapNotFunctioning
+    )
+    const fishProcessedValues = returnDefinitionArray(
+      dropdownsState.values.fishProcessed
+    )
+    const whyFishNotProcessedValues = returnDefinitionArray(
+      dropdownsState.values.whyFishNotProcessed
+    )
+    const trapStatusAtEndValues = returnDefinitionArray(
+      dropdownsState.values.trapStatusAtEnd
     )
     const {
       rpm1: startRpm1,
       rpm2: startRpm2,
       rpm3: startRpm3,
-    } = trapPreProcessingState.values
+    } = trapStatusState.values
     const {
       rpm1: endRpm1,
       rpm2: endRpm2,
       rpm3: endRpm3,
     } = trapPostProcessingState.values
 
+    const returnNullableTableId = (value: any) => {
+      value == -1 ? null : value + 1
+    }
+
     const trapVisitSubmission = {
-      id: null,
       programId: 1,
-      visitTypeId: null,
+      visitType: null,
       trapLocationId: null,
       trapVisitTimeStart: currentDateTime,
       trapVisitTimeEnd: null,
-      fishProcessed:
+      fishProcessed: returnNullableTableId(
         fishProcessedValues.indexOf(
           fishProcessingState.values.fishProcessedResult
-        ) + 1,
-      whyFishNotProcessed:
+        )
+      ),
+      whyFishNotProcessed: returnNullableTableId(
         whyFishNotProcessedValues.indexOf(
           fishProcessingState.values.fishProcessedResult
-        ) + 1,
+        )
+      ),
       sampleGearId: null,
-      coneDepth: trapPreProcessingState.values.coneDepth,
+      coneDepth: parseInt(trapStatusState.values.coneDepth),
       trapInThalweg: null,
-      trapFunctioning: trapStatusState.values.trapStatus,
-      whyTrapNotFunctioning: trapStatusState.values.reasonForNotFunc,
-      trapStatusAtEnd:
+      trapFunctioning: returnNullableTableId(
+        trapFunctioningValues.indexOf(trapStatusState.values.trapStatus)
+      ),
+      whyTrapNotFunctioning: returnNullableTableId(
+        whyTrapNotFunctioningValues.indexOf(
+          trapStatusState.values.reasonForNotFunc
+        )
+      ),
+      trapStatusAtEnd: returnNullableTableId(
         trapStatusAtEndValues.indexOf(
           `${trapPostProcessingState.values.endingTrapStatus}`.toLowerCase()
-        ) + 1,
-      totalRevolutions: trapPreProcessingState.values.totalRevolutions,
-      rpmAtStart: (startRpm1 + startRpm2 + startRpm3) / 3,
-      rpmAtEnd: (endRpm1 + endRpm2 + endRpm3) / 3,
+        )
+      ),
+      totalRevolutions: parseInt(trapStatusState.values.totalRevolutions),
+      rpmAtStart:
+        (parseInt(startRpm1) + parseInt(startRpm2) + parseInt(startRpm3)) / 3,
+      rpmAtEnd: (parseInt(endRpm1) + parseInt(endRpm2) + parseInt(endRpm3)) / 3,
       inHalfConeConfiguration:
-        trapPreProcessingState.values.coneSetting === 'half' ? true : false,
-      debrisVolumeLiters: trapPostProcessingState.values.debrisVolume,
+        trapStatusState.values.coneSetting === 'half' ? true : false,
+      debrisVolumeLiters: parseInt(trapPostProcessingState.values.debrisVolume),
       qcCompleted: null,
       qcCompletedAt: null,
       comments: null,

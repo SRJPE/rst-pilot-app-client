@@ -7,15 +7,6 @@ export default function ProgressHeader(props: any) {
   const activePageTitle = steps[activeStep]?.name
   let currentStep = activeStep > 7 ? '7' : activeStep
 
-  const renderPageTitle = () => {
-    let title
-    activePageTitle === 'Trap Post-Processing' ||
-    activePageTitle === 'Trap Pre-Processing'
-      ? (title = 'Trap Operations')
-      : (title = activePageTitle)
-    return title
-  }
-
   const renderCurrentStepOfTotalSteps = () => {
     //if page is Historical Data render step as 1
     if (activeStep === 15) {
@@ -29,7 +20,7 @@ export default function ProgressHeader(props: any) {
     <Box>
       <VStack>
         <HStack w='100%' justifyContent='space-between' p='4'>
-          <Text fontSize='2xl'>{renderPageTitle()}</Text>
+          <Text fontSize='2xl'>{activePageTitle}</Text>
           <Text fontSize='xl'>{renderCurrentStepOfTotalSteps()}</Text>
         </HStack>
         <Box w='100%'>

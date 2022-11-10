@@ -14,6 +14,12 @@ export interface TrapStatusValuesI {
   waterTemperatureUnit: string
   waterTurbidity: number | null
   waterTurbidityUnit: string
+  coneDepth: number | null
+  coneSetting: string | null
+  totalRevolutions: number | null
+  rpm1: number | null
+  rpm2: number | null
+  rpm3: number | null
 }
 
 const initialState: InitialStateI = {
@@ -27,6 +33,12 @@ const initialState: InitialStateI = {
     waterTemperatureUnit: '°F',
     waterTurbidity: null,
     waterTurbidityUnit: 'ntu',
+    coneDepth: null,
+    coneSetting: 'full',
+    totalRevolutions: null,
+    rpm1: null,
+    rpm2: null,
+    rpm3: null,
   },
 }
 

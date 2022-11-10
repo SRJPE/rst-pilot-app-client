@@ -11,7 +11,6 @@ import NoFishCaught from '../screens/formScreens/navigationFlowWarnings/NoFishCa
 import EndTrapping from '../screens/formScreens/EndTrapping'
 import IncompleteSections from '../screens/formScreens/IncompleteSections'
 import StartMarkRecapture from '../screens/markRecaptureScreens/StartMarkRecapture'
-import TrapPreProcessing from '../screens/formScreens/TrapPreProcessing'
 import TrapPostProcessing from '../screens/formScreens/TrapPostProcessing'
 import AddFishModalContent from '../screens/formScreens/AddFishContent'
 import HistoricalData from '../screens/formScreens/HistoricalData'
@@ -30,10 +29,6 @@ export default function FormStackNavigation() {
     >
       <FormStack.Screen name='Visit Setup' component={VisitSetup} />
       <FormStack.Screen name='Trap Status' component={TrapStatus} />
-      <FormStack.Screen
-        name='Trap Pre-Processing'
-        component={TrapPreProcessing}
-      />
       <FormStack.Screen name='Fish Processing' component={FishProcessing} />
       <FormStack.Screen
         name='Fish Input'

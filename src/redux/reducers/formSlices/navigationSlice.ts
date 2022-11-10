@@ -3,27 +3,22 @@ import { createSlice } from '@reduxjs/toolkit'
 const formSteps = {
   1: { name: 'Visit Setup', propName: 'visitSetup', completed: false },
   2: { name: 'Trap Status', propName: 'trapStatus', completed: false },
-  3: {
-    name: 'Trap Pre-Processing',
-    propName: 'trapPreProcessing',
-    completed: false,
-  },
-  4: { name: 'Fish Processing', propName: 'fishProcessing', completed: false },
-  5: { name: 'Fish Input', propName: 'fishInput', completed: false },
-  6: {
+  3: { name: 'Fish Processing', propName: 'fishProcessing', completed: false },
+  4: { name: 'Fish Input', propName: 'fishInput', completed: false },
+  5: {
     name: 'Trap Post-Processing',
     propName: 'trapPostProcessing',
     completed: false,
   },
-  7: { name: 'Incomplete Sections', propName: 'incompleteSections' },
-  8: { name: 'Start Mark Recapture', propName: 'StartMarkRecapture' },
-  9: { name: 'High Flows', propName: 'highFlows' },
-  10: { name: 'High Temperatures', propName: 'highTemperatures' },
-  11: { name: 'Non Functional Trap', propName: 'nonFunctionalTrap' },
-  12: { name: 'No Fish Caught', propName: 'noFishCaught' },
-  13: { name: 'End Trapping', propName: 'endTrapping' },
-  14: { name: 'Add Fish', propName: 'addFish' },
-  15: { name: 'Historical Data', propName: 'historicalData' },
+  6: { name: 'Incomplete Sections', propName: 'incompleteSections' },
+  7: { name: 'Start Mark Recapture', propName: 'StartMarkRecapture' },
+  8: { name: 'High Flows', propName: 'highFlows' },
+  9: { name: 'High Temperatures', propName: 'highTemperatures' },
+  10: { name: 'Non Functional Trap', propName: 'nonFunctionalTrap' },
+  11: { name: 'No Fish Caught', propName: 'noFishCaught' },
+  12: { name: 'End Trapping', propName: 'endTrapping' },
+  13: { name: 'Add Fish', propName: 'addFish' },
+  14: { name: 'Historical Data', propName: 'historicalData' },
 }
 
 interface NavigationStateI {

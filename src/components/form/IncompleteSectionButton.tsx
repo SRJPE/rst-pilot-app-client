@@ -27,8 +27,6 @@ const IncompleteSectionButton = ({
         return 220
       case 'Trap Status':
         return 213
-      case 'Trap Pre-Processing':
-        return 144
       case 'Fish Processing':
         return 181
       case 'Fish Input':

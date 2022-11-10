@@ -32,7 +32,7 @@ const mapStateToProps = (state: RootState) => {
   }
 }
 
-const TrapPreProcessing = ({
+const TrapPostProcessing = ({
   navigation,
   reduxState,
 }: {
@@ -265,4 +265,4 @@ const TrapPreProcessing = ({
   )
 }
 
-export default connect(mapStateToProps)(TrapPreProcessing)
+export default connect(mapStateToProps)(TrapPostProcessing)

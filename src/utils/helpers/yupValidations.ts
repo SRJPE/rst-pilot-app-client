@@ -28,9 +28,6 @@ export const trapStatusSchema = yup.object().shape({
     .required('Water Turbidity Required')
     .typeError('Input must be a number'),
   waterTurbidityUnit: yup.string(),
-})
-
-export const trapPreProcessingSchema = yup.object().shape({
   coneDepth: yup
     .number()
     // .transform(value => (isNaN(value) ? undefined : value))
@@ -61,6 +58,7 @@ export const trapPreProcessingSchema = yup.object().shape({
     .required('Measurement 3 required')
     .typeError('Input must be a number'),
 })
+
 export const trapPostProcessingSchema = yup.object().shape({
   debrisVolume: yup
     .number()
