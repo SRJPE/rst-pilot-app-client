@@ -105,82 +105,90 @@ const TrapStatus = ({
         values,
       }) => (
         <>
-          <ScrollView bg='#fff' p='6%' borderColor='themeGrey' borderWidth='15'>
+          <ScrollView
+            bg='#fff'
+            p='6%'
+            borderColor='themeGrey'
+            borderWidth='15'
+            borderBottomWidth='0'
+            mb='15'
+          >
             <Pressable onPress={Keyboard.dismiss}>
-              <VStack space={12}>
-                <HStack space={2} alignItems='center'>
-                  <Heading>Is the Trap functioning normally?</Heading>
-                  <Popover
-                    placement='bottom left'
-                    trigger={triggerProps => {
-                      return (
-                        <IconButton
-                          {...triggerProps}
-                          icon={
-                            <Icon
-                              as={MaterialIcons}
-                              name='info-outline'
-                              size='xl'
-                            />
-                          }
-                        ></IconButton>
-                      )
-                    }}
-                  >
-                    <Popover.Content
-                      accessibilityLabel='Trap Stats Info'
-                      w='600'
-                      mr='10'
-                    >
-                      <Popover.Arrow />
-                      <Popover.CloseButton />
-                      <Popover.Header>
-                        Please select one of the trap functioning dropdowns
-                        based on a visual inspection of the trap.
-                      </Popover.Header>
-                      <Popover.Body p={4}>
-                        <VStack space={2}>
-                          <HStack space={2} alignItems='flex-start'>
-                            <Avatar size={'2'} mt={'2'} />
-                            <Text fontSize='md'>
-                              Trap Functioning Normally: Trap rotating normally
-                              in the expected location in river.
-                            </Text>
-                          </HStack>
-                          <HStack space={2} alignItems='flex-start'>
-                            <Avatar size={'2'} mt={'2'} />
-                            <Text fontSize='md'>
-                              Trap Not Functioning: Trap not rotating or
-                              displaced in the river.
-                            </Text>
-                          </HStack>
-                          <HStack space={2} alignItems='flex-start'>
-                            <Avatar size={'2'} mt={'2'} />
-                            <Text fontSize='md'>
-                              Trap Functioning but not normally: The trap
-                              appears to be rotating but not consistently. There
-                              may be high flows or high debris levels that are
-                              affecting the trap.
-                            </Text>
-                          </HStack>
-                          <HStack space={2} alignItems='flex-start'>
-                            <Avatar size={'2'} mt={'2'} />
-                            <Text fontSize='md'>
-                              Trap Not in Service: Trap not set up for fishing
-                              upon arrival.
-                            </Text>
-                          </HStack>
-                        </VStack>
-                      </Popover.Body>
-                    </Popover.Content>
-                  </Popover>
-                </HStack>
+              <VStack space={5}>
+                <Heading>Trap Operations</Heading>
+
                 <FormControl>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Trap Status
-                    </Text>
-                  </FormControl.Label>
+                  <HStack space={2} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Trap Is the Trap functioning normally?
+                      </Text>
+                    </FormControl.Label>
+                    <Popover
+                      placement='bottom left'
+                      trigger={triggerProps => {
+                        return (
+                          <IconButton
+                            {...triggerProps}
+                            icon={
+                              <Icon
+                                as={MaterialIcons}
+                                name='info-outline'
+                                size='lg'
+                              />
+                            }
+                          ></IconButton>
+                        )
+                      }}
+                    >
+                      <Popover.Content
+                        accessibilityLabel='Trap Stats Info'
+                        w='600'
+                        mr='10'
+                      >
+                        <Popover.Arrow />
+                        <Popover.CloseButton />
+                        <Popover.Header>
+                          Please select one of the trap functioning dropdowns
+                          based on a visual inspection of the trap.
+                        </Popover.Header>
+                        <Popover.Body p={4}>
+                          <VStack space={2}>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Avatar size={'2'} mt={'2'} />
+                              <Text fontSize='md'>
+                                Trap Functioning Normally: Trap rotating
+                                normally in the expected location in river.
+                              </Text>
+                            </HStack>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Avatar size={'2'} mt={'2'} />
+                              <Text fontSize='md'>
+                                Trap Not Functioning: Trap not rotating or
+                                displaced in the river.
+                              </Text>
+                            </HStack>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Avatar size={'2'} mt={'2'} />
+                              <Text fontSize='md'>
+                                Trap Functioning but not normally: The trap
+                                appears to be rotating but not consistently.
+                                There may be high flows or high debris levels
+                                that are affecting the trap.
+                              </Text>
+                            </HStack>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Avatar size={'2'} mt={'2'} />
+                              <Text fontSize='md'>
+                                Trap Not in Service: Trap not set up for fishing
+                                upon arrival.
+                              </Text>
+                            </HStack>
+                          </VStack>
+                        </Popover.Body>
+                      </Popover.Content>
+                    </Popover>
+                  </HStack>
                   <CustomSelect
                     selectedValue={values.trapStatus}
                     placeholder='Trap Status'
@@ -220,7 +228,167 @@ const TrapStatus = ({
                 )}
                 {values.trapStatus.length > 0 && (
                   <>
-                    <Heading fontSize='2xl'>Environmental Conditions:</Heading>
+                    <HStack space={10}>
+                      <FormControl w='47%'>
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Cone Depth
+                            </Text>
+                          </FormControl.Label>
+                          {Number(values.coneDepth) > QARanges.coneDepth.max &&
+                            RenderWarningMessage()}
+                          {touched.coneDepth &&
+                            errors.coneDepth &&
+                            RenderErrorMessage(errors, 'coneDepth')}
+                        </HStack>
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={handleChange('coneDepth')}
+                          onBlur={handleBlur('coneDepth')}
+                          value={values.coneDepth}
+                        />
+                        <Text
+                          color='#A1A1A1'
+                          position='absolute'
+                          top={50}
+                          right={4}
+                          fontSize={16}
+                        >
+                          {'in'}
+                        </Text>
+                      </FormControl>
+
+                      <FormControl w='47%'>
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Total Revolutions (optional)
+                            </Text>
+                          </FormControl.Label>
+                          {Number(values.totalRevolutions) >
+                            QARanges.totalRevolutions.max &&
+                            RenderWarningMessage()}
+                          {touched.totalRevolutions &&
+                            errors.totalRevolutions &&
+                            RenderErrorMessage(errors, 'totalRevolutions')}
+                        </HStack>
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={handleChange('totalRevolutions')}
+                          onBlur={handleBlur('totalRevolutions')}
+                          value={values.totalRevolutions}
+                        />
+                      </FormControl>
+                    </HStack>
+                    <FormControl w='30%'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Cone Setting
+                        </Text>
+                      </FormControl.Label>
+                      <Radio.Group
+                        name='coneSetting'
+                        accessibilityLabel='cone setting'
+                        value={`${values.coneSetting}`}
+                        onChange={(value: any) => {
+                          setFieldTouched('coneSetting', true)
+                          if (value === 'full') {
+                            setFieldValue('coneSetting', 'full')
+                          } else {
+                            setFieldValue('coneSetting', 'half')
+                          }
+                        }}
+                      >
+                        <Radio
+                          colorScheme='primary'
+                          value='full'
+                          my={1}
+                          _icon={{ color: 'primary' }}
+                        >
+                          Full
+                        </Radio>
+                        <Radio
+                          colorScheme='primary'
+                          value='half'
+                          my={1}
+                          _icon={{ color: 'primary' }}
+                        >
+                          Half
+                        </Radio>
+                      </Radio.Group>
+                    </FormControl>
+
+                    <FormControl>
+                      <HStack space={4} alignItems='center'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            RPM Before Cleaning
+                          </Text>
+                        </FormControl.Label>
+                        {((touched.rpm1 && errors.rpm1) ||
+                          (touched.rpm2 && errors.rpm2) ||
+                          (touched.rpm3 && errors.rpm3)) && (
+                          <HStack space={1}>
+                            <Icon
+                              marginTop={'.5'}
+                              as={Ionicons}
+                              name='alert-circle-outline'
+                              color='error'
+                            />
+                            <Text style={{ fontSize: 14, color: '#b71c1c' }}>
+                              All Three measurements are required
+                            </Text>
+                          </HStack>
+                        )}
+                      </HStack>
+                      <HStack space={8} justifyContent='space-between'>
+                        <FormControl w='30%'>
+                          <Input
+                            height='50px'
+                            fontSize='16'
+                            placeholder='Numeric Value'
+                            keyboardType='numeric'
+                            onChangeText={handleChange('rpm1')}
+                            onBlur={handleBlur('rpm1')}
+                            value={values.rpm1}
+                          />
+                        </FormControl>
+                        <FormControl w='30%'>
+                          <Input
+                            height='50px'
+                            fontSize='16'
+                            placeholder='Numeric Value'
+                            keyboardType='numeric'
+                            onChangeText={handleChange('rpm2')}
+                            onBlur={handleBlur('rpm2')}
+                            value={values.rpm2}
+                          />
+                        </FormControl>
+                        <FormControl w='30%'>
+                          <Input
+                            height='50px'
+                            fontSize='16'
+                            placeholder='Numeric Value'
+                            keyboardType='numeric'
+                            onChangeText={handleChange('rpm3')}
+                            onBlur={handleBlur('rpm3')}
+                            value={values.rpm3}
+                          />
+                        </FormControl>
+                      </HStack>
+                      <Text color='grey' mt='5' fontSize='17'>
+                        Please take 3 separate measures of cone rotations per
+                        minute before cleaning the trap.
+                      </Text>
+                    </FormControl>
+                    <Heading>Environmental Conditions</Heading>
                     <HStack space={5} width='125%'>
                       <FormControl w='1/4'>
                         <FormControl.Label>
@@ -291,163 +459,6 @@ const TrapStatus = ({
                           RenderErrorMessage(errors, 'waterTurbidity')}
                       </FormControl>
                     </HStack>
-                    <Heading fontSize='2xl'>Trap Pre-Processing</Heading>
-                    <FormControl w='1/2'>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Cone Depth
-                          </Text>
-                        </FormControl.Label>
-                        {Number(values.coneDepth) > QARanges.coneDepth.max &&
-                          RenderWarningMessage()}
-                        {touched.coneDepth &&
-                          errors.coneDepth &&
-                          RenderErrorMessage(errors, 'coneDepth')}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('coneDepth')}
-                        onBlur={handleBlur('coneDepth')}
-                        value={values.coneDepth}
-                      />
-                      <Text
-                        color='#A1A1A1'
-                        position='absolute'
-                        top={50}
-                        right={4}
-                        fontSize={16}
-                      >
-                        {'in'}
-                      </Text>
-                    </FormControl>
-                    <FormControl w='30%'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Cone Setting
-                        </Text>
-                      </FormControl.Label>
-                      <Radio.Group
-                        name='coneSetting'
-                        accessibilityLabel='cone setting'
-                        value={`${values.coneSetting}`}
-                        onChange={(value: any) => {
-                          setFieldTouched('coneSetting', true)
-                          if (value === 'full') {
-                            setFieldValue('coneSetting', 'full')
-                          } else {
-                            setFieldValue('coneSetting', 'half')
-                          }
-                        }}
-                      >
-                        <Radio
-                          colorScheme='primary'
-                          value='full'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          Full
-                        </Radio>
-                        <Radio
-                          colorScheme='primary'
-                          value='half'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          Half
-                        </Radio>
-                      </Radio.Group>
-                    </FormControl>
-                    <FormControl w='1/2'>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Total Revolutions
-                          </Text>
-                        </FormControl.Label>
-                        {Number(values.totalRevolutions) >
-                          QARanges.totalRevolutions.max &&
-                          RenderWarningMessage()}
-                        {touched.totalRevolutions &&
-                          errors.totalRevolutions &&
-                          RenderErrorMessage(errors, 'totalRevolutions')}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('totalRevolutions')}
-                        onBlur={handleBlur('totalRevolutions')}
-                        value={values.totalRevolutions}
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            RPM Before Cleaning
-                          </Text>
-                        </FormControl.Label>
-                        {((touched.rpm1 && errors.rpm1) ||
-                          (touched.rpm2 && errors.rpm2) ||
-                          (touched.rpm3 && errors.rpm3)) && (
-                          <HStack space={1}>
-                            <Icon
-                              marginTop={'.5'}
-                              as={Ionicons}
-                              name='alert-circle-outline'
-                              color='error'
-                            />
-                            <Text style={{ fontSize: 14, color: '#b71c1c' }}>
-                              All Three measurements are required
-                            </Text>
-                          </HStack>
-                        )}
-                      </HStack>
-                      <HStack space={8} justifyContent='space-between'>
-                        <FormControl w='30%'>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm1')}
-                            onBlur={handleBlur('rpm1')}
-                            value={values.rpm1}
-                          />
-                        </FormControl>
-                        <FormControl w='30%'>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm2')}
-                            onBlur={handleBlur('rpm2')}
-                            value={values.rpm2}
-                          />
-                        </FormControl>
-                        <FormControl w='30%'>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm3')}
-                            onBlur={handleBlur('rpm3')}
-                            value={values.rpm3}
-                          />
-                        </FormControl>
-                      </HStack>
-                      <Text color='grey' my='5' fontSize='17'>
-                        Please take 3 separate measures of cone rotations per
-                        minute before cleaning the trap.
-                      </Text>
-                    </FormControl>
                     <Text
                       color='black'
                       fontSize='xl'
