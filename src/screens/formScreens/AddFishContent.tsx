@@ -41,6 +41,8 @@ import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { Keyboard } from 'react-native'
+import { QARanges } from '../../utils/utils'
+import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
 const speciesDictionary = [
   { label: 'chinook', value: 'chinook' },
@@ -202,6 +204,8 @@ const AddFishContent = ({
                               Fork Length
                             </Text>
                           </FormControl.Label>
+                          {Number(values.forkLength) >
+                            QARanges.forkLength.max && RenderWarningMessage()}
                           {touched.forkLength &&
                             errors.forkLength &&
                             RenderErrorMessage(errors, 'forkLength')}
@@ -339,7 +343,8 @@ const AddFishContent = ({
                                 Weight (optional)
                               </Text>
                             </FormControl.Label>
-
+                            {Number(values.weight) > QARanges.weight.max &&
+                              RenderWarningMessage()}
                             {touched.weight &&
                               errors.weight &&
                               RenderErrorMessage(errors, 'weight')}

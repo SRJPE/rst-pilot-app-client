@@ -28,6 +28,8 @@ import {
 } from '../../redux/reducers/formSlices/trapStatusSlice'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { Keyboard } from 'react-native'
+import { QARanges } from '../../utils/utils'
+import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Flows', value: 'High Flows' },
@@ -236,9 +238,11 @@ const TrapStatus = ({
                           value={values.flowMeasure}
                         />
                         {inputUnit(values.flowMeasureUnit)}
-                        {/* {touched.flowMeasure &&
-                        errors.flowMeasure &&
-                        RenderErrorMessage(errors, 'flowMeasure')} */}
+                        {Number(values.flowMeasure) >
+                          QARanges.flowMeasure.max && RenderWarningMessage()}
+                        {touched.flowMeasure &&
+                          errors.flowMeasure &&
+                          RenderErrorMessage(errors, 'flowMeasure')}
                       </FormControl>
                       <FormControl w='1/4'>
                         <FormControl.Label>
@@ -256,6 +260,9 @@ const TrapStatus = ({
                           value={values.waterTemperature}
                         />
                         {inputUnit(values.waterTemperatureUnit, setFieldValue)}
+                        {Number(values.waterTemperature) >
+                          QARanges.waterTemperature.max &&
+                          RenderWarningMessage()}
                         {touched.waterTemperature &&
                           errors.waterTemperature &&
                           RenderErrorMessage(errors, 'waterTemperature')}
@@ -277,6 +284,8 @@ const TrapStatus = ({
                           value={values.waterTurbidity}
                         />
                         {inputUnit(values.waterTurbidityUnit)}
+                        {Number(values.waterTurbidity) >
+                          QARanges.waterTurbidity.max && RenderWarningMessage()}
                         {touched.waterTurbidity &&
                           errors.waterTurbidity &&
                           RenderErrorMessage(errors, 'waterTurbidity')}
@@ -290,6 +299,8 @@ const TrapStatus = ({
                             Cone Depth
                           </Text>
                         </FormControl.Label>
+                        {Number(values.coneDepth) > QARanges.coneDepth.max &&
+                          RenderWarningMessage()}
                         {touched.coneDepth &&
                           errors.coneDepth &&
                           RenderErrorMessage(errors, 'coneDepth')}
@@ -357,6 +368,9 @@ const TrapStatus = ({
                             Total Revolutions
                           </Text>
                         </FormControl.Label>
+                        {Number(values.totalRevolutions) >
+                          QARanges.totalRevolutions.max &&
+                          RenderWarningMessage()}
                         {touched.totalRevolutions &&
                           errors.totalRevolutions &&
                           RenderErrorMessage(errors, 'totalRevolutions')}

@@ -16,9 +16,11 @@ import { connect, useDispatch, useSelector } from 'react-redux'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addMarksOrTagsSchema } from '../../utils/helpers/yupValidations'
+import { QARanges } from '../../utils/utils'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
+import RenderWarningMessage from '../Shared/RenderWarningMessage'
 
 const initialFormValues = {
   type: '',
@@ -105,7 +107,6 @@ const MarkFishModalContent = ({
                         Type
                       </Text>
                     </FormControl.Label>
-
                     {touched.type &&
                       errors.type &&
                       RenderErrorMessage(errors, 'type')}
@@ -129,7 +130,8 @@ const MarkFishModalContent = ({
                         Number
                       </Text>
                     </FormControl.Label>
-
+                    {Number(values.number) > QARanges.markNumber.max &&
+                      RenderWarningMessage()}
                     {touched.number &&
                       errors.number &&
                       RenderErrorMessage(errors, 'number')}
@@ -152,12 +154,10 @@ const MarkFishModalContent = ({
                         Position
                       </Text>
                     </FormControl.Label>
-
                     {touched.position &&
                       errors.position &&
                       RenderErrorMessage(errors, 'position')}
                   </HStack>
-
                   <CustomSelect
                     selectedValue={values.position}
                     placeholder={'Mark Position'}
@@ -195,7 +195,6 @@ const MarkFishModalContent = ({
                         Crew Member Tagging
                       </Text>
                     </FormControl.Label>
-
                     {touched.crewMemberTagging &&
                       errors.crewMemberTagging &&
                       RenderErrorMessage(errors, 'crewMemberTagging')}

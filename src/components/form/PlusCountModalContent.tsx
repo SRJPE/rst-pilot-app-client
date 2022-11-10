@@ -15,9 +15,11 @@ import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
+import { QARanges } from '../../utils/utils'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
+import RenderWarningMessage from '../Shared/RenderWarningMessage'
 
 const initialFormValues = {
   species: '',
@@ -167,7 +169,8 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
                       Count
                     </Text>
                   </FormControl.Label>
-
+                  {Number(values.count) > QARanges.plusCount.max &&
+                    RenderWarningMessage()}
                   {touched.count &&
                     errors.count &&
                     RenderErrorMessage(errors, 'count')}
