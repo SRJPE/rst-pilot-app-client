@@ -18,7 +18,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { addMarksOrTagsSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
-import renderErrorMessage from '../Shared/RenderErrorMessage'
+import RenderErrorMessage from '../Shared/RenderErrorMessage'
 
 const initialFormValues = {
   type: '',
@@ -108,7 +108,7 @@ const MarkFishModalContent = ({
 
                     {touched.type &&
                       errors.type &&
-                      renderErrorMessage(errors, 'type')}
+                      RenderErrorMessage(errors, 'type')}
                   </HStack>
                   <CustomSelect
                     selectedValue={values.type}
@@ -132,7 +132,7 @@ const MarkFishModalContent = ({
 
                     {touched.number &&
                       errors.number &&
-                      renderErrorMessage(errors, 'number')}
+                      RenderErrorMessage(errors, 'number')}
                   </HStack>
                   <Input
                     height='50px'
@@ -155,7 +155,7 @@ const MarkFishModalContent = ({
 
                     {touched.position &&
                       errors.position &&
-                      renderErrorMessage(errors, 'position')}
+                      RenderErrorMessage(errors, 'position')}
                   </HStack>
 
                   <CustomSelect
@@ -198,7 +198,7 @@ const MarkFishModalContent = ({
 
                     {touched.crewMemberTagging &&
                       errors.crewMemberTagging &&
-                      renderErrorMessage(errors, 'crewMemberTagging')}
+                      RenderErrorMessage(errors, 'crewMemberTagging')}
                   </HStack>
                   <CustomSelect
                     selectedValue={values.crewMemberTagging}

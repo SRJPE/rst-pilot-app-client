@@ -19,7 +19,7 @@ import {
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../utils/helpers/yupValidations'
-import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
+import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
@@ -103,19 +103,14 @@ const TrapStatus = ({
         values,
       }) => (
         <>
-          <ScrollView
-            bg='#fff'
-            p='6%'
-            borderColor='themeGrey'
-            borderWidth='15'
-          >
+          <ScrollView bg='#fff' p='6%' borderColor='themeGrey' borderWidth='15'>
             <Pressable onPress={Keyboard.dismiss}>
               <VStack space={12}>
                 <HStack space={2} alignItems='center'>
                   <Heading>Is the Trap functioning normally?</Heading>
                   <Popover
                     placement='bottom left'
-                    trigger={(triggerProps) => {
+                    trigger={triggerProps => {
                       return (
                         <IconButton
                           {...triggerProps}
@@ -198,7 +193,7 @@ const TrapStatus = ({
                   />
                   {touched.trapStatus &&
                     errors.trapStatus &&
-                    renderErrorMessage(errors, 'trapStatus')}
+                    RenderErrorMessage(errors, 'trapStatus')}
                 </FormControl>
                 {(values.trapStatus === 'trap functioning but not normally' ||
                   values.trapStatus === 'trap not functioning') && (
@@ -218,7 +213,7 @@ const TrapStatus = ({
 
                     {touched.reasonNotFunc &&
                       errors.reasonNotFunc &&
-                      renderErrorMessage(errors, 'reasonNotFunc')}
+                      RenderErrorMessage(errors, 'reasonNotFunc')}
                   </FormControl>
                 )}
                 {values.trapStatus.length > 0 && (
@@ -243,7 +238,7 @@ const TrapStatus = ({
                         {inputUnit(values.flowMeasureUnit)}
                         {/* {touched.flowMeasure &&
                         errors.flowMeasure &&
-                        renderErrorMessage(errors, 'flowMeasure')} */}
+                        RenderErrorMessage(errors, 'flowMeasure')} */}
                       </FormControl>
                       <FormControl w='1/4'>
                         <FormControl.Label>
@@ -263,7 +258,7 @@ const TrapStatus = ({
                         {inputUnit(values.waterTemperatureUnit, setFieldValue)}
                         {touched.waterTemperature &&
                           errors.waterTemperature &&
-                          renderErrorMessage(errors, 'waterTemperature')}
+                          RenderErrorMessage(errors, 'waterTemperature')}
                       </FormControl>
                       <FormControl w='1/4'>
                         <FormControl.Label>
@@ -284,7 +279,7 @@ const TrapStatus = ({
                         {inputUnit(values.waterTurbidityUnit)}
                         {touched.waterTurbidity &&
                           errors.waterTurbidity &&
-                          renderErrorMessage(errors, 'waterTurbidity')}
+                          RenderErrorMessage(errors, 'waterTurbidity')}
                       </FormControl>
                     </HStack>
                     <Heading fontSize='2xl'>Trap Pre-Processing</Heading>
@@ -297,7 +292,7 @@ const TrapStatus = ({
                         </FormControl.Label>
                         {touched.coneDepth &&
                           errors.coneDepth &&
-                          renderErrorMessage(errors, 'coneDepth')}
+                          RenderErrorMessage(errors, 'coneDepth')}
                       </HStack>
                       <Input
                         height='50px'
@@ -364,7 +359,7 @@ const TrapStatus = ({
                         </FormControl.Label>
                         {touched.totalRevolutions &&
                           errors.totalRevolutions &&
-                          renderErrorMessage(errors, 'totalRevolutions')}
+                          RenderErrorMessage(errors, 'totalRevolutions')}
                       </HStack>
                       <Input
                         height='50px'
@@ -439,7 +434,12 @@ const TrapStatus = ({
                         minute before cleaning the trap.
                       </Text>
                     </FormControl>
-                    <Text color='black' fontSize='xl' alignSelf='center' pb='15%'>
+                    <Text
+                      color='black'
+                      fontSize='xl'
+                      alignSelf='center'
+                      pb='15%'
+                    >
                       - Remove debris and begin fish processing -
                     </Text>
                   </>

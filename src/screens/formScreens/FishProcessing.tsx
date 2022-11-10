@@ -11,7 +11,7 @@ import {
 import { useEffect } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
-import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
+import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import NavButtons from '../../components/formContainer/NavButtons'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
@@ -95,7 +95,7 @@ const FishProcessing = ({
                 />
                 {touched.fishProcessed &&
                   errors.fishProcessed &&
-                  renderErrorMessage(errors, 'fishProcessed')}
+                  RenderErrorMessage(errors, 'fishProcessed')}
               </FormControl>
               {(values.fishProcessedResult ===
                 'no catch data, fish left in live box' ||
@@ -116,7 +116,7 @@ const FishProcessing = ({
                   />
                   {touched.reasonForNotProcessing &&
                     errors.reasonForNotProcessing &&
-                    renderErrorMessage(errors, 'reasonForNotProcessing')}
+                    RenderErrorMessage(errors, 'reasonForNotProcessing')}
                 </FormControl>
               )}
 

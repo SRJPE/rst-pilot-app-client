@@ -17,7 +17,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
-import renderErrorMessage from '../Shared/RenderErrorMessage'
+import RenderErrorMessage from '../Shared/RenderErrorMessage'
 
 const initialFormValues = {
   species: '',
@@ -99,7 +99,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
 
                     {touched.species &&
                       errors.species &&
-                      renderErrorMessage(errors, 'species')}
+                      RenderErrorMessage(errors, 'species')}
                   </HStack>
                   <CustomSelect
                     selectedValue={values.species}
@@ -119,7 +119,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
 
                     {touched.lifeStage &&
                       errors.lifeStage &&
-                      renderErrorMessage(errors, 'lifeStage')}
+                      RenderErrorMessage(errors, 'lifeStage')}
                   </HStack>
                   <CustomSelect
                     selectedValue={values.lifeStage}
@@ -145,7 +145,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
 
                     {touched.run &&
                       errors.run &&
-                      renderErrorMessage(errors, 'run')}
+                      RenderErrorMessage(errors, 'run')}
                   </HStack>
 
                   <CustomSelect
@@ -170,7 +170,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
 
                   {touched.count &&
                     errors.count &&
-                    renderErrorMessage(errors, 'count')}
+                    RenderErrorMessage(errors, 'count')}
                 </HStack>
                 <Input
                   height='50px'
@@ -193,7 +193,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
 
                   {touched.plusCountMethod &&
                     errors.plusCountMethod &&
-                    renderErrorMessage(errors, 'plusCountMethod')}
+                    RenderErrorMessage(errors, 'plusCountMethod')}
                 </HStack>
                 <CustomSelect
                   selectedValue={values.plusCountMethod}

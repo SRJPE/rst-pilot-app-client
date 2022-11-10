@@ -19,7 +19,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { addGeneticsSampleSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
-import renderErrorMessage from '../Shared/RenderErrorMessage'
+import RenderErrorMessage from '../Shared/RenderErrorMessage'
 
 const initialFormValues = {
   sampleIdNumber: '',
@@ -142,7 +142,7 @@ const AddGeneticsModalContent = ({
 
                         {touched.sampleIdNumber &&
                           errors.sampleIdNumber &&
-                          renderErrorMessage(errors, 'sampleIdNumber')}
+                          RenderErrorMessage(errors, 'sampleIdNumber')}
                       </HStack>
                       <Input
                         height='50px'
@@ -239,7 +239,7 @@ const AddGeneticsModalContent = ({
 
                         {touched.crewMemberCollectingSample &&
                           errors.crewMemberCollectingSample &&
-                          renderErrorMessage(
+                          RenderErrorMessage(
                             errors,
                             'crewMemberCollectingSample'
                           )}

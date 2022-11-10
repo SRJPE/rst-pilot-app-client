@@ -1,7 +1,7 @@
 import { Text, Icon, HStack } from 'native-base'
 import { Ionicons } from '@expo/vector-icons'
 
-const renderErrorMessage = (errors: any, inputName: string) => {
+const RenderErrorMessage = (errors: any, inputName: string) => {
   return (
     <HStack space={1}>
       <Icon
@@ -16,4 +16,4 @@ const renderErrorMessage = (errors: any, inputName: string) => {
     </HStack>
   )
 }
-export default renderErrorMessage
+export default RenderErrorMessage
