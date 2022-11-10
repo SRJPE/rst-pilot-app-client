@@ -25,7 +25,8 @@ export const trapStatusSchema = yup.object().shape({
   waterTemperatureUnit: yup.string(),
   waterTurbidity: yup
     .number()
-    .required('Water Turbidity Required')
+    .nullable()
+    // .required('Water Turbidity Required')
     .typeError('Input must be a number'),
   waterTurbidityUnit: yup.string(),
   coneDepth: yup
@@ -43,7 +44,7 @@ export const trapStatusSchema = yup.object().shape({
     // .transform((value, originalValue) => {
     //   return originalValue === '' ? undefined : value
     // })
-    .required('Total Revolutions Required')
+    .required('Total Required')
     .typeError('Input must be a number'),
   rpm1: yup
     .number()
