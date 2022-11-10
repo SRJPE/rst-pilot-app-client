@@ -10,7 +10,7 @@ const RenderErrorMessage = (errors: any, inputName: string) => {
         name='alert-circle-outline'
         color='error'
       />
-      <Text style={{ fontSize: 14, color: '#b71c1c' }}>
+      <Text style={{ fontSize: 16, color: '#b71c1c' }}>
         {errors[inputName] as string}
       </Text>
     </HStack>
