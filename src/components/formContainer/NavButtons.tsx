@@ -92,7 +92,7 @@ const NavButtons = ({
         navigateHelper('End Trapping')
         break
       case 'High Temperatures':
-        navigateHelper('Trap Pre-Processing')
+        navigateHelper('Fish Processing')
         break
       case 'No Fish Caught':
         navigateHelper('Trap Post-Processing')

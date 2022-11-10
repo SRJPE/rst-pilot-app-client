@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../../api/axiosConfig'
+import { RootState } from '../../store'
 import { connectionChanged } from '../connectivitySlice'
 
 interface InitialStateI {
@@ -51,8 +52,8 @@ const initialState: InitialStateI = {
 export const postTrapVisitSubmissions = createAsyncThunk(
   'trapVisitPostBundler/postTrapVisitSubmissions',
   async (_, thunkAPI) => {
-    const state = thunkAPI.getState() as InitialStateI
-    const trapVisitSubmissions = state.trapVisitSubmissions
+    const state = thunkAPI.getState() as RootState
+    const trapVisitSubmissions = state.trapVisitPostBundler.trapVisitSubmissions
     const response: APIResponseI = await api.post(
       'trap-visit/',
       trapVisitSubmissions

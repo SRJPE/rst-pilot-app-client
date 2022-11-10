@@ -5,7 +5,6 @@ import dropdownsSlice from './dropdownsSlice'
 import navigationSlice from './formSlices/navigationSlice'
 import visitSetupSlice from './formSlices/visitSetupSlice'
 import trapStatusSlice from './formSlices/trapStatusSlice'
-import trapPreProcessingSlice from './formSlices/trapPreProcessingSlice'
 import fishProcessingSlice from './formSlices/fishProcessingSlice'
 import fishInputSlice from './formSlices/fishInputSlice'
 import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
@@ -41,7 +40,6 @@ export default combineReducers({
   navigation: navigationSlice,
   visitSetup: visitSetupSlice,
   trapStatus: trapStatusSlice,
-  trapPreProcessing: trapPreProcessingSlice,
   fishProcessing: fishProcessingSlice,
   fishInput: fishInputSlice,
   addMarksOrTags: addMarksOrTagsSlice,
