@@ -13,8 +13,7 @@ import markRecaptureNavigationSlice from './markRecaptureSlices/markRecaptureNav
 import addMarksOrTagsSlice from './formSlices/addMarksOrTagsSlice'
 import addGeneticSamplesSlice from './formSlices/addGeneticSamplesSlice'
 import visitSetupDefaultsSlice from './visitSetupDefaults'
-import catchRawPostBundler from './postSlices/catchRawPostBundler'
-import trapVisitPostBundler from './postSlices/trapVisitPostBundler'
+import trapVisitFormPostBundler from './postSlices/trapVisitFormPostBundler'
 import connectivitySlice from './connectivitySlice'
 import slideAlertSlice from './slideAlertSlice'
 
@@ -47,7 +46,6 @@ export default combineReducers({
   trapPostProcessing: trapPostProcessingSlice,
   markRecaptureNavigation: markRecaptureNavigationSlice,
   releaseTrial: releaseTrialSlice,
-  catchRawPostBundler,
-  trapVisitPostBundler,
+  trapVisitFormPostBundler,
   connectivity: connectivitySlice,
 })

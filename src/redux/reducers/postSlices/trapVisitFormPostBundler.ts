@@ -11,6 +11,8 @@ interface InitialStateI {
     | 'submission-successful'
   trapVisitSubmissions: TrapVisitSubmissionI[]
   previousTrapVisitSubmissions: TrapVisitSubmissionI[]
+  catchRawSubmissions: CatchRawSubmissionI[]
+  previousCatchRawSubmissions: CatchRawSubmissionI[]
 }
 
 interface TrapVisitSubmissionI {
@@ -38,6 +40,32 @@ interface TrapVisitSubmissionI {
   comments?: string
 }
 
+interface CatchRawSubmissionI {
+  id?: number
+  programId?: number
+  trapVisitId?: number
+  taxonId?: number
+  captureRunClass?: number
+  captureRunClassMethod?: number
+  markType?: number
+  adiposeClipped?: boolean
+  lifeStage?: number
+  forkLength?: number
+  weight?: number
+  numFishCaught?: number
+  plusCount?: boolean
+  plusCountMethodology?: number
+  isRandom?: boolean
+  comments?: string
+  createdBy?: number
+  createdAt?: Date
+  updatedAt?: Date
+  qcCompleted?: Date
+  qcCompletedBy?: number
+  qcTime?: Date
+  qcComments?: string
+}
+
 interface APIResponseI {
   data: any
 }
@@ -46,14 +74,16 @@ const initialState: InitialStateI = {
   submissionStatus: 'not-submitted',
   trapVisitSubmissions: [],
   previousTrapVisitSubmissions: [],
+  catchRawSubmissions: [],
+  previousCatchRawSubmissions: [],
 }
 
 // Async actions API calls
-export const postTrapVisitSubmissions = createAsyncThunk(
-  'trapVisitPostBundler/postTrapVisitSubmissions',
+export const postTrapVisitFormSubmissions = createAsyncThunk(
+  'trapVisitPostBundler/postTrapVisitFormSubmissions',
   async (_, thunkAPI) => {
     const state = thunkAPI.getState() as RootState
-    const trapVisitSubmissions = state.trapVisitPostBundler.trapVisitSubmissions
+    const trapVisitSubmissions = state.trapVisitFormPostBundler.trapVisitSubmissions
     const response: APIResponseI = await api.post(
       'trap-visit/',
       trapVisitSubmissions
@@ -72,11 +102,11 @@ export const trapVisitPostBundler = createSlice({
     },
   },
   extraReducers: {
-    [postTrapVisitSubmissions.pending.type]: (state, action) => {
+    [postTrapVisitFormSubmissions.pending.type]: (state, action) => {
       state.submissionStatus = 'submitting...'
     },
 
-    [postTrapVisitSubmissions.fulfilled.type]: (state, action) => {
+    [postTrapVisitFormSubmissions.fulfilled.type]: (state, action) => {
       const trapVisitPostResult = action.payload
       state.submissionStatus = 'submission-successful'
       state.previousTrapVisitSubmissions = [
@@ -87,7 +117,7 @@ export const trapVisitPostBundler = createSlice({
       console.log('successful post result: ', action.payload)
     },
 
-    [postTrapVisitSubmissions.rejected.type]: (state, action) => {
+    [postTrapVisitFormSubmissions.rejected.type]: (state, action) => {
       state.submissionStatus = 'submission-failed'
     },
     [connectionChanged.type]: (state, action) => {
