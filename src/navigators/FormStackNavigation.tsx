@@ -12,7 +12,7 @@ import EndTrapping from '../screens/formScreens/EndTrapping'
 import IncompleteSections from '../screens/formScreens/IncompleteSections'
 import StartMarkRecapture from '../screens/markRecaptureScreens/StartMarkRecapture'
 import TrapPostProcessing from '../screens/formScreens/TrapPostProcessing'
-import AddFishModalContent from '../screens/formScreens/AddFishContent'
+import AddFish from '../screens/formScreens/AddFish'
 import HistoricalData from '../screens/formScreens/HistoricalData'
 import { useSelector } from 'react-redux'
 
@@ -49,7 +49,7 @@ export default function FormStackNavigation() {
       <FormStack.Screen name='End Trapping' component={EndTrapping} />
       <FormStack.Screen
         name='Add Fish'
-        component={AddFishModalContent}
+        component={AddFish}
         options={{ headerShown: false }}
       />
       <FormStack.Screen

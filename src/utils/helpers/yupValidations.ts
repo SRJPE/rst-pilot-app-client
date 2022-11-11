@@ -25,7 +25,8 @@ export const trapStatusSchema = yup.object().shape({
   waterTemperatureUnit: yup.string(),
   waterTurbidity: yup
     .number()
-    .required('Water Turbidity Required')
+    .nullable()
+    // .required('Water Turbidity Required')
     .typeError('Input must be a number'),
   waterTurbidityUnit: yup.string(),
   coneDepth: yup
@@ -43,7 +44,7 @@ export const trapStatusSchema = yup.object().shape({
     // .transform((value, originalValue) => {
     //   return originalValue === '' ? undefined : value
     // })
-    .required('Total Revolutions Required')
+    .required('Total Required')
     .typeError('Input must be a number'),
   rpm1: yup
     .number()
@@ -62,7 +63,7 @@ export const trapStatusSchema = yup.object().shape({
 export const trapPostProcessingSchema = yup.object().shape({
   debrisVolume: yup
     .number()
-    .required('Stream required')
+    .required('Debris volume required')
     .typeError('Input must be a number'),
   rpm1: yup
     .number()
@@ -95,7 +96,7 @@ export const addIndividualFishSchema = yup.object().shape({
     .typeError('Input must be a number'),
   run: yup
     .number()
-    // .required('Fish fork length required')
+    // .required('Run required')
     // .nullable()
     .typeError('Input must be a number'),
   weight: yup.number().nullable().typeError('Input must be a number'),
@@ -161,7 +162,7 @@ export const addPlusCountsSchema = yup.object().shape({
   // run: yup.string().required('Run required'),
   count: yup
     .number()
-    .required('Fish fork length required')
+    .required('Count is required')
     .typeError('Input must be a number'),
   plusCountMethod: yup.string().required('Plus count method required'),
 })

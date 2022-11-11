@@ -22,7 +22,7 @@ import NavButtons from '../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../utils/helpers/yupValidations'
 import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 
-import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
+import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import CustomSelect from '../../components/Shared/CustomSelect'
 
 const mapStateToProps = (state: RootState) => {
@@ -141,7 +141,7 @@ const VisitSetup = ({
                 />
                 {touched.stream &&
                   errors.stream &&
-                  renderErrorMessage(errors, 'stream')}
+                  RenderErrorMessage(errors, 'stream')}
               </FormControl>
               {values.stream && (
                 <>
@@ -177,7 +177,7 @@ const VisitSetup = ({
                     />
                     {touched.trapSite &&
                       errors.trapSite &&
-                      renderErrorMessage(errors, 'trapSite')}
+                      RenderErrorMessage(errors, 'trapSite')}
                   </FormControl>
                   <FormControl>
                     <FormControl.Label>
@@ -197,7 +197,7 @@ const VisitSetup = ({
                     />
                     {/* {touched.crew &&
                       errors.crew &&
-                      renderErrorMessage(errors, 'crew')} */}
+                      RenderErrorMessage(errors, 'crew')} */}
                   </FormControl>
                 </>
               )}

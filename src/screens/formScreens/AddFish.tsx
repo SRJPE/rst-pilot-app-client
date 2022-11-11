@@ -37,10 +37,12 @@ import {
 import { saveGeneticSampleData } from '../../redux/reducers/formSlices/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
 import { MaterialIcons } from '@expo/vector-icons'
-import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
+import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { Keyboard } from 'react-native'
+import { QARanges } from '../../utils/utils'
+import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
 const speciesDictionary = [
   { label: 'chinook', value: 'chinook' },
@@ -149,7 +151,7 @@ const AddFishContent = ({
 
                       {touched.species &&
                         errors.species &&
-                        renderErrorMessage(errors, 'species')}
+                        RenderErrorMessage(errors, 'species')}
                     </HStack>
                     <CustomSelect
                       selectedValue={values.species}
@@ -202,9 +204,11 @@ const AddFishContent = ({
                               Fork Length
                             </Text>
                           </FormControl.Label>
+                          {Number(values.forkLength) >
+                            QARanges.forkLength.max && RenderWarningMessage()}
                           {touched.forkLength &&
                             errors.forkLength &&
-                            renderErrorMessage(errors, 'forkLength')}
+                            RenderErrorMessage(errors, 'forkLength')}
                         </HStack>
                         <Input
                           height='50px'
@@ -238,7 +242,7 @@ const AddFishContent = ({
                             </Text>
                             {/* {touched.run &&
                         errors.run &&
-                        renderErrorMessage(errors, 'run')} */}
+                        RenderErrorMessage(errors, 'run')} */}
                           </HStack>
                           {/* <Input
                       height='50px'
@@ -306,7 +310,7 @@ const AddFishContent = ({
                             </Popover>
                             {touched.lifeStage &&
                               errors.lifeStage &&
-                              renderErrorMessage(errors, 'lifeStage')}
+                              RenderErrorMessage(errors, 'lifeStage')}
                           </HStack>
 
                           <CustomSelect
@@ -339,10 +343,11 @@ const AddFishContent = ({
                                 Weight (optional)
                               </Text>
                             </FormControl.Label>
-
+                            {Number(values.weight) > QARanges.weight.max &&
+                              RenderWarningMessage()}
                             {touched.weight &&
                               errors.weight &&
-                              renderErrorMessage(errors, 'weight')}
+                              RenderErrorMessage(errors, 'weight')}
                           </HStack>
                           <Input
                             height='50px'

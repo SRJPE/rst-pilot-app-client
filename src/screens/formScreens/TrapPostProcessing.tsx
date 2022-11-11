@@ -17,7 +17,7 @@ import NavButtons from '../../components/formContainer/NavButtons'
 import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
 import { Keyboard } from 'react-native'
-import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
+import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 import {
   markTrapPostProcessingCompleted,
@@ -25,6 +25,8 @@ import {
 } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
 import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
+import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
+import { QARanges } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -100,9 +102,11 @@ const TrapPostProcessing = ({
                       Debris Volume
                     </Text>
                   </FormControl.Label>
+                  {Number(values.debrisVolume) > QARanges.debrisVolume.max &&
+                    RenderWarningMessage()}
                   {touched.debrisVolume &&
                     errors.debrisVolume &&
-                    renderErrorMessage(errors, 'debrisVolume')}
+                    RenderErrorMessage(errors, 'debrisVolume')}
                 </HStack>
                 <Input
                   height='50px'
@@ -131,6 +135,7 @@ const TrapPostProcessing = ({
                       RPM After Cleaning
                     </Text>
                   </FormControl.Label>
+
                   {((touched.rpm1 && errors.rpm1) ||
                     (touched.rpm2 && errors.rpm2) ||
                     (touched.rpm3 && errors.rpm3)) && (
@@ -141,7 +146,7 @@ const TrapPostProcessing = ({
                         name='alert-circle-outline'
                         color='error'
                       />
-                      <Text style={{ fontSize: 14, color: '#b71c1c' }}>
+                      <Text style={{ fontSize: 16, color: '#b71c1c' }}>
                         All Three measurements are required
                       </Text>
                     </HStack>
@@ -150,15 +155,28 @@ const TrapPostProcessing = ({
 
                 <HStack space={8} justifyContent='space-between'>
                   <FormControl w='30%'>
-                    <Input
-                      height='50px'
-                      fontSize='16'
-                      placeholder='Numeric Value'
-                      keyboardType='numeric'
-                      onChangeText={handleChange('rpm1')}
-                      onBlur={handleBlur('rpm1')}
-                      value={values.rpm1}
-                    />
+                    <VStack space={3}>
+                      <Input
+                        height='50px'
+                        fontSize='16'
+                        placeholder='Numeric Value'
+                        keyboardType='numeric'
+                        onChangeText={handleChange('rpm1')}
+                        onBlur={handleBlur('rpm1')}
+                        value={values.rpm1}
+                      />
+                      {/* {console.log('123123123', Number(values.rpm1))}
+                      {console.log('098797890', Number(QARanges.RPM.max))}
+                      {console.log(
+                        '&&&&&&&&',
+                        Number(values.rmp1) > Number(QARanges.RPM.max)
+                      )} */}
+                      {Number(values.rmp1) > 30 ? (
+                        RenderWarningMessage()
+                      ) : (
+                        <></>
+                      )}
+                    </VStack>
                   </FormControl>
                   <FormControl w='30%'>
                     <Input
@@ -170,6 +188,8 @@ const TrapPostProcessing = ({
                       onBlur={handleBlur('rpm2')}
                       value={values.rpm2}
                     />
+                    {Number(values.rmp2) > QARanges.RPM.max &&
+                      RenderWarningMessage()}
                   </FormControl>
                   <FormControl w='30%'>
                     <Input
@@ -181,6 +201,8 @@ const TrapPostProcessing = ({
                       onBlur={handleBlur('rpm3')}
                       value={values.rpm3}
                     />
+                    {Number(values.rmp3) > QARanges.RPM.max &&
+                      RenderWarningMessage()}
                   </FormControl>
                 </HStack>
                 <Text color='grey' my='5' fontSize='17'>

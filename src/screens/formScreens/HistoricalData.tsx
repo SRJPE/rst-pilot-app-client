@@ -7,6 +7,7 @@ import {
   Input,
   HStack,
   Divider,
+  FormControl,
 } from 'native-base'
 import { useState } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -203,6 +204,22 @@ export default function HistoricalData({ navigation }: { navigation: any }) {
               />
             </Box>
           </HStack>
+          <FormControl>
+            <FormControl.Label>
+              <Text color='black' fontSize='xl'>
+                Comments
+              </Text>
+            </FormControl.Label>
+            <Input
+              height='50px'
+              fontSize='16'
+              placeholder='Write a comment'
+              keyboardType='default'
+              // onChangeText={handleChange('comments')}
+              // onBlur={handleBlur('comments')}
+              // value={values.comments}
+            />
+          </FormControl>
         </VStack>
       </View>
       <NavButtons navigation={navigation} />

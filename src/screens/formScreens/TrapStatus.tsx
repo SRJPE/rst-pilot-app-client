@@ -19,7 +19,7 @@ import {
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../utils/helpers/yupValidations'
-import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
+import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
@@ -28,6 +28,8 @@ import {
 } from '../../redux/reducers/formSlices/trapStatusSlice'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { Keyboard } from 'react-native'
+import { QARanges } from '../../utils/utils'
+import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
 const reasonsForTrapNotFunctioning = [
   { label: 'High Flows', value: 'High Flows' },
@@ -108,82 +110,85 @@ const TrapStatus = ({
             p='6%'
             borderColor='themeGrey'
             borderWidth='15'
+            borderBottomWidth='0'
+            mb='15'
           >
             <Pressable onPress={Keyboard.dismiss}>
-              <VStack space={12}>
-                <HStack space={2} alignItems='center'>
-                  <Heading>Is the Trap functioning normally?</Heading>
-                  <Popover
-                    placement='bottom left'
-                    trigger={(triggerProps) => {
-                      return (
-                        <IconButton
-                          {...triggerProps}
-                          icon={
-                            <Icon
-                              as={MaterialIcons}
-                              name='info-outline'
-                              size='xl'
-                            />
-                          }
-                        ></IconButton>
-                      )
-                    }}
-                  >
-                    <Popover.Content
-                      accessibilityLabel='Trap Stats Info'
-                      w='600'
-                      mr='10'
-                    >
-                      <Popover.Arrow />
-                      <Popover.CloseButton />
-                      <Popover.Header>
-                        Please select one of the trap functioning dropdowns
-                        based on a visual inspection of the trap.
-                      </Popover.Header>
-                      <Popover.Body p={4}>
-                        <VStack space={2}>
-                          <HStack space={2} alignItems='flex-start'>
-                            <Avatar size={'2'} mt={'2'} />
-                            <Text fontSize='md'>
-                              Trap Functioning Normally: Trap rotating normally
-                              in the expected location in river.
-                            </Text>
-                          </HStack>
-                          <HStack space={2} alignItems='flex-start'>
-                            <Avatar size={'2'} mt={'2'} />
-                            <Text fontSize='md'>
-                              Trap Not Functioning: Trap not rotating or
-                              displaced in the river.
-                            </Text>
-                          </HStack>
-                          <HStack space={2} alignItems='flex-start'>
-                            <Avatar size={'2'} mt={'2'} />
-                            <Text fontSize='md'>
-                              Trap Functioning but not normally: The trap
-                              appears to be rotating but not consistently. There
-                              may be high flows or high debris levels that are
-                              affecting the trap.
-                            </Text>
-                          </HStack>
-                          <HStack space={2} alignItems='flex-start'>
-                            <Avatar size={'2'} mt={'2'} />
-                            <Text fontSize='md'>
-                              Trap Not in Service: Trap not set up for fishing
-                              upon arrival.
-                            </Text>
-                          </HStack>
-                        </VStack>
-                      </Popover.Body>
-                    </Popover.Content>
-                  </Popover>
-                </HStack>
+              <VStack space={5}>
+                <Heading>Trap Operations</Heading>
+
                 <FormControl>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Trap Status
-                    </Text>
-                  </FormControl.Label>
+                  <HStack space={2} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Trap Is the Trap functioning normally?
+                      </Text>
+                    </FormControl.Label>
+                    <Popover
+                      placement='bottom left'
+                      trigger={triggerProps => {
+                        return (
+                          <IconButton
+                            {...triggerProps}
+                            icon={
+                              <Icon
+                                as={MaterialIcons}
+                                name='info-outline'
+                                size='lg'
+                              />
+                            }
+                          ></IconButton>
+                        )
+                      }}
+                    >
+                      <Popover.Content
+                        accessibilityLabel='Trap Stats Info'
+                        w='600'
+                        mr='10'
+                      >
+                        <Popover.Arrow />
+                        <Popover.CloseButton />
+                        <Popover.Header>
+                          Please select one of the trap functioning dropdowns
+                          based on a visual inspection of the trap.
+                        </Popover.Header>
+                        <Popover.Body p={4}>
+                          <VStack space={2}>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Avatar size={'2'} mt={'2'} />
+                              <Text fontSize='md'>
+                                Trap Functioning Normally: Trap rotating
+                                normally in the expected location in river.
+                              </Text>
+                            </HStack>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Avatar size={'2'} mt={'2'} />
+                              <Text fontSize='md'>
+                                Trap Not Functioning: Trap not rotating or
+                                displaced in the river.
+                              </Text>
+                            </HStack>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Avatar size={'2'} mt={'2'} />
+                              <Text fontSize='md'>
+                                Trap Functioning but not normally: The trap
+                                appears to be rotating but not consistently.
+                                There may be high flows or high debris levels
+                                that are affecting the trap.
+                              </Text>
+                            </HStack>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Avatar size={'2'} mt={'2'} />
+                              <Text fontSize='md'>
+                                Trap Not in Service: Trap not set up for fishing
+                                upon arrival.
+                              </Text>
+                            </HStack>
+                          </VStack>
+                        </Popover.Body>
+                      </Popover.Content>
+                    </Popover>
+                  </HStack>
                   <CustomSelect
                     selectedValue={values.trapStatus}
                     placeholder='Trap Status'
@@ -198,7 +203,7 @@ const TrapStatus = ({
                   />
                   {touched.trapStatus &&
                     errors.trapStatus &&
-                    renderErrorMessage(errors, 'trapStatus')}
+                    RenderErrorMessage(errors, 'trapStatus')}
                 </FormControl>
                 {(values.trapStatus === 'trap functioning but not normally' ||
                   values.trapStatus === 'trap not functioning') && (
@@ -218,106 +223,70 @@ const TrapStatus = ({
 
                     {touched.reasonNotFunc &&
                       errors.reasonNotFunc &&
-                      renderErrorMessage(errors, 'reasonNotFunc')}
+                      RenderErrorMessage(errors, 'reasonNotFunc')}
                   </FormControl>
                 )}
                 {values.trapStatus.length > 0 && (
                   <>
-                    <Heading fontSize='2xl'>Environmental Conditions:</Heading>
-                    <HStack space={5} width='125%'>
-                      <FormControl w='1/4'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Flow Measure
-                          </Text>
-                        </FormControl.Label>
-                        <Input
-                          height='50px'
-                          fontSize='16'
-                          placeholder='Populated from CDEC'
-                          keyboardType='numeric'
-                          onChangeText={handleChange('flowMeasure')}
-                          onBlur={handleBlur('flowMeasure')}
-                          value={values.flowMeasure}
-                        />
-                        {inputUnit(values.flowMeasureUnit)}
-                        {/* {touched.flowMeasure &&
-                        errors.flowMeasure &&
-                        renderErrorMessage(errors, 'flowMeasure')} */}
-                      </FormControl>
-                      <FormControl w='1/4'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Water Temperature
-                          </Text>
-                        </FormControl.Label>
+                    <HStack space={10}>
+                      <FormControl w='47%'>
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Cone Depth
+                            </Text>
+                          </FormControl.Label>
+                          {Number(values.coneDepth) > QARanges.coneDepth.max &&
+                            RenderWarningMessage()}
+                          {touched.coneDepth &&
+                            errors.coneDepth &&
+                            RenderErrorMessage(errors, 'coneDepth')}
+                        </HStack>
                         <Input
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
                           keyboardType='numeric'
-                          onChangeText={handleChange('waterTemperature')}
-                          onBlur={handleBlur('waterTemperature')}
-                          value={values.waterTemperature}
+                          onChangeText={handleChange('coneDepth')}
+                          onBlur={handleBlur('coneDepth')}
+                          value={values.coneDepth}
                         />
-                        {inputUnit(values.waterTemperatureUnit, setFieldValue)}
-                        {touched.waterTemperature &&
-                          errors.waterTemperature &&
-                          renderErrorMessage(errors, 'waterTemperature')}
+                        <Text
+                          color='#A1A1A1'
+                          position='absolute'
+                          top={50}
+                          right={4}
+                          fontSize={16}
+                        >
+                          {'in'}
+                        </Text>
                       </FormControl>
-                      <FormControl w='1/4'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Water Turbidity
-                          </Text>
-                        </FormControl.Label>
 
+                      <FormControl w='47%'>
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Total Revolutions
+                            </Text>
+                          </FormControl.Label>
+                          {Number(values.totalRevolutions) >
+                            QARanges.totalRevolutions.max &&
+                            RenderWarningMessage()}
+                          {touched.totalRevolutions &&
+                            errors.totalRevolutions &&
+                            RenderErrorMessage(errors, 'totalRevolutions')}
+                        </HStack>
                         <Input
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
                           keyboardType='numeric'
-                          onChangeText={handleChange('waterTurbidity')}
-                          onBlur={handleBlur('waterTurbidity')}
-                          value={values.waterTurbidity}
+                          onChangeText={handleChange('totalRevolutions')}
+                          onBlur={handleBlur('totalRevolutions')}
+                          value={values.totalRevolutions}
                         />
-                        {inputUnit(values.waterTurbidityUnit)}
-                        {touched.waterTurbidity &&
-                          errors.waterTurbidity &&
-                          renderErrorMessage(errors, 'waterTurbidity')}
                       </FormControl>
                     </HStack>
-                    <Heading fontSize='2xl'>Trap Pre-Processing</Heading>
-                    <FormControl w='1/2'>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Cone Depth
-                          </Text>
-                        </FormControl.Label>
-                        {touched.coneDepth &&
-                          errors.coneDepth &&
-                          renderErrorMessage(errors, 'coneDepth')}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('coneDepth')}
-                        onBlur={handleBlur('coneDepth')}
-                        value={values.coneDepth}
-                      />
-                      <Text
-                        color='#A1A1A1'
-                        position='absolute'
-                        top={50}
-                        right={4}
-                        fontSize={16}
-                      >
-                        {'in'}
-                      </Text>
-                    </FormControl>
                     <FormControl w='30%'>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
@@ -355,27 +324,7 @@ const TrapStatus = ({
                         </Radio>
                       </Radio.Group>
                     </FormControl>
-                    <FormControl w='1/2'>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Total Revolutions
-                          </Text>
-                        </FormControl.Label>
-                        {touched.totalRevolutions &&
-                          errors.totalRevolutions &&
-                          renderErrorMessage(errors, 'totalRevolutions')}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('totalRevolutions')}
-                        onBlur={handleBlur('totalRevolutions')}
-                        value={values.totalRevolutions}
-                      />
-                    </FormControl>
+
                     <FormControl>
                       <HStack space={4} alignItems='center'>
                         <FormControl.Label>
@@ -434,12 +383,88 @@ const TrapStatus = ({
                           />
                         </FormControl>
                       </HStack>
-                      <Text color='grey' my='5' fontSize='17'>
+                      <Text color='grey' mt='5' fontSize='17'>
                         Please take 3 separate measures of cone rotations per
                         minute before cleaning the trap.
                       </Text>
                     </FormControl>
-                    <Text color='black' fontSize='xl' alignSelf='center' pb='15%'>
+                    <Heading>Environmental Conditions</Heading>
+                    <HStack space={5} width='125%'>
+                      <FormControl w='1/4'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Flow Measure
+                          </Text>
+                        </FormControl.Label>
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Populated from CDEC'
+                          keyboardType='numeric'
+                          onChangeText={handleChange('flowMeasure')}
+                          onBlur={handleBlur('flowMeasure')}
+                          value={values.flowMeasure}
+                        />
+                        {inputUnit(values.flowMeasureUnit)}
+                        {Number(values.flowMeasure) >
+                          QARanges.flowMeasure.max && RenderWarningMessage()}
+                        {touched.flowMeasure &&
+                          errors.flowMeasure &&
+                          RenderErrorMessage(errors, 'flowMeasure')}
+                      </FormControl>
+                      <FormControl w='1/4'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Water Temperature
+                          </Text>
+                        </FormControl.Label>
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={handleChange('waterTemperature')}
+                          onBlur={handleBlur('waterTemperature')}
+                          value={values.waterTemperature}
+                        />
+                        {inputUnit(values.waterTemperatureUnit, setFieldValue)}
+                        {Number(values.waterTemperature) >
+                          QARanges.waterTemperature.max &&
+                          RenderWarningMessage()}
+                        {touched.waterTemperature &&
+                          errors.waterTemperature &&
+                          RenderErrorMessage(errors, 'waterTemperature')}
+                      </FormControl>
+                      <FormControl w='1/4'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Water Turbidity
+                          </Text>
+                        </FormControl.Label>
+
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={handleChange('waterTurbidity')}
+                          onBlur={handleBlur('waterTurbidity')}
+                          value={values.waterTurbidity}
+                        />
+                        {inputUnit(values.waterTurbidityUnit)}
+                        {Number(values.waterTurbidity) >
+                          QARanges.waterTurbidity.max && RenderWarningMessage()}
+                        {touched.waterTurbidity &&
+                          errors.waterTurbidity &&
+                          RenderErrorMessage(errors, 'waterTurbidity')}
+                      </FormControl>
+                    </HStack>
+                    <Text
+                      color='black'
+                      fontSize='xl'
+                      alignSelf='center'
+                      pb='15%'
+                    >
                       - Remove debris and begin fish processing -
                     </Text>
                   </>

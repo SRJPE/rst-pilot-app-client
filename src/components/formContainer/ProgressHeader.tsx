@@ -22,7 +22,11 @@ export default function ProgressHeader(props: any) {
     <Box>
       <VStack>
         <HStack w='100%' justifyContent='space-between' p='4'>
-          <Text fontSize='2xl'>{activePageTitle}</Text>
+          <Text fontSize='2xl'>
+            {activePageTitle === 'Trap Status'
+              ? 'Trap Operations & Environmental Conditions'
+              : activePageTitle}
+          </Text>
           <Text fontSize='xl'>{renderCurrentStepOfTotalSteps()}</Text>
         </HStack>
         <Box w='100%'>
