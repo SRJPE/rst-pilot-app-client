@@ -44,12 +44,6 @@ import { Keyboard } from 'react-native'
 import { QARanges } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
-const speciesDictionary = [
-  { label: 'chinook', value: 'chinook' },
-  { label: 'steelhead', value: 'steelhead' },
-  { label: 'other', value: 'other' },
-]
-
 const AddFishContent = ({
   saveIndividualFish,
   saveMarkOrTagData,
@@ -58,6 +52,7 @@ const AddFishContent = ({
   setActiveTab,
   closeModal,
   individualFishStore,
+  taxonDropdowns,
 }: {
   saveIndividualFish: any
   saveMarkOrTagData: any
@@ -66,6 +61,7 @@ const AddFishContent = ({
   setActiveTab: any
   closeModal: any
   individualFishStore: any
+  taxonDropdowns: any
 }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
@@ -101,7 +97,7 @@ const AddFishContent = ({
     <Formik
       validationSchema={addIndividualFishSchema}
       initialValues={lastAddedFish ? lastAddedFish : individualFishInitialState}
-      onSubmit={values => {
+      onSubmit={(values) => {
         handleFormSubmit(values)
         showSlideAlert(dispatch, 'Fish')
       }}
@@ -158,7 +154,29 @@ const AddFishContent = ({
                       placeholder={'Species'}
                       onValueChange={handleChange('species')}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={speciesDictionary}
+                      selectOptions={taxonDropdowns
+                        .filter((taxon: any) => {
+                          return (
+                            taxon?.commonname == 'Chinook salmon' ||
+                            taxon?.commonname == 'Steelhead / rainbow trout'
+                          )
+                        })
+                        .map((taxon: any) => {
+                          if (taxon?.commonname == 'Chinook salmon') {
+                            return {
+                              label: 'Chinook',
+                              value: 'Chinook',
+                            }
+                          } else if (
+                            taxon?.commonname == 'Steelhead / rainbow trout'
+                          ) {
+                            return {
+                              label: 'Steelhead',
+                              value: 'Steelhead',
+                            }
+                          }
+                        })
+                        .concat({ label: 'Other', value: 'Other' })}
                     />
                   </FormControl>
                   <FormControl>
@@ -258,8 +276,8 @@ const AddFishContent = ({
                     </HStack>
 
                     <HStack>
-                      {(values.species === 'chinook' ||
-                        values.species === 'steelhead') && (
+                      {(values.species === 'Chinook' ||
+                        values.species === 'Steelhead') && (
                         <FormControl w='1/2' paddingRight='5'>
                           <HStack space={2} alignItems='center'>
                             <FormControl.Label>
@@ -270,7 +288,7 @@ const AddFishContent = ({
 
                             <Popover
                               placement='bottom right'
-                              trigger={triggerProps => {
+                              trigger={(triggerProps) => {
                                 return (
                                   <IconButton
                                     {...triggerProps}
@@ -331,8 +349,8 @@ const AddFishContent = ({
                         <FormControl
                           w='47%'
                           paddingLeft={
-                            values.species === 'chinook' ||
-                            values.species === 'steelhead'
+                            values.species === 'Chinook' ||
+                            values.species === 'Steelhead'
                               ? '5'
                               : '0'
                           }
@@ -370,7 +388,7 @@ const AddFishContent = ({
                         </FormControl>
                       )}
                     </HStack>
-                    {values.species === 'chinook' && (
+                    {values.species === 'Chinook' && (
                       <FormControl w='1/2'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
@@ -419,7 +437,7 @@ const AddFishContent = ({
                           </FormControl.Label>
                           <Popover
                             placement='top right'
-                            trigger={triggerProps => {
+                            trigger={(triggerProps) => {
                               return (
                                 <IconButton
                                   {...triggerProps}
@@ -641,7 +659,7 @@ const AddFishContent = ({
                       </Radio.Group>
                     </FormControl>
 
-                    {values.species === 'chinook' && (
+                    {values.species === 'Chinook' && (
                       <FormControl w='full'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
@@ -701,7 +719,7 @@ const AddFishContent = ({
                           <Text color='primary'>Tag Fish</Text>
                         </Button>
                       )}
-                      {values.species === 'chinook' && (
+                      {values.species === 'Chinook' && (
                         <Button
                           bg='secondary'
                           color='#007C7C'
@@ -786,7 +804,10 @@ const AddFishContent = ({
 }
 
 const mapStateToProps = (state: RootState) => {
-  return { individualFishStore: state.fishInput.individualFish }
+  return {
+    individualFishStore: state.fishInput.individualFish,
+    taxonDropdowns: state.dropdowns.values.taxon,
+  }
 }
 
 export default connect(mapStateToProps, {
