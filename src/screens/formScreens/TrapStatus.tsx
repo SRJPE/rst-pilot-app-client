@@ -266,7 +266,7 @@ const TrapStatus = ({
                         <HStack space={4} alignItems='center'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
-                              Total Revolutions (optional)
+                              Total Revolutions
                             </Text>
                           </FormControl.Label>
                           {Number(values.totalRevolutions) >
