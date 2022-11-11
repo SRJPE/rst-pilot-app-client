@@ -17,6 +17,7 @@ interface ValuesI {
   trapFunctionality: any[]
   whyTrapNotFunctioning: any[]
   trapStatusAtEnd: any[]
+  taxon: any[]
   fishProcessed: any[]
   whyFishNotProcessed: any[]
   lifeStage: any[]
@@ -42,6 +43,7 @@ const initialState: InitialStateI = {
     trapFunctionality: [],
     whyTrapNotFunctioning: [],
     trapStatusAtEnd: [],
+    taxon: [],
     fishProcessed: [],
     whyFishNotProcessed: [],
     lifeStage: [],
