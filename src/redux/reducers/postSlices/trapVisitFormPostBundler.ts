@@ -83,12 +83,24 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
   'trapVisitPostBundler/postTrapVisitFormSubmissions',
   async (_, thunkAPI) => {
     const state = thunkAPI.getState() as RootState
-    const trapVisitSubmissions = state.trapVisitFormPostBundler.trapVisitSubmissions
-    const response: APIResponseI = await api.post(
+    console.log('state pre-submission: ', state)
+    const trapVisitSubmissions =
+      state.trapVisitFormPostBundler.trapVisitSubmissions
+    const trapVisitResponse: APIResponseI = await api.post(
       'trap-visit/',
       trapVisitSubmissions
     )
-    return response.data
+    const catchRawSubmissions =
+      state.trapVisitFormPostBundler.catchRawSubmissions
+    const catchRawResponse: APIResponseI = await api.post(
+      'catch-raw/',
+      catchRawSubmissions
+    )
+
+    return {
+      trapVisitResponse: trapVisitResponse.data,
+      catchRawResponse: catchRawResponse.data,
+    }
   }
 )
 
@@ -100,6 +112,13 @@ export const trapVisitPostBundler = createSlice({
       state.trapVisitSubmissions.push({ ...action.payload })
       state.submissionStatus = 'not-submitted'
     },
+    saveCatchRawSubmissions: (state, action) => {
+      state.catchRawSubmissions = [
+        ...state.catchRawSubmissions,
+        ...action.payload,
+      ]
+      state.submissionStatus = 'not-submitted'
+    },
   },
   extraReducers: {
     [postTrapVisitFormSubmissions.pending.type]: (state, action) => {
@@ -107,13 +126,19 @@ export const trapVisitPostBundler = createSlice({
     },
 
     [postTrapVisitFormSubmissions.fulfilled.type]: (state, action) => {
-      const trapVisitPostResult = action.payload
+      const trapVisitPostResult = action.payload.trapVisitResponse
+      const catchRawPostResult = action.payload.catchRawResponse
       state.submissionStatus = 'submission-successful'
       state.previousTrapVisitSubmissions = [
         ...state.previousTrapVisitSubmissions,
-        ...(trapVisitPostResult as TrapVisitSubmissionI[]),
+        ...trapVisitPostResult,
       ]
       state.trapVisitSubmissions = []
+      state.previousCatchRawSubmissions = [
+        ...state.previousCatchRawSubmissions,
+        ...catchRawPostResult,
+      ]
+      state.catchRawSubmissions = []
       console.log('successful post result: ', action.payload)
     },
 
@@ -148,6 +173,7 @@ export const trapVisitPostBundler = createSlice({
   },
 })
 
-export const { saveTrapVisitSubmission } = trapVisitPostBundler.actions
+export const { saveTrapVisitSubmission, saveCatchRawSubmissions } =
+  trapVisitPostBundler.actions
 
 export default trapVisitPostBundler.reducer
