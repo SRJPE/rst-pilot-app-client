@@ -11,6 +11,8 @@ interface InitialStateI {
     | 'submission-successful'
   trapVisitSubmissions: TrapVisitSubmissionI[]
   previousTrapVisitSubmissions: TrapVisitSubmissionI[]
+  catchRawSubmissions: CatchRawSubmissionI[]
+  previousCatchRawSubmissions: CatchRawSubmissionI[]
 }
 
 interface TrapVisitSubmissionI {
@@ -38,6 +40,32 @@ interface TrapVisitSubmissionI {
   comments?: string
 }
 
+interface CatchRawSubmissionI {
+  id?: number
+  programId?: number
+  trapVisitId?: number
+  taxonId?: number
+  captureRunClass?: number
+  captureRunClassMethod?: number
+  markType?: number
+  adiposeClipped?: boolean
+  lifeStage?: number
+  forkLength?: number
+  weight?: number
+  numFishCaught?: number
+  plusCount?: boolean
+  plusCountMethodology?: number
+  isRandom?: boolean
+  comments?: string
+  createdBy?: number
+  createdAt?: Date
+  updatedAt?: Date
+  qcCompleted?: Date
+  qcCompletedBy?: number
+  qcTime?: Date
+  qcComments?: string
+}
+
 interface APIResponseI {
   data: any
 }
@@ -46,19 +74,33 @@ const initialState: InitialStateI = {
   submissionStatus: 'not-submitted',
   trapVisitSubmissions: [],
   previousTrapVisitSubmissions: [],
+  catchRawSubmissions: [],
+  previousCatchRawSubmissions: [],
 }
 
 // Async actions API calls
-export const postTrapVisitSubmissions = createAsyncThunk(
-  'trapVisitPostBundler/postTrapVisitSubmissions',
+export const postTrapVisitFormSubmissions = createAsyncThunk(
+  'trapVisitPostBundler/postTrapVisitFormSubmissions',
   async (_, thunkAPI) => {
     const state = thunkAPI.getState() as RootState
-    const trapVisitSubmissions = state.trapVisitPostBundler.trapVisitSubmissions
-    const response: APIResponseI = await api.post(
+    console.log('state pre-submission: ', state)
+    const trapVisitSubmissions =
+      state.trapVisitFormPostBundler.trapVisitSubmissions
+    const trapVisitResponse: APIResponseI = await api.post(
       'trap-visit/',
       trapVisitSubmissions
     )
-    return response.data
+    const catchRawSubmissions =
+      state.trapVisitFormPostBundler.catchRawSubmissions
+    const catchRawResponse: APIResponseI = await api.post(
+      'catch-raw/',
+      catchRawSubmissions
+    )
+
+    return {
+      trapVisitResponse: trapVisitResponse.data,
+      catchRawResponse: catchRawResponse.data,
+    }
   }
 )
 
@@ -70,24 +112,37 @@ export const trapVisitPostBundler = createSlice({
       state.trapVisitSubmissions.push({ ...action.payload })
       state.submissionStatus = 'not-submitted'
     },
+    saveCatchRawSubmissions: (state, action) => {
+      state.catchRawSubmissions = [
+        ...state.catchRawSubmissions,
+        ...action.payload,
+      ]
+      state.submissionStatus = 'not-submitted'
+    },
   },
   extraReducers: {
-    [postTrapVisitSubmissions.pending.type]: (state, action) => {
+    [postTrapVisitFormSubmissions.pending.type]: (state, action) => {
       state.submissionStatus = 'submitting...'
     },
 
-    [postTrapVisitSubmissions.fulfilled.type]: (state, action) => {
-      const trapVisitPostResult = action.payload
+    [postTrapVisitFormSubmissions.fulfilled.type]: (state, action) => {
+      const trapVisitPostResult = action.payload.trapVisitResponse
+      const catchRawPostResult = action.payload.catchRawResponse
       state.submissionStatus = 'submission-successful'
       state.previousTrapVisitSubmissions = [
         ...state.previousTrapVisitSubmissions,
-        ...(trapVisitPostResult as TrapVisitSubmissionI[]),
+        ...trapVisitPostResult,
       ]
       state.trapVisitSubmissions = []
+      state.previousCatchRawSubmissions = [
+        ...state.previousCatchRawSubmissions,
+        ...catchRawPostResult,
+      ]
+      state.catchRawSubmissions = []
       console.log('successful post result: ', action.payload)
     },
 
-    [postTrapVisitSubmissions.rejected.type]: (state, action) => {
+    [postTrapVisitFormSubmissions.rejected.type]: (state, action) => {
       state.submissionStatus = 'submission-failed'
     },
     [connectionChanged.type]: (state, action) => {
@@ -118,6 +173,7 @@ export const trapVisitPostBundler = createSlice({
   },
 })
 
-export const { saveTrapVisitSubmission } = trapVisitPostBundler.actions
+export const { saveTrapVisitSubmission, saveCatchRawSubmissions } =
+  trapVisitPostBundler.actions
 
 export default trapVisitPostBundler.reducer

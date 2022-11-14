@@ -11,12 +11,16 @@ import {
 import NavButtons from '../../components/formContainer/NavButtons'
 import IncompleteSectionButton from '../../components/form/IncompleteSectionButton'
 import {
-  postTrapVisitSubmissions,
+  postTrapVisitFormSubmissions,
+  saveCatchRawSubmissions,
   saveTrapVisitSubmission,
-} from '../../redux/reducers/postSlices/trapVisitPostBundler'
+} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { resetGeneticSamplesSlice } from '../../redux/reducers/formSlices/addGeneticSamplesSlice'
 import { resetMarksOrTagsSlice } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
-import { resetFishInputSlice } from '../../redux/reducers/formSlices/fishInputSlice'
+import {
+  IndividualFishValuesI,
+  resetFishInputSlice,
+} from '../../redux/reducers/formSlices/fishInputSlice'
 import { resetFishProcessingSlice } from '../../redux/reducers/formSlices/fishProcessingSlice'
 import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
 import { resetTrapStatusSlice } from '../../redux/reducers/formSlices/trapStatusSlice'
@@ -31,6 +35,7 @@ const mapStateToProps = (state: RootState) => {
     trapStatusState: state.trapStatus,
     dropdownsState: state.dropdowns,
     connectivityState: state.connectivity,
+    fishInputState: state.fishInput,
   }
 }
 
@@ -43,6 +48,7 @@ const IncompleteSections = ({
   trapStatusState,
   dropdownsState,
   connectivityState,
+  fishInputState,
 }: {
   navigation: any
   navigationState: any
@@ -52,6 +58,7 @@ const IncompleteSections = ({
   trapStatusState: any
   dropdownsState: any
   connectivityState: any
+  fishInputState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
@@ -65,10 +72,10 @@ const IncompleteSections = ({
 
   const handleSubmit = () => {
     submitTrapVisit()
+    saveCatchRawSubmission()
     resetAllFormSlices()
-
     if (connectivityState.isConnected) {
-      dispatch(postTrapVisitSubmissions())
+      dispatch(postTrapVisitFormSubmissions())
     }
   }
 
@@ -83,13 +90,18 @@ const IncompleteSections = ({
     dispatch(resetVisitSetupSlice())
   }
 
+  const returnDefinitionArray = (dropdownsArray: any[]) => {
+    return dropdownsArray.map((dropdownObj: any) => {
+      return dropdownObj.definition
+    })
+  }
+
+  const returnNullableTableId = (value: any) => {
+    value == -1 ? null : value + 1
+  }
+
   const submitTrapVisit = () => {
     const currentDateTime = new Date()
-    const returnDefinitionArray = (dropdownsArray: any[]) => {
-      return dropdownsArray.map((dropdownObj: any) => {
-        return dropdownObj.definition
-      })
-    }
     const trapFunctioningValues = returnDefinitionArray(
       dropdownsState.values.trapFunctionality
     )
@@ -116,10 +128,6 @@ const IncompleteSections = ({
       rpm3: endRpm3,
     } = trapPostProcessingState.values
 
-    const returnNullableTableId = (value: any) => {
-      value == -1 ? null : value + 1
-    }
-
     const trapVisitSubmission = {
       programId: 1,
       visitType: null,
@@ -137,7 +145,9 @@ const IncompleteSections = ({
         )
       ),
       sampleGearId: null,
-      coneDepth: parseInt(trapStatusState.values.coneDepth),
+      coneDepth: trapStatusState.values.coneDepth
+        ? parseInt(trapStatusState.values.coneDepth)
+        : null,
       trapInThalweg: null,
       trapFunctioning: returnNullableTableId(
         trapFunctioningValues.indexOf(trapStatusState.values.trapStatus)
@@ -152,19 +162,94 @@ const IncompleteSections = ({
           `${trapPostProcessingState.values.endingTrapStatus}`.toLowerCase()
         )
       ),
-      totalRevolutions: parseInt(trapStatusState.values.totalRevolutions),
+      totalRevolutions: trapStatusState.values.totalRevolutions
+        ? parseInt(trapStatusState.values.totalRevolutions)
+        : null,
       rpmAtStart:
-        (parseInt(startRpm1) + parseInt(startRpm2) + parseInt(startRpm3)) / 3,
-      rpmAtEnd: (parseInt(endRpm1) + parseInt(endRpm2) + parseInt(endRpm3)) / 3,
+        startRpm1 && startRpm2 && startRpm3
+          ? (parseInt(startRpm1) + parseInt(startRpm2) + parseInt(startRpm3)) /
+            3
+          : null,
+      rpmAtEnd:
+        endRpm1 && endRpm2 && endRpm3
+          ? (parseInt(endRpm1) + parseInt(endRpm2) + parseInt(endRpm3)) / 3
+          : null,
       inHalfConeConfiguration:
         trapStatusState.values.coneSetting === 'half' ? true : false,
-      debrisVolumeLiters: parseInt(trapPostProcessingState.values.debrisVolume),
+      debrisVolumeLiters: trapPostProcessingState.values.debrisVolume
+        ? parseInt(trapPostProcessingState.values.debrisVolume)
+        : null,
       qcCompleted: null,
       qcCompletedAt: null,
       comments: null,
     }
 
     dispatch(saveTrapVisitSubmission(trapVisitSubmission))
+  }
+
+  const saveCatchRawSubmission = () => {
+    const currentDateTime = new Date()
+    const lifestageValues = returnDefinitionArray(
+      dropdownsState.values.lifeStage
+    )
+    const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
+      let code = null
+      dropdownsState.values.taxon.forEach((taxonValue: any) => {
+        if (
+          taxonValue.commonname
+            .toLowerCase()
+            .includes(fishSubmissionData.species.toLowerCase())
+        ) {
+          code = taxonValue.code
+        }
+      })
+      return code
+    }
+    const catchRawSubmissions: any[] = []
+
+    fishInputState.individualFish.forEach(
+      (fishSubmissionData: IndividualFishValuesI) => {
+        catchRawSubmissions.push({
+          programId: 1,
+          trapVisitId: null,
+          taxonCode: returnTaxonCode(fishSubmissionData),
+          captureRunClass: null,
+          captureRunClassMethod: null,
+          markType: null, // Check w/ Erin
+          adiposeClipped: fishSubmissionData.adiposeClipped,
+          lifeStage: returnNullableTableId(
+            lifestageValues.indexOf(fishSubmissionData.lifeStage)
+          ),
+          forkLength:
+            fishSubmissionData.forkLength != null
+              ? parseInt(fishSubmissionData?.forkLength as any)
+              : null,
+          weight:
+            fishSubmissionData?.weight != null
+              ? parseInt(fishSubmissionData?.weight as any)
+              : null,
+          numFishCaught: fishSubmissionData?.numFishCaught,
+          plusCount: fishSubmissionData?.plusCount,
+          plusCountMethodology: fishSubmissionData?.plusCountMethod
+            ? fishSubmissionData?.plusCountMethod
+            : null,
+          isRandom: null, // Check w/ Erin
+          releaseId: null,
+          comments: null,
+          createdBy: null,
+          createdAt: currentDateTime,
+          updatedAt: null,
+          qcCompleted: null,
+          qcCompletedBy: null,
+          qcTime: null,
+          qcComments: null,
+        })
+      }
+    )
+
+    if (catchRawSubmissions.length) {
+      dispatch(saveCatchRawSubmissions(catchRawSubmissions))
+    }
   }
 
   return (
