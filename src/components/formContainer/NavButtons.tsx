@@ -171,6 +171,10 @@ const NavButtons = ({
   }
 
   const disableRightButton = () => {
+    //if historical then never disable the right button
+    if (isHistoricalStore) {
+      return false
+    }
     if (activePage === 'Incomplete Sections') {
       //if form is complete, then do not disable button
       // return isFormComplete ? false : true
