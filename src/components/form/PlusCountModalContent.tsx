@@ -15,7 +15,7 @@ import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
-import { QARanges } from '../../utils/utils'
+import { QARanges, reorderTaxon } from '../../utils/utils'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
@@ -36,30 +36,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
   const { lifeStage, run, plusCountMethodology, taxon } = useSelector(
     (state: RootState) => state.dropdowns.values
   )
-
-  const reorderTaxon = () => {
-    //sort the taxon
-    const alphabeticalTaxon = [...taxon].sort((a, b) => {
-      if (a.commonname < b.commonname) return -1
-      if (a.commonname > b.commonname) return 1
-      return 0
-    })
-    //move chinook and steelhead to the front
-    let chinook, steelhead
-    for (var i = 0; i < alphabeticalTaxon.length; i++) {
-      if (alphabeticalTaxon[i].commonname === 'Chinook salmon') {
-        chinook = alphabeticalTaxon[i]
-        alphabeticalTaxon.splice(i, 1)
-      }
-      if (alphabeticalTaxon[i].commonname === 'Steelhead / rainbow trout') {
-        steelhead = alphabeticalTaxon[i]
-        alphabeticalTaxon.splice(i, 1)
-      }
-    }
-    alphabeticalTaxon.unshift(chinook, steelhead)
-    return alphabeticalTaxon
-  }
-  const reorderedTaxon = reorderTaxon()
+  const reorderedTaxon = reorderTaxon(taxon)
 
   const handleFormSubmit = (values: any) => {
     dispatch(savePlusCount(values))
