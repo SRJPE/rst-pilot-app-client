@@ -45,7 +45,7 @@ import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { Keyboard } from 'react-native'
-import { QARanges } from '../../utils/utils'
+import { QARanges, reorderTaxon } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
 const AddFishContent = ({
@@ -56,7 +56,6 @@ const AddFishContent = ({
   setActiveTab,
   closeModal,
   individualFishStore,
-  taxonDropdowns,
 }: {
   saveIndividualFish: any
   saveMarkOrTagData: any
@@ -65,7 +64,6 @@ const AddFishContent = ({
   setActiveTab: any
   closeModal: any
   individualFishStore: any
-  taxonDropdowns: any
 }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
@@ -84,6 +82,8 @@ const AddFishContent = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+
+  const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
   const handleFormSubmit = (values: any) => {
     saveIndividualFish(values)
@@ -200,33 +200,17 @@ const AddFishContent = ({
                       placeholder={'Species'}
                       onValueChange={(value: any) => {
                         handleChange('species')(value)
-                        if (value == 'Steelhead') {
+                        if (value == 'Steelhead / rainbow trout') {
                           setValidationSchema('optionalLifeStage')
                         } else {
                           setValidationSchema('default')
                         }
                       }}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={taxonDropdowns.map((taxon: any) => {
-                        if (taxon?.commonname == 'Chinook salmon') {
-                          return {
-                            label: 'Chinook',
-                            value: 'Chinook',
-                          }
-                        } else if (
-                          taxon?.commonname == 'Steelhead / rainbow trout'
-                        ) {
-                          return {
-                            label: 'Steelhead',
-                            value: 'Steelhead',
-                          }
-                        } else {
-                          return {
-                            label: taxon?.commonname,
-                            value: taxon?.commonname,
-                          }
-                        }
-                      })}
+                      selectOptions={reorderedTaxon.map((taxon: any) => ({
+                        label: taxon?.commonname,
+                        value: taxon?.commonname,
+                      }))}
                     />
                   </FormControl>
                   <FormControl>
@@ -298,7 +282,7 @@ const AddFishContent = ({
                         </Text>
                       </FormControl>
                       {values.species !== 'other' &&
-                        values.species !== 'Steelhead' && (
+                        values.species !== 'Steelhead / rainbow trout' && (
                           <FormControl w='1/2' paddingLeft={5}>
                             <HStack space={4} alignItems='center'>
                               <FormControl.Label>
@@ -327,8 +311,8 @@ const AddFishContent = ({
                     </HStack>
 
                     <HStack>
-                      {(values.species === 'Chinook' ||
-                        values.species === 'Steelhead') && (
+                      {(values.species === 'Chinook salmon' ||
+                        values.species === 'Steelhead / rainbow trout') && (
                         <FormControl w='1/2' paddingRight='5'>
                           <HStack space={2} alignItems='center'>
                             <FormControl.Label>
@@ -397,7 +381,7 @@ const AddFishContent = ({
                                   item?.definition?.includes('adult')
                                 ) {
                                   return item
-                                } else if (values.species == 'Chinook') {
+                                } else if (values.species == 'Chinook salmon') {
                                   return item
                                 }
                               })
@@ -412,8 +396,8 @@ const AddFishContent = ({
                         <FormControl
                           w='47%'
                           paddingLeft={
-                            values.species === 'Chinook' ||
-                            values.species === 'Steelhead'
+                            values.species === 'Chinook salmon' ||
+                            values.species === 'Steelhead / rainbow trout'
                               ? '5'
                               : '0'
                           }
@@ -451,7 +435,7 @@ const AddFishContent = ({
                         </FormControl>
                       )}
                     </HStack>
-                    {values.species === 'Chinook' && (
+                    {values.species === 'Chinook salmon' && (
                       <FormControl w='1/2'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
@@ -712,7 +696,7 @@ const AddFishContent = ({
                       </Radio.Group>
                     </FormControl>
 
-                    {values.species === 'Chinook' && (
+                    {values.species === 'Chinook salmon' && (
                       <FormControl w='full'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
@@ -772,7 +756,7 @@ const AddFishContent = ({
                           <Text color='primary'>Tag Fish</Text>
                         </Button>
                       )}
-                      {values.species === 'Chinook' && (
+                      {values.species === 'Chinook salmon' && (
                         <Button
                           bg='secondary'
                           color='#007C7C'
@@ -859,7 +843,6 @@ const AddFishContent = ({
 const mapStateToProps = (state: RootState) => {
   return {
     individualFishStore: state.fishInput.individualFish,
-    taxonDropdowns: state.dropdowns.values.taxon,
   }
 }
 
