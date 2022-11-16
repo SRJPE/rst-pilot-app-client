@@ -16,6 +16,7 @@ import visitSetupDefaultsSlice from './visitSetupDefaults'
 import trapVisitFormPostBundler from './postSlices/trapVisitFormPostBundler'
 import connectivitySlice from './connectivitySlice'
 import slideAlertSlice from './slideAlertSlice'
+import historicalDataSlice from './formSlices/historicalDataSlice'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
@@ -48,4 +49,5 @@ export default combineReducers({
   releaseTrial: releaseTrialSlice,
   trapVisitFormPostBundler,
   connectivity: connectivitySlice,
+  historicalData: historicalDataSlice,
 })

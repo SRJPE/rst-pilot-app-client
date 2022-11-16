@@ -33,9 +33,33 @@ const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
 
 const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const dropdownValues = useSelector(
+  const { lifeStage, run, plusCountMethodology, taxon } = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+
+  const reorderTaxon = () => {
+    //sort the taxon
+    const alphabeticalTaxon = [...taxon].sort((a, b) => {
+      if (a.commonname < b.commonname) return -1
+      if (a.commonname > b.commonname) return 1
+      return 0
+    })
+    //move chinook and steelhead to the front
+    let chinook, steelhead
+    for (var i = 0; i < alphabeticalTaxon.length; i++) {
+      if (alphabeticalTaxon[i].commonname === 'Chinook salmon') {
+        chinook = alphabeticalTaxon[i]
+        alphabeticalTaxon.splice(i, 1)
+      }
+      if (alphabeticalTaxon[i].commonname === 'Steelhead / rainbow trout') {
+        steelhead = alphabeticalTaxon[i]
+        alphabeticalTaxon.splice(i, 1)
+      }
+    }
+    alphabeticalTaxon.unshift(chinook, steelhead)
+    return alphabeticalTaxon
+  }
+  const reorderedTaxon = reorderTaxon()
 
   const handleFormSubmit = (values: any) => {
     dispatch(savePlusCount(values))
@@ -47,14 +71,13 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
     <ScrollView>
       <Formik
         validationSchema={addPlusCountsSchema}
-        initialValues={initialFormValues}
+        initialValues={{ ...initialFormValues, plusCountMethod: 'none' }}
         onSubmit={values => handleFormSubmit(values)}
       >
         {({
           handleChange,
           handleBlur,
           handleSubmit,
-          setFieldValue,
           setFieldTouched,
           touched,
           errors,
@@ -87,9 +110,6 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
               }
             />
             <VStack space={5} paddingX='20' paddingTop='7' paddingBottom='3'>
-              {/* <Heading fontSize='2xl'>
-                {`You Counted ${'{#}'}${'{species}'}${'{run}'}.`}
-              </Heading> */}
               <HStack space={6}>
                 <FormControl w='31%'>
                   <HStack space={4} alignItems='center'>
@@ -108,7 +128,10 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
                     placeholder={'Species'}
                     onValueChange={handleChange('species')}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={speciesDictionary}
+                    selectOptions={reorderedTaxon.map((item: any) => ({
+                      label: item.commonname,
+                      value: item.commonname,
+                    }))}
                   />
                 </FormControl>
                 <FormControl w='31%'>
@@ -128,12 +151,10 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
                     placeholder={'Life stage'}
                     onValueChange={handleChange('lifeStage')}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues.lifeStage.map(
-                      (item: any) => ({
-                        label: item.definition,
-                        value: item.definition,
-                      })
-                    )}
+                    selectOptions={lifeStage.map((item: any) => ({
+                      label: item.definition,
+                      value: item.definition,
+                    }))}
                   />
                 </FormControl>
 
@@ -155,7 +176,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
                     placeholder={'Run'}
                     onValueChange={handleChange('run')}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues.run.map((item: any) => ({
+                    selectOptions={run.map((item: any) => ({
                       label: item.definition,
                       value: item.definition,
                     }))}
@@ -203,12 +224,10 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
                   placeholder={'Method'}
                   onValueChange={handleChange('plusCountMethod')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={dropdownValues?.plusCountMethodology.map(
-                    (item: any) => ({
-                      label: item.definition,
-                      value: item.definition,
-                    })
-                  )}
+                  selectOptions={plusCountMethodology.map((item: any) => ({
+                    label: item.definition,
+                    value: item.definition,
+                  }))}
                 />
               </FormControl>
             </VStack>
