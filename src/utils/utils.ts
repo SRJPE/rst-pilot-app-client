@@ -11,6 +11,29 @@ export const getInitials = (name: string) => {
   return result
 }
 
+export const reorderTaxon = (taxon: Array<any>) => {
+  //sort the taxon
+  const alphabeticalTaxon = [...taxon].sort((a, b) => {
+    if (a.commonname < b.commonname) return -1
+    if (a.commonname > b.commonname) return 1
+    return 0
+  })
+  //move chinook and steelhead to the front
+  let chinook, steelhead
+  for (var i = 0; i < alphabeticalTaxon.length; i++) {
+    if (alphabeticalTaxon[i].commonname === 'Chinook salmon') {
+      chinook = alphabeticalTaxon[i]
+      alphabeticalTaxon.splice(i, 1)
+    }
+    if (alphabeticalTaxon[i].commonname === 'Steelhead / rainbow trout') {
+      steelhead = alphabeticalTaxon[i]
+      alphabeticalTaxon.splice(i, 1)
+    }
+  }
+  alphabeticalTaxon.unshift(chinook, steelhead)
+  return alphabeticalTaxon
+}
+
 export const QARanges = {
   flowMeasure: { max: 3000, min: null },
   waterTemperature: { max: 100, min: null }, //need F/C
