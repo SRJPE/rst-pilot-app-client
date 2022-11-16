@@ -17,11 +17,15 @@ import {
   Text,
   VStack,
   Pressable,
+  Center,
 } from 'native-base'
 import { Formik } from 'formik'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { addIndividualFishSchema } from '../../utils/helpers/yupValidations'
+import {
+  addIndividualFishSchema,
+  addIndividualFishSchemaOptionalLifeStage,
+} from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import CustomModal from '../../components/Shared/CustomModal'
 import CustomSelect from '../../components/Shared/CustomSelect'
@@ -66,6 +70,13 @@ const AddFishContent = ({
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
   const lastAddedFish = [...individualFishStore].pop() as any
+  const validationSchemas = {
+    default: addIndividualFishSchema,
+    optionalLifeStage: addIndividualFishSchemaOptionalLifeStage,
+  }
+  const [validationSchema, setValidationSchema] = useState<
+    'default' | 'optionalLifeStage'
+  >('default')
   const [markFishModalOpen, setMarkFishModalOpen] = useState(false as boolean)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
     false as boolean
@@ -95,7 +106,7 @@ const AddFishContent = ({
 
   return (
     <Formik
-      validationSchema={addIndividualFishSchema}
+      validationSchema={validationSchemas[validationSchema]}
       initialValues={lastAddedFish ? lastAddedFish : individualFishInitialState}
       onSubmit={(values) => {
         handleFormSubmit(values)
@@ -144,6 +155,41 @@ const AddFishContent = ({
                           Species
                         </Text>
                       </FormControl.Label>
+                      <Popover
+                        placement='bottom right'
+                        trigger={(triggerProps) => {
+                          return (
+                            <IconButton
+                              {...triggerProps}
+                              icon={
+                                <Icon
+                                  as={MaterialIcons}
+                                  name='info-outline'
+                                  size='xl'
+                                />
+                              }
+                            ></IconButton>
+                          )
+                        }}
+                      >
+                        <Popover.Content
+                          ml='10'
+                          accessibilityLabel='Species Lookup'
+                          minW='720'
+                          minH='300'
+                          backgroundColor='light.100'
+                        >
+                          <Popover.Arrow />
+                          <Popover.CloseButton />
+                          <Popover.Body p={0} flex={1}>
+                            <ScrollView>
+                              <Center>
+                                <Popover.Header>Species Lookup</Popover.Header>
+                              </Center>
+                            </ScrollView>
+                          </Popover.Body>
+                        </Popover.Content>
+                      </Popover>
 
                       {touched.species &&
                         errors.species &&
@@ -152,31 +198,35 @@ const AddFishContent = ({
                     <CustomSelect
                       selectedValue={values.species}
                       placeholder={'Species'}
-                      onValueChange={handleChange('species')}
+                      onValueChange={(value: any) => {
+                        handleChange('species')(value)
+                        if (value == 'Steelhead') {
+                          setValidationSchema('optionalLifeStage')
+                        } else {
+                          setValidationSchema('default')
+                        }
+                      }}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={taxonDropdowns
-                        .filter((taxon: any) => {
-                          return (
-                            taxon?.commonname == 'Chinook salmon' ||
-                            taxon?.commonname == 'Steelhead / rainbow trout'
-                          )
-                        })
-                        .map((taxon: any) => {
-                          if (taxon?.commonname == 'Chinook salmon') {
-                            return {
-                              label: 'Chinook',
-                              value: 'Chinook',
-                            }
-                          } else if (
-                            taxon?.commonname == 'Steelhead / rainbow trout'
-                          ) {
-                            return {
-                              label: 'Steelhead',
-                              value: 'Steelhead',
-                            }
+                      selectOptions={taxonDropdowns.map((taxon: any) => {
+                        if (taxon?.commonname == 'Chinook salmon') {
+                          return {
+                            label: 'Chinook',
+                            value: 'Chinook',
                           }
-                        })
-                        .concat({ label: 'Other', value: 'Other' })}
+                        } else if (
+                          taxon?.commonname == 'Steelhead / rainbow trout'
+                        ) {
+                          return {
+                            label: 'Steelhead',
+                            value: 'Steelhead',
+                          }
+                        } else {
+                          return {
+                            label: taxon?.commonname,
+                            value: taxon?.commonname,
+                          }
+                        }
+                      })}
                     />
                   </FormControl>
                   <FormControl>
@@ -247,22 +297,23 @@ const AddFishContent = ({
                           {'mm'}
                         </Text>
                       </FormControl>
-                      {values.species !== 'other' && (
-                        <FormControl w='1/2' paddingLeft={5}>
-                          <HStack space={4} alignItems='center'>
-                            <FormControl.Label>
-                              <Text color='black' fontSize='xl'>
-                                Run:
+                      {values.species !== 'other' &&
+                        values.species !== 'Steelhead' && (
+                          <FormControl w='1/2' paddingLeft={5}>
+                            <HStack space={4} alignItems='center'>
+                              <FormControl.Label>
+                                <Text color='black' fontSize='xl'>
+                                  Run:
+                                </Text>
+                              </FormControl.Label>
+                              <Text color='grey' fontSize='sm'>
+                                (currently disabled)
                               </Text>
-                            </FormControl.Label>
-                            <Text color='grey' fontSize='sm'>
-                              (currently disabled)
-                            </Text>
-                            {/* {touched.run &&
+                              {/* {touched.run &&
                         errors.run &&
                         RenderErrorMessage(errors, 'run')} */}
-                          </HStack>
-                          {/* <Input
+                            </HStack>
+                            {/* <Input
                       height='50px'
                       fontSize='16'
                       placeholder='Calculated from fork length (disabled)'
@@ -271,8 +322,8 @@ const AddFishContent = ({
                       onBlur={handleBlur('run')}
                       value={values.run}
                     /> */}
-                        </FormControl>
-                      )}
+                          </FormControl>
+                        )}
                     </HStack>
 
                     <HStack>
@@ -282,7 +333,10 @@ const AddFishContent = ({
                           <HStack space={2} alignItems='center'>
                             <FormControl.Label>
                               <Text color='black' fontSize='xl'>
-                                Life Stage
+                                Life Stage{' '}
+                                {validationSchema == 'optionalLifeStage'
+                                  ? '(optional)'
+                                  : ''}
                               </Text>
                             </FormControl.Label>
 
@@ -336,12 +390,21 @@ const AddFishContent = ({
                             placeholder={'Life Stage'}
                             onValueChange={handleChange('lifeStage')}
                             setFieldTouched={setFieldTouched}
-                            selectOptions={dropdownValues.lifeStage.map(
-                              (item: any) => ({
-                                label: item.definition,
-                                value: item.definition,
+                            selectOptions={dropdownValues.lifeStage
+                              .filter((item: any) => {
+                                if (
+                                  item?.definition?.includes('juvenile') ||
+                                  item?.definition?.includes('adult')
+                                ) {
+                                  return item
+                                } else if (values.species == 'Chinook') {
+                                  return item
+                                }
                               })
-                            )}
+                              .map((item: any) => ({
+                                label: item?.definition,
+                                value: item?.definition,
+                              }))}
                           />
                         </FormControl>
                       )}
@@ -490,20 +553,12 @@ const AddFishContent = ({
                                   <HStack space={2} alignItems='flex-start'>
                                     <Avatar size={'2'} mt={'2'} />
                                     <Text fontSize='md'>
-                                      BIS-BROWN: Bismarck Brown
-                                    </Text>
-                                  </HStack>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Avatar size={'2'} mt={'2'} />
-                                    <Text fontSize='md'>
-                                      ELA-YEL-FIN: Elastomer Yellow Fin
-                                    </Text>
-                                  </HStack>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Avatar size={'2'} mt={'2'} />
-                                    <Text fontSize='md'>
                                       CWT: Coded wire tag
                                     </Text>
+                                  </HStack>
+                                  <HStack space={2} alignItems='flex-start'>
+                                    <Avatar size={'2'} mt={'2'} />
+                                    <Text fontSize='md'>Fin Clip</Text>
                                   </HStack>
                                 </VStack>
                               </Popover.Body>
@@ -514,7 +569,7 @@ const AddFishContent = ({
                         <HStack>
                           <Button
                             bg={
-                              values.existingMark === 'ELA-YEL-FIN'
+                              values.existingMark === 'CWT'
                                 ? 'primary'
                                 : 'secondary'
                             }
@@ -523,23 +578,21 @@ const AddFishContent = ({
                             shadow='3'
                             borderRadius='5'
                             marginRight='10'
-                            onPress={() =>
-                              setFieldValue('existingMark', 'ELA-YEL-FIN')
-                            }
+                            onPress={() => setFieldValue('existingMark', 'CWT')}
                           >
                             <Text
                               color={
-                                values.existingMark === 'ELA-YEL-FIN'
+                                values.existingMark === 'CWT'
                                   ? 'white'
                                   : 'primary'
                               }
                             >
-                              ELA-YEL-FIN
+                              CWT
                             </Text>
                           </Button>
                           <Button
                             bg={
-                              values.existingMark === 'BIS-BROWN'
+                              values.existingMark === 'Fin Clip'
                                 ? 'primary'
                                 : 'secondary'
                             }
@@ -550,17 +603,17 @@ const AddFishContent = ({
                             borderRadius='5'
                             marginRight='10'
                             onPress={() =>
-                              setFieldValue('existingMark', 'BIS-BROWN')
+                              setFieldValue('existingMark', 'Fin Clip')
                             }
                           >
                             <Text
                               color={
-                                values.existingMark === 'BIS-BROWN'
+                                values.existingMark === 'Fin Clip'
                                   ? 'white'
                                   : 'primary'
                               }
                             >
-                              BIS-BROWN
+                              Fin Clip
                             </Text>
                           </Button>
                           <HStack alignItems='center' opacity={0.25}>

@@ -132,6 +132,7 @@ const IncompleteSections = ({
       programId: 1,
       visitType: null,
       trapLocationId: null,
+      isPaperEntry: null,
       trapVisitTimeStart: currentDateTime,
       trapVisitTimeEnd: null,
       fishProcessed: returnNullableTableId(
@@ -217,6 +218,7 @@ const IncompleteSections = ({
           captureRunClassMethod: null,
           markType: null, // Check w/ Erin
           adiposeClipped: fishSubmissionData.adiposeClipped,
+          dead: null,
           lifeStage: returnNullableTableId(
             lifestageValues.indexOf(fishSubmissionData.lifeStage)
           ),
