@@ -35,7 +35,11 @@ const CustomSelect: React.FC<CustomSelectI> = props => {
             return (
               <Select.Item
                 key={item.id ?? idx}
-                label={startCase(item.label)}
+                label={
+                  props.placeholder === 'Species'
+                    ? item.label
+                    : startCase(item.label)
+                }
                 value={item.value}
               />
             )
@@ -43,7 +47,11 @@ const CustomSelect: React.FC<CustomSelectI> = props => {
             return (
               <Select.Item
                 key={item.id}
-                label={startCase(item.definition)}
+                label={
+                  props.placeholder === 'Species'
+                    ? item.definition
+                    : startCase(item.definition)
+                }
                 value={item.definition}
               />
             )
