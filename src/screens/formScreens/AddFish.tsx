@@ -207,27 +207,26 @@ const AddFishContent = ({
                         }
                       }}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={taxonDropdowns
-                        .map((taxon: any) => {
-                          if (taxon?.commonname == 'Chinook salmon') {
-                            return {
-                              label: 'Chinook',
-                              value: 'Chinook',
-                            }
-                          } else if (
-                            taxon?.commonname == 'Steelhead / rainbow trout'
-                          ) {
-                            return {
-                              label: 'Steelhead',
-                              value: 'Steelhead',
-                            }
-                          } else {
-                            return {
-                              label: taxon?.commonname,
-                              value: taxon?.commonname,
-                            }
+                      selectOptions={taxonDropdowns.map((taxon: any) => {
+                        if (taxon?.commonname == 'Chinook salmon') {
+                          return {
+                            label: 'Chinook',
+                            value: 'Chinook',
                           }
-                        })}
+                        } else if (
+                          taxon?.commonname == 'Steelhead / rainbow trout'
+                        ) {
+                          return {
+                            label: 'Steelhead',
+                            value: 'Steelhead',
+                          }
+                        } else {
+                          return {
+                            label: taxon?.commonname,
+                            value: taxon?.commonname,
+                          }
+                        }
+                      })}
                     />
                   </FormControl>
                   <FormControl>
@@ -391,12 +390,21 @@ const AddFishContent = ({
                             placeholder={'Life Stage'}
                             onValueChange={handleChange('lifeStage')}
                             setFieldTouched={setFieldTouched}
-                            selectOptions={dropdownValues.lifeStage.map(
-                              (item: any) => ({
-                                label: item.definition,
-                                value: item.definition,
+                            selectOptions={dropdownValues.lifeStage
+                              .filter((item: any) => {
+                                if (
+                                  item?.definition?.includes('juvenile') ||
+                                  item?.definition?.includes('adult')
+                                ) {
+                                  return item
+                                } else if (values.species == 'Chinook') {
+                                  return item
+                                }
                               })
-                            )}
+                              .map((item: any) => ({
+                                label: item?.definition,
+                                value: item?.definition,
+                              }))}
                           />
                         </FormControl>
                       )}
