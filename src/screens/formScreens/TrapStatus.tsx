@@ -350,37 +350,58 @@ const TrapStatus = ({
                       </HStack>
                       <HStack space={8} justifyContent='space-between'>
                         <FormControl w='30%'>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm1')}
-                            onBlur={handleBlur('rpm1')}
-                            value={values.rpm1}
-                          />
+                          <VStack>
+                            <Input
+                              height='50px'
+                              fontSize='16'
+                              placeholder='Numeric Value'
+                              keyboardType='numeric'
+                              onChangeText={handleChange('rpm1')}
+                              onBlur={handleBlur('rpm1')}
+                              value={values.rpm1}
+                            />
+                            {Number(values.rpm1) > QARanges.RPM.max ? (
+                              RenderWarningMessage()
+                            ) : (
+                              <></>
+                            )}
+                          </VStack>
                         </FormControl>
                         <FormControl w='30%'>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm2')}
-                            onBlur={handleBlur('rpm2')}
-                            value={values.rpm2}
-                          />
+                          <VStack>
+                            <Input
+                              height='50px'
+                              fontSize='16'
+                              placeholder='Numeric Value'
+                              keyboardType='numeric'
+                              onChangeText={handleChange('rpm2')}
+                              onBlur={handleBlur('rpm2')}
+                              value={values.rpm2}
+                            />
+                            {Number(values.rpm2) > QARanges.RPM.max ? (
+                              RenderWarningMessage()
+                            ) : (
+                              <></>
+                            )}
+                          </VStack>
                         </FormControl>
                         <FormControl w='30%'>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm3')}
-                            onBlur={handleBlur('rpm3')}
-                            value={values.rpm3}
-                          />
+                          <VStack>
+                            <Input
+                              height='50px'
+                              fontSize='16'
+                              placeholder='Numeric Value'
+                              keyboardType='numeric'
+                              onChangeText={handleChange('rpm3')}
+                              onBlur={handleBlur('rpm3')}
+                              value={values.rpm3}
+                            />
+                            {Number(values.rpm3) > QARanges.RPM.max ? (
+                              RenderWarningMessage()
+                            ) : (
+                              <></>
+                            )}
+                          </VStack>
                         </FormControl>
                       </HStack>
                       <Text color='grey' mt='5' fontSize='17'>
