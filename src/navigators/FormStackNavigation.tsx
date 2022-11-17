@@ -13,7 +13,7 @@ import IncompleteSections from '../screens/formScreens/IncompleteSections'
 import StartMarkRecapture from '../screens/markRecaptureScreens/StartMarkRecapture'
 import TrapPostProcessing from '../screens/formScreens/TrapPostProcessing'
 import AddFish from '../screens/formScreens/AddFish'
-import HistoricalData from '../screens/formScreens/HistoricalData'
+import PaperEntry from '../screens/formScreens/PaperEntry'
 import { useSelector } from 'react-redux'
 
 const FormStack = createStackNavigator()
@@ -61,11 +61,7 @@ export default function FormStackNavigation() {
         component={StartMarkRecapture}
         options={{ headerShown: false }}
       />
-      <FormStack.Screen
-        name='Historical Data'
-        component={HistoricalData}
-        // options={{ headerShown: false }}
-      />
+      <FormStack.Screen name='Paper Entry' component={PaperEntry} />
     </FormStack.Navigator>
   )
 }

@@ -20,7 +20,7 @@ const formSteps = {
   11: { name: 'No Fish Caught', propName: 'noFishCaught' },
   12: { name: 'End Trapping', propName: 'endTrapping' },
   13: { name: 'Add Fish', propName: 'addFish' },
-  14: { name: 'Historical Data', propName: 'historicalData' },
+  14: { name: 'Paper Entry', propName: 'paperEntry' },
 }
 
 interface NavigationStateI {
@@ -57,7 +57,7 @@ export const navigationSlice = createSlice({
         }
       }
     },
-    checkIfFormIsComplete: (state) => {
+    checkIfFormIsComplete: state => {
       //iterate over the first 6 step and check if all steps are completed
       const stepsArray = Object.values(state.steps).slice(0, 6) as Array<any>
       const incompleteSteps = [] as Array<any>

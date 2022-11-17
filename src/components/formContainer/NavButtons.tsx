@@ -12,7 +12,7 @@ const NavButtons = ({
   touched,
   values,
   isFormComplete,
-  isHistorical,
+  isPaperEntry,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -20,7 +20,7 @@ const NavButtons = ({
   touched?: any
   values?: any
   isFormComplete?: boolean
-  isHistorical?: boolean
+  isPaperEntry?: boolean
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -30,7 +30,7 @@ const NavButtons = ({
   // const isFormComplete = navigationState.isFormComplete
   const { waterTemperature, waterTemperatureUnit } =
     reduxState.trapStatus.values
-  const isHistoricalStore = reduxState.visitSetup.isHistorical
+  const isPaperEntryStore = reduxState.visitSetup.isPaperEntry
 
   const navigateHelper = (destination: string) => {
     const formSteps = Object.values(navigationState?.steps) as any
@@ -51,12 +51,12 @@ const NavButtons = ({
   const navigateFlowRightButton = (values: any) => {
     switch (activePage) {
       case 'Visit Setup':
-        if (isHistorical) {
-          navigateHelper('Historical Data')
+        if (isPaperEntry) {
+          navigateHelper('Paper Entry')
         }
         break
       case 'Trap Status':
-        if (!isHistoricalStore) {
+        if (!isPaperEntryStore) {
           if (values?.trapStatus === 'trap not functioning') {
             navigateHelper('Non Functional Trap')
           } else if (values?.trapStatus === 'trap not in service') {
@@ -76,7 +76,7 @@ const NavButtons = ({
 
         break
       case 'Fish Processing':
-        if (!isHistoricalStore) {
+        if (!isPaperEntryStore) {
           if (values?.fishProcessedResult === 'no fish caught') {
             navigateHelper('No Fish Caught')
           } else if (
@@ -97,7 +97,7 @@ const NavButtons = ({
       case 'No Fish Caught':
         navigateHelper('Trap Post-Processing')
         break
-      case 'Historical Data':
+      case 'Paper Entry':
         navigateHelper('Trap Status')
         break
       default:
@@ -108,7 +108,7 @@ const NavButtons = ({
   const navigateFlowLeftButton = () => {
     switch (activePage) {
       case 'Trap Status':
-        if (isHistoricalStore) navigateHelper('Historical Data')
+        if (isPaperEntryStore) navigateHelper('Paper Entry')
         break
       case 'High Flows':
         navigateHelper('Trap Status')
@@ -122,7 +122,7 @@ const NavButtons = ({
       case 'No Fish Caught':
         navigateHelper('Fish Processing')
         break
-      case 'Historical Data':
+      case 'Paper Entry':
         navigateHelper('Visit Setup')
         break
       default:
@@ -171,8 +171,8 @@ const NavButtons = ({
   }
 
   const disableRightButton = () => {
-    //if historical then never disable the right button
-    if (isHistoricalStore) {
+    //if paper entry then never disable the right button
+    if (isPaperEntryStore) {
       return false
     }
     if (activePage === 'Incomplete Sections') {

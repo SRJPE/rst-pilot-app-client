@@ -44,7 +44,8 @@ export const trapStatusSchema = yup.object().shape({
     // .transform((value, originalValue) => {
     //   return originalValue === '' ? undefined : value
     // })
-    .required('Total Required')
+    .nullable()
+    // .required('Total Required')
     .typeError('Input must be a number'),
   rpm1: yup
     .number()

@@ -3,7 +3,7 @@ import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
-  markTrapVisitHistorical,
+  markTrapVisitPaperEntry,
   markVisitSetupCompleted,
   saveVisitSetup,
 } from '../../redux/reducers/formSlices/visitSetupSlice'
@@ -42,7 +42,7 @@ const VisitSetup = ({
   visitSetupDefaultsState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [isHistorical, setIsHistorical] = useState(false as boolean)
+  const [isPaperEntry, setIsPaperEntry] = useState(false as boolean)
   const [selectedProgramId, setSelectedProgramId] = useState<number | null>(
     null
   )
@@ -52,7 +52,7 @@ const VisitSetup = ({
     dispatch(saveVisitSetup(values))
     dispatch(markVisitSetupCompleted(true))
     dispatch(markStepCompleted([true]))
-    dispatch(markTrapVisitHistorical(isHistorical))
+    dispatch(markTrapVisitPaperEntry(isPaperEntry))
     console.log('🚀 ~ handleSubmit ~ Visit', values)
   }
 
@@ -97,16 +97,16 @@ const VisitSetup = ({
               <FormControl>
                 <HStack space={6} alignItems='center'>
                   <FormControl.Label>
-                    <Heading>Will you be importing historical data?</Heading>
+                    <Heading>Will you be importing a paper entry?</Heading>
                   </FormControl.Label>
                   <Switch
                     shadow='3'
                     offTrackColor='secondary'
                     onTrackColor='primary'
                     size='lg'
-                    value={isHistorical}
-                    accessibilityLabel='Select Historical Data Entry'
-                    onToggle={() => setIsHistorical(!isHistorical)}
+                    value={isPaperEntry}
+                    accessibilityLabel='Is the entry a paper entry?'
+                    onToggle={() => setIsPaperEntry(!isPaperEntry)}
                   />
                 </HStack>
               </FormControl>
@@ -208,7 +208,7 @@ const VisitSetup = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
-            isHistorical={isHistorical}
+            isPaperEntry={isPaperEntry}
           />
         </>
       )}
