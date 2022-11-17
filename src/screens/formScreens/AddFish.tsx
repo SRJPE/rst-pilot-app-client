@@ -281,33 +281,46 @@ const AddFishContent = ({
                           {'mm'}
                         </Text>
                       </FormControl>
-                      {values.species !== 'other' &&
-                        values.species !== 'Steelhead / rainbow trout' && (
-                          <FormControl w='1/2' paddingLeft={5}>
-                            <HStack space={4} alignItems='center'>
-                              <FormControl.Label>
-                                <Text color='black' fontSize='xl'>
-                                  Run:
-                                </Text>
-                              </FormControl.Label>
-                              <Text color='grey' fontSize='sm'>
-                                (currently disabled)
-                              </Text>
-                              {/* {touched.run &&
-                        errors.run &&
-                        RenderErrorMessage(errors, 'run')} */}
-                            </HStack>
-                            {/* <Input
-                      height='50px'
-                      fontSize='16'
-                      placeholder='Calculated from fork length (disabled)'
-                      keyboardType='numeric'
-                      onChangeText={handleChange('run')}
-                      onBlur={handleBlur('run')}
-                      value={values.run}
-                    /> */}
-                          </FormControl>
-                        )}
+                      <FormControl
+                        w='47%'
+                        paddingLeft={
+                          values.species === 'Chinook salmon' ||
+                          values.species === 'Steelhead / rainbow trout'
+                            ? '5'
+                            : '0'
+                        }
+                      >
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label pb='3'>
+                            <Text color='black' fontSize='xl'>
+                              Weight (optional)
+                            </Text>
+                          </FormControl.Label>
+                          {Number(values.weight) > QARanges.weight.max &&
+                            RenderWarningMessage()}
+                          {touched.weight &&
+                            errors.weight &&
+                            RenderErrorMessage(errors, 'weight')}
+                        </HStack>
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={handleChange('weight')}
+                          onBlur={handleBlur('weight')}
+                          value={values.weight}
+                        />
+                        <Text
+                          color='#A1A1A1'
+                          position='absolute'
+                          top={60}
+                          right={4}
+                          fontSize={16}
+                        >
+                          {'g'}
+                        </Text>
+                      </FormControl>
                     </HStack>
 
                     <HStack>
@@ -390,48 +403,6 @@ const AddFishContent = ({
                                 value: item?.definition,
                               }))}
                           />
-                        </FormControl>
-                      )}
-                      {values.species !== 'other' && (
-                        <FormControl
-                          w='47%'
-                          paddingLeft={
-                            values.species === 'Chinook salmon' ||
-                            values.species === 'Steelhead / rainbow trout'
-                              ? '5'
-                              : '0'
-                          }
-                        >
-                          <HStack space={4} alignItems='center'>
-                            <FormControl.Label pb='3'>
-                              <Text color='black' fontSize='xl'>
-                                Weight (optional)
-                              </Text>
-                            </FormControl.Label>
-                            {Number(values.weight) > QARanges.weight.max &&
-                              RenderWarningMessage()}
-                            {touched.weight &&
-                              errors.weight &&
-                              RenderErrorMessage(errors, 'weight')}
-                          </HStack>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('weight')}
-                            onBlur={handleBlur('weight')}
-                            value={values.weight}
-                          />
-                          <Text
-                            color='#A1A1A1'
-                            position='absolute'
-                            top={60}
-                            right={4}
-                            fontSize={16}
-                          >
-                            {'g'}
-                          </Text>
                         </FormControl>
                       )}
                     </HStack>
