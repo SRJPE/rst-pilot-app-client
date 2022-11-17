@@ -13,19 +13,19 @@ import { useState } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import NavButtons from '../../components/formContainer/NavButtons'
 import {
-  markHistoricalDataCompleted,
-  saveHistoricalData,
-} from '../../redux/reducers/formSlices/historicalDataSlice'
+  markPaperEntryCompleted,
+  savePaperEntry,
+} from '../../redux/reducers/formSlices/paperEntrySlice'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 
 const mapStateToProps = (state: RootState) => {
   return {
-    historicalDataStore: state.historicalData.values,
+    historicalDataStore: state.paperEntry.values,
   }
 }
 
-const HistoricalData = ({
+const PaperEntry = ({
   navigation,
   historicalDataStore,
 }: {
@@ -53,13 +53,13 @@ const HistoricalData = ({
 
   const handleSubmit = () => {
     dispatch(
-      saveHistoricalData({
+      savePaperEntry({
         comments,
         startDate,
         endDate,
       })
     )
-    dispatch(markHistoricalDataCompleted(true))
+    dispatch(markPaperEntryCompleted(true))
   }
 
   return (
@@ -135,4 +135,4 @@ const HistoricalData = ({
     </>
   )
 }
-export default connect(mapStateToProps)(HistoricalData)
+export default connect(mapStateToProps)(PaperEntry)

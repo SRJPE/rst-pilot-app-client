@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
   completed: boolean
-  isHistorical: false
+  isPaperEntry: false
   values: VisitSetupValuesI
 }
 
@@ -14,7 +14,7 @@ interface VisitSetupValuesI {
 
 const initialState: InitialStateI = {
   completed: false,
-  isHistorical: false,
+  isPaperEntry: false,
   values: {
     stream: '',
     trapSite: '',
@@ -33,8 +33,8 @@ export const visitSetupSlice = createSlice({
     markVisitSetupCompleted: (state, action) => {
       state.completed = action.payload
     },
-    markTrapVisitHistorical: (state, action) => {
-      state.isHistorical = action.payload
+    markTrapVisitPaperEntry: (state, action) => {
+      state.isPaperEntry = action.payload
     },
   },
 })
@@ -43,7 +43,7 @@ export const {
   resetVisitSetupSlice,
   saveVisitSetup,
   markVisitSetupCompleted,
-  markTrapVisitHistorical,
+  markTrapVisitPaperEntry,
 } = visitSetupSlice.actions
 
 export default visitSetupSlice.reducer

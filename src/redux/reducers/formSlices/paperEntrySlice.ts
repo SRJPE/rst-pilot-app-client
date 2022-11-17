@@ -18,24 +18,21 @@ const initialState: InitialStateI = {
   },
 }
 
-export const historicalDataSlice = createSlice({
-  name: 'historicalData',
+export const paperEntrySlice = createSlice({
+  name: 'paperEntry',
   initialState: initialState,
   reducers: {
-    resetHistoricalDataSlice: () => initialState,
-    saveHistoricalData: (state, action) => {
+    resetPaperEntrySlice: () => initialState,
+    savePaperEntry: (state, action) => {
       state.values = action.payload
     },
-    markHistoricalDataCompleted: (state, action) => {
+    markPaperEntryCompleted: (state, action) => {
       state.completed = action.payload
     },
   },
 })
 
-export const {
-  resetHistoricalDataSlice,
-  saveHistoricalData,
-  markHistoricalDataCompleted,
-} = historicalDataSlice.actions
+export const { resetPaperEntrySlice, savePaperEntry, markPaperEntryCompleted } =
+  paperEntrySlice.actions
 
-export default historicalDataSlice.reducer
+export default paperEntrySlice.reducer

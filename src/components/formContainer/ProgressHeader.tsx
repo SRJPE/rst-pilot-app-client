@@ -11,7 +11,7 @@ export default function ProgressHeader(props: any) {
 
   const renderCurrentStepOfTotalSteps = () => {
     //if page is Historical Data render step as 1
-    if (activeStep === 15) {
+    if (activeStep === 14) {
       currentStep = '1'
     }
     const totalSteps = `${numOfFormSteps}`
