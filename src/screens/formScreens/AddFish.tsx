@@ -437,7 +437,7 @@ const AddFishContent = ({
                             my={1}
                             _icon={{ color: 'primary' }}
                           >
-                            True
+                            Yes
                           </Radio>
                           <Radio
                             colorScheme='primary'
@@ -445,7 +445,7 @@ const AddFishContent = ({
                             my={1}
                             _icon={{ color: 'primary' }}
                           >
-                            False
+                            No
                           </Radio>
                         </Radio.Group>
                       </FormControl>
@@ -660,7 +660,7 @@ const AddFishContent = ({
                           my={1}
                           _icon={{ color: 'primary' }}
                         >
-                          True
+                          Yes
                         </Radio>
                         <Radio
                           colorScheme='primary'
@@ -668,7 +668,7 @@ const AddFishContent = ({
                           my={1}
                           _icon={{ color: 'primary' }}
                         >
-                          False
+                          No
                         </Radio>
                       </Radio.Group>
                     </FormControl>
@@ -699,7 +699,7 @@ const AddFishContent = ({
                             my={1}
                             _icon={{ color: 'primary' }}
                           >
-                            True
+                            Yes
                           </Radio>
                           <Radio
                             colorScheme='primary'
@@ -707,7 +707,7 @@ const AddFishContent = ({
                             my={1}
                             _icon={{ color: 'primary' }}
                           >
-                            False
+                            No
                           </Radio>
                         </Radio.Group>
                         <Text color='#A19C9C' marginTop='2' fontSize='xl'>
