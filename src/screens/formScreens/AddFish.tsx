@@ -25,6 +25,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import {
   addIndividualFishSchema,
   addIndividualFishSchemaOptionalLifeStage,
+  addIndividualFishSchemaOtherSpecies,
 } from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import CustomModal from '../../components/Shared/CustomModal'
@@ -71,9 +72,10 @@ const AddFishContent = ({
   const validationSchemas = {
     default: addIndividualFishSchema,
     optionalLifeStage: addIndividualFishSchemaOptionalLifeStage,
+    otherSpecies: addIndividualFishSchemaOtherSpecies,
   }
   const [validationSchema, setValidationSchema] = useState<
-    'default' | 'optionalLifeStage'
+    'default' | 'optionalLifeStage' | 'otherSpecies'
   >('default')
   const [markFishModalOpen, setMarkFishModalOpen] = useState(false as boolean)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
@@ -200,10 +202,12 @@ const AddFishContent = ({
                       placeholder={'Species'}
                       onValueChange={(value: any) => {
                         handleChange('species')(value)
-                        if (value == 'Steelhead / rainbow trout') {
+                        if (value == 'Chinook salmon') {
+                          setValidationSchema('default')
+                        } else if (value == 'Steelhead / rainbow trout') {
                           setValidationSchema('optionalLifeStage')
                         } else {
-                          setValidationSchema('default')
+                          setValidationSchema('otherSpecies')
                         }
                       }}
                       setFieldTouched={setFieldTouched}
@@ -291,7 +295,7 @@ const AddFishContent = ({
                         }
                       >
                         <HStack space={4} alignItems='center'>
-                          <FormControl.Label pb='3'>
+                          <FormControl.Label>
                             <Text color='black' fontSize='xl'>
                               Weight (optional)
                             </Text>
@@ -445,7 +449,8 @@ const AddFishContent = ({
                         </Radio.Group>
                       </FormControl>
                     )}
-                    {values.species !== 'other' && (
+                    {(values.species == 'Chinook salmon' ||
+                      values.species == 'Steelhead / rainbow trout') && (
                       <FormControl w='full'>
                         <HStack space={2} alignItems='center'>
                           <FormControl.Label>
@@ -710,7 +715,8 @@ const AddFishContent = ({
                       </FormControl>
                     )}
                     <HStack mb={'4'}>
-                      {values.species !== 'other' && (
+                      {(values.species === 'Chinook salmon' ||
+                        values.species === 'Steelhead / rainbow trout') && (
                         <Button
                           height='50px'
                           fontSize='16'
