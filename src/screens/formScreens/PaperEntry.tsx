@@ -67,25 +67,18 @@ const PaperEntry = ({
       <View flex={1} bg='#fff' p='6%' borderColor='themeGrey' borderWidth='15'>
         <VStack space={5}>
           <Heading mb='4'>Select the date and time of the trap visit:</Heading>
-
           <HStack space={4} alignItems='center'>
             <Text color='black' fontSize='xl'>
               Start Date:
             </Text>
+            <Text color='black' fontSize='xl'>
+              {`${startDate.toLocaleString()}`}
+            </Text>
 
-            <Box alignSelf='center' minWidth='130'>
+            <Box alignSelf='center' minWidth='330' ml='-100'>
               <DateTimePicker
                 value={startDate}
-                mode='date'
-                onChange={onStartDateChange}
-                accentColor='#007C7C'
-              />
-            </Box>
-
-            <Box alignSelf='center' minWidth='90'>
-              <DateTimePicker
-                value={startDate}
-                mode='time'
+                mode='datetime'
                 onChange={onStartDateChange}
                 accentColor='#007C7C'
               />
@@ -95,18 +88,13 @@ const PaperEntry = ({
             <Text color='black' fontSize='xl'>
               End Date:{'  '}
             </Text>
-            <Box alignSelf='center' minWidth='130'>
+            <Text color='black' fontSize='xl'>
+              {`${endDate.toLocaleString()}`}
+            </Text>
+            <Box alignSelf='center' minWidth='330' ml='-100'>
               <DateTimePicker
                 value={endDate}
-                mode='date'
-                onChange={onEndDateChange}
-                accentColor='#007C7C'
-              />
-            </Box>
-            <Box alignSelf='center' minWidth='90'>
-              <DateTimePicker
-                value={endDate}
-                mode='time'
+                mode='datetime'
                 onChange={onEndDateChange}
                 accentColor='#007C7C'
               />
@@ -123,7 +111,7 @@ const PaperEntry = ({
               fontSize='16'
               placeholder='Write a comment'
               keyboardType='default'
-              onChangeText={newText => {
+              onChangeText={(newText) => {
                 setComments(newText)
               }}
               value={comments}
