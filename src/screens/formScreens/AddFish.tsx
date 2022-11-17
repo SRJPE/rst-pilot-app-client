@@ -106,6 +106,21 @@ const AddFishContent = ({
     )
   }
 
+  const resetFormValues = {
+    values: {
+      species: '',
+      forkLength: '',
+      run: '',
+      weight: '',
+      lifeStage: '',
+      adiposeClipped: false,
+      existingMark: '',
+      dead: false,
+      willBeUsedInRecapture: false,
+      plusCountMethod: '',
+    },
+  }
+
   return (
     <Formik
       validationSchema={validationSchemas[validationSchema]}
@@ -201,6 +216,7 @@ const AddFishContent = ({
                       selectedValue={values.species}
                       placeholder={'Species'}
                       onValueChange={(value: any) => {
+                        resetForm(resetFormValues)
                         handleChange('species')(value)
                         if (value == 'Chinook salmon') {
                           setValidationSchema('default')
@@ -227,22 +243,7 @@ const AddFishContent = ({
                       h='50'
                       w='1/2'
                       bg='primary'
-                      onPress={() =>
-                        resetForm({
-                          values: {
-                            species: '',
-                            forkLength: '',
-                            run: '',
-                            weight: '',
-                            lifeStage: '',
-                            adiposeClipped: false,
-                            existingMark: '',
-                            dead: false,
-                            willBeUsedInRecapture: false,
-                            plusCountMethod: '',
-                          },
-                        })
-                      }
+                      onPress={() => resetForm(resetFormValues)}
                     >
                       Clear All Values
                     </Button>
