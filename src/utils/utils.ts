@@ -41,8 +41,8 @@ export const QARanges = {
   coneDepth: { max: 100, min: null }, //need values
   totalRevolutions: { max: 25000, min: null },
   RPM: { max: 30 },
-  forkLength: { max: 1000, min: null }, //need juvenile
-  weight: { max: 400, min: null }, //need juvenile
+  forkLength: { maxAdult: 1000, maxJuvenile: 100, min: null }, //need juvenile
+  weight: { maxAdult: 400, maxJuvenile: 50, min: null }, //need juvenile
   markNumber: { max: 1000, min: null }, //need values
   plusCount: { max: 1000, min: null }, //need values
   debrisVolume: { max: 2000, min: null },

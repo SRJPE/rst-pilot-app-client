@@ -106,6 +106,31 @@ const AddFishContent = ({
     )
   }
 
+  const renderForkLengthWarning = (
+    forkLengthValue: number,
+    lifeStage: string
+  ) => {
+    //for juvenile max is 100 for all else use 1000
+    if (lifeStage === 'juvenile') {
+      return (
+        forkLengthValue > QARanges.forkLength.maxJuvenile &&
+        RenderWarningMessage()
+      )
+    } else {
+      return (
+        forkLengthValue > QARanges.forkLength.maxAdult && RenderWarningMessage()
+      )
+    }
+  }
+  const renderWeightWarning = (weightValue: number, lifeStage: string) => {
+    //for juvenile max is 50 for all else use 400
+    if (lifeStage === 'juvenile') {
+      return weightValue > QARanges.weight.maxJuvenile && RenderWarningMessage()
+    } else {
+      return weightValue > QARanges.weight.maxAdult && RenderWarningMessage()
+    }
+  }
+
   const resetFormValues = {
     values: {
       species: '',
@@ -261,8 +286,10 @@ const AddFishContent = ({
                               Fork Length
                             </Text>
                           </FormControl.Label>
-                          {Number(values.forkLength) >
-                            QARanges.forkLength.max && RenderWarningMessage()}
+                          {renderForkLengthWarning(
+                            Number(values.forkLength),
+                            values.lifeStage
+                          )}
                           {touched.forkLength &&
                             errors.forkLength &&
                             RenderErrorMessage(errors, 'forkLength')}
@@ -301,8 +328,10 @@ const AddFishContent = ({
                               Weight (optional)
                             </Text>
                           </FormControl.Label>
-                          {Number(values.weight) > QARanges.weight.max &&
-                            RenderWarningMessage()}
+                          {renderWeightWarning(
+                            Number(values.weight),
+                            values.lifeStage
+                          )}
                           {touched.weight &&
                             errors.weight &&
                             RenderErrorMessage(errors, 'weight')}
