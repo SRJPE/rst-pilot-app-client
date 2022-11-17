@@ -134,6 +134,25 @@ export const addIndividualFishSchemaOptionalLifeStage = yup.object().shape({
     .required('Marked for recapture required'),
 })
 
+export const addIndividualFishSchemaOtherSpecies = yup.object().shape({
+  species: yup.string().required('Fish species required'),
+  forkLength: yup
+    .number()
+    .required('Fish fork length required')
+    .typeError('Input must be a number'),
+  run: yup
+    .number()
+    // .required('Run required')
+    // .nullable()
+    .typeError('Input must be a number'),
+  weight: yup.number().nullable().typeError('Input must be a number'),
+  lifeStage: yup.string(),
+  adiposeClipped: yup.boolean(),
+  existingMark: yup.string(),
+  dead: yup.boolean().required('Fish mortality required'),
+  willBeUsedInRecapture: yup.boolean(),
+})
+
 export const releaseTrialSchema = yup.object().shape({
   wildCount: yup
     .number()

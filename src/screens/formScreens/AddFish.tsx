@@ -25,6 +25,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import {
   addIndividualFishSchema,
   addIndividualFishSchemaOptionalLifeStage,
+  addIndividualFishSchemaOtherSpecies,
 } from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import CustomModal from '../../components/Shared/CustomModal'
@@ -71,9 +72,10 @@ const AddFishContent = ({
   const validationSchemas = {
     default: addIndividualFishSchema,
     optionalLifeStage: addIndividualFishSchemaOptionalLifeStage,
+    otherSpecies: addIndividualFishSchemaOtherSpecies,
   }
   const [validationSchema, setValidationSchema] = useState<
-    'default' | 'optionalLifeStage'
+    'default' | 'optionalLifeStage' | 'otherSpecies'
   >('default')
   const [markFishModalOpen, setMarkFishModalOpen] = useState(false as boolean)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
@@ -102,6 +104,21 @@ const AddFishContent = ({
       (touched && Object.keys(touched).length === 0) ||
       (errors && Object.keys(errors).length > 0)
     )
+  }
+
+  const resetFormValues = {
+    values: {
+      species: '',
+      forkLength: '',
+      run: '',
+      weight: '',
+      lifeStage: '',
+      adiposeClipped: false,
+      existingMark: '',
+      dead: false,
+      willBeUsedInRecapture: false,
+      plusCountMethod: '',
+    },
   }
 
   return (
@@ -199,11 +216,14 @@ const AddFishContent = ({
                       selectedValue={values.species}
                       placeholder={'Species'}
                       onValueChange={(value: any) => {
+                        resetForm(resetFormValues)
                         handleChange('species')(value)
-                        if (value == 'Steelhead / rainbow trout') {
+                        if (value == 'Chinook salmon') {
+                          setValidationSchema('default')
+                        } else if (value == 'Steelhead / rainbow trout') {
                           setValidationSchema('optionalLifeStage')
                         } else {
-                          setValidationSchema('default')
+                          setValidationSchema('otherSpecies')
                         }
                       }}
                       setFieldTouched={setFieldTouched}
@@ -223,22 +243,7 @@ const AddFishContent = ({
                       h='50'
                       w='1/2'
                       bg='primary'
-                      onPress={() =>
-                        resetForm({
-                          values: {
-                            species: '',
-                            forkLength: '',
-                            run: '',
-                            weight: '',
-                            lifeStage: '',
-                            adiposeClipped: false,
-                            existingMark: '',
-                            dead: false,
-                            willBeUsedInRecapture: false,
-                            plusCountMethod: '',
-                          },
-                        })
-                      }
+                      onPress={() => resetForm(resetFormValues)}
                     >
                       Clear All Values
                     </Button>
@@ -281,33 +286,46 @@ const AddFishContent = ({
                           {'mm'}
                         </Text>
                       </FormControl>
-                      {values.species !== 'other' &&
-                        values.species !== 'Steelhead / rainbow trout' && (
-                          <FormControl w='1/2' paddingLeft={5}>
-                            <HStack space={4} alignItems='center'>
-                              <FormControl.Label>
-                                <Text color='black' fontSize='xl'>
-                                  Run:
-                                </Text>
-                              </FormControl.Label>
-                              <Text color='grey' fontSize='sm'>
-                                (currently disabled)
-                              </Text>
-                              {/* {touched.run &&
-                        errors.run &&
-                        RenderErrorMessage(errors, 'run')} */}
-                            </HStack>
-                            {/* <Input
-                      height='50px'
-                      fontSize='16'
-                      placeholder='Calculated from fork length (disabled)'
-                      keyboardType='numeric'
-                      onChangeText={handleChange('run')}
-                      onBlur={handleBlur('run')}
-                      value={values.run}
-                    /> */}
-                          </FormControl>
-                        )}
+                      <FormControl
+                        w='47%'
+                        paddingLeft={
+                          values.species === 'Chinook salmon' ||
+                          values.species === 'Steelhead / rainbow trout'
+                            ? '5'
+                            : '0'
+                        }
+                      >
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Weight (optional)
+                            </Text>
+                          </FormControl.Label>
+                          {Number(values.weight) > QARanges.weight.max &&
+                            RenderWarningMessage()}
+                          {touched.weight &&
+                            errors.weight &&
+                            RenderErrorMessage(errors, 'weight')}
+                        </HStack>
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={handleChange('weight')}
+                          onBlur={handleBlur('weight')}
+                          value={values.weight}
+                        />
+                        <Text
+                          color='#A1A1A1'
+                          position='absolute'
+                          top={60}
+                          right={4}
+                          fontSize={16}
+                        >
+                          {'g'}
+                        </Text>
+                      </FormControl>
                     </HStack>
 
                     <HStack>
@@ -392,48 +410,6 @@ const AddFishContent = ({
                           />
                         </FormControl>
                       )}
-                      {values.species !== 'other' && (
-                        <FormControl
-                          w='47%'
-                          paddingLeft={
-                            values.species === 'Chinook salmon' ||
-                            values.species === 'Steelhead / rainbow trout'
-                              ? '5'
-                              : '0'
-                          }
-                        >
-                          <HStack space={4} alignItems='center'>
-                            <FormControl.Label pb='3'>
-                              <Text color='black' fontSize='xl'>
-                                Weight (optional)
-                              </Text>
-                            </FormControl.Label>
-                            {Number(values.weight) > QARanges.weight.max &&
-                              RenderWarningMessage()}
-                            {touched.weight &&
-                              errors.weight &&
-                              RenderErrorMessage(errors, 'weight')}
-                          </HStack>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('weight')}
-                            onBlur={handleBlur('weight')}
-                            value={values.weight}
-                          />
-                          <Text
-                            color='#A1A1A1'
-                            position='absolute'
-                            top={60}
-                            right={4}
-                            fontSize={16}
-                          >
-                            {'g'}
-                          </Text>
-                        </FormControl>
-                      )}
                     </HStack>
                     {values.species === 'Chinook salmon' && (
                       <FormControl w='1/2'>
@@ -474,7 +450,8 @@ const AddFishContent = ({
                         </Radio.Group>
                       </FormControl>
                     )}
-                    {values.species !== 'other' && (
+                    {(values.species == 'Chinook salmon' ||
+                      values.species == 'Steelhead / rainbow trout') && (
                       <FormControl w='full'>
                         <HStack space={2} alignItems='center'>
                           <FormControl.Label>
@@ -739,7 +716,8 @@ const AddFishContent = ({
                       </FormControl>
                     )}
                     <HStack mb={'4'}>
-                      {values.species !== 'other' && (
+                      {(values.species === 'Chinook salmon' ||
+                        values.species === 'Steelhead / rainbow trout') && (
                         <Button
                           height='50px'
                           fontSize='16'
