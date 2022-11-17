@@ -36,7 +36,7 @@ export const reorderTaxon = (taxon: Array<any>) => {
 
 export const QARanges = {
   flowMeasure: { max: 3000, min: null },
-  waterTemperature: { max: 100, min: null }, //need F/C
+  waterTemperature: { maxF: 100, maxC: 30, min: null },
   waterTurbidity: { max: 1000, min: null },
   coneDepth: { max: 100, min: null }, //need values
   totalRevolutions: { max: 25000, min: null },
