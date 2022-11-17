@@ -8,8 +8,9 @@ import {
   HStack,
   Divider,
   FormControl,
+  Checkbox,
 } from 'native-base'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import NavButtons from '../../components/formContainer/NavButtons'
 import {
@@ -33,13 +34,24 @@ const PaperEntry = ({
   historicalDataStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [startDate, setStartDate] = useState(
-    historicalDataStore.startDate as any
-  )
-  const [endDate, setEndDate] = useState(historicalDataStore.endDate as any)
+  const [checkboxGroupValues, setCheckboxGroupValues] = useState([
+    'end same as start',
+  ])
+  const [endDate, setEndDate] = useState(new Date('01/01/2022') as any)
+  const [startDate, setStartDate] = useState(new Date('01/01/2022') as any)
   const [comments, setComments] = useState(
     historicalDataStore.comments as string
   )
+
+  useEffect(() => {
+    //use the values from the store if they are not null
+    if (historicalDataStore.startDate) {
+      setEndDate(historicalDataStore.startDate)
+    }
+    if (historicalDataStore.endDate) {
+      setEndDate(historicalDataStore.endDate)
+    }
+  }, [])
 
   const onStartDateChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
@@ -52,16 +64,27 @@ const PaperEntry = ({
   }
 
   const handleSubmit = () => {
-    dispatch(
-      savePaperEntry({
-        comments,
-        startDate,
-        endDate,
-      })
-    )
+    //only set end date if it exists
+    if (checkboxGroupValues.length > 0) {
+      dispatch(
+        savePaperEntry({
+          comments,
+          startDate,
+          endDate: null,
+        })
+      )
+    } else {
+      dispatch(
+        savePaperEntry({
+          comments,
+          startDate,
+          endDate,
+        })
+      )
+    }
     dispatch(markPaperEntryCompleted(true))
   }
-
+  console.log(startDate.toLocaleString())
   return (
     <>
       <View flex={1} bg='#fff' p='6%' borderColor='themeGrey' borderWidth='15'>
@@ -71,11 +94,7 @@ const PaperEntry = ({
             <Text color='black' fontSize='xl'>
               Start Date:
             </Text>
-            <Text color='black' fontSize='xl'>
-              {`${startDate.toLocaleString()}`}
-            </Text>
-
-            <Box alignSelf='center' minWidth='330' ml='-100'>
+            <Box alignSelf='center' minWidth='320' ml='-100'>
               <DateTimePicker
                 value={startDate}
                 mode='datetime'
@@ -84,22 +103,40 @@ const PaperEntry = ({
               />
             </Box>
           </HStack>
-          <HStack space={4} alignItems='center'>
-            <Text color='black' fontSize='xl'>
-              End Date:{'  '}
-            </Text>
-            <Text color='black' fontSize='xl'>
-              {`${endDate.toLocaleString()}`}
-            </Text>
-            <Box alignSelf='center' minWidth='330' ml='-100'>
-              <DateTimePicker
-                value={endDate}
-                mode='datetime'
-                onChange={onEndDateChange}
-                accentColor='#007C7C'
-              />
-            </Box>
-          </HStack>
+
+          <Checkbox.Group
+            colorScheme='green'
+            onChange={(value) => {
+              setCheckboxGroupValues(value)
+              setEndDate(new Date('01/01/2022'))
+            }}
+            defaultValue={checkboxGroupValues}
+            accessibilityLabel='choose numbers'
+          >
+            <Checkbox
+              value='end same as start'
+              my={2}
+              _checked={{ bg: 'primary', borderColor: 'primary' }}
+            >
+              End date is the same as start date
+            </Checkbox>
+          </Checkbox.Group>
+
+          {checkboxGroupValues.length < 1 && (
+            <HStack space={4} alignItems='center'>
+              <Text color='black' fontSize='xl'>
+                End Date:
+              </Text>
+              <Box alignSelf='center' minWidth='320' ml='-100'>
+                <DateTimePicker
+                  value={endDate}
+                  mode='datetime'
+                  onChange={onEndDateChange}
+                  accentColor='#007C7C'
+                />
+              </Box>
+            </HStack>
+          )}
           <FormControl>
             <FormControl.Label>
               <Text color='black' fontSize='xl'>

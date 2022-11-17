@@ -13,8 +13,8 @@ const initialState: InitialStateI = {
   completed: false,
   values: {
     comments: '',
-    startDate: new Date('01/01/2022'),
-    endDate: new Date('01/01/2022'),
+    startDate: null,
+    endDate: null,
   },
 }
 
