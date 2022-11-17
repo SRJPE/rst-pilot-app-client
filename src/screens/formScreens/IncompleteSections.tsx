@@ -25,6 +25,7 @@ import { resetFishProcessingSlice } from '../../redux/reducers/formSlices/fishPr
 import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
 import { resetTrapStatusSlice } from '../../redux/reducers/formSlices/trapStatusSlice'
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
+import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -88,6 +89,7 @@ const IncompleteSections = ({
     dispatch(resetTrapPostProcessingSlice())
     dispatch(resetTrapStatusSlice())
     dispatch(resetVisitSetupSlice())
+    dispatch(resetPaperEntrySlice())
   }
 
   const returnDefinitionArray = (dropdownsArray: any[]) => {
@@ -190,7 +192,7 @@ const IncompleteSections = ({
 
   const saveCatchRawSubmission = () => {
     const currentDateTime = new Date()
-    const lifestageValues = returnDefinitionArray(
+    const lifeStageValues = returnDefinitionArray(
       dropdownsState.values.lifeStage
     )
     const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
@@ -220,7 +222,7 @@ const IncompleteSections = ({
           adiposeClipped: fishSubmissionData.adiposeClipped,
           dead: null,
           lifeStage: returnNullableTableId(
-            lifestageValues.indexOf(fishSubmissionData.lifeStage)
+            lifeStageValues.indexOf(fishSubmissionData.lifeStage)
           ),
           forkLength:
             fishSubmissionData.forkLength != null
