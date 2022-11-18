@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { View } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
-import CrewListItem from './CrewListItem'
 
 export default function CrewDropDown({
   crewList,
