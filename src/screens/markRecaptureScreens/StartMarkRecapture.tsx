@@ -76,6 +76,7 @@ export default function StartMarkRecapture({
             py='5'
             minWidth='50%'
             borderRadius='5'
+            isDisabled={true}
             onPress={handlePressReturnToTrapVisit}
           >
             <Text fontWeight='bold' fontSize='lg' color='#FFF'>

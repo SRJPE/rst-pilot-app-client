@@ -56,7 +56,7 @@ const AddGeneticsModalContent = ({
       <Formik
         validationSchema={addGeneticsSampleSchema}
         initialValues={initialFormValues}
-        onSubmit={values => {
+        onSubmit={(values) => {
           console.log('🚀 ~  Genetic Sample values', values)
           handleFormSubmit(values)
         }}
@@ -179,7 +179,7 @@ const AddGeneticsModalContent = ({
                           my={1}
                           _icon={{ color: 'primary' }}
                         >
-                          True
+                          Yes
                         </Radio>
                         <Radio
                           colorScheme='primary'
@@ -187,7 +187,7 @@ const AddGeneticsModalContent = ({
                           my={1}
                           _icon={{ color: 'primary' }}
                         >
-                          False
+                          No
                         </Radio>
                       </Radio.Group>
                     </FormControl>
@@ -216,7 +216,7 @@ const AddGeneticsModalContent = ({
                           my={1}
                           _icon={{ color: 'primary' }}
                         >
-                          True
+                          Yes
                         </Radio>
                         <Radio
                           colorScheme='primary'
@@ -224,7 +224,7 @@ const AddGeneticsModalContent = ({
                           my={1}
                           _icon={{ color: 'primary' }}
                         >
-                          False
+                          No
                         </Radio>
                       </Radio.Group>
                     </FormControl>

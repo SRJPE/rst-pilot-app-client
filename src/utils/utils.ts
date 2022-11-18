@@ -36,14 +36,14 @@ export const reorderTaxon = (taxon: Array<any>) => {
 
 export const QARanges = {
   flowMeasure: { max: 3000, min: null },
-  waterTemperature: { max: 100, min: null }, //need F/C
+  waterTemperature: { maxF: 100, maxC: 30, min: null },
   waterTurbidity: { max: 1000, min: null },
-  coneDepth: { max: 100, min: null }, //need values
+  coneDepth: { max: 100, min: null }, //need actual values
   totalRevolutions: { max: 25000, min: null },
   RPM: { max: 30 },
-  forkLength: { max: 1000, min: null }, //need juvenile
-  weight: { max: 400, min: null }, //need juvenile
-  markNumber: { max: 1000, min: null }, //need values
-  plusCount: { max: 1000, min: null }, //need values
+  forkLength: { maxAdult: 1000, maxJuvenile: 100, min: null },
+  weight: { maxAdult: 400, maxJuvenile: 50, min: null },
+  markNumber: { max: 1000, min: null }, //need actual values
+  plusCount: { max: 1000, min: null }, //need actual values
   debrisVolume: { max: 2000, min: null },
 }

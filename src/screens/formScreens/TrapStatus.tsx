@@ -53,6 +53,23 @@ const TrapStatus = ({
     (state: RootState) => state.dropdowns.values
   )
 
+  const calculateTempWarning = (
+    waterTemperatureValue: number,
+    unit: string
+  ) => {
+    if (unit === '°F') {
+      return (
+        waterTemperatureValue > QARanges.waterTemperature.maxF &&
+        RenderWarningMessage()
+      )
+    } else {
+      return (
+        waterTemperatureValue > QARanges.waterTemperature.maxC &&
+        RenderWarningMessage()
+      )
+    }
+  }
+
   const handleSubmit = (values: any, errors: any) => {
     dispatch(saveTrapStatus(values))
     dispatch(markTrapStatusCompleted(true))
@@ -121,12 +138,12 @@ const TrapStatus = ({
                   <HStack space={2} alignItems='center'>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
-                        Trap Is the Trap functioning normally?
+                        Is the Trap functioning normally?
                       </Text>
                     </FormControl.Label>
                     <Popover
                       placement='bottom left'
-                      trigger={triggerProps => {
+                      trigger={(triggerProps) => {
                         return (
                           <IconButton
                             {...triggerProps}
@@ -449,9 +466,10 @@ const TrapStatus = ({
                           value={values.waterTemperature}
                         />
                         {inputUnit(values.waterTemperatureUnit, setFieldValue)}
-                        {Number(values.waterTemperature) >
-                          QARanges.waterTemperature.max &&
-                          RenderWarningMessage()}
+                        {calculateTempWarning(
+                          Number(values.waterTemperature),
+                          values.waterTemperatureUnit
+                        )}
                         {touched.waterTemperature &&
                           errors.waterTemperature &&
                           RenderErrorMessage(errors, 'waterTemperature')}
