@@ -75,6 +75,10 @@ const IncompleteSections = ({
     submitTrapVisit()
     saveCatchRawSubmission()
     resetAllFormSlices()
+    navigation.reset({
+      index: 1,
+      routes: [{ name: 'Visit Setup' }],
+    })
     if (connectivityState.isConnected) {
       dispatch(postTrapVisitFormSubmissions())
     }
