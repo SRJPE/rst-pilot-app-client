@@ -46,7 +46,7 @@ import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { Keyboard } from 'react-native'
-import { QARanges, reorderTaxon } from '../../utils/utils'
+import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
 const AddFishContent = ({
@@ -86,6 +86,10 @@ const AddFishContent = ({
   )
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
+  const alphabeticalLifeStage = alphabeticalSort(
+    dropdownValues.lifeStage,
+    'definition'
+  )
 
   const handleFormSubmit = (values: any) => {
     saveIndividualFish(values)
@@ -421,7 +425,7 @@ const AddFishContent = ({
                             placeholder={'Life Stage'}
                             onValueChange={handleChange('lifeStage')}
                             setFieldTouched={setFieldTouched}
-                            selectOptions={dropdownValues.lifeStage
+                            selectOptions={alphabeticalLifeStage
                               .filter((item: any) => {
                                 if (
                                   item?.definition?.includes('juvenile') ||
