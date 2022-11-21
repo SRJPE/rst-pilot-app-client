@@ -260,7 +260,7 @@ const AddFishContent = ({
                   </FormControl>
                   <FormControl>
                     <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
+                      <Text color='black' fontSize='xl' paddingBottom='3'>
                         Reset Form
                       </Text>
                     </FormControl.Label>
