@@ -43,7 +43,7 @@ export default function CrewDropDown({
         badgeDotColors={['#007C7C']}
         placeholder='Select your crew'
         searchPlaceholder='Search...'
-        maxHeight={350}
+        maxHeight={275}
         // renderListItem={props => <CrewListItem {...props} />}
       />
     </View>

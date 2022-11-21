@@ -260,7 +260,7 @@ const AddFishContent = ({
                   </FormControl>
                   <FormControl>
                     <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
+                      <Text color='black' fontSize='xl' paddingBottom='3'>
                         Reset Form
                       </Text>
                     </FormControl.Label>
@@ -748,7 +748,7 @@ const AddFishContent = ({
                       {(values.species === 'Chinook salmon' ||
                         values.species === 'Steelhead / rainbow trout') && (
                         <Button
-                          height='50px'
+                          height='40px'
                           fontSize='16'
                           bg='secondary'
                           color='#007C7C'
