@@ -167,7 +167,7 @@ const AddFishContent = ({
         values,
       }) => (
         <>
-          <ScrollView
+          <View
             flex={1}
             bg='#fff'
             borderWidth='10'
@@ -782,7 +782,7 @@ const AddFishContent = ({
                 )}
               </VStack>
             </Pressable>
-          </ScrollView>
+          </View>
           <Box bg='themeGrey' pb='12' py='6' px='3'>
             <HStack justifyContent='space-evenly'>
               <Button
