@@ -167,7 +167,7 @@ const AddFishContent = ({
         values,
       }) => (
         <>
-          <View
+          <ScrollView
             flex={1}
             bg='#fff'
             borderWidth='10'
@@ -748,7 +748,7 @@ const AddFishContent = ({
                       {(values.species === 'Chinook salmon' ||
                         values.species === 'Steelhead / rainbow trout') && (
                         <Button
-                          height='50px'
+                          height='40px'
                           fontSize='16'
                           bg='secondary'
                           color='#007C7C'
@@ -782,7 +782,7 @@ const AddFishContent = ({
                 )}
               </VStack>
             </Pressable>
-          </View>
+          </ScrollView>
           <Box bg='themeGrey' pb='12' py='6' px='3'>
             <HStack justifyContent='space-evenly'>
               <Button
