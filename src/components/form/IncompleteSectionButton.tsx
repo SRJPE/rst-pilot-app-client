@@ -15,7 +15,6 @@ const IncompleteSectionButton = ({
   navigation: any
   step: number
 }) => {
-  console.log('🚀 ~ name', name, completed)
   const dispatch = useDispatch<AppDispatch>()
   const handleButtonPress = () => {
     navigation.navigate('Trap Visit Form', { screen: name })
