@@ -219,7 +219,8 @@ const AddFishContent = ({
                         }}
                       >
                         <Popover.Content
-                          ml='10'
+                          mx='10'
+                          mb='10'
                           accessibilityLabel='Species Lookup'
                           minW='720'
                           minH='300'
@@ -227,11 +228,28 @@ const AddFishContent = ({
                         >
                           <Popover.Arrow />
                           <Popover.CloseButton />
-                          <Popover.Body p={0} flex={1}>
+                          <Popover.Body p={0}>
                             <ScrollView>
-                              <Center>
-                                <Popover.Header>Species Lookup</Popover.Header>
-                              </Center>
+                              <Image
+                                source={require('../../../assets/speciesID/Species_ID_Sheet_1-1.jpg')}
+                                alt='Species ID'
+                                size='1000px'
+                              />
+                              <Image
+                                source={require('../../../assets/speciesID/Species_ID_Sheet_2-2.jpg')}
+                                alt='Species ID'
+                                size='1000px'
+                              />
+                              <Image
+                                source={require('../../../assets/speciesID/Species_ID_Sheet_3-3.jpg')}
+                                alt='Species ID'
+                                size='1000px'
+                              />
+                              <Image
+                                source={require('../../../assets/speciesID/Species_ID_Sheet_4-end.jpg')}
+                                alt='Species ID'
+                                size='1000px'
+                              />
                             </ScrollView>
                           </Popover.Body>
                         </Popover.Content>
