@@ -104,7 +104,6 @@ const FishInputDataTable = ({
         return (
           <DataTable.Row key={`${Object.keys(obj)[rowIdx]}-${rowIdx}`}>
             {Object.keys(obj)
-              // .slice(0, 10)
               .map((key: string | number, itemIdx: number) => {
                 return (
                   <DataTable.Cell key={`${key}-${obj[key]}-${itemIdx}`}>
