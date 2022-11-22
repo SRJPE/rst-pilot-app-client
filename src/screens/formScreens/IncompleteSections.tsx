@@ -26,6 +26,7 @@ import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/tr
 import { resetTrapStatusSlice } from '../../redux/reducers/formSlices/trapStatusSlice'
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
+import { CommonActions, StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -61,6 +62,7 @@ const IncompleteSections = ({
   connectivityState: any
   fishInputState: any
 }) => {
+  console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
     0,
@@ -76,9 +78,21 @@ const IncompleteSections = ({
     saveCatchRawSubmission()
     resetAllFormSlices()
     navigation.reset({
-      index: 1,
+      index: 0,
       routes: [{ name: 'Visit Setup' }],
     })
+
+    // navigation.dispatch(
+    //   CommonActions.reset({
+    //     index: 0,
+    //     routes: [{ name: 'Visit Setup' }],
+    //   })
+    // )
+
+    // navigation.navigate.popToTop()
+
+    // navigation.dispatch(StackActions.popToTop())
+
     if (connectivityState.isConnected) {
       dispatch(postTrapVisitFormSubmissions())
     }
