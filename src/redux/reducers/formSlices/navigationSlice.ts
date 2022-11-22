@@ -64,7 +64,6 @@ export const navigationSlice = createSlice({
       const stepsArray = Object.values(state.steps).slice(0, 6) as Array<any>
       const incompleteSteps = [] as Array<any>
       for (let step of stepsArray) {
-        console.log('🚀 ~ step completed?', step.name, ':', step.completed)
         if (step.completed === false) {
           incompleteSteps.push(step.completed)
         }
