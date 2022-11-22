@@ -37,6 +37,7 @@ const mapStateToProps = (state: RootState) => {
     dropdownsState: state.dropdowns,
     connectivityState: state.connectivity,
     fishInputState: state.fishInput,
+    paperEntryState: state.paperEntry,
   }
 }
 
@@ -50,6 +51,7 @@ const IncompleteSections = ({
   dropdownsState,
   connectivityState,
   fishInputState,
+  paperEntryState,
 }: {
   navigation: any
   navigationState: any
@@ -60,6 +62,7 @@ const IncompleteSections = ({
   dropdownsState: any
   connectivityState: any
   fishInputState: any
+  paperEntryState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
@@ -98,9 +101,7 @@ const IncompleteSections = ({
     })
   }
 
-  const returnNullableTableId = (value: any) => {
-    value == -1 ? null : value + 1
-  }
+  const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
 
   const submitTrapVisit = () => {
     const currentDateTime = new Date()
@@ -132,9 +133,9 @@ const IncompleteSections = ({
 
     const trapVisitSubmission = {
       programId: 1,
-      visitType: null,
+      visitTypeId: null,
       trapLocationId: null,
-      isPaperEntry: null,
+      isPaperEntry: visitSetupState.isPaperEntry,
       trapVisitTimeStart: currentDateTime,
       trapVisitTimeEnd: null,
       fishProcessed: returnNullableTableId(
@@ -184,7 +185,7 @@ const IncompleteSections = ({
         : null,
       qcCompleted: null,
       qcCompletedAt: null,
-      comments: null,
+      comments: paperEntryState.values.comments ? paperEntryState.values.comments : null,
     }
 
     dispatch(saveTrapVisitSubmission(trapVisitSubmission))
@@ -220,7 +221,7 @@ const IncompleteSections = ({
           captureRunClassMethod: null,
           markType: null, // Check w/ Erin
           adiposeClipped: fishSubmissionData.adiposeClipped,
-          dead: null,
+          dead: fishSubmissionData.dead,
           lifeStage: returnNullableTableId(
             lifeStageValues.indexOf(fishSubmissionData.lifeStage)
           ),

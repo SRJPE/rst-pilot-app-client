@@ -83,24 +83,32 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
   'trapVisitPostBundler/postTrapVisitFormSubmissions',
   async (_, thunkAPI) => {
     const state = thunkAPI.getState() as RootState
-    console.log('state pre-submission: ', state)
+    let payload = {
+      trapVisitResponse: [],
+      catchRawResponse: [],
+    }
+    
     const trapVisitSubmissions =
       state.trapVisitFormPostBundler.trapVisitSubmissions
-    const trapVisitResponse: APIResponseI = await api.post(
-      'trap-visit/',
-      trapVisitSubmissions
-    )
+    if (trapVisitSubmissions.length) {
+      const apiResponse: APIResponseI = await api.post(
+        'trap-visit/',
+        trapVisitSubmissions
+      )
+      payload.trapVisitResponse = apiResponse.data
+    }
+
     const catchRawSubmissions =
       state.trapVisitFormPostBundler.catchRawSubmissions
-    const catchRawResponse: APIResponseI = await api.post(
-      'catch-raw/',
-      catchRawSubmissions
-    )
-
-    return {
-      trapVisitResponse: trapVisitResponse.data,
-      catchRawResponse: catchRawResponse.data,
+    if (catchRawSubmissions.length) {
+      const apiResponse: APIResponseI = await api.post(
+        'catch-raw/',
+        catchRawSubmissions
+      )
+      payload.catchRawResponse = apiResponse.data
     }
+
+    return payload
   }
 )
 
