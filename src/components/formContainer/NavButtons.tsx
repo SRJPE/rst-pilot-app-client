@@ -255,20 +255,6 @@ const NavButtons = ({
             {activePage === 'Visit Setup' ? 'Return Home' : 'Back'}
           </Text>
         </Button>
-
-        <Button
-          height='20'
-          bg='primary'
-          alignSelf='flex-start'
-          width='5%'
-          shadow='5'
-          onPress={() => console.log('🚀 ~ reduxState', reduxState)}
-        >
-          <Text fontWeight='bold' color='white'>
-            redux state
-          </Text>
-        </Button>
-
         <Button
           alignSelf='flex-start'
           bg='primary'
