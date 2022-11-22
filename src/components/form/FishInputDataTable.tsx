@@ -2,6 +2,7 @@ import React from 'react'
 import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
 import { RootState } from '../../redux/store'
+import { assign, pick, cloneDeep } from 'lodash'
 
 const headers = [
   'Species',
@@ -17,16 +18,16 @@ const headers = [
 ]
 
 const emptyTableData = {
-  1: '---',
-  2: '---',
-  3: '---',
-  4: '---',
-  5: '---',
-  6: '---',
-  7: '---',
-  8: '---',
-  9: '---',
-  10: '---',
+  species: '---',
+  numFishCaught: '---',
+  forkLength: '---',
+  run: '---',
+  weight: '---',
+  lifeStage: '---',
+  adiposeClipped: '---',
+  existingMark: '---',
+  dead: '---',
+  willBeUsedInRecapture: '---',
 }
 
 const FishInputDataTable = ({
@@ -41,25 +42,26 @@ const FishInputDataTable = ({
   ])
 
   React.useEffect(() => {
-    const rowsForPage = generateRowsForPage()
-    setPageRows(rowsForPage)
+    const pageRows = generateRowsForPage()
+    setPageRows(pageRows)
   }, [individualFishList])
 
   React.useEffect(() => {
-    const rowsForPage = generateRowsForPage()
-    setPageRows(rowsForPage)
+    const pageRows = generateRowsForPage()
+    setPageRows(pageRows)
   }, [page])
 
   const generateRowsForPage = () => {
-    const rowsForPage = individualFishList.slice(
+    const pageRows = individualFishList.slice(
       page * numberOfItemsPerPage,
       page * numberOfItemsPerPage + numberOfItemsPerPage
     )
-    while (rowsForPage.length < 5) {
-      rowsForPage.push(emptyTableData)
-    }
-    return rowsForPage
+    let sortedPageRows = sortPageRows(pageRows)
+    addEmptyRows(sortedPageRows)
+
+    return sortedPageRows
   }
+
   const renderCell = (obj: any, key: any) => {
     if (`${obj[key]}` === 'null') {
       return '---'
@@ -68,6 +70,25 @@ const FishInputDataTable = ({
       return `${obj[key]}`
     } else {
       return '---'
+    }
+  }
+
+  const sortPageRows = (arr: any[]) => {
+    let sortedRows: any[] = []
+    arr.forEach((dataObj) => {
+      const sorted = Object.assign(
+        cloneDeep(emptyTableData),
+        pick(dataObj, Object.keys(emptyTableData))
+      )
+      sortedRows.push(sorted)
+    })
+
+    return sortedRows
+  }
+
+  const addEmptyRows = (arr: any[]) => {
+    while (arr.length < 5) {
+      arr.push(emptyTableData)
     }
   }
 
@@ -81,9 +102,8 @@ const FishInputDataTable = ({
 
       {pageRows.map((obj, rowIdx: number) => {
         return (
-          <DataTable.Row key={Object.keys(obj)[rowIdx]}>
+          <DataTable.Row key={`${Object.keys(obj)[rowIdx]}-${rowIdx}`}>
             {Object.keys(obj)
-              .slice(0, 10)
               .map((key: string | number, itemIdx: number) => {
                 return (
                   <DataTable.Cell key={`${key}-${obj[key]}-${itemIdx}`}>
