@@ -51,7 +51,7 @@ const VisitSetup = ({
     // values.crew = ['temp1']
     dispatch(saveVisitSetup(values))
     dispatch(markVisitSetupCompleted(true))
-    dispatch(markStepCompleted([true]))
+    dispatch(markStepCompleted([true, 'visitSetup']))
     dispatch(markTrapVisitPaperEntry(isPaperEntry))
     console.log('🚀 ~ handleSubmit ~ Visit', values)
   }
@@ -72,7 +72,7 @@ const VisitSetup = ({
       // maybe this is not needed for first step in form?
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
-      onSubmit={values => {
+      onSubmit={(values) => {
         handleSubmit(values)
       }}
     >

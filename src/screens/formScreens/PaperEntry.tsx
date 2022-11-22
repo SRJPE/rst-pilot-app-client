@@ -34,9 +34,6 @@ const PaperEntry = ({
   historicalDataStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [checkboxGroupValues, setCheckboxGroupValues] = useState([
-    'end same as start',
-  ])
   const [endDate, setEndDate] = useState(new Date('01/01/2022') as any)
   const [startDate, setStartDate] = useState(new Date('01/01/2022') as any)
   const [comments, setComments] = useState(
@@ -46,7 +43,7 @@ const PaperEntry = ({
   useEffect(() => {
     //use the values from the store if they are not null
     if (historicalDataStore.startDate) {
-      setEndDate(historicalDataStore.startDate)
+      setStartDate(historicalDataStore.startDate)
     }
     if (historicalDataStore.endDate) {
       setEndDate(historicalDataStore.endDate)
@@ -64,31 +61,20 @@ const PaperEntry = ({
   }
 
   const handleSubmit = () => {
-    //only set end date if it exists
-    if (checkboxGroupValues.length > 0) {
-      dispatch(
-        savePaperEntry({
-          comments,
-          startDate,
-          endDate: null,
-        })
-      )
-    } else {
-      dispatch(
-        savePaperEntry({
-          comments,
-          startDate,
-          endDate,
-        })
-      )
-    }
+    dispatch(
+      savePaperEntry({
+        comments,
+        startDate,
+        endDate,
+      })
+    )
     dispatch(markPaperEntryCompleted(true))
   }
-  console.log(startDate.toLocaleString())
+
   return (
     <>
       <View flex={1} bg='#fff' p='6%' borderColor='themeGrey' borderWidth='15'>
-        <VStack space={5}>
+        <VStack space={8}>
           <Heading mb='4'>Select the date and time of the trap visit:</Heading>
           <HStack space={4} alignItems='center'>
             <Text color='black' fontSize='xl'>
@@ -104,39 +90,20 @@ const PaperEntry = ({
             </Box>
           </HStack>
 
-          <Checkbox.Group
-            colorScheme='green'
-            onChange={(value) => {
-              setCheckboxGroupValues(value)
-              setEndDate(new Date('01/01/2022'))
-            }}
-            defaultValue={checkboxGroupValues}
-            accessibilityLabel='choose numbers'
-          >
-            <Checkbox
-              value='end same as start'
-              my={2}
-              _checked={{ bg: 'primary', borderColor: 'primary' }}
-            >
-              End date is the same as start date
-            </Checkbox>
-          </Checkbox.Group>
+          <HStack space={4} alignItems='center'>
+            <Text color='black' fontSize='xl'>
+              End Date:
+            </Text>
+            <Box alignSelf='center' minWidth='320' ml='-93'>
+              <DateTimePicker
+                value={endDate}
+                mode='datetime'
+                onChange={onEndDateChange}
+                accentColor='#007C7C'
+              />
+            </Box>
+          </HStack>
 
-          {checkboxGroupValues.length < 1 && (
-            <HStack space={4} alignItems='center'>
-              <Text color='black' fontSize='xl'>
-                End Date:
-              </Text>
-              <Box alignSelf='center' minWidth='320' ml='-100'>
-                <DateTimePicker
-                  value={endDate}
-                  mode='datetime'
-                  onChange={onEndDateChange}
-                  accentColor='#007C7C'
-                />
-              </Box>
-            </HStack>
-          )}
           <FormControl>
             <FormControl.Label>
               <Text color='black' fontSize='xl'>

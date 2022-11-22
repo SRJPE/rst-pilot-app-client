@@ -1,6 +1,9 @@
 import { Button, Heading, Text, View, VStack } from 'native-base'
 import { useDispatch } from 'react-redux'
-import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  resetNavigationSlice,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import { AppDispatch } from '../../redux/store'
 
 export default function StartMarkRecapture({
@@ -13,6 +16,12 @@ export default function StartMarkRecapture({
     navigation.navigate('Mark Recapture')
   }
   const handlePressReturnToHomepage = () => {
+    //temp
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Visit Setup' }],
+    })
+    dispatch(resetNavigationSlice())
     navigation.navigate('Home')
   }
   const handlePressQCData = () => {

@@ -15,7 +15,7 @@ import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
-import { QARanges, reorderTaxon } from '../../utils/utils'
+import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
@@ -29,14 +29,13 @@ const initialFormValues = {
   plusCountMethod: '',
 }
 
-const speciesDictionary = [{ label: 'chinook', value: 'chinook' }]
-
 const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
   const dispatch = useDispatch<AppDispatch>()
   const { lifeStage, run, plusCountMethodology, taxon } = useSelector(
     (state: RootState) => state.dropdowns.values
   )
   const reorderedTaxon = reorderTaxon(taxon)
+  const alphabeticalLifeStage = alphabeticalSort(lifeStage, 'definition')
 
   const handleFormSubmit = (values: any) => {
     dispatch(savePlusCount(values))
@@ -49,7 +48,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
       <Formik
         validationSchema={addPlusCountsSchema}
         initialValues={{ ...initialFormValues, plusCountMethod: 'none' }}
-        onSubmit={values => handleFormSubmit(values)}
+        onSubmit={(values) => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -128,7 +127,7 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
                     placeholder={'Life stage'}
                     onValueChange={handleChange('lifeStage')}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={lifeStage.map((item: any) => ({
+                    selectOptions={alphabeticalLifeStage.map((item: any) => ({
                       label: item.definition,
                       value: item.definition,
                     }))}

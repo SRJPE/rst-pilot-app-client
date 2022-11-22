@@ -27,9 +27,6 @@ const NavButtons = ({
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
-  // const isFormComplete = navigationState.isFormComplete
-  const { waterTemperature, waterTemperatureUnit } =
-    reduxState.trapStatus.values
   const isPaperEntryStore = reduxState.visitSetup.isPaperEntry
 
   const navigateHelper = (destination: string) => {
@@ -52,7 +49,11 @@ const NavButtons = ({
     switch (activePage) {
       case 'Visit Setup':
         if (isPaperEntry) {
-          navigateHelper('Paper Entry')
+          navigation.navigate('Trap Visit Form', { screen: 'Paper Entry' })
+          dispatch({
+            type: updateActiveStep,
+            payload: 14,
+          })
         }
         break
       case 'Trap Status':
@@ -136,16 +137,25 @@ const NavButtons = ({
       handleSubmit()
       showSlideAlert(dispatch)
     }
-    //navigate Right
-    navigation.navigate('Trap Visit Form', {
-      screen: navigationState.steps[activeStep + 1]?.name,
-    })
-    dispatch({
-      type: updateActiveStep,
-      payload: navigationState.activeStep + 1,
-    })
-    //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
-    navigateFlowRightButton(values)
+
+    if (activePage === 'Visit Setup' && isPaperEntry) {
+      navigation.navigate('Trap Visit Form', { screen: 'Paper Entry' })
+      dispatch({
+        type: updateActiveStep,
+        payload: 14,
+      })
+    } else {
+      //navigate Right
+      navigation.navigate('Trap Visit Form', {
+        screen: navigationState.steps[activeStep + 1]?.name,
+      })
+      dispatch({
+        type: updateActiveStep,
+        payload: navigationState.activeStep + 1,
+      })
+      //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
+      navigateFlowRightButton(values)
+    }
   }
 
   const handleLeftButton = () => {
