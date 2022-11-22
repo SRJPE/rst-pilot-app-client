@@ -47,7 +47,8 @@ export const navigationSlice = createSlice({
       //currently working: "state.activeStep - 1" could be refactored in the future
 
       //super hacky fixes for the demo:
-      // if (state.steps[state.activeStep - 1]?.completed !== undefined) {
+
+      //another fix to get visitSetup working properly
       if (action.payload[1] === 'visitSetup') {
         state.steps['1'].completed = action.payload[0]
       } else if (action.payload[1] === 'fishInput') {
@@ -57,7 +58,6 @@ export const navigationSlice = createSlice({
       } else {
         state.steps[state.activeStep - 1].completed = action.payload[0]
       }
-      // }
     },
     checkIfFormIsComplete: (state) => {
       //iterate over the first 6 step and check if all steps are completed
