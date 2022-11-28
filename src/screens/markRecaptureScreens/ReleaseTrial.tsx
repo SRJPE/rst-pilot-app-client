@@ -153,20 +153,6 @@ const ReleaseTrial = ({
                         </Radio>
                       </Radio.Group>
                     </FormControl>
-                    <Button
-                      alignSelf='flex-end'
-                      ml='-400'
-                      bg='primary'
-                      rounded='xs'
-                      borderRadius='5'
-                      shadow='5'
-                      onPress={() => {
-                        console.log('🚀 ~ touched', touched)
-                        console.log('🚀 ~ errors', errors)
-                      }}
-                    >
-                      TEST BUTTON
-                    </Button>
                   </HStack>
                 </VStack>
               </Box>
