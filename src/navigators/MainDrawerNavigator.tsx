@@ -7,6 +7,7 @@ import DataQualityControl from '../screens/QCData'
 import MarkRecaptureForm from '../screens/MarkRecaptureFormRoot'
 import Profile from '../screens/Profile'
 import PermitInfo from '../screens/PermitInfo'
+import Debug from "../screens/Debug"
 
 const Drawer = createDrawerNavigator()
 
@@ -32,6 +33,7 @@ export default function DrawerNavigator() {
       <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
       <Drawer.Screen name='Profile' component={Profile} />
       <Drawer.Screen name='Permit Info' component={PermitInfo} />
+      <Drawer.Screen name='Debug' component={Debug} />
     </Drawer.Navigator>
   )
 }

@@ -152,6 +152,12 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
               })}
             </>
           )}
+          <MenuButton
+            active={currentRoute === 'Debug'}
+            onPress={() => handlePressMainNavButton('Debug')}
+            icon='bug'
+            title='Debug'
+          />
         </DrawerContentScrollView>
       </VStack>
     </Box>
