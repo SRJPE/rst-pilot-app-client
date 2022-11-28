@@ -7,7 +7,6 @@ import visitSetupSlice from './formSlices/visitSetupSlice'
 import trapStatusSlice from './formSlices/trapStatusSlice'
 import fishProcessingSlice from './formSlices/fishProcessingSlice'
 import fishInputSlice from './formSlices/fishInputSlice'
-import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
 import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
 import markRecaptureNavigationSlice from './markRecaptureSlices/markRecaptureNavigationSlice'
 import addMarksOrTagsSlice from './formSlices/addMarksOrTagsSlice'
@@ -17,6 +16,9 @@ import trapVisitFormPostBundler from './postSlices/trapVisitFormPostBundler'
 import connectivitySlice from './connectivitySlice'
 import slideAlertSlice from './slideAlertSlice'
 import paperEntrySlice from './formSlices/paperEntrySlice'
+
+import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
+import releaseTrialDataEntrySlice from './markRecaptureSlices/releaseTrialDataEntrySlice'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
@@ -46,8 +48,9 @@ export default combineReducers({
   addGeneticSamples: addGeneticSamplesSlice,
   trapPostProcessing: trapPostProcessingSlice,
   markRecaptureNavigation: markRecaptureNavigationSlice,
-  releaseTrial: releaseTrialSlice,
   trapVisitFormPostBundler,
   connectivity: connectivitySlice,
   paperEntry: paperEntrySlice,
+  releaseTrial: releaseTrialSlice,
+  releaseTrialDataEntry: releaseTrialDataEntrySlice,
 })
