@@ -49,11 +49,19 @@ export default function MenuButton({
         completed ? (
           <Icon
             as={Ionicons}
-            name={title === 'Trap Visit Form' ? 'caret-down' : 'checkmark'}
+            name={
+              title === 'Trap Visit Form' || title === 'Mark Recapture'
+                ? 'caret-down'
+                : 'checkmark'
+            }
             size='lg'
             opacity={0.75}
             color={active ? 'white' : 'primary'}
-            ml={title === 'Trap Visit Form' ? '12' : '0'}
+            ml={
+              title === 'Trap Visit Form' || title === 'Mark Recapture'
+                ? '12'
+                : '0'
+            }
           />
         ) : (
           <></>
