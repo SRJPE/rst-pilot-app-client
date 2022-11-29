@@ -10,7 +10,7 @@ export interface ReleaseTrialValuesI {
   markColor: string | null
   markPosition: string | null
   releaseLocation: string | null
-  releaseTime: string | null
+  releaseTime: any | null
 }
 
 const initialState: InitialStateI = {
@@ -29,11 +29,11 @@ export const releaseTrialDataEntrySlice = createSlice({
   initialState: initialState,
   reducers: {
     resetReleaseTrialDataEntrySlice: () => initialState,
-    saveReleaseTrial: (state, action) => {
+    saveReleaseTrialDataEntry: (state, action) => {
       state.values = action.payload
     },
 
-    markReleaseTrialCompleted: (state, action) => {
+    markReleaseTrialDataEntryCompleted: (state, action) => {
       state.completed = action.payload
     },
   },
@@ -41,8 +41,8 @@ export const releaseTrialDataEntrySlice = createSlice({
 
 export const {
   resetReleaseTrialDataEntrySlice,
-  saveReleaseTrial,
-  markReleaseTrialCompleted,
+  saveReleaseTrialDataEntry,
+  markReleaseTrialDataEntryCompleted,
 } = releaseTrialDataEntrySlice.actions
 
 export default releaseTrialDataEntrySlice.reducer
