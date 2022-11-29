@@ -7,6 +7,11 @@ const formSteps = {
     propName: 'releaseDataEntry',
     completed: false,
   },
+  3: {
+    name: 'Mark Recapture Complete',
+    propName: 'markRecaptureComplete',
+    completed: false,
+  },
 }
 
 interface NavigationStateI {
