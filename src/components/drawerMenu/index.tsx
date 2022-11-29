@@ -17,7 +17,11 @@ import MenuButton from './MenuButton'
 import { useSelector } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { useDispatch } from 'react-redux'
-import { numOfFormSteps, updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  numOfFormSteps,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
+import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
 
 const DrawerMenu = (props: DrawerContentComponentProps) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -29,6 +33,15 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
   //unsliced Array for dev
   // const stepsArray = Object.values(steps) as Array<any>
   const stepsArray = Object.values(steps).slice(0, numOfFormSteps) as Array<any>
+
+  //mark recapture steps
+  const markRecaptureSteps = useSelector(
+    (state: any) => state.markRecaptureNavigation.steps
+  )
+  const markRecaptureStepsArray = Object.values(markRecaptureSteps).slice(
+    0,
+    2
+  ) as Array<any>
 
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {
@@ -53,6 +66,20 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
       type: updateActiveStep,
       payload: stepPayload,
       // payload: steps[buttonTitle],
+    })
+  }, [])
+
+  const handlePressMarkRecaptureButton = useCallback((buttonTitle: string) => {
+    navigation.navigate('Mark Recapture', { screen: buttonTitle })
+    let stepPayload
+    for (let i = 0; i < markRecaptureStepsArray.length; i++) {
+      if (markRecaptureStepsArray[i].name === buttonTitle) {
+        stepPayload = i + 1
+      }
+    }
+    dispatch({
+      type: updateActiveMarkRecaptureStep,
+      payload: stepPayload,
     })
   }, [])
 
@@ -123,6 +150,28 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             icon='clipboard'
             title='Mark Recapture'
           />
+          {markRecaptureStepsArray && currentRoute === 'Mark Recapture' && (
+            <>
+              <Divider mt='2' />
+              {markRecaptureStepsArray.map((step: any, index: any) => {
+                return (
+                  <VStack ml='4' key={index}>
+                    <MenuButton
+                      active={currentRoute === step.name}
+                      completed={step.completed}
+                      icon='ellipse'
+                      listItem={true}
+                      title={step.name}
+                      // isDisabled={
+                      //   reduxState[step.propName]?.completed ? false : true
+                      // }
+                      onPress={() => handlePressMarkRecaptureButton(step.name)}
+                    />
+                  </VStack>
+                )
+              })}
+            </>
+          )}
           <MenuButton
             active={currentRoute === 'Trap Visit Form'}
             onPress={() => handlePressMainNavButton('Trap Visit Form')}

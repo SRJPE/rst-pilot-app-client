@@ -32,6 +32,7 @@ export const releaseTrialSlice = createSlice({
   name: 'releaseTrial',
   initialState: initialState,
   reducers: {
+    resetReleaseTrialSlice: () => initialState,
     saveReleaseTrial: (state, action) => {
       state.values = action.payload
     },
@@ -42,7 +43,10 @@ export const releaseTrialSlice = createSlice({
   },
 })
 
-export const { saveReleaseTrial, markReleaseTrialCompleted } =
-  releaseTrialSlice.actions
+export const {
+  resetReleaseTrialSlice,
+  saveReleaseTrial,
+  markReleaseTrialCompleted,
+} = releaseTrialSlice.actions
 
 export default releaseTrialSlice.reducer

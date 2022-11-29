@@ -31,11 +31,6 @@ import { Keyboard } from 'react-native'
 import { QARanges } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
-const reasonsForTrapNotFunctioning = [
-  { label: 'High Flows', value: 'High Flows' },
-  { label: 'Broken Trap', value: 'Broken Trap' },
-  { label: 'Debris in Trap', value: 'Debris in Trap' },
-]
 const mapStateToProps = (state: RootState) => {
   return {
     reduxState: state.trapStatus,
@@ -52,6 +47,7 @@ const TrapStatus = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+  const { whyTrapNotFunctioning } = dropdownValues
 
   const calculateTempWarning = (
     waterTemperatureValue: number,
@@ -235,7 +231,7 @@ const TrapStatus = ({
                       placeholder='Trap Status'
                       onValueChange={handleChange('reasonNotFunc')}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={reasonsForTrapNotFunctioning}
+                      selectOptions={whyTrapNotFunctioning}
                     />
 
                     {touched.reasonNotFunc &&
