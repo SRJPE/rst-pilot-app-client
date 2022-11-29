@@ -66,9 +66,6 @@ const ReleaseDataEntry = ({
     <Formik
       validationSchema={releaseTrialDataEntrySchema}
       initialValues={releaseTrialDataEntryState.values}
-      //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
-      // initialTouched={{ wildCount: true }}
-      // initialErrors={reduxState.completed ? undefined : { wildCount: '' }}
       onSubmit={(values) => {
         handleSubmit(values)
       }}
