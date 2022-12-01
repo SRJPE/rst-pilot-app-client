@@ -25,12 +25,6 @@ import {
 } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { markActiveMarkRecaptureStepCompleted } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
 
-const releaseLocationsTemp = [
-  { definition: 'Location 1', value: 'Location 1', label: 'Location 1' },
-  { definition: 'Location 2', value: 'Location 2', label: 'Location 2' },
-  { definition: 'Other', value: 'Other', label: 'Other' },
-]
-
 const mapStateToProps = (state: RootState) => {
   return {
     releaseTrialDataEntryState: state.releaseTrialDataEntry,
