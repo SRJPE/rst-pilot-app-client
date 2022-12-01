@@ -247,8 +247,16 @@ export const releaseTrialSchema = yup.object().shape({
 
 export const releaseTrialDataEntrySchema = yup.object().shape({
   markType: yup.string().required('Mark type required'),
-  markColor: yup.string().required('Mark color required'),
-  markPosition: yup.string().required('Mark position required'),
-  // releaseLocation: yup.string().required('Release location required'),
+  markColor: yup.string().when('markType', {
+    is: 'Bismark Brown',
+    then: yup.string().nullable(),
+    otherwise: yup.string().required('Mark color required'),
+  }),
+  markPosition: yup.string().when('markType', {
+    is: 'Bismark Brown',
+    then: yup.string().nullable(),
+    otherwise: yup.string().required('Mark position required'),
+  }),
+  releaseLocation: yup.string().required('Release location required'),
   // releaseTime: yup.
 })
