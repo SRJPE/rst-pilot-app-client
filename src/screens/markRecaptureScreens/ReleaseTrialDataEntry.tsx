@@ -5,12 +5,12 @@ import {
   FormControl,
   HStack,
   Icon,
+  Pressable,
   Text,
   View,
   VStack,
 } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import NavButtons from '../../components/formContainer/NavButtons'
 import MarkRecaptureNavButtons from '../../components/markRecapture/MarkRecaptureNavButtons'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
@@ -24,6 +24,8 @@ import {
   saveReleaseTrialDataEntry,
 } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { markActiveMarkRecaptureStepCompleted } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
+import CustomModal from '../../components/Shared/CustomModal'
+import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -46,6 +48,7 @@ const ReleaseDataEntry = ({
   const { markType, markColor, bodyPart } = dropdownValues.values
   const { trapLocations } = visitSetupDefaultsState
   const [releaseTime, setReleaseTime] = useState(new Date('01/01/2022') as any)
+  const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
 
   const onReleaseTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
@@ -142,18 +145,20 @@ const ReleaseDataEntry = ({
                       errors.markPosition &&
                       RenderErrorMessage(errors, 'markPosition')}
                   </FormControl>
-                  <HStack alignItems='center' opacity={0.25}>
-                    <Icon
-                      as={Ionicons}
-                      name={'add-circle'}
-                      size='3xl'
-                      color='primary'
-                      marginRight='1'
-                    />
-                    <Text color='primary' fontSize='xl'>
-                      Add Another Mark
-                    </Text>
-                  </HStack>
+                  <Pressable onPress={() => setAddMarkModalOpen(true)}>
+                    <HStack alignItems='center'>
+                      <Icon
+                        as={Ionicons}
+                        name={'add-circle'}
+                        size='3xl'
+                        color='primary'
+                        marginRight='1'
+                      />
+                      <Text color='primary' fontSize='xl'>
+                        Add Another Mark
+                      </Text>
+                    </HStack>
+                  </Pressable>
                 </>
               )}
               <Divider bg='black' />
@@ -198,6 +203,18 @@ const ReleaseDataEntry = ({
             errors={errors}
             touched={touched}
           />
+          {/* --------- Modals --------- */}
+          <CustomModal
+            isOpen={addMarkModalOpen}
+            closeModal={() => setAddMarkModalOpen(false)}
+            height='3/4'
+          >
+            <AddAnotherMarkModalContent
+              //add new submission function
+              // handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
+              closeModal={() => setAddMarkModalOpen(false)}
+            />
+          </CustomModal>
         </>
       )}
     </Formik>
