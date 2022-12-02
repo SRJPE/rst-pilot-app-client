@@ -260,3 +260,10 @@ export const releaseTrialDataEntrySchema = yup.object().shape({
   releaseLocation: yup.string().required('Release location required'),
   // releaseTime: yup.
 })
+
+export const addAnotherMarkSchema = yup.object().shape({
+  markType: yup.string().required('Mark type required'),
+  markColor: yup.string().required('Mark color required'),
+  markPosition: yup.string().required('Mark position required'),
+  markNumber: yup.number().nullable().typeError('Input must be a number'),
+})
