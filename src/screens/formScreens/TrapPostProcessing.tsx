@@ -70,7 +70,7 @@ const TrapPostProcessing = ({
       initialValues={reduxState.values}
       initialTouched={{ debrisVolume: true }}
       initialErrors={reduxState.completed ? undefined : { debrisVolume: '' }}
-      onSubmit={values => {
+      onSubmit={(values) => {
         handleSubmit(values)
       }}
     >
@@ -124,7 +124,7 @@ const TrapPostProcessing = ({
                   right={4}
                   fontSize={16}
                 >
-                  {'L'}
+                  {'gal'}
                 </Text>
               </FormControl>
 

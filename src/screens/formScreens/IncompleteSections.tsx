@@ -198,12 +198,14 @@ const IncompleteSections = ({
           : null,
       inHalfConeConfiguration:
         trapStatusState.values.coneSetting === 'half' ? true : false,
-      debrisVolumeLiters: trapPostProcessingState.values.debrisVolume
+      debrisVolumeGallons: trapPostProcessingState.values.debrisVolume
         ? parseInt(trapPostProcessingState.values.debrisVolume)
         : null,
       qcCompleted: null,
       qcCompletedAt: null,
-      comments: paperEntryState.values.comments ? paperEntryState.values.comments : null,
+      comments: paperEntryState.values.comments
+        ? paperEntryState.values.comments
+        : null,
     }
 
     dispatch(saveTrapVisitSubmission(trapVisitSubmission))
