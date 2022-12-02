@@ -16,6 +16,7 @@ import {
   Pressable,
   Radio,
   ScrollView,
+  KeyboardAvoidingView,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapStatusSchema } from '../../utils/helpers/yupValidations'
@@ -117,7 +118,7 @@ const TrapStatus = ({
         errors,
         values,
       }) => (
-        <>
+        <KeyboardAvoidingView flex='1' behavior='padding'>
           <ScrollView
             bg='#fff'
             p='6%'
@@ -129,7 +130,6 @@ const TrapStatus = ({
             <Pressable onPress={Keyboard.dismiss}>
               <VStack space={5}>
                 <Heading>Trap Operations</Heading>
-
                 <FormControl>
                   <HStack space={2} alignItems='center'>
                     <FormControl.Label>
@@ -514,7 +514,7 @@ const TrapStatus = ({
             touched={touched}
             values={values}
           />
-        </>
+        </KeyboardAvoidingView>
       )}
     </Formik>
   )
