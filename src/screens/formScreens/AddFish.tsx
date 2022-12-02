@@ -48,6 +48,7 @@ import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { Keyboard } from 'react-native'
 import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
+import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
 
 const AddFishContent = ({
   saveIndividualFish,
@@ -78,9 +79,11 @@ const AddFishContent = ({
     'default' | 'optionalLifeStage' | 'otherSpecies'
   >('default')
   const [markFishModalOpen, setMarkFishModalOpen] = useState(false as boolean)
+  const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
     false as boolean
   )
+
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
@@ -628,19 +631,20 @@ const AddFishContent = ({
                               Fin Clip
                             </Text>
                           </Button>
-                          <HStack alignItems='center' opacity={0.25}>
-                            <Icon
-                              as={Ionicons}
-                              name={'add-circle'}
-                              size='3xl'
-                              opacity={0.75}
-                              color='primary'
-                              marginRight='1'
-                            />
-                            <Text color='primary' fontSize='lg'>
-                              Select another mark type
-                            </Text>
-                          </HStack>
+                          <Pressable onPress={() => setAddMarkModalOpen(true)}>
+                            <HStack alignItems='center'>
+                              <Icon
+                                as={Ionicons}
+                                name={'add-circle'}
+                                size='3xl'
+                                color='primary'
+                                marginRight='1'
+                              />
+                              <Text color='primary' fontSize='lg'>
+                                Add Another Mark
+                              </Text>
+                            </HStack>
+                          </Pressable>
                         </HStack>
                       </FormControl>
                     )}
@@ -861,6 +865,16 @@ const AddFishContent = ({
             <AddGeneticsModalContent
               handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
               closeModal={() => setAddGeneticModalOpen(false)}
+            />
+          </CustomModal>
+          <CustomModal
+            isOpen={addMarkModalOpen}
+            closeModal={() => setAddMarkModalOpen(false)}
+            height='3/4'
+          >
+            <AddAnotherMarkModalContent
+              // handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
+              closeModal={() => setAddMarkModalOpen(false)}
             />
           </CustomModal>
         </>
