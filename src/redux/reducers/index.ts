@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import dropdownsSlice from './dropdownsSlice'
 import navigationSlice from './formSlices/navigationSlice'
 import visitSetupSlice from './formSlices/visitSetupSlice'
-import trapStatusSlice from './formSlices/trapStatusSlice'
+import trapOperationsSlice from './formSlices/trapOperationsSlice'
 import fishProcessingSlice from './formSlices/fishProcessingSlice'
 import fishInputSlice from './formSlices/fishInputSlice'
 import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
@@ -41,7 +41,7 @@ export default combineReducers({
   slideAlert: slideAlertSlice,
   navigation: navigationSlice,
   visitSetup: visitSetupSlice,
-  trapStatus: trapStatusSlice,
+  trapOperations: trapOperationsSlice,
   fishProcessing: fishProcessingSlice,
   fishInput: fishInputSlice,
   addMarksOrTags: addMarksOrTagsSlice,

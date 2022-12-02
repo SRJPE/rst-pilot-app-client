@@ -10,7 +10,7 @@ export const trapVisitSchema = yup.object().shape({
   // crew: yup.array().min(1).required('Crew cannot be blank.'),
 })
 
-export const trapStatusSchema = yup.object().shape({
+export const trapOperationsSchema = yup.object().shape({
   trapStatus: yup.string().required('Trap Status Required'),
   reasonNotFunc: yup.string().when('trapStatus', {
     is: 'trap functioning but not normally' || 'trap not functioning',
