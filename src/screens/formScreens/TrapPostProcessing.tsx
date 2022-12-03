@@ -27,6 +27,9 @@ import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import { QARanges } from '../../utils/utils'
 import { color } from 'native-base/lib/typescript/theme/styled-system'
+import { useState } from 'react'
+import CustomModal from '../../components/Shared/CustomModal'
+import FishHoldingModalContent from '../../components/form/FishHoldingModalContent'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -42,6 +45,9 @@ const TrapPostProcessing = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const [fishHoldingModalOpen, setFishHoldingModalOpen] = useState(
+    false as boolean
+  )
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
     ;(async () => {
@@ -70,7 +76,7 @@ const TrapPostProcessing = ({
       initialValues={reduxState.values}
       initialTouched={{ debrisVolume: true }}
       initialErrors={reduxState.completed ? undefined : { debrisVolume: '' }}
-      onSubmit={values => {
+      onSubmit={(values) => {
         handleSubmit(values)
       }}
     >
@@ -277,6 +283,17 @@ const TrapPostProcessing = ({
                   </Radio>
                 </Radio.Group>
               </FormControl>
+
+              <Button
+                bg='primary'
+                alignSelf='flex-start'
+                shadow='5'
+                onPress={() => setFishHoldingModalOpen(true)}
+              >
+                <Text fontWeight='bold' color='white'>
+                  redux state
+                </Text>
+              </Button>
             </VStack>
           </Pressable>
           <NavButtons
@@ -285,6 +302,17 @@ const TrapPostProcessing = ({
             errors={errors}
             touched={touched}
           />
+          {/* --------- Modals --------- */}
+          <CustomModal
+            isOpen={fishHoldingModalOpen}
+            closeModal={() => setFishHoldingModalOpen(false)}
+            height='3/4'
+          >
+            <FishHoldingModalContent
+              // handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
+              closeModal={() => setFishHoldingModalOpen(false)}
+            />
+          </CustomModal>
         </>
       )}
     </Formik>
