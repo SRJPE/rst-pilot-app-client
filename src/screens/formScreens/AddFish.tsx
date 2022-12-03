@@ -49,7 +49,7 @@ import { Keyboard } from 'react-native'
 import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
-const AddFishContent = ({
+const AddFish = ({
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
@@ -879,4 +879,4 @@ export default connect(mapStateToProps, {
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
-})(AddFishContent)
+})(AddFish)
