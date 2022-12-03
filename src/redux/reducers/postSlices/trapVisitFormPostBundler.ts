@@ -34,7 +34,7 @@ interface TrapVisitSubmissionI {
   rpmAtStart?: number
   rpmAtEnd?: number
   inHalfConeConfiguration?: boolean
-  debrisVolumeLiters?: number
+  debrisVolumeGallons?: number
   qcCompleted?: boolean
   qcCompletedAt?: Date
   comments?: string
@@ -87,7 +87,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       trapVisitResponse: [],
       catchRawResponse: [],
     }
-    
+
     const trapVisitSubmissions =
       state.trapVisitFormPostBundler.trapVisitSubmissions
     if (trapVisitSubmissions.length) {

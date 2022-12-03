@@ -5,12 +5,12 @@ import {
   FormControl,
   HStack,
   Icon,
+  Pressable,
   Text,
   View,
   VStack,
 } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import NavButtons from '../../components/formContainer/NavButtons'
 import MarkRecaptureNavButtons from '../../components/markRecapture/MarkRecaptureNavButtons'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
@@ -24,31 +24,31 @@ import {
   saveReleaseTrialDataEntry,
 } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { markActiveMarkRecaptureStepCompleted } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
-
-const releaseLocationsTemp = [
-  { definition: 'Location 1', value: 'Location 1', label: 'Location 1' },
-  { definition: 'Location 2', value: 'Location 2', label: 'Location 2' },
-  { definition: 'Other', value: 'Other', label: 'Other' },
-]
+import CustomModal from '../../components/Shared/CustomModal'
+import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
 
 const mapStateToProps = (state: RootState) => {
   return {
     releaseTrialDataEntryState: state.releaseTrialDataEntry,
+    visitSetupDefaultsState: state.visitSetupDefaults,
   }
 }
 
 const ReleaseDataEntry = ({
   navigation,
   releaseTrialDataEntryState,
+  visitSetupDefaultsState,
 }: {
   navigation: any
   releaseTrialDataEntryState: any
+  visitSetupDefaultsState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const { markType, markColor, bodyPart } = dropdownValues.values
-
+  const { trapLocations } = visitSetupDefaultsState
   const [releaseTime, setReleaseTime] = useState(new Date('01/01/2022') as any)
+  const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
 
   const onReleaseTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
@@ -100,58 +100,67 @@ const ReleaseDataEntry = ({
                   placeholder='Type'
                   onValueChange={handleChange('markType')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={markType}
+                  selectOptions={markType.concat([
+                    { id: 1, definition: 'Bismark Brown' },
+                  ])}
                 />
                 {touched.markType &&
                   errors.markType &&
                   RenderErrorMessage(errors, 'markType')}
               </FormControl>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Mark Color
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={values.markColor}
-                  placeholder='Color'
-                  onValueChange={handleChange('markColor')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={markColor}
-                />
-                {touched.markColor &&
-                  errors.markColor &&
-                  RenderErrorMessage(errors, 'markColor')}
-              </FormControl>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Mark Position
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={values.markPosition}
-                  placeholder='Position'
-                  onValueChange={handleChange('markPosition')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={bodyPart}
-                />
-                {touched.markPosition &&
-                  errors.markPosition &&
-                  RenderErrorMessage(errors, 'markPosition')}
-              </FormControl>
-              <HStack alignItems='center' opacity={0.25}>
-                <Icon
-                  as={Ionicons}
-                  name={'add-circle'}
-                  size='3xl'
-                  color='primary'
-                  marginRight='1'
-                />
-                <Text color='primary' fontSize='xl'>
-                  Add Another Mark
-                </Text>
-              </HStack>
+
+              {values.markType !== 'Bismark Brown' && (
+                <>
+                  <FormControl>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Mark Color
+                      </Text>
+                    </FormControl.Label>
+                    <CustomSelect
+                      selectedValue={values.markColor}
+                      placeholder='Color'
+                      onValueChange={handleChange('markColor')}
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={markColor}
+                    />
+                    {touched.markColor &&
+                      errors.markColor &&
+                      RenderErrorMessage(errors, 'markColor')}
+                  </FormControl>
+                  <FormControl>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Mark Position
+                      </Text>
+                    </FormControl.Label>
+                    <CustomSelect
+                      selectedValue={values.markPosition}
+                      placeholder='Position'
+                      onValueChange={handleChange('markPosition')}
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={bodyPart}
+                    />
+                    {touched.markPosition &&
+                      errors.markPosition &&
+                      RenderErrorMessage(errors, 'markPosition')}
+                  </FormControl>
+                  <Pressable onPress={() => setAddMarkModalOpen(true)}>
+                    <HStack alignItems='center'>
+                      <Icon
+                        as={Ionicons}
+                        name={'add-circle'}
+                        size='3xl'
+                        color='primary'
+                        marginRight='1'
+                      />
+                      <Text color='primary' fontSize='xl'>
+                        Add Another Mark
+                      </Text>
+                    </HStack>
+                  </Pressable>
+                </>
+              )}
               <Divider bg='black' />
               <FormControl>
                 <FormControl.Label>
@@ -164,7 +173,10 @@ const ReleaseDataEntry = ({
                   placeholder='Location'
                   onValueChange={handleChange('releaseLocation')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={releaseLocationsTemp}
+                  selectOptions={trapLocations?.map((trapLocation: any) => ({
+                    label: trapLocation?.siteName,
+                    value: trapLocation?.siteName,
+                  }))}
                 />
                 {touched.releaseLocation &&
                   errors.releaseLocation &&
@@ -191,6 +203,18 @@ const ReleaseDataEntry = ({
             errors={errors}
             touched={touched}
           />
+          {/* --------- Modals --------- */}
+          <CustomModal
+            isOpen={addMarkModalOpen}
+            closeModal={() => setAddMarkModalOpen(false)}
+            height='3/4'
+          >
+            <AddAnotherMarkModalContent
+              //add new submission function
+              // handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
+              closeModal={() => setAddMarkModalOpen(false)}
+            />
+          </CustomModal>
         </>
       )}
     </Formik>

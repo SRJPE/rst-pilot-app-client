@@ -16,16 +16,17 @@ import {
   Pressable,
   Radio,
   ScrollView,
+  KeyboardAvoidingView,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
-import { trapStatusSchema } from '../../utils/helpers/yupValidations'
+import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
-  markTrapStatusCompleted,
-  saveTrapStatus,
-} from '../../redux/reducers/formSlices/trapStatusSlice'
+  markTrapOperationsCompleted,
+  saveTrapOperations,
+} from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { Keyboard } from 'react-native'
 import { QARanges } from '../../utils/utils'
@@ -33,10 +34,10 @@ import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
 const mapStateToProps = (state: RootState) => {
   return {
-    reduxState: state.trapStatus,
+    reduxState: state.trapOperations,
   }
 }
-const TrapStatus = ({
+const TrapOperations = ({
   navigation,
   reduxState,
 }: {
@@ -67,8 +68,8 @@ const TrapStatus = ({
   }
 
   const handleSubmit = (values: any, errors: any) => {
-    dispatch(saveTrapStatus(values))
-    dispatch(markTrapStatusCompleted(true))
+    dispatch(saveTrapOperations(values))
+    dispatch(markTrapOperationsCompleted(true))
     dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ Status', values)
   }
@@ -98,7 +99,7 @@ const TrapStatus = ({
 
   return (
     <Formik
-      validationSchema={trapStatusSchema}
+      validationSchema={trapOperationsSchema}
       initialValues={reduxState.values}
       initialTouched={{ trapStatus: true }}
       // only create initial error when form is not completed
@@ -117,7 +118,7 @@ const TrapStatus = ({
         errors,
         values,
       }) => (
-        <>
+        <KeyboardAvoidingView flex='1' behavior='padding'>
           <ScrollView
             bg='#fff'
             p='6%'
@@ -129,7 +130,6 @@ const TrapStatus = ({
             <Pressable onPress={Keyboard.dismiss}>
               <VStack space={5}>
                 <Heading>Trap Operations</Heading>
-
                 <FormControl>
                   <HStack space={2} alignItems='center'>
                     <FormControl.Label>
@@ -228,7 +228,7 @@ const TrapStatus = ({
                     </FormControl.Label>
                     <CustomSelect
                       selectedValue={values.reasonNotFunc}
-                      placeholder='Trap Status'
+                      placeholder='Reason'
                       onValueChange={handleChange('reasonNotFunc')}
                       setFieldTouched={setFieldTouched}
                       selectOptions={whyTrapNotFunctioning}
@@ -514,9 +514,9 @@ const TrapStatus = ({
             touched={touched}
             values={values}
           />
-        </>
+        </KeyboardAvoidingView>
       )}
     </Formik>
   )
 }
-export default connect(mapStateToProps)(TrapStatus)
+export default connect(mapStateToProps)(TrapOperations)
