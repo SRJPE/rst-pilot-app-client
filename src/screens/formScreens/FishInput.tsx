@@ -152,7 +152,21 @@ const FishInput = ({
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>
-                Input Fish Measurements
+                Input Single Fish Measurement
+              </Text>
+            </Button>
+            <Button
+              bg='primary'
+              px='3'
+              borderRadius='5'
+              flex='1'
+              shadow='3'
+              onPress={() => {
+                navigation.navigate('Add Batch')
+              }}
+            >
+              <Text fontSize='sm' fontWeight='bold' color='white'>
+                Input Batch Count
               </Text>
             </Button>
 

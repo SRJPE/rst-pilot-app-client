@@ -14,6 +14,7 @@ import StartMarkRecapture from '../screens/markRecaptureScreens/StartMarkRecaptu
 import TrapPostProcessing from '../screens/formScreens/TrapPostProcessing'
 import AddFish from '../screens/formScreens/AddFish'
 import PaperEntry from '../screens/formScreens/PaperEntry'
+import AddBatch from '../screens/formScreens/AddBatch'
 import { useSelector } from 'react-redux'
 
 const FormStack = createStackNavigator()
@@ -25,7 +26,7 @@ export default function FormStackNavigation() {
   return (
     <FormStack.Navigator
       initialRouteName='Visit Setup'
-      screenOptions={{ header: props => <ProgressHeader {...props} /> }}
+      screenOptions={{ header: (props) => <ProgressHeader {...props} /> }}
     >
       <FormStack.Screen name='Visit Setup' component={VisitSetup} />
       <FormStack.Screen name='Trap Status' component={TrapStatus} />
@@ -50,6 +51,11 @@ export default function FormStackNavigation() {
       <FormStack.Screen
         name='Add Fish'
         component={AddFish}
+        options={{ headerShown: false }}
+      />
+      <FormStack.Screen
+        name='Add Batch'
+        component={AddBatch}
         options={{ headerShown: false }}
       />
       <FormStack.Screen
