@@ -7,6 +7,7 @@ const theme = extendTheme({
     // primary: '#4c642f',
     // secondary: '#842f3f',
     themeGrey: '#DADADA42',
+    themeOrange: '#F9A38C',
 
     error: '#b71c1c',
     warning: '#eec227',

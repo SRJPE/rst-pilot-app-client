@@ -811,7 +811,7 @@ const AddFishContent = ({
                 flex='1'
                 py='5'
                 mx='2'
-                bg='#F9A38C'
+                bg='themeOrange'
                 shadow='5'
                 isDisabled={handleSaveButtonDisable(touched, errors)}
                 onPress={() => {
