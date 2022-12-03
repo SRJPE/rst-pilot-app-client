@@ -130,7 +130,7 @@ const TrapPostProcessing = ({
                   right={4}
                   fontSize={16}
                 >
-                  {'L'}
+                  {'gal'}
                 </Text>
               </FormControl>
 

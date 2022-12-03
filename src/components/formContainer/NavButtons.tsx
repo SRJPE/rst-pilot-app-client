@@ -56,7 +56,7 @@ const NavButtons = ({
           })
         }
         break
-      case 'Trap Status':
+      case 'Trap Operations':
         if (!isPaperEntryStore) {
           if (values?.trapStatus === 'trap not functioning') {
             navigateHelper('Non Functional Trap')
@@ -99,7 +99,7 @@ const NavButtons = ({
         navigateHelper('Trap Post-Processing')
         break
       case 'Paper Entry':
-        navigateHelper('Trap Status')
+        navigateHelper('Trap Operations')
         break
       default:
         break
@@ -108,17 +108,17 @@ const NavButtons = ({
 
   const navigateFlowLeftButton = () => {
     switch (activePage) {
-      case 'Trap Status':
+      case 'Trap Operations':
         if (isPaperEntryStore) navigateHelper('Paper Entry')
         break
       case 'High Flows':
-        navigateHelper('Trap Status')
+        navigateHelper('Trap Operations')
         break
       case 'High Temperatures':
-        navigateHelper('Trap Status')
+        navigateHelper('Trap Operations')
         break
       case 'Non Functional Trap':
-        navigateHelper('Trap Status')
+        navigateHelper('Trap Operations')
         break
       case 'No Fish Caught':
         navigateHelper('Fish Processing')

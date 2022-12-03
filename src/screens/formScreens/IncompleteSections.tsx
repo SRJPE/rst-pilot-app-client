@@ -23,7 +23,7 @@ import {
 } from '../../redux/reducers/formSlices/fishInputSlice'
 import { resetFishProcessingSlice } from '../../redux/reducers/formSlices/fishProcessingSlice'
 import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
-import { resetTrapStatusSlice } from '../../redux/reducers/formSlices/trapStatusSlice'
+import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { CommonActions, StackActions } from '@react-navigation/native'
@@ -34,7 +34,7 @@ const mapStateToProps = (state: RootState) => {
     visitSetupState: state.visitSetup,
     fishProcessingState: state.fishProcessing,
     trapPostProcessingState: state.trapPostProcessing,
-    trapStatusState: state.trapStatus,
+    trapOperationsState: state.trapOperations,
     dropdownsState: state.dropdowns,
     connectivityState: state.connectivity,
     fishInputState: state.fishInput,
@@ -48,7 +48,7 @@ const IncompleteSections = ({
   visitSetupState,
   fishProcessingState,
   trapPostProcessingState,
-  trapStatusState,
+  trapOperationsState,
   dropdownsState,
   connectivityState,
   fishInputState,
@@ -59,7 +59,7 @@ const IncompleteSections = ({
   visitSetupState: any
   fishProcessingState: any
   trapPostProcessingState: any
-  trapStatusState: any
+  trapOperationsState: any
   dropdownsState: any
   connectivityState: any
   fishInputState: any
@@ -108,7 +108,7 @@ const IncompleteSections = ({
     dispatch(resetFishInputSlice())
     dispatch(resetFishProcessingSlice())
     dispatch(resetTrapPostProcessingSlice())
-    dispatch(resetTrapStatusSlice())
+    dispatch(resetTrapOperationsSlice())
     dispatch(resetVisitSetupSlice())
     dispatch(resetPaperEntrySlice())
   }
@@ -142,7 +142,7 @@ const IncompleteSections = ({
       rpm1: startRpm1,
       rpm2: startRpm2,
       rpm3: startRpm3,
-    } = trapStatusState.values
+    } = trapOperationsState.values
     const {
       rpm1: endRpm1,
       rpm2: endRpm2,
@@ -167,16 +167,16 @@ const IncompleteSections = ({
         )
       ),
       sampleGearId: null,
-      coneDepth: trapStatusState.values.coneDepth
-        ? parseInt(trapStatusState.values.coneDepth)
+      coneDepth: trapOperationsState.values.coneDepth
+        ? parseInt(trapOperationsState.values.coneDepth)
         : null,
       trapInThalweg: null,
       trapFunctioning: returnNullableTableId(
-        trapFunctioningValues.indexOf(trapStatusState.values.trapStatus)
+        trapFunctioningValues.indexOf(trapOperationsState.values.trapStatus)
       ),
       whyTrapNotFunctioning: returnNullableTableId(
         whyTrapNotFunctioningValues.indexOf(
-          trapStatusState.values.reasonForNotFunc
+          trapOperationsState.values.reasonForNotFunc
         )
       ),
       trapStatusAtEnd: returnNullableTableId(
@@ -184,8 +184,8 @@ const IncompleteSections = ({
           `${trapPostProcessingState.values.endingTrapStatus}`.toLowerCase()
         )
       ),
-      totalRevolutions: trapStatusState.values.totalRevolutions
-        ? parseInt(trapStatusState.values.totalRevolutions)
+      totalRevolutions: trapOperationsState.values.totalRevolutions
+        ? parseInt(trapOperationsState.values.totalRevolutions)
         : null,
       rpmAtStart:
         startRpm1 && startRpm2 && startRpm3
@@ -197,13 +197,15 @@ const IncompleteSections = ({
           ? (parseInt(endRpm1) + parseInt(endRpm2) + parseInt(endRpm3)) / 3
           : null,
       inHalfConeConfiguration:
-        trapStatusState.values.coneSetting === 'half' ? true : false,
-      debrisVolumeLiters: trapPostProcessingState.values.debrisVolume
+        trapOperationsState.values.coneSetting === 'half' ? true : false,
+      debrisVolumeGallons: trapPostProcessingState.values.debrisVolume
         ? parseInt(trapPostProcessingState.values.debrisVolume)
         : null,
       qcCompleted: null,
       qcCompletedAt: null,
-      comments: paperEntryState.values.comments ? paperEntryState.values.comments : null,
+      comments: paperEntryState.values.comments
+        ? paperEntryState.values.comments
+        : null,
     }
 
     dispatch(saveTrapVisitSubmission(trapVisitSubmission))

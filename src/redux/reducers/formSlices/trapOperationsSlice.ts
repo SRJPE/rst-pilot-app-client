@@ -2,10 +2,10 @@ import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
   completed: boolean
-  values: TrapStatusValuesI
+  values: TrapOperationsValuesI
 }
 
-export interface TrapStatusValuesI {
+export interface TrapOperationsValuesI {
   trapStatus: string
   reasonNotFunc: string
   flowMeasure: number | null
@@ -42,21 +42,24 @@ const initialState: InitialStateI = {
   },
 }
 
-export const trapStatusSlice = createSlice({
-  name: 'trapStatus',
+export const trapOperationsSlice = createSlice({
+  name: 'trapOperations',
   initialState: initialState,
   reducers: {
-    resetTrapStatusSlice: () => initialState,
-    saveTrapStatus: (state, action) => {
+    resetTrapOperationsSlice: () => initialState,
+    saveTrapOperations: (state, action) => {
       state.values = action.payload
     },
-    markTrapStatusCompleted: (state, action) => {
+    markTrapOperationsCompleted: (state, action) => {
       state.completed = action.payload
     },
   },
 })
 
-export const { resetTrapStatusSlice, saveTrapStatus, markTrapStatusCompleted } =
-  trapStatusSlice.actions
+export const {
+  resetTrapOperationsSlice,
+  saveTrapOperations,
+  markTrapOperationsCompleted,
+} = trapOperationsSlice.actions
 
-export default trapStatusSlice.reducer
+export default trapOperationsSlice.reducer

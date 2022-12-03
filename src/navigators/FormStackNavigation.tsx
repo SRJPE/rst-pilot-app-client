@@ -2,7 +2,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import FishInput from '../screens/formScreens/FishInput'
 import FishProcessing from '../screens/formScreens/FishProcessing'
 import VisitSetup from '../screens/formScreens/VisitSetup'
-import TrapStatus from '../screens/formScreens/TrapStatus'
+import TrapOperations from '../screens/formScreens/TrapOperations'
 import HighFlows from '../screens/formScreens/navigationFlowWarnings/HighFlows'
 import HighTemperatures from '../screens/formScreens/navigationFlowWarnings/HighTemperatures'
 import ProgressHeader from '../components/formContainer/ProgressHeader'
@@ -29,7 +29,7 @@ export default function FormStackNavigation() {
       screenOptions={{ header: (props) => <ProgressHeader {...props} /> }}
     >
       <FormStack.Screen name='Visit Setup' component={VisitSetup} />
-      <FormStack.Screen name='Trap Status' component={TrapStatus} />
+      <FormStack.Screen name='Trap Operations' component={TrapOperations} />
       <FormStack.Screen name='Fish Processing' component={FishProcessing} />
       <FormStack.Screen
         name='Fish Input'

@@ -4,7 +4,7 @@ export const numOfFormSteps = 6
 
 const formSteps = {
   1: { name: 'Visit Setup', propName: 'visitSetup', completed: false },
-  2: { name: 'Trap Status', propName: 'trapStatus', completed: false },
+  2: { name: 'Trap Operations', propName: 'trapOperations', completed: false },
   3: { name: 'Fish Processing', propName: 'fishProcessing', completed: false },
   4: { name: 'Fish Input', propName: 'fishInput', completed: false },
   5: {

@@ -10,7 +10,7 @@ export const trapVisitSchema = yup.object().shape({
   // crew: yup.array().min(1).required('Crew cannot be blank.'),
 })
 
-export const trapStatusSchema = yup.object().shape({
+export const trapOperationsSchema = yup.object().shape({
   trapStatus: yup.string().required('Trap Status Required'),
   reasonNotFunc: yup.string().when('trapStatus', {
     is: 'trap functioning but not normally' || 'trap not functioning',
@@ -247,8 +247,23 @@ export const releaseTrialSchema = yup.object().shape({
 
 export const releaseTrialDataEntrySchema = yup.object().shape({
   markType: yup.string().required('Mark type required'),
+  markColor: yup.string().when('markType', {
+    is: 'Bismark Brown',
+    then: yup.string().nullable(),
+    otherwise: yup.string().required('Mark color required'),
+  }),
+  markPosition: yup.string().when('markType', {
+    is: 'Bismark Brown',
+    then: yup.string().nullable(),
+    otherwise: yup.string().required('Mark position required'),
+  }),
+  releaseLocation: yup.string().required('Release location required'),
+  // releaseTime: yup.
+})
+
+export const addAnotherMarkSchema = yup.object().shape({
+  markType: yup.string().required('Mark type required'),
   markColor: yup.string().required('Mark color required'),
   markPosition: yup.string().required('Mark position required'),
-  // releaseLocation: yup.string().required('Release location required'),
-  // releaseTime: yup.
+  markNumber: yup.number().nullable().typeError('Input must be a number'),
 })
