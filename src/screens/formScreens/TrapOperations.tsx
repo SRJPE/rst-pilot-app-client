@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import { Formik } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -519,4 +519,4 @@ const TrapOperations = ({
     </Formik>
   )
 }
-export default connect(mapStateToProps)(TrapOperations)
+export default connect(mapStateToProps)(memo(TrapOperations))

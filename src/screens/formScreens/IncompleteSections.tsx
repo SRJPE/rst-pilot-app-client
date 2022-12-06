@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { memo, useEffect } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 
@@ -309,4 +309,4 @@ const IncompleteSections = ({
   )
 }
 
-export default connect(mapStateToProps)(IncompleteSections)
+export default connect(mapStateToProps)(memo(IncompleteSections))

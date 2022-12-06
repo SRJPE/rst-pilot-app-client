@@ -8,7 +8,7 @@ import {
   Avatar,
   HStack,
 } from 'native-base'
-import { useEffect } from 'react'
+import { memo, useEffect } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
@@ -58,7 +58,7 @@ const FishProcessing = ({
       initialErrors={
         reduxState.completed ? undefined : { fishProcessedResult: '' }
       }
-      onSubmit={values => {
+      onSubmit={(values) => {
         handleSubmit(values)
       }}
     >
@@ -159,4 +159,4 @@ const FishProcessing = ({
   )
 }
 
-export default connect(mapStateToProps)(FishProcessing)
+export default connect(mapStateToProps)(memo(FishProcessing))

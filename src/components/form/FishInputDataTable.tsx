@@ -103,14 +103,13 @@ const FishInputDataTable = ({
       {pageRows.map((obj, rowIdx: number) => {
         return (
           <DataTable.Row key={`${Object.keys(obj)[rowIdx]}-${rowIdx}`}>
-            {Object.keys(obj)
-              .map((key: string | number, itemIdx: number) => {
-                return (
-                  <DataTable.Cell key={`${key}-${obj[key]}-${itemIdx}`}>
-                    {renderCell(obj, key)}
-                  </DataTable.Cell>
-                )
-              })}
+            {Object.keys(obj).map((key: string | number, itemIdx: number) => {
+              return (
+                <DataTable.Cell key={`${key}-${obj[key]}-${itemIdx}`}>
+                  {renderCell(obj, key)}
+                </DataTable.Cell>
+              )
+            })}
           </DataTable.Row>
         )
       })}

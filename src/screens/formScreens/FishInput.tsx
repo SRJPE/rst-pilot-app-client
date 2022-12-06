@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -216,4 +216,4 @@ const FishInput = ({
   )
 }
 
-export default connect(mapStateToProps)(FishInput)
+export default connect(mapStateToProps)(memo(FishInput))

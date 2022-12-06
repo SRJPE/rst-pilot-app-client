@@ -9,6 +9,7 @@ interface ModalPropsI {
 }
 
 export default function CustomModal(props: ModalPropsI) {
+  console.log('modalRendered')
   return (
     <Modal
       isOpen={props.isOpen}

@@ -27,7 +27,7 @@ import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import { QARanges } from '../../utils/utils'
 import { color } from 'native-base/lib/typescript/theme/styled-system'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import CustomModal from '../../components/Shared/CustomModal'
 import FishHoldingModalContent from '../../components/form/FishHoldingModalContent'
 
@@ -319,4 +319,4 @@ const TrapPostProcessing = ({
   )
 }
 
-export default connect(mapStateToProps)(TrapPostProcessing)
+export default connect(mapStateToProps)(memo(TrapPostProcessing))

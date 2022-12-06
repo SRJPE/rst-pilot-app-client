@@ -3,6 +3,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
+import { useCallback } from 'react'
 
 const IncompleteSectionButton = ({
   name,
@@ -16,10 +17,10 @@ const IncompleteSectionButton = ({
   step: number
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const handleButtonPress = () => {
+  const handleButtonPress = useCallback(() => {
     navigation.navigate('Trap Visit Form', { screen: name })
     dispatch(updateActiveStep(step))
-  }
+  }, [name, step])
 
   const calculateMargin = () => {
     switch (name) {

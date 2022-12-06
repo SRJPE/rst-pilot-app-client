@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { CheckIcon, Select } from 'native-base'
 import { startCase } from 'lodash'
 
@@ -10,7 +10,7 @@ interface CustomSelectI {
   selectOptions: any[]
 }
 
-const CustomSelect: React.FC<CustomSelectI> = props => {
+const CustomSelect: React.FC<CustomSelectI> = (props) => {
   return (
     <Select
       height='50px'
@@ -24,7 +24,7 @@ const CustomSelect: React.FC<CustomSelectI> = props => {
         endIcon: <CheckIcon size='6' />,
       }}
       mt={1}
-      onValueChange={itemValue => {
+      onValueChange={(itemValue) => {
         props.setFieldTouched(props.selectedValue, true)
         props.onValueChange(itemValue)
       }}
@@ -67,4 +67,4 @@ const CustomSelect: React.FC<CustomSelectI> = props => {
     </Select>
   )
 }
-export default CustomSelect
+export default memo(CustomSelect)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -55,6 +55,29 @@ const VisitSetup = ({
     dispatch(markTrapVisitPaperEntry(isPaperEntry))
     console.log('🚀 ~ handleSubmit ~ Visit', values)
   }
+  const renderStreamOptions = () => {
+    return visitSetupDefaultsState?.programs?.map((program: any) => ({
+      label: program?.streamName,
+      value: program?.streamName,
+    }))
+  }
+  const renderTrapSiteOptions = () => {
+    return visitSetupDefaultsState?.trapLocations?.map((trapLocation: any) => ({
+      label: trapLocation?.siteName,
+      value: trapLocation?.siteName,
+    }))
+  }
+  const renderCrewList = () => {
+    return visitSetupDefaultsState?.crewMembers[
+      selectedProgramId ? selectedProgramId - 1 : 0
+    ].map((crewMember: any) => ({
+      label: `${crewMember?.firstName} ${crewMember?.lastName}`,
+      value: `${crewMember?.firstName} ${crewMember?.lastName}`,
+    }))
+  }
+  const streamOptionsMemo = useMemo(() => renderStreamOptions(), [])
+  const trapSitesMemo = useMemo(() => renderTrapSiteOptions(), [])
+  const crewListMemo = useMemo(() => renderCrewList(), [])
 
   const updateSelectedProgram = (streamName: string) => {
     let programId = null
@@ -132,12 +155,7 @@ const VisitSetup = ({
                     updateSelectedProgram(itemValue)
                   }}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={visitSetupDefaultsState?.programs?.map(
-                    (program: any) => ({
-                      label: program?.streamName,
-                      value: program?.streamName,
-                    })
-                  )}
+                  selectOptions={streamOptionsMemo}
                 />
                 {touched.stream &&
                   errors.stream &&
@@ -168,12 +186,7 @@ const VisitSetup = ({
                         updateSelectedProgram(itemValue)
                       }}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={visitSetupDefaultsState?.trapLocations?.map(
-                        (trapLocation: any) => ({
-                          label: trapLocation?.siteName,
-                          value: trapLocation?.siteName,
-                        })
-                      )}
+                      selectOptions={trapSitesMemo}
                     />
                     {touched.trapSite &&
                       errors.trapSite &&
@@ -186,12 +199,7 @@ const VisitSetup = ({
                       </Text>
                     </FormControl.Label>
                     <CrewDropDown
-                      crewList={visitSetupDefaultsState?.crewMembers[
-                        selectedProgramId ? selectedProgramId - 1 : 0
-                      ].map((crewMember: any) => ({
-                        label: `${crewMember?.firstName} ${crewMember?.lastName}`,
-                        value: `${crewMember?.firstName} ${crewMember?.lastName}`,
-                      }))}
+                      crewList={crewListMemo}
                       setFieldValue={setFieldValue}
                       setFieldTouched={setFieldTouched}
                     />
@@ -216,4 +224,4 @@ const VisitSetup = ({
   )
 }
 
-export default connect(mapStateToProps)(VisitSetup)
+export default connect(mapStateToProps)(memo(VisitSetup))
