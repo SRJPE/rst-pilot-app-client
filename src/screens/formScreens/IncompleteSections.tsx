@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
-
 import { AppDispatch, RootState } from '../../redux/store'
 import {
   checkIfFormIsComplete,
@@ -26,12 +25,13 @@ import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/tr
 import { resetTrapStatusSlice } from '../../redux/reducers/formSlices/trapStatusSlice'
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
-import { CommonActions, StackActions } from '@react-navigation/native'
+import { flatten, uniq } from 'lodash'
 
 const mapStateToProps = (state: RootState) => {
   return {
     navigationState: state.navigation,
     visitSetupState: state.visitSetup,
+    visitSetupDefaultState: state.visitSetupDefaults,
     fishProcessingState: state.fishProcessing,
     trapPostProcessingState: state.trapPostProcessing,
     trapStatusState: state.trapStatus,
@@ -46,6 +46,7 @@ const IncompleteSections = ({
   navigation,
   navigationState,
   visitSetupState,
+  visitSetupDefaultState,
   fishProcessingState,
   trapPostProcessingState,
   trapStatusState,
@@ -57,6 +58,7 @@ const IncompleteSections = ({
   navigation: any
   navigationState: any
   visitSetupState: any
+  visitSetupDefaultState: any
   fishProcessingState: any
   trapPostProcessingState: any
   trapStatusState: any
@@ -148,8 +150,24 @@ const IncompleteSections = ({
       rpm2: endRpm2,
       rpm3: endRpm3,
     } = trapPostProcessingState.values
+    const selectedCrewNames: string[] = [...visitSetupState.values.crew] // ['james', 'steve']
+    const selectedCrewNamesMap: Record<string, boolean> =
+      selectedCrewNames.reduce(
+        (acc: Record<string, boolean>, name: string) => ({
+          ...acc,
+          [name]: true,
+        }),
+        {}
+      )
+    const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
+    const selectedCrewIds = uniq(allCrewObjects
+      .filter(
+        (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
+      )
+      .map((obj: any) => obj.personnelId))
 
     const trapVisitSubmission = {
+      crew: selectedCrewIds,
       programId: 1,
       visitTypeId: null,
       trapLocationId: null,
@@ -203,7 +221,9 @@ const IncompleteSections = ({
         : null,
       qcCompleted: null,
       qcCompletedAt: null,
-      comments: paperEntryState.values.comments ? paperEntryState.values.comments : null,
+      comments: paperEntryState.values.comments
+        ? paperEntryState.values.comments
+        : null,
     }
 
     dispatch(saveTrapVisitSubmission(trapVisitSubmission))

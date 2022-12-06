@@ -186,12 +186,18 @@ const VisitSetup = ({
                       </Text>
                     </FormControl.Label>
                     <CrewDropDown
-                      crewList={visitSetupDefaultsState?.crewMembers[
-                        selectedProgramId ? selectedProgramId - 1 : 0
-                      ].map((crewMember: any) => ({
-                        label: `${crewMember?.firstName} ${crewMember?.lastName}`,
-                        value: `${crewMember?.firstName} ${crewMember?.lastName}`,
-                      }))}
+                      crewList={
+                        visitSetupDefaultsState?.crewMembers[
+                          selectedProgramId ? selectedProgramId - 1 : 0
+                        ]
+                          ? visitSetupDefaultsState?.crewMembers[
+                              selectedProgramId ? selectedProgramId - 1 : 0
+                            ].map((crewMember: any) => ({
+                              label: `${crewMember?.firstName} ${crewMember?.lastName}`,
+                              value: `${crewMember?.firstName} ${crewMember?.lastName}`,
+                            }))
+                          : [{ label: 'No crew members found', value: 'null' }]
+                      }
                       setFieldValue={setFieldValue}
                       setFieldTouched={setFieldTouched}
                     />
