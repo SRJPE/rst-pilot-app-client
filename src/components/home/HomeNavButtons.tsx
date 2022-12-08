@@ -149,7 +149,7 @@ export default function BottomNavigation({
                   opacity='0.8'
                   borderRadius='5'
                 >
-                  <Text fontSize={23} fontWeight='450'>
+                  <Text fontSize={23} fontWeight='400'>
                     Standard Trap Visit
                   </Text>
                 </Badge>
@@ -183,7 +183,7 @@ export default function BottomNavigation({
                   opacity='0.8'
                   borderRadius='5'
                 >
-                  <Text fontSize={23} fontWeight='450'>
+                  <Text fontSize={23} fontWeight='400'>
                     Mark Recapture Release
                   </Text>
                 </Badge>
