@@ -23,7 +23,6 @@
         "buildType": "apk"
       },
       "ios": {
-        "supportsTablet": true,
         "simulator": true,
         "image": "latest"
       }
