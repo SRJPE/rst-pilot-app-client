@@ -70,10 +70,14 @@ const VisitSetup = ({
   const renderCrewList = () => {
     return visitSetupDefaultsState?.crewMembers[
       selectedProgramId ? selectedProgramId - 1 : 0
-    ].map((crewMember: any) => ({
-      label: `${crewMember?.firstName} ${crewMember?.lastName}`,
-      value: `${crewMember?.firstName} ${crewMember?.lastName}`,
-    }))
+    ]
+      ? visitSetupDefaultsState?.crewMembers[
+          selectedProgramId ? selectedProgramId - 1 : 0
+        ].map((crewMember: any) => ({
+          label: `${crewMember?.firstName} ${crewMember?.lastName}`,
+          value: `${crewMember?.firstName} ${crewMember?.lastName}`,
+        }))
+      : [{ label: 'No crew members found', value: 'null' }]
   }
   const streamOptionsMemo = useMemo(() => renderStreamOptions(), [])
   const trapSitesMemo = useMemo(() => renderTrapSiteOptions(), [])
