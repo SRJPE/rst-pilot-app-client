@@ -291,7 +291,7 @@ const TrapPostProcessing = ({
                 onPress={() => setFishHoldingModalOpen(true)}
               >
                 <Text fontWeight='bold' color='white'>
-                  redux state
+                  Fish Holding Test
                 </Text>
               </Button>
             </VStack>
