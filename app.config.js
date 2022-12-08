@@ -8,6 +8,10 @@ export default ({ config }) => {
     runtimeVersion: {
       policy: 'sdkVersion',
     },
+    ios: {
+      bundleIdentifier: 'com.flowwest.rstapp',
+      supportsTablet: true
+    },
     extra: {
       REACT_APP_BASE_URL: process.env.REACT_APP_BASE_URL,
       eas: {
