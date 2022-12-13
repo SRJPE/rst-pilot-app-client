@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -50,7 +50,7 @@ import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
 
-const AddFishContent = ({
+const AddFish = ({
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
@@ -815,7 +815,7 @@ const AddFishContent = ({
                 flex='1'
                 py='5'
                 mx='2'
-                bg='#F9A38C'
+                bg='themeOrange'
                 shadow='5'
                 isDisabled={handleSaveButtonDisable(touched, errors)}
                 onPress={() => {
@@ -893,4 +893,4 @@ export default connect(mapStateToProps, {
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
-})(AddFishContent)
+})(memo(AddFish))
