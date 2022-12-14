@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react'
+import React, { useState } from 'react'
 import {
   Avatar,
   Box,
@@ -893,4 +893,4 @@ export default connect(mapStateToProps, {
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
-})(memo(AddFish))
+})(AddFish)
