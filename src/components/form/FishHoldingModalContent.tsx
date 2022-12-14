@@ -1,4 +1,5 @@
 import { HStack, VStack, Text, Button, Divider, Heading } from 'native-base'
+import { memo, useCallback } from 'react'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import FishHoldingCard from './FishHoldingCard'
 
@@ -9,6 +10,17 @@ const FishHoldingModalContent = ({
   handleMarkFishFormSubmit?: any
   closeModal: any
 }) => {
+  // console.log('🚀 ~ FishHoldingModalContentRendered')
+
+  const renderFishHoldingCards = useCallback(() => {
+    return (
+      <HStack space={10} justifyContent='center'>
+        <FishHoldingCard cardTitle='Run' />
+        <FishHoldingCard cardTitle='Life Stage' />
+      </HStack>
+    )
+  }, [])
+
   return (
     <>
       <CustomModalHeader
@@ -38,18 +50,22 @@ const FishHoldingModalContent = ({
       />
       <>
         <Divider my={2} thickness='3' />
-        <VStack space={10} paddingX='10' paddingTop='7' paddingBottom='3'>
-          <Heading color='black' fontSize='2xl'>
+        <VStack
+          alignItems='center'
+          // space={10}
+          paddingX='10'
+          paddingTop='7'
+          paddingBottom='3'
+        >
+          <Heading color='black' fontSize='2xl' mb='5%'>
             Which fish are you holding for mark recapture Trials?
           </Heading>
-          <HStack space={10} justifyContent='center'>
-            <FishHoldingCard cardTitle='Run' />
-            <FishHoldingCard cardTitle='Life Stage' />
-          </HStack>
+          {renderFishHoldingCards()}
+          <Heading>Total Fish Holding: </Heading>
         </VStack>
       </>
     </>
   )
 }
 
-export default FishHoldingModalContent
+export default memo(FishHoldingModalContent)
