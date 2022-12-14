@@ -1,31 +1,8 @@
 import { Ionicons } from '@expo/vector-icons'
-
-import {
-  Badge,
-  Pressable,
-  Box,
-  HStack,
-  Spacer,
-  Text,
-  Flex,
-  VStack,
-  AspectRatio,
-  Center,
-  Image,
-  Stack,
-  Heading,
-  IconButton,
-  Icon,
-} from 'native-base'
-import { useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
+import { Badge, Box, VStack, Center, Icon } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-
-const mapStateToProps = (state: RootState) => {
-  return {
-    individualFishStore: state.fishInput.individualFish,
-  }
-}
 
 const FishHoldingCard = ({
   cardTitle,
@@ -39,6 +16,7 @@ const FishHoldingCard = ({
     (state: RootState) => state.dropdowns.values
   )
   const [selectedLifeStages, setSelectedLifeStages] = useState([] as Array<any>)
+  console.log('🚀 ~ FishHoldingCardRendered')
 
   //update selectedLifeStages when individualFishStore changes
   useEffect(() => {
@@ -52,6 +30,54 @@ const FishHoldingCard = ({
     const lifeStagesSet = [...new Set(lifeStagesStore)]
     setSelectedLifeStages(lifeStagesSet)
   }, [individualFishStore])
+
+  const renderFishHoldingCardContent = useCallback(() => {
+    return cardTitle === 'Run'
+      ? dropdownValues?.run.map((item, idx) => {
+          return (
+            <Badge
+              key={idx}
+              bg='themeOrange'
+              alignSelf='center'
+              justifyContent='space-between'
+              width='70%'
+              variant='solid'
+              shadow='3'
+              _text={{
+                color: 'white',
+                fontSize: '16',
+              }}
+              rightIcon={
+                <Icon as={Ionicons} name={'close'} size='lg' color='white' />
+              }
+            >
+              {item.definition}
+            </Badge>
+          )
+        })
+      : selectedLifeStages.map((item, idx) => {
+          return (
+            <Badge
+              key={idx}
+              bg='themeOrange'
+              alignSelf='center'
+              justifyContent='space-between'
+              width='70%'
+              variant='solid'
+              shadow='3'
+              _text={{
+                color: 'white',
+                fontSize: '16',
+              }}
+              rightIcon={
+                <Icon as={Ionicons} name={'close'} size='lg' color='white' />
+              }
+            >
+              {item}
+            </Badge>
+          )
+        })
+  }, [cardTitle, selectedLifeStages])
 
   return (
     <Box w='40%' rounded='xl' overflow='hidden'>
@@ -79,61 +105,16 @@ const FishHoldingCard = ({
         bg='secondary'
         roundedBottom='xl'
       >
-        {cardTitle === 'Run'
-          ? dropdownValues?.run.map((item) => {
-              return (
-                <Badge
-                  bg='themeOrange'
-                  alignSelf='center'
-                  justifyContent='space-between'
-                  width='70%'
-                  variant='solid'
-                  shadow='3'
-                  _text={{
-                    color: 'white',
-                    fontSize: '16',
-                  }}
-                  rightIcon={
-                    <Icon
-                      as={Ionicons}
-                      name={'close'}
-                      size='lg'
-                      color='white'
-                    />
-                  }
-                >
-                  {item.definition}
-                </Badge>
-              )
-            })
-          : selectedLifeStages.map((item) => {
-              return (
-                <Badge
-                  bg='themeOrange'
-                  alignSelf='center'
-                  justifyContent='space-between'
-                  width='70%'
-                  variant='solid'
-                  shadow='3'
-                  _text={{
-                    color: 'white',
-                    fontSize: '16',
-                  }}
-                  rightIcon={
-                    <Icon
-                      as={Ionicons}
-                      name={'close'}
-                      size='lg'
-                      color='white'
-                    />
-                  }
-                >
-                  {item}
-                </Badge>
-              )
-            })}
+        {renderFishHoldingCardContent()}
       </VStack>
     </Box>
   )
 }
-export default connect(mapStateToProps)(FishHoldingCard)
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    individualFishStore: state.fishInput.individualFish,
+  }
+}
+
+export default connect(mapStateToProps)(memo(FishHoldingCard))

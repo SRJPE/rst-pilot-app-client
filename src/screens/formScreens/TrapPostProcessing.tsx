@@ -27,7 +27,7 @@ import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import { QARanges } from '../../utils/utils'
 import { color } from 'native-base/lib/typescript/theme/styled-system'
-import { memo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import CustomModal from '../../components/Shared/CustomModal'
 import FishHoldingModalContent from '../../components/form/FishHoldingModalContent'
 
@@ -62,6 +62,38 @@ const TrapPostProcessing = ({
       }
     })()
   }
+  const handelModalChange = () => {
+    setFishHoldingModalOpen(!fishHoldingModalOpen)
+  }
+
+  //  useCallback(
+  const renderModalCallBack = () => {
+    return (
+      <CustomModal
+        isOpen={fishHoldingModalOpen}
+        closeModal={handelModalChange}
+        height='3/4'
+      >
+        <FishHoldingModalContent
+          // handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
+          closeModal={handelModalChange}
+        />
+      </CustomModal>
+    )
+  }
+  // , [])
+
+  const handleTrapStatusAtEndRadio = useCallback(
+    (nextValue: any, setFieldTouched: any, setFieldValue: any) => {
+      setFieldTouched('endingTrapStatus', true)
+      if (nextValue === 'Restart Trap') {
+        setFieldValue('endingTrapStatus', 'Restart Trap')
+      } else {
+        setFieldValue('endingTrapStatus', 'End Trapping')
+      }
+    },
+    []
+  )
 
   const handleSubmit = (values: any) => {
     dispatch(saveTrapPostProcessing(values))
@@ -256,13 +288,12 @@ const TrapPostProcessing = ({
                   name='endingTrapStatus'
                   accessibilityLabel='Ending Trap Status'
                   value={`${values.endingTrapStatus}`}
-                  onChange={(nextValue: any) => {
-                    setFieldTouched('endingTrapStatus', true)
-                    if (nextValue === 'Restart Trap') {
-                      setFieldValue('endingTrapStatus', 'Restart Trap')
-                    } else {
-                      setFieldValue('endingTrapStatus', 'End Trapping')
-                    }
+                  onChange={(newValue: any) => {
+                    handleTrapStatusAtEndRadio(
+                      newValue,
+                      setFieldTouched,
+                      setFieldValue
+                    )
                   }}
                 >
                   <Radio
@@ -288,7 +319,7 @@ const TrapPostProcessing = ({
                 bg='primary'
                 alignSelf='flex-start'
                 shadow='5'
-                onPress={() => setFishHoldingModalOpen(true)}
+                onPress={handelModalChange}
               >
                 <Text fontWeight='bold' color='white'>
                   Fish Holding Test
@@ -302,21 +333,11 @@ const TrapPostProcessing = ({
             errors={errors}
             touched={touched}
           />
-          {/* --------- Modals --------- */}
-          <CustomModal
-            isOpen={fishHoldingModalOpen}
-            closeModal={() => setFishHoldingModalOpen(false)}
-            height='3/4'
-          >
-            <FishHoldingModalContent
-              // handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
-              closeModal={() => setFishHoldingModalOpen(false)}
-            />
-          </CustomModal>
+          {renderModalCallBack()}
         </>
       )}
     </Formik>
   )
 }
 
-export default connect(mapStateToProps)(memo(TrapPostProcessing))
+export default connect(mapStateToProps)(TrapPostProcessing)
