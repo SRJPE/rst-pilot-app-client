@@ -101,7 +101,6 @@ const TrapOperations = ({
   }
 
   const popoverTrigger = (triggerProps: any) => {
-    console.log('re-rendered')
     return (
       <IconButton
         {...triggerProps}
