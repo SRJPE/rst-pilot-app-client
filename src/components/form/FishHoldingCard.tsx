@@ -31,6 +31,15 @@ const FishHoldingCard = ({
     setSelectedLifeStages(lifeStagesSet)
   }, [individualFishStore])
 
+  const handlePressRemoveBadge = (badgeToRemove: string) => {
+    console.log('🚀 ~ handlePressRemoveBadge ~ badgeToRemove', badgeToRemove)
+
+    //iterate over the selected life stages
+    //find the selected button by its name
+    //remove that item from the list
+    //set the new selectedLifeStages
+  }
+
   const renderFishHoldingCardContent = useCallback(() => {
     return cardTitle === 'Run'
       ? dropdownValues?.run.map((item, idx) => {
@@ -48,7 +57,13 @@ const FishHoldingCard = ({
                 fontSize: '16',
               }}
               rightIcon={
-                <Icon as={Ionicons} name={'close'} size='lg' color='white' />
+                <Icon
+                  as={Ionicons}
+                  name={'close'}
+                  size='lg'
+                  color='white'
+                  onPress={() => handlePressRemoveBadge(item.definition)}
+                />
               }
             >
               {item.definition}
@@ -70,7 +85,13 @@ const FishHoldingCard = ({
                 fontSize: '16',
               }}
               rightIcon={
-                <Icon as={Ionicons} name={'close'} size='lg' color='white' />
+                <Icon
+                  as={Ionicons}
+                  name={'close'}
+                  size='lg'
+                  color='white'
+                  onPress={() => handlePressRemoveBadge(item)}
+                />
               }
             >
               {item}
@@ -101,7 +122,7 @@ const FishHoldingCard = ({
         pt='4'
         space={4}
         overflow='hidden'
-        height={'3/4'}
+        height={'60%'}
         bg='secondary'
         roundedBottom='xl'
       >
