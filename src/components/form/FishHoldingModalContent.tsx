@@ -60,6 +60,28 @@ const FishHoldingModalContent = ({
           <Heading color='black' fontSize='2xl' mb='5%'>
             Which fish are you holding for mark recapture Trials?
           </Heading>
+          <HStack m='4' space={4}>
+            <Button
+              bg='primary'
+              alignSelf='flex-start'
+              shadow='5'
+              // onPress={handelModalChange}
+            >
+              <Text fontWeight='bold' color='white'>
+                Clear all, I am not holding any fish.
+              </Text>
+            </Button>
+            <Button
+              bg='primary'
+              alignSelf='flex-start'
+              shadow='5'
+              // onPress={handelModalChange}
+            >
+              <Text fontWeight='bold' color='white'>
+                Reset All
+              </Text>
+            </Button>
+          </HStack>
           {renderFishHoldingCards()}
           <Heading>Total Fish Holding: </Heading>
         </VStack>
