@@ -68,7 +68,7 @@ const TrapOperations = ({
   }
 
   const handleSubmit = (values: any, errors: any) => {
-    dispatch(saveTrapOperations(values))
+    dispatch(saveTrapOperations({ ...values, trapVisitStopTime: new Date() }))
     dispatch(markTrapOperationsCompleted(true))
     dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ Status', values)
