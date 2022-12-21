@@ -58,7 +58,14 @@ const TrapPostProcessing = ({
   }
 
   const handleSubmit = (values: any) => {
-    dispatch(saveTrapPostProcessing(values))
+    let trapVisitStartTime = null
+    if (values.endingTrapStatus == 'Restart Trap') {
+      trapVisitStartTime = new Date()
+    }
+
+    dispatch(
+      saveTrapPostProcessing({ ...values, trapVisitStartTime })
+    )
     dispatch(markTrapPostProcessingCompleted(true))
     dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ TrapPostProcessing', values)
