@@ -95,6 +95,8 @@ const AddFish = ({
   )
 
   const handleFormSubmit = (values: any) => {
+    console.log('🚀 ~ handleFormSubmit ~ values', values)
+
     saveIndividualFish(values)
   }
 
@@ -382,7 +384,7 @@ const AddFish = ({
                       </FormControl>
                     </HStack>
 
-                    <HStack>
+                    <HStack space={4} alignItems='center'>
                       {(values.species === 'Chinook salmon' ||
                         values.species === 'Steelhead / rainbow trout') && (
                         <FormControl w='1/2' paddingRight='5'>
@@ -464,6 +466,20 @@ const AddFish = ({
                           />
                         </FormControl>
                       )}
+                      <FormControl w='1/2' paddingRight='9'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Run
+                          </Text>
+                        </FormControl.Label>
+                        <CustomSelect
+                          selectedValue={values.run}
+                          placeholder={'Run'}
+                          onValueChange={handleChange('run')}
+                          setFieldTouched={setFieldTouched}
+                          selectOptions={dropdownValues?.run}
+                        />
+                      </FormControl>
                     </HStack>
                     {values.species === 'Chinook salmon' && (
                       <FormControl w='1/2'>

@@ -100,9 +100,9 @@ export const addIndividualFishSchema = yup.object().shape({
     .required('Fish fork length required')
     .typeError('Input must be a number'),
   run: yup
-    .number()
+    .string()
     // .required('Run required')
-    // .nullable()
+    .nullable()
     .typeError('Input must be a number'),
   weight: yup.number().nullable().typeError('Input must be a number'),
   lifeStage: yup.string().required('Fish life stage required'),
@@ -123,9 +123,9 @@ export const addIndividualFishSchemaOptionalLifeStage = yup.object().shape({
     .required('Fish fork length required')
     .typeError('Input must be a number'),
   run: yup
-    .number()
+    .string()
     // .required('Run required')
-    // .nullable()
+    .nullable()
     .typeError('Input must be a number'),
   weight: yup.number().nullable().typeError('Input must be a number'),
   lifeStage: yup.string(),
@@ -146,9 +146,9 @@ export const addIndividualFishSchemaOtherSpecies = yup.object().shape({
     .required('Fish fork length required')
     .typeError('Input must be a number'),
   run: yup
-    .number()
+    .string()
     // .required('Run required')
-    // .nullable()
+    .nullable()
     .typeError('Input must be a number'),
   weight: yup.number().nullable().typeError('Input must be a number'),
   lifeStage: yup.string(),
