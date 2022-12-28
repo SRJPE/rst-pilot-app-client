@@ -3,6 +3,7 @@ import {
   Box,
   Divider,
   FormControl,
+  Heading,
   HStack,
   Icon,
   Pressable,
@@ -47,7 +48,7 @@ const ReleaseDataEntry = ({
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const { markType, markColor, bodyPart } = dropdownValues.values
   const { trapLocations } = visitSetupDefaultsState
-  const [releaseTime, setReleaseTime] = useState(new Date('01/01/2022') as any)
+  const [releaseTime, setReleaseTime] = useState(new Date() as any)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
 
   const onReleaseTimeChange = (event: any, selectedDate: any) => {
@@ -89,6 +90,7 @@ const ReleaseDataEntry = ({
             borderWidth='15'
           >
             <VStack space={6}>
+              <Heading>Describe marks applied for efficiency trial:</Heading>
               <FormControl>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
@@ -186,7 +188,7 @@ const ReleaseDataEntry = ({
                 <Text color='black' fontSize='xl'>
                   Confirm Release Date and Time:
                 </Text>
-                <Box alignSelf='start' minWidth='320' ml='-105'>
+                <Box alignSelf='flex-start' minWidth='320' ml='-105'>
                   <DateTimePicker
                     value={releaseTime}
                     mode='datetime'
