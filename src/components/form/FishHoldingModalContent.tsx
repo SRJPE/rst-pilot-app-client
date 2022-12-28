@@ -14,7 +14,6 @@ const FishHoldingModalContent = ({
   handleMarkFishFormSubmit?: any
   closeModal: any
 }) => {
-  console.log('🚀 ~ individualFishStore', individualFishStore)
   const [selectedLifeStages, setSelectedLifeStages] = useState([] as Array<any>)
   const [selectedRuns, setSelectedRuns] = useState([] as Array<any>)
   const [totalFish, setTotalFish] = useState(0 as number)
@@ -66,7 +65,6 @@ const FishHoldingModalContent = ({
   }
 
   const handlePressRemoveBadge = (badgeToRemove: string, cardTitle: string) => {
-    console.log('🚀 ~ handlePressRemoveBadge ~ badgeToRemove', badgeToRemove)
     if (cardTitle === 'Run') {
       setSelectedRuns([...removeBadgeFromList(selectedRuns, badgeToRemove)])
     } else {

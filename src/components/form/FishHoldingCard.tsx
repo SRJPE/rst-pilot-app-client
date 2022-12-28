@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
 import { Badge, Box, VStack, Center, Icon } from 'native-base'
+import { memo } from 'react'
 
 const FishHoldingCard = ({
   cardContent,
@@ -10,11 +11,8 @@ const FishHoldingCard = ({
   cardTitle: string
   handlePressRemoveBadge: any
 }) => {
-  console.log('🚀 ~ cardContent', cardContent)
-
   const renderFishHoldingCardContent = () => {
     return cardContent?.map((item, idx) => {
-      console.log('🚀 ~ cardContent?.map ~ item', item)
       return (
         <Badge
           key={idx}
@@ -76,4 +74,4 @@ const FishHoldingCard = ({
   )
 }
 
-export default FishHoldingCard
+export default memo(FishHoldingCard)
