@@ -85,7 +85,8 @@ const FishHoldingModalContent = ({
     calculateTotalFish()
   }
 
-  const renderFishHoldingCards = () => {
+  //render new cards when selected runs or lifeStages change
+  const renderFishHoldingCards = useCallback(() => {
     return (
       <HStack space={10} justifyContent='center'>
         <FishHoldingCard
@@ -100,7 +101,7 @@ const FishHoldingModalContent = ({
         />
       </HStack>
     )
-  }
+  }, [selectedRuns, selectedLifeStages])
 
   return (
     <>
