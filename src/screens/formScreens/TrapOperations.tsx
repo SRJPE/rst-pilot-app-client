@@ -50,6 +50,7 @@ const TrapOperations = ({
     (state: RootState) => state.dropdowns.values
   )
   const { whyTrapNotFunctioning } = dropdownValues
+  const trapNotInServiceLabel = '- restart trapping'
 
   const calculateTempWarning = (
     waterTemperatureValue: number,
@@ -205,10 +206,19 @@ const TrapOperations = ({
                     onValueChange={handleChange('trapStatus')}
                     setFieldTouched={setFieldTouched}
                     selectOptions={dropdownValues.trapFunctionality.map(
-                      (item: any) => ({
-                        label: item.definition,
-                        value: item.definition,
-                      })
+                      (item: any) => {
+                        if (item.definition == 'trap not in service') {
+                          return {
+                            label: `${item.definition} ${trapNotInServiceLabel}`,
+                            value: `${item.definition} ${trapNotInServiceLabel}`,
+                          }
+                        } else {
+                          return {
+                            label: item.definition,
+                            value: item.definition,
+                          }
+                        }
+                      }
                     )}
                   />
                   {touched.trapStatus &&
