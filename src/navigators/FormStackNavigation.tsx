@@ -15,6 +15,7 @@ import TrapPostProcessing from '../screens/formScreens/TrapPostProcessing'
 import AddFish from '../screens/formScreens/AddFish'
 import PaperEntry from '../screens/formScreens/PaperEntry'
 import { useSelector } from 'react-redux'
+import StartedTrapping from '../screens/formScreens/StartedTrapping'
 
 const FormStack = createStackNavigator()
 
@@ -47,6 +48,7 @@ export default function FormStackNavigation() {
       />
       <FormStack.Screen name='No Fish Caught' component={NoFishCaught} />
       <FormStack.Screen name='End Trapping' component={EndTrapping} />
+      <FormStack.Screen name='Started Trapping' component={StartedTrapping} />
       <FormStack.Screen
         name='Add Fish'
         component={AddFish}
