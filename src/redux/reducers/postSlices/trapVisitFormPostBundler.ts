@@ -16,6 +16,7 @@ interface InitialStateI {
 }
 
 interface TrapVisitSubmissionI {
+  crew?: number[]
   id?: number
   programId?: number
   visitTypeId?: number
@@ -34,7 +35,7 @@ interface TrapVisitSubmissionI {
   rpmAtStart?: number
   rpmAtEnd?: number
   inHalfConeConfiguration?: boolean
-  debrisVolumeLiters?: number
+  debrisVolumeGallons?: number
   qcCompleted?: boolean
   qcCompletedAt?: Date
   comments?: string
@@ -87,7 +88,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       trapVisitResponse: [],
       catchRawResponse: [],
     }
-    
+
     const trapVisitSubmissions =
       state.trapVisitFormPostBundler.trapVisitSubmissions
     if (trapVisitSubmissions.length) {
@@ -95,7 +96,12 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
         'trap-visit/',
         trapVisitSubmissions
       )
-      payload.trapVisitResponse = apiResponse.data
+      const { createdTrapVisitResponse, createdTrapVisitCrewResponse } =
+        apiResponse.data
+      createdTrapVisitResponse.forEach((trapVisit: any, idx: number) => {
+        trapVisit['crew'] = createdTrapVisitCrewResponse[idx]
+      })
+      payload.trapVisitResponse = createdTrapVisitResponse
     }
 
     const catchRawSubmissions =
@@ -107,7 +113,6 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       )
       payload.catchRawResponse = apiResponse.data
     }
-
     return payload
   }
 )

@@ -44,7 +44,7 @@ const AddGeneticsModalContent = ({
   closeModal: any
   crewMembers: Array<any>
 }) => {
-  const dispatch = useDispatch<AppDispatch>()
+const dispatch = useDispatch<AppDispatch>()
 
   const handleFormSubmit = (values: any) => {
     handleGeneticSampleFormSubmit(values)
@@ -251,10 +251,14 @@ const AddGeneticsModalContent = ({
                           'crewMemberCollectingSample'
                         )}
                         setFieldTouched={setFieldTouched}
-                        selectOptions={crewMembers.map((item: any) => ({
-                          label: item,
-                          value: item,
-                        }))}
+                        selectOptions={
+                          crewMembers.length
+                            ? crewMembers.map((item: any) => ({
+                                label: item,
+                                value: item,
+                              }))
+                            : [{ label: 'No crew members found', value: 'null' }]
+                        }
                       />
                     </FormControl>
                   </VStack>

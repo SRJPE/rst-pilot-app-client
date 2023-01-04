@@ -58,7 +58,14 @@ const TrapPostProcessing = ({
   }
 
   const handleSubmit = (values: any) => {
-    dispatch(saveTrapPostProcessing(values))
+    let trapVisitStartTime = null
+    if (values.endingTrapStatus == 'Restart Trap') {
+      trapVisitStartTime = new Date()
+    }
+
+    dispatch(
+      saveTrapPostProcessing({ ...values, trapVisitStartTime })
+    )
     dispatch(markTrapPostProcessingCompleted(true))
     dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ TrapPostProcessing', values)
@@ -70,7 +77,7 @@ const TrapPostProcessing = ({
       initialValues={reduxState.values}
       initialTouched={{ debrisVolume: true }}
       initialErrors={reduxState.completed ? undefined : { debrisVolume: '' }}
-      onSubmit={values => {
+      onSubmit={(values) => {
         handleSubmit(values)
       }}
     >
@@ -124,7 +131,7 @@ const TrapPostProcessing = ({
                   right={4}
                   fontSize={16}
                 >
-                  {'L'}
+                  {'gal'}
                 </Text>
               </FormControl>
 

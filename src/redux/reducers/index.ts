@@ -4,10 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import dropdownsSlice from './dropdownsSlice'
 import navigationSlice from './formSlices/navigationSlice'
 import visitSetupSlice from './formSlices/visitSetupSlice'
-import trapStatusSlice from './formSlices/trapStatusSlice'
+import trapOperationsSlice from './formSlices/trapOperationsSlice'
 import fishProcessingSlice from './formSlices/fishProcessingSlice'
 import fishInputSlice from './formSlices/fishInputSlice'
-import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
 import trapPostProcessingSlice from './formSlices/trapPostProcessingSlice'
 import markRecaptureNavigationSlice from './markRecaptureSlices/markRecaptureNavigationSlice'
 import addMarksOrTagsSlice from './formSlices/addMarksOrTagsSlice'
@@ -17,6 +16,10 @@ import trapVisitFormPostBundler from './postSlices/trapVisitFormPostBundler'
 import connectivitySlice from './connectivitySlice'
 import slideAlertSlice from './slideAlertSlice'
 import paperEntrySlice from './formSlices/paperEntrySlice'
+
+import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
+import releaseTrialDataEntrySlice from './markRecaptureSlices/releaseTrialDataEntrySlice'
+import addAnotherMarkSlice from './addAnotherMarkSlice'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
@@ -39,15 +42,17 @@ export default combineReducers({
   slideAlert: slideAlertSlice,
   navigation: navigationSlice,
   visitSetup: visitSetupSlice,
-  trapStatus: trapStatusSlice,
+  trapOperations: trapOperationsSlice,
   fishProcessing: fishProcessingSlice,
   fishInput: fishInputSlice,
   addMarksOrTags: addMarksOrTagsSlice,
   addGeneticSamples: addGeneticSamplesSlice,
   trapPostProcessing: trapPostProcessingSlice,
   markRecaptureNavigation: markRecaptureNavigationSlice,
-  releaseTrial: releaseTrialSlice,
   trapVisitFormPostBundler,
   connectivity: connectivitySlice,
   paperEntry: paperEntrySlice,
+  releaseTrial: releaseTrialSlice,
+  releaseTrialDataEntry: releaseTrialDataEntrySlice,
+  addAnotherMark: addAnotherMarkSlice,
 })

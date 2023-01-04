@@ -1,12 +1,16 @@
 import * as yup from 'yup'
 
+/*----------------------------------------------------------------
+  TRAP VISIT SCHEMAS
+----------------------------------------------------------------*/
+
 export const trapVisitSchema = yup.object().shape({
   stream: yup.string().required('Stream required'),
   // trapSite: yup.string().required('Trap site required'),
   // crew: yup.array().min(1).required('Crew cannot be blank.'),
 })
 
-export const trapStatusSchema = yup.object().shape({
+export const trapOperationsSchema = yup.object().shape({
   trapStatus: yup.string().required('Trap Status Required'),
   reasonNotFunc: yup.string().when('trapStatus', {
     is: 'trap functioning but not normally' || 'trap not functioning',
@@ -154,31 +158,6 @@ export const addIndividualFishSchemaOtherSpecies = yup.object().shape({
   willBeUsedInRecapture: yup.boolean(),
 })
 
-export const releaseTrialSchema = yup.object().shape({
-  wildCount: yup
-    .number()
-    .required('Wild count is required')
-    .typeError('Input must be a number'),
-  deadWildCount: yup
-    .number()
-    .required('Dead wild count is required')
-    .typeError('Input must be a number'),
-  willSupplement: yup.boolean().required('Field required'),
-  hatcheryCount: yup
-    .number()
-    .required('Hatchery count is required')
-    .typeError('Input must be a number'),
-  runIDHatchery: yup.string().required('Hatchery Count is required'),
-  runWeightHatchery: yup
-    .number()
-    .required('Hatchery run weight is required')
-    .typeError('Input must be a number'),
-  deadHatcheryCount: yup
-    .number()
-    .required('Hatchery dead count is required')
-    .typeError('Input must be a number'),
-})
-
 export const addMarksOrTagsSchema = yup.object().shape({
   type: yup.string().required('Mark Type is required'),
   number: yup.number().typeError('Input must be a number'),
@@ -208,4 +187,83 @@ export const addPlusCountsSchema = yup.object().shape({
     .required('Count is required')
     .typeError('Input must be a number'),
   plusCountMethod: yup.string().required('Plus count method required'),
+})
+
+/*----------------------------------------------------------------
+  MARK RECAPTURE SCHEMAS
+----------------------------------------------------------------*/
+
+export const releaseTrialSchema = yup.object().shape({
+  wildCount: yup
+    .number()
+    .required('Wild count is required')
+    .typeError('Input must be a number'),
+  deadWildCount: yup
+    .number()
+    .required('Dead wild count is required')
+    .typeError('Input must be a number'),
+  willSupplement: yup.boolean().required('Field required'),
+  hatcheryCount: yup.number().when('willSupplement', {
+    is: true,
+    then: yup
+      .number()
+      .required('Hatchery count is required')
+      .typeError('Input must be a number'),
+    otherwise: yup
+      .number()
+      .transform((value) => (isNaN(value) ? 0 : value))
+      .typeError('Input must be a number')
+      .notRequired(),
+  }),
+  runIDHatchery: yup.string().when('willSupplement', {
+    is: true,
+    then: yup.string().required('Hatchery Run ID is required'),
+  }),
+  runWeightHatchery: yup.number().when('willSupplement', {
+    is: true,
+    then: yup
+      .number()
+      .required('Hatchery run weight is required')
+      .typeError('Input must be a number'),
+    otherwise: yup
+      .number()
+      .transform((value) => (isNaN(value) ? 0 : value))
+      .typeError('Input must be a number')
+      .notRequired(),
+  }),
+  deadHatcheryCount: yup.number().when('willSupplement', {
+    is: true,
+    then: yup
+      .number()
+      .required('Hatchery dead count is required')
+      .typeError('Input must be a number'),
+    otherwise: yup
+      .number()
+      .transform((value) => (isNaN(value) ? 0 : value))
+      .typeError('Input must be a number')
+      .notRequired(),
+  }),
+})
+
+export const releaseTrialDataEntrySchema = yup.object().shape({
+  markType: yup.string().required('Mark type required'),
+  markColor: yup.string().when('markType', {
+    is: 'Bismark Brown',
+    then: yup.string().nullable(),
+    otherwise: yup.string().required('Mark color required'),
+  }),
+  markPosition: yup.string().when('markType', {
+    is: 'Bismark Brown',
+    then: yup.string().nullable(),
+    otherwise: yup.string().required('Mark position required'),
+  }),
+  releaseLocation: yup.string().required('Release location required'),
+  // releaseTime: yup.
+})
+
+export const addAnotherMarkSchema = yup.object().shape({
+  markType: yup.string().required('Mark type required'),
+  markColor: yup.string().required('Mark color required'),
+  markPosition: yup.string().required('Mark position required'),
+  markNumber: yup.number().nullable().typeError('Input must be a number'),
 })

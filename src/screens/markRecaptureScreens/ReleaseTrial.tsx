@@ -1,7 +1,9 @@
 import {
   Box,
+  Button,
   Center,
   FormControl,
+  HStack,
   Input,
   Radio,
   Text,
@@ -52,7 +54,7 @@ const ReleaseTrial = ({
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       initialTouched={{ wildCount: true }}
       initialErrors={reduxState.completed ? undefined : { wildCount: '' }}
-      onSubmit={values => {
+      onSubmit={(values) => {
         handleSubmit(values)
       }}
     >
@@ -124,129 +126,132 @@ const ReleaseTrial = ({
                       errors.deadWildCount &&
                       renderErrorMessage(errors, 'deadWildCount')}
                   </FormControl>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Will you supplement with hatchery fish?{' '}
-                      </Text>
-                    </FormControl.Label>
-                    <Radio.Group
-                      w='30%'
-                      name='willSupplement'
-                      accessibilityLabel='Will supplement with hatchery?'
-                      value={`${values.willSupplement}`}
-                      onChange={(value: any) => {
-                        if (value === 'true') {
-                          setFieldValue('willSupplement', true)
-                        } else {
-                          setFieldValue('willSupplement', false)
-                        }
-                      }}
-                    >
-                      <Radio colorScheme='primary' value='true' my={1}>
-                        Yes
-                      </Radio>
-                      <Radio colorScheme='primary' value='false' my={1}>
-                        No
-                      </Radio>
-                    </Radio.Group>
-                  </FormControl>
+                  <HStack space={4}>
+                    <FormControl>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Will you supplement with hatchery fish?{' '}
+                        </Text>
+                      </FormControl.Label>
+                      <Radio.Group
+                        name='willSupplement'
+                        accessibilityLabel='Will supplement with hatchery?'
+                        value={`${values.willSupplement}`}
+                        onChange={(value: any) => {
+                          if (value === 'true') {
+                            setFieldValue('willSupplement', true)
+                          } else {
+                            setFieldValue('willSupplement', false)
+                          }
+                        }}
+                      >
+                        <Radio colorScheme='primary' value='true' my={1}>
+                          Yes
+                        </Radio>
+                        <Radio colorScheme='primary' value='false' my={1}>
+                          No
+                        </Radio>
+                      </Radio.Group>
+                    </FormControl>
+                  </HStack>
                 </VStack>
               </Box>
-              <Box bg='#FFF'>
-                <Center
-                  bg='primary'
-                  _text={{
-                    alignSelf: 'flex-start',
-                    color: '#FFF',
-                    fontWeight: '700',
-                    fontSize: 'xl',
-                  }}
-                  bottom='0'
-                  px='3'
-                  py='1.5'
-                >
-                  RELEASE TRIAL - HATCHERY
-                </Center>
-                <VStack py='2%' px='4%' space={4}>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Number of Hatchery Fish
-                      </Text>
-                    </FormControl.Label>
-                    <Input
-                      w='1/2'
-                      height='50px'
-                      fontSize='16'
-                      placeholder='Numeric Value'
-                      keyboardType='numeric'
-                      onChangeText={handleChange('hatcheryCount')}
-                      onBlur={handleBlur('hatcheryCount')}
-                      value={values.hatcheryCount}
-                    />
-                    {touched.hatcheryCount &&
-                      errors.hatcheryCount &&
-                      renderErrorMessage(errors, 'hatcheryCount')}
-                  </FormControl>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Run ID of Hatchery Fish
-                      </Text>
-                    </FormControl.Label>
-                    <CustomSelect
-                      selectedValue={values.runIDHatchery}
-                      placeholder='Run ID'
-                      onValueChange={handleChange('runIDHatchery')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={run}
-                    />
-                    {touched.runIDHatchery &&
-                      errors.runIDHatchery &&
-                      renderErrorMessage(errors, 'runIDHatchery')}
-                  </FormControl>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Run Weight Count (provided by hatchery)
-                      </Text>
-                    </FormControl.Label>
-                    <Input
-                      w='1/2'
-                      height='50px'
-                      fontSize='16'
-                      placeholder='Numeric Value'
-                      keyboardType='numeric'
-                      onChangeText={handleChange('runWeightHatchery')}
-                      onBlur={handleBlur('runWeightHatchery')}
-                      value={values.runWeightHatchery}
-                    />
-                    {touched.runWeightHatchery &&
-                      errors.runWeightHatchery &&
-                      renderErrorMessage(errors, 'runWeightHatchery')}
-                  </FormControl>
-                  <FormControl w='1/2'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Dead Count (hatchery)
-                      </Text>
-                    </FormControl.Label>
-                    <Input
-                      height='50px'
-                      fontSize='16'
-                      placeholder='Numeric Value'
-                      keyboardType='numeric'
-                      onChangeText={handleChange('deadHatcheryCount')}
-                      onBlur={handleBlur('deadHatcheryCount')}
-                      value={values.deadHatcheryCount}
-                    />
-                    {touched.deadHatcheryCount &&
-                      errors.deadHatcheryCount &&
-                      renderErrorMessage(errors, 'deadHatcheryCount')}
-                  </FormControl>
-                </VStack>
-              </Box>
+              {values.willSupplement && (
+                <Box bg='#FFF'>
+                  <Center
+                    bg='primary'
+                    _text={{
+                      alignSelf: 'flex-start',
+                      color: '#FFF',
+                      fontWeight: '700',
+                      fontSize: 'xl',
+                    }}
+                    bottom='0'
+                    px='3'
+                    py='1.5'
+                  >
+                    RELEASE TRIAL - HATCHERY
+                  </Center>
+                  <VStack py='2%' px='4%' space={4}>
+                    <FormControl>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Number of Hatchery Fish
+                        </Text>
+                      </FormControl.Label>
+                      <Input
+                        w='1/2'
+                        height='50px'
+                        fontSize='16'
+                        placeholder='Numeric Value'
+                        keyboardType='numeric'
+                        onChangeText={handleChange('hatcheryCount')}
+                        onBlur={handleBlur('hatcheryCount')}
+                        value={values.hatcheryCount}
+                      />
+                      {touched.hatcheryCount &&
+                        errors.hatcheryCount &&
+                        renderErrorMessage(errors, 'hatcheryCount')}
+                    </FormControl>
+                    <FormControl>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Run ID of Hatchery Fish
+                        </Text>
+                      </FormControl.Label>
+                      <CustomSelect
+                        selectedValue={values.runIDHatchery}
+                        placeholder='Run ID'
+                        onValueChange={handleChange('runIDHatchery')}
+                        setFieldTouched={setFieldTouched}
+                        selectOptions={run}
+                      />
+                      {touched.runIDHatchery &&
+                        errors.runIDHatchery &&
+                        renderErrorMessage(errors, 'runIDHatchery')}
+                    </FormControl>
+                    <FormControl>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Run Weight Count (provided by hatchery)
+                        </Text>
+                      </FormControl.Label>
+                      <Input
+                        w='1/2'
+                        height='50px'
+                        fontSize='16'
+                        placeholder='Numeric Value'
+                        keyboardType='numeric'
+                        onChangeText={handleChange('runWeightHatchery')}
+                        onBlur={handleBlur('runWeightHatchery')}
+                        value={values.runWeightHatchery}
+                      />
+                      {touched.runWeightHatchery &&
+                        errors.runWeightHatchery &&
+                        renderErrorMessage(errors, 'runWeightHatchery')}
+                    </FormControl>
+                    <FormControl w='1/2'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Dead Count (hatchery)
+                        </Text>
+                      </FormControl.Label>
+                      <Input
+                        height='50px'
+                        fontSize='16'
+                        placeholder='Numeric Value'
+                        keyboardType='numeric'
+                        onChangeText={handleChange('deadHatcheryCount')}
+                        onBlur={handleBlur('deadHatcheryCount')}
+                        value={values.deadHatcheryCount}
+                      />
+                      {touched.deadHatcheryCount &&
+                        errors.deadHatcheryCount &&
+                        renderErrorMessage(errors, 'deadHatcheryCount')}
+                    </FormControl>
+                  </VStack>
+                </Box>
+              )}
             </VStack>
           </View>
           <MarkRecaptureNavButtons

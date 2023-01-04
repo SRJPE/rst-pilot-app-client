@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
-
 import { AppDispatch, RootState } from '../../redux/store'
 import {
   checkIfFormIsComplete,
@@ -23,18 +22,19 @@ import {
 } from '../../redux/reducers/formSlices/fishInputSlice'
 import { resetFishProcessingSlice } from '../../redux/reducers/formSlices/fishProcessingSlice'
 import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
-import { resetTrapStatusSlice } from '../../redux/reducers/formSlices/trapStatusSlice'
+import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
-import { CommonActions, StackActions } from '@react-navigation/native'
+import { flatten, uniq } from 'lodash'
 
 const mapStateToProps = (state: RootState) => {
   return {
     navigationState: state.navigation,
     visitSetupState: state.visitSetup,
+    visitSetupDefaultState: state.visitSetupDefaults,
     fishProcessingState: state.fishProcessing,
     trapPostProcessingState: state.trapPostProcessing,
-    trapStatusState: state.trapStatus,
+    trapOperationsState: state.trapOperations,
     dropdownsState: state.dropdowns,
     connectivityState: state.connectivity,
     fishInputState: state.fishInput,
@@ -46,9 +46,10 @@ const IncompleteSections = ({
   navigation,
   navigationState,
   visitSetupState,
+  visitSetupDefaultState,
   fishProcessingState,
   trapPostProcessingState,
-  trapStatusState,
+  trapOperationsState,
   dropdownsState,
   connectivityState,
   fishInputState,
@@ -57,9 +58,10 @@ const IncompleteSections = ({
   navigation: any
   navigationState: any
   visitSetupState: any
+  visitSetupDefaultState: any
   fishProcessingState: any
   trapPostProcessingState: any
-  trapStatusState: any
+  trapOperationsState: any
   dropdownsState: any
   connectivityState: any
   fishInputState: any
@@ -77,7 +79,7 @@ const IncompleteSections = ({
   }, [])
 
   const handleSubmit = () => {
-    submitTrapVisit()
+    saveTrapVisit()
     saveCatchRawSubmission()
     resetAllFormSlices()
     navigation.reset({
@@ -108,7 +110,7 @@ const IncompleteSections = ({
     dispatch(resetFishInputSlice())
     dispatch(resetFishProcessingSlice())
     dispatch(resetTrapPostProcessingSlice())
-    dispatch(resetTrapStatusSlice())
+    dispatch(resetTrapOperationsSlice())
     dispatch(resetVisitSetupSlice())
     dispatch(resetPaperEntrySlice())
   }
@@ -121,7 +123,7 @@ const IncompleteSections = ({
 
   const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
 
-  const submitTrapVisit = () => {
+  const saveTrapVisit = () => {
     const currentDateTime = new Date()
     const trapFunctioningValues = returnDefinitionArray(
       dropdownsState.values.trapFunctionality
@@ -142,20 +144,42 @@ const IncompleteSections = ({
       rpm1: startRpm1,
       rpm2: startRpm2,
       rpm3: startRpm3,
-    } = trapStatusState.values
+    } = trapOperationsState.values
     const {
       rpm1: endRpm1,
       rpm2: endRpm2,
       rpm3: endRpm3,
     } = trapPostProcessingState.values
+    const selectedCrewNames: string[] = [...visitSetupState.values.crew] // ['james', 'steve']
+    const selectedCrewNamesMap: Record<string, boolean> =
+      selectedCrewNames.reduce(
+        (acc: Record<string, boolean>, name: string) => ({
+          ...acc,
+          [name]: true,
+        }),
+        {}
+      )
+    const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
+    const selectedCrewIds = uniq(
+      allCrewObjects
+        .filter(
+          (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
+        )
+        .map((obj: any) => obj.personnelId)
+    )
 
     const trapVisitSubmission = {
+      crew: selectedCrewIds,
       programId: 1,
       visitTypeId: null,
       trapLocationId: null,
       isPaperEntry: visitSetupState.isPaperEntry,
-      trapVisitTimeStart: currentDateTime,
-      trapVisitTimeEnd: null,
+      trapVisitTimeStart: visitSetupState.isPaperEntry
+        ? paperEntryState.values.startDate
+        : trapPostProcessingState.values.trapVisitStartTime,
+      trapVisitTimeEnd: visitSetupState.isPaperEntry
+        ? paperEntryState.values.endDate
+        : trapOperationsState.values.trapVisitStopTime,
       fishProcessed: returnNullableTableId(
         fishProcessedValues.indexOf(
           fishProcessingState.values.fishProcessedResult
@@ -167,16 +191,16 @@ const IncompleteSections = ({
         )
       ),
       sampleGearId: null,
-      coneDepth: trapStatusState.values.coneDepth
-        ? parseInt(trapStatusState.values.coneDepth)
+      coneDepth: trapOperationsState.values.coneDepth
+        ? parseInt(trapOperationsState.values.coneDepth)
         : null,
       trapInThalweg: null,
       trapFunctioning: returnNullableTableId(
-        trapFunctioningValues.indexOf(trapStatusState.values.trapStatus)
+        trapFunctioningValues.indexOf(trapOperationsState.values.trapStatus)
       ),
       whyTrapNotFunctioning: returnNullableTableId(
         whyTrapNotFunctioningValues.indexOf(
-          trapStatusState.values.reasonForNotFunc
+          trapOperationsState.values.reasonForNotFunc
         )
       ),
       trapStatusAtEnd: returnNullableTableId(
@@ -184,8 +208,8 @@ const IncompleteSections = ({
           `${trapPostProcessingState.values.endingTrapStatus}`.toLowerCase()
         )
       ),
-      totalRevolutions: trapStatusState.values.totalRevolutions
-        ? parseInt(trapStatusState.values.totalRevolutions)
+      totalRevolutions: trapOperationsState.values.totalRevolutions
+        ? parseInt(trapOperationsState.values.totalRevolutions)
         : null,
       rpmAtStart:
         startRpm1 && startRpm2 && startRpm3
@@ -197,13 +221,15 @@ const IncompleteSections = ({
           ? (parseInt(endRpm1) + parseInt(endRpm2) + parseInt(endRpm3)) / 3
           : null,
       inHalfConeConfiguration:
-        trapStatusState.values.coneSetting === 'half' ? true : false,
+        trapOperationsState.values.coneSetting === 'half' ? true : false,
       debrisVolumeLiters: trapPostProcessingState.values.debrisVolume
         ? parseInt(trapPostProcessingState.values.debrisVolume)
         : null,
       qcCompleted: null,
       qcCompletedAt: null,
-      comments: paperEntryState.values.comments ? paperEntryState.values.comments : null,
+      comments: paperEntryState.values.comments
+        ? paperEntryState.values.comments
+        : null,
     }
 
     dispatch(saveTrapVisitSubmission(trapVisitSubmission))

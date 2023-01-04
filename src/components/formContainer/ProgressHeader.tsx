@@ -23,7 +23,7 @@ export default function ProgressHeader(props: any) {
       <VStack>
         <HStack w='100%' justifyContent='space-between' p='4'>
           <Text fontSize='2xl'>
-            {activePageTitle === 'Trap Status'
+            {activePageTitle === 'Trap Operations'
               ? 'Trap Operations & Environmental Conditions'
               : activePageTitle}
           </Text>

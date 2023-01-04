@@ -30,6 +30,11 @@ export default function MarkRecaptureNavButtons({
     if (handleSubmit) {
       handleSubmit()
     }
+    //if Mark Recapture complete go to QA and return
+    if (activePage === 'Mark Recapture Complete') {
+      navigation.navigate('Data Quality Control')
+      return
+    }
     //navigate Right
     navigation.navigate('Mark Recapture', {
       screen: navigationState.steps[activeStep + 1]?.name,
@@ -71,9 +76,18 @@ export default function MarkRecaptureNavButtons({
     )
   }
 
-  // const renderRightButtonText = (activePage: string) => {
-
-  // }
+  const renderRightButtonText = (activePage: string) => {
+    let buttonText
+    switch (activePage) {
+      case 'Mark Recapture Complete':
+        buttonText = 'QC Data'
+        break
+      default:
+        buttonText = 'Next'
+        break
+    }
+    return buttonText
+  }
 
   return (
     <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>
@@ -125,8 +139,7 @@ export default function MarkRecaptureNavButtons({
           onPress={handleRightButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
-            {/* {renderRightButtonText(activePage)} */}
-            Next
+            {renderRightButtonText(activePage) as string}
           </Text>
         </Button>
       </HStack>

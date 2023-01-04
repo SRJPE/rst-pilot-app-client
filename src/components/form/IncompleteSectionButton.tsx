@@ -25,7 +25,7 @@ const IncompleteSectionButton = ({
     switch (name) {
       case 'Visit Setup':
         return 220
-      case 'Trap Status':
+      case 'Trap Operations':
         return 213
       case 'Fish Processing':
         return 181
