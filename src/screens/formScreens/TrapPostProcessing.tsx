@@ -62,7 +62,7 @@ const TrapPostProcessing = ({
       }
     })()
   }
-  const handelModalChange = () => {
+  const handleModalChange = () => {
     setFishHoldingModalOpen(!fishHoldingModalOpen)
   }
 
@@ -71,12 +71,12 @@ const TrapPostProcessing = ({
     return (
       <CustomModal
         isOpen={fishHoldingModalOpen}
-        closeModal={handelModalChange}
+        closeModal={handleModalChange}
         height='3/4'
       >
         <FishHoldingModalContent
           // handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
-          closeModal={handelModalChange}
+          closeModal={handleModalChange}
         />
       </CustomModal>
     )
@@ -319,7 +319,7 @@ const TrapPostProcessing = ({
                 bg='primary'
                 alignSelf='flex-start'
                 shadow='5'
-                onPress={handelModalChange}
+                onPress={handleModalChange}
               >
                 <Text fontWeight='bold' color='white'>
                   Fish Holding Test
@@ -332,6 +332,7 @@ const TrapPostProcessing = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
+            toggleModal={() => handleModalChange}
           />
           {renderModalCallBack()}
         </>
