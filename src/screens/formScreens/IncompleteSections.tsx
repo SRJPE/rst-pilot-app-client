@@ -67,7 +67,7 @@ const IncompleteSections = ({
   fishInputState: any
   paperEntryState: any
 }) => {
-  console.log('🚀 ~ navigation', navigation)
+  // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
     0,
@@ -160,11 +160,13 @@ const IncompleteSections = ({
         {}
       )
     const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
-    const selectedCrewIds = uniq(allCrewObjects
-      .filter(
-        (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
-      )
-      .map((obj: any) => obj.personnelId))
+    const selectedCrewIds = uniq(
+      allCrewObjects
+        .filter(
+          (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
+        )
+        .map((obj: any) => obj.personnelId)
+    )
 
     const trapVisitSubmission = {
       crew: selectedCrewIds,
