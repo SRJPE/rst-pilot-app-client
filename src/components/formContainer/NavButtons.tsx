@@ -13,6 +13,7 @@ const NavButtons = ({
   values,
   isFormComplete,
   isPaperEntry,
+  toggleModal,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -21,6 +22,7 @@ const NavButtons = ({
   values?: any
   isFormComplete?: boolean
   isPaperEntry?: boolean
+  toggleModal?: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -28,6 +30,16 @@ const NavButtons = ({
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
   const isPaperEntryStore = reduxState.visitSetup.isPaperEntry
+
+  const individualFishStore = useSelector(
+    (state: any) => state.fishInput.individualFish
+  )
+
+  const haveAnyFishBeenMarkedForRecapture = individualFishStore.some(
+    (fish: any) => {
+      return fish.willBeUsedInRecapture === true
+    }
+  )
 
   const navigateHelper = (destination: string) => {
     const formSteps = Object.values(navigationState?.steps) as any
@@ -88,6 +100,19 @@ const NavButtons = ({
             navigateHelper('Trap Post-Processing')
           }
         }
+        break
+      case 'Trap Post-Processing':
+        //check to see if there are any fish marked for recapture
+        //if there are fish marked for recapture
+        //open the modal
+
+        console.log('TEST: ', individualFishStore)
+        if (haveAnyFishBeenMarkedForRecapture) {
+          console.log('INSIDE OF THE IF STATEMENT')
+          toggleModal()
+          return
+        }
+
         break
       case 'High Flows':
         navigateHelper('End Trapping')
