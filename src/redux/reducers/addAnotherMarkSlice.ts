@@ -9,7 +9,7 @@ export interface ReleaseTrialValuesI {
   markType: string | null
   markColor: string | null
   markPosition: string | null
-  markNumber: number | null
+  markNumber?: number | null
 }
 
 const initialState: InitialStateI = {
