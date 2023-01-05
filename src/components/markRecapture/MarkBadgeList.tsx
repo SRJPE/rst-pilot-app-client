@@ -66,7 +66,7 @@ const MarkBadgeList = ({
                   />
                 }
               >
-                <Text color='white' fontWeight='500'>
+                <Text color='white' fontWeight='500' fontSize='md'>
                   {`${markType} - ${markColor} - ${markPosition}`}
                 </Text>
               </Badge>
