@@ -12,6 +12,7 @@ import {
 } from 'native-base'
 import React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
+import { addMarkToAppliedMarks } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addAnotherMarkSchema } from '../../utils/helpers/yupValidations'
@@ -38,6 +39,9 @@ const mapStateToProps = (state: RootState) => {
 /*
 This modal needs its submission connected to the main formik form of each component
 this will depend on if it is in add fish or in mark recapture
+
+Make sure to take BisMark Brown into account 
+  => {values.markType !== 'Bismark Brown' && ( <render other dropdowns> )
 */
 
 const AddAnotherMarkModalContent = ({
@@ -55,6 +59,7 @@ const AddAnotherMarkModalContent = ({
 
   const handleSubmit = (values: any) => {
     // handleMarkFishFormSubmit(values)
+    dispatch(addMarkToAppliedMarks(values))
     showSlideAlert(dispatch, 'Mark or tag')
   }
 
@@ -78,7 +83,7 @@ const AddAnotherMarkModalContent = ({
       }) => (
         <>
           <CustomModalHeader
-            headerText={'Add Another Mark'}
+            headerText={'Add Mark'}
             showHeaderButton={true}
             closeModal={closeModal}
             headerButton={
@@ -159,7 +164,7 @@ const AddAnotherMarkModalContent = ({
                   errors.markPosition &&
                   RenderErrorMessage(errors, 'markPosition')}
               </FormControl>
-              <FormControl>
+              {/* <FormControl>
                 <HStack space={4} alignItems='center'>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
@@ -185,7 +190,7 @@ const AddAnotherMarkModalContent = ({
                 {touched.markNumber &&
                   errors.markNumber &&
                   RenderErrorMessage(errors, 'markNumber')}
-              </FormControl>
+              </FormControl> */}
             </VStack>
           </View>
         </>
