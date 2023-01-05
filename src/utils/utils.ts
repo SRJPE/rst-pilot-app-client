@@ -41,7 +41,7 @@ export const QARanges = {
   debrisVolume: { max: 2000, min: null },
 }
 
-export const markLookup = {
+export const markBadgeLookup = {
   type: {
     none: 'n',
     elastomer: 'ela',
