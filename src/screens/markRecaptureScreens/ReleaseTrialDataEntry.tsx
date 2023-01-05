@@ -68,8 +68,6 @@ const ReleaseDataEntry = ({
       validationSchema={releaseTrialDataEntrySchema}
       initialValues={releaseTrialDataEntryState.values}
       onSubmit={(values) => {
-        //this should be refactored to not bypass formik
-        values.appliedMarks = releaseTrialDataEntryState.values.appliedMarks
         handleSubmit(values)
       }}
     >
@@ -98,6 +96,8 @@ const ReleaseDataEntry = ({
                 badgeListContent={
                   releaseTrialDataEntryState.values.appliedMarks
                 }
+                setFieldValue={setFieldValue}
+                setFieldTouched={setFieldTouched}
               />
 
               <Pressable onPress={() => setAddMarkModalOpen(true)}>

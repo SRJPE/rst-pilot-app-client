@@ -1,5 +1,5 @@
+import { useEffect } from 'react'
 import { Badge, IconButton, ScrollView, Text, VStack } from 'native-base'
-import React from 'react'
 import { markBadgeLookup } from '../../utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { useDispatch } from 'react-redux'
@@ -14,10 +14,20 @@ interface markBadgeI {
 
 const MarkBadgeList = ({
   badgeListContent,
+  setFieldValue,
+  setFieldTouched,
 }: {
   badgeListContent: Array<any>
+  setFieldValue: any
+  setFieldTouched: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+
+  //sets the field value to be the current badgeListContent and updates on change
+  useEffect(() => {
+    setFieldValue('appliedMarks', badgeListContent)
+    setFieldTouched('appliedMarks')
+  }, [badgeListContent])
 
   const handleRemoveBadge = (index: number) => {
     //make copy of badge list
