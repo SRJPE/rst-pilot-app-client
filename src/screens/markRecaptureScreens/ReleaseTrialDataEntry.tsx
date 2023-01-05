@@ -27,6 +27,7 @@ import {
 import { markActiveMarkRecaptureStepCompleted } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
 import CustomModal from '../../components/Shared/CustomModal'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
+import MarkBadgeList from '../../components/markRecapture/MarkBadgeList'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -46,7 +47,6 @@ const ReleaseDataEntry = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-  const { markType, markColor, bodyPart } = dropdownValues.values
   const { trapLocations } = visitSetupDefaultsState
   const [releaseTime, setReleaseTime] = useState(new Date() as any)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
@@ -68,6 +68,8 @@ const ReleaseDataEntry = ({
       validationSchema={releaseTrialDataEntrySchema}
       initialValues={releaseTrialDataEntryState.values}
       onSubmit={(values) => {
+        //this should be refactored to not bypass formik
+        values.appliedMarks = releaseTrialDataEntryState.values.appliedMarks
         handleSubmit(values)
       }}
     >
@@ -91,78 +93,28 @@ const ReleaseDataEntry = ({
           >
             <VStack space={6}>
               <Heading>Describe marks applied for efficiency trial:</Heading>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Mark Type
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={values.markType}
-                  placeholder='Type'
-                  onValueChange={handleChange('markType')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={markType.concat([
-                    { id: 1, definition: 'Bismark Brown' },
-                  ])}
-                />
-                {touched.markType &&
-                  errors.markType &&
-                  RenderErrorMessage(errors, 'markType')}
-              </FormControl>
 
-              {values.markType !== 'Bismark Brown' && (
-                <>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Mark Color
-                      </Text>
-                    </FormControl.Label>
-                    <CustomSelect
-                      selectedValue={values.markColor}
-                      placeholder='Color'
-                      onValueChange={handleChange('markColor')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={markColor}
-                    />
-                    {touched.markColor &&
-                      errors.markColor &&
-                      RenderErrorMessage(errors, 'markColor')}
-                  </FormControl>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Mark Position
-                      </Text>
-                    </FormControl.Label>
-                    <CustomSelect
-                      selectedValue={values.markPosition}
-                      placeholder='Position'
-                      onValueChange={handleChange('markPosition')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={bodyPart}
-                    />
-                    {touched.markPosition &&
-                      errors.markPosition &&
-                      RenderErrorMessage(errors, 'markPosition')}
-                  </FormControl>
-                  <Pressable onPress={() => setAddMarkModalOpen(true)}>
-                    <HStack alignItems='center'>
-                      <Icon
-                        as={Ionicons}
-                        name={'add-circle'}
-                        size='3xl'
-                        color='primary'
-                        marginRight='1'
-                      />
-                      <Text color='primary' fontSize='xl'>
-                        Add Another Mark
-                      </Text>
-                    </HStack>
-                  </Pressable>
-                </>
-              )}
+              <MarkBadgeList
+                badgeListContent={
+                  releaseTrialDataEntryState.values.appliedMarks
+                }
+              />
+
+              <Pressable onPress={() => setAddMarkModalOpen(true)}>
+                <HStack alignItems='center'>
+                  <Icon
+                    as={Ionicons}
+                    name={'add-circle'}
+                    size='3xl'
+                    color='primary'
+                    marginRight='1'
+                  />
+                  <Text color='primary' fontSize='xl'>
+                    Add Mark
+                  </Text>
+                </HStack>
+              </Pressable>
+
               <Divider bg='black' />
               <FormControl>
                 <FormControl.Label>
@@ -209,7 +161,7 @@ const ReleaseDataEntry = ({
           <CustomModal
             isOpen={addMarkModalOpen}
             closeModal={() => setAddMarkModalOpen(false)}
-            height='3/4'
+            height='1/2'
           >
             <AddAnotherMarkModalContent
               //add new submission function
