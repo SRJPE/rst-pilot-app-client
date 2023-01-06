@@ -173,6 +173,9 @@ const ReleaseTrial = ({
                     RELEASE TRIAL - HATCHERY
                   </Center>
                   <VStack py='2%' px='4%' space={4}>
+                    {/* Need to check if the number of fish used in the retrial is the same as the number confirmed.
+                    (This can be done by comparing state.releaseTrial.totalFishHolding with values.wildCount.)
+                    */}
                     <FormControl>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
