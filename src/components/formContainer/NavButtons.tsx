@@ -110,7 +110,7 @@ const NavButtons = ({
         if (haveAnyFishBeenMarkedForRecapture) {
           console.log('INSIDE OF THE IF STATEMENT')
           toggleModal()
-          return
+          break
         }
 
         break
@@ -191,7 +191,10 @@ const NavButtons = ({
     }
     //if function truthy, submit form to save to redux
     if (handleSubmit) {
-      handleSubmit()
+      //do not submit when going back from incomplete sections page (prevents early submission errors)
+      if (activePage !== 'Incomplete Sections') {
+        handleSubmit()
+      }
     }
     //navigate left
     navigation.navigate('Trap Visit Form', {
