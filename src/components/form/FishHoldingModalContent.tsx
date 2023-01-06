@@ -1,7 +1,8 @@
 import { HStack, VStack, Text, Button, Divider, Heading } from 'native-base'
 import { memo, useCallback, useEffect, useState } from 'react'
-import { connect } from 'react-redux'
-import { RootState } from '../../redux/store'
+import { connect, useDispatch } from 'react-redux'
+import { saveTotalFishHolding } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
+import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import FishHoldingCard from './FishHoldingCard'
 
@@ -14,6 +15,7 @@ const FishHoldingModalContent = ({
   handleMarkFishFormSubmit?: any
   closeModal: any
 }) => {
+  const dispatch = useDispatch<AppDispatch>()
   const [selectedLifeStages, setSelectedLifeStages] = useState([] as Array<any>)
   const [selectedRuns, setSelectedRuns] = useState([] as Array<any>)
   const [totalFish, setTotalFish] = useState(0 as number)
@@ -85,6 +87,10 @@ const FishHoldingModalContent = ({
     calculateTotalFish()
   }
 
+  const handleSubmit = () => {
+    dispatch(saveTotalFishHolding(totalFish))
+  }
+
   //render new cards when selected runs or lifeStages change
   const renderFishHoldingCards = useCallback(() => {
     return (
@@ -120,7 +126,7 @@ const FishHoldingModalContent = ({
             //   (errors && Object.keys(errors).length > 0)
             // }
             onPress={() => {
-              // handleSubmit()
+              handleSubmit()
               closeModal()
             }}
           >
@@ -134,7 +140,6 @@ const FishHoldingModalContent = ({
         <Divider my={2} thickness='3' />
         <VStack
           alignItems='center'
-          // space={10}
           paddingX='10'
           paddingTop='7'
           paddingBottom='3'
@@ -166,7 +171,7 @@ const FishHoldingModalContent = ({
           </HStack>
           {renderFishHoldingCards()}
           <Heading>
-            <Text>Total Fish Holding:</Text>
+            <Text>Total Fish Holding: </Text>
             {totalFish}
           </Heading>
         </VStack>
