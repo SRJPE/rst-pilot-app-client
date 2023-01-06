@@ -2,7 +2,7 @@ import { registerRootComponent } from 'expo'
 
 import App from './App'
 
-//optimization test
+//optimization for react navigation
 import { enableScreens } from 'react-native-screens'
 enableScreens()
 

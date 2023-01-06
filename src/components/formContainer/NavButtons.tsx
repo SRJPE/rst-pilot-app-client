@@ -105,14 +105,6 @@ const NavButtons = ({
         //check to see if there are any fish marked for recapture
         //if there are fish marked for recapture
         //open the modal
-
-        console.log('TEST: ', individualFishStore)
-        if (haveAnyFishBeenMarkedForRecapture) {
-          console.log('INSIDE OF THE IF STATEMENT')
-          toggleModal()
-          break
-        }
-
         break
       case 'High Flows':
         navigateHelper('End Trapping')

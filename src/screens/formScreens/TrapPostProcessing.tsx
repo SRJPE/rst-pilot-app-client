@@ -66,7 +66,6 @@ const TrapPostProcessing = ({
     setFishHoldingModalOpen(!fishHoldingModalOpen)
   }
 
-  //  useCallback(
   const renderModalCallBack = () => {
     return (
       <CustomModal
@@ -74,14 +73,10 @@ const TrapPostProcessing = ({
         closeModal={handleModalChange}
         height='3/4'
       >
-        <FishHoldingModalContent
-          // handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
-          closeModal={handleModalChange}
-        />
+        <FishHoldingModalContent closeModal={handleModalChange} />
       </CustomModal>
     )
   }
-  // , [])
 
   const handleTrapStatusAtEndRadio = useCallback(
     (nextValue: any, setFieldTouched: any, setFieldValue: any) => {

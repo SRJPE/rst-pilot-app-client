@@ -20,6 +20,10 @@ const FishHoldingModalContent = ({
   const [selectedRuns, setSelectedRuns] = useState([] as Array<any>)
   const [totalFish, setTotalFish] = useState(0 as number)
 
+  /*
+This Component needs to be refactored for object access
+*/
+
   useEffect(() => {
     setSelectedLifeStagesAndRuns()
     calculateTotalFish()
