@@ -3,6 +3,9 @@ import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { assign, pick, cloneDeep } from 'lodash'
+import { Row, IconButton, Icon, Box } from 'native-base'
+import { FishStoreI } from '../../redux/reducers/formSlices/fishInputSlice'
+import { Entypo } from '@expo/vector-icons'
 
 const headers = [
   'Species',
@@ -15,6 +18,7 @@ const headers = [
   'Mark',
   'Dead',
   'Recapture',
+  '',
 ]
 
 const emptyTableData = {
@@ -30,21 +34,15 @@ const emptyTableData = {
   willBeUsedInRecapture: '---',
 }
 
-const FishInputDataTable = ({
-  individualFishList,
-}: {
-  individualFishList: any
-}) => {
+const FishInputDataTable = ({ fishStore }: { fishStore: FishStoreI }) => {
   const numberOfItemsPerPage = 5
   const [page, setPage] = React.useState(0)
-  const [pageRows, setPageRows] = React.useState([
-    ...individualFishList.slice(0, numberOfItemsPerPage),
-  ])
+  const [pageRows, setPageRows] = React.useState({})
 
   React.useEffect(() => {
     const pageRows = generateRowsForPage()
     setPageRows(pageRows)
-  }, [individualFishList])
+  }, [fishStore])
 
   React.useEffect(() => {
     const pageRows = generateRowsForPage()
@@ -52,14 +50,20 @@ const FishInputDataTable = ({
   }, [page])
 
   const generateRowsForPage = () => {
-    const pageRows = individualFishList.slice(
+    const pageRowsIndexes = Object.keys(fishStore).slice(
       page * numberOfItemsPerPage,
       page * numberOfItemsPerPage + numberOfItemsPerPage
     )
-    let sortedPageRows = sortPageRows(pageRows)
-    addEmptyRows(sortedPageRows)
+    const pageRowsSliced: any = {}
+    pageRowsIndexes.forEach((idx) => {
+      pageRowsSliced[Number(idx)] = fishStore[Number(idx)]
+    })
+    let sortedPageRows = sortPageRows(pageRowsSliced)
+    console.log('this bad boy: ', sortedPageRows)
+    let paddedPageRows = addEmptyRows(sortedPageRows)
+    console.log('bad boy 2: ', paddedPageRows)
 
-    return sortedPageRows
+    return paddedPageRows
   }
 
   const renderCell = (obj: any, key: any) => {
@@ -73,23 +77,31 @@ const FishInputDataTable = ({
     }
   }
 
-  const sortPageRows = (arr: any[]) => {
-    let sortedRows: any[] = []
-    arr.forEach((dataObj) => {
-      const sorted = Object.assign(
-        cloneDeep(emptyTableData),
-        pick(dataObj, Object.keys(emptyTableData))
-      )
-      sortedRows.push(sorted)
+  const sortPageRows = (obj: FishStoreI) => {
+    let sortedRows: any = {}
+    const keys = Object.keys(obj)
+    keys.forEach((key) => {
+      let dataObj: any = cloneDeep(obj[Number(key)])
+      const dataObjKeys = Object.keys(dataObj)
+      dataObjKeys.forEach((dataObjKey) => {
+        if (dataObj[dataObjKey] === '') {
+          dataObj[dataObjKey] = '---'
+        }
+      })
+      sortedRows[Number(key)] = dataObj
     })
-
     return sortedRows
   }
 
-  const addEmptyRows = (arr: any[]) => {
-    while (arr.length < 5) {
-      arr.push(emptyTableData)
+  const addEmptyRows = (obj: any) => {
+    let objCopy = cloneDeep(obj)
+    let keys = Object.keys(objCopy)
+    for (let i = keys.length; i < numberOfItemsPerPage; i++) {
+      let id = `empty-#${i}`
+      objCopy[id] = emptyTableData
     }
+
+    return objCopy
   }
 
   return (
@@ -100,25 +112,43 @@ const FishInputDataTable = ({
         ))}
       </DataTable.Header>
 
-      {pageRows.map((obj, rowIdx: number) => {
+      {Object.keys(pageRows).map((rowKey, idx: number) => {
         return (
-          <DataTable.Row key={`${Object.keys(obj)[rowIdx]}-${rowIdx}`}>
-            {Object.keys(obj)
-              .map((key: string | number, itemIdx: number) => {
-                return (
-                  <DataTable.Cell key={`${key}-${obj[key]}-${itemIdx}`}>
-                    {renderCell(obj, key)}
-                  </DataTable.Cell>
-                )
-              })}
-          </DataTable.Row>
+          <Row key={`${rowKey}-${idx}`}>
+            <DataTable.Row key={`${rowKey}-${idx}`} style={{ flex: 1 }}>
+              {Object.keys(pageRows[rowKey as keyof typeof pageRows]).map(
+                (objKey: string | number, itemIdx: number) => {
+                  return (
+                    <DataTable.Cell key={`${objKey}-${itemIdx}`}>
+                      {renderCell(
+                        pageRows[rowKey as keyof typeof pageRows],
+                        objKey
+                      )}
+                    </DataTable.Cell>
+                  )
+                }
+              )}
+            </DataTable.Row>
+            <IconButton
+              marginY={3}
+              variant='solid'
+              bg='primary'
+              colorScheme='primary'
+              size='sm'
+              onPress={() => {
+                console.log('here: ', fishStore[Number(rowKey)])
+              }}
+            >
+              <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
+            </IconButton>
+          </Row>
         )
       })}
 
       <DataTable.Pagination
         page={page}
         numberOfPages={Math.ceil(
-          individualFishList.length / numberOfItemsPerPage
+          Object.keys(fishStore).length / numberOfItemsPerPage
         )}
         label={`Page ${page + 1}`}
         onPageChange={(page: number) => setPage(page)}
@@ -130,7 +160,7 @@ const FishInputDataTable = ({
 
 const mapStateToProps = (state: RootState) => {
   return {
-    individualFishList: state.fishInput.individualFish,
+    fishStore: state.fishInput.fishStore,
   }
 }
 

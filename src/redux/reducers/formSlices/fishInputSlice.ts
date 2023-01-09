@@ -5,7 +5,11 @@ interface InitialStateI {
   completed: boolean
   modalOpen: boolean
   speciesCaptured: Array<string>
-  individualFish: IndividualFishValuesI[]
+  fishStore: FishStoreI
+}
+
+export interface FishStoreI {
+  [id: number]: IndividualFishValuesI
 }
 
 export interface IndividualFishValuesI {
@@ -46,7 +50,7 @@ const initialState: InitialStateI = {
   completed: false,
   modalOpen: false,
   speciesCaptured: [],
-  individualFish: [],
+  fishStore: {},
 }
 
 export const saveFishSlice = createSlice({
@@ -58,9 +62,17 @@ export const saveFishSlice = createSlice({
       state.speciesCaptured = action.payload
     },
     saveIndividualFish: (state, action) => {
-      let individualFishCopy = cloneDeep(state.individualFish)
-      individualFishCopy.push({ ...action.payload, numFishCaught: 1 })
-      state.individualFish = individualFishCopy
+      let fishStoreCopy = cloneDeep(state.fishStore)
+      let id = null
+      if (Object.keys(fishStoreCopy).length) {
+        // @ts-ignore
+        const largestId = Math.max(...Object.keys(fishStoreCopy))
+        id = largestId + 1
+      } else {
+        id = 0
+      }
+      fishStoreCopy[id] = { ...action.payload, numFishCaught: 1 }
+      state.fishStore = fishStoreCopy
     },
     savePlusCount: (state, action) => {
       const plusCountEntry = {
@@ -78,9 +90,18 @@ export const saveFishSlice = createSlice({
         plusCount: true,
       } as IndividualFishValuesI
 
-      let individualFishCopy = cloneDeep(state.individualFish)
-      individualFishCopy.push(plusCountEntry)
-      state.individualFish = individualFishCopy
+      let fishStoreCopy = cloneDeep(state.fishStore)
+      let id = null
+      if (Object.keys(fishStoreCopy).length) {
+        // @ts-ignore
+        const largestId = Math.max(...Object.keys(fishStoreCopy))
+        id = largestId + 1
+      } else {
+        id = 0
+      }
+
+      fishStoreCopy[id] = plusCountEntry
+      state.fishStore = fishStoreCopy
     },
     markFishInputCompleted: (state, action) => {
       state.completed = action.payload
@@ -101,4 +122,3 @@ export const {
 } = saveFishSlice.actions
 
 export default saveFishSlice.reducer
-

@@ -36,6 +36,7 @@ import CustomModalHeader, {
 import MarkFishModalContent from '../../components/form/MarkFishModalContent'
 import AddGeneticsModalContent from '../../components/form/AddGeneticsModalContent'
 import {
+  FishStoreI,
   individualFishInitialState,
   saveIndividualFish,
 } from '../../redux/reducers/formSlices/fishInputSlice'
@@ -57,7 +58,7 @@ const AddFishContent = ({
   activeTab,
   setActiveTab,
   closeModal,
-  individualFishStore,
+  fishStore,
 }: {
   saveIndividualFish: any
   saveMarkOrTagData: any
@@ -65,11 +66,12 @@ const AddFishContent = ({
   activeTab: any
   setActiveTab: any
   closeModal: any
-  individualFishStore: any
+  fishStore: FishStoreI
 }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
-  const lastAddedFish = [...individualFishStore].pop() as any
+  // @ts-ignore
+  const lastAddedFish = fishStore[Object.keys(fishStore).pop()]
   const validationSchemas = {
     default: addIndividualFishSchema,
     optionalLifeStage: addIndividualFishSchemaOptionalLifeStage,
@@ -885,7 +887,7 @@ const AddFishContent = ({
 
 const mapStateToProps = (state: RootState) => {
   return {
-    individualFishStore: state.fishInput.individualFish,
+    fishStore: state.fishInput.fishStore,
   }
 }
 
