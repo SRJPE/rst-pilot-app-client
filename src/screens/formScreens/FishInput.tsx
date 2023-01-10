@@ -174,7 +174,7 @@ const FishInput = ({
 
           <Box px='4'>
             <Heading pb='8'>Catch Table</Heading>
-            <FishInputDataTable />
+            <FishInputDataTable navigation={navigation} />
           </Box>
         </VStack>
         {/* --------- Modals --------- */}

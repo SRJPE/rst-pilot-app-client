@@ -103,6 +103,19 @@ export const saveFishSlice = createSlice({
       fishStoreCopy[id] = plusCountEntry
       state.fishStore = fishStoreCopy
     },
+    updateFishEntry: (state, action) => {
+      let fishStoreCopy = cloneDeep(state.fishStore)
+      let id = action.payload?.id
+      let actionPayloadCopy = action.payload
+      delete actionPayloadCopy.id
+      fishStoreCopy[id] = actionPayloadCopy
+      state.fishStore = fishStoreCopy
+    },
+    deleteFishEntry: (state, action) => {
+      let fishStoreCopy = cloneDeep(state.fishStore)
+      delete fishStoreCopy[action.payload]
+      state.fishStore = fishStoreCopy
+    },
     markFishInputCompleted: (state, action) => {
       state.completed = action.payload
     },
@@ -117,6 +130,8 @@ export const {
   saveFishInput,
   saveIndividualFish,
   savePlusCount,
+  updateFishEntry,
+  deleteFishEntry,
   markFishInputCompleted,
   markFishInputModalOpen,
 } = saveFishSlice.actions

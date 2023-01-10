@@ -21,6 +21,19 @@ const headers = [
   '',
 ]
 
+const sortedDataByHeaders = [
+  'species',
+  'numFishCaught',
+  'forkLength',
+  'run',
+  'weight',
+  'lifeStage',
+  'adiposeClipped',
+  'existingMark',
+  'dead',
+  'willBeUsedInRecapture',
+]
+
 const emptyTableData = {
   species: '---',
   numFishCaught: '---',
@@ -34,7 +47,13 @@ const emptyTableData = {
   willBeUsedInRecapture: '---',
 }
 
-const FishInputDataTable = ({ fishStore }: { fishStore: FishStoreI }) => {
+const FishInputDataTable = ({
+  navigation,
+  fishStore,
+}: {
+  navigation: any
+  fishStore: FishStoreI
+}) => {
   const numberOfItemsPerPage = 5
   const [page, setPage] = React.useState(0)
   const [pageRows, setPageRows] = React.useState({})
@@ -59,10 +78,7 @@ const FishInputDataTable = ({ fishStore }: { fishStore: FishStoreI }) => {
       pageRowsSliced[Number(idx)] = fishStore[Number(idx)]
     })
     let sortedPageRows = sortPageRows(pageRowsSliced)
-    console.log('this bad boy: ', sortedPageRows)
     let paddedPageRows = addEmptyRows(sortedPageRows)
-    console.log('bad boy 2: ', paddedPageRows)
-
     return paddedPageRows
   }
 
@@ -116,18 +132,24 @@ const FishInputDataTable = ({ fishStore }: { fishStore: FishStoreI }) => {
         return (
           <Row key={`${rowKey}-${idx}`}>
             <DataTable.Row key={`${rowKey}-${idx}`} style={{ flex: 1 }}>
-              {Object.keys(pageRows[rowKey as keyof typeof pageRows]).map(
-                (objKey: string | number, itemIdx: number) => {
-                  return (
-                    <DataTable.Cell key={`${objKey}-${itemIdx}`}>
-                      {renderCell(
-                        pageRows[rowKey as keyof typeof pageRows],
-                        objKey
-                      )}
-                    </DataTable.Cell>
-                  )
-                }
-              )}
+              {Object.keys(pageRows[rowKey as keyof typeof pageRows])
+                .sort(
+                  (a, b) =>
+                    sortedDataByHeaders.indexOf(a) -
+                    sortedDataByHeaders.indexOf(b)
+                )
+                .map((objKey: string | number, itemIdx: number) => {
+                  if (objKey !== 'plusCountMethod' && objKey !== 'plusCount') {
+                    return (
+                      <DataTable.Cell key={`${objKey}-${itemIdx}`}>
+                        {renderCell(
+                          pageRows[rowKey as keyof typeof pageRows],
+                          objKey
+                        )}
+                      </DataTable.Cell>
+                    )
+                  }
+                })}
             </DataTable.Row>
             <IconButton
               marginY={3}
@@ -135,8 +157,18 @@ const FishInputDataTable = ({ fishStore }: { fishStore: FishStoreI }) => {
               bg='primary'
               colorScheme='primary'
               size='sm'
+              isDisabled={rowKey.includes('empty')}
               onPress={() => {
-                console.log('here: ', fishStore[Number(rowKey)])
+                if (!rowKey.includes('empty')) {
+                  if (fishStore[Number(rowKey)]) {
+                    navigation.navigate('Add Fish', {
+                      editModeData: {
+                        id: rowKey,
+                        ...fishStore[Number(rowKey)],
+                      },
+                    })
+                  }
+                }
               }}
             >
               <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />

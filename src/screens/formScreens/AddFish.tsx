@@ -39,6 +39,8 @@ import {
   FishStoreI,
   individualFishInitialState,
   saveIndividualFish,
+  updateFishEntry,
+  deleteFishEntry,
 } from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveGeneticSampleData } from '../../redux/reducers/formSlices/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
@@ -52,17 +54,23 @@ import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
 
 const AddFishContent = ({
+  route,
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
+  updateFishEntry,
+  deleteFishEntry,
   activeTab,
   setActiveTab,
   closeModal,
   fishStore,
 }: {
+  route?: any
   saveIndividualFish: any
   saveMarkOrTagData: any
   saveGeneticSampleData: any
+  updateFishEntry: any
+  deleteFishEntry: any
   activeTab: any
   setActiveTab: any
   closeModal: any
@@ -158,7 +166,13 @@ const AddFishContent = ({
   return (
     <Formik
       validationSchema={validationSchemas[validationSchema]}
-      initialValues={lastAddedFish ? lastAddedFish : individualFishInitialState}
+      initialValues={
+        route.params?.editModeData
+          ? route.params.editModeData
+          : lastAddedFish
+          ? lastAddedFish
+          : individualFishInitialState
+      }
       onSubmit={(values) => {
         handleFormSubmit(values)
         showSlideAlert(dispatch, 'Fish')
@@ -185,7 +199,9 @@ const AddFishContent = ({
           >
             <Pressable onPress={Keyboard.dismiss}>
               <CustomModalHeader
-                headerText={'Add Fish'}
+                headerText={
+                  route.params?.editModeData ? 'Edit Fish' : 'Add Fish'
+                }
                 showHeaderButton={true}
                 closeModal={closeModal}
                 navigateBack={true}
@@ -305,6 +321,29 @@ const AddFishContent = ({
                 <Divider mt={1} />
                 {values.species.length > 0 && (
                   <>
+                    {route.params?.editModeData ? (
+                      <HStack alignItems='center'>
+                        <FormControl w='1/2' pr='5'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Count
+                            </Text>
+                          </FormControl.Label>
+                          <Input
+                            height='50px'
+                            fontSize='16'
+                            placeholder='Numeric Value'
+                            keyboardType='numeric'
+                            onChangeText={handleChange('numFishCaught')}
+                            onBlur={handleBlur('numFishCaught')}
+                            value={values.count}
+                          />
+                        </FormControl>
+                      </HStack>
+                    ) : (
+                      <></>
+                    )}
+
                     <HStack>
                       <FormControl w='1/2' pr='5'>
                         <HStack space={4} alignItems='center'>
@@ -819,30 +858,67 @@ const AddFishContent = ({
                 mx='2'
                 bg='#F9A38C'
                 shadow='5'
-                isDisabled={handleSaveButtonDisable(touched, errors)}
+                isDisabled={
+                  route.params?.editModeData
+                    ? false
+                    : handleSaveButtonDisable(touched, errors)
+                }
                 onPress={() => {
-                  handleSubmit()
-                  navigation.goBack()
+                  if (route.params?.editModeData) {
+                    navigation.goBack()
+                  } else {
+                    handleSubmit()
+                    navigation.goBack()
+                  }
                 }}
               >
                 <Text fontWeight='bold' color='white' fontSize='xl'>
-                  Save and Exit
+                  {route.params?.editModeData ? 'Cancel' : 'Save and Exit'}
                 </Text>
               </Button>
-              {/* <Button onPress={() => console.log(reduxState)}>
-                    Log Redux State
-                  </Button> */}
+              {route.params?.editModeData ? (
+                <Button
+                  flex='1'
+                  bg='#b71c1c'
+                  onPress={() => {
+                    deleteFishEntry(route.params?.editModeData?.id)
+                    navigation.goBack()
+                  }}
+                >
+                  <Text fontWeight='bold' color='white' fontSize='xl'>
+                    Delete
+                  </Text>
+                </Button>
+              ) : (
+                <></>
+              )}
               <Button
                 flex='1'
                 py='5'
                 mx='2'
                 bg='primary'
                 shadow='5'
-                isDisabled={handleSaveButtonDisable(touched, errors)}
-                onPress={() => handleSubmit()}
+                isDisabled={
+                  route.params?.editModeData
+                    ? false
+                    : handleSaveButtonDisable(touched, errors)
+                }
+                onPress={() => {
+                  if (route.params?.editModeData) {
+                    updateFishEntry({
+                      id: route.params?.editModeData?.id,
+                      ...values,
+                    })
+                    navigation.goBack()
+                  } else {
+                    handleSubmit()
+                  }
+                }}
               >
                 <Text fontWeight='bold' color='white' fontSize='xl'>
-                  Save and Add Another Fish
+                  {route.params?.editModeData
+                    ? 'Update'
+                    : 'Save and Add Another Fish'}
                 </Text>
               </Button>
             </HStack>
@@ -895,4 +971,6 @@ export default connect(mapStateToProps, {
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
+  updateFishEntry,
+  deleteFishEntry,
 })(AddFishContent)
