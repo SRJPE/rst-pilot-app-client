@@ -131,20 +131,20 @@ const AddFishContent = ({
     if (lifeStage === 'juvenile') {
       return (
         forkLengthValue > QARanges.forkLength.maxJuvenile &&
-        RenderWarningMessage()
+        <RenderWarningMessage />
       )
     } else {
       return (
-        forkLengthValue > QARanges.forkLength.maxAdult && RenderWarningMessage()
+        forkLengthValue > QARanges.forkLength.maxAdult && <RenderWarningMessage />
       )
     }
   }
   const renderWeightWarning = (weightValue: number, lifeStage: string) => {
     //for juvenile max is 50 for all else use 400
     if (lifeStage === 'juvenile') {
-      return weightValue > QARanges.weight.maxJuvenile && RenderWarningMessage()
+      return weightValue > QARanges.weight.maxJuvenile && <RenderWarningMessage />
     } else {
-      return weightValue > QARanges.weight.maxAdult && RenderWarningMessage()
+      return weightValue > QARanges.weight.maxAdult && <RenderWarningMessage />
     }
   }
 
