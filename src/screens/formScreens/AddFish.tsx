@@ -95,8 +95,6 @@ const AddFish = ({
   )
 
   const handleFormSubmit = (values: any) => {
-    console.log('🚀 ~ handleFormSubmit ~ values', values)
-
     saveIndividualFish(values)
   }
 
