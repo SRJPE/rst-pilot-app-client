@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Formik } from 'formik'
+import React, { useState, useEffect, useCallback } from 'react'
+import { Form, Formik } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
@@ -31,6 +31,7 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { Keyboard } from 'react-native'
 import { QARanges } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
+import OptimizedInput from '../../components/Shared/OptimizedInput'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -56,19 +57,21 @@ const TrapOperations = ({
   ) => {
     if (unit === '°F') {
       return (
-        waterTemperatureValue > QARanges.waterTemperature.maxF &&
-        RenderWarningMessage()
+        waterTemperatureValue > QARanges.waterTemperature.maxF && (
+          <RenderWarningMessage />
+        )
       )
     } else {
       return (
-        waterTemperatureValue > QARanges.waterTemperature.maxC &&
-        RenderWarningMessage()
+        waterTemperatureValue > QARanges.waterTemperature.maxC && (
+          <RenderWarningMessage />
+        )
       )
     }
   }
 
   const handleSubmit = (values: any, errors: any) => {
-    dispatch(saveTrapOperations(values))
+    dispatch(saveTrapOperations({ ...values, trapVisitStopTime: new Date() }))
     dispatch(markTrapOperationsCompleted(true))
     dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ Status', values)
@@ -97,9 +100,19 @@ const TrapOperations = ({
     )
   }
 
+  const popoverTrigger = (triggerProps: any) => {
+    return (
+      <IconButton
+        {...triggerProps}
+        icon={<Icon as={MaterialIcons} name='info-outline' size='lg' />}
+      ></IconButton>
+    )
+  }
+
   return (
     <Formik
       validationSchema={trapOperationsSchema}
+      validateOnChange={false}
       initialValues={reduxState.values}
       initialTouched={{ trapStatus: true }}
       // only create initial error when form is not completed
@@ -137,23 +150,7 @@ const TrapOperations = ({
                         Is the Trap functioning normally?
                       </Text>
                     </FormControl.Label>
-                    <Popover
-                      placement='bottom left'
-                      trigger={(triggerProps) => {
-                        return (
-                          <IconButton
-                            {...triggerProps}
-                            icon={
-                              <Icon
-                                as={MaterialIcons}
-                                name='info-outline'
-                                size='lg'
-                              />
-                            }
-                          ></IconButton>
-                        )
-                      }}
-                    >
+                    <Popover placement='bottom left' trigger={popoverTrigger}>
                       <Popover.Content
                         accessibilityLabel='Trap Stats Info'
                         w='600'
@@ -249,13 +246,13 @@ const TrapOperations = ({
                               Cone Depth (optional)
                             </Text>
                           </FormControl.Label>
-                          {Number(values.coneDepth) > QARanges.coneDepth.max &&
-                            RenderWarningMessage()}
+                          {Number(values.coneDepth) >
+                            QARanges.coneDepth.max && <RenderWarningMessage />}
                           {touched.coneDepth &&
                             errors.coneDepth &&
                             RenderErrorMessage(errors, 'coneDepth')}
                         </HStack>
-                        <Input
+                        <OptimizedInput
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
@@ -283,13 +280,14 @@ const TrapOperations = ({
                             </Text>
                           </FormControl.Label>
                           {Number(values.totalRevolutions) >
-                            QARanges.totalRevolutions.max &&
-                            RenderWarningMessage()}
+                            QARanges.totalRevolutions.max && (
+                            <RenderWarningMessage />
+                          )}
                           {touched.totalRevolutions &&
                             errors.totalRevolutions &&
                             RenderErrorMessage(errors, 'totalRevolutions')}
                         </HStack>
-                        <Input
+                        <OptimizedInput
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
@@ -393,7 +391,7 @@ const TrapOperations = ({
                       <HStack space={8} justifyContent='space-between'>
                         <FormControl w='30%'>
                           <VStack>
-                            <Input
+                            <OptimizedInput
                               height='50px'
                               fontSize='16'
                               placeholder='Numeric Value'
@@ -403,7 +401,7 @@ const TrapOperations = ({
                               value={values.rpm1}
                             />
                             {Number(values.rpm1) > QARanges.RPM.max ? (
-                              RenderWarningMessage()
+                              <RenderWarningMessage />
                             ) : (
                               <></>
                             )}
@@ -411,7 +409,7 @@ const TrapOperations = ({
                         </FormControl>
                         <FormControl w='30%'>
                           <VStack>
-                            <Input
+                            <OptimizedInput
                               height='50px'
                               fontSize='16'
                               placeholder='Numeric Value (optional)'
@@ -421,7 +419,7 @@ const TrapOperations = ({
                               value={values.rpm2}
                             />
                             {Number(values.rpm2) > QARanges.RPM.max ? (
-                              RenderWarningMessage()
+                              <RenderWarningMessage />
                             ) : (
                               <></>
                             )}
@@ -429,7 +427,7 @@ const TrapOperations = ({
                         </FormControl>
                         <FormControl w='30%'>
                           <VStack>
-                            <Input
+                            <OptimizedInput
                               height='50px'
                               fontSize='16'
                               placeholder='Numeric Value (optional)'
@@ -439,7 +437,7 @@ const TrapOperations = ({
                               value={values.rpm3}
                             />
                             {Number(values.rpm3) > QARanges.RPM.max ? (
-                              RenderWarningMessage()
+                              <RenderWarningMessage />
                             ) : (
                               <></>
                             )}
@@ -459,7 +457,7 @@ const TrapOperations = ({
                             Flow Measure
                           </Text>
                         </FormControl.Label>
-                        <Input
+                        <OptimizedInput
                           height='50px'
                           fontSize='16'
                           placeholder='Populated from CDEC'
@@ -470,7 +468,7 @@ const TrapOperations = ({
                         />
                         {inputUnit(values.flowMeasureUnit)}
                         {Number(values.flowMeasure) >
-                          QARanges.flowMeasure.max && RenderWarningMessage()}
+                          QARanges.flowMeasure.max && <RenderWarningMessage />}
                         {touched.flowMeasure &&
                           errors.flowMeasure &&
                           RenderErrorMessage(errors, 'flowMeasure')}
@@ -481,7 +479,7 @@ const TrapOperations = ({
                             Water Temperature
                           </Text>
                         </FormControl.Label>
-                        <Input
+                        <OptimizedInput
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
@@ -506,7 +504,7 @@ const TrapOperations = ({
                           </Text>
                         </FormControl.Label>
 
-                        <Input
+                        <OptimizedInput
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
@@ -517,7 +515,9 @@ const TrapOperations = ({
                         />
                         {inputUnit(values.waterTurbidityUnit)}
                         {Number(values.waterTurbidity) >
-                          QARanges.waterTurbidity.max && RenderWarningMessage()}
+                          QARanges.waterTurbidity.max && (
+                          <RenderWarningMessage />
+                        )}
                         {touched.waterTurbidity &&
                           errors.waterTurbidity &&
                           RenderErrorMessage(errors, 'waterTurbidity')}

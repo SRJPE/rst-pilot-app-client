@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback, memo } from 'react'
 import { CheckIcon, Select } from 'native-base'
 import { startCase } from 'lodash'
 
@@ -10,7 +10,12 @@ interface CustomSelectI {
   selectOptions: any[]
 }
 
-const CustomSelect: React.FC<CustomSelectI> = props => {
+const CustomSelect: React.FC<CustomSelectI> = (props) => {
+  const handleOnChange = useCallback((itemValue: any) => {
+    props.setFieldTouched(props.selectedValue, true)
+    props.onValueChange(itemValue)
+  }, [props.selectedValue])
+
   return (
     <Select
       height='50px'
@@ -24,10 +29,7 @@ const CustomSelect: React.FC<CustomSelectI> = props => {
         endIcon: <CheckIcon size='6' />,
       }}
       mt={1}
-      onValueChange={itemValue => {
-        props.setFieldTouched(props.selectedValue, true)
-        props.onValueChange(itemValue)
-      }}
+      onValueChange={handleOnChange}
     >
       {props.selectOptions ? (
         props?.selectOptions.map((item, idx) => {
@@ -67,4 +69,4 @@ const CustomSelect: React.FC<CustomSelectI> = props => {
     </Select>
   )
 }
-export default CustomSelect
+export default memo(CustomSelect)

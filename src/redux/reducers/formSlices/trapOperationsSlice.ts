@@ -20,6 +20,7 @@ export interface TrapOperationsValuesI {
   rpm1: number | null
   rpm2: number | null
   rpm3: number | null
+  trapVisitStopTime: Date | null
 }
 
 const initialState: InitialStateI = {
@@ -39,6 +40,7 @@ const initialState: InitialStateI = {
     rpm1: null,
     rpm2: null,
     rpm3: null,
+    trapVisitStopTime: null,
   },
 }
 
@@ -48,7 +50,11 @@ export const trapOperationsSlice = createSlice({
   reducers: {
     resetTrapOperationsSlice: () => initialState,
     saveTrapOperations: (state, action) => {
-      state.values = action.payload
+      state.values = {
+        ...action.payload,
+        trapVisitStopTime:
+          state.values.trapVisitStopTime ?? action.payload.trapVisitStopTime,
+      }
     },
     markTrapOperationsCompleted: (state, action) => {
       state.completed = action.payload
