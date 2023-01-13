@@ -259,7 +259,7 @@ const TrapOperations = ({
                         <HStack space={4} alignItems='center'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
-                              Cone Depth
+                              Cone Depth (optional)
                             </Text>
                           </FormControl.Label>
                           {Number(values.coneDepth) >
@@ -359,6 +359,35 @@ const TrapOperations = ({
                             RPM Before Cleaning
                           </Text>
                         </FormControl.Label>
+                        <Popover
+                          placement='bottom left'
+                          trigger={(triggerProps) => {
+                            return (
+                              <IconButton
+                                {...triggerProps}
+                                icon={
+                                  <Icon
+                                    as={MaterialIcons}
+                                    name='info-outline'
+                                    size='lg'
+                                  />
+                                }
+                              ></IconButton>
+                            )
+                          }}
+                        >
+                          <Popover.Content
+                            accessibilityLabel='RPM Info'
+                            w='600'
+                            mr='10'
+                          >
+                            <Popover.Arrow />
+                            <Popover.Header>
+                              Take one or more measure of cone rotations. We
+                              will save the average in our database.
+                            </Popover.Header>
+                          </Popover.Content>
+                        </Popover>
                         {((touched.rpm1 && errors.rpm1) ||
                           (touched.rpm2 && errors.rpm2) ||
                           (touched.rpm3 && errors.rpm3)) && (
@@ -370,7 +399,7 @@ const TrapOperations = ({
                               color='error'
                             />
                             <Text style={{ fontSize: 14, color: '#b71c1c' }}>
-                              All Three measurements are required
+                              At least one measurement is required
                             </Text>
                           </HStack>
                         )}
@@ -399,7 +428,7 @@ const TrapOperations = ({
                             <OptimizedInput
                               height='50px'
                               fontSize='16'
-                              placeholder='Numeric Value'
+                              placeholder='Numeric Value (optional)'
                               keyboardType='numeric'
                               onChangeText={handleChange('rpm2')}
                               onBlur={handleBlur('rpm2')}
@@ -417,7 +446,7 @@ const TrapOperations = ({
                             <OptimizedInput
                               height='50px'
                               fontSize='16'
-                              placeholder='Numeric Value'
+                              placeholder='Numeric Value (optional)'
                               keyboardType='numeric'
                               onChangeText={handleChange('rpm3')}
                               onBlur={handleBlur('rpm3')}
