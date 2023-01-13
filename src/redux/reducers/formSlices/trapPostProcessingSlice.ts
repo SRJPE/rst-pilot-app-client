@@ -42,6 +42,9 @@ export const trapPostProcessingSlice = createSlice({
           state.values.trapVisitStartTime ?? action.payload.trapVisitStartTime,
       }
     },
+    updateTrapVisitStartTime: (state, action) => {
+      state.values.trapVisitStartTime = action.payload
+    },
     markTrapPostProcessingCompleted: (state, action) => {
       state.completed = action.payload
     },
@@ -51,6 +54,7 @@ export const trapPostProcessingSlice = createSlice({
 export const {
   resetTrapPostProcessingSlice,
   saveTrapPostProcessing,
+  updateTrapVisitStartTime,
   markTrapPostProcessingCompleted,
 } = trapPostProcessingSlice.actions
 

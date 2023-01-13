@@ -1,6 +1,6 @@
 import React, { useCallback, memo } from 'react'
 import { CheckIcon, Select } from 'native-base'
-import { startCase } from 'lodash'
+import { capitalize } from 'lodash'
 
 interface CustomSelectI {
   selectedValue: string
@@ -40,7 +40,7 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
                 label={
                   props.placeholder === 'Species'
                     ? item.label
-                    : startCase(item.label)
+                    : item.label.replace(/\w+/g, capitalize)
                 }
                 value={item.value}
               />
@@ -52,7 +52,7 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
                 label={
                   props.placeholder === 'Species'
                     ? item.definition
-                    : startCase(item.definition)
+                    : item.definition.replace(/\w+/g, capitalize)
                 }
                 value={item.definition}
               />

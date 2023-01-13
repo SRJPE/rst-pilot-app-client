@@ -32,6 +32,7 @@ import { Keyboard } from 'react-native'
 import { QARanges } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import OptimizedInput from '../../components/Shared/OptimizedInput'
+import { updateTrapVisitStartTime } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -50,6 +51,8 @@ const TrapOperations = ({
     (state: RootState) => state.dropdowns.values
   )
   const { whyTrapNotFunctioning } = dropdownValues
+  const trapNotInServiceLabel = '- restart trapping'
+  const trapNotInServiceIdentifier = 'trap not in service - restart trapping'
 
   const calculateTempWarning = (
     waterTemperatureValue: number,
@@ -71,6 +74,10 @@ const TrapOperations = ({
   }
 
   const handleSubmit = (values: any, errors: any) => {
+    const newDate = new Date()
+    if (values.trapStatus === trapNotInServiceIdentifier) {
+      dispatch(updateTrapVisitStartTime(newDate))
+    }
     dispatch(saveTrapOperations({ ...values, trapVisitStopTime: new Date() }))
     dispatch(markTrapOperationsCompleted(true))
     dispatch(markStepCompleted([true]))
@@ -205,10 +212,19 @@ const TrapOperations = ({
                     onValueChange={handleChange('trapStatus')}
                     setFieldTouched={setFieldTouched}
                     selectOptions={dropdownValues.trapFunctionality.map(
-                      (item: any) => ({
-                        label: item.definition,
-                        value: item.definition,
-                      })
+                      (item: any) => {
+                        if (item.definition == 'trap not in service') {
+                          return {
+                            label: `${item.definition} ${trapNotInServiceLabel}`,
+                            value: `${item.definition} ${trapNotInServiceLabel}`,
+                          }
+                        } else {
+                          return {
+                            label: item.definition,
+                            value: item.definition,
+                          }
+                        }
+                      }
                     )}
                   />
                   {touched.trapStatus &&
