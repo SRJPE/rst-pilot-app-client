@@ -1,7 +1,8 @@
+import { memo } from 'react'
 import { Text, Icon, HStack } from 'native-base'
 import { Ionicons } from '@expo/vector-icons'
 
-const RenderWarningMessage = () => {
+const RenderWarningMessage: React.FC = () => {
   return (
     <HStack space={1} pt='1'>
       <Icon
@@ -16,4 +17,5 @@ const RenderWarningMessage = () => {
     </HStack>
   )
 }
-export default RenderWarningMessage
+
+export default memo(RenderWarningMessage)

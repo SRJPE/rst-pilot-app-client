@@ -21,6 +21,7 @@ const formSteps = {
   12: { name: 'End Trapping', propName: 'endTrapping' },
   13: { name: 'Add Fish', propName: 'addFish' },
   14: { name: 'Paper Entry', propName: 'paperEntry' },
+  15: { name: 'Started Trapping', propName: 'startedTrapping' },
 }
 
 interface NavigationStateI {

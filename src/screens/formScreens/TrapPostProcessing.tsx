@@ -91,7 +91,14 @@ const TrapPostProcessing = ({
   )
 
   const handleSubmit = (values: any) => {
-    dispatch(saveTrapPostProcessing(values))
+    let trapVisitStartTime = null
+    if (values.endingTrapStatus == 'Restart Trap') {
+      trapVisitStartTime = new Date()
+    }
+
+    dispatch(
+      saveTrapPostProcessing({ ...values, trapVisitStartTime })
+    )
     dispatch(markTrapPostProcessingCompleted(true))
     dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ TrapPostProcessing', values)
@@ -179,7 +186,7 @@ const TrapPostProcessing = ({
                         color='error'
                       />
                       <Text style={{ fontSize: 16, color: '#b71c1c' }}>
-                        All Three measurements are required
+                        At least one measurement is required
                       </Text>
                     </HStack>
                   )}
@@ -209,7 +216,7 @@ const TrapPostProcessing = ({
                       <Input
                         height='50px'
                         fontSize='16'
-                        placeholder='Numeric Value'
+                        placeholder='Numeric Value (optional)'
                         keyboardType='numeric'
                         onChangeText={handleChange('rpm2')}
                         onBlur={handleBlur('rpm2')}
@@ -228,7 +235,7 @@ const TrapPostProcessing = ({
                       <Input
                         height='50px'
                         fontSize='16'
-                        placeholder='Numeric Value'
+                        placeholder='Numeric Value (optional)'
                         keyboardType='numeric'
                         onChangeText={handleChange('rpm3')}
                         onBlur={handleBlur('rpm3')}
@@ -243,8 +250,8 @@ const TrapPostProcessing = ({
                   </FormControl>
                 </HStack>
                 <Text color='grey' my='5' fontSize='17'>
-                  Please take 3 separate measures of cone rotations per minute
-                  before cleaning the trap.
+                  Take one or more measure of cone rotations. We will save the
+                  average in our database.
                 </Text>
 
                 <HStack space={3} alignItems='center' mt='5'>

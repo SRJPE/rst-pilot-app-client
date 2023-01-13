@@ -36,8 +36,11 @@ import CustomModalHeader, {
 import MarkFishModalContent from '../../components/form/MarkFishModalContent'
 import AddGeneticsModalContent from '../../components/form/AddGeneticsModalContent'
 import {
+  FishStoreI,
   individualFishInitialState,
   saveIndividualFish,
+  updateFishEntry,
+  deleteFishEntry,
 } from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveGeneticSampleData } from '../../redux/reducers/formSlices/addGeneticSamplesSlice'
 import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
@@ -50,26 +53,33 @@ import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
 
-const AddFish = ({
+const AddFishContent = ({
+  route,
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
+  updateFishEntry,
+  deleteFishEntry,
   activeTab,
   setActiveTab,
   closeModal,
-  individualFishStore,
+  fishStore,
 }: {
+  route?: any
   saveIndividualFish: any
   saveMarkOrTagData: any
   saveGeneticSampleData: any
+  updateFishEntry: any
+  deleteFishEntry: any
   activeTab: any
   setActiveTab: any
   closeModal: any
-  individualFishStore: any
+  fishStore: FishStoreI
 }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
-  const lastAddedFish = [...individualFishStore].pop() as any
+  // @ts-ignore
+  const lastAddedFish = fishStore[Object.keys(fishStore).pop()]
   const validationSchemas = {
     default: addIndividualFishSchema,
     optionalLifeStage: addIndividualFishSchemaOptionalLifeStage,
@@ -120,21 +130,26 @@ const AddFish = ({
     //for juvenile max is 100 for all else use 1000
     if (lifeStage === 'juvenile') {
       return (
-        forkLengthValue > QARanges.forkLength.maxJuvenile &&
-        RenderWarningMessage()
+        forkLengthValue > QARanges.forkLength.maxJuvenile && (
+          <RenderWarningMessage />
+        )
       )
     } else {
       return (
-        forkLengthValue > QARanges.forkLength.maxAdult && RenderWarningMessage()
+        forkLengthValue > QARanges.forkLength.maxAdult && (
+          <RenderWarningMessage />
+        )
       )
     }
   }
   const renderWeightWarning = (weightValue: number, lifeStage: string) => {
     //for juvenile max is 50 for all else use 400
     if (lifeStage === 'juvenile') {
-      return weightValue > QARanges.weight.maxJuvenile && RenderWarningMessage()
+      return (
+        weightValue > QARanges.weight.maxJuvenile && <RenderWarningMessage />
+      )
     } else {
-      return weightValue > QARanges.weight.maxAdult && RenderWarningMessage()
+      return weightValue > QARanges.weight.maxAdult && <RenderWarningMessage />
     }
   }
 
@@ -156,7 +171,13 @@ const AddFish = ({
   return (
     <Formik
       validationSchema={validationSchemas[validationSchema]}
-      initialValues={lastAddedFish ? lastAddedFish : individualFishInitialState}
+      initialValues={
+        route.params?.editModeData
+          ? route.params.editModeData
+          : lastAddedFish
+          ? lastAddedFish
+          : individualFishInitialState
+      }
       onSubmit={(values) => {
         handleFormSubmit(values)
         showSlideAlert(dispatch, 'Fish')
@@ -183,7 +204,9 @@ const AddFish = ({
           >
             <Pressable onPress={Keyboard.dismiss}>
               <CustomModalHeader
-                headerText={'Add Fish'}
+                headerText={
+                  route.params?.editModeData ? 'Edit Fish' : 'Add Fish'
+                }
                 showHeaderButton={true}
                 closeModal={closeModal}
                 navigateBack={true}
@@ -303,6 +326,29 @@ const AddFish = ({
                 <Divider mt={1} />
                 {values.species.length > 0 && (
                   <>
+                    {route.params?.editModeData ? (
+                      <HStack alignItems='center'>
+                        <FormControl w='1/2' pr='5'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Count
+                            </Text>
+                          </FormControl.Label>
+                          <Input
+                            height='50px'
+                            fontSize='16'
+                            placeholder='Numeric Value'
+                            keyboardType='numeric'
+                            onChangeText={handleChange('numFishCaught')}
+                            onBlur={handleBlur('numFishCaught')}
+                            value={values.count}
+                          />
+                        </FormControl>
+                      </HStack>
+                    ) : (
+                      <></>
+                    )}
+
                     <HStack>
                       <FormControl w='1/2' pr='5'>
                         <HStack space={4} alignItems='center'>
@@ -831,30 +877,67 @@ const AddFish = ({
                 mx='2'
                 bg='themeOrange'
                 shadow='5'
-                isDisabled={handleSaveButtonDisable(touched, errors)}
+                isDisabled={
+                  route.params?.editModeData
+                    ? false
+                    : handleSaveButtonDisable(touched, errors)
+                }
                 onPress={() => {
-                  handleSubmit()
-                  navigation.goBack()
+                  if (route.params?.editModeData) {
+                    navigation.goBack()
+                  } else {
+                    handleSubmit()
+                    navigation.goBack()
+                  }
                 }}
               >
                 <Text fontWeight='bold' color='white' fontSize='xl'>
-                  Save and Exit
+                  {route.params?.editModeData ? 'Cancel' : 'Save and Exit'}
                 </Text>
               </Button>
-              {/* <Button onPress={() => console.log(reduxState)}>
-                    Log Redux State
-                  </Button> */}
+              {route.params?.editModeData ? (
+                <Button
+                  flex='1'
+                  bg='#b71c1c'
+                  onPress={() => {
+                    deleteFishEntry(route.params?.editModeData?.id)
+                    navigation.goBack()
+                  }}
+                >
+                  <Text fontWeight='bold' color='white' fontSize='xl'>
+                    Delete
+                  </Text>
+                </Button>
+              ) : (
+                <></>
+              )}
               <Button
                 flex='1'
                 py='5'
                 mx='2'
                 bg='primary'
                 shadow='5'
-                isDisabled={handleSaveButtonDisable(touched, errors)}
-                onPress={() => handleSubmit()}
+                isDisabled={
+                  route.params?.editModeData
+                    ? false
+                    : handleSaveButtonDisable(touched, errors)
+                }
+                onPress={() => {
+                  if (route.params?.editModeData) {
+                    updateFishEntry({
+                      id: route.params?.editModeData?.id,
+                      ...values,
+                    })
+                    navigation.goBack()
+                  } else {
+                    handleSubmit()
+                  }
+                }}
               >
                 <Text fontWeight='bold' color='white' fontSize='xl'>
-                  Save and Add Another Fish
+                  {route.params?.editModeData
+                    ? 'Update'
+                    : 'Save and Add Another Fish'}
                 </Text>
               </Button>
             </HStack>
@@ -899,7 +982,7 @@ const AddFish = ({
 
 const mapStateToProps = (state: RootState) => {
   return {
-    individualFishStore: state.fishInput.individualFish,
+    fishStore: state.fishInput.fishStore,
   }
 }
 
@@ -907,4 +990,6 @@ export default connect(mapStateToProps, {
   saveIndividualFish,
   saveMarkOrTagData,
   saveGeneticSampleData,
-})(AddFish)
+  updateFishEntry,
+  deleteFishEntry,
+})(AddFishContent)

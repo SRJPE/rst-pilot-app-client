@@ -13,6 +13,7 @@ export interface trapPostProcessingValuesI {
   trapLatitude: number | null
   trapLongitude: number | null
   endingTrapStatus: string
+  trapVisitStartTime: Date | null
 }
 
 const initialState: InitialStateI = {
@@ -25,6 +26,7 @@ const initialState: InitialStateI = {
     trapLatitude: null,
     trapLongitude: null,
     endingTrapStatus: 'Restart Trap',
+    trapVisitStartTime: null,
   },
 }
 
@@ -34,7 +36,14 @@ export const trapPostProcessingSlice = createSlice({
   reducers: {
     resetTrapPostProcessingSlice: () => initialState,
     saveTrapPostProcessing: (state, action) => {
-      state.values = action.payload
+      state.values = {
+        ...action.payload,
+        trapVisitStartTime:
+          state.values.trapVisitStartTime ?? action.payload.trapVisitStartTime,
+      }
+    },
+    updateTrapVisitStartTime: (state, action) => {
+      state.values.trapVisitStartTime = action.payload
     },
     markTrapPostProcessingCompleted: (state, action) => {
       state.completed = action.payload
@@ -45,6 +54,7 @@ export const trapPostProcessingSlice = createSlice({
 export const {
   resetTrapPostProcessingSlice,
   saveTrapPostProcessing,
+  updateTrapVisitStartTime,
   markTrapPostProcessingCompleted,
 } = trapPostProcessingSlice.actions
 

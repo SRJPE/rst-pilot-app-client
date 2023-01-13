@@ -79,7 +79,7 @@ const IncompleteSections = ({
   }, [])
 
   const handleSubmit = () => {
-    submitTrapVisit()
+    saveTrapVisit()
     saveCatchRawSubmission()
     resetAllFormSlices()
     navigation.reset({
@@ -123,7 +123,7 @@ const IncompleteSections = ({
 
   const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
 
-  const submitTrapVisit = () => {
+  const saveTrapVisit = () => {
     const currentDateTime = new Date()
     const trapFunctioningValues = returnDefinitionArray(
       dropdownsState.values.trapFunctionality
@@ -174,8 +174,12 @@ const IncompleteSections = ({
       visitTypeId: null,
       trapLocationId: null,
       isPaperEntry: visitSetupState.isPaperEntry,
-      trapVisitTimeStart: currentDateTime,
-      trapVisitTimeEnd: null,
+      trapVisitTimeStart: visitSetupState.isPaperEntry
+        ? paperEntryState.values.startDate
+        : trapPostProcessingState.values.trapVisitStartTime,
+      trapVisitTimeEnd: visitSetupState.isPaperEntry
+        ? paperEntryState.values.endDate
+        : trapOperationsState.values.trapVisitStopTime,
       fishProcessed: returnNullableTableId(
         fishProcessedValues.indexOf(
           fishProcessingState.values.fishProcessedResult
@@ -218,7 +222,7 @@ const IncompleteSections = ({
           : null,
       inHalfConeConfiguration:
         trapOperationsState.values.coneSetting === 'half' ? true : false,
-      debrisVolumeGallons: trapPostProcessingState.values.debrisVolume
+      debrisVolumeLiters: trapPostProcessingState.values.debrisVolume
         ? parseInt(trapPostProcessingState.values.debrisVolume)
         : null,
       qcCompleted: null,

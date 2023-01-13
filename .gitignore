@@ -1,5 +1,6 @@
 node_modules/
 .env
+ios/
 .expo/
 dist/
 npm-debug.*

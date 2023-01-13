@@ -72,8 +72,8 @@ const NavButtons = ({
         if (!isPaperEntryStore) {
           if (values?.trapStatus === 'trap not functioning') {
             navigateHelper('Non Functional Trap')
-          } else if (values?.trapStatus === 'trap not in service') {
-            navigateHelper('No Fish Caught')
+          } else if (values?.trapStatus === 'trap not in service - restart trapping') {
+            navigateHelper('Started Trapping')
           } else if (values?.flowMeasure > 1000) {
             navigateHelper('High Flows')
           } else if (values?.waterTemperatureUnit === '°C') {
@@ -118,6 +118,9 @@ const NavButtons = ({
       case 'Paper Entry':
         navigateHelper('Trap Operations')
         break
+      case 'Started Trapping':
+        navigation.navigate('Home')
+        break
       default:
         break
     }
@@ -142,6 +145,9 @@ const NavButtons = ({
         break
       case 'Paper Entry':
         navigateHelper('Visit Setup')
+        break
+      case 'Started Trapping':
+        navigateHelper('Trap Operations')
         break
       default:
         break
@@ -239,6 +245,9 @@ const NavButtons = ({
         break
       case 'No Fish Caught':
         buttonText = 'End Trapping'
+        break
+      case 'Started Trapping':
+        buttonText = 'Home'
         break
       case 'High Temperatures':
         buttonText = 'Move on to Fish Processing'
