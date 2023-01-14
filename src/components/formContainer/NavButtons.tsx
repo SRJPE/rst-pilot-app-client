@@ -31,15 +31,15 @@ const NavButtons = ({
   const reduxState = useSelector((state: any) => state)
   const isPaperEntryStore = reduxState.visitSetup.isPaperEntry
 
-  const individualFishStore = useSelector(
-    (state: any) => state.fishInput.individualFish
-  )
+  // const individualFishStore = useSelector(
+  //   (state: any) => state.fishInput.individualFish
+  // )
 
-  const haveAnyFishBeenMarkedForRecapture = individualFishStore.some(
-    (fish: any) => {
-      return fish.willBeUsedInRecapture === true
-    }
-  )
+  // const haveAnyFishBeenMarkedForRecapture = individualFishStore.some(
+  //   (fish: any) => {
+  //     return fish.willBeUsedInRecapture === true
+  //   }
+  // )
 
   const navigateHelper = (destination: string) => {
     const formSteps = Object.values(navigationState?.steps) as any
@@ -72,7 +72,9 @@ const NavButtons = ({
         if (!isPaperEntryStore) {
           if (values?.trapStatus === 'trap not functioning') {
             navigateHelper('Non Functional Trap')
-          } else if (values?.trapStatus === 'trap not in service - restart trapping') {
+          } else if (
+            values?.trapStatus === 'trap not in service - restart trapping'
+          ) {
             navigateHelper('Started Trapping')
           } else if (values?.flowMeasure > 1000) {
             navigateHelper('High Flows')
