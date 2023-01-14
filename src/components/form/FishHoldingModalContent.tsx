@@ -1,62 +1,67 @@
 import { HStack, VStack, Text, Button, Divider, Heading } from 'native-base'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
+import { FishStoreI } from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveTotalFishHolding } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import FishHoldingCard from './FishHoldingCard'
 
 const FishHoldingModalContent = ({
-  individualFishStore,
+  fishStore,
   handleMarkFishFormSubmit,
   closeModal,
 }: {
-  individualFishStore: any
+  fishStore: FishStoreI
   handleMarkFishFormSubmit?: any
   closeModal: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const [selectedFishStore, setSelectedFishStore] = useState({} as any)
   const [selectedLifeStages, setSelectedLifeStages] = useState([] as Array<any>)
   const [selectedRuns, setSelectedRuns] = useState([] as Array<any>)
   const [totalFish, setTotalFish] = useState(0 as number)
 
-  /*
-This Component needs to be refactored for object access
-*/
-
   useEffect(() => {
     setSelectedLifeStagesAndRuns()
-    calculateTotalFish()
   }, [])
 
+  useEffect(() => {
+    calculateTotalFish()
+  }, [selectedFishStore])
+
   const setSelectedLifeStagesAndRuns = () => {
-    const lifeStagesStore = []
-    const runsStore = []
-    //for each fish in individualFish Array
-    for (let currentFish of individualFishStore) {
+    const lifeStagesNamesArray = []
+    const runNamesArray = []
+    const tempSelectedFishStore = {} as any
+
+    //for each fish in the fish Store
+    for (const fish in fishStore) {
+      //only add fish that are marked for recapture
+      if (!fishStore[fish].willBeUsedInRecapture) continue
+
       //do not add yolk sac fry to store
-      if (currentFish.lifeStage === 'yolk sac fry') continue
-      //add `to the temp store arr
-      lifeStagesStore.push(currentFish.lifeStage)
-      runsStore.push(currentFish.run)
+      if (fishStore[fish].lifeStage === 'yolk sac fry') continue
+
+      //add remaining fish objects to selectedFishStore
+      tempSelectedFishStore[fish] = fishStore[fish]
+
+      //add to the temp store arr
+      lifeStagesNamesArray.push(fishStore[fish].lifeStage)
+      runNamesArray.push(fishStore[fish].run)
     }
-    //slickly remove duplicates and set state
-    const lifeStagesSet = [...new Set(lifeStagesStore)]
-    const runsSet = [...new Set(runsStore)]
+    //set the temp fish store the state
+    setSelectedFishStore(tempSelectedFishStore)
+
+    //remove duplicates by creating new Sets and then set state
+    const lifeStagesSet = [...new Set(lifeStagesNamesArray)]
+    const runsSet = [...new Set(runNamesArray)]
     setSelectedLifeStages(lifeStagesSet)
     setSelectedRuns(runsSet)
   }
+
   const calculateTotalFish = () => {
-    //this needs work ask Erin about functionality
-    let count = 0
-    for (let fish of individualFishStore) {
-      //do not add yolk sac fry to count
-      if (fish.lifeStage === 'yolk sac fry') continue
-      if (fish.willBeUsedInRecapture) {
-        count++
-      }
-    }
-    setTotalFish(count)
+    setTotalFish(Object.keys(selectedFishStore).length)
   }
 
   const removeBadgeFromList = (list: Array<any>, badgeToRemove: string) => {
@@ -70,10 +75,35 @@ This Component needs to be refactored for object access
     return list
   }
 
+  const removeFishFromSelectedStore = (
+    badgeToRemove: string,
+    propInQuestion: string
+  ) => {
+    //make a copy of the fish store
+    const selectedFishStoreCopy = { ...selectedFishStore }
+    //for each prop in the selectedFishStore
+    //if the prop value.run === badge to remove
+    //delete that property from the selectedFishStore
+    for (const fish in selectedFishStoreCopy) {
+      if (selectedFishStoreCopy[fish][propInQuestion] === badgeToRemove) {
+        delete selectedFishStoreCopy[fish]
+      }
+    }
+    // setSelectedFishStore(selectedFishStoreCopy)
+    return selectedFishStoreCopy
+  }
+
+  // when a badge is removed
+  // all fish objects with the corresponding badge should be removed from the selectedFishStore
+
   const handlePressRemoveBadge = (badgeToRemove: string, cardTitle: string) => {
     if (cardTitle === 'Run') {
+      setSelectedFishStore(removeFishFromSelectedStore(badgeToRemove, 'run'))
       setSelectedRuns([...removeBadgeFromList(selectedRuns, badgeToRemove)])
     } else {
+      setSelectedFishStore(
+        removeFishFromSelectedStore(badgeToRemove, 'lifeStage')
+      )
       setSelectedLifeStages([
         ...removeBadgeFromList(selectedLifeStages, badgeToRemove),
       ])
@@ -86,6 +116,7 @@ This Component needs to be refactored for object access
     setSelectedLifeStages([])
     setTotalFish(0)
   }
+
   const handleResetAll = () => {
     setSelectedLifeStagesAndRuns()
     calculateTotalFish()
@@ -172,6 +203,18 @@ This Component needs to be refactored for object access
                 Reset All
               </Text>
             </Button>
+            <Button
+              bg='primary'
+              alignSelf='flex-start'
+              shadow='5'
+              onPress={() =>
+                console.log('selectedFishStore: ', selectedFishStore)
+              }
+            >
+              <Text fontWeight='bold' color='white'>
+                Log selectedFishStore
+              </Text>
+            </Button>
           </HStack>
           {renderFishHoldingCards()}
           <Heading>
@@ -186,8 +229,26 @@ This Component needs to be refactored for object access
 
 const mapStateToProps = (state: RootState) => {
   return {
-    individualFishStore: state.fishInput.individualFish,
+    fishStore: state.fishInput.fishStore,
   }
 }
 
 export default connect(mapStateToProps)(FishHoldingModalContent)
+
+// const setSelectedLifeStagesAndRuns = () => {
+//   const lifeStagesStore = []
+//   const runsStore = []
+//   //for each fish in individualFish Array
+//   for (let currentFish of individualFishStore) {
+//     //do not add yolk sac fry to store
+//     if (currentFish.lifeStage === 'yolk sac fry') continue
+//     //add `to the temp store arr
+//     lifeStagesStore.push(currentFish.lifeStage)
+//     runsStore.push(currentFish.run)
+//   }
+//   //slickly remove duplicates and set state
+//   const lifeStagesSet = [...new Set(lifeStagesStore)]
+//   const runsSet = [...new Set(runsStore)]
+//   setSelectedLifeStages(lifeStagesSet)
+//   setSelectedRuns(runsSet)
+// }
