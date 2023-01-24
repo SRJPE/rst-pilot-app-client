@@ -31,8 +31,8 @@ const FishHoldingModalContent = ({
   }, [selectedFishStore])
 
   const setSelectedLifeStagesAndRuns = () => {
-    const lifeStagesNamesArray = []
-    const runNamesArray = []
+    const lifeStagesNamesArray: string[] = []
+    const runNamesArray: string[] = []
     const tempSelectedFishStore = {} as any
 
     //for each fish in the fish Store
