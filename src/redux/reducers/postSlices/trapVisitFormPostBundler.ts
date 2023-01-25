@@ -160,28 +160,12 @@ export const trapVisitPostBundler = createSlice({
     },
     [connectionChanged.type]: (state, action) => {
       if (
-        action.payload.isConnected &&
+        action.payload.connectionState.isConnected &&
         (state.submissionStatus === 'not-submitted' ||
           state.submissionStatus === 'submission-failed') &&
         state.trapVisitSubmissions.length
       ) {
-        try {
-          ;(async () => {
-            const trapVisitPostRequest: APIResponseI = await api.post(
-              'trap-visit/',
-              state.trapVisitSubmissions
-            )
-            const trapVisitPostResult = trapVisitPostRequest.data
-            state.submissionStatus = 'submission-successful'
-            state.previousTrapVisitSubmissions = [
-              ...state.previousTrapVisitSubmissions,
-              ...(trapVisitPostResult as TrapVisitSubmissionI[]),
-            ]
-            state.trapVisitSubmissions = []
-          })()
-        } catch (e) {
-          state.submissionStatus = 'submission-failed'
-        }
+        action.payload.dispatch(postTrapVisitFormSubmissions())
       }
     },
   },

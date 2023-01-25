@@ -6,7 +6,7 @@ interface InitialStateI {
   isInternetReachable: boolean
 }
 
-// Connection Types: 
+// Connection Types:
 // - none
 // - unknown
 // - cellular
@@ -20,7 +20,7 @@ interface InitialStateI {
 const initialState: InitialStateI = {
   type: 'none',
   isConnected: false,
-  isInternetReachable: false
+  isInternetReachable: false,
 }
 
 export const connectivitySlice = createSlice({
@@ -28,7 +28,8 @@ export const connectivitySlice = createSlice({
   initialState: initialState,
   reducers: {
     connectionChanged: (state, action) => {
-      const {type, isConnected, isInternetReachable} = action.payload
+      const { type, isConnected, isInternetReachable } =
+        action.payload.connectionState
       state.type = type
       state.isConnected = isConnected
       state.isInternetReachable = isInternetReachable
