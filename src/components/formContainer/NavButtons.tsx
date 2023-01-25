@@ -4,6 +4,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { useEffect } from 'react'
 
 const NavButtons = ({
   navigation,
@@ -31,15 +32,9 @@ const NavButtons = ({
   const reduxState = useSelector((state: any) => state)
   const isPaperEntryStore = reduxState.visitSetup.isPaperEntry
 
-  // const individualFishStore = useSelector(
-  //   (state: any) => state.fishInput.individualFish
-  // )
-
-  // const haveAnyFishBeenMarkedForRecapture = individualFishStore.some(
-  //   (fish: any) => {
-  //     return fish.willBeUsedInRecapture === true
-  //   }
-  // )
+  const individualFishStore = useSelector(
+    (state: any) => state.fishInput.fishStore
+  )
 
   const navigateHelper = (destination: string) => {
     const formSteps = Object.values(navigationState?.steps) as any
@@ -103,11 +98,6 @@ const NavButtons = ({
           }
         }
         break
-      case 'Trap Post-Processing':
-        //check to see if there are any fish marked for recapture
-        //if there are fish marked for recapture
-        //open the modal
-        break
       case 'High Flows':
         navigateHelper('End Trapping')
         break
@@ -160,6 +150,18 @@ const NavButtons = ({
     //if function truthy, submit form to check for errors and save to redux
     if (handleSubmit) {
       handleSubmit()
+
+      //if the active page is TPP, then only open modal if any fish have been marked for recapture
+      if (activePage === 'Trap Post-Processing') {
+        const haveAnyFishBeenMarkedForRecapture = Object.values(
+          individualFishStore
+        ).some((fish: any) => {
+          return fish.willBeUsedInRecapture === true
+        })
+        haveAnyFishBeenMarkedForRecapture && toggleModal()
+        return
+      }
+
       showSlideAlert(dispatch)
     }
 
