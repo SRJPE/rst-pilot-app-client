@@ -57,7 +57,7 @@ const ReleaseDataEntry = ({
   }
 
   const handleSubmit = (values: any) => {
-    dispatch(saveReleaseTrialDataEntry(values))
+    dispatch(saveReleaseTrialDataEntry({ ...values, releaseTime: releaseTime }))
     dispatch(markReleaseTrialDataEntryCompleted(true))
     dispatch(markActiveMarkRecaptureStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ ReleaseTrialDataEntry', values)
