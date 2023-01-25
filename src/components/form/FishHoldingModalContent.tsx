@@ -168,7 +168,7 @@ const FishHoldingModalContent = ({
               navigation.navigate('Trap Visit Form', {
                 screen: 'Incomplete Sections',
               })
-              dispatch(updateActiveStep(14))
+              dispatch(updateActiveStep(6))
 
               handleSubmit()
               closeModal()
@@ -191,7 +191,7 @@ const FishHoldingModalContent = ({
           <Heading color='black' fontSize='2xl' mb='5%'>
             Which fish are you holding for mark recapture Trials?
           </Heading>
-          <HStack m='4' space={4}>
+          <HStack m='4' space={10}>
             <Button
               bg='primary'
               alignSelf='flex-start'
@@ -212,7 +212,7 @@ const FishHoldingModalContent = ({
                 Reset All
               </Text>
             </Button>
-            <Button
+            {/* <Button
               bg='primary'
               alignSelf='flex-start'
               shadow='5'
@@ -223,7 +223,7 @@ const FishHoldingModalContent = ({
               <Text fontWeight='bold' color='white'>
                 Log selectedFishStore
               </Text>
-            </Button>
+            </Button> */}
           </HStack>
           {renderFishHoldingCards()}
           <Heading>
