@@ -240,6 +240,9 @@ const IncompleteSections = ({
     const lifeStageValues = returnDefinitionArray(
       dropdownsState.values.lifeStage
     )
+    const plusCountMethodValues = returnDefinitionArray(
+      dropdownsState.values.plusCountMethodology
+    )
     const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
       let code = null
       dropdownsState.values.taxon.forEach((taxonValue: any) => {
@@ -255,46 +258,46 @@ const IncompleteSections = ({
     }
     const catchRawSubmissions: any[] = []
 
-    fishInputState.individualFish.forEach(
-      (fishSubmissionData: IndividualFishValuesI) => {
-        catchRawSubmissions.push({
-          programId: 1,
-          trapVisitId: null,
-          taxonCode: returnTaxonCode(fishSubmissionData),
-          captureRunClass: null,
-          captureRunClassMethod: null,
-          markType: null, // Check w/ Erin
-          adiposeClipped: fishSubmissionData.adiposeClipped,
-          dead: fishSubmissionData.dead,
-          lifeStage: returnNullableTableId(
-            lifeStageValues.indexOf(fishSubmissionData.lifeStage)
-          ),
-          forkLength:
-            fishSubmissionData.forkLength != null
-              ? parseInt(fishSubmissionData?.forkLength as any)
-              : null,
-          weight:
-            fishSubmissionData?.weight != null
-              ? parseInt(fishSubmissionData?.weight as any)
-              : null,
-          numFishCaught: fishSubmissionData?.numFishCaught,
-          plusCount: fishSubmissionData?.plusCount,
-          plusCountMethodology: fishSubmissionData?.plusCountMethod
-            ? fishSubmissionData?.plusCountMethod
+    const fishStoreKeys = Object.keys(fishInputState.fishStore)
+    fishStoreKeys.forEach((key) => {
+      const fishValue = fishInputState.fishStore[key]
+      catchRawSubmissions.push({
+        programId: 1,
+        trapVisitId: null,
+        taxonCode: returnTaxonCode(fishValue),
+        captureRunClass: null,
+        captureRunClassMethod: null,
+        markType: null, // Check w/ Erin
+        adiposeClipped: fishValue.adiposeClipped,
+        dead: fishValue.dead,
+        lifeStage: returnNullableTableId(
+          lifeStageValues.indexOf(fishValue.lifeStage)
+        ),
+        forkLength:
+          fishValue.forkLength != null
+            ? parseInt(fishValue?.forkLength as any)
             : null,
-          isRandom: null, // Check w/ Erin
-          releaseId: null,
-          comments: null,
-          createdBy: null,
-          createdAt: currentDateTime,
-          updatedAt: null,
-          qcCompleted: null,
-          qcCompletedBy: null,
-          qcTime: null,
-          qcComments: null,
-        })
-      }
-    )
+        weight:
+          fishValue?.weight != null ? parseInt(fishValue?.weight as any) : null,
+        numFishCaught: fishValue?.numFishCaught,
+        plusCount: fishValue?.plusCount,
+        plusCountMethodology: fishValue?.plusCountMethod
+          ? returnNullableTableId(
+              plusCountMethodValues.indexOf(fishValue?.plusCountMethod)
+            )
+          : null,
+        isRandom: null, // Check w/ Erin
+        releaseId: null,
+        comments: null,
+        createdBy: null,
+        createdAt: currentDateTime,
+        updatedAt: null,
+        qcCompleted: null,
+        qcCompletedBy: null,
+        qcTime: null,
+        qcComments: null,
+      })
+    })
 
     if (catchRawSubmissions.length) {
       dispatch(saveCatchRawSubmissions(catchRawSubmissions))
