@@ -158,8 +158,10 @@ const NavButtons = ({
         ).some((fish: any) => {
           return fish.willBeUsedInRecapture === true
         })
-        haveAnyFishBeenMarkedForRecapture && toggleModal()
-        return
+        if (haveAnyFishBeenMarkedForRecapture) {
+          toggleModal()
+          return
+        }
       }
 
       showSlideAlert(dispatch)
