@@ -96,9 +96,7 @@ const TrapPostProcessing = ({
       trapVisitStartTime = new Date()
     }
 
-    dispatch(
-      saveTrapPostProcessing({ ...values, trapVisitStartTime })
-    )
+    dispatch(saveTrapPostProcessing({ ...values, trapVisitStartTime }))
     dispatch(markTrapPostProcessingCompleted(true))
     dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ TrapPostProcessing', values)
@@ -142,8 +140,9 @@ const TrapPostProcessing = ({
                       Debris Volume
                     </Text>
                   </FormControl.Label>
-                  {Number(values.debrisVolume) > QARanges.debrisVolume.max &&
-                    RenderWarningMessage()}
+                  {Number(values.debrisVolume) > QARanges.debrisVolume.max && (
+                    <RenderWarningMessage />
+                  )}
                   {touched.debrisVolume &&
                     errors.debrisVolume &&
                     RenderErrorMessage(errors, 'debrisVolume')}
@@ -205,7 +204,7 @@ const TrapPostProcessing = ({
                         value={values.rpm1}
                       />
                       {Number(values.rpm1) > QARanges.RPM.max ? (
-                        RenderWarningMessage()
+                        <RenderWarningMessage />
                       ) : (
                         <></>
                       )}
@@ -223,7 +222,7 @@ const TrapPostProcessing = ({
                         value={values.rpm2}
                       />
                       {Number(values.rpm2) > QARanges.RPM.max ? (
-                        RenderWarningMessage()
+                        <RenderWarningMessage />
                       ) : (
                         <></>
                       )}
@@ -242,7 +241,7 @@ const TrapPostProcessing = ({
                         value={values.rpm3}
                       />
                       {Number(values.rpm3) > QARanges.RPM.max ? (
-                        RenderWarningMessage()
+                        <RenderWarningMessage />
                       ) : (
                         <></>
                       )}
@@ -334,7 +333,7 @@ const TrapPostProcessing = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
-            toggleModal={() => handleModalChange}
+            toggleModal={handleModalChange}
           />
           {renderModalCallBack()}
         </>
