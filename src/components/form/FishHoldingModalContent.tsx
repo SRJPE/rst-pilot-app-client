@@ -1,7 +1,9 @@
+import { useNavigation } from '@react-navigation/native'
 import { HStack, VStack, Text, Button, Divider, Heading } from 'native-base'
 import { memo, useCallback, useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { FishStoreI } from '../../redux/reducers/formSlices/fishInputSlice'
+import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { saveTotalFishHolding } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
@@ -21,6 +23,8 @@ const FishHoldingModalContent = ({
   const [selectedLifeStages, setSelectedLifeStages] = useState([] as Array<any>)
   const [selectedRuns, setSelectedRuns] = useState([] as Array<any>)
   const [totalFish, setTotalFish] = useState(0 as number)
+
+  const navigation: any = useNavigation()
 
   useEffect(() => {
     setSelectedLifeStagesAndRuns()
@@ -161,6 +165,11 @@ const FishHoldingModalContent = ({
             //   (errors && Object.keys(errors).length > 0)
             // }
             onPress={() => {
+              navigation.navigate('Trap Visit Form', {
+                screen: 'Incomplete Sections',
+              })
+              dispatch(updateActiveStep(14))
+
               handleSubmit()
               closeModal()
             }}
@@ -234,21 +243,3 @@ const mapStateToProps = (state: RootState) => {
 }
 
 export default connect(mapStateToProps)(FishHoldingModalContent)
-
-// const setSelectedLifeStagesAndRuns = () => {
-//   const lifeStagesStore = []
-//   const runsStore = []
-//   //for each fish in individualFish Array
-//   for (let currentFish of individualFishStore) {
-//     //do not add yolk sac fry to store
-//     if (currentFish.lifeStage === 'yolk sac fry') continue
-//     //add `to the temp store arr
-//     lifeStagesStore.push(currentFish.lifeStage)
-//     runsStore.push(currentFish.run)
-//   }
-//   //slickly remove duplicates and set state
-//   const lifeStagesSet = [...new Set(lifeStagesStore)]
-//   const runsSet = [...new Set(runsStore)]
-//   setSelectedLifeStages(lifeStagesSet)
-//   setSelectedRuns(runsSet)
-// }
