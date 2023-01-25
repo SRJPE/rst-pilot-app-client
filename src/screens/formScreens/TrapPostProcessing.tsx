@@ -316,7 +316,7 @@ const TrapPostProcessing = ({
                 </Radio.Group>
               </FormControl>
 
-              <Button
+              {/* <Button
                 bg='primary'
                 alignSelf='flex-start'
                 shadow='5'
@@ -325,7 +325,7 @@ const TrapPostProcessing = ({
                 <Text fontWeight='bold' color='white'>
                   Fish Holding Test
                 </Text>
-              </Button>
+              </Button> */}
             </VStack>
           </Pressable>
           <NavButtons
