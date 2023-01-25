@@ -4,6 +4,7 @@ import {
   Center,
   FormControl,
   HStack,
+  Icon,
   Input,
   Radio,
   Text,
@@ -22,6 +23,7 @@ import {
 import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { markActiveMarkRecaptureStepCompleted } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
 import CustomSelect from '../../components/Shared/CustomSelect'
+import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -40,6 +42,13 @@ const ReleaseTrial = ({
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const { run } = dropdownValues.values
 
+  const compareFishHoldingToWildCount = (wildCount: string) => {
+    if (reduxState.totalFishHolding !== Number(wildCount)) {
+      //this message needs to be updated.
+      return <RenderWarningMessage />
+    }
+  }
+
   const handleSubmit = (values: any) => {
     dispatch(saveReleaseTrial(values))
     dispatch(markReleaseTrialCompleted(true))
@@ -52,7 +61,7 @@ const ReleaseTrial = ({
       validationSchema={releaseTrialSchema}
       initialValues={reduxState.values}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
-      initialTouched={{ wildCount: true }}
+      initialTouched={{ willSupplement: true }}
       initialErrors={reduxState.completed ? undefined : { wildCount: '' }}
       onSubmit={(values) => {
         handleSubmit(values)
@@ -93,16 +102,20 @@ const ReleaseTrial = ({
                         Confirm number of fish used in release trial
                       </Text>
                     </FormControl.Label>
-                    <Input
-                      w='1/2'
-                      height='50px'
-                      fontSize='16'
-                      placeholder='Numeric Value'
-                      keyboardType='numeric'
-                      onChangeText={handleChange('wildCount')}
-                      onBlur={handleBlur('wildCount')}
-                      value={values.wildCount}
-                    />
+                    <HStack space={4}>
+                      <Input
+                        w='1/2'
+                        height='50px'
+                        fontSize='16'
+                        placeholder='Numeric Value'
+                        keyboardType='numeric'
+                        onChangeText={handleChange('wildCount')}
+                        onBlur={handleBlur('wildCount')}
+                        value={values.wildCount}
+                      />
+                      {touched.wildCount &&
+                        compareFishHoldingToWildCount(values.wildCount)}
+                    </HStack>
                     {touched.wildCount &&
                       errors.wildCount &&
                       renderErrorMessage(errors, 'wildCount')}
@@ -173,9 +186,6 @@ const ReleaseTrial = ({
                     RELEASE TRIAL - HATCHERY
                   </Center>
                   <VStack py='2%' px='4%' space={4}>
-                    {/* Need to check if the number of fish used in the retrial is the same as the number confirmed.
-                    (This can be done by comparing state.releaseTrial.totalFishHolding with values.wildCount.)
-                    */}
                     <FormControl>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
