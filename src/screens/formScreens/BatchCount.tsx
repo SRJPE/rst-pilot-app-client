@@ -24,6 +24,8 @@ const BatchCount = ({ route }: { route: any }) => {
   const adiposeClipped = 'test'
   const dead = 'test'
   const mark = 'test'
+  const totalCount = 'test'
+  const lastEntered = 'test'
 
   const navigation = useNavigation()
 
@@ -84,6 +86,19 @@ const BatchCount = ({ route }: { route: any }) => {
           <VStack space={4}>
             <ForkLengthButtonGroup setForkLengthRange={setForkLengthRange} />
             <BatchCountButtonGrid buttonValueStart={forkLengthRange} />
+            <HStack p='2%' justifyContent='space-between'>
+              <Heading size='md'>TotalCount: {totalCount}</Heading>
+              <VStack space={4}>
+                <Heading size='md'>
+                  LastFishEntered: fork length = {lastEntered}
+                </Heading>
+                <Button bg='primary'>
+                  <Text fontSize='lg' bold color='white'>
+                    Remove Last Fish
+                  </Text>
+                </Button>
+              </VStack>
+            </HStack>
           </VStack>
         </Pressable>
       </View>
