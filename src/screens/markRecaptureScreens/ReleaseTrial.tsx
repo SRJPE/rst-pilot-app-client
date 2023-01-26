@@ -43,9 +43,9 @@ const ReleaseTrial = ({
   const { run } = dropdownValues.values
 
   const compareFishHoldingToWildCount = (wildCount: string) => {
+    const message = `This value does not match the \npreviously confirmed value.`
     if (reduxState.totalFishHolding !== Number(wildCount)) {
-      //this message needs to be updated.
-      return <RenderWarningMessage />
+      return <RenderWarningMessage messageToRender={message} />
     }
   }
 
