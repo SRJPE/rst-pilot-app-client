@@ -1,5 +1,6 @@
 import { createStackNavigator } from '@react-navigation/stack'
 import FishInput from '../screens/formScreens/FishInput'
+import { useSelector } from 'react-redux'
 import FishProcessing from '../screens/formScreens/FishProcessing'
 import VisitSetup from '../screens/formScreens/VisitSetup'
 import TrapOperations from '../screens/formScreens/TrapOperations'
@@ -14,8 +15,8 @@ import StartMarkRecapture from '../screens/markRecaptureScreens/StartMarkRecaptu
 import TrapPostProcessing from '../screens/formScreens/TrapPostProcessing'
 import AddFish from '../screens/formScreens/AddFish'
 import PaperEntry from '../screens/formScreens/PaperEntry'
-import { useSelector } from 'react-redux'
 import StartedTrapping from '../screens/formScreens/StartedTrapping'
+import BatchCount from '../screens/formScreens/BatchCount'
 
 const FormStack = createStackNavigator()
 
@@ -37,22 +38,18 @@ export default function FormStackNavigation() {
         options={{ headerShown: fishInputModalOpen ? false : true }}
       />
       <FormStack.Screen
-        name='Trap Post-Processing'
-        component={TrapPostProcessing}
-      />
-      <FormStack.Screen name='High Flows' component={HighFlows} />
-      <FormStack.Screen name='High Temperatures' component={HighTemperatures} />
-      <FormStack.Screen
-        name='Non Functional Trap'
-        component={NonFunctionalTrap}
-      />
-      <FormStack.Screen name='No Fish Caught' component={NoFishCaught} />
-      <FormStack.Screen name='End Trapping' component={EndTrapping} />
-      <FormStack.Screen name='Started Trapping' component={StartedTrapping} />
-      <FormStack.Screen
         name='Add Fish'
         component={AddFish}
         options={{ headerShown: false }}
+      />
+      <FormStack.Screen
+        name='Batch Count'
+        component={BatchCount}
+        options={{ headerShown: false }}
+      />
+      <FormStack.Screen
+        name='Trap Post-Processing'
+        component={TrapPostProcessing}
       />
       <FormStack.Screen
         name='Incomplete Sections'
@@ -63,6 +60,15 @@ export default function FormStackNavigation() {
         component={StartMarkRecapture}
         options={{ headerShown: false }}
       />
+      <FormStack.Screen name='High Flows' component={HighFlows} />
+      <FormStack.Screen name='High Temperatures' component={HighTemperatures} />
+      <FormStack.Screen
+        name='Non Functional Trap'
+        component={NonFunctionalTrap}
+      />
+      <FormStack.Screen name='No Fish Caught' component={NoFishCaught} />
+      <FormStack.Screen name='End Trapping' component={EndTrapping} />
+      <FormStack.Screen name='Started Trapping' component={StartedTrapping} />
       <FormStack.Screen name='Paper Entry' component={PaperEntry} />
     </FormStack.Navigator>
   )

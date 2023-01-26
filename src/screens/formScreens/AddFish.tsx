@@ -130,19 +130,24 @@ const AddFishContent = ({
     //for juvenile max is 100 for all else use 1000
     if (lifeStage === 'juvenile') {
       return (
-        forkLengthValue > QARanges.forkLength.maxJuvenile &&
-        <RenderWarningMessage />
+        forkLengthValue > QARanges.forkLength.maxJuvenile && (
+          <RenderWarningMessage />
+        )
       )
     } else {
       return (
-        forkLengthValue > QARanges.forkLength.maxAdult && <RenderWarningMessage />
+        forkLengthValue > QARanges.forkLength.maxAdult && (
+          <RenderWarningMessage />
+        )
       )
     }
   }
   const renderWeightWarning = (weightValue: number, lifeStage: string) => {
     //for juvenile max is 50 for all else use 400
     if (lifeStage === 'juvenile') {
-      return weightValue > QARanges.weight.maxJuvenile && <RenderWarningMessage />
+      return (
+        weightValue > QARanges.weight.maxJuvenile && <RenderWarningMessage />
+      )
     } else {
       return weightValue > QARanges.weight.maxAdult && <RenderWarningMessage />
     }
@@ -163,6 +168,12 @@ const AddFishContent = ({
     },
   }
 
+  const nav = () => {
+    // @ts-ignore
+    navigation.navigate('Trap Visit Form', {
+      screen: 'Batch Count',
+    })
+  }
   return (
     <Formik
       validationSchema={validationSchemas[validationSchema]}
@@ -198,20 +209,33 @@ const AddFishContent = ({
             borderColor='themeGrey'
           >
             <Pressable onPress={Keyboard.dismiss}>
-              <CustomModalHeader
-                headerText={
-                  route.params?.editModeData ? 'Edit Fish' : 'Add Fish'
-                }
-                showHeaderButton={true}
-                closeModal={closeModal}
-                navigateBack={true}
-                headerButton={null}
-                //   AddFishModalHeaderButton({
-                //   activeTab,
-                //   setActiveTab,
-                // })
-                // }
-              />
+              <HStack space={10}>
+                <CustomModalHeader
+                  headerText={
+                    route.params?.editModeData ? 'Edit Fish' : 'Add Fish'
+                  }
+                  showHeaderButton={true}
+                  closeModal={closeModal}
+                  navigateBack={true}
+                  headerButton={null}
+                  //   AddFishModalHeaderButton({
+                  //   activeTab,
+                  //   setActiveTab,
+                  // })
+                  // }
+                />
+                <Button
+                  bg='primary'
+                  // onPress={nav}
+                  onPress={() =>
+                    navigation.navigate('Trap Visit Form', {
+                      screen: 'Batch Count',
+                    })
+                  }
+                >
+                  <Text>BATCH COUNT TEMP BUTTON</Text>
+                </Button>
+              </HStack>
               <Divider mb='1' />
               <VStack paddingX='10' paddingBottom='3' space={3}>
                 <HStack alignItems='center'>
