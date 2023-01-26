@@ -27,6 +27,26 @@ export const reorderTaxon = (taxon: Array<any>) => {
   return alphabeticalTaxon
 }
 
+export const createArray = (start: number) => {
+  var result = []
+  for (var i = start; i <= start + 19; i++) {
+    result.push(i)
+  }
+  return result
+}
+
+export const buttonLookup: any = {
+  '< 20': 0,
+  '20-39': 20,
+  '40-59': 40,
+  '60-79': 60,
+  '80-99': 80,
+  '100-119': 100,
+  '120-139': 120,
+  '140-159': 140,
+  '> 160': 160,
+}
+
 export const QARanges = {
   flowMeasure: { max: 3000, min: null },
   waterTemperature: { maxF: 100, maxC: 30, min: null },
