@@ -12,12 +12,16 @@ import {
 } from 'native-base'
 import { useState } from 'react'
 import { Keyboard } from 'react-native'
+import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
 import BatchCountButtonGrid from '../../components/form/batchCount/BatchCountButtonGrid'
 import BatchCountGraph from '../../components/form/batchCount/BatchCountGraph'
 import ForkLengthButtonGroup from '../../components/form/batchCount/ForkLengthButtonGroup'
+import CustomModal from '../../components/Shared/CustomModal'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 
 const BatchCount = ({ route }: { route: any }) => {
+  const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
+    useState(false as boolean)
   const [forkLengthRange, setForkLengthRange] = useState(0 as number)
 
   const lifeStage = 'test'
@@ -71,7 +75,7 @@ const BatchCount = ({ route }: { route: any }) => {
               <Text>Dead: {dead}</Text>
               <Text>Mark: {mark}</Text>
             </HStack>
-            <Pressable>
+            <Pressable onPress={() => setBatchCharacteristicsModalOpen(true)}>
               <Text>New Batch</Text>
             </Pressable>
           </Box>
@@ -102,6 +106,17 @@ const BatchCount = ({ route }: { route: any }) => {
           </VStack>
         </Pressable>
       </View>
+      {/* --------- Modal --------- */}
+      <CustomModal
+        isOpen={batchCharacteristicsModalOpen}
+        closeModal={() => setBatchCharacteristicsModalOpen(false)}
+        height='3/4'
+      >
+        <BatchCharacteristicsModalContent
+          // handleMarkFishFormSubmit={handleMarkFishFormSubmit}
+          closeModal={() => setBatchCharacteristicsModalOpen(false)}
+        />
+      </CustomModal>
     </>
   )
 }

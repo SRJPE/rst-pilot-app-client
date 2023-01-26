@@ -168,7 +168,7 @@ const AddFishContent = ({
     },
   }
 
-  const nav = () => {
+  const buttonNav = () => {
     // @ts-ignore
     navigation.navigate('Trap Visit Form', {
       screen: 'Batch Count',
@@ -224,15 +224,7 @@ const AddFishContent = ({
                   // })
                   // }
                 />
-                <Button
-                  bg='primary'
-                  // onPress={nav}
-                  onPress={() =>
-                    navigation.navigate('Trap Visit Form', {
-                      screen: 'Batch Count',
-                    })
-                  }
-                >
+                <Button bg='primary' onPress={buttonNav}>
                   <Text>BATCH COUNT TEMP BUTTON</Text>
                 </Button>
               </HStack>
