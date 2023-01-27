@@ -19,8 +19,12 @@ const ForkLengthButtonGroup = ({
       alignSelf='center'
     >
       {buttonLookup &&
-        Object.keys(buttonLookup).map((label) => (
-          <Button borderWidth='1' onPress={() => handlePressGroupButton(label)}>
+        Object.keys(buttonLookup).map((label: string, idx: number) => (
+          <Button
+            key={idx}
+            borderWidth='1'
+            onPress={() => handlePressGroupButton(label)}
+          >
             <Text fontSize='md'>{label}</Text>
           </Button>
         ))}
