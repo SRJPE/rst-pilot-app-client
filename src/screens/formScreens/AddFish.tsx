@@ -217,16 +217,14 @@ const AddFishContent = ({
                   showHeaderButton={true}
                   closeModal={closeModal}
                   navigateBack={true}
-                  headerButton={null}
-                  //   AddFishModalHeaderButton({
-                  //   activeTab,
-                  //   setActiveTab,
-                  // })
-                  // }
+                  headerButton={AddFishModalHeaderButton({
+                    activeTab: 'Individual',
+                    buttonNav,
+                  })}
                 />
-                <Button bg='primary' onPress={buttonNav}>
-                  <Text>BATCH COUNT TEMP BUTTON</Text>
-                </Button>
+                {/* <Button h='50' bg='primary' onPress={buttonNav}>
+                  <Text color='white'>BATCH COUNT TEMP BUTTON</Text>
+                </Button> */}
               </HStack>
               <Divider mb='1' />
               <VStack paddingX='10' paddingBottom='3' space={3}>

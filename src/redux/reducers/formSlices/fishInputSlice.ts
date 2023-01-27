@@ -87,6 +87,9 @@ export const saveFishSlice = createSlice({
         action.payload,
       ]
     },
+    removeLastForkLengthEntered: (state) => {
+      state.batchCharacteristics.forkLengths.pop()
+    },
     saveIndividualFish: (state, action) => {
       let fishStoreCopy = cloneDeep(state.fishStore)
       let id = null
@@ -162,6 +165,7 @@ export const {
   markFishInputModalOpen,
   saveBatchCharacteristics,
   addForkLengthToBatchCount,
+  removeLastForkLengthEntered,
 } = saveFishSlice.actions
 
 export default saveFishSlice.reducer

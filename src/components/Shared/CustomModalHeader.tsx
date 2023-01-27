@@ -122,14 +122,17 @@ interface AddFishModalButtonI {
   setActiveTab: any
 }
 
-export const AddFishModalHeaderButton: React.FC<AddFishModalButtonI> = ({
+export const AddFishModalHeaderButton = ({
   activeTab,
-  setActiveTab,
+  buttonNav,
+}: {
+  activeTab: any
+  buttonNav: any
 }) => {
   return (
     <View style={addFishModalButtonStyles.individualOrBatchButton}>
       <Box
-        onTouchStart={() => setActiveTab('Individual')}
+        onTouchStart={() => buttonNav()}
         style={
           activeTab === 'Individual'
             ? [
@@ -144,7 +147,7 @@ export const AddFishModalHeaderButton: React.FC<AddFishModalButtonI> = ({
         </Text>
       </Box>
       <Box
-        onTouchStart={() => setActiveTab('Batch')}
+        onTouchStart={() => buttonNav()}
         style={
           activeTab === 'Batch'
             ? [

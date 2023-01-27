@@ -10,30 +10,43 @@ import {
   View,
   VStack,
 } from 'native-base'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Keyboard } from 'react-native'
-import { connect } from 'react-redux'
+import { connect, useDispatch } from 'react-redux'
 import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
 import BatchCountButtonGrid from '../../components/form/batchCount/BatchCountButtonGrid'
 import BatchCountGraph from '../../components/form/batchCount/BatchCountGraph'
 import ForkLengthButtonGroup from '../../components/form/batchCount/ForkLengthButtonGroup'
 import CustomModal from '../../components/Shared/CustomModal'
-import CustomModalHeader from '../../components/Shared/CustomModalHeader'
-import { RootState } from '../../redux/store'
+import CustomModalHeader, {
+  AddFishModalHeaderButton,
+} from '../../components/Shared/CustomModalHeader'
+import { AppDispatch, RootState } from '../../redux/store'
 import { capitalize } from 'lodash'
 import ForkLengthHistogram from '../../components/form/batchCount/ForkLengthHistogram'
+import { removeLastForkLengthEntered } from '../../redux/reducers/formSlices/fishInputSlice'
 
 const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
+  const dispatch = useDispatch<AppDispatch>()
   const [forkLengthRange, setForkLengthRange] = useState(0 as number)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
     useState(false as boolean)
-  const { lifeStage, adiposeClipped, dead, existingMark } =
-    fishStore.batchCharacteristics
+  const navigation = useNavigation()
 
+  const { lifeStage, adiposeClipped, dead, existingMark, forkLengths } =
+    fishStore.batchCharacteristics
+  // const totalCount = forkLengths?.length
+  // const lastEntered = [...forkLengths].pop()
   const totalCount = 'test'
   const lastEntered = 'test'
 
-  const navigation = useNavigation()
+  // useEffect(() => {
+  //   setBatchCharacteristicsModalOpen(true)
+  // }, [])
+
+  // const handlePressRemoveFish = () => {
+  //   dispatch(removeLastForkLengthEntered())
+  // }
 
   const buttonNav = () => {
     // @ts-ignore
@@ -57,16 +70,15 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
               showHeaderButton={true}
               // closeModal={closeModal}
               // navigateBack={true}
-              headerButton={null}
-              //   AddFishModalHeaderButton({
-              //   activeTab,
-              //   setActiveTab,
-              // })
-              // }
+              // headerButton={null}
+              headerButton={AddFishModalHeaderButton({
+                activeTab: 'Batch',
+                buttonNav,
+              })}
             />
-            <Button bg='primary' onPress={buttonNav}>
-              <Text>ADD FISH TEMP BUTTON</Text>
-            </Button>
+            {/* <Button h='50' bg='primary' onPress={buttonNav}
+              <Text color='white'>ADD FISH TEMP BUTTON</Text>
+            </Button> */}
           </HStack>
           <Divider m='1%' />
           <Box p='2%'>
@@ -82,6 +94,17 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             </Pressable>
           </Box>
           <Divider m='1%' />
+          {/* <Box
+            h='2/5'
+            w='4/5'
+            alignSelf='center'
+            alignItems='center'
+            justifyContent='center'
+            bg='secondary'
+          >
+            <Text>GRAPH</Text>
+            <Text>{forkLengths}</Text>
+          </Box> */}
           <BatchCountGraph />
           {/* <ForkLengthHistogram data={[]} width={400} height={400} /> */}
           <HStack alignItems='center' space={10}>
@@ -99,7 +122,10 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                 <Heading size='md'>
                   LastFishEntered: fork length = {lastEntered}
                 </Heading>
-                <Button bg='primary'>
+                <Button
+                  bg='primary'
+                  // onPress={handlePressRemoveFish}
+                >
                   <Text fontSize='lg' bold color='white'>
                     Remove Last Fish
                   </Text>
