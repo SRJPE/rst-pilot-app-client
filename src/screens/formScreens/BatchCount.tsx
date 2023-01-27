@@ -12,22 +12,23 @@ import {
 } from 'native-base'
 import { useState } from 'react'
 import { Keyboard } from 'react-native'
+import { connect } from 'react-redux'
 import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
 import BatchCountButtonGrid from '../../components/form/batchCount/BatchCountButtonGrid'
 import BatchCountGraph from '../../components/form/batchCount/BatchCountGraph'
 import ForkLengthButtonGroup from '../../components/form/batchCount/ForkLengthButtonGroup'
 import CustomModal from '../../components/Shared/CustomModal'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
+import { RootState } from '../../redux/store'
+import { capitalize } from 'lodash'
 
-const BatchCount = ({ route }: { route: any }) => {
+const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
+  const [forkLengthRange, setForkLengthRange] = useState(0 as number)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
     useState(false as boolean)
-  const [forkLengthRange, setForkLengthRange] = useState(0 as number)
+  const { lifeStage, adiposeClipped, dead, existingMark } =
+    fishStore.batchCharacteristics
 
-  const lifeStage = 'test'
-  const adiposeClipped = 'test'
-  const dead = 'test'
-  const mark = 'test'
   const totalCount = 'test'
   const lastEntered = 'test'
 
@@ -66,20 +67,20 @@ const BatchCount = ({ route }: { route: any }) => {
               <Text>ADD FISH TEMP BUTTON</Text>
             </Button>
           </HStack>
-          <Divider mb='1' />
+          <Divider m='1%' />
           <Box p='2%'>
             <HStack space={6}>
               <Text bold>Selected Batch Characteristics:</Text>
-              <Text>LifeStage: {lifeStage}</Text>
-              <Text>Adiposed Clipped: {adiposeClipped}</Text>
-              <Text>Dead: {dead}</Text>
-              <Text>Mark: {mark}</Text>
+              <Text>Life Stage: {capitalize(lifeStage)}</Text>
+              <Text>Adiposed Clipped: {adiposeClipped ? 'Yes' : 'No'}</Text>
+              <Text>Dead: {dead ? 'Yes' : 'No'}</Text>
+              <Text>Mark: {existingMark ? existingMark : 'N/A'}</Text>
             </HStack>
             <Pressable onPress={() => setBatchCharacteristicsModalOpen(true)}>
               <Text>New Batch</Text>
             </Pressable>
           </Box>
-          <Divider mb='1' />
+          <Divider m='1%' />
           <BatchCountGraph />
           <HStack alignItems='center' space={10}>
             <Heading size='md' p='2%'>
@@ -110,7 +111,7 @@ const BatchCount = ({ route }: { route: any }) => {
       <CustomModal
         isOpen={batchCharacteristicsModalOpen}
         closeModal={() => setBatchCharacteristicsModalOpen(false)}
-        height='3/4'
+        height='1/2'
       >
         <BatchCharacteristicsModalContent
           // handleMarkFishFormSubmit={handleMarkFishFormSubmit}
@@ -121,4 +122,9 @@ const BatchCount = ({ route }: { route: any }) => {
   )
 }
 
-export default BatchCount
+const mapStateToProps = (state: RootState) => {
+  return {
+    fishStore: state.fishInput,
+  }
+}
+export default connect(mapStateToProps)(BatchCount)

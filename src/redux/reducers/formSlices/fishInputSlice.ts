@@ -4,6 +4,7 @@ import { cloneDeep } from 'lodash'
 interface InitialStateI {
   completed: boolean
   modalOpen: boolean
+  batchCharacteristics: any
   speciesCaptured: Array<string>
   fishStore: FishStoreI
 }
@@ -46,9 +47,23 @@ export interface FishInputValuesI {
   speciesCaptured: Array<string>
 }
 
+export interface batchCharacteristicsI {
+  lifeStage: string
+  adiposeClipped: boolean
+  dead: boolean
+  existingMark: string
+}
+export const batchCharacteristicsInitialState: batchCharacteristicsI = {
+  lifeStage: '',
+  adiposeClipped: false,
+  dead: false,
+  existingMark: '',
+}
+
 const initialState: InitialStateI = {
   completed: false,
   modalOpen: false,
+  batchCharacteristics: batchCharacteristicsInitialState,
   speciesCaptured: [],
   fishStore: {},
 }
@@ -60,6 +75,9 @@ export const saveFishSlice = createSlice({
     resetFishInputSlice: () => initialState,
     saveFishInput: (state, action) => {
       state.speciesCaptured = action.payload
+    },
+    saveBatchCharacteristics: (state, action) => {
+      state.batchCharacteristics = action.payload
     },
     saveIndividualFish: (state, action) => {
       let fishStoreCopy = cloneDeep(state.fishStore)
@@ -134,6 +152,7 @@ export const {
   deleteFishEntry,
   markFishInputCompleted,
   markFishInputModalOpen,
+  saveBatchCharacteristics,
 } = saveFishSlice.actions
 
 export default saveFishSlice.reducer
