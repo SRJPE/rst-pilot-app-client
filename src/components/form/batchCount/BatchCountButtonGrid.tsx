@@ -1,5 +1,8 @@
 import { Box, Pressable, Text } from 'native-base'
 import React, { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { addForkLengthToBatchCount } from '../../../redux/reducers/formSlices/fishInputSlice'
+import { AppDispatch } from '../../../redux/store'
 import { createArray } from '../../../utils/utils'
 
 const BatchCountButtonGrid = ({
@@ -8,10 +11,16 @@ const BatchCountButtonGrid = ({
   buttonValueStart: number
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
+  const dispatch = useDispatch<AppDispatch>()
 
   useEffect(() => {
     setNumArray(createArray(buttonValueStart))
   }, [buttonValueStart])
+
+  const handlePress = (num: number) => {
+    console.log('🚀 ~ handlePress ~ num', num)
+    dispatch(addForkLengthToBatchCount(num))
+  }
 
   return (
     <Box
@@ -22,20 +31,21 @@ const BatchCountButtonGrid = ({
     >
       {numArray.map((num: number, idx: number) => {
         return (
-          <Box
-            key={idx}
-            justifyContent='center'
-            alignItems='center'
-            bg='#FFC5B6'
-            h='70'
-            w='70'
-            margin='1'
-            borderRadius='sm'
-          >
-            <Text fontSize='lg' bold color='white'>
-              {num}
-            </Text>
-          </Box>
+          <Pressable key={idx} onPress={() => handlePress(num)}>
+            <Box
+              justifyContent='center'
+              alignItems='center'
+              bg='#FFC5B6'
+              h='70'
+              w='70'
+              margin='1'
+              borderRadius='sm'
+            >
+              <Text fontSize='lg' bold color='white'>
+                {num}
+              </Text>
+            </Box>
+          </Pressable>
         )
       })}
     </Box>

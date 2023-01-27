@@ -21,6 +21,7 @@ import CustomModal from '../../components/Shared/CustomModal'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import { RootState } from '../../redux/store'
 import { capitalize } from 'lodash'
+import ForkLengthHistogram from '../../components/form/batchCount/ForkLengthHistogram'
 
 const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const [forkLengthRange, setForkLengthRange] = useState(0 as number)
@@ -82,6 +83,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
           </Box>
           <Divider m='1%' />
           <BatchCountGraph />
+          {/* <ForkLengthHistogram data={[]} width={400} height={400} /> */}
           <HStack alignItems='center' space={10}>
             <Heading size='md' p='2%'>
               Select size range for fork length buttons:
