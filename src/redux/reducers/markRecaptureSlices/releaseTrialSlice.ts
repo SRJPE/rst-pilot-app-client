@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
   completed: boolean
+  totalFishHolding: number | null
   values: ReleaseTrialValuesI
 }
 
@@ -17,6 +18,7 @@ export interface ReleaseTrialValuesI {
 
 const initialState: InitialStateI = {
   completed: false,
+  totalFishHolding: null,
   values: {
     wildCount: null,
     deadWildCount: null,
@@ -36,7 +38,9 @@ export const releaseTrialSlice = createSlice({
     saveReleaseTrial: (state, action) => {
       state.values = action.payload
     },
-
+    saveTotalFishHolding: (state, action) => {
+      state.totalFishHolding = action.payload
+    },
     markReleaseTrialCompleted: (state, action) => {
       state.completed = action.payload
     },
@@ -46,6 +50,7 @@ export const releaseTrialSlice = createSlice({
 export const {
   resetReleaseTrialSlice,
   saveReleaseTrial,
+  saveTotalFishHolding,
   markReleaseTrialCompleted,
 } = releaseTrialSlice.actions
 

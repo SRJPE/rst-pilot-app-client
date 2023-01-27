@@ -27,6 +27,9 @@ import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import { QARanges } from '../../utils/utils'
 import { color } from 'native-base/lib/typescript/theme/styled-system'
+import { useCallback, useState } from 'react'
+import CustomModal from '../../components/Shared/CustomModal'
+import FishHoldingModalContent from '../../components/form/FishHoldingModalContent'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -42,6 +45,9 @@ const TrapPostProcessing = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const [fishHoldingModalOpen, setFishHoldingModalOpen] = useState(
+    false as boolean
+  )
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
     ;(async () => {
@@ -56,6 +62,33 @@ const TrapPostProcessing = ({
       }
     })()
   }
+  const handleModalChange = () => {
+    setFishHoldingModalOpen(!fishHoldingModalOpen)
+  }
+
+  const renderModalCallBack = () => {
+    return (
+      <CustomModal
+        isOpen={fishHoldingModalOpen}
+        closeModal={handleModalChange}
+        height='60%'
+      >
+        <FishHoldingModalContent closeModal={handleModalChange} />
+      </CustomModal>
+    )
+  }
+
+  const handleTrapStatusAtEndRadio = useCallback(
+    (nextValue: any, setFieldTouched: any, setFieldValue: any) => {
+      setFieldTouched('endingTrapStatus', true)
+      if (nextValue === 'Restart Trap') {
+        setFieldValue('endingTrapStatus', 'Restart Trap')
+      } else {
+        setFieldValue('endingTrapStatus', 'End Trapping')
+      }
+    },
+    []
+  )
 
   const handleSubmit = (values: any) => {
     let trapVisitStartTime = null
@@ -63,9 +96,7 @@ const TrapPostProcessing = ({
       trapVisitStartTime = new Date()
     }
 
-    dispatch(
-      saveTrapPostProcessing({ ...values, trapVisitStartTime })
-    )
+    dispatch(saveTrapPostProcessing({ ...values, trapVisitStartTime }))
     dispatch(markTrapPostProcessingCompleted(true))
     dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ TrapPostProcessing', values)
@@ -109,8 +140,9 @@ const TrapPostProcessing = ({
                       Debris Volume
                     </Text>
                   </FormControl.Label>
-                  {Number(values.debrisVolume) > QARanges.debrisVolume.max &&
-                    RenderWarningMessage()}
+                  {Number(values.debrisVolume) > QARanges.debrisVolume.max && (
+                    <RenderWarningMessage />
+                  )}
                   {touched.debrisVolume &&
                     errors.debrisVolume &&
                     RenderErrorMessage(errors, 'debrisVolume')}
@@ -172,7 +204,7 @@ const TrapPostProcessing = ({
                         value={values.rpm1}
                       />
                       {Number(values.rpm1) > QARanges.RPM.max ? (
-                        RenderWarningMessage()
+                        <RenderWarningMessage />
                       ) : (
                         <></>
                       )}
@@ -190,7 +222,7 @@ const TrapPostProcessing = ({
                         value={values.rpm2}
                       />
                       {Number(values.rpm2) > QARanges.RPM.max ? (
-                        RenderWarningMessage()
+                        <RenderWarningMessage />
                       ) : (
                         <></>
                       )}
@@ -209,7 +241,7 @@ const TrapPostProcessing = ({
                         value={values.rpm3}
                       />
                       {Number(values.rpm3) > QARanges.RPM.max ? (
-                        RenderWarningMessage()
+                        <RenderWarningMessage />
                       ) : (
                         <></>
                       )}
@@ -257,13 +289,12 @@ const TrapPostProcessing = ({
                   name='endingTrapStatus'
                   accessibilityLabel='Ending Trap Status'
                   value={`${values.endingTrapStatus}`}
-                  onChange={(nextValue: any) => {
-                    setFieldTouched('endingTrapStatus', true)
-                    if (nextValue === 'Restart Trap') {
-                      setFieldValue('endingTrapStatus', 'Restart Trap')
-                    } else {
-                      setFieldValue('endingTrapStatus', 'End Trapping')
-                    }
+                  onChange={(newValue: any) => {
+                    handleTrapStatusAtEndRadio(
+                      newValue,
+                      setFieldTouched,
+                      setFieldValue
+                    )
                   }}
                 >
                   <Radio
@@ -291,7 +322,9 @@ const TrapPostProcessing = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
+            toggleModal={handleModalChange}
           />
+          {renderModalCallBack()}
         </>
       )}
     </Formik>

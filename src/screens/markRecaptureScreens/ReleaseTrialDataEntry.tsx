@@ -3,6 +3,7 @@ import {
   Box,
   Divider,
   FormControl,
+  Heading,
   HStack,
   Icon,
   Pressable,
@@ -26,6 +27,7 @@ import {
 import { markActiveMarkRecaptureStepCompleted } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
 import CustomModal from '../../components/Shared/CustomModal'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
+import MarkBadgeList from '../../components/markRecapture/MarkBadgeList'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -45,9 +47,8 @@ const ReleaseDataEntry = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
-  const { markType, markColor, bodyPart } = dropdownValues.values
   const { trapLocations } = visitSetupDefaultsState
-  const [releaseTime, setReleaseTime] = useState(new Date('01/01/2022') as any)
+  const [releaseTime, setReleaseTime] = useState(new Date() as any)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
 
   const onReleaseTimeChange = (event: any, selectedDate: any) => {
@@ -56,7 +57,7 @@ const ReleaseDataEntry = ({
   }
 
   const handleSubmit = (values: any) => {
-    dispatch(saveReleaseTrialDataEntry(values))
+    dispatch(saveReleaseTrialDataEntry({ ...values, releaseTime: releaseTime }))
     dispatch(markReleaseTrialDataEntryCompleted(true))
     dispatch(markActiveMarkRecaptureStepCompleted(true))
     console.log('🚀 ~ handleSubmit ~ ReleaseTrialDataEntry', values)
@@ -89,78 +90,31 @@ const ReleaseDataEntry = ({
             borderWidth='15'
           >
             <VStack space={6}>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Mark Type
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={values.markType}
-                  placeholder='Type'
-                  onValueChange={handleChange('markType')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={markType.concat([
-                    { id: 1, definition: 'Bismark Brown' },
-                  ])}
-                />
-                {touched.markType &&
-                  errors.markType &&
-                  RenderErrorMessage(errors, 'markType')}
-              </FormControl>
+              <Heading>Describe marks applied for efficiency trial:</Heading>
 
-              {values.markType !== 'Bismark Brown' && (
-                <>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Mark Color
-                      </Text>
-                    </FormControl.Label>
-                    <CustomSelect
-                      selectedValue={values.markColor}
-                      placeholder='Color'
-                      onValueChange={handleChange('markColor')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={markColor}
-                    />
-                    {touched.markColor &&
-                      errors.markColor &&
-                      RenderErrorMessage(errors, 'markColor')}
-                  </FormControl>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Mark Position
-                      </Text>
-                    </FormControl.Label>
-                    <CustomSelect
-                      selectedValue={values.markPosition}
-                      placeholder='Position'
-                      onValueChange={handleChange('markPosition')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={bodyPart}
-                    />
-                    {touched.markPosition &&
-                      errors.markPosition &&
-                      RenderErrorMessage(errors, 'markPosition')}
-                  </FormControl>
-                  <Pressable onPress={() => setAddMarkModalOpen(true)}>
-                    <HStack alignItems='center'>
-                      <Icon
-                        as={Ionicons}
-                        name={'add-circle'}
-                        size='3xl'
-                        color='primary'
-                        marginRight='1'
-                      />
-                      <Text color='primary' fontSize='xl'>
-                        Add Another Mark
-                      </Text>
-                    </HStack>
-                  </Pressable>
-                </>
-              )}
+              <MarkBadgeList
+                badgeListContent={
+                  releaseTrialDataEntryState.values.appliedMarks
+                }
+                setFieldValue={setFieldValue}
+                setFieldTouched={setFieldTouched}
+              />
+
+              <Pressable onPress={() => setAddMarkModalOpen(true)}>
+                <HStack alignItems='center'>
+                  <Icon
+                    as={Ionicons}
+                    name={'add-circle'}
+                    size='3xl'
+                    color='primary'
+                    marginRight='1'
+                  />
+                  <Text color='primary' fontSize='xl'>
+                    Add Mark
+                  </Text>
+                </HStack>
+              </Pressable>
+
               <Divider bg='black' />
               <FormControl>
                 <FormControl.Label>
@@ -186,7 +140,7 @@ const ReleaseDataEntry = ({
                 <Text color='black' fontSize='xl'>
                   Confirm Release Date and Time:
                 </Text>
-                <Box alignSelf='start' minWidth='320' ml='-105'>
+                <Box alignSelf='flex-start' minWidth='320' ml='-105'>
                   <DateTimePicker
                     value={releaseTime}
                     mode='datetime'
@@ -207,7 +161,7 @@ const ReleaseDataEntry = ({
           <CustomModal
             isOpen={addMarkModalOpen}
             closeModal={() => setAddMarkModalOpen(false)}
-            height='3/4'
+            height='1/2'
           >
             <AddAnotherMarkModalContent
               //add new submission function
