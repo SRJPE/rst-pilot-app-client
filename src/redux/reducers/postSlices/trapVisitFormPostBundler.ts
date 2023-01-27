@@ -159,6 +159,7 @@ export const trapVisitPostBundler = createSlice({
       state.submissionStatus = 'submission-failed'
     },
     [connectionChanged.type]: (state, action) => {
+      console.log('connection changed: ', action.payload)
       if (
         action.payload.connectionState.isConnected &&
         (state.submissionStatus === 'not-submitted' ||
