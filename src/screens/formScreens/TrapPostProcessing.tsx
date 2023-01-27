@@ -71,7 +71,7 @@ const TrapPostProcessing = ({
       <CustomModal
         isOpen={fishHoldingModalOpen}
         closeModal={handleModalChange}
-        height='3/4'
+        height='60%'
       >
         <FishHoldingModalContent closeModal={handleModalChange} />
       </CustomModal>
@@ -315,17 +315,6 @@ const TrapPostProcessing = ({
                   </Radio>
                 </Radio.Group>
               </FormControl>
-
-              {/* <Button
-                bg='primary'
-                alignSelf='flex-start'
-                shadow='5'
-                onPress={handleModalChange}
-              >
-                <Text fontWeight='bold' color='white'>
-                  Fish Holding Test
-                </Text>
-              </Button> */}
             </VStack>
           </Pressable>
           <NavButtons

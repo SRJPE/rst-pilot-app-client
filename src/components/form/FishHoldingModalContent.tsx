@@ -160,16 +160,11 @@ const FishHoldingModalContent = ({
             mx='2'
             px='10'
             shadow='3'
-            // isDisabled={
-            //   (touched && Object.keys(touched).length === 0) ||
-            //   (errors && Object.keys(errors).length > 0)
-            // }
             onPress={() => {
               navigation.navigate('Trap Visit Form', {
                 screen: 'Incomplete Sections',
               })
               dispatch(updateActiveStep(6))
-
               handleSubmit()
               closeModal()
             }}
@@ -187,11 +182,12 @@ const FishHoldingModalContent = ({
           paddingX='10'
           paddingTop='7'
           paddingBottom='3'
+          space={5}
         >
-          <Heading color='black' fontSize='2xl' mb='5%'>
+          <Heading color='black' fontSize='2xl'>
             Which fish are you holding for mark recapture Trials?
           </Heading>
-          <HStack m='4' space={10}>
+          <HStack m='2%' space={10}>
             <Button
               bg='primary'
               alignSelf='flex-start'
@@ -226,10 +222,8 @@ const FishHoldingModalContent = ({
             </Button> */}
           </HStack>
           {renderFishHoldingCards()}
-          <Heading>
-            <Text>Total Fish Holding: </Text>
-            {totalFish}
-          </Heading>
+          {/* this margin needs to be changed */}
+          <Heading mt='-10'>Total Fish Holding: {totalFish}</Heading>
         </VStack>
       </>
     </>
