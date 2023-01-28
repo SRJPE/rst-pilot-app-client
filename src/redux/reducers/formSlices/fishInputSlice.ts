@@ -52,7 +52,7 @@ export interface batchCharacteristicsI {
   adiposeClipped: boolean
   dead: boolean
   existingMark: string
-  forkLengths: number[]
+  forkLengths: any
 }
 export const batchCharacteristicsInitialState: batchCharacteristicsI = {
   lifeStage: '',
@@ -79,16 +79,21 @@ export const saveFishSlice = createSlice({
       state.speciesCaptured = action.payload
     },
     saveBatchCharacteristics: (state, action) => {
-      state.batchCharacteristics = action.payload
+      state.batchCharacteristics = { ...action.payload, forkLengths: [] }
     },
     addForkLengthToBatchCount: (state, action) => {
-      state.batchCharacteristics.forkLengths = [
-        ...state.batchCharacteristics.forkLengths,
-        action.payload,
-      ]
+      state.batchCharacteristics.forkLengths &&
+        (state.batchCharacteristics.forkLengths = [
+          ...state.batchCharacteristics.forkLengths,
+          action.payload,
+        ])
+      // state.batchCharacteristics.forkLengths &&
+      //   (state.batchCharacteristics.forkLengths[action.payload] === undefined
+      //     ? (state.batchCharacteristics.forkLengths[action.payload] = 1)
+      //     : state.batchCharacteristics.forkLengths[action.payload]++)
     },
     removeLastForkLengthEntered: (state) => {
-      state.batchCharacteristics.forkLengths.pop()
+      // state.batchCharacteristics.forkLengths.pop()
     },
     saveIndividualFish: (state, action) => {
       let fishStoreCopy = cloneDeep(state.fishStore)
