@@ -15,7 +15,6 @@ import { Keyboard } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
 import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
 import BatchCountButtonGrid from '../../components/form/batchCount/BatchCountButtonGrid'
-import BatchCountGraph from '../../components/form/batchCount/BatchCountGraph'
 import ForkLengthButtonGroup from '../../components/form/batchCount/ForkLengthButtonGroup'
 import CustomModal from '../../components/Shared/CustomModal'
 import CustomModalHeader, {
@@ -23,21 +22,25 @@ import CustomModalHeader, {
 } from '../../components/Shared/CustomModalHeader'
 import { AppDispatch, RootState } from '../../redux/store'
 import { capitalize } from 'lodash'
-import { removeLastForkLengthEntered } from '../../redux/reducers/formSlices/fishInputSlice'
+import {
+  removeLastForkLengthEntered,
+  saveBatchCount,
+} from '../../redux/reducers/formSlices/fishInputSlice'
+import BatchCountHistogram from '../../components/form/batchCount/BatchCountHistogram'
 
 const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const navigation = useNavigation()
   const [forkLengthRange, setForkLengthRange] = useState(0 as number)
+  const [processedData, setProcessedData] = useState([] as any)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
     useState(false as boolean)
-  const navigation = useNavigation()
-
   const { lifeStage, adiposeClipped, dead, existingMark, forkLengths } =
     fishStore.batchCharacteristics
-  // const totalCount = forkLengths?.length
-  // const lastEntered = [...forkLengths].pop()
-  const totalCount = 'test'
-  const lastEntered = 'test'
+
+  useEffect(() => {
+    processData()
+  }, [forkLengths])
 
   useEffect(() => {
     if (lifeStage === '') {
@@ -45,8 +48,42 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     }
   }, [])
 
+  const processData = () => {
+    //create a copy of the data
+    const processedDataCopy: any = [...processedData]
+    //store the last entry in a variable
+    const lastEntry = [...forkLengths].pop()
+    if (lastEntry === undefined) return
+
+    //if this is the first entry
+    if (forkLengths.length === 1) {
+      //then create our first entry into processedData
+      setProcessedData([{ forkLength: lastEntry, count: 1 }])
+      //exit function
+      return
+    }
+    //find the index of the last entry in the processedDataCopy
+    let indexOfFoundEntry = processedDataCopy.findIndex(
+      (entry: any) => entry.forkLength === lastEntry
+    )
+
+    //if the last entry does already exist, then increment the count
+    if (indexOfFoundEntry > -1) {
+      processedDataCopy[indexOfFoundEntry].count++
+    } else {
+      //otherwise create the new data with the last entry
+      setProcessedData([
+        ...processedDataCopy,
+        { forkLength: lastEntry, count: 1 },
+      ])
+    }
+  }
+
   const handlePressRemoveFish = () => {
-    // dispatch(removeLastForkLengthEntered())
+    dispatch(removeLastForkLengthEntered())
+  }
+  const handlePressSaveBatchCount = () => {
+    dispatch(saveBatchCount(processedData))
   }
 
   const buttonNav = () => {
@@ -55,6 +92,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
       screen: 'Add Fish',
     })
   }
+
   return (
     <>
       <View
@@ -77,9 +115,6 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                 buttonNav,
               })}
             />
-            {/* <Button h='50' bg='primary' onPress={buttonNav}
-              <Text color='white'>ADD FISH TEMP BUTTON</Text>
-            </Button> */}
           </HStack>
           <Divider m='1%' />
           <Box p='2%'>
@@ -114,19 +149,11 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             justifyContent='center'
             bg='secondary'
           >
-            <Text>GRAPH</Text>
-            {forkLengths && (
-              <>
-                {/* <Text>{Object.keys(forkLengths)}</Text>
-                <Text>{Object.values(forkLengths)}</Text> */}
-                <Text>{forkLengths}</Text>
-              </>
-            )}
+            <BatchCountHistogram processedData={processedData} />
           </Box>
-          {/* <BatchCountGraph /> */}
           <HStack alignItems='center' space={10}>
             <Heading size='md' p='2%'>
-              Select size range for fork length buttons:
+              Select size range for forkLength buttons:
             </Heading>
             <Text>MODE TOGGLE PLACEHOLDER</Text>
           </HStack>
@@ -134,20 +161,25 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             <ForkLengthButtonGroup setForkLengthRange={setForkLengthRange} />
             <BatchCountButtonGrid buttonValueStart={forkLengthRange} />
             <HStack p='2%' justifyContent='space-between'>
-              {/* <Heading size='md'>
+              <Heading size='md'>
                 TotalCount: {forkLengths ? forkLengths.length : 0}
-              </Heading> */}
+              </Heading>
+              <Button bg='primary' onPress={handlePressSaveBatchCount}>
+                <Text fontSize='lg' bold color='white'>
+                  Save Batch Count
+                </Text>
+              </Button>
               <VStack space={4}>
-                <Heading size='md'>
-                  {/* LastFishEntered: fork length ={' '}
-                  {forkLengths[forkLengths.length - 1]} */}
-                </Heading>
+                <Heading size='md'>LastFishEntered: forkLength ={}</Heading>
                 <Button bg='primary' onPress={handlePressRemoveFish}>
                   <Text fontSize='lg' bold color='white'>
                     Remove Last Fish
                   </Text>
                 </Button>
-                <Button bg='primary' onPress={() => console.log(fishStore)}>
+                <Button
+                  bg='primary'
+                  onPress={() => console.log(fishStore, forkLengths)}
+                >
                   <Text fontSize='lg' bold color='white'>
                     LOG
                   </Text>
@@ -164,7 +196,6 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
         height='1/2'
       >
         <BatchCharacteristicsModalContent
-          // handleMarkFishFormSubmit={handleMarkFishFormSubmit}
           closeModal={() => setBatchCharacteristicsModalOpen(false)}
         />
       </CustomModal>
