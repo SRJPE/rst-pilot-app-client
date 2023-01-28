@@ -23,7 +23,6 @@ import CustomModalHeader, {
 } from '../../components/Shared/CustomModalHeader'
 import { AppDispatch, RootState } from '../../redux/store'
 import { capitalize } from 'lodash'
-import ForkLengthHistogram from '../../components/form/batchCount/ForkLengthHistogram'
 import { removeLastForkLengthEntered } from '../../redux/reducers/formSlices/fishInputSlice'
 
 const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
@@ -40,13 +39,15 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const totalCount = 'test'
   const lastEntered = 'test'
 
-  // useEffect(() => {
-  //   setBatchCharacteristicsModalOpen(true)
-  // }, [])
+  useEffect(() => {
+    if (lifeStage === '') {
+      setBatchCharacteristicsModalOpen(true)
+    }
+  }, [])
 
-  // const handlePressRemoveFish = () => {
-  //   dispatch(removeLastForkLengthEntered())
-  // }
+  const handlePressRemoveFish = () => {
+    // dispatch(removeLastForkLengthEntered())
+  }
 
   const buttonNav = () => {
     // @ts-ignore
@@ -84,17 +85,28 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
           <Box p='2%'>
             <HStack space={6}>
               <Text bold>Selected Batch Characteristics:</Text>
-              <Text>Life Stage: {capitalize(lifeStage)}</Text>
-              <Text>Adiposed Clipped: {adiposeClipped ? 'Yes' : 'No'}</Text>
-              <Text>Dead: {dead ? 'Yes' : 'No'}</Text>
-              <Text>Mark: {existingMark ? existingMark : 'N/A'}</Text>
+              <Text>
+                Life Stage: <Text bold>{capitalize(lifeStage)}</Text>
+              </Text>
+              <Text>
+                Adiposed Clipped:{' '}
+                <Text bold>{adiposeClipped ? 'Yes' : 'No'}</Text>
+              </Text>
+              <Text>
+                Dead: <Text bold>{dead ? 'Yes' : 'No'}</Text>
+              </Text>
+              <Text>
+                Mark: <Text bold>{existingMark ? existingMark : 'N/A'}</Text>
+              </Text>
             </HStack>
             <Pressable onPress={() => setBatchCharacteristicsModalOpen(true)}>
-              <Text>New Batch</Text>
+              <Text fontSize='16' color='primary' bold>
+                New Batch
+              </Text>
             </Pressable>
           </Box>
           <Divider m='1%' />
-          {/* <Box
+          <Box
             h='2/5'
             w='4/5'
             alignSelf='center'
@@ -103,10 +115,15 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             bg='secondary'
           >
             <Text>GRAPH</Text>
-            <Text>{forkLengths}</Text>
-          </Box> */}
-          <BatchCountGraph />
-          {/* <ForkLengthHistogram data={[]} width={400} height={400} /> */}
+            {forkLengths && (
+              <>
+                {/* <Text>{Object.keys(forkLengths)}</Text>
+                <Text>{Object.values(forkLengths)}</Text> */}
+                <Text>{forkLengths}</Text>
+              </>
+            )}
+          </Box>
+          {/* <BatchCountGraph /> */}
           <HStack alignItems='center' space={10}>
             <Heading size='md' p='2%'>
               Select size range for fork length buttons:
@@ -117,17 +134,22 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             <ForkLengthButtonGroup setForkLengthRange={setForkLengthRange} />
             <BatchCountButtonGrid buttonValueStart={forkLengthRange} />
             <HStack p='2%' justifyContent='space-between'>
-              <Heading size='md'>TotalCount: {totalCount}</Heading>
+              {/* <Heading size='md'>
+                TotalCount: {forkLengths ? forkLengths.length : 0}
+              </Heading> */}
               <VStack space={4}>
                 <Heading size='md'>
-                  LastFishEntered: fork length = {lastEntered}
+                  {/* LastFishEntered: fork length ={' '}
+                  {forkLengths[forkLengths.length - 1]} */}
                 </Heading>
-                <Button
-                  bg='primary'
-                  // onPress={handlePressRemoveFish}
-                >
+                <Button bg='primary' onPress={handlePressRemoveFish}>
                   <Text fontSize='lg' bold color='white'>
                     Remove Last Fish
+                  </Text>
+                </Button>
+                <Button bg='primary' onPress={() => console.log(fishStore)}>
+                  <Text fontSize='lg' bold color='white'>
+                    LOG
                   </Text>
                 </Button>
               </VStack>
