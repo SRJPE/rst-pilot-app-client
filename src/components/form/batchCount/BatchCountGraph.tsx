@@ -14,15 +14,15 @@ import { RootState } from '../../../redux/store'
 const BatchCountGraph = ({ fishStore }: { fishStore: any }) => {
   const { forkLengths } = fishStore.batchCharacteristics
   const forkLengthSet = new Set(forkLengths)
-  const data = {
-    // labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-    labels: Array.from(forkLengthSet),
-    datasets: [
-      {
-        data: forkLengths,
-      },
-    ],
-  }
+  // const data = {
+  //   // labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+  //   labels: Array.from(forkLengthSet),
+  //   datasets: [
+  //     {
+  //       data: forkLengths,
+  //     },
+  //   ],
+  // }
   const chartConfig = {
     backgroundGradientFrom: '#1E2923',
     backgroundGradientFromOpacity: 0,
@@ -50,18 +50,19 @@ const BatchCountGraph = ({ fishStore }: { fishStore: any }) => {
     },
   }
   return (
-    <BarChart
-      style={{
-        marginVertical: 8,
-        borderRadius: 16,
-      }}
-      data={data}
-      width={700}
-      height={220}
-      yAxisLabel='$'
-      chartConfig={chartConfig2}
-      verticalLabelRotation={30}
-    />
+    // <BarChart
+    //   style={{
+    //     marginVertical: 8,
+    //     borderRadius: 16,
+    //   }}
+    //   data={data}
+    //   width={700}
+    //   height={220}
+    //   yAxisLabel='$'
+    //   chartConfig={chartConfig2}
+    //   verticalLabelRotation={30}
+    // />
+    <></>
   )
 }
 const mapStateToProps = (state: RootState) => {
