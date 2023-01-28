@@ -47,7 +47,7 @@ const BatchCharacteristicsModalContent = ({
 
   const handleFormSubmit = (values: any) => {
     dispatch(saveBatchCharacteristics(values))
-    console.log('🚀 ~ Plus Count Values: ', values)
+    console.log('🚀 ~ BatchCount Values: ', values)
     showSlideAlert(dispatch, 'Batch characteristics')
   }
 
