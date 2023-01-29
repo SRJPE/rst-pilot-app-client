@@ -70,6 +70,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     //if the last entry does already exist, then increment the count
     if (indexOfFoundEntry > -1) {
       processedDataCopy[indexOfFoundEntry].count++
+      setProcessedData(processedDataCopy)
     } else {
       //otherwise create the new data with the last entry
       setProcessedData([
@@ -79,9 +80,29 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     }
   }
 
-  const handlePressRemoveFish = () => {
+  const handlePressRemoveFish = (
+    lastEntry: number = forkLengths[forkLengths.length - 1]
+  ) => {
+    const processedDataCopy: any = [...processedData]
+    if (forkLengths.length === 0) return
+    if (processedDataCopy.length === 0) return
+
+    let indexOfFoundEntry = processedDataCopy.findIndex(
+      (entry: any) => entry.forkLength === lastEntry
+    )
+
+    if (indexOfFoundEntry > -1) {
+      if (processedDataCopy[indexOfFoundEntry].count === 1) {
+        processedDataCopy.splice(indexOfFoundEntry, 1)
+      } else {
+        processedDataCopy[indexOfFoundEntry].count--
+      }
+    }
+
+    setProcessedData(processedDataCopy)
     dispatch(removeLastForkLengthEntered())
   }
+
   const handlePressSaveBatchCount = () => {
     dispatch(saveBatchCount(processedData))
   }
@@ -153,7 +174,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
           </Box>
           <HStack alignItems='center' space={10}>
             <Heading size='md' p='2%'>
-              Select size range for forkLength buttons:
+              Select size range for fork length buttons:
             </Heading>
             <Text>MODE TOGGLE PLACEHOLDER</Text>
           </HStack>
@@ -170,8 +191,11 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                 </Text>
               </Button>
               <VStack space={4}>
-                <Heading size='md'>LastFishEntered: forkLength ={}</Heading>
-                <Button bg='primary' onPress={handlePressRemoveFish}>
+                <Heading size='md'>
+                  LastFishEntered: fork length ={' '}
+                  {forkLengths[forkLengths.length - 1]}
+                </Heading>
+                <Button bg='primary' onPress={() => handlePressRemoveFish()}>
                   <Text fontSize='lg' bold color='white'>
                     Remove Last Fish
                   </Text>
