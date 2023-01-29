@@ -8,10 +8,20 @@ import {
   VictoryChart,
   VictoryTheme,
   VictoryAxis,
+  VictoryLabel,
+  VictoryContainer,
+  Bar,
+  VictoryTooltip,
+
   // VictorySelectionContainer,
 } from 'victory-native'
 
-const BatchCountHistogram = ({ processedData }: { processedData: any }) => {
+const BatchCountHistogram = ({
+  processedData,
+}: {
+  processedData: { forkLength: number; count: number }[]
+}) => {
+  const calculateXAxisTickValues = () => {}
   return (
     <View
       flex={1}
@@ -20,34 +30,53 @@ const BatchCountHistogram = ({ processedData }: { processedData: any }) => {
       backgroundColor='#f5fcff'
     >
       <VictoryChart
-        width={640}
+        width={667}
+        height={300}
         theme={VictoryTheme.material}
         domainPadding={30}
-        // containerComponent={<VictorySelectionContainer />}
+        // title='Popularity of Dog Breeds by Percentage'
+        // containerComponent={
+        //   <VictoryContainer title={'Popularity of Dog Breeds by Percentage'} />
+        // }
       >
         {/*---X AXIS---*/}
         <VictoryAxis
-          // label='Fork Length (cm)'
-          // tickValues={xAxisTickValues}
+          label='Fork Length (cm)'
           // tickValues={[1, 2, 3, 4]}
           // tickFormat={['Quarter 1', 'Quarter 2', 'Quarter 3', 'Quarter 4']}
           tickFormat={(x) => x}
+          style={{
+            axisLabel: { fontSize: 18, padding: 30 },
+            tickLabels: { fontSize: 12, padding: 5 },
+          }}
         />
         {/*---Y AXIS---*/}
         <VictoryAxis
-          // label='Count'
           dependentAxis
-          // tickFormat specifies how ticks should be displayed
+          label='Count'
           tickFormat={(x) => x}
+          style={{
+            axisLabel: { fontSize: 18, padding: 30 },
+            tickLabels: { fontSize: 12, padding: 5 },
+          }}
         />
         <VictoryBar
           data={processedData}
           x='forkLength'
           y='count'
-          // animate={{
-          //   duration: 2000,
-          //   onLoad: { duration: 1000 },
-          // }}
+          labels={({ datum }) => datum.count}
+          labelComponent={
+            <VictoryLabel dy={25} />
+
+            // <VictoryTooltip
+            //   flyoutWidth={30}
+            //   style={{ fontSize: 20, fill: 'black' }}
+            // />
+          }
+          style={{
+            data: { fill: '#007C7C', opacity: 0.8 },
+            labels: { fontSize: 16, fill: 'white' },
+          }}
         />
       </VictoryChart>
     </View>
