@@ -18,7 +18,6 @@ const BatchCountButtonGrid = ({
   }, [buttonValueStart])
 
   const handlePress = (num: number) => {
-    console.log('🚀 ~ handlePress ~ num', num)
     dispatch(addForkLengthToBatchCount(num))
   }
 
