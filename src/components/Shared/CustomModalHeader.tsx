@@ -26,7 +26,7 @@ const CustomModalHeader = ({
   closeModal?: any
   navigateBack?: any
 }) => {
-  const navigation = useNavigation()
+  const navigation = useNavigation() as any
   if (showHeaderButton) {
     return (
       <>
@@ -42,7 +42,10 @@ const CustomModalHeader = ({
                 size='lg'
                 onPress={() => {
                   if (navigateBack) {
-                    navigation.goBack()
+                    // navigation.goBack()
+                    navigation.navigate('Trap Visit Form', {
+                      screen: 'Fish Input',
+                    })
                   }
                   if (closeModal) {
                     closeModal()
