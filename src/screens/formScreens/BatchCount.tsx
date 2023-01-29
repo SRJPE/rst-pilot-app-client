@@ -3,8 +3,11 @@ import {
   Box,
   Button,
   Divider,
+  FormControl,
   Heading,
   HStack,
+  Input,
+  Modal,
   Pressable,
   Text,
   View,
@@ -27,12 +30,19 @@ import {
   saveBatchCount,
 } from '../../redux/reducers/formSlices/fishInputSlice'
 import BatchCountHistogram from '../../components/form/batchCount/BatchCountHistogram'
+import { Switch } from 'native-base'
+import BatchCountDataTable from '../../components/form/batchCount/BatchCountDataTable'
 
 const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
   const [forkLengthRange, setForkLengthRange] = useState(0 as number)
-  const [processedData, setProcessedData] = useState([] as any)
+  const [showTableModal, setShowTableModal] = useState(false as boolean)
+
+  const [processedData, setProcessedData] = useState(
+    [] as { forkLength: number; count: number }[]
+  )
+  const [showTable, setShowTable] = useState(false as boolean)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
     useState(false as boolean)
   const { lifeStage, adiposeClipped, dead, existingMark, forkLengths } =
@@ -50,7 +60,9 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
 
   const processData = () => {
     //create a copy of the data
-    const processedDataCopy: any = [...processedData]
+    const processedDataCopy: { forkLength: number; count: number }[] = [
+      ...processedData,
+    ]
     //store the last entry in a variable
     const lastEntry = [...forkLengths].pop()
     if (lastEntry === undefined) return
@@ -64,7 +76,8 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     }
     //find the index of the last entry in the processedDataCopy
     let indexOfFoundEntry = processedDataCopy.findIndex(
-      (entry: any) => entry.forkLength === lastEntry
+      (entry: { forkLength: number; count: number }) =>
+        entry.forkLength === lastEntry
     )
 
     //if the last entry does already exist, then increment the count
@@ -83,7 +96,9 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const handlePressRemoveFish = (
     lastEntry: number = forkLengths[forkLengths.length - 1]
   ) => {
-    const processedDataCopy: any = [...processedData]
+    const processedDataCopy: { forkLength: number; count: number }[] = [
+      ...processedData,
+    ]
     if (forkLengths.length === 0) return
     if (processedDataCopy.length === 0) return
 
@@ -113,6 +128,46 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
       screen: 'Add Fish',
     })
   }
+  const [modalData, setModalData] = useState({
+    forkLength: '',
+    count: '',
+  } as any)
+  const [value, setValue] = useState<string>('')
+
+  const handleChangeText = (text: string) => setValue(text)
+  const handleShowTableModal = (selectedRow: any) => {
+    setModalData({
+      forkLength: selectedRow.forkLength,
+      count: selectedRow.count,
+    })
+    setValue(selectedRow.count)
+    setShowTableModal(true)
+  }
+
+  const handleEditForkLengthCount = (newCount: any) => {
+    //find the current item in the processedData
+    //if the new count is 0
+    //delete that object from the processedData
+    //otherwise
+    //set the count to be the new count
+
+    const processedDataCopy: { forkLength: number; count: number }[] = [
+      ...processedData,
+    ]
+
+    let indexOfFoundEntry = processedDataCopy.findIndex(
+      (entry: { forkLength: number; count: number }) =>
+        entry.forkLength === modalData.forkLength
+    )
+    if (newCount < 1) {
+      processedDataCopy.splice(indexOfFoundEntry, 1)
+    } else {
+      processedDataCopy[indexOfFoundEntry].count = newCount
+    }
+    setProcessedData(processedDataCopy)
+
+    // processData()
+  }
 
   return (
     <>
@@ -128,9 +183,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             <CustomModalHeader
               headerText={route.params?.editModeData ? 'Edit Fish' : 'Add Fish'}
               showHeaderButton={true}
-              // closeModal={closeModal}
-              // navigateBack={true}
-              // headerButton={null}
+              navigateBack={true}
               headerButton={AddFishModalHeaderButton({
                 activeTab: 'Batch',
                 buttonNav,
@@ -163,8 +216,8 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
           </Box>
           <Divider m='1%' />
           <Box
-            h='2/5'
-            w='4/5'
+            h='2/6'
+            w='5/6'
             alignSelf='center'
             alignItems='center'
             justifyContent='center'
@@ -176,11 +229,27 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             <Heading size='md' p='2%'>
               Select size range for fork length buttons:
             </Heading>
-            <Text>MODE TOGGLE PLACEHOLDER</Text>
+            <HStack alignItems='center' space={4}>
+              <Text>Show Table</Text>
+              <Switch onToggle={() => setShowTable(!showTable)} size='sm' />
+            </HStack>
           </HStack>
-          <VStack space={4}>
-            <ForkLengthButtonGroup setForkLengthRange={setForkLengthRange} />
-            <BatchCountButtonGrid buttonValueStart={forkLengthRange} />
+          <VStack space={8}>
+            {showTable ? (
+              <BatchCountDataTable
+                processedData={processedData}
+                handleShowTableModal={handleShowTableModal}
+              />
+            ) : (
+              <>
+                <ForkLengthButtonGroup
+                  setForkLengthRange={setForkLengthRange}
+                />
+                <BatchCountButtonGrid buttonValueStart={forkLengthRange} />
+              </>
+            )}
+            {/* <ForkLengthButtonGroup setForkLengthRange={setForkLengthRange} />
+             <BatchCountButtonGrid buttonValueStart={forkLengthRange} /> */}
             <HStack p='2%' justifyContent='space-between'>
               <Heading size='md'>
                 TotalCount: {forkLengths ? forkLengths.length : 0}
@@ -213,7 +282,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
           </VStack>
         </Pressable>
       </View>
-      {/* --------- Modal --------- */}
+      {/* --------- Modals --------- */}
       <CustomModal
         isOpen={batchCharacteristicsModalOpen}
         closeModal={() => setBatchCharacteristicsModalOpen(false)}
@@ -223,6 +292,56 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
           closeModal={() => setBatchCharacteristicsModalOpen(false)}
         />
       </CustomModal>
+      <Modal isOpen={showTableModal} onClose={() => setShowTableModal(false)}>
+        <Modal.Content maxWidth='400px'>
+          <Modal.CloseButton />
+          <Modal.Header>
+            <Heading color='black' fontSize='2xl'>
+              Edit Fork Length Count
+            </Heading>
+          </Modal.Header>
+          <Modal.Body>
+            <HStack alignItems='center'>
+              <Text color='black' fontSize='xl'>
+                Fork Length (cm):{' '}
+              </Text>
+              <Text bold color='black' fontSize='2xl'>
+                {modalData.forkLength}
+              </Text>
+            </HStack>
+            <FormControl mt='3'>
+              <FormControl.Label>
+                <Text color='black' fontSize='xl'>
+                  Count
+                </Text>
+              </FormControl.Label>
+              <Input size='2xl' value={value} onChangeText={handleChangeText} />
+            </FormControl>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button.Group space={2}>
+              <Button
+                variant='ghost'
+                colorScheme='blueGray'
+                onPress={() => {
+                  setShowTableModal(false)
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                bg='primary'
+                onPress={() => {
+                  setShowTableModal(false)
+                  handleEditForkLengthCount(value)
+                }}
+              >
+                Save
+              </Button>
+            </Button.Group>
+          </Modal.Footer>
+        </Modal.Content>
+      </Modal>
     </>
   )
 }
