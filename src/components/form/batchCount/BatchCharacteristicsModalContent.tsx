@@ -70,7 +70,7 @@ const BatchCharacteristicsModalContent = ({
         }) => (
           <>
             <CustomModalHeader
-              headerText={'Choose Batch Characteristics'}
+              headerText={'Batch Characteristics'}
               showHeaderButton={true}
               closeModal={closeModal}
               headerButton={
