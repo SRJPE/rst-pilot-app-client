@@ -186,7 +186,7 @@ const ReleaseDataEntry = ({
                 <Text color='black' fontSize='xl'>
                   Confirm Release Date and Time:
                 </Text>
-                <Box alignSelf='start' minWidth='320' ml='-105'>
+                <Box alignSelf='flex-start' minWidth='320' ml='-105'>
                   <DateTimePicker
                     value={releaseTime}
                     mode='datetime'

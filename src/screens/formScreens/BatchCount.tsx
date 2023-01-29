@@ -26,6 +26,7 @@ import CustomModalHeader, {
 import { AppDispatch, RootState } from '../../redux/store'
 import { capitalize } from 'lodash'
 import {
+  removeForkLength,
   removeLastForkLengthEntered,
   saveBatchCount,
 } from '../../redux/reducers/formSlices/fishInputSlice'
@@ -132,15 +133,17 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     forkLength: '',
     count: '',
   } as any)
-  const [value, setValue] = useState<string>('')
+  // const [value, setValue] = useState<string>('')
 
-  const handleChangeText = (text: string) => setValue(text)
+  const handleChangeText = (text: string) =>
+    setModalData({ ...modalData, count: text })
   const handleShowTableModal = (selectedRow: any) => {
     setModalData({
       forkLength: selectedRow.forkLength,
       count: selectedRow.count,
     })
-    setValue(selectedRow.count)
+    // setValue(selectedRow.count)
+    // setModalData({ ...modalData, count: selectedRow.count })
     setShowTableModal(true)
   }
 
@@ -165,6 +168,9 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
       processedDataCopy[indexOfFoundEntry].count = newCount
     }
     setProcessedData(processedDataCopy)
+
+    //also need to remove the entry from the forkLengths array
+    dispatch(removeForkLength(modalData))
 
     // processData()
   }
@@ -315,7 +321,11 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                   Count
                 </Text>
               </FormControl.Label>
-              <Input size='2xl' value={value} onChangeText={handleChangeText} />
+              <Input
+                size='2xl'
+                value={modalData.count}
+                onChangeText={handleChangeText}
+              />
             </FormControl>
           </Modal.Body>
           <Modal.Footer>
@@ -333,7 +343,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                 bg='primary'
                 onPress={() => {
                   setShowTableModal(false)
-                  handleEditForkLengthCount(value)
+                  handleEditForkLengthCount(modalData.count)
                 }}
               >
                 Save
