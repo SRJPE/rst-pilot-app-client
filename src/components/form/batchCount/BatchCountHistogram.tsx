@@ -11,8 +11,6 @@ import {
   VictoryContainer,
   Bar,
   VictoryTooltip,
-
-  // VictorySelectionContainer,
 } from 'victory-native'
 
 const BatchCountHistogram = ({

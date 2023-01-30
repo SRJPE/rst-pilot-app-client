@@ -222,9 +222,6 @@ const AddFishContent = ({
                     buttonNav,
                   })}
                 />
-                {/* <Button h='50' bg='primary' onPress={buttonNav}>
-                  <Text color='white'>BATCH COUNT TEMP BUTTON</Text>
-                </Button> */}
               </HStack>
               <Divider mb='1' />
               <VStack paddingX='10' paddingBottom='3' space={3}>

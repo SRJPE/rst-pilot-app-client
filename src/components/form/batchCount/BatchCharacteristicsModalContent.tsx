@@ -54,7 +54,7 @@ const BatchCharacteristicsModalContent = ({
   return (
     <ScrollView>
       <Formik
-        // validationSchema={addPlusCountsSchema}
+        // validationSchema={}
         initialValues={initialFormValues}
         onSubmit={(values) => handleFormSubmit(values)}
       >
@@ -104,14 +104,8 @@ const BatchCharacteristicsModalContent = ({
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
                     Life Stage{' '}
-                    {/* {validationSchema == 'optionalLifeStage'
-                        ? '(optional)'
-                        : ''} */}
                   </Text>
                 </FormControl.Label>
-                {/* {touched.lifeStage &&
-                  errors.lifeStage &&
-                  RenderErrorMessage(errors, 'lifeStage')} */}
                 <CustomSelect
                   selectedValue={values.lifeStage}
                   placeholder={'Life Stage'}

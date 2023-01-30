@@ -57,6 +57,7 @@ const CustomModalHeader = ({
             }
             <Heading marginLeft='10'>{headerText}</Heading>
           </HStack>
+          {/* QUICK FIX */}
           {headerText === 'Add Fish' ? (
             <Box ml='340'>{headerButton ? headerButton : <></>}</Box>
           ) : (
@@ -97,7 +98,7 @@ const addFishModalButtonStyles = StyleSheet.create({
     borderRadius: 50,
     width: 200,
     height: 50,
-    // position: 'relative',
+    position: 'relative',
   },
   buttonBoxLeft: {
     position: 'absolute',
