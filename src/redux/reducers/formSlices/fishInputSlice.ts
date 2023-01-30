@@ -53,13 +53,23 @@ export interface batchCharacteristicsI {
   dead: boolean
   existingMark: string
   forkLengths?: any
+  lastEnteredForkLength: any
 }
+// export interface batchCountForkLengthsI {
+//   forkLength: number | null
+//   count: number | null
+// }
+// export const batchCountForkLengths: batchCountForkLengthsI = {
+//   forkLength: null,
+//   count: null,
+// }
 export const batchCharacteristicsInitialState: batchCharacteristicsI = {
   lifeStage: '',
   adiposeClipped: false,
   dead: false,
   existingMark: '',
-  forkLengths: [],
+  forkLengths: {},
+  lastEnteredForkLength: null,
 }
 
 const initialState: InitialStateI = {
@@ -82,14 +92,36 @@ export const saveFishSlice = createSlice({
       state.batchCharacteristics = { ...action.payload, forkLengths: [] }
     },
     addForkLengthToBatchCount: (state, action) => {
+      //add fork length to batch count
       state.batchCharacteristics.forkLengths &&
-        (state.batchCharacteristics.forkLengths = [
-          ...state.batchCharacteristics.forkLengths,
-          action.payload,
-        ])
+        (state.batchCharacteristics.forkLengths[action.payload] === undefined
+          ? (state.batchCharacteristics.forkLengths[action.payload] = 1)
+          : state.batchCharacteristics.forkLengths[action.payload]++)
+      //update lastEnteredForkLength
+      state.batchCharacteristics.lastEnteredForkLength = action.payload
     },
     removeLastForkLengthEntered: (state) => {
-      state.batchCharacteristics.forkLengths.pop()
+      console.log('FORK LENGTHS: ', {
+        ...state.batchCharacteristics.forkLengths,
+      })
+      console.log(
+        'LAST ENTERED: ',
+        state.batchCharacteristics.lastEnteredForkLength
+      )
+
+      if (
+        state.batchCharacteristics.forkLengths[
+          state.batchCharacteristics.lastEnteredForkLength
+        ] === 1
+      ) {
+        delete state.batchCharacteristics.forkLengths[
+          state.batchCharacteristics.lastEnteredForkLength
+        ]
+      } else {
+        state.batchCharacteristics.forkLengths[
+          state.batchCharacteristics.lastEnteredForkLength
+        ]--
+      }
     },
     removeForkLength: (state, action) => {
       console.log('VALUE :', action.payload)

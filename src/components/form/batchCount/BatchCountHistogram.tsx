@@ -17,10 +17,28 @@ import {
 } from 'victory-native'
 
 const BatchCountHistogram = ({
-  processedData,
+  forkLengthsStore,
 }: {
-  processedData: { forkLength: number; count: number }[]
+  forkLengthsStore: any
 }) => {
+  const [processedData, setProcessedData] = useState(
+    [] as { forkLength: number; count: number }[]
+  )
+  useEffect(() => {
+    prepareDataForGraph()
+  }, [forkLengthsStore])
+
+  const prepareDataForGraph = () => {
+    const storageArray: { forkLength: number; count: number }[] = []
+    Object.keys(forkLengthsStore).forEach((key: any) => {
+      storageArray.push({
+        forkLength: Number(key),
+        count: forkLengthsStore[key],
+      })
+    })
+    setProcessedData(storageArray)
+  }
+
   const calculateXAxisTickValues = () => {}
   return (
     <View
@@ -82,5 +100,9 @@ const BatchCountHistogram = ({
     </View>
   )
 }
-
-export default BatchCountHistogram
+const mapStateToProps = (state: RootState) => {
+  return {
+    forkLengthsStore: state.fishInput.batchCharacteristics.forkLengths,
+  }
+}
+export default connect(mapStateToProps)(BatchCountHistogram)

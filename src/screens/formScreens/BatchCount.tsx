@@ -46,81 +46,55 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const [showTable, setShowTable] = useState(false as boolean)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
     useState(false as boolean)
-  const { lifeStage, adiposeClipped, dead, existingMark, forkLengths } =
-    fishStore.batchCharacteristics
+  const {
+    lifeStage,
+    adiposeClipped,
+    dead,
+    existingMark,
+    forkLengths,
+    lastEnteredForkLength,
+  } = fishStore.batchCharacteristics
 
-  useEffect(() => {
-    processData()
-  }, [forkLengths])
+  // useEffect(() => {
+  //   processData()
+  // }, [forkLengths])
 
-  useEffect(() => {
-    if (lifeStage === '') {
-      setBatchCharacteristicsModalOpen(true)
-    }
-  }, [])
+  // useEffect(() => {
+  //   if (lifeStage === '') {
+  //     setBatchCharacteristicsModalOpen(true)
+  //   }
+  // }, [])
 
-  const processData = () => {
-    //create a copy of the data
-    const processedDataCopy: { forkLength: number; count: number }[] = [
-      ...processedData,
-    ]
-    //store the last entry in a variable
-    const lastEntry = [...forkLengths].pop()
-    if (lastEntry === undefined) return
+  // const handlePressRemoveFish = (
+  //   lastEntry: number = forkLengths[forkLengths.length - 1]
+  // ) => {
+  //   const processedDataCopy: { forkLength: number; count: number }[] = [
+  //     ...processedData,
+  //   ]
+  //   if (forkLengths.length === 0) return
+  //   if (processedDataCopy.length === 0) return
 
-    //if this is the first entry
-    if (forkLengths.length === 1) {
-      //then create our first entry into processedData
-      setProcessedData([{ forkLength: lastEntry, count: 1 }])
-      //exit function
-      return
-    }
-    //find the index of the last entry in the processedDataCopy
-    let indexOfFoundEntry = processedDataCopy.findIndex(
-      (entry: { forkLength: number; count: number }) =>
-        entry.forkLength === lastEntry
-    )
+  //   let indexOfFoundEntry = processedDataCopy.findIndex(
+  //     (entry: any) => entry.forkLength === lastEntry
+  //   )
 
-    //if the last entry does already exist, then increment the count
-    if (indexOfFoundEntry > -1) {
-      processedDataCopy[indexOfFoundEntry].count++
-      setProcessedData(processedDataCopy)
-    } else {
-      //otherwise create the new data with the last entry
-      setProcessedData([
-        ...processedDataCopy,
-        { forkLength: lastEntry, count: 1 },
-      ])
-    }
-  }
+  //   if (indexOfFoundEntry > -1) {
+  //     if (processedDataCopy[indexOfFoundEntry].count === 1) {
+  //       processedDataCopy.splice(indexOfFoundEntry, 1)
+  //     } else {
+  //       processedDataCopy[indexOfFoundEntry].count--
+  //     }
+  //   }
 
-  const handlePressRemoveFish = (
-    lastEntry: number = forkLengths[forkLengths.length - 1]
-  ) => {
-    const processedDataCopy: { forkLength: number; count: number }[] = [
-      ...processedData,
-    ]
-    if (forkLengths.length === 0) return
-    if (processedDataCopy.length === 0) return
-
-    let indexOfFoundEntry = processedDataCopy.findIndex(
-      (entry: any) => entry.forkLength === lastEntry
-    )
-
-    if (indexOfFoundEntry > -1) {
-      if (processedDataCopy[indexOfFoundEntry].count === 1) {
-        processedDataCopy.splice(indexOfFoundEntry, 1)
-      } else {
-        processedDataCopy[indexOfFoundEntry].count--
-      }
-    }
-
-    setProcessedData(processedDataCopy)
+  //   setProcessedData(processedDataCopy)
+  //   dispatch(removeLastForkLengthEntered())
+  // }
+  const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())
   }
 
   const handlePressSaveBatchCount = () => {
-    dispatch(saveBatchCount(processedData))
+    // dispatch(saveBatchCount(processedData))
   }
 
   const buttonNav = () => {
@@ -229,7 +203,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             justifyContent='center'
             bg='secondary'
           >
-            <BatchCountHistogram processedData={processedData} />
+            <BatchCountHistogram />
           </Box>
           <HStack alignItems='center' space={10}>
             <Heading size='md' p='2%'>
@@ -258,7 +232,9 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
              <BatchCountButtonGrid buttonValueStart={forkLengthRange} /> */}
             <HStack p='2%' justifyContent='space-between'>
               <Heading size='md'>
-                TotalCount: {forkLengths ? forkLengths.length : 0}
+                {/* TotalCount: {forkLengths ? forkLengths.length : 0} */}
+                TotalCount:
+                {/* {Object.keys(forkLengths).length} */}
               </Heading>
               <Button bg='primary' onPress={handlePressSaveBatchCount}>
                 <Text fontSize='lg' bold color='white'>
@@ -267,8 +243,8 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
               </Button>
               <VStack space={4}>
                 <Heading size='md'>
-                  LastFishEntered: fork length ={' '}
-                  {forkLengths[forkLengths.length - 1]}
+                  LastFishEntered: fork length = {lastEnteredForkLength}
+                  {/* {forkLengths[forkLengths.length - 1]} */}
                 </Heading>
                 <Button bg='primary' onPress={() => handlePressRemoveFish()}>
                   <Text fontSize='lg' bold color='white'>
@@ -362,3 +338,38 @@ const mapStateToProps = (state: RootState) => {
   }
 }
 export default connect(mapStateToProps)(BatchCount)
+
+// const processData = () => {
+//   //create a copy of the data
+//   const processedDataCopy: { forkLength: number; count: number }[] = [
+//     ...processedData,
+//   ]
+//   //store the last entry in a variable
+//   const lastEntry = [...forkLengths].pop()
+//   if (lastEntry === undefined) return
+
+//   //if this is the first entry
+//   if (forkLengths.length === 1) {
+//     //then create our first entry into processedData
+//     setProcessedData([{ forkLength: lastEntry, count: 1 }])
+//     //exit function
+//     return
+//   }
+//   //find the index of the last entry in the processedDataCopy
+//   let indexOfFoundEntry = processedDataCopy.findIndex(
+//     (entry: { forkLength: number; count: number }) =>
+//       entry.forkLength === lastEntry
+//   )
+
+//   //if the last entry does already exist, then increment the count
+//   if (indexOfFoundEntry > -1) {
+//     processedDataCopy[indexOfFoundEntry].count++
+//     setProcessedData(processedDataCopy)
+//   } else {
+//     //otherwise create the new data with the last entry
+//     setProcessedData([
+//       ...processedDataCopy,
+//       { forkLength: lastEntry, count: 1 },
+//     ])
+//   }
+// }
