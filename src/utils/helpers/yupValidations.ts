@@ -57,10 +57,12 @@ export const trapOperationsSchema = yup.object().shape({
     .typeError('Input must be a number'),
   rpm2: yup
     .number()
+    .nullable()
     // .required('Measurement 2 required')
     .typeError('Input must be a number'),
   rpm3: yup
     .number()
+    .nullable()
     // .required('Measurement 3 required')
     .typeError('Input must be a number'),
 })
@@ -76,12 +78,14 @@ export const trapPostProcessingSchema = yup.object().shape({
     .typeError('Input must be a number'),
   rpm2: yup
     .number()
+    .nullable()
     // .required('Measurement 2 required')
     .typeError('Input must be a number'),
   rpm3: yup
     .number()
-    .typeError('Input must be a number')
+    .nullable()
     // .required('Measurement 3 required'),
+    .typeError('Input must be a number'),
 })
 
 export const fishProcessingSchema = yup.object().shape({
