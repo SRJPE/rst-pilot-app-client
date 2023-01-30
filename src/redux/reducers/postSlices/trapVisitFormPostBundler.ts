@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../../api/axiosConfig'
 import { RootState } from '../../store'
-import { connectionChanged } from '../connectivitySlice'
 
 interface InitialStateI {
   submissionStatus:
@@ -152,36 +151,11 @@ export const trapVisitPostBundler = createSlice({
         ...catchRawPostResult,
       ]
       state.catchRawSubmissions = []
-      console.log('successful post result: ', action.payload)
+      console.log('successful post processing: ', action.payload)
     },
 
     [postTrapVisitFormSubmissions.rejected.type]: (state, action) => {
       state.submissionStatus = 'submission-failed'
-    },
-    [connectionChanged.type]: (state, action) => {
-      if (
-        action.payload.isConnected &&
-        state.submissionStatus === 'not-submitted' &&
-        state.trapVisitSubmissions.length
-      ) {
-        try {
-          ;(async () => {
-            const trapVisitPostRequest: APIResponseI = await api.post(
-              'trap-visit/',
-              state.trapVisitSubmissions
-            )
-            const trapVisitPostResult = trapVisitPostRequest.data
-            state.submissionStatus = 'submission-successful'
-            state.previousTrapVisitSubmissions = [
-              ...state.previousTrapVisitSubmissions,
-              ...(trapVisitPostResult as TrapVisitSubmissionI[]),
-            ]
-            state.trapVisitSubmissions = []
-          })()
-        } catch (e) {
-          state.submissionStatus = 'submission-failed'
-        }
-      }
     },
   },
 })

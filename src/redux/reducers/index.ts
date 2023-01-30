@@ -33,6 +33,12 @@ const visitSetupDefaultsPersistConfig = {
   storage: AsyncStorage,
 }
 
+const trapVisitPostPersistConfig = {
+  key: 'trapVisitPostPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
 export default combineReducers({
   dropdowns: persistReducer(dropdownsPersistConfig, dropdownsSlice),
   visitSetupDefaults: persistReducer(
@@ -49,7 +55,10 @@ export default combineReducers({
   addGeneticSamples: addGeneticSamplesSlice,
   trapPostProcessing: trapPostProcessingSlice,
   markRecaptureNavigation: markRecaptureNavigationSlice,
-  trapVisitFormPostBundler,
+  trapVisitFormPostBundler: persistReducer(
+    trapVisitPostPersistConfig,
+    trapVisitFormPostBundler
+  ),
   connectivity: connectivitySlice,
   paperEntry: paperEntrySlice,
   releaseTrial: releaseTrialSlice,
