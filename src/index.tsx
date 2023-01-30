@@ -6,6 +6,7 @@ import { persistor, store } from './redux/store'
 import { PersistGate } from 'redux-persist/integration/react'
 import OnStartupProvider from './redux/onStartupProvider'
 import SlideAlertProvider from './redux/slideAlertProvider'
+import { Provider as PaperProvider } from 'react-native-paper'
 
 type Props = {
   children: React.ReactNode
@@ -17,9 +18,11 @@ export default function AppContainer(props: Props) {
       <PersistGate persistor={persistor}>
         <NavigationContainer>
           <NativeBaseProvider theme={theme}>
-            <SlideAlertProvider>
-              <OnStartupProvider>{props.children}</OnStartupProvider>
-            </SlideAlertProvider>
+            <PaperProvider>
+              <SlideAlertProvider>
+                <OnStartupProvider>{props.children}</OnStartupProvider>
+              </SlideAlertProvider>
+            </PaperProvider>
           </NativeBaseProvider>
         </NavigationContainer>
       </PersistGate>

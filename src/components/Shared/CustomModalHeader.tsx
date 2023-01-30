@@ -26,7 +26,7 @@ const CustomModalHeader = ({
   closeModal?: any
   navigateBack?: any
 }) => {
-  const navigation = useNavigation()
+  const navigation = useNavigation() as any
   if (showHeaderButton) {
     return (
       <>
@@ -42,7 +42,10 @@ const CustomModalHeader = ({
                 size='lg'
                 onPress={() => {
                   if (navigateBack) {
-                    navigation.goBack()
+                    // navigation.goBack()
+                    navigation.navigate('Trap Visit Form', {
+                      screen: 'Fish Input',
+                    })
                   }
                   if (closeModal) {
                     closeModal()
@@ -54,7 +57,12 @@ const CustomModalHeader = ({
             }
             <Heading marginLeft='10'>{headerText}</Heading>
           </HStack>
-          {headerButton ? headerButton : <></>}
+          {/* QUICK FIX */}
+          {headerText === 'Add Fish' ? (
+            <Box ml='340'>{headerButton ? headerButton : <></>}</Box>
+          ) : (
+            <Box ml='200'>{headerButton ? headerButton : <></>}</Box>
+          )}
         </HStack>
       </>
     )
@@ -122,14 +130,17 @@ interface AddFishModalButtonI {
   setActiveTab: any
 }
 
-export const AddFishModalHeaderButton: React.FC<AddFishModalButtonI> = ({
+export const AddFishModalHeaderButton = ({
   activeTab,
-  setActiveTab,
+  buttonNav,
+}: {
+  activeTab: any
+  buttonNav: any
 }) => {
   return (
     <View style={addFishModalButtonStyles.individualOrBatchButton}>
       <Box
-        onTouchStart={() => setActiveTab('Individual')}
+        onTouchStart={() => buttonNav()}
         style={
           activeTab === 'Individual'
             ? [
@@ -144,7 +155,7 @@ export const AddFishModalHeaderButton: React.FC<AddFishModalButtonI> = ({
         </Text>
       </Box>
       <Box
-        onTouchStart={() => setActiveTab('Batch')}
+        onTouchStart={() => buttonNav()}
         style={
           activeTab === 'Batch'
             ? [

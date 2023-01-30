@@ -168,6 +168,12 @@ const AddFishContent = ({
     },
   }
 
+  const buttonNav = () => {
+    // @ts-ignore
+    navigation.navigate('Trap Visit Form', {
+      screen: 'Batch Count',
+    })
+  }
   return (
     <Formik
       validationSchema={validationSchemas[validationSchema]}
@@ -203,20 +209,24 @@ const AddFishContent = ({
             borderColor='themeGrey'
           >
             <Pressable onPress={Keyboard.dismiss}>
-              <CustomModalHeader
-                headerText={
-                  route.params?.editModeData ? 'Edit Fish' : 'Add Fish'
-                }
-                showHeaderButton={true}
-                closeModal={closeModal}
-                navigateBack={true}
-                headerButton={null}
-                //   AddFishModalHeaderButton({
-                //   activeTab,
-                //   setActiveTab,
-                // })
-                // }
-              />
+              <HStack space={10}>
+                <CustomModalHeader
+                  headerText={
+                    route.params?.editModeData ? 'Edit Fish' : 'Add Fish'
+                  }
+                  showHeaderButton={true}
+                  closeModal={closeModal}
+                  navigateBack={true}
+                  headerButton={
+                    route.params?.editModeData
+                      ? null
+                      : AddFishModalHeaderButton({
+                          activeTab: 'Individual',
+                          buttonNav,
+                        })
+                  }
+                />
+              </HStack>
               <Divider mb='1' />
               <VStack paddingX='10' paddingBottom='3' space={3}>
                 <HStack alignItems='center'>
