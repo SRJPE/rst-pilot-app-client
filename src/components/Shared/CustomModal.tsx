@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { Modal } from 'native-base'
 
 interface ModalPropsI {
@@ -8,7 +8,7 @@ interface ModalPropsI {
   height?: string
 }
 
-export default function CustomModal(props: ModalPropsI) {
+const CustomModal = (props: ModalPropsI) => {
   return (
     <Modal
       isOpen={props.isOpen}
@@ -24,3 +24,5 @@ export default function CustomModal(props: ModalPropsI) {
     </Modal>
   )
 }
+
+export default memo(CustomModal)

@@ -6,9 +6,8 @@ interface InitialStateI {
 }
 
 export interface ReleaseTrialValuesI {
-  markType: string | null
-  markColor: string | null
-  markPosition: string | null
+  appliedMarks: Array<any>
+
   releaseLocation: string | null
   releaseTime: any | null
 }
@@ -16,9 +15,8 @@ export interface ReleaseTrialValuesI {
 const initialState: InitialStateI = {
   completed: false,
   values: {
-    markType: null,
-    markColor: null,
-    markPosition: null,
+    appliedMarks: [],
+
     releaseLocation: null,
     releaseTime: null,
   },
@@ -32,6 +30,12 @@ export const releaseTrialDataEntrySlice = createSlice({
     saveReleaseTrialDataEntry: (state, action) => {
       state.values = action.payload
     },
+    addMarkToAppliedMarks: (state, action) => {
+      state.values.appliedMarks = [...state.values.appliedMarks, action.payload]
+    },
+    removeMarkFromAppliedMarks: (state, action) => {
+      state.values.appliedMarks = action.payload
+    },
 
     markReleaseTrialDataEntryCompleted: (state, action) => {
       state.completed = action.payload
@@ -42,6 +46,8 @@ export const releaseTrialDataEntrySlice = createSlice({
 export const {
   resetReleaseTrialDataEntrySlice,
   saveReleaseTrialDataEntry,
+  addMarkToAppliedMarks,
+  removeMarkFromAppliedMarks,
   markReleaseTrialDataEntryCompleted,
 } = releaseTrialDataEntrySlice.actions
 
