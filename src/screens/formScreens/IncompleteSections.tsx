@@ -98,9 +98,9 @@ const IncompleteSections = ({
 
     // navigation.dispatch(StackActions.popToTop())
 
-    if (connectivityState.isConnected) {
-      dispatch(postTrapVisitFormSubmissions())
-    }
+    // if (connectivityState.isConnected) {
+    //   dispatch(postTrapVisitFormSubmissions())
+    // }
   }
 
   const resetAllFormSlices = () => {

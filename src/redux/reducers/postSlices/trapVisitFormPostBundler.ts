@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../../api/axiosConfig'
 import { RootState } from '../../store'
-import { connectionChanged } from '../connectivitySlice'
 
 interface InitialStateI {
   submissionStatus:
@@ -157,17 +156,6 @@ export const trapVisitPostBundler = createSlice({
 
     [postTrapVisitFormSubmissions.rejected.type]: (state, action) => {
       state.submissionStatus = 'submission-failed'
-    },
-    [connectionChanged.type]: (state, action) => {
-      console.log('connection changed: ', action.payload)
-      if (
-        action.payload.connectionState.isConnected &&
-        (state.submissionStatus === 'not-submitted' ||
-          state.submissionStatus === 'submission-failed') &&
-        state.trapVisitSubmissions.length
-      ) {
-        action.payload.dispatch(postTrapVisitFormSubmissions())
-      }
     },
   },
 })
