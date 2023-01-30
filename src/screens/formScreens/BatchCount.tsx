@@ -9,6 +9,7 @@ import {
   Input,
   Modal,
   Pressable,
+  ScrollView,
   Text,
   View,
   VStack,
@@ -180,10 +181,13 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                 <Text fontSize='16'>Show Table</Text>
               </HStack>
             </HStack>
+            {/* using scrollView to patch the table overflow issues*/}
             {showTable ? (
-              <BatchCountDataTable
-                handleShowTableModal={handleShowTableModal}
-              />
+              <ScrollView maxHeight='250'>
+                <BatchCountDataTable
+                  handleShowTableModal={handleShowTableModal}
+                />
+              </ScrollView>
             ) : (
               <>
                 <ForkLengthButtonGroup
