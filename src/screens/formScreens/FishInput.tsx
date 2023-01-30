@@ -173,7 +173,7 @@ const FishInput = ({
           </HStack>
 
           <Box px='4'>
-            <Heading pb='8'>Catch Table</Heading>
+            <Heading pb='4'>Catch Table</Heading>
             <FishInputDataTable navigation={navigation} />
           </Box>
         </VStack>
