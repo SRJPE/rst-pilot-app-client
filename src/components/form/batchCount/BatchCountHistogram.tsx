@@ -1,6 +1,5 @@
-import { indexOf } from 'lodash'
 import { View } from 'native-base'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import { RootState } from '../../../redux/store'
 import {
@@ -30,12 +29,13 @@ const BatchCountHistogram = ({
 
   const prepareDataForGraph = () => {
     const storageArray: { forkLength: number; count: number }[] = []
-    Object.keys(forkLengthsStore).forEach((key: any) => {
-      storageArray.push({
-        forkLength: Number(key),
-        count: forkLengthsStore[key],
+    forkLengthsStore &&
+      Object.keys(forkLengthsStore).forEach((key: any) => {
+        storageArray.push({
+          forkLength: Number(key),
+          count: forkLengthsStore[key],
+        })
       })
-    })
     setProcessedData(storageArray)
   }
 
@@ -52,9 +52,9 @@ const BatchCountHistogram = ({
         height={300}
         theme={VictoryTheme.material}
         domainPadding={30}
-        // title='Popularity of Dog Breeds by Percentage'
+        // title='TITLE'
         // containerComponent={
-        //   <VictoryContainer title={'Popularity of Dog Breeds by Percentage'} />
+        //   <VictoryContainer title={TITLE'} />
         // }
       >
         {/*---X AXIS---*/}

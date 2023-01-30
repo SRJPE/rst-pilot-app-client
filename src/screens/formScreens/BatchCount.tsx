@@ -26,7 +26,7 @@ import CustomModalHeader, {
 import { AppDispatch, RootState } from '../../redux/store'
 import { capitalize } from 'lodash'
 import {
-  removeForkLength,
+  updateSingleForkLengthCount,
   removeLastForkLengthEntered,
   saveBatchCount,
 } from '../../redux/reducers/formSlices/fishInputSlice'
@@ -39,13 +39,13 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const navigation = useNavigation()
   const [forkLengthRange, setForkLengthRange] = useState(0 as number)
   const [showTableModal, setShowTableModal] = useState(false as boolean)
-
-  const [processedData, setProcessedData] = useState(
-    [] as { forkLength: number; count: number }[]
-  )
   const [showTable, setShowTable] = useState(false as boolean)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
     useState(false as boolean)
+  const [modalData, setModalData] = useState({
+    forkLength: '',
+    count: '',
+  } as any)
   const {
     lifeStage,
     adiposeClipped,
@@ -55,46 +55,22 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     lastEnteredForkLength,
   } = fishStore.batchCharacteristics
 
-  // useEffect(() => {
-  //   processData()
-  // }, [forkLengths])
+  useEffect(() => {
+    if (lifeStage === '') {
+      setBatchCharacteristicsModalOpen(true)
+    }
+  }, [])
 
-  // useEffect(() => {
-  //   if (lifeStage === '') {
-  //     setBatchCharacteristicsModalOpen(true)
-  //   }
-  // }, [])
-
-  // const handlePressRemoveFish = (
-  //   lastEntry: number = forkLengths[forkLengths.length - 1]
-  // ) => {
-  //   const processedDataCopy: { forkLength: number; count: number }[] = [
-  //     ...processedData,
-  //   ]
-  //   if (forkLengths.length === 0) return
-  //   if (processedDataCopy.length === 0) return
-
-  //   let indexOfFoundEntry = processedDataCopy.findIndex(
-  //     (entry: any) => entry.forkLength === lastEntry
-  //   )
-
-  //   if (indexOfFoundEntry > -1) {
-  //     if (processedDataCopy[indexOfFoundEntry].count === 1) {
-  //       processedDataCopy.splice(indexOfFoundEntry, 1)
-  //     } else {
-  //       processedDataCopy[indexOfFoundEntry].count--
-  //     }
-  //   }
-
-  //   setProcessedData(processedDataCopy)
-  //   dispatch(removeLastForkLengthEntered())
-  // }
   const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())
   }
 
   const handlePressSaveBatchCount = () => {
-    // dispatch(saveBatchCount(processedData))
+    dispatch(saveBatchCount())
+  }
+
+  const handleEditForkLengthCount = () => {
+    dispatch(updateSingleForkLengthCount(modalData))
   }
 
   const buttonNav = () => {
@@ -103,50 +79,24 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
       screen: 'Add Fish',
     })
   }
-  const [modalData, setModalData] = useState({
-    forkLength: '',
-    count: '',
-  } as any)
-  // const [value, setValue] = useState<string>('')
-
-  const handleChangeText = (text: string) =>
-    setModalData({ ...modalData, count: text })
   const handleShowTableModal = (selectedRow: any) => {
     setModalData({
       forkLength: selectedRow.forkLength,
-      count: selectedRow.count,
+      count: selectedRow.count.toString(),
     })
-    // setValue(selectedRow.count)
-    // setModalData({ ...modalData, count: selectedRow.count })
     setShowTableModal(true)
   }
 
-  const handleEditForkLengthCount = (newCount: any) => {
-    //find the current item in the processedData
-    //if the new count is 0
-    //delete that object from the processedData
-    //otherwise
-    //set the count to be the new count
-
-    const processedDataCopy: { forkLength: number; count: number }[] = [
-      ...processedData,
-    ]
-
-    let indexOfFoundEntry = processedDataCopy.findIndex(
-      (entry: { forkLength: number; count: number }) =>
-        entry.forkLength === modalData.forkLength
-    )
-    if (newCount < 1) {
-      processedDataCopy.splice(indexOfFoundEntry, 1)
-    } else {
-      processedDataCopy[indexOfFoundEntry].count = newCount
-    }
-    setProcessedData(processedDataCopy)
-
-    //also need to remove the entry from the forkLengths array
-    dispatch(removeForkLength(modalData))
-
-    // processData()
+  const handleChangeModalText = (text: string) => {
+    setModalData({ ...modalData, count: text })
+  }
+  const calculateTotalCount = () => {
+    let count: number = 0
+    if (!forkLengths) return count
+    Object.values(forkLengths).forEach((forkLengthCount: any) => {
+      count += forkLengthCount
+    })
+    return count
   }
 
   return (
@@ -205,19 +155,33 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
           >
             <BatchCountHistogram />
           </Box>
-          <HStack alignItems='center' space={10}>
-            <Heading size='md' p='2%'>
-              Select size range for fork length buttons:
-            </Heading>
-            <HStack alignItems='center' space={4}>
-              <Text>Show Table</Text>
-              <Switch onToggle={() => setShowTable(!showTable)} size='sm' />
-            </HStack>
-          </HStack>
           <VStack space={8}>
+            <HStack
+              alignItems='center'
+              space={10}
+              justifyContent='space-between'
+              px='5'
+            >
+              <Heading size='md' p='2%'>
+                {showTable
+                  ? 'Record count for each for length: '
+                  : 'Select size range for fork length buttons: '}
+              </Heading>
+              <HStack alignItems='center' space={4}>
+                <Text fontSize='16'>Input Fork Lengths</Text>
+                <Switch
+                  shadow='3'
+                  offTrackColor='primary'
+                  onTrackColor='primary'
+                  size='md'
+                  isChecked={showTable}
+                  onToggle={() => setShowTable(!showTable)}
+                />
+                <Text fontSize='16'>Show Table</Text>
+              </HStack>
+            </HStack>
             {showTable ? (
               <BatchCountDataTable
-                processedData={processedData}
                 handleShowTableModal={handleShowTableModal}
               />
             ) : (
@@ -228,37 +192,40 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                 <BatchCountButtonGrid buttonValueStart={forkLengthRange} />
               </>
             )}
-            {/* <ForkLengthButtonGroup setForkLengthRange={setForkLengthRange} />
-             <BatchCountButtonGrid buttonValueStart={forkLengthRange} /> */}
             <HStack p='2%' justifyContent='space-between'>
-              <Heading size='md'>
-                {/* TotalCount: {forkLengths ? forkLengths.length : 0} */}
-                TotalCount:
-                {/* {Object.keys(forkLengths).length} */}
-              </Heading>
-              <Button bg='primary' onPress={handlePressSaveBatchCount}>
-                <Text fontSize='lg' bold color='white'>
-                  Save Batch Count
-                </Text>
-              </Button>
               <VStack space={4}>
                 <Heading size='md'>
-                  LastFishEntered: fork length = {lastEnteredForkLength}
-                  {/* {forkLengths[forkLengths.length - 1]} */}
+                  TotalCount:
+                  {calculateTotalCount()}
                 </Heading>
-                <Button bg='primary' onPress={() => handlePressRemoveFish()}>
+                <Button bg='primary' onPress={handlePressSaveBatchCount}>
+                  <Text fontSize='lg' bold color='white'>
+                    Save Batch Count
+                  </Text>
+                </Button>
+              </VStack>
+              <VStack space={4}>
+                <Heading size='md'>
+                  LastFishEntered: fork length ={' '}
+                  {lastEnteredForkLength ? lastEnteredForkLength : 'N/A'}
+                </Heading>
+                <Button
+                  bg='primary'
+                  onPress={() => handlePressRemoveFish()}
+                  isDisabled={!lastEnteredForkLength}
+                >
                   <Text fontSize='lg' bold color='white'>
                     Remove Last Fish
                   </Text>
                 </Button>
-                <Button
+                {/* <Button
                   bg='primary'
-                  onPress={() => console.log(fishStore, forkLengths)}
+                  onPress={() => console.log('Fork Lengths: ', forkLengths)}
                 >
                   <Text fontSize='lg' bold color='white'>
                     LOG
                   </Text>
-                </Button>
+                </Button> */}
               </VStack>
             </HStack>
           </VStack>
@@ -300,7 +267,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
               <Input
                 size='2xl'
                 value={modalData.count}
-                onChangeText={handleChangeText}
+                onChangeText={handleChangeModalText}
               />
             </FormControl>
           </Modal.Body>
@@ -319,7 +286,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                 bg='primary'
                 onPress={() => {
                   setShowTableModal(false)
-                  handleEditForkLengthCount(modalData.count)
+                  handleEditForkLengthCount()
                 }}
               >
                 Save
@@ -338,38 +305,3 @@ const mapStateToProps = (state: RootState) => {
   }
 }
 export default connect(mapStateToProps)(BatchCount)
-
-// const processData = () => {
-//   //create a copy of the data
-//   const processedDataCopy: { forkLength: number; count: number }[] = [
-//     ...processedData,
-//   ]
-//   //store the last entry in a variable
-//   const lastEntry = [...forkLengths].pop()
-//   if (lastEntry === undefined) return
-
-//   //if this is the first entry
-//   if (forkLengths.length === 1) {
-//     //then create our first entry into processedData
-//     setProcessedData([{ forkLength: lastEntry, count: 1 }])
-//     //exit function
-//     return
-//   }
-//   //find the index of the last entry in the processedDataCopy
-//   let indexOfFoundEntry = processedDataCopy.findIndex(
-//     (entry: { forkLength: number; count: number }) =>
-//       entry.forkLength === lastEntry
-//   )
-
-//   //if the last entry does already exist, then increment the count
-//   if (indexOfFoundEntry > -1) {
-//     processedDataCopy[indexOfFoundEntry].count++
-//     setProcessedData(processedDataCopy)
-//   } else {
-//     //otherwise create the new data with the last entry
-//     setProcessedData([
-//       ...processedDataCopy,
-//       { forkLength: lastEntry, count: 1 },
-//     ])
-//   }
-// }

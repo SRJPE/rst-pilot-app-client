@@ -55,14 +55,6 @@ export interface batchCharacteristicsI {
   forkLengths?: any
   lastEnteredForkLength: any
 }
-// export interface batchCountForkLengthsI {
-//   forkLength: number | null
-//   count: number | null
-// }
-// export const batchCountForkLengths: batchCountForkLengthsI = {
-//   forkLength: null,
-//   count: null,
-// }
 export const batchCharacteristicsInitialState: batchCharacteristicsI = {
   lifeStage: '',
   adiposeClipped: false,
@@ -89,7 +81,19 @@ export const saveFishSlice = createSlice({
       state.speciesCaptured = action.payload
     },
     saveBatchCharacteristics: (state, action) => {
-      state.batchCharacteristics = { ...action.payload, forkLengths: [] }
+      const { lifeStage, adiposeClipped, dead, existingMark } = action.payload
+      const forkLengthsCopy = { ...state.batchCharacteristics.forkLengths }
+      const lastEnteredForkLengthCopy =
+        state.batchCharacteristics.lastEnteredForkLength
+
+      state.batchCharacteristics = {
+        lifeStage,
+        adiposeClipped,
+        dead,
+        existingMark,
+        forkLengths: forkLengthsCopy,
+        lastEnteredForkLength: lastEnteredForkLengthCopy,
+      }
     },
     addForkLengthToBatchCount: (state, action) => {
       //add fork length to batch count
@@ -101,40 +105,43 @@ export const saveFishSlice = createSlice({
       state.batchCharacteristics.lastEnteredForkLength = action.payload
     },
     removeLastForkLengthEntered: (state) => {
-      console.log('FORK LENGTHS: ', {
-        ...state.batchCharacteristics.forkLengths,
-      })
-      console.log(
-        'LAST ENTERED: ',
-        state.batchCharacteristics.lastEnteredForkLength
-      )
+      //this function is currently limited to remove the SINGLE last fork length entered.
+      //possible refactor in the future to allow continuous removal of fork lengths
 
-      if (
-        state.batchCharacteristics.forkLengths[
-          state.batchCharacteristics.lastEnteredForkLength
-        ] === 1
-      ) {
-        delete state.batchCharacteristics.forkLengths[
-          state.batchCharacteristics.lastEnteredForkLength
-        ]
+      const forkLengthsCopy = { ...state.batchCharacteristics.forkLengths }
+      const lastEnteredForkLengthCopy =
+        state.batchCharacteristics.lastEnteredForkLength
+
+      if (!state.batchCharacteristics.lastEnteredForkLength) return
+
+      if (forkLengthsCopy[lastEnteredForkLengthCopy] === 1) {
+        delete forkLengthsCopy[lastEnteredForkLengthCopy]
       } else {
-        state.batchCharacteristics.forkLengths[
-          state.batchCharacteristics.lastEnteredForkLength
-        ]--
+        forkLengthsCopy[lastEnteredForkLengthCopy]--
       }
+      state.batchCharacteristics.forkLengths = forkLengthsCopy
+      state.batchCharacteristics.lastEnteredForkLength = null
     },
-    removeForkLength: (state, action) => {
-      console.log('VALUE :', action.payload)
+    updateSingleForkLengthCount: (state, action) => {
+      const forkLengthsCopy = { ...state.batchCharacteristics.forkLengths }
+      if (action.payload.count < 1) {
+        delete forkLengthsCopy[action.payload.forkLength]
+      } else {
+        forkLengthsCopy[action.payload.forkLength] = Number(
+          action.payload.count
+        )
+      }
+      state.batchCharacteristics.forkLengths = forkLengthsCopy
     },
-    saveBatchCount: (state, action) => {
+    saveBatchCount: (state) => {
       let fishStoreCopy = cloneDeep(state.fishStore)
-      //look at each entry in the payload
-      //for each entry in payload construct an individual fish entry
-      action.payload.forEach((fishObject: any) => {
+      const forkLengthsCopy = { ...state.batchCharacteristics.forkLengths }
+
+      for (let key in forkLengthsCopy) {
         const batchCountEntry = {
-          species: 'BatchCount',
-          numFishCaught: fishObject.count,
-          forkLength: fishObject.forkLength,
+          species: 'Chinook salmon',
+          numFishCaught: forkLengthsCopy[key],
+          forkLength: Number(key),
           run: null,
           weight: null,
           lifeStage: state.batchCharacteristics.lifeStage,
@@ -145,7 +152,6 @@ export const saveFishSlice = createSlice({
           plusCountMethod: null,
           plusCount: false,
         } as any
-
         let id = null
         if (Object.keys(fishStoreCopy).length) {
           // @ts-ignore
@@ -156,7 +162,7 @@ export const saveFishSlice = createSlice({
         }
 
         fishStoreCopy[id] = batchCountEntry
-      })
+      }
 
       state.fishStore = fishStoreCopy
     },
@@ -237,7 +243,7 @@ export const {
   addForkLengthToBatchCount,
   removeLastForkLengthEntered,
   saveBatchCount,
-  removeForkLength,
+  updateSingleForkLengthCount,
 } = saveFishSlice.actions
 
 export default saveFishSlice.reducer
