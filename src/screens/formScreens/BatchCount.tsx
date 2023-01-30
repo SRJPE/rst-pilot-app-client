@@ -195,7 +195,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             <HStack p='2%' justifyContent='space-between'>
               <VStack space={4}>
                 <Heading size='md'>
-                  TotalCount:
+                  Total Count:
                   {calculateTotalCount()}
                 </Heading>
                 <Button bg='primary' onPress={handlePressSaveBatchCount}>
@@ -206,8 +206,8 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
               </VStack>
               <VStack space={4}>
                 <Heading size='md'>
-                  LastFishEntered: fork length ={' '}
-                  {lastEnteredForkLength ? lastEnteredForkLength : 'N/A'}
+                  Fork length of last fish entered ={' '}
+                  {lastEnteredForkLength ? lastEnteredForkLength : '_'}
                 </Heading>
                 <Button
                   bg='primary'
@@ -267,6 +267,8 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
               <Input
                 size='2xl'
                 value={modalData.count}
+                isFocused
+                keyboardType='numeric'
                 onChangeText={handleChangeModalText}
               />
             </FormControl>
