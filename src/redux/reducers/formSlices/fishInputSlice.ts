@@ -167,6 +167,14 @@ export const saveFishSlice = createSlice({
       }
 
       state.fishStore = fishStoreCopy
+      state.batchCharacteristics = {
+        lifeStage: '',
+        adiposeClipped: false,
+        dead: false,
+        existingMark: '',
+        forkLengths: {},
+        lastEnteredForkLength: null,
+      }
     },
     saveIndividualFish: (state, action) => {
       let fishStoreCopy = cloneDeep(state.fishStore)
