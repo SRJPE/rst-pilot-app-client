@@ -151,7 +151,7 @@ export const trapVisitPostBundler = createSlice({
         ...catchRawPostResult,
       ]
       state.catchRawSubmissions = []
-      console.log('successful post result: ', action.payload)
+      console.log('successful post processing: ', action.payload)
     },
 
     [postTrapVisitFormSubmissions.rejected.type]: (state, action) => {
