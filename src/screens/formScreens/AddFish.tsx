@@ -217,10 +217,14 @@ const AddFishContent = ({
                   showHeaderButton={true}
                   closeModal={closeModal}
                   navigateBack={true}
-                  headerButton={AddFishModalHeaderButton({
-                    activeTab: 'Individual',
-                    buttonNav,
-                  })}
+                  headerButton={
+                    route.params?.editModeData
+                      ? null
+                      : AddFishModalHeaderButton({
+                          activeTab: 'Individual',
+                          buttonNav,
+                        })
+                  }
                 />
               </HStack>
               <Divider mb='1' />
