@@ -12,6 +12,7 @@ import {
 } from 'native-base'
 import React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
+import { addMarkToAppliedMarks } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addAnotherMarkSchema } from '../../utils/helpers/yupValidations'
@@ -36,8 +37,9 @@ const mapStateToProps = (state: RootState) => {
 }
 
 /*
-This modal needs its submission connected to the main formik form of each component
-this will depend on if it is in add fish or in mark recapture
+
+Make sure to take BisMark Brown into account 
+  => {values.markType !== 'Bismark Brown' && ( <render other dropdowns> )
 */
 
 const AddAnotherMarkModalContent = ({
@@ -54,7 +56,7 @@ const AddAnotherMarkModalContent = ({
   const { markType, markColor, bodyPart } = dropdownValues.values
 
   const handleSubmit = (values: any) => {
-    // handleMarkFishFormSubmit(values)
+    dispatch(addMarkToAppliedMarks(values))
     showSlideAlert(dispatch, 'Mark or tag')
   }
 
@@ -78,7 +80,7 @@ const AddAnotherMarkModalContent = ({
       }) => (
         <>
           <CustomModalHeader
-            headerText={'Add Another Mark'}
+            headerText={'Add Mark'}
             showHeaderButton={true}
             closeModal={closeModal}
             headerButton={
@@ -158,33 +160,6 @@ const AddAnotherMarkModalContent = ({
                 {touched.markPosition &&
                   errors.markPosition &&
                   RenderErrorMessage(errors, 'markPosition')}
-              </FormControl>
-              <FormControl>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Mark Number
-                    </Text>
-                  </FormControl.Label>
-                  {Number(values.markNumber) > QARanges.markNumber.max &&
-                    RenderWarningMessage()}
-                  {touched.markNumber &&
-                    errors.markNumber &&
-                    RenderErrorMessage(errors, 'markNumber')}
-                </HStack>
-                <Input
-                  mt={1}
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Number'
-                  keyboardType='numeric'
-                  onChangeText={handleChange('markNumber')}
-                  onBlur={handleBlur('markNumber')}
-                  value={values.markNumber}
-                />
-                {touched.markNumber &&
-                  errors.markNumber &&
-                  RenderErrorMessage(errors, 'markNumber')}
               </FormControl>
             </VStack>
           </View>

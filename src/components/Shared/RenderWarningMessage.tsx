@@ -2,7 +2,11 @@ import { memo } from 'react'
 import { Text, Icon, HStack } from 'native-base'
 import { Ionicons } from '@expo/vector-icons'
 
-const RenderWarningMessage: React.FC = () => {
+const RenderWarningMessage = ({
+  messageToRender,
+}: {
+  messageToRender?: string
+}) => {
   return (
     <HStack space={1} pt='1'>
       <Icon
@@ -12,7 +16,7 @@ const RenderWarningMessage: React.FC = () => {
         color='warning'
       />
       <Text style={{ fontSize: 16, color: '#eec227' }}>
-        {'Value out of range' as string}
+        {messageToRender ? messageToRender : ('Value out of range' as string)}
       </Text>
     </HStack>
   )

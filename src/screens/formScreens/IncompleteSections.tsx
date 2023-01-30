@@ -67,7 +67,7 @@ const IncompleteSections = ({
   fishInputState: any
   paperEntryState: any
 }) => {
-  console.log('🚀 ~ navigation', navigation)
+  // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
     0,

@@ -1,4 +1,4 @@
-import { createStackNavigator } from '@react-navigation/stack'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import FishInput from '../screens/formScreens/FishInput'
 import { useSelector } from 'react-redux'
 import FishProcessing from '../screens/formScreens/FishProcessing'
@@ -18,7 +18,7 @@ import PaperEntry from '../screens/formScreens/PaperEntry'
 import StartedTrapping from '../screens/formScreens/StartedTrapping'
 import BatchCount from '../screens/formScreens/BatchCount'
 
-const FormStack = createStackNavigator()
+const FormStack = createNativeStackNavigator()
 
 export default function FormStackNavigation() {
   const fishInputModalOpen = useSelector(

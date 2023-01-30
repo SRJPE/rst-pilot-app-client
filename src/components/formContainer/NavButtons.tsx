@@ -4,6 +4,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { useEffect } from 'react'
 
 const NavButtons = ({
   navigation,
@@ -13,6 +14,7 @@ const NavButtons = ({
   values,
   isFormComplete,
   isPaperEntry,
+  toggleModal,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -21,6 +23,7 @@ const NavButtons = ({
   values?: any
   isFormComplete?: boolean
   isPaperEntry?: boolean
+  toggleModal?: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -28,6 +31,10 @@ const NavButtons = ({
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
   const isPaperEntryStore = reduxState.visitSetup.isPaperEntry
+
+  const individualFishStore = useSelector(
+    (state: any) => state.fishInput.fishStore
+  )
 
   const navigateHelper = (destination: string) => {
     const formSteps = Object.values(navigationState?.steps) as any
@@ -60,7 +67,9 @@ const NavButtons = ({
         if (!isPaperEntryStore) {
           if (values?.trapStatus === 'trap not functioning') {
             navigateHelper('Non Functional Trap')
-          } else if (values?.trapStatus === 'trap not in service - restart trapping') {
+          } else if (
+            values?.trapStatus === 'trap not in service - restart trapping'
+          ) {
             navigateHelper('Started Trapping')
           } else if (values?.flowMeasure > 1000) {
             navigateHelper('High Flows')
@@ -141,6 +150,20 @@ const NavButtons = ({
     //if function truthy, submit form to check for errors and save to redux
     if (handleSubmit) {
       handleSubmit()
+
+      //if the active page is TPP, then only open modal if any fish have been marked for recapture
+      if (activePage === 'Trap Post-Processing') {
+        const haveAnyFishBeenMarkedForRecapture = Object.values(
+          individualFishStore
+        ).some((fish: any) => {
+          return fish.willBeUsedInRecapture === true
+        })
+        if (haveAnyFishBeenMarkedForRecapture) {
+          toggleModal()
+          return
+        }
+      }
+
       showSlideAlert(dispatch)
     }
 
@@ -172,7 +195,10 @@ const NavButtons = ({
     }
     //if function truthy, submit form to save to redux
     if (handleSubmit) {
-      handleSubmit()
+      //do not submit when going back from incomplete sections page (prevents early submission errors)
+      if (activePage !== 'Incomplete Sections') {
+        handleSubmit()
+      }
     }
     //navigate left
     navigation.navigate('Trap Visit Form', {

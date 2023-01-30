@@ -437,7 +437,7 @@ const AddFishContent = ({
                       </FormControl>
                     </HStack>
 
-                    <HStack>
+                    <HStack space={4} alignItems='center'>
                       {(values.species === 'Chinook salmon' ||
                         values.species === 'Steelhead / rainbow trout') && (
                         <FormControl w='1/2' paddingRight='5'>
@@ -519,6 +519,20 @@ const AddFishContent = ({
                           />
                         </FormControl>
                       )}
+                      <FormControl w='1/2' paddingRight='9'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Run
+                          </Text>
+                        </FormControl.Label>
+                        <CustomSelect
+                          selectedValue={values.run}
+                          placeholder={'Run'}
+                          onValueChange={handleChange('run')}
+                          setFieldTouched={setFieldTouched}
+                          selectOptions={dropdownValues?.run}
+                        />
+                      </FormControl>
                     </HStack>
                     {values.species === 'Chinook salmon' && (
                       <FormControl w='1/2'>
@@ -870,7 +884,7 @@ const AddFishContent = ({
                 flex='1'
                 py='5'
                 mx='2'
-                bg='#F9A38C'
+                bg='themeOrange'
                 shadow='5'
                 isDisabled={
                   route.params?.editModeData
