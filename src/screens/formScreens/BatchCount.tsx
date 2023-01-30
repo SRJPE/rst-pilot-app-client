@@ -34,6 +34,7 @@ import {
 import BatchCountHistogram from '../../components/form/batchCount/BatchCountHistogram'
 import { Switch } from 'native-base'
 import BatchCountDataTable from '../../components/form/batchCount/BatchCountDataTable'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -68,6 +69,11 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
 
   const handlePressSaveBatchCount = () => {
     dispatch(saveBatchCount())
+    showSlideAlert(dispatch, 'Batch Count')
+    // @ts-ignore
+    navigation.navigate('Trap Visit Form', {
+      screen: 'Fish Input',
+    })
   }
 
   const handleEditForkLengthCount = () => {
@@ -183,7 +189,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             </HStack>
             {/* using scrollView to patch the table overflow issues*/}
             {showTable ? (
-              <ScrollView maxHeight='250'>
+              <ScrollView height='234'>
                 <BatchCountDataTable
                   handleShowTableModal={handleShowTableModal}
                 />
@@ -199,8 +205,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             <HStack p='2%' justifyContent='space-between'>
               <VStack space={4}>
                 <Heading size='md'>
-                  Total Count:
-                  {calculateTotalCount()}
+                  Total Count: {calculateTotalCount()}
                 </Heading>
                 <Button bg='primary' onPress={handlePressSaveBatchCount}>
                   <Text fontSize='lg' bold color='white'>
