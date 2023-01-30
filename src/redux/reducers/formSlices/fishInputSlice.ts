@@ -96,12 +96,14 @@ export const saveFishSlice = createSlice({
       }
     },
     addForkLengthToBatchCount: (state, action) => {
+      const forkLengthsCopy = { ...state.batchCharacteristics.forkLengths }
       //add fork length to batch count
       state.batchCharacteristics.forkLengths &&
-        (state.batchCharacteristics.forkLengths[action.payload] === undefined
-          ? (state.batchCharacteristics.forkLengths[action.payload] = 1)
-          : state.batchCharacteristics.forkLengths[action.payload]++)
+        (forkLengthsCopy[action.payload] === undefined
+          ? (forkLengthsCopy[action.payload] = 1)
+          : forkLengthsCopy[action.payload]++)
       //update lastEnteredForkLength
+      state.batchCharacteristics.forkLengths = forkLengthsCopy
       state.batchCharacteristics.lastEnteredForkLength = action.payload
     },
     removeLastForkLengthEntered: (state) => {
