@@ -165,7 +165,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             >
               <Heading size='md' p='2%'>
                 {showTable
-                  ? 'Record count for each for length: '
+                  ? 'Record count for each fork length: '
                   : 'Select size range for fork length buttons: '}
               </Heading>
               <HStack alignItems='center' space={4}>

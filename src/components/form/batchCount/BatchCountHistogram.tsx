@@ -85,7 +85,7 @@ const BatchCountHistogram = ({
       >
         {/*---X AXIS---*/}
         <VictoryAxis
-          label='Fork Length'
+          label='Fork Length (mm)'
           tickFormat={(x) => x}
           tickValues={tickValues}
           style={{

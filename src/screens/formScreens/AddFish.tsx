@@ -316,7 +316,7 @@ const AddFishContent = ({
                       }))}
                     />
                   </FormControl>
-                  <FormControl>
+                  {/* <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl' paddingBottom='3'>
                         Reset Form
@@ -330,7 +330,7 @@ const AddFishContent = ({
                     >
                       Clear All Values
                     </Button>
-                  </FormControl>
+                  </FormControl> */}
                 </HStack>
 
                 <Divider mt={1} />
@@ -941,6 +941,20 @@ const AddFishContent = ({
                     navigation.goBack()
                   } else {
                     handleSubmit()
+                    resetForm({
+                      values: {
+                        species: values.species,
+                        forkLength: '',
+                        run: '',
+                        weight: '',
+                        lifeStage: '',
+                        adiposeClipped: false,
+                        existingMark: '',
+                        dead: false,
+                        willBeUsedInRecapture: false,
+                        plusCountMethod: '',
+                      },
+                    })
                   }
                 }}
               >
