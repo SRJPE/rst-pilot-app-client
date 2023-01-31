@@ -60,7 +60,13 @@ const BatchCountHistogram = ({
     processedData.forEach((element: any) => {
       tickValuesStore.push(element.forkLength)
     })
-
+    if (processedData.length <= 4) {
+      let smallestValue = tickValuesStore[0]
+      let LargestValue = tickValuesStore[tickValuesStore.length - 1]
+      let start = Math.floor(smallestValue - 2) || 0
+      let end = Math.floor(LargestValue + 2) || 5
+      tickValuesStore.push(start, end)
+    }
     const paddedTickValues = padArrayWithMissingNumbers(tickValuesStore)
     setTickValues(paddedTickValues)
   }
@@ -75,11 +81,7 @@ const BatchCountHistogram = ({
         width={667}
         height={300}
         theme={VictoryTheme.material}
-        domainPadding={30}
-        // title='TITLE'
-        // containerComponent={
-        //   <VictoryContainer title={TITLE'} />
-        // }
+        domainPadding={37}
       >
         {/*---X AXIS---*/}
         <VictoryAxis
@@ -106,6 +108,7 @@ const BatchCountHistogram = ({
           x='forkLength'
           y='count'
           labels={({ datum }) => datum.count}
+          barWidth={23}
           labelComponent={<VictoryLabel dy={25} />}
           style={{
             data: { fill: '#007C7C', opacity: 0.8 },
