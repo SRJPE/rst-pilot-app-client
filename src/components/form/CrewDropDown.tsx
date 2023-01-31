@@ -4,10 +4,12 @@ import DropDownPicker from 'react-native-dropdown-picker'
 
 export default function CrewDropDown({
   crewList,
+  setCrewList,
   setFieldValue,
   setFieldTouched,
 }: {
   crewList: any
+  setCrewList: any,
   setFieldValue: any
   setFieldTouched: any
 }) {
@@ -18,8 +20,6 @@ export default function CrewDropDown({
     setFieldValue('crew', [...value])
     setFieldTouched('crew', true)
   }, [value])
-
-  const [items, setItems] = useState([...crewList])
 
   return (
     <View
@@ -33,10 +33,10 @@ export default function CrewDropDown({
       <DropDownPicker
         open={open}
         value={value}
-        items={items}
+        items={crewList}
         setOpen={setOpen}
         setValue={setValue}
-        setItems={setItems}
+        setItems={setCrewList}
         multiple={true}
         mode='BADGE'
         badgeDotColors={['#007C7C']}

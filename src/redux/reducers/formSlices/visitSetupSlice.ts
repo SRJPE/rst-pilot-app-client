@@ -7,6 +7,8 @@ interface InitialStateI {
 }
 
 interface VisitSetupValuesI {
+  programId: number | null
+  trapLocationId: number | null
   stream: string
   trapSite: string
   crew: Array<string>
@@ -16,6 +18,8 @@ const initialState: InitialStateI = {
   completed: false,
   isPaperEntry: false,
   values: {
+    programId: null,
+    trapLocationId: null,
     stream: '',
     trapSite: '',
     crew: [],
