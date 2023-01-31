@@ -38,7 +38,7 @@ const BatchCountDataTable = ({
   return (
     <DataTable>
       <DataTable.Header>
-        <DataTable.Title numeric>Fork Length (cm)</DataTable.Title>
+        <DataTable.Title numeric>Fork Length</DataTable.Title>
         <DataTable.Title numeric>Count</DataTable.Title>
       </DataTable.Header>
       {processedData.map((forkLengthObject: any, idx: number) => {
