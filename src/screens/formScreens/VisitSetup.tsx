@@ -21,6 +21,7 @@ import CrewDropDown from '../../components/form/CrewDropDown'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../utils/helpers/yupValidations'
 import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import { uniqBy } from 'lodash'
 
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import CustomSelect from '../../components/Shared/CustomSelect'
@@ -46,14 +47,28 @@ const VisitSetup = ({
   const [selectedProgramId, setSelectedProgramId] = useState<number | null>(
     null
   )
+  const [selectedTrapLocationId, setSelectedTrapLocationId] = useState<
+    number | null
+  >(null)
+  const [showTrapNameField, setShowTrapNameField] = useState(false as boolean)
+  const [crewList, setCrewList] = useState<{ label: string; value: string }[]>(
+    []
+  )
 
   const handleSubmit = (values: any) => {
     // values.crew = ['temp1']
-    dispatch(saveVisitSetup(values))
+    const programId = selectedProgramId
+    const trapLocationId = selectedTrapLocationId
+    const payload = {
+      ...values,
+      programId,
+      trapLocationId,
+    }
+    dispatch(saveVisitSetup(payload))
     dispatch(markVisitSetupCompleted(true))
     dispatch(markStepCompleted([true, 'visitSetup']))
     dispatch(markTrapVisitPaperEntry(isPaperEntry))
-    console.log('🚀 ~ handleSubmit ~ Visit', values)
+    console.log('🚀 ~ handleSubmit ~ Visit', payload)
   }
 
   const updateSelectedProgram = (streamName: string) => {
@@ -62,6 +77,68 @@ const VisitSetup = ({
       if (program.streamName === streamName) programId = program.id
     })
     setSelectedProgramId(programId)
+    setShowTrapNameField(false)
+    generateCrewList(programId)
+  }
+
+  const updateSelectedTrapLocation = ({
+    trapSite,
+    trapName,
+  }: {
+    trapSite?: string
+    trapName?: string
+  }) => {
+    let trapLocationId = null
+    if (trapSite) {
+      const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
+        (obj: any) => obj.siteName === trapSite
+      )
+      if (trapLocations.length === 1) {
+        trapLocationId = trapLocations[0].id
+      }
+    }
+
+    if (trapName) {
+      const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
+        (obj: any) => obj.trapName === trapName
+      )
+      if (trapLocations.length === 1) {
+        trapLocationId = trapLocations[0].id
+      }
+    }
+
+    setSelectedTrapLocationId(trapLocationId)
+  }
+
+  const shouldShowTrapNameField = (trapSite: string) => {
+    let trapNameValues = visitSetupDefaultsState?.trapLocations?.filter(
+      (obj: any) => obj.siteName === trapSite
+    )
+    if (trapNameValues.length > 1) {
+      setShowTrapNameField(true)
+    } else {
+      setShowTrapNameField(false)
+    }
+  }
+
+  const generateCrewList = (programId: number | null) => {
+    let payload = [
+      {
+        label: 'No crew members found',
+        value: 'null',
+      },
+    ]
+    const crewMemberDefaults = visitSetupDefaultsState?.crewMembers
+    crewMemberDefaults.forEach((crewList: any[]) => {
+      if (crewList[0].programId === programId) {
+        payload = crewList.map((crewMember: any) => ({
+          label: `${crewMember?.firstName} ${crewMember?.lastName}`,
+          value: `${crewMember?.firstName} ${crewMember?.lastName}`,
+        }))
+      }
+    })
+
+    setCrewList(payload)
   }
 
   return (
@@ -123,12 +200,15 @@ const VisitSetup = ({
                   placeholder='Stream'
                   onValueChange={(itemValue: string) => {
                     setFieldValue('stream', itemValue)
-                    setFieldValue(
-                      'trapSite',
-                      itemValue === 'Mill Creek'
-                        ? 'Mill Creek RST'
-                        : 'Deer Creek RST'
-                    )
+                    if (itemValue === 'Mill Creek') {
+                      setFieldValue('trapSite', 'Mill Creek RST')
+                      updateSelectedTrapLocation({ trapSite: 'Mill Creek RST' })
+                    } else if (itemValue === 'Deer Creek') {
+                      setFieldValue('trapSite', 'Deer Creek RST')
+                      updateSelectedTrapLocation({ trapSite: 'Deer Creek RST' })
+                    } else {
+                      updateSelectedTrapLocation({})
+                    }
                     updateSelectedProgram(itemValue)
                   }}
                   setFieldTouched={setFieldTouched}
@@ -158,46 +238,72 @@ const VisitSetup = ({
                       selectedValue={values.trapSite}
                       placeholder='Trap Site'
                       onValueChange={(itemValue: string) => {
+                        if (itemValue !== values.trapSite) {
+                          shouldShowTrapNameField(itemValue)
+                          updateSelectedTrapLocation({ trapSite: itemValue })
+                        }
                         setFieldValue('trapSite', itemValue)
-                        setFieldValue(
-                          'stream',
-                          itemValue === 'Mill Creek RST'
-                            ? 'Mill Creek'
-                            : 'Deer Creek'
-                        )
-                        updateSelectedProgram(itemValue)
                       }}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={visitSetupDefaultsState?.trapLocations?.map(
-                        (trapLocation: any) => ({
-                          label: trapLocation?.siteName,
-                          value: trapLocation?.siteName,
-                        })
+                      selectOptions={uniqBy(
+                        visitSetupDefaultsState?.trapLocations
+                          ?.filter(
+                            (obj: any) => obj.programId === selectedProgramId
+                          )
+                          ?.map((trapLocation: any) => ({
+                            label: trapLocation?.siteName,
+                            value: trapLocation?.siteName,
+                          })),
+                        'label'
                       )}
                     />
                     {touched.trapSite &&
                       errors.trapSite &&
                       RenderErrorMessage(errors, 'trapSite')}
                   </FormControl>
+
+                  {showTrapNameField && (
+                    <FormControl>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Trap Name
+                        </Text>
+                      </FormControl.Label>
+                      <CustomSelect
+                        selectedValue={values.trapName}
+                        placeholder='Trap Name'
+                        onValueChange={(itemValue: string) => {
+                          if (itemValue !== values.trapName) {
+                            updateSelectedTrapLocation({ trapName: itemValue })
+                          }
+                          setFieldValue('trapName', itemValue)
+                        }}
+                        setFieldTouched={setFieldTouched}
+                        selectOptions={visitSetupDefaultsState?.trapLocations
+                          ?.filter(
+                            (obj: any) => obj.siteName === values.trapSite
+                          )
+                          ?.map((trapLocation: any) => ({
+                            label: trapLocation?.trapName,
+                            value: trapLocation?.trapName,
+                          }))}
+                      />
+                      {touched.trapName &&
+                        errors.trapName &&
+                        RenderErrorMessage(errors, 'trapName')}
+                    </FormControl>
+                  )}
+
                   <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
                         Crew
                       </Text>
                     </FormControl.Label>
+
                     <CrewDropDown
-                      crewList={
-                        visitSetupDefaultsState?.crewMembers[
-                          selectedProgramId ? selectedProgramId - 1 : 0
-                        ]
-                          ? visitSetupDefaultsState?.crewMembers[
-                              selectedProgramId ? selectedProgramId - 1 : 0
-                            ].map((crewMember: any) => ({
-                              label: `${crewMember?.firstName} ${crewMember?.lastName}`,
-                              value: `${crewMember?.firstName} ${crewMember?.lastName}`,
-                            }))
-                          : [{ label: 'No crew members found', value: 'null' }]
-                      }
+                      crewList={crewList}
+                      setCrewList={setCrewList}
                       setFieldValue={setFieldValue}
                       setFieldTouched={setFieldTouched}
                     />

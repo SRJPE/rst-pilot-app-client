@@ -170,9 +170,9 @@ const IncompleteSections = ({
 
     const trapVisitSubmission = {
       crew: selectedCrewIds,
-      programId: 1,
+      programId: visitSetupState.values.programId,
       visitTypeId: null,
-      trapLocationId: null,
+      trapLocationId: visitSetupState.values.trapLocationId,
       isPaperEntry: visitSetupState.isPaperEntry,
       trapVisitTimeStart: visitSetupState.isPaperEntry
         ? paperEntryState.values.startDate
