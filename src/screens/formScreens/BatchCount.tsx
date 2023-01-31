@@ -108,13 +108,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
 
   return (
     <>
-      <View
-        flex={1}
-        bg='#fff'
-        borderWidth='10'
-        borderBottomWidth='0'
-        borderColor='themeGrey'
-      >
+      <View flex={1} bg='#fff' borderWidth='10' borderColor='themeGrey'>
         <Pressable onPress={Keyboard.dismiss}>
           <HStack space={10}>
             <CustomModalHeader
@@ -261,7 +255,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
           <Modal.Body>
             <HStack alignItems='center'>
               <Text color='black' fontSize='xl'>
-                Fork Length (cm):{' '}
+                Fork Length:{' '}
               </Text>
               <Text bold color='black' fontSize='2xl'>
                 {modalData.forkLength}

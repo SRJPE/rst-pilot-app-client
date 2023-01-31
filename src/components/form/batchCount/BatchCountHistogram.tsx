@@ -8,9 +8,6 @@ import {
   VictoryTheme,
   VictoryAxis,
   VictoryLabel,
-  VictoryContainer,
-  Bar,
-  VictoryTooltip,
 } from 'victory-native'
 
 const BatchCountHistogram = ({
@@ -18,12 +15,19 @@ const BatchCountHistogram = ({
 }: {
   forkLengthsStore: any
 }) => {
+  const [tickValues, setTickValues] = useState([] as number[])
   const [processedData, setProcessedData] = useState(
     [] as { forkLength: number; count: number }[]
   )
+
   useEffect(() => {
+    calculateXAxisTickValues()
     prepareDataForGraph()
   }, [forkLengthsStore])
+
+  useEffect(() => {
+    calculateXAxisTickValues()
+  }, [processedData])
 
   const prepareDataForGraph = () => {
     const storageArray: { forkLength: number; count: number }[] = []
@@ -37,7 +41,35 @@ const BatchCountHistogram = ({
     setProcessedData(storageArray)
   }
 
-  const calculateXAxisTickValues = () => {}
+  const padArrayWithMissingNumbers = (arr: number[]): number[] => {
+    arr = Array.from(new Set(arr)).sort((a, b) => a - b)
+    const start = arr[0]
+    const end = arr[arr.length - 1]
+    let missingNumbers: number[] = []
+
+    for (let i = start; i < end; i++) {
+      if (!arr.includes(i)) {
+        missingNumbers.push(i)
+      }
+    }
+    return [...arr, ...missingNumbers]
+  }
+
+  const calculateXAxisTickValues = () => {
+    const tickValuesStore: number[] = []
+    processedData.forEach((element: any) => {
+      tickValuesStore.push(element.forkLength)
+    })
+    if (processedData.length <= 4) {
+      let smallestValue = tickValuesStore[0]
+      let LargestValue = tickValuesStore[tickValuesStore.length - 1]
+      let start = Math.floor(smallestValue - 2) || 0
+      let end = Math.floor(LargestValue + 2) || 5
+      tickValuesStore.push(start, end)
+    }
+    const paddedTickValues = padArrayWithMissingNumbers(tickValuesStore)
+    setTickValues(paddedTickValues)
+  }
   return (
     <View
       flex={1}
@@ -49,18 +81,13 @@ const BatchCountHistogram = ({
         width={667}
         height={300}
         theme={VictoryTheme.material}
-        domainPadding={30}
-        // title='TITLE'
-        // containerComponent={
-        //   <VictoryContainer title={TITLE'} />
-        // }
+        domainPadding={37}
       >
         {/*---X AXIS---*/}
         <VictoryAxis
-          label='Fork Length (cm)'
-          // tickValues={[1, 2, 3, 4]}
-          // tickFormat={['Quarter 1', 'Quarter 2', 'Quarter 3', 'Quarter 4']}
+          label='Fork Length'
           tickFormat={(x) => x}
+          tickValues={tickValues}
           style={{
             axisLabel: { fontSize: 18, padding: 30 },
             tickLabels: { fontSize: 12, padding: 5 },
@@ -81,14 +108,8 @@ const BatchCountHistogram = ({
           x='forkLength'
           y='count'
           labels={({ datum }) => datum.count}
-          labelComponent={
-            <VictoryLabel dy={25} />
-
-            // <VictoryTooltip
-            //   flyoutWidth={30}
-            //   style={{ fontSize: 20, fill: 'black' }}
-            // />
-          }
+          barWidth={23}
+          labelComponent={<VictoryLabel dy={25} />}
           style={{
             data: { fill: '#007C7C', opacity: 0.8 },
             labels: { fontSize: 16, fill: 'white' },
