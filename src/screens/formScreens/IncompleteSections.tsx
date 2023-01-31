@@ -150,6 +150,18 @@ const IncompleteSections = ({
       rpm2: endRpm2,
       rpm3: endRpm3,
     } = trapPostProcessingState.values
+    const calculateRpmAvg = (rpms: (string | null)[]) => {
+      const validRpms = rpms.filter((n) => n)
+      if (!validRpms.length) {
+        return null
+      }
+      const numericRpms = validRpms.map((str: any) => parseInt(str))
+      let counter = 0
+      numericRpms.forEach((num: number) => {
+        counter += num
+      })
+      return counter / numericRpms.length
+    }
     const selectedCrewNames: string[] = [...visitSetupState.values.crew] // ['james', 'steve']
     const selectedCrewNamesMap: Record<string, boolean> =
       selectedCrewNames.reduce(
@@ -211,15 +223,8 @@ const IncompleteSections = ({
       totalRevolutions: trapOperationsState.values.totalRevolutions
         ? parseInt(trapOperationsState.values.totalRevolutions)
         : null,
-      rpmAtStart:
-        startRpm1 && startRpm2 && startRpm3
-          ? (parseInt(startRpm1) + parseInt(startRpm2) + parseInt(startRpm3)) /
-            3
-          : null,
-      rpmAtEnd:
-        endRpm1 && endRpm2 && endRpm3
-          ? (parseInt(endRpm1) + parseInt(endRpm2) + parseInt(endRpm3)) / 3
-          : null,
+      rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
+      rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
       inHalfConeConfiguration:
         trapOperationsState.values.coneSetting === 'half' ? true : false,
       debrisVolumeLiters: trapPostProcessingState.values.debrisVolume
