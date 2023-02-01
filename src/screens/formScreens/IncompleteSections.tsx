@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -26,6 +26,7 @@ import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOp
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { flatten, uniq } from 'lodash'
+import { uid } from 'uid'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -69,6 +70,7 @@ const IncompleteSections = ({
 }) => {
   // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
+  const [tempUID, setTempUID] = useState<string>(uid())
   const stepsArray = Object.values(navigationState.steps).slice(
     0,
     numOfFormSteps - 1
@@ -181,6 +183,7 @@ const IncompleteSections = ({
     )
 
     const trapVisitSubmission = {
+      uid: tempUID,
       crew: selectedCrewIds,
       programId: visitSetupState.values.programId,
       visitTypeId: null,
@@ -267,6 +270,7 @@ const IncompleteSections = ({
     fishStoreKeys.forEach((key) => {
       const fishValue = fishInputState.fishStore[key]
       catchRawSubmissions.push({
+        uid: tempUID,
         programId: 1,
         trapVisitId: null,
         taxonCode: returnTaxonCode(fishValue),

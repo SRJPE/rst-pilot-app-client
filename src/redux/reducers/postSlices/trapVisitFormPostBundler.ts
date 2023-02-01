@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../../api/axiosConfig'
 import { RootState } from '../../store'
+import { cloneDeep } from 'lodash'
 
 interface InitialStateI {
   submissionStatus:
@@ -15,6 +16,7 @@ interface InitialStateI {
 }
 
 interface TrapVisitSubmissionI {
+  uid: string
   crew?: number[]
   id?: number
   programId?: number
@@ -41,6 +43,7 @@ interface TrapVisitSubmissionI {
 }
 
 interface CatchRawSubmissionI {
+  uid: string
   id?: number
   programId?: number
   trapVisitId?: number
@@ -83,35 +86,55 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
   'trapVisitPostBundler/postTrapVisitFormSubmissions',
   async (_, thunkAPI) => {
     const state = thunkAPI.getState() as RootState
-    let payload = {
+    let payload: {
+      trapVisitResponse: any[]
+      catchRawResponse: any[]
+    } = {
       trapVisitResponse: [],
       catchRawResponse: [],
     }
 
+    // getting submissions for trap / catch_raw
     const trapVisitSubmissions =
       state.trapVisitFormPostBundler.trapVisitSubmissions
-    if (trapVisitSubmissions.length) {
-      const apiResponse: APIResponseI = await api.post(
-        'trap-visit/',
-        trapVisitSubmissions
-      )
-      const { createdTrapVisitResponse, createdTrapVisitCrewResponse } =
-        apiResponse.data
-      createdTrapVisitResponse.forEach((trapVisit: any, idx: number) => {
-        trapVisit['crew'] = createdTrapVisitCrewResponse[idx]
-      })
-      payload.trapVisitResponse = createdTrapVisitResponse
-    }
-
     const catchRawSubmissions =
       state.trapVisitFormPostBundler.catchRawSubmissions
-    if (catchRawSubmissions.length) {
-      const apiResponse: APIResponseI = await api.post(
-        'catch-raw/',
-        catchRawSubmissions
-      )
-      payload.catchRawResponse = apiResponse.data
-    }
+
+    // for each trap visit
+    await Promise.all(
+      trapVisitSubmissions.map(async (trapSubmission: any) => {
+        console.log('hit inside of promise...')
+        const uid = trapSubmission.uid
+        const trapSubmissionCopy = cloneDeep(trapSubmission)
+        delete trapSubmissionCopy['uid']
+        console.log('hit... trapSubmissionCopy: ', trapSubmissionCopy)
+        // submit trap visit
+        const apiResponse: APIResponseI = await api.post(
+          'trap-visit/',
+          trapSubmissionCopy
+        )
+        // get response from server
+        const { createdTrapVisitResponse, createdTrapVisitCrewResponse } =
+          apiResponse.data
+        // save to payload
+        payload.trapVisitResponse.push(createdTrapVisitResponse)
+        // get all linked catch raws for iteration of trap visit
+        const linkedCatchRawSubmissions = catchRawSubmissions.filter(
+          (catchSubmission: any) => catchSubmission.uid === uid
+        )
+        // submit all linked catch_raw's and give id from trap_visit response
+        Promise.all(linkedCatchRawSubmissions.map( async (catchSubmission: any) => {
+          const catchSubmissionCopy = cloneDeep(catchSubmission)
+          delete catchSubmissionCopy['uid']
+          console.log('hit... catchSubmissionCopy: ', catchSubmissionCopy)
+          await api.post('catch-raw/', {
+            ...catchSubmissionCopy,
+            trapVisitId: createdTrapVisitResponse[0].id,
+          })
+        }))
+      })
+    )
+
     return payload
   }
 )
