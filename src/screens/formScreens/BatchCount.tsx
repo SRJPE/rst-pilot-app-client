@@ -57,14 +57,12 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     lastEnteredForkLength,
   } = fishStore.batchCharacteristics
 
-  const { height: screenHeight, width: screenWidth } = useWindowDimensions()
+  const { height: screenHeight } = useWindowDimensions()
 
   useEffect(() => {
     if (lifeStage === '') {
       setBatchCharacteristicsModalOpen(true)
     }
-    console.log('🚀 ~ BatchCount ~ width', screenWidth)
-    console.log('🚀 ~ BatchCount ~ height', screenHeight)
   }, [])
 
   const handlePressRemoveFish = () => {
