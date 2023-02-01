@@ -8,12 +8,11 @@ import {
   Text,
   Button,
   Radio,
-  Box,
-  View,
   Divider,
 } from 'native-base'
-import React from 'react'
-import { connect, useDispatch } from 'react-redux'
+
+import { Linking, Alert } from 'react-native'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addGeneticsSampleSchema } from '../../utils/helpers/yupValidations'
@@ -29,12 +28,6 @@ const initialFormValues = {
   comments: '',
 }
 
-const mapStateToProps = (state: RootState) => {
-  return {
-    crewMembers: state.visitSetup.values.crew,
-  }
-}
-
 const AddGeneticsModalContent = ({
   handleGeneticSampleFormSubmit,
   closeModal,
@@ -44,11 +37,20 @@ const AddGeneticsModalContent = ({
   closeModal: any
   crewMembers: Array<any>
 }) => {
-const dispatch = useDispatch<AppDispatch>()
+  const dispatch = useDispatch<AppDispatch>()
+  const connectivityState = useSelector((state: any) => state.connectivity)
 
   const handleFormSubmit = (values: any) => {
     handleGeneticSampleFormSubmit(values)
     showSlideAlert(dispatch, 'Genetic sample')
+  }
+
+  const OpenURLButton = () => {
+    if (connectivityState.isConnected === true) {
+      Linking.openURL('https://gvl.ucdavis.edu/protocols')
+    } else {
+      Alert.alert(`No Network Connection`)
+    }
   }
 
   return (
@@ -114,7 +116,6 @@ const dispatch = useDispatch<AppDispatch>()
                       View Genetic Sampling Protocols
                     </Text>
                   </Button>
-
                   <Button
                     bg='secondary'
                     flex={1}
@@ -122,7 +123,10 @@ const dispatch = useDispatch<AppDispatch>()
                     height='50px'
                     fontSize='16'
                     shadow='3'
-                    isDisabled={true}
+                    isDisabled={connectivityState.isConnected !== true}
+                    onPress={() => {
+                      OpenURLButton()
+                    }}
                   >
                     <Text fontSize='xl' color='primary'>
                       Watch Video
@@ -257,13 +261,18 @@ const dispatch = useDispatch<AppDispatch>()
                                 label: item,
                                 value: item,
                               }))
-                            : [{ label: 'No crew members found', value: 'null' }]
+                            : [
+                                {
+                                  label: 'No crew members found',
+                                  value: 'null',
+                                },
+                              ]
                         }
                       />
                     </FormControl>
                   </VStack>
 
-                  <View w='1/2' h='full' paddingLeft='5'>
+                  {/* <View w='1/2' h='full' paddingLeft='5'>
                     <Box w='full' borderWidth='2' borderColor='grey'>
                       <VStack alignItems='center'>
                         <Text fontSize='xl' marginBottom='2'>
@@ -272,7 +281,7 @@ const dispatch = useDispatch<AppDispatch>()
                         <Divider marginBottom='10' />
                       </VStack>
                     </Box>
-                  </View>
+                  </View> */}
                 </HStack>
 
                 <FormControl mt='2'>
@@ -298,6 +307,11 @@ const dispatch = useDispatch<AppDispatch>()
       </Formik>
     </ScrollView>
   )
+}
+const mapStateToProps = (state: RootState) => {
+  return {
+    crewMembers: state.visitSetup.values.crew,
+  }
 }
 
 export default connect(mapStateToProps)(AddGeneticsModalContent)

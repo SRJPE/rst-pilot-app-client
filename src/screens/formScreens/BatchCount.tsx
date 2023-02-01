@@ -15,7 +15,7 @@ import {
   VStack,
 } from 'native-base'
 import { useEffect, useState } from 'react'
-import { Keyboard } from 'react-native'
+import { Keyboard, useWindowDimensions } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
 import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
 import BatchCountButtonGrid from '../../components/form/batchCount/BatchCountButtonGrid'
@@ -56,6 +56,8 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     forkLengths,
     lastEnteredForkLength,
   } = fishStore.batchCharacteristics
+
+  const { height: screenHeight } = useWindowDimensions()
 
   useEffect(() => {
     if (lifeStage === '') {
@@ -108,7 +110,13 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
 
   return (
     <>
-      <View flex={1} bg='#fff' borderWidth='10' borderColor='themeGrey'>
+      <ScrollView
+        scrollEnabled={screenHeight < 1180}
+        flex={1}
+        bg='#fff'
+        borderWidth='10'
+        borderColor='themeGrey'
+      >
         <Pressable onPress={Keyboard.dismiss}>
           <HStack space={10}>
             <CustomModalHeader
@@ -233,7 +241,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             </HStack>
           </VStack>
         </Pressable>
-      </View>
+      </ScrollView>
       {/* --------- Modals --------- */}
       <CustomModal
         isOpen={batchCharacteristicsModalOpen}

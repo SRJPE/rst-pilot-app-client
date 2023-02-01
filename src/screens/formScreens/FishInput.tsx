@@ -10,6 +10,7 @@ import {
   Text,
   View,
   Icon,
+  ScrollView,
 } from 'native-base'
 import CustomModal from '../../components/Shared/CustomModal'
 import { Formik } from 'formik'
@@ -25,6 +26,7 @@ import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSli
 import FishInputDataTable from '../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../components/form/PlusCountModalContent'
 import { Ionicons } from '@expo/vector-icons'
+import { useWindowDimensions } from 'react-native'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -52,6 +54,7 @@ const FishInput = ({
       ? ([...fishInputSliceState.speciesCaptured] as Array<string>)
       : (['YOY Chinook'] as Array<string>)
   )
+  const { height: screenHeight } = useWindowDimensions()
 
   useEffect(() => {
     checkboxGroupValue.length < 1 ? setShowError(true) : setShowError(false)
@@ -70,8 +73,9 @@ const FishInput = ({
 
   return (
     <>
-      <View
+      <ScrollView
         flex={1}
+        scrollEnabled={screenHeight < 1180}
         bg='#fff'
         py='10%'
         borderColor='themeGrey'
@@ -192,7 +196,7 @@ const FishInput = ({
             }}
           />
         </CustomModal>
-      </View>
+      </ScrollView>
       <NavButtons
         navigation={navigation}
         handleSubmit={handleSubmit}

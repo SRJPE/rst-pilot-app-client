@@ -48,7 +48,7 @@ import { MaterialIcons } from '@expo/vector-icons'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { Keyboard } from 'react-native'
+import { Keyboard, useWindowDimensions } from 'react-native'
 import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
@@ -93,6 +93,7 @@ const AddFishContent = ({
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
     false as boolean
   )
+  const { height: screenHeight } = useWindowDimensions()
 
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -201,8 +202,9 @@ const AddFishContent = ({
         values,
       }) => (
         <>
-          <View
+          <ScrollView
             flex={1}
+            scrollEnabled={screenHeight < 1180}
             bg='#fff'
             borderWidth='10'
             borderBottomWidth='0'
@@ -878,7 +880,7 @@ const AddFishContent = ({
                 )}
               </VStack>
             </Pressable>
-          </View>
+          </ScrollView>
           <Box bg='themeGrey' pb='12' py='6' px='3'>
             <HStack justifyContent='space-evenly'>
               <Button
@@ -994,7 +996,7 @@ const AddFishContent = ({
             height='3/4'
           >
             <AddAnotherMarkModalContent
-              // handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
+              // handleAddAnotherMarkFormSubmit={handleAddAnotherMarkFormSubmit}
               closeModal={() => setAddMarkModalOpen(false)}
             />
           </CustomModal>
