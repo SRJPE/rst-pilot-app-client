@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -26,6 +26,7 @@ import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOp
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { flatten, uniq } from 'lodash'
+import { uid } from 'uid'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -69,6 +70,7 @@ const IncompleteSections = ({
 }) => {
   // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
+  const [tempUID, setTempUID] = useState<string>(uid())
   const stepsArray = Object.values(navigationState.steps).slice(
     0,
     numOfFormSteps - 1
@@ -150,6 +152,18 @@ const IncompleteSections = ({
       rpm2: endRpm2,
       rpm3: endRpm3,
     } = trapPostProcessingState.values
+    const calculateRpmAvg = (rpms: (string | null)[]) => {
+      const validRpms = rpms.filter((n) => n)
+      if (!validRpms.length) {
+        return null
+      }
+      const numericRpms = validRpms.map((str: any) => parseInt(str))
+      let counter = 0
+      numericRpms.forEach((num: number) => {
+        counter += num
+      })
+      return counter / numericRpms.length
+    }
     const selectedCrewNames: string[] = [...visitSetupState.values.crew] // ['james', 'steve']
     const selectedCrewNamesMap: Record<string, boolean> =
       selectedCrewNames.reduce(
@@ -169,6 +183,7 @@ const IncompleteSections = ({
     )
 
     const trapVisitSubmission = {
+      uid: tempUID,
       crew: selectedCrewIds,
       programId: visitSetupState.values.programId,
       visitTypeId: null,
@@ -211,15 +226,8 @@ const IncompleteSections = ({
       totalRevolutions: trapOperationsState.values.totalRevolutions
         ? parseInt(trapOperationsState.values.totalRevolutions)
         : null,
-      rpmAtStart:
-        startRpm1 && startRpm2 && startRpm3
-          ? (parseInt(startRpm1) + parseInt(startRpm2) + parseInt(startRpm3)) /
-            3
-          : null,
-      rpmAtEnd:
-        endRpm1 && endRpm2 && endRpm3
-          ? (parseInt(endRpm1) + parseInt(endRpm2) + parseInt(endRpm3)) / 3
-          : null,
+      rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
+      rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
       inHalfConeConfiguration:
         trapOperationsState.values.coneSetting === 'half' ? true : false,
       debrisVolumeLiters: trapPostProcessingState.values.debrisVolume
@@ -262,6 +270,7 @@ const IncompleteSections = ({
     fishStoreKeys.forEach((key) => {
       const fishValue = fishInputState.fishStore[key]
       catchRawSubmissions.push({
+        uid: tempUID,
         programId: 1,
         trapVisitId: null,
         taxonCode: returnTaxonCode(fishValue),

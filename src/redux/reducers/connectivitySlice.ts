@@ -39,6 +39,7 @@ export const connectionChanged = createAsyncThunk(
   'connectivitySlice/connectionChanged',
   async (connectionState: ConnectivityInfoI, thunkAPI) => {
     const payload = connectionState
+    console.log('connection changed...')
     try {
       thunkAPI.dispatch(postTrapVisitFormSubmissions())
       return payload
