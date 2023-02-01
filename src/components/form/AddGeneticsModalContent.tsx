@@ -46,7 +46,7 @@ const AddGeneticsModalContent = ({
   }
 
   const OpenURLButton = () => {
-    if (connectivityState.isInternetReachable === true) {
+    if (connectivityState.isConnected === true) {
       Linking.openURL('https://gvl.ucdavis.edu/protocols')
     } else {
       Alert.alert(`No Network Connection`)
@@ -123,7 +123,7 @@ const AddGeneticsModalContent = ({
                     height='50px'
                     fontSize='16'
                     shadow='3'
-                    isDisabled={connectivityState.isInternetReachable !== true}
+                    isDisabled={connectivityState.isConnected !== true}
                     onPress={() => {
                       OpenURLButton()
                     }}
