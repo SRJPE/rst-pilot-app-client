@@ -22,7 +22,7 @@ export interface IndividualFishValuesI {
   adiposeClipped: boolean | null
   existingMark: string
   dead: boolean | null
-  willBeUsedInRecapture: null
+  willBeUsedInRecapture: boolean | null
   plusCountMethod: string // | number
   numFishCaught?: number | null
   plusCount?: boolean

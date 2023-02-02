@@ -51,6 +51,7 @@ interface CatchRawSubmissionI {
   captureRunClass?: number
   captureRunClassMethod?: number
   markType?: number
+  markedForRelease?: boolean
   adiposeClipped?: boolean
   lifeStage?: number
   forkLength?: number

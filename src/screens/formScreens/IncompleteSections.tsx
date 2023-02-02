@@ -251,6 +251,7 @@ const IncompleteSections = ({
     const plusCountMethodValues = returnDefinitionArray(
       dropdownsState.values.plusCountMethodology
     )
+    const runValues = returnDefinitionArray(dropdownsState.values.run)
     const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
       let code = null
       dropdownsState.values.taxon.forEach((taxonValue: any) => {
@@ -274,9 +275,14 @@ const IncompleteSections = ({
         programId: 1,
         trapVisitId: null,
         taxonCode: returnTaxonCode(fishValue),
-        captureRunClass: null,
-        captureRunClassMethod: null,
-        markType: null, // Check w/ Erin
+        captureRunClass: returnNullableTableId(
+          runValues.indexOf(fishValue.run)
+        ),
+        // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
+        captureRunClassMethod: fishValue.run ? 6 : null,
+        // defaults to "none" (id: 1) if not selected
+        markType: 1, // Check w/ Erin
+        markedForRelease: fishValue.willBeUsedInRecapture,
         adiposeClipped: fishValue.adiposeClipped,
         dead: fishValue.dead,
         lifeStage: returnNullableTableId(
