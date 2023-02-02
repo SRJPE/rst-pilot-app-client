@@ -278,9 +278,10 @@ const IncompleteSections = ({
         captureRunClass: returnNullableTableId(
           runValues.indexOf(fishValue.run)
         ),
-        // save capture run class method as 6 if selected from fish input dropdown
+        // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
         captureRunClassMethod: fishValue.run ? 6 : null,
-        markType: null, // Check w/ Erin
+        // defaults to "none" (id: 1) if not selected
+        markType: 1, // Check w/ Erin
         markedForRelease: fishValue.willBeUsedInRecapture,
         adiposeClipped: fishValue.adiposeClipped,
         dead: fishValue.dead,
