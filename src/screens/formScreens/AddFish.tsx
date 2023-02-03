@@ -431,7 +431,7 @@ const AddFishContent = ({
                         <Text
                           color='#A1A1A1'
                           position='absolute'
-                          top={60}
+                          top={50}
                           right={4}
                           fontSize={16}
                         >
@@ -872,7 +872,7 @@ const AddFishContent = ({
                           maxWidth='40%'
                           onPress={() => setAddGeneticModalOpen(true)}
                         >
-                          <Text color='primary'>Tag Genetic Sample</Text>
+                          <Text color='primary'>Take Genetic Sample</Text>
                         </Button>
                       )}
                     </HStack>
@@ -899,6 +899,20 @@ const AddFishContent = ({
                     navigation.goBack()
                   } else {
                     handleSubmit()
+                    resetForm({
+                      values: {
+                        species: values.species,
+                        forkLength: '',
+                        run: '',
+                        weight: '',
+                        lifeStage: '',
+                        adiposeClipped: false,
+                        existingMark: '',
+                        dead: false,
+                        willBeUsedInRecapture: false,
+                        plusCountMethod: '',
+                      },
+                    })
                     navigation.goBack()
                   }
                 }}

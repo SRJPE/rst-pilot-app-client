@@ -78,20 +78,6 @@ export default function StartMarkRecapture({
               QC Data
             </Text>
           </Button>
-          <Button
-            bg='primary'
-            rounded='xs'
-            alignSelf='center'
-            py='5'
-            minWidth='50%'
-            borderRadius='5'
-            isDisabled={true}
-            onPress={handlePressReturnToTrapVisit}
-          >
-            <Text fontWeight='bold' fontSize='lg' color='#FFF'>
-              Return To Trap Visit
-            </Text>
-          </Button>
         </VStack>
       </View>
     </>
