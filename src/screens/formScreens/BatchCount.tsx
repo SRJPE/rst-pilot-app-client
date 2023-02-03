@@ -49,7 +49,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     count: '',
   } as any)
   const {
-    lifeStage,
+    species,
     adiposeClipped,
     dead,
     existingMark,
@@ -60,7 +60,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const { height: screenHeight } = useWindowDimensions()
 
   useEffect(() => {
-    if (lifeStage === '') {
+    if (species === '') {
       setBatchCharacteristicsModalOpen(true)
     }
   }, [])
@@ -134,7 +134,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             <HStack space={6}>
               <Text bold>Selected Batch Characteristics:</Text>
               <Text>
-                Life Stage: <Text bold>{capitalize(lifeStage)}</Text>
+                Species: <Text bold>{capitalize(species)}</Text>
               </Text>
               <Text>
                 Adiposed Clipped:{' '}
