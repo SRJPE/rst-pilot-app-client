@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
+import { calculateLifeStage } from '../../../utils/utils'
 
 interface InitialStateI {
   completed: boolean
@@ -146,7 +147,7 @@ export const saveFishSlice = createSlice({
           forkLength: Number(key),
           run: null,
           weight: null,
-          lifeStage: null,
+          lifeStage: calculateLifeStage(Number(key)),
           adiposeClipped: state.batchCharacteristics.adiposeClipped,
           existingMark: state.batchCharacteristics.existingMark,
           dead: state.batchCharacteristics.dead,
