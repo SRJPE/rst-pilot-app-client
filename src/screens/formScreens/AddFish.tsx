@@ -181,8 +181,6 @@ const AddFishContent = ({
       initialValues={
         route.params?.editModeData
           ? route.params.editModeData
-          : lastAddedFish
-          ? lastAddedFish
           : individualFishInitialState
       }
       onSubmit={(values) => {
@@ -444,7 +442,7 @@ const AddFishContent = ({
                       {(values.species === 'Chinook salmon' ||
                         values.species === 'Steelhead / rainbow trout') && (
                         <FormControl w='1/2' paddingRight='5'>
-                          <HStack space={2} alignItems='center'>
+                          <HStack space={2} alignItems='center' mb='-1.5'>
                             <FormControl.Label>
                               <Text color='black' fontSize='xl'>
                                 Life Stage{' '}
@@ -899,20 +897,6 @@ const AddFishContent = ({
                     navigation.goBack()
                   } else {
                     handleSubmit()
-                    resetForm({
-                      values: {
-                        species: values.species,
-                        forkLength: '',
-                        run: '',
-                        weight: '',
-                        lifeStage: '',
-                        adiposeClipped: false,
-                        existingMark: '',
-                        dead: false,
-                        willBeUsedInRecapture: false,
-                        plusCountMethod: '',
-                      },
-                    })
                     navigation.goBack()
                   }
                 }}
@@ -956,7 +940,10 @@ const AddFishContent = ({
                     })
                     navigation.goBack()
                   } else {
-                    handleSubmit()
+                    // bypasses formik to fix async issues.
+                    // This should be fine since the button is only enabled when the form is valid
+                    saveIndividualFish({ ...values })
+                    showSlideAlert(dispatch, 'Fish')
                     resetForm({
                       values: {
                         species: values.species,
