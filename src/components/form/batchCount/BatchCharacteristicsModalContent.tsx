@@ -102,7 +102,6 @@ const BatchCharacteristicsModalContent = ({
                 Please return to the individual fish input if you plan on
                 marking or sampling a fish.
               </Text>
-              {/* <HStack alignItems='center'> */}
               <FormControl w='1/2' pr='5'>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
@@ -117,17 +116,7 @@ const BatchCharacteristicsModalContent = ({
                 <CustomSelect
                   selectedValue={values.species}
                   placeholder={'Species'}
-                  onValueChange={(value: any) => {
-                    // resetForm(resetFormValues)
-                    handleChange('species')(value)
-                    // if (value == 'Chinook salmon') {
-                    //   setValidationSchema('default')
-                    // } else if (value == 'Steelhead / rainbow trout') {
-                    //   setValidationSchema('optionalLifeStage')
-                    // } else {
-                    //   setValidationSchema('otherSpecies')
-                    // }
-                  }}
+                  onValueChange={(value: any) => handleChange('species')(value)}
                   setFieldTouched={setFieldTouched}
                   selectOptions={reorderedTaxon.map((taxon: any) => ({
                     label: taxon?.commonname,
