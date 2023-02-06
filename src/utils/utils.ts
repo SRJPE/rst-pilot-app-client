@@ -47,6 +47,22 @@ export const buttonLookup: any = {
   '> 160': 160,
 }
 
+export const calculateLifeStage = (forkLength: number) => {
+  //look over the the values of lookup, return the first key that is >= forkLength
+  const lifeStageLookup: any = {
+    'Yolk Sac Fry': 20,
+    Fry: 40,
+    Parr: 80,
+    'Silvery Parr': 120,
+    Smolt: 160,
+  }
+  for (const key in lifeStageLookup) {
+    if (forkLength <= lifeStageLookup[key]) {
+      return key
+    }
+  }
+}
+
 export const QARanges = {
   flowMeasure: { max: 3000, min: null },
   waterTemperature: { maxF: 100, maxC: 30, min: null },

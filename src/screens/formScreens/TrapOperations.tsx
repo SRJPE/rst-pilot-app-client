@@ -255,8 +255,7 @@ const TrapOperations = ({
                 {values.trapStatus.length > 0 &&
                   values.trapStatus !== trapNotInServiceIdentifier && (
                     <>
-                      <HStack space={10}>
-                        <FormControl w='47%'>
+                      {/* <FormControl w='47%'>
                           <HStack space={4} alignItems='center'>
                             <FormControl.Label>
                               <Text color='black' fontSize='xl'>
@@ -289,34 +288,8 @@ const TrapOperations = ({
                           >
                             {'in'}
                           </Text>
-                        </FormControl>
+                        </FormControl> */}
 
-                        <FormControl w='47%'>
-                          <HStack space={4} alignItems='center'>
-                            <FormControl.Label>
-                              <Text color='black' fontSize='xl'>
-                                Total Revolutions
-                              </Text>
-                            </FormControl.Label>
-                            {Number(values.totalRevolutions) >
-                              QARanges.totalRevolutions.max && (
-                              <RenderWarningMessage />
-                            )}
-                            {touched.totalRevolutions &&
-                              errors.totalRevolutions &&
-                              RenderErrorMessage(errors, 'totalRevolutions')}
-                          </HStack>
-                          <OptimizedInput
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('totalRevolutions')}
-                            onBlur={handleBlur('totalRevolutions')}
-                            value={values.totalRevolutions}
-                          />
-                        </FormControl>
-                      </HStack>
                       <FormControl w='30%'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
@@ -468,6 +441,31 @@ const TrapOperations = ({
                           minute before cleaning the trap.
                         </Text>
                       </FormControl>
+                      <FormControl w='47%'>
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Total Revolutions
+                            </Text>
+                          </FormControl.Label>
+                          {Number(values.totalRevolutions) >
+                            QARanges.totalRevolutions.max && (
+                            <RenderWarningMessage />
+                          )}
+                          {touched.totalRevolutions &&
+                            errors.totalRevolutions &&
+                            RenderErrorMessage(errors, 'totalRevolutions')}
+                        </HStack>
+                        <OptimizedInput
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={handleChange('totalRevolutions')}
+                          onBlur={handleBlur('totalRevolutions')}
+                          value={values.totalRevolutions}
+                        />
+                      </FormControl>
                       <Heading>Environmental Conditions</Heading>
                       <HStack space={5} width='125%'>
                         <FormControl w='1/4'>
@@ -563,7 +561,9 @@ const TrapOperations = ({
           <NavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}
-            errors={values.trapStatus !== trapNotInServiceIdentifier ? errors : null}
+            errors={
+              values.trapStatus !== trapNotInServiceIdentifier ? errors : null
+            }
             touched={touched}
             values={values}
           />

@@ -9,7 +9,9 @@ import {
   Input,
   Modal,
   Pressable,
+  Radio,
   ScrollView,
+  Stack,
   Text,
   View,
   VStack,
@@ -49,7 +51,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     count: '',
   } as any)
   const {
-    lifeStage,
+    species,
     adiposeClipped,
     dead,
     existingMark,
@@ -59,8 +61,11 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
 
   const { height: screenHeight } = useWindowDimensions()
 
+  //this is not yet hooked up to the fork length button Group interface
+  const [lifeStageRadioValue, setLifeStageRadioValue] = useState('' as string)
+
   useEffect(() => {
-    if (lifeStage === '') {
+    if (species === '') {
       setBatchCharacteristicsModalOpen(true)
     }
   }, [])
@@ -76,6 +81,11 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     navigation.navigate('Trap Visit Form', {
       screen: 'Fish Input',
     })
+  }
+  const handlePressSaveAndStartNewBatchCount = () => {
+    dispatch(saveBatchCount())
+    showSlideAlert(dispatch, 'Batch Count')
+    setBatchCharacteristicsModalOpen(true)
   }
 
   const handleEditForkLengthCount = () => {
@@ -130,11 +140,11 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             />
           </HStack>
           <Divider m='1%' />
-          <Box p='2%'>
-            <HStack space={6}>
+          <Box px='2%'>
+            <HStack space={6} mb='2'>
               <Text bold>Selected Batch Characteristics:</Text>
               <Text>
-                Life Stage: <Text bold>{capitalize(lifeStage)}</Text>
+                Species: <Text bold>{capitalize(species)}</Text>
               </Text>
               <Text>
                 Adiposed Clipped:{' '}
@@ -147,11 +157,86 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                 Mark: <Text bold>{existingMark ? existingMark : 'N/A'}</Text>
               </Text>
             </HStack>
-            <Pressable onPress={() => setBatchCharacteristicsModalOpen(true)}>
-              <Text fontSize='16' color='primary' bold>
-                New Batch
-              </Text>
-            </Pressable>
+            <HStack space={4}>
+              <Pressable onPress={handlePressSaveAndStartNewBatchCount}>
+                <Text fontSize='16' color='primary' bold>
+                  Save and Start New Batch
+                </Text>
+              </Pressable>
+              <Pressable onPress={() => setBatchCharacteristicsModalOpen(true)}>
+                <Text fontSize='16' color='primary' bold>
+                  Update Batch Characteristics
+                </Text>
+              </Pressable>
+            </HStack>
+          </Box>
+          <Divider m='1%' />
+          <Box px='2%'>
+            <HStack space={6} alignItems='center'>
+              <Text bold>Life Stage:</Text>
+              <Radio.Group
+                name='lifeStageRadioGroup'
+                value={lifeStageRadioValue}
+                onChange={(nextValue) => {
+                  setLifeStageRadioValue(nextValue)
+                }}
+              >
+                <Stack
+                  direction={{
+                    base: 'column',
+                    md: 'row',
+                  }}
+                  alignItems={{
+                    base: 'flex-start',
+                    md: 'center',
+                  }}
+                  space={10}
+                  w='75%'
+                  maxW='300px'
+                >
+                  <Radio
+                    colorScheme='primary'
+                    value='Yolk Sac Fry'
+                    my={1}
+                    _icon={{ color: 'primary' }}
+                  >
+                    Yolk Sac Fry
+                  </Radio>
+                  <Radio
+                    colorScheme='primary'
+                    value=' Fry'
+                    my={1}
+                    _icon={{ color: 'primary' }}
+                  >
+                    Fry
+                  </Radio>
+                  <Radio
+                    colorScheme='primary'
+                    value='Parr'
+                    my={1}
+                    _icon={{ color: 'primary' }}
+                  >
+                    Parr
+                  </Radio>
+                  <Radio
+                    colorScheme='primary'
+                    value='Silvery Parr'
+                    my={1}
+                    _icon={{ color: 'primary' }}
+                  >
+                    Silvery Parr
+                  </Radio>
+                  <Radio
+                    colorScheme='primary'
+                    value='Smolt'
+                    my={1}
+                    _icon={{ color: 'primary' }}
+                  >
+                    Smolt
+                  </Radio>
+                </Stack>
+              </Radio.Group>
+            </HStack>
           </Box>
           <Divider m='1%' />
           <Box

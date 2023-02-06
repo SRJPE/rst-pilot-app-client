@@ -17,13 +17,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { saveBatchCharacteristics } from '../../../redux/reducers/formSlices/fishInputSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { alphabeticalSort } from '../../../utils/utils'
+import { alphabeticalSort, reorderTaxon } from '../../../utils/utils'
 import CustomModalHeader from '../../Shared/CustomModalHeader'
 import CustomSelect from '../../Shared/CustomSelect'
 import RenderErrorMessage from '../../Shared/RenderErrorMessage'
 
 const initialFormValues = {
-  lifeStage: '',
+  species: '',
   adiposeClipped: false,
   dead: false,
   existingMark: '',
@@ -39,6 +39,8 @@ const BatchCharacteristicsModalContent = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+
+  const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
   const alphabeticalLifeStage = alphabeticalSort(
     dropdownValues.lifeStage,
@@ -100,20 +102,25 @@ const BatchCharacteristicsModalContent = ({
                 Please return to the individual fish input if you plan on
                 marking or sampling a fish.
               </Text>
-              <FormControl w='1/2' paddingRight='5'>
+              <FormControl w='1/2' pr='5'>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
-                    Life Stage{' '}
+                    Species
                   </Text>
                 </FormControl.Label>
+
+                {touched.species &&
+                  errors.species &&
+                  RenderErrorMessage(errors, 'species')}
+
                 <CustomSelect
-                  selectedValue={values.lifeStage}
-                  placeholder={'Life Stage'}
-                  onValueChange={handleChange('lifeStage')}
+                  selectedValue={values.species}
+                  placeholder={'Species'}
+                  onValueChange={(value: any) => handleChange('species')(value)}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={alphabeticalLifeStage.map((item: any) => ({
-                    label: item?.definition,
-                    value: item?.definition,
+                  selectOptions={reorderedTaxon.map((taxon: any) => ({
+                    label: taxon?.commonname,
+                    value: taxon?.commonname,
                   }))}
                 />
               </FormControl>

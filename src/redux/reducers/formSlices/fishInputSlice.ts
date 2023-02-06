@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
+import { calculateLifeStage } from '../../../utils/utils'
 
 interface InitialStateI {
   completed: boolean
@@ -48,7 +49,7 @@ export interface FishInputValuesI {
 }
 
 export interface batchCharacteristicsI {
-  lifeStage: string
+  species: string
   adiposeClipped: boolean
   dead: boolean
   existingMark: string
@@ -56,7 +57,7 @@ export interface batchCharacteristicsI {
   lastEnteredForkLength: any
 }
 export const batchCharacteristicsInitialState: batchCharacteristicsI = {
-  lifeStage: '',
+  species: '',
   adiposeClipped: false,
   dead: false,
   existingMark: '',
@@ -81,13 +82,13 @@ export const saveFishSlice = createSlice({
       state.speciesCaptured = action.payload
     },
     saveBatchCharacteristics: (state, action) => {
-      const { lifeStage, adiposeClipped, dead, existingMark } = action.payload
+      const { species, adiposeClipped, dead, existingMark } = action.payload
       const forkLengthsCopy = { ...state.batchCharacteristics.forkLengths }
       const lastEnteredForkLengthCopy =
         state.batchCharacteristics.lastEnteredForkLength
 
       state.batchCharacteristics = {
-        lifeStage,
+        species,
         adiposeClipped,
         dead,
         existingMark,
@@ -141,12 +142,12 @@ export const saveFishSlice = createSlice({
 
       for (let key in forkLengthsCopy) {
         const batchCountEntry = {
-          species: 'Chinook salmon',
+          species: state.batchCharacteristics.species,
           numFishCaught: forkLengthsCopy[key],
           forkLength: Number(key),
           run: null,
           weight: null,
-          lifeStage: state.batchCharacteristics.lifeStage,
+          lifeStage: calculateLifeStage(Number(key)),
           adiposeClipped: state.batchCharacteristics.adiposeClipped,
           existingMark: state.batchCharacteristics.existingMark,
           dead: state.batchCharacteristics.dead,
@@ -168,7 +169,7 @@ export const saveFishSlice = createSlice({
 
       state.fishStore = fishStoreCopy
       state.batchCharacteristics = {
-        lifeStage: '',
+        species: '',
         adiposeClipped: false,
         dead: false,
         existingMark: '',
