@@ -64,7 +64,12 @@ export const calculateLifeStage = (forkLength: number) => {
 }
 
 export const QARanges = {
-  flowMeasure: { max: 3000, min: null },
+  flowMeasure: {
+    'Mill Creek': { max: 2000, min: null },
+    'Deer Creek': { max: 2000, min: null },
+    'Feather River': { max: 5000, min: 800 },
+    'Yuba River': { max: 3500, min: 50 },
+  } as any,
   waterTemperature: { maxF: 100, maxC: 30, min: null },
   waterTurbidity: { max: 1000, min: null },
   coneDepth: { max: 100, min: null }, //need actual values

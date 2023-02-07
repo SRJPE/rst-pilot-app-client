@@ -37,14 +37,17 @@ import { updateTrapVisitStartTime } from '../../redux/reducers/formSlices/trapPo
 const mapStateToProps = (state: RootState) => {
   return {
     reduxState: state.trapOperations,
+    selectedStream: state.visitSetup.values.stream,
   }
 }
 const TrapOperations = ({
   navigation,
   reduxState,
+  selectedStream,
 }: {
   navigation: any
   reduxState: any
+  selectedStream: string
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
@@ -484,10 +487,16 @@ const TrapOperations = ({
                             value={values.flowMeasure}
                           />
                           {inputUnit(values.flowMeasureUnit)}
-                          {Number(values.flowMeasure) >
-                            QARanges.flowMeasure.max && (
-                            <RenderWarningMessage />
-                          )}
+                          {touched.flowMeasure &&
+                            Number(values.flowMeasure) >
+                              QARanges.flowMeasure[selectedStream].max && (
+                              <RenderWarningMessage />
+                            )}
+                          {touched.flowMeasure &&
+                            Number(values.flowMeasure) <
+                              QARanges.flowMeasure[selectedStream].min && (
+                              <RenderWarningMessage />
+                            )}
                           {touched.flowMeasure &&
                             errors.flowMeasure &&
                             RenderErrorMessage(errors, 'flowMeasure')}
