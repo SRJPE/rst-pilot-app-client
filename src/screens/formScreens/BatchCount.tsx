@@ -231,9 +231,9 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                     <Radio.Group
                       name='lifeStageRadioGroup'
                       value={lifeStageRadioValue}
-                      onChange={(nextValue) => {
-                        setLifeStageRadioValue(nextValue)
-                      }}
+                      // onChange={(nextValue) => {
+                      //   setLifeStageRadioValue(nextValue)
+                      // }}
                     >
                       <Stack
                         direction={{
