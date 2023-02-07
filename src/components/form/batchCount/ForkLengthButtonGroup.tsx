@@ -3,12 +3,18 @@ import React, { useState } from 'react'
 import { buttonLookup } from '../../../utils/utils'
 
 const ForkLengthButtonGroup = ({
-  setForkLengthRange,
+  setFirstButton,
+  setLifeStageRadioValue,
+  setNumberOfAdditionalButtons,
 }: {
-  setForkLengthRange: any
+  setFirstButton: any
+  setLifeStageRadioValue: any
+  setNumberOfAdditionalButtons: any
 }) => {
   const handlePressGroupButton = (key: string) => {
-    setForkLengthRange(buttonLookup[key])
+    setFirstButton(buttonLookup[key].firstButton)
+    setNumberOfAdditionalButtons(buttonLookup[key].additionalButtons)
+    setLifeStageRadioValue(buttonLookup[key].lifeStage)
   }
 
   return (
@@ -21,8 +27,14 @@ const ForkLengthButtonGroup = ({
       {buttonLookup &&
         Object.keys(buttonLookup).map((label: string, idx: number) => (
           <Button
+            // bg='secondary'
+            // _focus={{ bg: 'secondary' }}
+            // _pressed={{ bg: 'secondary' }}
+            isFocused
             key={idx}
             borderWidth='1'
+            px='5%'
+            shadow='3'
             onPress={() => handlePressGroupButton(label)}
           >
             <Text fontSize='md'>{label}</Text>
