@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -52,6 +52,9 @@ import { Keyboard, useWindowDimensions } from 'react-native'
 import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
+import SpeciesPopoverContent from '../../components/form/popovers/SpeciesPopoverContent'
+import LifeStagePopoverContent from '../../components/form/popovers/LifeStagePopoverContent'
+import AddExistingMarkPopoverContent from '../../components/form/popovers/AddExistingMarkPopoverContent'
 
 const AddFishContent = ({
   route,
@@ -175,6 +178,17 @@ const AddFishContent = ({
       screen: 'Batch Count',
     })
   }
+
+  const popoverTrigger = (triggerProps: any) => {
+    return (
+      <IconButton
+        {...triggerProps}
+        icon={<Icon as={MaterialIcons} name='info-outline' size='lg' />}
+      ></IconButton>
+    )
+  }
+  const [species, setSpecies] = useState('' as string)
+
   return (
     <Formik
       validationSchema={validationSchemas[validationSchema]}
@@ -239,56 +253,9 @@ const AddFishContent = ({
                       </FormControl.Label>
                       <Popover
                         placement='bottom right'
-                        trigger={(triggerProps) => {
-                          return (
-                            <IconButton
-                              {...triggerProps}
-                              icon={
-                                <Icon
-                                  as={MaterialIcons}
-                                  name='info-outline'
-                                  size='xl'
-                                />
-                              }
-                            ></IconButton>
-                          )
-                        }}
+                        trigger={popoverTrigger}
                       >
-                        <Popover.Content
-                          mx='10'
-                          mb='10'
-                          accessibilityLabel='Species Lookup'
-                          minW='720'
-                          minH='300'
-                          backgroundColor='light.100'
-                        >
-                          <Popover.Arrow />
-                          <Popover.CloseButton />
-                          <Popover.Body p={0}>
-                            <ScrollView>
-                              <Image
-                                source={require('../../../assets/speciesID/Species_ID_Sheet_1-1.jpg')}
-                                alt='Species ID'
-                                size='1000px'
-                              />
-                              <Image
-                                source={require('../../../assets/speciesID/Species_ID_Sheet_2-2.jpg')}
-                                alt='Species ID'
-                                size='1000px'
-                              />
-                              <Image
-                                source={require('../../../assets/speciesID/Species_ID_Sheet_3-3.jpg')}
-                                alt='Species ID'
-                                size='1000px'
-                              />
-                              <Image
-                                source={require('../../../assets/speciesID/Species_ID_Sheet_4-end.jpg')}
-                                alt='Species ID'
-                                size='1000px'
-                              />
-                            </ScrollView>
-                          </Popover.Body>
-                        </Popover.Content>
+                        <SpeciesPopoverContent />
                       </Popover>
 
                       {touched.species &&
@@ -301,6 +268,7 @@ const AddFishContent = ({
                       onValueChange={(value: any) => {
                         resetForm(resetFormValues)
                         handleChange('species')(value)
+                        setSpecies(value)
                         if (value == 'Chinook salmon') {
                           setValidationSchema('default')
                         } else if (value == 'Steelhead / rainbow trout') {
@@ -334,7 +302,7 @@ const AddFishContent = ({
                 </HStack>
 
                 <Divider mt={1} />
-                {values.species.length > 0 && (
+                {species.length > 0 && (
                   <>
                     {route.params?.editModeData ? (
                       <HStack alignItems='center'>
@@ -397,8 +365,8 @@ const AddFishContent = ({
                       <FormControl
                         w='47%'
                         paddingLeft={
-                          values.species === 'Chinook salmon' ||
-                          values.species === 'Steelhead / rainbow trout'
+                          species === 'Chinook salmon' ||
+                          species === 'Steelhead / rainbow trout'
                             ? '5'
                             : '0'
                         }
@@ -439,8 +407,8 @@ const AddFishContent = ({
                     </HStack>
 
                     <HStack space={4} alignItems='center'>
-                      {(values.species === 'Chinook salmon' ||
-                        values.species === 'Steelhead / rainbow trout') && (
+                      {(species === 'Chinook salmon' ||
+                        species === 'Steelhead / rainbow trout') && (
                         <FormControl w='1/2' paddingRight='5'>
                           <HStack space={2} alignItems='center' mb='-1.5'>
                             <FormControl.Label>
@@ -454,43 +422,9 @@ const AddFishContent = ({
 
                             <Popover
                               placement='bottom right'
-                              trigger={(triggerProps) => {
-                                return (
-                                  <IconButton
-                                    {...triggerProps}
-                                    icon={
-                                      <Icon
-                                        as={MaterialIcons}
-                                        name='info-outline'
-                                        size='xl'
-                                      />
-                                    }
-                                  ></IconButton>
-                                )
-                              }}
+                              trigger={popoverTrigger}
                             >
-                              <Popover.Content
-                                ml='10'
-                                accessibilityLabel='Existing Mark Info'
-                                w='720'
-                                h='600'
-                              >
-                                <Popover.Arrow />
-                                <Popover.CloseButton />
-                                <Popover.Body p={0}>
-                                  <ScrollView>
-                                    <Image
-                                      source={require('../../../assets/life_stage_image.png')}
-                                      alt='Life Stage Image'
-                                      width='720'
-                                    />
-                                    <Image
-                                      source={require('../../../assets/life_stage_table.png')}
-                                      alt='Life Stage Image'
-                                    />
-                                  </ScrollView>
-                                </Popover.Body>
-                              </Popover.Content>
+                              <LifeStagePopoverContent />
                             </Popover>
                             {touched.lifeStage &&
                               errors.lifeStage &&
@@ -509,7 +443,7 @@ const AddFishContent = ({
                                   item?.definition?.includes('adult')
                                 ) {
                                   return item
-                                } else if (values.species == 'Chinook salmon') {
+                                } else if (species == 'Chinook salmon') {
                                   return item
                                 }
                               })
@@ -535,7 +469,7 @@ const AddFishContent = ({
                         />
                       </FormControl>
                     </HStack>
-                    {values.species === 'Chinook salmon' && (
+                    {species === 'Chinook salmon' && (
                       <FormControl w='1/2'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
@@ -574,8 +508,8 @@ const AddFishContent = ({
                         </Radio.Group>
                       </FormControl>
                     )}
-                    {(values.species == 'Chinook salmon' ||
-                      values.species == 'Steelhead / rainbow trout') && (
+                    {(species == 'Chinook salmon' ||
+                      species == 'Steelhead / rainbow trout') && (
                       <FormControl w='full'>
                         <HStack space={2} alignItems='center'>
                           <FormControl.Label>
@@ -585,69 +519,9 @@ const AddFishContent = ({
                           </FormControl.Label>
                           <Popover
                             placement='top right'
-                            trigger={(triggerProps) => {
-                              return (
-                                <IconButton
-                                  {...triggerProps}
-                                  icon={
-                                    <Icon
-                                      as={MaterialIcons}
-                                      name='info-outline'
-                                      size='xl'
-                                    />
-                                  }
-                                ></IconButton>
-                              )
-                            }}
+                            trigger={popoverTrigger}
                           >
-                            <Popover.Content
-                              accessibilityLabel='Existing Mark  Info'
-                              w='600'
-                              ml='10'
-                            >
-                              <Popover.Arrow />
-                              <Popover.CloseButton />
-                              <Popover.Header>
-                                Click on one more existing mark buttons to add
-                                marks.
-                              </Popover.Header>
-                              <Popover.Body p={4}>
-                                <VStack space={2}>
-                                  <Text fontSize='md'>
-                                    The existing mark buttons display
-                                    abbreviated versions of marks recently used
-                                    for efficiency trials. If you catch a fish
-                                    with other existing marks, please click on
-                                    “select another mark type”. This will open
-                                    up a window where you can specify mark type,
-                                    color, position, and code if applicable.
-                                  </Text>
-                                  <Divider />
-
-                                  <Text fontSize='md'>
-                                    Abbreviations follow a consistent format
-                                    “mark type abbreviation - color abbreviation
-                                    - position abbreviation”. All of these
-                                    fields are only applicable to some mark
-                                    types. Any fields that are not applicable to
-                                    a particular mark type are left blank.
-                                  </Text>
-                                  <Text fontSize='md'>
-                                    Below are some examples of common marks:
-                                  </Text>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Avatar size={'2'} mt={'2'} />
-                                    <Text fontSize='md'>
-                                      CWT: Coded wire tag
-                                    </Text>
-                                  </HStack>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Avatar size={'2'} mt={'2'} />
-                                    <Text fontSize='md'>Fin Clip</Text>
-                                  </HStack>
-                                </VStack>
-                              </Popover.Body>
-                            </Popover.Content>
+                            <AddExistingMarkPopoverContent />
                           </Popover>
                         </HStack>
 
@@ -718,7 +592,7 @@ const AddFishContent = ({
                         </HStack>
                       </FormControl>
                     )}
-                    {values.species === 'other' && (
+                    {species === 'other' && (
                       <FormControl w='full'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
@@ -798,7 +672,7 @@ const AddFishContent = ({
                       </Radio.Group>
                     </FormControl>
 
-                    {values.species === 'Chinook salmon' && (
+                    {species === 'Chinook salmon' && (
                       <FormControl w='full'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
@@ -841,8 +715,8 @@ const AddFishContent = ({
                       </FormControl>
                     )}
                     <HStack mb={'4'}>
-                      {(values.species === 'Chinook salmon' ||
-                        values.species === 'Steelhead / rainbow trout') && (
+                      {(species === 'Chinook salmon' ||
+                        species === 'Steelhead / rainbow trout') && (
                         <Button
                           height='40px'
                           fontSize='16'
@@ -859,7 +733,7 @@ const AddFishContent = ({
                           <Text color='primary'>Tag Fish</Text>
                         </Button>
                       )}
-                      {values.species === 'Chinook salmon' && (
+                      {species === 'Chinook salmon' && (
                         <Button
                           bg='secondary'
                           color='#007C7C'
