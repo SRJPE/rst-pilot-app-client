@@ -50,6 +50,9 @@ const BatchCountHistogram = ({
     for (let i = start; i < end; i++) {
       if (!arr.includes(i)) {
         missingNumbers.push(i)
+        //this is where iterations could be skipped based on range
+        //this would skip 5 numbers before adding a tick
+        // i += 5
       }
     }
     return [...arr, ...missingNumbers]
@@ -68,6 +71,12 @@ const BatchCountHistogram = ({
       tickValuesStore.push(start, end)
     }
     const paddedTickValues = padArrayWithMissingNumbers(tickValuesStore)
+    //currently an issue with too many tick values when the range is too big
+    //possible solution by skipping iterations inside padArrayWithMissingNumbers based on range
+    // console.log(
+    //   '🚀 ~ calculateXAxisTickValues ~ paddedTickValues',
+    //   paddedTickValues
+    // )
     setTickValues(paddedTickValues)
   }
   return (
