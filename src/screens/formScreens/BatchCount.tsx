@@ -41,7 +41,10 @@ import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
-  const [forkLengthRange, setForkLengthRange] = useState(0 as number)
+  const [firstButton, setFirstButton] = useState(0 as number)
+  const [numberOfAdditionalButtons, setNumberOfAdditionalButtons] = useState(
+    0 as number
+  )
   const [showTableModal, setShowTableModal] = useState(false as boolean)
   const [showTable, setShowTable] = useState(false as boolean)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
@@ -171,74 +174,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             </HStack>
           </Box>
           <Divider m='1%' />
-          <Box px='2%'>
-            <HStack space={6} alignItems='center'>
-              <Text bold>Life Stage:</Text>
-              <Radio.Group
-                name='lifeStageRadioGroup'
-                value={lifeStageRadioValue}
-                onChange={(nextValue) => {
-                  setLifeStageRadioValue(nextValue)
-                }}
-              >
-                <Stack
-                  direction={{
-                    base: 'column',
-                    md: 'row',
-                  }}
-                  alignItems={{
-                    base: 'flex-start',
-                    md: 'center',
-                  }}
-                  space={10}
-                  w='75%'
-                  maxW='300px'
-                >
-                  <Radio
-                    colorScheme='primary'
-                    value='Yolk Sac Fry'
-                    my={1}
-                    _icon={{ color: 'primary' }}
-                  >
-                    Yolk Sac Fry
-                  </Radio>
-                  <Radio
-                    colorScheme='primary'
-                    value=' Fry'
-                    my={1}
-                    _icon={{ color: 'primary' }}
-                  >
-                    Fry
-                  </Radio>
-                  <Radio
-                    colorScheme='primary'
-                    value='Parr'
-                    my={1}
-                    _icon={{ color: 'primary' }}
-                  >
-                    Parr
-                  </Radio>
-                  <Radio
-                    colorScheme='primary'
-                    value='Silvery Parr'
-                    my={1}
-                    _icon={{ color: 'primary' }}
-                  >
-                    Silvery Parr
-                  </Radio>
-                  <Radio
-                    colorScheme='primary'
-                    value='Smolt'
-                    my={1}
-                    _icon={{ color: 'primary' }}
-                  >
-                    Smolt
-                  </Radio>
-                </Stack>
-              </Radio.Group>
-            </HStack>
-          </Box>
-          <Divider m='1%' />
+
           <Box
             h='2/6'
             w='5/6'
@@ -249,7 +185,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
           >
             <BatchCountHistogram />
           </Box>
-          <VStack space={8}>
+          <VStack space={4}>
             <HStack
               alignItems='center'
               space={10}
@@ -276,7 +212,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             </HStack>
             {/* using scrollView to patch the table overflow issues*/}
             {showTable ? (
-              <ScrollView height='234'>
+              <ScrollView height='376'>
                 <BatchCountDataTable
                   handleShowTableModal={handleShowTableModal}
                 />
@@ -284,12 +220,86 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
             ) : (
               <>
                 <ForkLengthButtonGroup
-                  setForkLengthRange={setForkLengthRange}
+                  setFirstButton={setFirstButton}
+                  setLifeStageRadioValue={setLifeStageRadioValue}
+                  setNumberOfAdditionalButtons={setNumberOfAdditionalButtons}
                 />
-                <BatchCountButtonGrid buttonValueStart={forkLengthRange} />
+                <Box px='2%'>
+                  <Divider my='1%' />
+                  <HStack space={6} alignItems='center'>
+                    <Text bold>Life Stage:</Text>
+                    <Radio.Group
+                      name='lifeStageRadioGroup'
+                      value={lifeStageRadioValue}
+                      onChange={(nextValue) => {
+                        setLifeStageRadioValue(nextValue)
+                      }}
+                    >
+                      <Stack
+                        direction={{
+                          base: 'column',
+                          md: 'row',
+                        }}
+                        alignItems={{
+                          base: 'flex-start',
+                          md: 'center',
+                        }}
+                        space={10}
+                        w='75%'
+                        maxW='300px'
+                      >
+                        <Radio
+                          colorScheme='primary'
+                          value='Yolk Sac Fry'
+                          my={1}
+                          _icon={{ color: 'primary' }}
+                        >
+                          Yolk Sac Fry
+                        </Radio>
+                        <Radio
+                          colorScheme='primary'
+                          value='Fry'
+                          my={1}
+                          _icon={{ color: 'primary' }}
+                        >
+                          Fry
+                        </Radio>
+                        <Radio
+                          colorScheme='primary'
+                          value='Parr'
+                          my={1}
+                          _icon={{ color: 'primary' }}
+                        >
+                          Parr
+                        </Radio>
+                        <Radio
+                          colorScheme='primary'
+                          value='Silvery Parr'
+                          my={1}
+                          _icon={{ color: 'primary' }}
+                        >
+                          Silvery Parr
+                        </Radio>
+                        <Radio
+                          colorScheme='primary'
+                          value='Smolt'
+                          my={1}
+                          _icon={{ color: 'primary' }}
+                        >
+                          Smolt
+                        </Radio>
+                      </Stack>
+                    </Radio.Group>
+                  </HStack>
+                  <Divider my='1%' />
+                </Box>
+                <BatchCountButtonGrid
+                  firstButton={firstButton}
+                  numberOfAdditionalButtons={numberOfAdditionalButtons}
+                />
               </>
             )}
-            <HStack p='2%' justifyContent='space-between'>
+            <HStack px='2%' justifyContent='space-between'>
               <VStack space={4}>
                 <Heading size='md'>
                   Total Count: {calculateTotalCount()}
