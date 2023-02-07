@@ -6,16 +6,18 @@ import { AppDispatch } from '../../../redux/store'
 import { createArray } from '../../../utils/utils'
 
 const BatchCountButtonGrid = ({
-  buttonValueStart,
+  firstButton,
+  numberOfAdditionalButtons,
 }: {
-  buttonValueStart: number
+  firstButton: number
+  numberOfAdditionalButtons: number
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
   const dispatch = useDispatch<AppDispatch>()
 
   useEffect(() => {
-    setNumArray(createArray(buttonValueStart))
-  }, [buttonValueStart])
+    setNumArray(createArray(firstButton, numberOfAdditionalButtons))
+  }, [firstButton])
 
   const handlePress = (num: number) => {
     dispatch(addForkLengthToBatchCount(num))
@@ -27,26 +29,34 @@ const BatchCountButtonGrid = ({
       justifyContent='center'
       alignItems='center'
       flexWrap='wrap'
+      height='234'
     >
-      {numArray.map((num: number, idx: number) => {
-        return (
-          <Pressable key={idx} onPress={() => handlePress(num)}>
-            <Box
-              justifyContent='center'
-              alignItems='center'
-              bg='#FFC5B6'
-              h='70'
-              w='70'
-              margin='1'
-              borderRadius='sm'
-            >
-              <Text fontSize='lg' bold color='white'>
-                {num}
-              </Text>
-            </Box>
-          </Pressable>
-        )
-      })}
+      {numArray.length > 1 ? (
+        numArray.map((num: number, idx: number) => {
+          return (
+            <Pressable key={idx} onPress={() => handlePress(num)}>
+              <Box
+                justifyContent='center'
+                alignItems='center'
+                bg='#FFC5B6'
+                h='70'
+                w='70'
+                margin='1'
+                borderRadius='sm'
+                shadow='3'
+              >
+                <Text fontSize='lg' bold color='white'>
+                  {num}
+                </Text>
+              </Box>
+            </Pressable>
+          )
+        })
+      ) : (
+        <Text bold fontSize='lg'>
+          PLease select a fork length size range.
+        </Text>
+      )}
     </Box>
   )
 }
