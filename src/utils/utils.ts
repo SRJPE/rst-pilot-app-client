@@ -27,34 +27,38 @@ export const reorderTaxon = (taxon: Array<any>) => {
   return alphabeticalTaxon
 }
 
-export const createArray = (start: number) => {
+export const createArray = (start: number, end: number) => {
   var result = []
-  for (var i = start; i <= start + 19; i++) {
+  for (var i = start; i <= start + end; i++) {
     result.push(i)
   }
   return result
 }
 
 export const buttonLookup: any = {
-  '< 20': 0,
-  '20-39': 20,
-  '40-59': 40,
-  '60-79': 60,
-  '80-99': 80,
-  '100-119': 100,
-  '120-139': 120,
-  '140-159': 140,
-  '> 160': 160,
+  '10-29': {
+    firstButton: 10,
+    additionalButtons: 19,
+    lifeStage: 'Yolk Sac Fry',
+  },
+  '30-40': { firstButton: 30, additionalButtons: 10, lifeStage: 'Fry' },
+  '41-59': { firstButton: 41, additionalButtons: 18, lifeStage: 'Parr' },
+  '60-89': {
+    firstButton: 60,
+    additionalButtons: 29,
+    lifeStage: 'Silvery Parr',
+  },
+  '90-105': { firstButton: 90, additionalButtons: 15, lifeStage: 'Smolt' },
 }
 
 export const calculateLifeStage = (forkLength: number) => {
   //look over the the values of lookup, return the first key that is >= forkLength
   const lifeStageLookup: any = {
-    'Yolk Sac Fry': 20,
+    'Yolk Sac Fry': 29,
     Fry: 40,
-    Parr: 80,
-    'Silvery Parr': 120,
-    Smolt: 160,
+    Parr: 59,
+    'Silvery Parr': 89,
+    Smolt: 105,
   }
   for (const key in lifeStageLookup) {
     if (forkLength <= lifeStageLookup[key]) {
