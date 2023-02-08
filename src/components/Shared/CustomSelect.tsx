@@ -12,7 +12,7 @@ interface CustomSelectI {
 
 const CustomSelect: React.FC<CustomSelectI> = (props) => {
   const handleOnChange = useCallback((itemValue: any) => {
-    props.setFieldTouched(props.selectedValue, true)
+    props.setFieldTouched()
     props.onValueChange(itemValue)
   }, [props.selectedValue])
 
