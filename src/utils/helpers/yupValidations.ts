@@ -11,7 +11,7 @@ export const trapVisitSchema = yup.object().shape({
 })
 
 export const trapOperationsSchema = yup.object().shape({
-  trapStatus: yup.string().required('Trap Status Required'),
+  trapStatus: yup.string(),
   reasonNotFunc: yup.string().when('trapStatus', {
     is: 'trap functioning but not normally' || 'trap not functioning',
     then: yup.string().required('Reason for not functioning required'),
@@ -33,14 +33,6 @@ export const trapOperationsSchema = yup.object().shape({
     // .required('Water Turbidity Required')
     .typeError('Input must be a number'),
   waterTurbidityUnit: yup.string(),
-  coneDepth: yup
-    .number()
-    // .transform(value => (isNaN(value) ? undefined : value))
-    // .transform((value, originalValue) => {
-    //   return originalValue === '' ? undefined : value
-    // })
-    // .required('Cone depth required')
-    .typeError('Input must be a number'),
 
   totalRevolutions: yup
     .number()
