@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -79,11 +79,7 @@ const AddFishContent = ({
   const dispatch = useDispatch<AppDispatch>()
   // @ts-ignore
   const lastAddedFish = fishStore[Object.keys(fishStore).pop()]
-  const validationSchemas = {
-    default: addIndividualFishSchema,
-    optionalLifeStage: addIndividualFishSchemaOptionalLifeStage,
-    otherSpecies: addIndividualFishSchemaOtherSpecies,
-  }
+  
   const [validationSchema, setValidationSchema] = useState<
     'default' | 'optionalLifeStage' | 'otherSpecies'
   >('default')
@@ -105,23 +101,12 @@ const AddFishContent = ({
     'definition'
   )
 
-  const handleFormSubmit = (values: any) => {
-    saveIndividualFish(values)
-  }
-
   const handleMarkFishFormSubmit = (values: any) => {
     saveMarkOrTagData(values)
   }
 
   const handleGeneticSampleFormSubmit = (values: any) => {
     saveGeneticSampleData(values)
-  }
-
-  const handleSaveButtonDisable = (touched: any, errors: any) => {
-    return (
-      (touched && Object.keys(touched).length === 0) ||
-      (errors && Object.keys(errors).length > 0)
-    )
   }
 
   const renderForkLengthWarning = (
@@ -154,21 +139,6 @@ const AddFishContent = ({
     }
   }
 
-  const resetFormValues = {
-    values: {
-      species: '',
-      forkLength: '',
-      run: '',
-      weight: '',
-      lifeStage: '',
-      adiposeClipped: false,
-      existingMark: '',
-      dead: false,
-      willBeUsedInRecapture: false,
-      plusCountMethod: '',
-    },
-  }
-
   const buttonNav = () => {
     // @ts-ignore
     navigation.navigate('Trap Visit Form', {
@@ -179,49 +149,305 @@ const AddFishContent = ({
   // ------------------------------------------------------------------------------------------------------------------------
 
   interface FormValueI {
-    value: string | boolean
+    value: string | boolean | null
     touched: boolean
-    error: boolean
+    error: string
+    required: boolean
   }
 
-  const createFormValueDefault = (value: string | boolean) => {
-    return { value, touched: false, error: false }
+  const errorMessages = {
+    species: { emptyError: 'Fish species required' },
+    forkLength: {
+      typeError: 'Input must be a number',
+      emptyError: 'Fish fork length required',
+    },
+    weight: { typeError: 'Input must be a number' },
+    lifeStage: { emptyError: 'Fish life stage required' },
+    adiposeClipped: { emptyError: 'Fish adipose clipped status required' },
+    dead: { emptyError: 'Fish mortality required' },
+    willBeUsedInRecapture: { emptyError: 'Marked for recapture required' },
   }
 
-  const [species, setSpecies] = useState<FormValueI>(createFormValueDefault(''))
-  const [count, setCount] = useState<FormValueI>(createFormValueDefault(''))
-  const [forkLength, setForkLength] = useState<FormValueI>(
-    createFormValueDefault('')
+  const createFormValueDefault = ({
+    value,
+    required = false,
+    error = '',
+    touched = false,
+  }: {
+    value: string | boolean | null
+    required?: boolean
+    error?: string
+    touched?: boolean
+  }) => {
+    return { value, touched, error, required }
+  }
+
+  const stateDefaults = {
+    whenSpeciesChinook: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null, required: true }),
+      adiposeClipped: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      existingMark: createFormValueDefault({ value: null }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      willBeUsedInRecapture: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+    },
+    whenSpeciesSteelhead: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null, required: true }),
+      adiposeClipped: createFormValueDefault({
+        value: null,
+        touched: true,
+      }),
+      existingMark: createFormValueDefault({ value: null }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      willBeUsedInRecapture: createFormValueDefault({
+        value: null,
+        touched: true,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+    },
+    whenSpeciesOther: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null }),
+      adiposeClipped: createFormValueDefault({
+        value: null,
+        touched: true,
+        required: false,
+      }),
+      existingMark: createFormValueDefault({ value: null }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      willBeUsedInRecapture: createFormValueDefault({
+        value: null,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+    },
+  }
+
+  const [formHasError, setFormHasError] = useState<boolean>(true)
+
+  const [species, setSpecies] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.species
+      : createFormValueDefault({
+          value: route.params?.editModeData.species,
+          touched: true,
+          required: false,
+        })
   )
-  const [run, setRun] = useState<FormValueI>(createFormValueDefault(''))
-  const [weight, setWeight] = useState<FormValueI>(createFormValueDefault(''))
+  const [count, setCount] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.count
+      : createFormValueDefault({
+          value: route.params?.editModeData.numFishCaught,
+          touched: true,
+          required: false,
+        })
+  )
+  const [forkLength, setForkLength] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.forkLength
+      : createFormValueDefault({
+          value: route.params?.editModeData.forkLength,
+          touched: true,
+          required: false,
+        })
+  )
+  const [run, setRun] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.run
+      : createFormValueDefault({
+          value: route.params?.editModeData.run,
+          touched: true,
+          required: false,
+        })
+  )
+  const [weight, setWeight] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.weight
+      : createFormValueDefault({
+          value: route.params?.editModeData.weight,
+          touched: true,
+          required: false,
+        })
+  )
   const [lifeStage, setLifeStage] = useState<FormValueI>(
-    createFormValueDefault('')
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.lifeStage
+      : createFormValueDefault({
+          value: route.params?.editModeData.lifeStage,
+          touched: true,
+          required: false,
+        })
   )
   const [adiposeClipped, setAdiposeClipped] = useState<FormValueI>(
-    createFormValueDefault(false)
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.adiposeClipped
+      : createFormValueDefault({
+          value: route.params?.editModeData.adiposeClipped,
+          touched: true,
+          required: false,
+        })
   )
   const [existingMark, setExistingMark] = useState<FormValueI>(
-    createFormValueDefault('')
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.existingMark
+      : createFormValueDefault({
+          value: route.params?.editModeData.existingMark,
+          touched: true,
+          required: false,
+        })
   )
-  const [dead, setDead] = useState<FormValueI>(createFormValueDefault(false))
+  const [dead, setDead] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.dead
+      : createFormValueDefault({
+          value: route.params?.editModeData.dead,
+          touched: true,
+          required: false,
+        })
+  )
   const [willBeUsedInRecapture, setWillBeUsedInRecapture] =
-    useState<FormValueI>(createFormValueDefault(false))
+    useState<FormValueI>(
+      !route.params?.editModeData
+        ? stateDefaults.whenSpeciesChinook.willBeUsedInRecapture
+        : createFormValueDefault({
+            value: route.params?.editModeData.willBeUsedInRecapture,
+            touched: true,
+            required: false,
+          })
+    )
+
   const [plusCountMethod, setPlusCountMethod] = useState<FormValueI>(
-    createFormValueDefault('')
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.plusCountMethod
+      : createFormValueDefault({
+          value: route.params?.editModeData.plusCountMethod,
+          touched: true,
+          required: false,
+        })
   )
 
-  const resetFormState = () => {
-    setSpecies(createFormValueDefault(''))
-    setForkLength(createFormValueDefault(''))
-    setRun(createFormValueDefault(''))
-    setWeight(createFormValueDefault(''))
-    setLifeStage(createFormValueDefault(''))
-    setAdiposeClipped(createFormValueDefault(false))
-    setExistingMark(createFormValueDefault(''))
-    setDead(createFormValueDefault(false))
-    setWillBeUsedInRecapture(createFormValueDefault(false))
-    setPlusCountMethod(createFormValueDefault(''))
+  useEffect(() => {
+    if (forkLength.value) checkForFormError()
+  }, [
+    species,
+    count,
+    forkLength,
+    run,
+    weight,
+    lifeStage,
+    adiposeClipped,
+    existingMark,
+    existingMark,
+    dead,
+    willBeUsedInRecapture,
+    plusCountMethod,
+  ])
+
+  const checkForFormError = () => {
+    const formValues = [
+      species,
+      count,
+      forkLength,
+      run,
+      weight,
+      lifeStage,
+      adiposeClipped,
+      existingMark,
+      dead,
+      willBeUsedInRecapture,
+      plusCountMethod,
+    ]
+    let hasError = false
+    formValues.every((field) => {
+      if (hasError) return false
+      if (
+        field.required &&
+        !field.touched &&
+        (field.value === '' || field.value === null)
+      ) {
+        hasError = true
+      } else if (field.error) {
+        hasError = true
+      }
+      if (!hasError) return true
+    })
+    if (hasError !== formHasError) setFormHasError(hasError)
+  }
+
+  const resetFormState = (resetType: 'chinook' | 'steelhead' | 'other') => {
+    let identifier:
+      | 'whenSpeciesChinook'
+      | 'whenSpeciesSteelhead'
+      | 'whenSpeciesOther' = 'whenSpeciesChinook'
+    if (resetType === 'chinook') {
+      identifier = 'whenSpeciesChinook'
+    } else if (resetType === 'steelhead') {
+      identifier = 'whenSpeciesSteelhead'
+    } else if (resetType === 'other') {
+      identifier = 'whenSpeciesOther'
+    }
+    setSpecies(stateDefaults[identifier].species)
+    setForkLength(stateDefaults[identifier].forkLength)
+    setRun(stateDefaults[identifier].run)
+    setWeight(stateDefaults[identifier].weight)
+    setLifeStage(stateDefaults[identifier].lifeStage)
+    setAdiposeClipped(stateDefaults[identifier].adiposeClipped)
+    setExistingMark(stateDefaults[identifier].existingMark)
+    setDead(stateDefaults[identifier].dead)
+    setWillBeUsedInRecapture(stateDefaults[identifier].willBeUsedInRecapture)
+    setPlusCountMethod(stateDefaults[identifier].plusCountMethod)
+    setFormHasError(true)
+  }
+
+  const returnFormValues = () => {
+    let values = {
+      species: species.value,
+      forkLength: forkLength.value,
+      run: run.value,
+      weight: weight.value,
+      lifeStage: lifeStage.value,
+      adiposeClipped: adiposeClipped.value,
+      existingMark: existingMark.value,
+      dead: dead.value,
+      willBeUsedInRecapture: willBeUsedInRecapture.value,
+      plusCountMethod: plusCountMethod.value,
+    }
+
+    return values
   }
 
   return (
@@ -323,16 +549,16 @@ const AddFishContent = ({
                   selectedValue={species.value as string}
                   placeholder={'Species'}
                   onValueChange={(value: string) => {
-                    resetFormState()
-                    setSpecies({ ...species, value })
-                    // TODO - validation logic
-                    // if (value == 'Chinook salmon') {
-                    //   setValidationSchema('default')
-                    // } else if (value == 'Steelhead / rainbow trout') {
-                    //   setValidationSchema('optionalLifeStage')
-                    // } else {
-                    //   setValidationSchema('otherSpecies')
-                    // }
+                    let payload = { ...species, value, touched: true }
+                    if (value.toLowerCase().includes('chinook')) {
+                      resetFormState('chinook')
+                    } else if (value.toLowerCase().includes('steelhead')) {
+                      resetFormState('steelhead')
+                    } else {
+                      resetFormState('other')
+                    }
+
+                    setSpecies(payload)
                   }}
                   setFieldTouched={() =>
                     setSpecies({ ...species, touched: true })
@@ -361,10 +587,7 @@ const AddFishContent = ({
             </HStack>
 
             <Divider mt={1} />
-            {
-              // TODO - verify logic below works as intended
-            }
-            {(species.value as string) !== '' && (
+            {(species.value as string) !== '' && species.value !== null && (
               <>
                 {route.params?.editModeData ? (
                   <HStack alignItems='center'>
@@ -414,9 +637,20 @@ const AddFishContent = ({
                       fontSize='16'
                       placeholder='Numeric Value'
                       keyboardType='numeric'
-                      onChangeText={(value) =>
-                        setForkLength({ ...forkLength, value })
-                      }
+                      onChangeText={(value) => {
+                        let payload: FormValueI = {
+                          ...forkLength,
+                          value,
+                          touched: true,
+                          error: '',
+                        }
+                        if (value === '') {
+                          payload.error = errorMessages.forkLength.emptyError
+                        } else if (!Number(value)) {
+                          payload.error = errorMessages.forkLength.typeError
+                        }
+                        setForkLength(payload)
+                      }}
                       // TODO - onBlur logic?
                       // onBlur={handleBlur('forkLength')}
                       value={forkLength.value as string}
@@ -448,7 +682,7 @@ const AddFishContent = ({
                       </FormControl.Label>
                       {renderWeightWarning(
                         Number(weight.value),
-                        lifeStage.value as string
+                        weight.value as string
                       )}
                       {weight.touched &&
                         weight.error &&
@@ -459,7 +693,20 @@ const AddFishContent = ({
                       fontSize='16'
                       placeholder='Numeric Value'
                       keyboardType='numeric'
-                      onChangeText={(value) => setWeight({ ...weight, value })}
+                      onChangeText={(value) => {
+                        let payload: FormValueI = {
+                          ...weight,
+                          value,
+                          touched: true,
+                          error: '',
+                        }
+                        if (value === '') {
+                          payload.error = ''
+                        } else if (!Number(value)) {
+                          payload.error = errorMessages.weight.typeError
+                        }
+                        setWeight(payload)
+                      }}
                       // TODO - onBlur logic?
                       // onBlur={handleBlur('weight')}
                       value={weight.value as string}
@@ -541,12 +788,20 @@ const AddFishContent = ({
                       <CustomSelect
                         selectedValue={lifeStage.value as string}
                         placeholder={'Life Stage'}
-                        onValueChange={(value: string) =>
-                          setLifeStage({ ...lifeStage, value })
-                        }
-                        setFieldTouched={() =>
-                          setLifeStage({ ...lifeStage, touched: true })
-                        }
+                        onValueChange={(value: string) => {
+                          let payload: FormValueI = {
+                            ...lifeStage,
+                            value,
+                            error: '',
+                          }
+                          setLifeStage(payload)
+                        }}
+                        setFieldTouched={() => {
+                          let payload = { ...lifeStage, touched: true }
+                          if (!lifeStage.value)
+                            payload.error = errorMessages.lifeStage.emptyError
+                          setLifeStage(payload)
+                        }}
                         selectOptions={alphabeticalLifeStage
                           .filter((item: any) => {
                             if (
@@ -939,18 +1194,13 @@ const AddFishContent = ({
             mx='2'
             bg='themeOrange'
             shadow='5'
-            // TODO - fix value for isDisabled
-            isDisabled={
-              false
-              // route.params?.editModeData
-              //   ? false
-              //   : handleSaveButtonDisable(touched, errors)
-            }
+            isDisabled={route.params?.editModeData ? false : formHasError}
             onPress={() => {
               if (route.params?.editModeData) {
                 navigation.goBack()
               } else {
-                // handleSubmit()
+                let payload = returnFormValues()
+                saveIndividualFish(payload)
                 navigation.goBack()
               }
             }}
@@ -981,27 +1231,22 @@ const AddFishContent = ({
             mx='2'
             bg='primary'
             shadow='5'
-            // TODO - fix value for isDisabled
-            isDisabled={
-              false
-              // route.params?.editModeData
-              //   ? false
-              //   : handleSaveButtonDisable(touched, errors)
-            }
+            isDisabled={route.params?.editModeData ? false : formHasError}
             onPress={() => {
+              let payload = returnFormValues()
               if (route.params?.editModeData) {
-                // TODO - payload for redux submission
-                // updateFishEntry({
-                //   id: route.params?.editModeData?.id,
-                //   ...values,
-                // })
+                updateFishEntry({
+                  id: route.params?.editModeData?.id,
+                  ...payload,
+                  numFishCaught: count.value,
+                })
                 navigation.goBack()
               } else {
                 // bypasses formik to fix async issues.
                 // This should be fine since the button is only enabled when the form is valid
-                // saveIndividualFish({ ...values })
+                saveIndividualFish(payload)
                 showSlideAlert(dispatch, 'Fish')
-                resetFormState()
+                resetFormState('other')
               }
             }}
           >
