@@ -231,9 +231,9 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                     <Radio.Group
                       name='lifeStageRadioGroup'
                       value={lifeStageRadioValue}
-                      // onChange={(nextValue) => {
-                      //   setLifeStageRadioValue(nextValue)
-                      // }}
+                      onChange={(nextValue) => {
+                        setLifeStageRadioValue(nextValue)
+                      }}
                     >
                       <Stack
                         direction={{
@@ -296,6 +296,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                 <BatchCountButtonGrid
                   firstButton={firstButton}
                   numberOfAdditionalButtons={numberOfAdditionalButtons}
+                  selectedLifeStage={lifeStageRadioValue}
                 />
               </>
             )}
@@ -304,11 +305,21 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                 <Heading size='md'>
                   Total Count: {calculateTotalCount()}
                 </Heading>
-                <Button bg='primary' onPress={handlePressSaveBatchCount}>
-                  <Text fontSize='lg' bold color='white'>
-                    Save Batch Count
-                  </Text>
-                </Button>
+                <HStack space={5}>
+                  <Button bg='primary' onPress={handlePressSaveBatchCount}>
+                    <Text fontSize='lg' bold color='white'>
+                      Save Batch Count
+                    </Text>
+                  </Button>
+                  <Button
+                    bg='primary'
+                    onPress={() => console.log('Fork Lengths: ', forkLengths)}
+                  >
+                    <Text fontSize='lg' bold color='white'>
+                      LOG
+                    </Text>
+                  </Button>
+                </HStack>
               </VStack>
               <VStack space={4}>
                 <Heading size='md'>
@@ -324,14 +335,6 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                     Remove Last Fish
                   </Text>
                 </Button>
-                {/* <Button
-                  bg='primary'
-                  onPress={() => console.log('Fork Lengths: ', forkLengths)}
-                >
-                  <Text fontSize='lg' bold color='white'>
-                    LOG
-                  </Text>
-                </Button> */}
               </VStack>
             </HStack>
           </VStack>

@@ -5,9 +5,11 @@ import { RootState } from '../../../redux/store'
 
 const BatchCountDataTable = ({
   forkLengthsStore,
+  forkLengthsStoreTest,
   handleShowTableModal,
 }: {
   forkLengthsStore: any
+  forkLengthsStoreTest: any
   handleShowTableModal: any
 }) => {
   const [page, setPage] = useState<number>(0)
@@ -18,17 +20,39 @@ const BatchCountDataTable = ({
 
   useEffect(() => {
     prepareDataForTable()
-  }, [forkLengthsStore])
+  }, [forkLengthsStoreTest])
 
   const prepareDataForTable = () => {
+    const TEST = prepareStorageObject()
     const storageArray: { forkLength: number; count: number }[] = []
-    Object.keys(forkLengthsStore).forEach((key: any) => {
+    Object.keys(TEST).forEach((key: any) => {
       storageArray.push({
         forkLength: Number(key),
         count: forkLengthsStore[key],
       })
     })
     setProcessedData(sortByForkLength(storageArray))
+  }
+  const prepareStorageObject = () => {
+    const storageObject: any = {}
+    forkLengthsStoreTest &&
+      Object.values(forkLengthsStoreTest).forEach((value: any) => {
+        // console.log('🚀 ~ prepareDataForGraphTEST Object.keys ~ key', value)
+        // console.log(
+        //   '🚀 ~ prepareDataForGraphTEST Object.keys ~ key FL',
+        //   value.forkLength
+        // )
+        storageObject[value.forkLength] === undefined
+          ? (storageObject[value.forkLength] = 1)
+          : storageObject[value.forkLength]++
+
+        // storageArray.push({
+        //   forkLength: Number(key),
+        //   count: forkLengthsStoreTest[key],
+        // })
+      })
+    // setProcessedDataTEST(storageArray)
+    return storageObject
   }
 
   const sortByForkLength = (data: { forkLength: number; count: number }[]) => {
@@ -71,6 +95,7 @@ const BatchCountDataTable = ({
 const mapStateToProps = (state: RootState) => {
   return {
     forkLengthsStore: state.fishInput.batchCharacteristics.forkLengths,
+    forkLengthsStoreTest: state.fishInput.batchCharacteristics.forkLengthsTest,
   }
 }
 

@@ -12,33 +12,60 @@ import {
 
 const BatchCountHistogram = ({
   forkLengthsStore,
+  forkLengthsStoreTest,
 }: {
   forkLengthsStore: any
+  forkLengthsStoreTest: any
 }) => {
   const [tickValues, setTickValues] = useState([] as number[])
   const [processedData, setProcessedData] = useState(
     [] as { forkLength: number; count: number }[]
   )
+  const [processedObject, setProcessedObject] = useState({} as any)
 
   useEffect(() => {
     calculateXAxisTickValues()
     prepareDataForGraph()
-  }, [forkLengthsStore])
+  }, [forkLengthsStoreTest])
 
   useEffect(() => {
     calculateXAxisTickValues()
   }, [processedData])
 
   const prepareDataForGraph = () => {
+    const testNEWSTORE = prepareStorageObject()
+    // console.log('🚀 ~ prepareDataForGraph ~ testNEWSTORE', testNEWSTORE)
+    // console.log('🚀 ~ prepareDataForGraph ~ forkLengthsStore', forkLengthsStore)
     const storageArray: { forkLength: number; count: number }[] = []
-    forkLengthsStore &&
-      Object.keys(forkLengthsStore).forEach((key: any) => {
+    testNEWSTORE &&
+      Object.keys(testNEWSTORE).forEach((key: any) => {
         storageArray.push({
           forkLength: Number(key),
           count: forkLengthsStore[key],
         })
       })
     setProcessedData(storageArray)
+  }
+  const prepareStorageObject = () => {
+    const storageObject: any = {}
+    forkLengthsStoreTest &&
+      Object.values(forkLengthsStoreTest).forEach((value: any) => {
+        // console.log('🚀 ~ prepareDataForGraphTEST Object.keys ~ key', value)
+        // console.log(
+        //   '🚀 ~ prepareDataForGraphTEST Object.keys ~ key FL',
+        //   value.forkLength
+        // )
+        storageObject[value.forkLength] === undefined
+          ? (storageObject[value.forkLength] = 1)
+          : storageObject[value.forkLength]++
+
+        // storageArray.push({
+        //   forkLength: Number(key),
+        //   count: forkLengthsStoreTest[key],
+        // })
+      })
+    // setProcessedDataTEST(storageArray)
+    return storageObject
   }
 
   const padArrayWithMissingNumbers = (arr: number[]): number[] => {
@@ -131,6 +158,7 @@ const BatchCountHistogram = ({
 const mapStateToProps = (state: RootState) => {
   return {
     forkLengthsStore: state.fishInput.batchCharacteristics.forkLengths,
+    forkLengthsStoreTest: state.fishInput.batchCharacteristics.forkLengthsTest,
   }
 }
 export default connect(mapStateToProps)(BatchCountHistogram)

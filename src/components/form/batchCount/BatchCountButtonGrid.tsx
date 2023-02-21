@@ -1,16 +1,21 @@
 import { Box, Pressable, Text } from 'native-base'
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { addForkLengthToBatchCount } from '../../../redux/reducers/formSlices/fishInputSlice'
+import {
+  addForkLengthToBatchCount,
+  addForkLengthToBatchStore,
+} from '../../../redux/reducers/formSlices/fishInputSlice'
 import { AppDispatch } from '../../../redux/store'
 import { createArray } from '../../../utils/utils'
 
 const BatchCountButtonGrid = ({
   firstButton,
   numberOfAdditionalButtons,
+  selectedLifeStage,
 }: {
   firstButton: number
   numberOfAdditionalButtons: number
+  selectedLifeStage?: string
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
   const dispatch = useDispatch<AppDispatch>()
@@ -21,6 +26,12 @@ const BatchCountButtonGrid = ({
 
   const handlePress = (num: number) => {
     dispatch(addForkLengthToBatchCount(num))
+    dispatch(
+      addForkLengthToBatchStore({
+        forkLength: num,
+        lifeStage: selectedLifeStage,
+      })
+    )
   }
 
   return (
