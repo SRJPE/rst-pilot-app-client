@@ -35,6 +35,34 @@ export const createArray = (start: number, end: number) => {
   return result
 }
 
+interface FishData {
+  forkLength: number
+  lifeStage: string
+}
+
+interface FormattedFishData {
+  [forkLength: number]: {
+    [lifeStage: string]: number
+  }
+}
+
+export const reformatBatchCountData = (
+  data: Record<string, FishData>
+): FormattedFishData => {
+  const formattedData: FormattedFishData = {}
+  for (const key in data) {
+    const fish = data[key]
+    if (!formattedData[fish.forkLength]) {
+      formattedData[fish.forkLength] = {}
+    }
+    if (!formattedData[fish.forkLength][fish.lifeStage]) {
+      formattedData[fish.forkLength][fish.lifeStage] = 0
+    }
+    formattedData[fish.forkLength][fish.lifeStage]++
+  }
+  return formattedData
+}
+
 export const buttonLookup: any = {
   '10-29': {
     firstButton: 10,
