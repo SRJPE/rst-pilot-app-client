@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
 import { RootState } from '../../../redux/store'
+import { reformatBatchCountData } from '../../../utils/utils'
 
 const BatchCountDataTable = ({
   forkLengthsStore,
@@ -17,19 +18,28 @@ const BatchCountDataTable = ({
   const [processedData, setProcessedData] = useState(
     [] as { forkLength: number; count: number }[]
   )
+  // console.log('🚀 ~ processedData', processedData)
 
   useEffect(() => {
     prepareDataForTable()
   }, [forkLengthsStoreTest])
 
   const prepareDataForTable = () => {
-    const TEST = prepareStorageObject()
+    // const TEST = prepareStorageObject()
+    const TEST = reformatBatchCountData(forkLengthsStoreTest)
+    // console.log('🚀 ~ prepareDataForTable ~ TEST', TEST)
     const storageArray: { forkLength: number; count: number }[] = []
     Object.keys(TEST).forEach((key: any) => {
-      storageArray.push({
+      const count = Object.values(TEST[key]).reduce((a, b) => a + b)
+      const forkLengthObject = {
         forkLength: Number(key),
-        count: forkLengthsStore[key],
+        count: count,
+      } as any
+      Object.keys(TEST[key]).forEach((innerKey: string) => {
+        forkLengthObject[innerKey] = TEST[key][innerKey]
       })
+
+      storageArray.push(forkLengthObject)
     })
     setProcessedData(sortByForkLength(storageArray))
   }

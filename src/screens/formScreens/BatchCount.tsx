@@ -37,6 +37,7 @@ import BatchCountHistogram from '../../components/form/batchCount/BatchCountHist
 import { Switch } from 'native-base'
 import BatchCountDataTable from '../../components/form/batchCount/BatchCountDataTable'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import BatchCountTableModal from '../../components/form/batchCount/BatchCountTableModal'
 
 const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -49,7 +50,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const [showTable, setShowTable] = useState(false as boolean)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
     useState(false as boolean)
-  const [modalData, setModalData] = useState({
+  const [modalInitialData, setModalInitialData] = useState({
     forkLength: '',
     count: '',
   } as any)
@@ -91,27 +92,24 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     setBatchCharacteristicsModalOpen(true)
   }
 
-  const handleEditForkLengthCount = () => {
-    dispatch(updateSingleForkLengthCount(modalData))
-  }
-
   const buttonNav = () => {
     // @ts-ignore
     navigation.navigate('Trap Visit Form', {
       screen: 'Add Fish',
     })
   }
-  const handleShowTableModal = (selectedRow: any) => {
-    setModalData({
-      forkLength: selectedRow.forkLength,
-      count: selectedRow.count.toString(),
+  const handleShowTableModal = (selectedRowData: any) => {
+    const modalDataContainer = {
+      // forkLength: selectedRowData.forkLength,
+      // count: selectedRowData.count.toString(),
+    } as any
+    Object.keys(selectedRowData).forEach((key: string) => {
+      modalDataContainer[key] = selectedRowData[key].toString()
     })
+    setModalInitialData(modalDataContainer)
     setShowTableModal(true)
   }
 
-  const handleChangeModalText = (text: string) => {
-    setModalData({ ...modalData, count: text })
-  }
   const calculateTotalCount = () => {
     let count: number = 0
     if (!forkLengths) return count
@@ -350,62 +348,13 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
           closeModal={() => setBatchCharacteristicsModalOpen(false)}
         />
       </CustomModal>
-      <Modal isOpen={showTableModal} onClose={() => setShowTableModal(false)}>
-        <Modal.Content maxWidth='400px'>
-          <Modal.CloseButton />
-          <Modal.Header>
-            <Heading color='black' fontSize='2xl'>
-              Edit Fork Length Count
-            </Heading>
-          </Modal.Header>
-          <Modal.Body>
-            <HStack alignItems='center'>
-              <Text color='black' fontSize='xl'>
-                Fork Length:{' '}
-              </Text>
-              <Text bold color='black' fontSize='2xl'>
-                {modalData.forkLength}
-              </Text>
-            </HStack>
-            <FormControl mt='3'>
-              <FormControl.Label>
-                <Text color='black' fontSize='xl'>
-                  Count
-                </Text>
-              </FormControl.Label>
-              <Input
-                size='2xl'
-                value={modalData.count}
-                isFocused
-                keyboardType='numeric'
-                onChangeText={handleChangeModalText}
-              />
-            </FormControl>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button.Group space={2}>
-              <Button
-                variant='ghost'
-                colorScheme='blueGray'
-                onPress={() => {
-                  setShowTableModal(false)
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                bg='primary'
-                onPress={() => {
-                  setShowTableModal(false)
-                  handleEditForkLengthCount()
-                }}
-              >
-                Save
-              </Button>
-            </Button.Group>
-          </Modal.Footer>
-        </Modal.Content>
-      </Modal>
+
+      <BatchCountTableModal
+        showTableModal={showTableModal}
+        setShowTableModal={setShowTableModal}
+        modalInitialData={modalInitialData}
+        // setModalData={setModalData}
+      />
     </>
   )
 }
