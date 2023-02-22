@@ -1,6 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
-import { calculateLifeStage } from '../../../utils/utils'
+import {
+  calculateLifeStage,
+  reformatBatchCountData,
+} from '../../../utils/utils'
 
 interface InitialStateI {
   completed: boolean
@@ -191,15 +194,16 @@ export const saveFishSlice = createSlice({
       // state.batchCharacteristics.lastEnteredForkLength = null
     },
     updateSingleForkLengthCount: (state, action) => {
-      const forkLengthsCopy = { ...state.batchCharacteristics.forkLengths }
-      if (action.payload.count < 1) {
-        delete forkLengthsCopy[action.payload.forkLength]
-      } else {
-        forkLengthsCopy[action.payload.forkLength] = Number(
-          action.payload.count
-        )
-      }
-      state.batchCharacteristics.forkLengths = forkLengthsCopy
+      console.log('🚀 ~ action payload', action.payload)
+      // const forkLengthsCopy = { ...state.batchCharacteristics.forkLengths }
+      // if (action.payload.count < 1) {
+      //   delete forkLengthsCopy[action.payload.forkLength]
+      // } else {
+      //   forkLengthsCopy[action.payload.forkLength] = Number(
+      //     action.payload.count
+      //   )
+      // }
+      // state.batchCharacteristics.forkLengths = forkLengthsCopy
     },
     saveBatchCount: (state) => {
       //makes a clone of the MAIN fish store OBJECT
@@ -237,36 +241,7 @@ export const saveFishSlice = createSlice({
 
       console.log('🚀 ~ forkLengthsTestCopy', forkLengthsTestCopy)
 
-      interface FishData {
-        forkLength: number
-        lifeStage: string
-      }
-
-      interface FormattedFishData {
-        [forkLength: number]: {
-          [lifeStage: string]: number
-        }
-      }
-
-      //create a storage Object
-      //for each entry in forkLengthsTestCopy
-      // if the forkLength does not yet exist, add that property at key fork length to the storage object
-      //the value of this property should be
-      function reformatData(data: Record<string, FishData>): FormattedFishData {
-        const formattedData: FormattedFishData = {}
-        for (const key in data) {
-          const fish = data[key]
-          if (!formattedData[fish.forkLength]) {
-            formattedData[fish.forkLength] = {}
-          }
-          if (!formattedData[fish.forkLength][fish.lifeStage]) {
-            formattedData[fish.forkLength][fish.lifeStage] = 0
-          }
-          formattedData[fish.forkLength][fish.lifeStage]++
-        }
-        return formattedData
-      }
-      const TESTCHAT = reformatData(forkLengthsTestCopy)
+      const TESTCHAT = reformatBatchCountData(forkLengthsTestCopy)
       console.log('🚀 ~ TESTCHAT', TESTCHAT)
       // const batchCountEntry = {
       //   species: state.batchCharacteristics.species,
