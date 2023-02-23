@@ -1,11 +1,13 @@
+import { NativeStackHeaderProps } from '@react-navigation/native-stack'
 import { Box, HStack, VStack, Text, Progress } from 'native-base'
 import { useSelector } from 'react-redux'
 import { numOfFormSteps } from '../../redux/reducers/formSlices/navigationSlice'
 
-export default function ProgressHeader(props: any) {
+export default function ProgressHeader(props: NativeStackHeaderProps) {
   const navigationState = useSelector((state: any) => state.navigation)
   const { steps, activeStep } = navigationState
-  const activePageTitle = steps[activeStep]?.name
+  // const activePageTitle = steps[activeStep]?.name
+  const activePageTitle = props.route.name
   let currentStep =
     activeStep > numOfFormSteps ? `${numOfFormSteps}` : activeStep
 
