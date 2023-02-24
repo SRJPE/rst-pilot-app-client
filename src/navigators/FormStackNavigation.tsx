@@ -1,4 +1,4 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createNativeStackNavigator, NativeStackHeaderProps } from '@react-navigation/native-stack'
 import FishInput from '../screens/formScreens/FishInput'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import FishProcessing from '../screens/formScreens/FishProcessing'
@@ -45,6 +45,87 @@ function FormStackNavigation(props: any) {
     (state: any) => state.fishInput.modalOpen
   )
   const tabSlice = props.tabSlice as TabStateI
+  const nonTabBarScreens = ['Incomplete Sections', 'Add Fish', 'Batch Count']
+  const renderTabContent = (
+    tabSlice: TabStateI,
+    props: NativeStackHeaderProps
+  ) => {
+    if (
+      Object.keys(tabSlice.tabs).length &&
+      !nonTabBarScreens.includes(props.route.name)
+    ) {
+      // show tabbar
+      return (
+        <Box px={'2%'} pt={'2%'}>
+          <ScrollView horizontal={true}>
+            <HStack alignItems={'center'} justifyContent='space-between'>
+              {Object.keys(tabSlice.tabs).map((tabId) => (
+                <Button
+                  bg={tabId == tabSlice.activeTabID ? 'primary' : 'secondary'}
+                  onPress={() => dispatch(setActiveTab(tabId))}
+                  key={tabId}
+                  mr={5}
+                >
+                  <HStack alignItems={'center'} justifyContent='space-between'>
+                    <Text
+                      fontSize='lg'
+                      color={
+                        tabId == tabSlice.activeTabID ? 'white' : 'primary'
+                      }
+                    >
+                      {tabSlice.tabs[tabId]}
+                    </Text>
+                    <Icon
+                      onPress={() => dispatch(deleteTab(tabId))}
+                      as={Ionicons}
+                      name='ios-close-circle'
+                      color='#FFF'
+                      size={6}
+                      margin='0'
+                      padding='0'
+                      marginLeft={3}
+                    />
+                  </HStack>
+                </Button>
+              ))}
+              <Icon
+                onPress={() => {
+                  const tabID = uid()
+                  dispatch(createTab({ tabID, tabName: 'New Tab' }))
+                  dispatch(setActiveTab(tabID))
+                  props.navigation.navigate('Trap Visit Form', {
+                    screen: 'Visit Setup',
+                  })
+                }}
+                as={Ionicons}
+                name='ios-add-circle'
+                color='primary'
+                size={9}
+                margin='0'
+                padding='0'
+              />
+            </HStack>
+          </ScrollView>
+        </Box>
+      )
+    } else if (
+      Object.keys(tabSlice.tabs).length &&
+      nonTabBarScreens.includes(props.route.name)
+    ) {
+      // just show tabname
+      if (
+        tabSlice.activeTabID != null &&
+        props.route.name != 'Incomplete Sections'
+      ) {
+        return <Text>{tabSlice.tabs[tabSlice.activeTabID]}</Text>
+      } else {
+        return <></>
+      }
+    } else {
+      // show nothing
+      return <></>
+    }
+  }
 
   return (
     <FormStack.Navigator
@@ -53,70 +134,7 @@ function FormStackNavigation(props: any) {
         header: (props) => (
           <VStack>
             <ProgressHeader {...props} />
-            {Object.keys(tabSlice.tabs).length ? (
-              <Box px={'2%'} pt={'2%'}>
-                <ScrollView horizontal={true}>
-                  <HStack alignItems={'center'} justifyContent='space-between'>
-                    {Object.keys(tabSlice.tabs).map((tabId) => (
-                      <Button
-                        bg={
-                          tabId == tabSlice.activeTabID
-                            ? 'primary'
-                            : 'secondary'
-                        }
-                        onPress={() => dispatch(setActiveTab(tabId))}
-                        key={tabId}
-                        mr={5}
-                      >
-                        <HStack
-                          alignItems={'center'}
-                          justifyContent='space-between'
-                        >
-                          <Text
-                            fontSize='lg'
-                            color={
-                              tabId == tabSlice.activeTabID
-                                ? 'white'
-                                : 'primary'
-                            }
-                          >
-                            {tabSlice.tabs[tabId]}
-                          </Text>
-                          <Icon
-                            onPress={() => dispatch(deleteTab(tabId))}
-                            as={Ionicons}
-                            name='ios-close-circle'
-                            color='#FFF'
-                            size={6}
-                            margin='0'
-                            padding='0'
-                            marginLeft={3}
-                          />
-                        </HStack>
-                      </Button>
-                    ))}
-                    <Icon
-                      onPress={() => {
-                        const tabID = uid()
-                        dispatch(createTab({ tabID, tabName: 'New Tab' }))
-                        dispatch(setActiveTab(tabID))
-                        props.navigation.navigate('Trap Visit Form', {
-                          screen: 'Visit Setup',
-                        })
-                      }}
-                      as={Ionicons}
-                      name='ios-add-circle'
-                      color='primary'
-                      size={9}
-                      margin='0'
-                      padding='0'
-                    />
-                  </HStack>
-                </ScrollView>
-              </Box>
-            ) : (
-              <></>
-            )}
+            {renderTabContent(tabSlice, props)}
           </VStack>
         ),
       }}
