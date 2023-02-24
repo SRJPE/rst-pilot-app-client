@@ -7,14 +7,24 @@ export default function CrewDropDown({
   setCrewList,
   setFieldValue,
   setFieldTouched,
+  visitSetupState,
+  tabID,
 }: {
   crewList: any
-  setCrewList: any,
+  setCrewList: any
   setFieldValue: any
   setFieldTouched: any
+  visitSetupState: any
+  tabID: any
 }) {
   const [open, setOpen] = useState(false as boolean)
   const [value, setValue] = useState([] as Array<any>)
+
+  useEffect(() => {
+    if (visitSetupState[tabID]?.values?.crew) {
+      setValue(visitSetupState[tabID]?.values?.crew)
+    }
+  }, [tabID])
 
   useEffect(() => {
     setFieldValue('crew', [...value])

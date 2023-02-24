@@ -21,15 +21,18 @@ import CrewDropDown from '../../components/form/CrewDropDown'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../utils/helpers/yupValidations'
 import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import { createTab, setTabName } from '../../redux/reducers/formSlices/tabSlice'
 import { uniqBy } from 'lodash'
 
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import CustomSelect from '../../components/Shared/CustomSelect'
+import { uid } from 'uid'
 
 const mapStateToProps = (state: RootState) => {
   return {
     visitSetupState: state.visitSetup,
     visitSetupDefaultsState: state.visitSetupDefaults,
+    tabState: state.tabSlice,
   }
 }
 
@@ -37,10 +40,12 @@ const VisitSetup = ({
   navigation,
   visitSetupState,
   visitSetupDefaultsState,
+  tabState,
 }: {
   navigation: any
   visitSetupState: any
   visitSetupDefaultsState: any
+  tabState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [isPaperEntry, setIsPaperEntry] = useState(false as boolean)
@@ -55,6 +60,21 @@ const VisitSetup = ({
     []
   )
 
+  useEffect(() => {
+    if (
+      visitSetupState[tabState.activeTabID]?.values?.programId !=
+      selectedProgramId
+    ) {
+      setSelectedProgramId(
+        visitSetupState[tabState.activeTabID]?.values?.programId
+      )
+      generateCrewList(visitSetupState[tabState.activeTabID]?.values?.programId)
+      shouldShowTrapNameField(
+        visitSetupState[tabState.activeTabID]?.values?.trapSite
+      )
+    }
+  }, [tabState.activeTabID])
+
   const handleSubmit = (values: any) => {
     // values.crew = ['temp1']
     const programId = selectedProgramId
@@ -64,10 +84,30 @@ const VisitSetup = ({
       programId,
       trapLocationId,
     }
-    dispatch(saveVisitSetup(payload))
-    dispatch(markVisitSetupCompleted(true))
+    if (!tabState.activeTabID) {
+      const tabID = uid()
+      console.log('hit 1... uid: ', tabID)
+      dispatch(
+        createTab({ tabID, tabName: values.trapName ?? values.trapSite })
+      )
+      dispatch(saveVisitSetup({ tabID, values: payload }))
+      dispatch(markVisitSetupCompleted({ tabID, completed: true }))
+      dispatch(markTrapVisitPaperEntry({ tabID, isPaperEntry }))
+    } else {
+      console.log('hit 2')
+      dispatch(saveVisitSetup({ tabID: tabState.activeTabID, values: payload }))
+      dispatch(setTabName(values.trapName ?? values.trapSite))
+      dispatch(
+        markVisitSetupCompleted({
+          tabID: tabState.activeTabID,
+          completed: true,
+        })
+      )
+      dispatch(
+        markTrapVisitPaperEntry({ tabID: tabState.activeTabID, isPaperEntry })
+      )
+    }
     dispatch(markStepCompleted([true, 'visitSetup']))
-    dispatch(markTrapVisitPaperEntry(isPaperEntry))
     console.log('🚀 ~ handleSubmit ~ Visit', payload)
   }
 
@@ -144,13 +184,21 @@ const VisitSetup = ({
   return (
     <Formik
       validationSchema={trapVisitSchema}
-      initialValues={visitSetupState.values}
+      enableReinitialize={true}
+      initialValues={
+        tabState.activeTabID
+          ? visitSetupState[tabState.activeTabID]
+            ? visitSetupState[tabState.activeTabID].values
+            : visitSetupState['placeholderID'].values
+          : visitSetupState['placeholderID'].values
+      }
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       // maybe this is not needed for first step in form?
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
-      onSubmit={(values) => {
+      onSubmit={(values, { resetForm }) => {
         handleSubmit(values)
+        resetForm()
       }}
     >
       {({
@@ -306,6 +354,8 @@ const VisitSetup = ({
                       setCrewList={setCrewList}
                       setFieldValue={setFieldValue}
                       setFieldTouched={setFieldTouched}
+                      visitSetupState={visitSetupState}
+                      tabID={tabState.activeTabID}
                     />
                     {/* {touched.crew &&
                       errors.crew &&
