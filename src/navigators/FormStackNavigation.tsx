@@ -17,6 +17,7 @@ import AddFish from '../screens/formScreens/AddFish'
 import PaperEntry from '../screens/formScreens/PaperEntry'
 import StartedTrapping from '../screens/formScreens/StartedTrapping'
 import BatchCount from '../screens/formScreens/BatchCount'
+import FishHolding from '../screens/formScreens/FishHolding'
 
 const FormStack = createNativeStackNavigator()
 
@@ -50,6 +51,11 @@ export default function FormStackNavigation() {
       <FormStack.Screen
         name='Trap Post-Processing'
         component={TrapPostProcessing}
+      />
+      <FormStack.Screen
+        name='Fish Holding'
+        component={FishHolding}
+        options={{ headerShown: false }}
       />
       <FormStack.Screen
         name='Incomplete Sections'

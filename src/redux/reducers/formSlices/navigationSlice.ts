@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import FishHolding from '../../../screens/formScreens/FishHolding'
 
 export const numOfFormSteps = 6
 
@@ -22,6 +23,7 @@ const formSteps = {
   13: { name: 'Add Fish', propName: 'addFish' },
   14: { name: 'Paper Entry', propName: 'paperEntry' },
   15: { name: 'Started Trapping', propName: 'startedTrapping' },
+  16: { name: 'Fish Holding', propName: 'FishHolding' },
 }
 
 interface NavigationStateI {
