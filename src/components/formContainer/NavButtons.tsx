@@ -35,6 +35,10 @@ const NavButtons = ({
   const individualFishStore = useSelector(
     (state: any) => state.fishInput.fishStore
   )
+  const willBeHoldingFishForMarkRecapture = useSelector(
+    (state: any) =>
+      state.fishProcessing.values.willBeHoldingFishForMarkRecapture
+  )
 
   const navigateHelper = (destination: string) => {
     const formSteps = Object.values(navigationState?.steps) as any
@@ -96,6 +100,11 @@ const NavButtons = ({
           ) {
             navigateHelper('Trap Post-Processing')
           }
+        }
+        break
+      case 'Trap Post-Processing':
+        if (willBeHoldingFishForMarkRecapture) {
+          navigateHelper('Fish Holding')
         }
         break
       case 'High Flows':
