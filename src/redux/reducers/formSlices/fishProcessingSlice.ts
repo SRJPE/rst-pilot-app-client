@@ -1,6 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
+  [tabId: string]: FishProcessingStateI
+}
+
+interface FishProcessingStateI {
   completed: boolean
   values: fishProcessingValuesI
 }
@@ -11,10 +15,12 @@ interface fishProcessingValuesI {
 }
 
 const initialState: InitialStateI = {
-  completed: false,
-  values: {
-    fishProcessedResult: '',
-    reasonForNotProcessing: '',
+  placeholderId: {
+    completed: false,
+    values: {
+      fishProcessedResult: '',
+      reasonForNotProcessing: '',
+    },
   },
 }
 
@@ -24,10 +30,12 @@ export const fishProcessingSlice = createSlice({
   reducers: {
     resetFishProcessingSlice: () => initialState,
     saveFishProcessing: (state, action) => {
-      state.values = action.payload
+      const { tabId, values } = action.payload
+      state[tabId] = { completed: true, values }
     },
     markFishProcessingCompleted: (state, action) => {
-      state.completed = action.payload
+      const { tabId, value } = action.payload
+      state[tabId].completed = value
     },
   },
 })

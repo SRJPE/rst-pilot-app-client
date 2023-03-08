@@ -1,6 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
+  [tabId: string]: TrapPostProcessingStateI
+}
+
+interface TrapPostProcessingStateI {
   completed: boolean
   values: trapPostProcessingValuesI
 }
@@ -17,16 +21,18 @@ export interface trapPostProcessingValuesI {
 }
 
 const initialState: InitialStateI = {
-  completed: false,
-  values: {
-    debrisVolume: null,
-    rpm1: null,
-    rpm2: null,
-    rpm3: null,
-    trapLatitude: null,
-    trapLongitude: null,
-    endingTrapStatus: 'Restart Trap',
-    trapVisitStartTime: null,
+  placeholderId: {
+    completed: false,
+    values: {
+      debrisVolume: null,
+      rpm1: null,
+      rpm2: null,
+      rpm3: null,
+      trapLatitude: null,
+      trapLongitude: null,
+      endingTrapStatus: 'Restart Trap',
+      trapVisitStartTime: null,
+    },
   },
 }
 
@@ -36,17 +42,24 @@ export const trapPostProcessingSlice = createSlice({
   reducers: {
     resetTrapPostProcessingSlice: () => initialState,
     saveTrapPostProcessing: (state, action) => {
-      state.values = {
-        ...action.payload,
-        trapVisitStartTime:
-          state.values.trapVisitStartTime ?? action.payload.trapVisitStartTime,
+      const { tabId, values } = action.payload
+      state[tabId] = {
+        completed: true,
+        values: {
+          ...values,
+          trapVisitStartTime: state[tabId]
+            ? state[tabId].values.trapVisitStartTime
+            : values.trapVisitStartTime,
+        },
       }
     },
     updateTrapVisitStartTime: (state, action) => {
-      state.values.trapVisitStartTime = action.payload
+      const { tabId, value } = action.payload
+      state[tabId].values.trapVisitStartTime = value
     },
     markTrapPostProcessingCompleted: (state, action) => {
-      state.completed = action.payload
+      const { tabId, value } = action.payload
+      state[tabId].completed = value
     },
   },
 })

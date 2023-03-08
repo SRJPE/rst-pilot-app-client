@@ -1,6 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
+  [tabId: string]: PaperEntryStateI
+}
+
+interface PaperEntryStateI {
   completed: boolean
   values: {
     comments: string
@@ -10,11 +14,13 @@ interface InitialStateI {
 }
 
 const initialState: InitialStateI = {
-  completed: false,
-  values: {
-    comments: '',
-    startDate: null,
-    endDate: null,
+  placeholderId: {
+    completed: false,
+    values: {
+      comments: '',
+      startDate: null,
+      endDate: null,
+    },
   },
 }
 
@@ -24,10 +30,12 @@ export const paperEntrySlice = createSlice({
   reducers: {
     resetPaperEntrySlice: () => initialState,
     savePaperEntry: (state, action) => {
-      state.values = action.payload
+      const { tabId, values } = action.payload
+      state[tabId] = {completed: true, values}
     },
     markPaperEntryCompleted: (state, action) => {
-      state.completed = action.payload
+      const { tabId, value } = action.payload
+      state[tabId].completed = value
     },
   },
 })

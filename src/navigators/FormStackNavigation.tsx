@@ -61,7 +61,7 @@ function FormStackNavigation(props: any) {
             <HStack alignItems={'center'} justifyContent='space-between'>
               {Object.keys(tabSlice.tabs).map((tabId) => (
                 <Button
-                  bg={tabId == tabSlice.activeTabID ? 'primary' : 'secondary'}
+                  bg={tabId == tabSlice.activeTabId ? 'primary' : 'secondary'}
                   onPress={() => dispatch(setActiveTab(tabId))}
                   key={tabId}
                   mr={5}
@@ -70,7 +70,7 @@ function FormStackNavigation(props: any) {
                     <Text
                       fontSize='lg'
                       color={
-                        tabId == tabSlice.activeTabID ? 'white' : 'primary'
+                        tabId == tabSlice.activeTabId ? 'white' : 'primary'
                       }
                     >
                       {tabSlice.tabs[tabId]}
@@ -90,9 +90,9 @@ function FormStackNavigation(props: any) {
               ))}
               <Icon
                 onPress={() => {
-                  const tabID = uid()
-                  dispatch(createTab({ tabID, tabName: 'New Tab' }))
-                  dispatch(setActiveTab(tabID))
+                  const tabId = uid()
+                  dispatch(createTab({ tabId, tabName: 'New Tab' }))
+                  dispatch(setActiveTab(tabId))
                   props.navigation.navigate('Trap Visit Form', {
                     screen: 'Visit Setup',
                   })
@@ -114,10 +114,10 @@ function FormStackNavigation(props: any) {
     ) {
       // just show tabname
       if (
-        tabSlice.activeTabID != null &&
+        tabSlice.activeTabId != null &&
         props.route.name != 'Incomplete Sections'
       ) {
-        return <Text>{tabSlice.tabs[tabSlice.activeTabID]}</Text>
+        return <Text>{tabSlice.tabs[tabSlice.activeTabId]}</Text>
       } else {
         return <></>
       }

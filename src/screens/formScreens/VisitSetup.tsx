@@ -62,18 +62,18 @@ const VisitSetup = ({
 
   useEffect(() => {
     if (
-      visitSetupState[tabState.activeTabID]?.values?.programId !=
+      visitSetupState[tabState.activeTabId]?.values?.programId !=
       selectedProgramId
     ) {
       setSelectedProgramId(
-        visitSetupState[tabState.activeTabID]?.values?.programId
+        visitSetupState[tabState.activeTabId]?.values?.programId
       )
-      generateCrewList(visitSetupState[tabState.activeTabID]?.values?.programId)
+      generateCrewList(visitSetupState[tabState.activeTabId]?.values?.programId)
       shouldShowTrapNameField(
-        visitSetupState[tabState.activeTabID]?.values?.trapSite
+        visitSetupState[tabState.activeTabId]?.values?.trapSite
       )
     }
-  }, [tabState.activeTabID])
+  }, [tabState.activeTabId])
 
   const handleSubmit = (values: any) => {
     // values.crew = ['temp1']
@@ -84,27 +84,25 @@ const VisitSetup = ({
       programId,
       trapLocationId,
     }
-    if (!tabState.activeTabID) {
-      const tabID = uid()
-      console.log('hit 1... uid: ', tabID)
+    if (!tabState.activeTabId) {
+      const tabId = uid()
       dispatch(
-        createTab({ tabID, tabName: values.trapName ?? values.trapSite })
+        createTab({ tabId, tabName: values.trapName ?? values.trapSite })
       )
-      dispatch(saveVisitSetup({ tabID, values: payload }))
-      dispatch(markVisitSetupCompleted({ tabID, completed: true }))
-      dispatch(markTrapVisitPaperEntry({ tabID, isPaperEntry }))
+      dispatch(saveVisitSetup({ tabId, values: payload }))
+      dispatch(markVisitSetupCompleted({ tabId, completed: true }))
+      dispatch(markTrapVisitPaperEntry({ tabId, isPaperEntry }))
     } else {
-      console.log('hit 2')
-      dispatch(saveVisitSetup({ tabID: tabState.activeTabID, values: payload }))
+      dispatch(saveVisitSetup({ tabId: tabState.activeTabId, values: payload }))
       dispatch(setTabName(values.trapName ?? values.trapSite))
       dispatch(
         markVisitSetupCompleted({
-          tabID: tabState.activeTabID,
+          tabId: tabState.activeTabId,
           completed: true,
         })
       )
       dispatch(
-        markTrapVisitPaperEntry({ tabID: tabState.activeTabID, isPaperEntry })
+        markTrapVisitPaperEntry({ tabId: tabState.activeTabId, isPaperEntry })
       )
     }
     dispatch(markStepCompleted([true, 'visitSetup']))
@@ -186,11 +184,11 @@ const VisitSetup = ({
       validationSchema={trapVisitSchema}
       enableReinitialize={true}
       initialValues={
-        tabState.activeTabID
-          ? visitSetupState[tabState.activeTabID]
-            ? visitSetupState[tabState.activeTabID].values
-            : visitSetupState['placeholderID'].values
-          : visitSetupState['placeholderID'].values
+        tabState.activeTabId
+          ? visitSetupState[tabState.activeTabId]
+            ? visitSetupState[tabState.activeTabId].values
+            : visitSetupState['placeholderId'].values
+          : visitSetupState['placeholderId'].values
       }
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       // maybe this is not needed for first step in form?
@@ -355,7 +353,7 @@ const VisitSetup = ({
                       setFieldValue={setFieldValue}
                       setFieldTouched={setFieldTouched}
                       visitSetupState={visitSetupState}
-                      tabID={tabState.activeTabID}
+                      tabId={tabState.activeTabId}
                     />
                     {/* {touched.crew &&
                       errors.crew &&

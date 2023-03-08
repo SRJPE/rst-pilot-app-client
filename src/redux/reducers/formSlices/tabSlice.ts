@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { uid } from 'uid'
 
 export interface TabStateI {
-  activeTabID: string | null
+  activeTabId: string | null
   tabs: TabsI
 }
 
@@ -12,7 +12,7 @@ interface TabsI {
 }
 
 const initialState: TabStateI = {
-  activeTabID: null,
+  activeTabId: null,
   tabs: {},
 }
 
@@ -22,28 +22,28 @@ export const tabsSlice = createSlice({
   reducers: {
     resetTabsSlice: () => initialState,
     createTab: (state, action) => {
-      const { tabID, tabName } = action.payload
+      const { tabId, tabName } = action.payload
       if (Object.keys(state.tabs).length) {
-        state.tabs[tabID] = tabName
+        state.tabs[tabId] = tabName
       } else {
-        state.activeTabID = tabID
-        state.tabs[tabID] = tabName
+        state.activeTabId = tabId
+        state.tabs[tabId] = tabName
       }
     },
     deleteTab: (state, action) => {
-      const tabID = action.payload
-      delete state.tabs[tabID]
+      const tabId = action.payload
+      delete state.tabs[tabId]
       if (Object.keys(state.tabs)) {
-        state.activeTabID = state.tabs[Object.keys(state.tabs)[0]]
+        state.activeTabId = state.tabs[Object.keys(state.tabs)[0]]
       } else {
-        state.activeTabID = null
+        state.activeTabId = null
       }
     },
     setActiveTab: (state, action) => {
-      state.activeTabID = action.payload
+      state.activeTabId = action.payload
     },
     setTabName: (state, action) => {
-      if (state.activeTabID) state.tabs[state.activeTabID] = action.payload
+      if (state.activeTabId) state.tabs[state.activeTabId] = action.payload
     },
   },
 })

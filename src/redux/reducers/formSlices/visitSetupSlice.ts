@@ -19,7 +19,7 @@ interface VisitSetupValuesI {
 }
 
 const initialState: InitialStateI = {
-  placeholderID: {
+  placeholderId: {
     completed: false,
     isPaperEntry: false,
     values: {
@@ -38,20 +38,20 @@ export const visitSetupSlice = createSlice({
   reducers: {
     resetVisitSetupSlice: () => initialState,
     saveVisitSetup: (state, action) => {
-      const { tabID, values } = action.payload
-      if (state[tabID]) {
-        state[tabID].values = values
+      const { tabId, values } = action.payload
+      if (state[tabId]) {
+        state[tabId].values = values
       } else {
-        state[tabID] = { completed: false, isPaperEntry: false, values }
+        state[tabId] = { completed: true, isPaperEntry: false, values }
       }
     },
     markVisitSetupCompleted: (state, action) => {
-      const { tabID, completed } = action.payload
-      state[tabID].completed = completed
+      const { tabId, completed } = action.payload
+      state[tabId].completed = completed
     },
     markTrapVisitPaperEntry: (state, action) => {
-      const { tabID, isPaperEntry } = action.payload
-      state[tabID].isPaperEntry = isPaperEntry
+      const { tabId, isPaperEntry } = action.payload
+      state[tabId].isPaperEntry = isPaperEntry
     },
   },
 })

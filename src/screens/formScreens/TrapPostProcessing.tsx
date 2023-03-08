@@ -34,15 +34,18 @@ import FishHoldingModalContent from '../../components/form/FishHoldingModalConte
 const mapStateToProps = (state: RootState) => {
   return {
     reduxState: state.trapPostProcessing,
+    tabState: state.tabSlice
   }
 }
 
 const TrapPostProcessing = ({
   navigation,
   reduxState,
+  tabState,
 }: {
   navigation: any
   reduxState: any
+  tabState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [fishHoldingModalOpen, setFishHoldingModalOpen] = useState(
@@ -91,13 +94,14 @@ const TrapPostProcessing = ({
   )
 
   const handleSubmit = (values: any) => {
+    const tabId = tabState.activeTabId
     let trapVisitStartTime = null
     if (values.endingTrapStatus == 'Restart Trap') {
       trapVisitStartTime = new Date()
     }
 
-    dispatch(saveTrapPostProcessing({ ...values, trapVisitStartTime }))
-    dispatch(markTrapPostProcessingCompleted(true))
+    dispatch(saveTrapPostProcessing({tabId, values: { ...values, trapVisitStartTime }}))
+    dispatch(markTrapPostProcessingCompleted({tabId, value: true}))
     dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ TrapPostProcessing', values)
   }
@@ -105,9 +109,15 @@ const TrapPostProcessing = ({
   return (
     <Formik
       validationSchema={trapPostProcessingSchema}
-      initialValues={reduxState.values}
+      initialValues={
+        tabState.activeTabId
+          ? reduxState[tabState.activeTabId]
+            ? reduxState[tabState.activeTabId].values
+            : reduxState['placeholderId'].values
+          : reduxState['placeholderId'].values
+      }
       initialTouched={{ debrisVolume: true }}
-      initialErrors={reduxState.completed ? undefined : { debrisVolume: '' }}
+      // initialErrors={reduxState.completed ? undefined : { debrisVolume: '' }}
       onSubmit={(values) => {
         handleSubmit(values)
       }}

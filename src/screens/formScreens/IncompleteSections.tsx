@@ -40,6 +40,7 @@ const mapStateToProps = (state: RootState) => {
     connectivityState: state.connectivity,
     fishInputState: state.fishInput,
     paperEntryState: state.paperEntry,
+    tabState: state.tabSlice,
   }
 }
 
@@ -55,6 +56,7 @@ const IncompleteSections = ({
   connectivityState,
   fishInputState,
   paperEntryState,
+  tabState,
 }: {
   navigation: any
   navigationState: any
@@ -67,6 +69,7 @@ const IncompleteSections = ({
   connectivityState: any
   fishInputState: any
   paperEntryState: any
+  tabState: any
 }) => {
   // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
@@ -81,7 +84,7 @@ const IncompleteSections = ({
   }, [])
 
   const handleSubmit = () => {
-    saveTrapVisit()
+    saveTrapVisits()
     saveCatchRawSubmission()
     resetAllFormSlices()
     navigation.reset({
@@ -125,7 +128,7 @@ const IncompleteSections = ({
 
   const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
 
-  const saveTrapVisit = () => {
+  const saveTrapVisits = () => {
     const currentDateTime = new Date()
     const trapFunctioningValues = returnDefinitionArray(
       dropdownsState.values.trapFunctionality
@@ -142,16 +145,6 @@ const IncompleteSections = ({
     const trapStatusAtEndValues = returnDefinitionArray(
       dropdownsState.values.trapStatusAtEnd
     )
-    const {
-      rpm1: startRpm1,
-      rpm2: startRpm2,
-      rpm3: startRpm3,
-    } = trapOperationsState.values
-    const {
-      rpm1: endRpm1,
-      rpm2: endRpm2,
-      rpm3: endRpm3,
-    } = trapPostProcessingState.values
     const calculateRpmAvg = (rpms: (string | null)[]) => {
       const validRpms = rpms.filter((n) => n)
       if (!validRpms.length) {
@@ -164,83 +157,99 @@ const IncompleteSections = ({
       })
       return counter / numericRpms.length
     }
-    const selectedCrewNames: string[] = [...visitSetupState.values.crew] // ['james', 'steve']
-    const selectedCrewNamesMap: Record<string, boolean> =
-      selectedCrewNames.reduce(
-        (acc: Record<string, boolean>, name: string) => ({
-          ...acc,
-          [name]: true,
-        }),
-        {}
+    const tabIds = Object.keys(tabState.tabs)
+
+    tabIds.forEach((id) => {
+      const {
+        rpm1: startRpm1,
+        rpm2: startRpm2,
+        rpm3: startRpm3,
+      } = trapOperationsState[id].values
+      const {
+        rpm1: endRpm1,
+        rpm2: endRpm2,
+        rpm3: endRpm3,
+      } = trapPostProcessingState[id].values
+      const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
+      const selectedCrewNamesMap: Record<string, boolean> =
+        selectedCrewNames.reduce(
+          (acc: Record<string, boolean>, name: string) => ({
+            ...acc,
+            [name]: true,
+          }),
+          {}
+        )
+      const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
+      const selectedCrewIds = uniq(
+        allCrewObjects
+          .filter(
+            (obj: any) =>
+              selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
+          )
+          .map((obj: any) => obj.personnelId)
       )
-    const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
-    const selectedCrewIds = uniq(
-      allCrewObjects
-        .filter(
-          (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
-        )
-        .map((obj: any) => obj.personnelId)
-    )
+      const trapVisitSubmission = {
+        uid: tempUID,
+        crew: selectedCrewIds,
+        programId: visitSetupState[id].values.programId,
+        visitTypeId: null,
+        trapLocationId: visitSetupState[id].values.trapLocationId,
+        isPaperEntry: visitSetupState.isPaperEntry,
+        trapVisitTimeStart: visitSetupState.isPaperEntry
+          ? paperEntryState[id].values.startDate
+          : trapPostProcessingState[id].values.trapVisitStartTime,
+        trapVisitTimeEnd: visitSetupState.isPaperEntry
+          ? paperEntryState[id].values.endDate
+          : trapOperationsState[id].values.trapVisitStopTime,
+        fishProcessed: returnNullableTableId(
+          fishProcessedValues.indexOf(
+            fishProcessingState[id].values.fishProcessedResult
+          )
+        ),
+        whyFishNotProcessed: returnNullableTableId(
+          whyFishNotProcessedValues.indexOf(
+            fishProcessingState[id].values.fishProcessedResult
+          )
+        ),
+        sampleGearId: null,
+        coneDepth: trapOperationsState[id].values.coneDepth
+          ? parseInt(trapOperationsState[id].values.coneDepth)
+          : null,
+        trapInThalweg: null,
+        trapFunctioning: returnNullableTableId(
+          trapFunctioningValues.indexOf(
+            trapOperationsState[id].values.trapStatus
+          )
+        ),
+        whyTrapNotFunctioning: returnNullableTableId(
+          whyTrapNotFunctioningValues.indexOf(
+            trapOperationsState[id].values.reasonForNotFunc
+          )
+        ),
+        trapStatusAtEnd: returnNullableTableId(
+          trapStatusAtEndValues.indexOf(
+            `${trapPostProcessingState[id].values.endingTrapStatus}`.toLowerCase()
+          )
+        ),
+        totalRevolutions: trapOperationsState[id].values.totalRevolutions
+          ? parseInt(trapOperationsState[id].values.totalRevolutions)
+          : null,
+        rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
+        rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
+        inHalfConeConfiguration:
+          trapOperationsState[id].values.coneSetting === 'half' ? true : false,
+        debrisVolumeLiters: trapPostProcessingState[id].values.debrisVolume
+          ? parseInt(trapPostProcessingState[id].values.debrisVolume)
+          : null,
+        qcCompleted: null,
+        qcCompletedAt: null,
+        comments: paperEntryState[id]
+          ? paperEntryState[id].values.comments
+          : null,
+      }
 
-    const trapVisitSubmission = {
-      uid: tempUID,
-      crew: selectedCrewIds,
-      programId: visitSetupState.values.programId,
-      visitTypeId: null,
-      trapLocationId: visitSetupState.values.trapLocationId,
-      isPaperEntry: visitSetupState.isPaperEntry,
-      trapVisitTimeStart: visitSetupState.isPaperEntry
-        ? paperEntryState.values.startDate
-        : trapPostProcessingState.values.trapVisitStartTime,
-      trapVisitTimeEnd: visitSetupState.isPaperEntry
-        ? paperEntryState.values.endDate
-        : trapOperationsState.values.trapVisitStopTime,
-      fishProcessed: returnNullableTableId(
-        fishProcessedValues.indexOf(
-          fishProcessingState.values.fishProcessedResult
-        )
-      ),
-      whyFishNotProcessed: returnNullableTableId(
-        whyFishNotProcessedValues.indexOf(
-          fishProcessingState.values.fishProcessedResult
-        )
-      ),
-      sampleGearId: null,
-      coneDepth: trapOperationsState.values.coneDepth
-        ? parseInt(trapOperationsState.values.coneDepth)
-        : null,
-      trapInThalweg: null,
-      trapFunctioning: returnNullableTableId(
-        trapFunctioningValues.indexOf(trapOperationsState.values.trapStatus)
-      ),
-      whyTrapNotFunctioning: returnNullableTableId(
-        whyTrapNotFunctioningValues.indexOf(
-          trapOperationsState.values.reasonForNotFunc
-        )
-      ),
-      trapStatusAtEnd: returnNullableTableId(
-        trapStatusAtEndValues.indexOf(
-          `${trapPostProcessingState.values.endingTrapStatus}`.toLowerCase()
-        )
-      ),
-      totalRevolutions: trapOperationsState.values.totalRevolutions
-        ? parseInt(trapOperationsState.values.totalRevolutions)
-        : null,
-      rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
-      rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
-      inHalfConeConfiguration:
-        trapOperationsState.values.coneSetting === 'half' ? true : false,
-      debrisVolumeLiters: trapPostProcessingState.values.debrisVolume
-        ? parseInt(trapPostProcessingState.values.debrisVolume)
-        : null,
-      qcCompleted: null,
-      qcCompletedAt: null,
-      comments: paperEntryState.values.comments
-        ? paperEntryState.values.comments
-        : null,
-    }
-
-    dispatch(saveTrapVisitSubmission(trapVisitSubmission))
+      dispatch(saveTrapVisitSubmission(trapVisitSubmission))
+    })
   }
 
   const saveCatchRawSubmission = () => {

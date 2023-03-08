@@ -22,31 +22,38 @@ import { AppDispatch, RootState } from '../../redux/store'
 
 const mapStateToProps = (state: RootState) => {
   return {
-    historicalDataStore: state.paperEntry.values,
+    historicalDataStore: state.paperEntry,
+    tabState: state.tabSlice,
   }
 }
 
 const PaperEntry = ({
   navigation,
   historicalDataStore,
+  tabState,
 }: {
   navigation: any
   historicalDataStore: any
+  tabState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [endDate, setEndDate] = useState(new Date('01/01/2022') as any)
   const [startDate, setStartDate] = useState(new Date('01/01/2022') as any)
   const [comments, setComments] = useState(
-    historicalDataStore.comments as string
+    historicalDataStore[tabState.activeTabId]
+      ? (historicalDataStore[tabState.activeTabId].values.comments as string)
+      : (historicalDataStore['placeholderId'].values.comments as string)
   )
 
   useEffect(() => {
     //use the values from the store if they are not null
-    if (historicalDataStore.startDate) {
-      setStartDate(historicalDataStore.startDate)
-    }
-    if (historicalDataStore.endDate) {
-      setEndDate(historicalDataStore.endDate)
+    if (historicalDataStore[tabState.activeTabId]) {
+      if (historicalDataStore[tabState.activeTabId].values.startDate) {
+        setStartDate(historicalDataStore[tabState.activeTabId].values.startDate)
+      }
+      if (historicalDataStore[tabState.activeTabId].values.endDate) {
+        setEndDate(historicalDataStore[tabState.activeTabId].values.endDate)
+      }
     }
   }, [])
 
@@ -61,14 +68,18 @@ const PaperEntry = ({
   }
 
   const handleSubmit = () => {
+    const tabId = tabState.activeTabId
     dispatch(
       savePaperEntry({
-        comments,
-        startDate,
-        endDate,
+        tabId,
+        values: {
+          comments,
+          startDate,
+          endDate,
+        },
       })
     )
-    dispatch(markPaperEntryCompleted(true))
+    dispatch(markPaperEntryCompleted({ tabId, value: true }))
   }
 
   return (
