@@ -165,7 +165,6 @@ const AddFishContent = ({
     lifeStage: { emptyError: 'Fish life stage required' },
     adiposeClipped: { emptyError: 'Fish adipose clipped status required' },
     dead: { emptyError: 'Fish mortality required' },
-    willBeUsedInRecapture: { emptyError: 'Marked for recapture required' },
   }
 
   const createFormValueDefault = ({
@@ -201,11 +200,6 @@ const AddFishContent = ({
         touched: true,
         required: true,
       }),
-      willBeUsedInRecapture: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: true,
-      }),
       plusCountMethod: createFormValueDefault({ value: null }),
     },
     whenSpeciesSteelhead: {
@@ -224,10 +218,6 @@ const AddFishContent = ({
         value: false,
         touched: true,
         required: true,
-      }),
-      willBeUsedInRecapture: createFormValueDefault({
-        value: null,
-        touched: true,
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
     },
@@ -249,9 +239,6 @@ const AddFishContent = ({
         touched: true,
         required: true,
       }),
-      // willBeUsedInRecapture: createFormValueDefault({
-      //   value: null,
-      // }),
       plusCountMethod: createFormValueDefault({ value: null }),
     },
   }
@@ -339,16 +326,6 @@ const AddFishContent = ({
           required: false,
         })
   )
-  // const [willBeUsedInRecapture, setWillBeUsedInRecapture] =
-  //   useState<FormValueI>(
-  //     !route.params?.editModeData
-  //       ? stateDefaults.whenSpeciesChinook.willBeUsedInRecapture
-  //       : createFormValueDefault({
-  //           value: route.params?.editModeData.willBeUsedInRecapture,
-  //           touched: true,
-  //           required: false,
-  //         })
-  //   )
 
   const [plusCountMethod, setPlusCountMethod] = useState<FormValueI>(
     !route.params?.editModeData
@@ -373,7 +350,6 @@ const AddFishContent = ({
     existingMark,
     existingMark,
     dead,
-    // willBeUsedInRecapture,
     plusCountMethod,
   ])
 
@@ -388,7 +364,6 @@ const AddFishContent = ({
       adiposeClipped,
       existingMark,
       dead,
-      // willBeUsedInRecapture,
       plusCountMethod,
     ]
     let hasError = false
@@ -428,7 +403,6 @@ const AddFishContent = ({
     setAdiposeClipped(stateDefaults[identifier].adiposeClipped)
     setExistingMark(stateDefaults[identifier].existingMark)
     setDead(stateDefaults[identifier].dead)
-    // setWillBeUsedInRecapture(stateDefaults[identifier].willBeUsedInRecapture)
     setPlusCountMethod(stateDefaults[identifier].plusCountMethod)
     setFormHasError(true)
   }
@@ -443,7 +417,6 @@ const AddFishContent = ({
       adiposeClipped: adiposeClipped.value,
       existingMark: existingMark.value,
       dead: dead.value,
-      // willBeUsedInRecapture: willBeUsedInRecapture.value,
       plusCountMethod: plusCountMethod.value,
     }
 
@@ -1112,54 +1085,6 @@ const AddFishContent = ({
                     </Radio.Group>
                   </FormControl>
 
-                  {/* {species.value === 'Chinook salmon' && (
-                  <FormControl w='full'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Will this fish be used in your next mark recapture
-                        trial?
-                      </Text>
-                    </FormControl.Label>
-                    <Radio.Group
-                      name='willBeUsedInRecapture'
-                      accessibilityLabel='Will be used in recapture?'
-                      value={`${willBeUsedInRecapture.value}`}
-                      onChange={(value: any) => {
-                        if (value === 'true') {
-                          setWillBeUsedInRecapture({
-                            ...willBeUsedInRecapture,
-                            value: true,
-                          })
-                        } else {
-                          setWillBeUsedInRecapture({
-                            ...willBeUsedInRecapture,
-                            value: false,
-                          })
-                        }
-                      }}
-                    >
-                      <Radio
-                        colorScheme='primary'
-                        value='true'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        Yes
-                      </Radio>
-                      <Radio
-                        colorScheme='primary'
-                        value='false'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        No
-                      </Radio>
-                    </Radio.Group>
-                    <Text color='#A19C9C' marginTop='2' fontSize='xl'>
-                      Place in a separate bucket
-                    </Text>
-                  </FormControl>
-                )} */}
                   <HStack mb={'4'}>
                     {(species.value === 'Chinook salmon' ||
                       species.value === 'Steelhead / rainbow trout') && (
