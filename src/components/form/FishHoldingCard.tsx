@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
-import { Badge, Box, VStack, Center, Icon } from 'native-base'
+import { Badge, Box, VStack, Center, Icon, ScrollView } from 'native-base'
 import { memo } from 'react'
 
 const FishHoldingCard = ({
@@ -12,38 +12,43 @@ const FishHoldingCard = ({
   handlePressRemoveBadge: any
 }) => {
   const renderFishHoldingCardContent = () => {
-    return cardContent?.map((item, idx) => {
-      return (
-        <Badge
-          key={idx}
-          bg='themeOrange'
-          alignSelf='center'
-          justifyContent='space-between'
-          width='70%'
-          variant='solid'
-          shadow='3'
-          _text={{
-            color: 'white',
-            fontSize: '16',
-          }}
-          rightIcon={
-            <Icon
-              as={Ionicons}
-              name={'close'}
-              size='lg'
-              color='white'
-              onPress={() => handlePressRemoveBadge(item, cardTitle)}
-            />
-          }
-        >
-          {item}
-        </Badge>
-      )
-    })
+    return (
+      <ScrollView>
+        {cardContent?.map((item, idx) => {
+          return (
+            <Badge
+              key={idx}
+              bg='themeOrange'
+              alignSelf='center'
+              justifyContent='space-between'
+              width='77%'
+              variant='solid'
+              shadow='3'
+              mb='4'
+              _text={{
+                color: 'white',
+                fontSize: '16',
+              }}
+              rightIcon={
+                <Icon
+                  as={Ionicons}
+                  name={'close'}
+                  size='lg'
+                  color='white'
+                  onPress={() => handlePressRemoveBadge(item, cardTitle)}
+                />
+              }
+            >
+              {item}
+            </Badge>
+          )
+        })}
+      </ScrollView>
+    )
   }
 
   return (
-    <Box w='40%' rounded='xl' overflow='hidden'>
+    <Box w='45%' rounded='xl' overflow='hidden'>
       <Center
         bg='primary'
         _text={{
@@ -62,9 +67,8 @@ const FishHoldingCard = ({
         py='2%'
         px='4%'
         pt='4'
-        space={4}
         overflow='hidden'
-        height={'60%'}
+        height={'100%'}
         bg='secondary'
         roundedBottom='xl'
       >

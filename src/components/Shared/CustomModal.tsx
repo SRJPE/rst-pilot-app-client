@@ -14,6 +14,7 @@ const CustomModal = (props: ModalPropsI) => {
       isOpen={props.isOpen}
       onClose={props.closeModal}
       avoidKeyboard
+      closeOnOverlayClick={false}
       size={'full'}
       h={props.height ? props.height : 'full'}
       style={{ marginBottom: 0, marginTop: 'auto' }}

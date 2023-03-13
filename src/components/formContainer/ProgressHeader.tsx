@@ -14,6 +14,10 @@ export default function ProgressHeader(props: any) {
     if (activeStep === 14) {
       currentStep = '1'
     }
+    //if page is fish Holding render as step 5
+    if (activeStep === 16) {
+      currentStep = '5'
+    }
     const totalSteps = `${numOfFormSteps}`
 
     return `Step ${currentStep} of ${totalSteps}`

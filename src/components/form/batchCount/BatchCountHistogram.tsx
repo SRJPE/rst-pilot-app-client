@@ -9,6 +9,7 @@ import {
   VictoryAxis,
   VictoryLabel,
 } from 'victory-native'
+import { reformatBatchCountData } from '../../../utils/utils'
 
 const BatchCountHistogram = ({
   forkLengthsStore,
@@ -30,14 +31,20 @@ const BatchCountHistogram = ({
   }, [processedData])
 
   const prepareDataForGraph = () => {
+    const reformatedBatchCountData = reformatBatchCountData(forkLengthsStore)
     const storageArray: { forkLength: number; count: number }[] = []
-    forkLengthsStore &&
-      Object.keys(forkLengthsStore).forEach((key: any) => {
+
+    reformatedBatchCountData &&
+      Object.keys(reformatedBatchCountData).forEach((key: any) => {
+        const count: number = Object.values(
+          reformatedBatchCountData[key]
+        ).reduce((a, b) => a + b)
         storageArray.push({
           forkLength: Number(key),
-          count: forkLengthsStore[key],
+          count: count,
         })
       })
+
     setProcessedData(storageArray)
   }
 
