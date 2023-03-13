@@ -9,63 +9,43 @@ import {
   VictoryAxis,
   VictoryLabel,
 } from 'victory-native'
+import { reformatBatchCountData } from '../../../utils/utils'
 
 const BatchCountHistogram = ({
   forkLengthsStore,
-  forkLengthsStoreTest,
 }: {
   forkLengthsStore: any
-  forkLengthsStoreTest: any
 }) => {
   const [tickValues, setTickValues] = useState([] as number[])
   const [processedData, setProcessedData] = useState(
     [] as { forkLength: number; count: number }[]
   )
-  const [processedObject, setProcessedObject] = useState({} as any)
 
   useEffect(() => {
     calculateXAxisTickValues()
     prepareDataForGraph()
-  }, [forkLengthsStoreTest])
+  }, [forkLengthsStore])
 
   useEffect(() => {
     calculateXAxisTickValues()
   }, [processedData])
 
   const prepareDataForGraph = () => {
-    const testNEWSTORE = prepareStorageObject()
-    // console.log('🚀 ~ prepareDataForGraph ~ testNEWSTORE', testNEWSTORE)
-    // console.log('🚀 ~ prepareDataForGraph ~ forkLengthsStore', forkLengthsStore)
+    const reformatedBatchCountData = reformatBatchCountData(forkLengthsStore)
     const storageArray: { forkLength: number; count: number }[] = []
-    testNEWSTORE &&
-      Object.keys(testNEWSTORE).forEach((key: any) => {
+
+    reformatedBatchCountData &&
+      Object.keys(reformatedBatchCountData).forEach((key: any) => {
+        const count: number = Object.values(
+          reformatedBatchCountData[key]
+        ).reduce((a, b) => a + b)
         storageArray.push({
           forkLength: Number(key),
-          count: forkLengthsStore[key],
+          count: count,
         })
       })
-    setProcessedData(storageArray)
-  }
-  const prepareStorageObject = () => {
-    const storageObject: any = {}
-    forkLengthsStoreTest &&
-      Object.values(forkLengthsStoreTest).forEach((value: any) => {
-        // console.log('🚀 ~ prepareDataForGraphTEST Object.keys ~ key', value)
-        // console.log(
-        //   '🚀 ~ prepareDataForGraphTEST Object.keys ~ key FL',
-        //   value.forkLength
-        // )
-        storageObject[value.forkLength] === undefined
-          ? (storageObject[value.forkLength] = 1)
-          : storageObject[value.forkLength]++
 
-        // storageArray.push({
-        //   forkLength: Number(key),
-        //   count: forkLengthsStoreTest[key],
-        // })
-      })
-    // setProcessedDataTEST(storageArray)
-    return storageObject
+    setProcessedData(storageArray)
   }
 
   const padArrayWithMissingNumbers = (arr: number[]): number[] => {
@@ -158,7 +138,6 @@ const BatchCountHistogram = ({
 const mapStateToProps = (state: RootState) => {
   return {
     forkLengthsStore: state.fishInput.batchCharacteristics.forkLengths,
-    forkLengthsStoreTest: state.fishInput.batchCharacteristics.forkLengthsTest,
   }
 }
 export default connect(mapStateToProps)(BatchCountHistogram)

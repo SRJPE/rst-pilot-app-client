@@ -16,94 +16,33 @@ const BatchCountTableModal = ({
   showTableModal,
   setShowTableModal,
   modalInitialData,
-}: // setModalData,
-{
+}: {
   showTableModal: any
   setShowTableModal: any
   modalInitialData: any
-  // setModalData: any
 }) => {
-  // console.log('🚀 ~ modalData', modalInitialData)
-  const [modalDataTemp, setModalDataTemp] = useState({
-    forkLength: '',
-    count: '',
-  } as any)
-  const [currentCount, setCurrentCount] = useState(null as any)
-  const [keyToChange, setKeyToChange] = useState('' as string)
-  const [valueToChange, setValueToChange] = useState('' as string)
   const dispatch = useDispatch<AppDispatch>()
-  // console.log('🚀 ~ modalDataTemp', modalDataTemp)
+  const [modalDataTemp, setModalDataTemp] = useState({} as any)
+  const [currentCount, setCurrentCount] = useState(0 as any)
 
-  // useEffect(() => {
-  //   setModalData({ ...modalData, keyToChange: valueToChange })
-  // }, [keyToChange])
   useEffect(() => {
     setModalDataTemp(modalInitialData)
-    setCurrentCount(modalInitialData.count)
-  }, [])
+  }, [modalInitialData])
+
   useEffect(() => {
-    // console.log(
-    //   '🚀 ~ useEffect ~ Object.values(modalDataTemp)',
-    //   Object.values(modalDataTemp)
-    //     .slice(2)
-    //     .reduce((a: any, b: any) => Number(a) + Number(b))
-    // )
-    console.log('LENGTH: ', Object.values(modalDataTemp))
     Object.values(modalDataTemp).length >= 3 &&
       setCurrentCount(
-        Object.values(modalDataTemp)
-          .slice(2)
-          .reduce((a: any, b: any) => Number(a) + Number(b))
+        Object.values(modalDataTemp) &&
+          (Object.values(modalDataTemp)
+            .slice(2)
+            .reduce((a: any, b: any) => Number(a) + Number(b)) as any)
       )
   }, [modalDataTemp])
 
-  const handleChangeModalText = (text: string) => {
-    // console.log('🚀 ~ handleChangeModalText ~ text', text)
-    // // console.log('TEST', arguments[0])
-    // modalDataTemp({ ...modalInitialData, count: text })
-  }
-  const handleEditForkLengthCount = () => {
+  const handleEditForkLengthCountSave = () => {
     dispatch(
       updateSingleForkLengthCount({ ...modalDataTemp, count: currentCount })
     )
-    setModalDataTemp(modalInitialData)
-    setCurrentCount(modalInitialData.count)
-  }
-
-  const renderLifeStageInputs = (modalDataTemp: any) => {
-    return Object.keys(modalDataTemp).map((key: string) => {
-      const keyTEST = key
-      if (key !== 'forkLength' && key !== 'count') {
-        // console.log('🚀 ~ returnObject.keys ~ key', keyTEST)
-        // console.log('🚀 ~ returnObject.keys ~ val', modalDataTemp[key])
-        return (
-          <FormControl mt='3'>
-            <FormControl.Label>
-              <Text color='black' fontSize='xl'>
-                {key}
-              </Text>
-            </FormControl.Label>
-            <Input
-              size='2xl'
-              value={modalDataTemp[key]}
-              isFocused
-              keyboardType='numeric'
-              onChangeText={
-                (value: any) => {
-                  setModalDataTemp({
-                    ...modalDataTemp,
-                    [keyTEST]: value,
-                  })
-                  // setKeyToChange(key)
-                  // setValueToChange(modalData[key])
-                }
-                // handleChangeModalText
-              }
-            />
-          </FormControl>
-        )
-      }
-    })
   }
 
   return (
@@ -132,17 +71,13 @@ const BatchCountTableModal = ({
               {currentCount}
             </Text>
           </HStack>
-          {/* {renderLifeStageInputs(modalInitialData)} */}
           {Object.keys(modalInitialData).map((key: string) => {
-            const keyTEST = key
             if (key !== 'forkLength' && key !== 'count') {
-              // console.log('🚀 ~ returnObject.keys ~ key', keyTEST)
-              // console.log('🚀 ~ returnObject.keys ~ val', modalDataTemp[key])
               return (
                 <FormControl mt='3' key={key}>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
-                      {key}
+                      {key === 'not recorded' ? 'Count' : key}
                     </Text>
                   </FormControl.Label>
                   <Input
@@ -150,17 +85,12 @@ const BatchCountTableModal = ({
                     value={modalDataTemp[key]}
                     isFocused
                     keyboardType='numeric'
-                    onChangeText={
-                      (value: any) => {
-                        setModalDataTemp({
-                          ...modalDataTemp,
-                          [keyTEST]: value,
-                        })
-                        // setKeyToChange(key)
-                        // setValueToChange(modalData[key])
-                      }
-                      // handleChangeModalText
-                    }
+                    onChangeText={(value: any) => {
+                      setModalDataTemp({
+                        ...modalDataTemp,
+                        [key]: value,
+                      })
+                    }}
                   />
                 </FormControl>
               )
@@ -182,8 +112,8 @@ const BatchCountTableModal = ({
               variant='ghost'
               colorScheme='blueGray'
               onPress={() => {
-                setShowTableModal(false)
                 setModalDataTemp(modalInitialData)
+                setShowTableModal(false)
               }}
             >
               Cancel
@@ -191,8 +121,8 @@ const BatchCountTableModal = ({
             <Button
               bg='primary'
               onPress={() => {
+                handleEditForkLengthCountSave()
                 setShowTableModal(false)
-                handleEditForkLengthCount()
               }}
             >
               Save
