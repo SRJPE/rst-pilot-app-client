@@ -3,17 +3,13 @@ import {
   Box,
   Button,
   Divider,
-  FormControl,
   Heading,
   HStack,
-  Input,
-  Modal,
   Pressable,
   Radio,
   ScrollView,
   Stack,
   Text,
-  View,
   VStack,
 } from 'native-base'
 import { useEffect, useState } from 'react'
@@ -29,7 +25,6 @@ import CustomModalHeader, {
 import { AppDispatch, RootState } from '../../redux/store'
 import { capitalize } from 'lodash'
 import {
-  updateSingleForkLengthCount,
   removeLastForkLengthEntered,
   saveBatchCount,
 } from '../../redux/reducers/formSlices/fishInputSlice'
@@ -37,6 +32,7 @@ import BatchCountHistogram from '../../components/form/batchCount/BatchCountHist
 import { Switch } from 'native-base'
 import BatchCountDataTable from '../../components/form/batchCount/BatchCountDataTable'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import BatchCountTableModal from '../../components/form/batchCount/BatchCountTableModal'
 
 const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -49,22 +45,15 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   const [showTable, setShowTable] = useState(false as boolean)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
     useState(false as boolean)
-  const [modalData, setModalData] = useState({
+  const [modalInitialData, setModalInitialData] = useState({
     forkLength: '',
     count: '',
   } as any)
-  const {
-    species,
-    adiposeClipped,
-    dead,
-    existingMark,
-    forkLengths,
-    lastEnteredForkLength,
-  } = fishStore.batchCharacteristics
+  const { species, adiposeClipped, dead, existingMark, forkLengths } =
+    fishStore.batchCharacteristics
 
   const { height: screenHeight } = useWindowDimensions()
 
-  //this is not yet hooked up to the fork length button Group interface
   const [lifeStageRadioValue, setLifeStageRadioValue] = useState('' as string)
 
   useEffect(() => {
@@ -91,34 +80,36 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     setBatchCharacteristicsModalOpen(true)
   }
 
-  const handleEditForkLengthCount = () => {
-    dispatch(updateSingleForkLengthCount(modalData))
-  }
-
   const buttonNav = () => {
     // @ts-ignore
     navigation.navigate('Trap Visit Form', {
       screen: 'Add Fish',
     })
   }
-  const handleShowTableModal = (selectedRow: any) => {
-    setModalData({
-      forkLength: selectedRow.forkLength,
-      count: selectedRow.count.toString(),
+  const handleShowTableModal = (selectedRowData: any) => {
+    const modalDataContainer = {} as any
+    Object.keys(selectedRowData).forEach((key: string) => {
+      modalDataContainer[key] = selectedRowData[key].toString()
     })
+    setModalInitialData(modalDataContainer)
     setShowTableModal(true)
   }
 
-  const handleChangeModalText = (text: string) => {
-    setModalData({ ...modalData, count: text })
-  }
   const calculateTotalCount = () => {
     let count: number = 0
     if (!forkLengths) return count
-    Object.values(forkLengths).forEach((forkLengthCount: any) => {
-      count += forkLengthCount
+    Object.values(forkLengths).forEach(() => {
+      count += 1
     })
     return count
+  }
+  const calculateLastFish = (): number | null => {
+    let forkLengthOfLastFish: number | null = null
+    if (!forkLengths) return null
+    Object.values(forkLengths).forEach((entry: any) => {
+      forkLengthOfLastFish = entry.forkLength
+    })
+    return forkLengthOfLastFish
   }
 
   return (
@@ -224,78 +215,82 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                   setLifeStageRadioValue={setLifeStageRadioValue}
                   setNumberOfAdditionalButtons={setNumberOfAdditionalButtons}
                 />
-                <Box px='2%'>
-                  <Divider my='1%' />
-                  <HStack space={6} alignItems='center'>
-                    <Text bold>Life Stage:</Text>
-                    <Radio.Group
-                      name='lifeStageRadioGroup'
-                      value={lifeStageRadioValue}
-                      // onChange={(nextValue) => {
-                      //   setLifeStageRadioValue(nextValue)
-                      // }}
-                    >
-                      <Stack
-                        direction={{
-                          base: 'column',
-                          md: 'row',
+                {species === 'Chinook salmon' && (
+                  <Box px='2%'>
+                    <Divider my='1%' />
+                    <HStack space={6} alignItems='center'>
+                      <Text bold>Life Stage:</Text>
+                      <Radio.Group
+                        name='lifeStageRadioGroup'
+                        value={lifeStageRadioValue}
+                        onChange={(nextValue) => {
+                          setLifeStageRadioValue(nextValue)
                         }}
-                        alignItems={{
-                          base: 'flex-start',
-                          md: 'center',
-                        }}
-                        space={10}
-                        w='75%'
-                        maxW='300px'
                       >
-                        <Radio
-                          colorScheme='primary'
-                          value='Yolk Sac Fry'
-                          my={1}
-                          _icon={{ color: 'primary' }}
+                        <Stack
+                          direction={{
+                            base: 'column',
+                            md: 'row',
+                          }}
+                          alignItems={{
+                            base: 'flex-start',
+                            md: 'center',
+                          }}
+                          space={10}
+                          w='75%'
+                          maxW='300px'
                         >
-                          Yolk Sac Fry
-                        </Radio>
-                        <Radio
-                          colorScheme='primary'
-                          value='Fry'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          Fry
-                        </Radio>
-                        <Radio
-                          colorScheme='primary'
-                          value='Parr'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          Parr
-                        </Radio>
-                        <Radio
-                          colorScheme='primary'
-                          value='Silvery Parr'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          Silvery Parr
-                        </Radio>
-                        <Radio
-                          colorScheme='primary'
-                          value='Smolt'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          Smolt
-                        </Radio>
-                      </Stack>
-                    </Radio.Group>
-                  </HStack>
-                  <Divider my='1%' />
-                </Box>
+                          <Radio
+                            colorScheme='primary'
+                            value='Yolk Sac Fry'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Yolk Sac Fry
+                          </Radio>
+                          <Radio
+                            colorScheme='primary'
+                            value='Fry'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Fry
+                          </Radio>
+                          <Radio
+                            colorScheme='primary'
+                            value='Parr'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Parr
+                          </Radio>
+                          <Radio
+                            colorScheme='primary'
+                            value='Silvery Parr'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Silvery Parr
+                          </Radio>
+                          <Radio
+                            colorScheme='primary'
+                            value='Smolt'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Smolt
+                          </Radio>
+                        </Stack>
+                      </Radio.Group>
+                    </HStack>
+                    <Divider my='1%' />
+                  </Box>
+                )}
                 <BatchCountButtonGrid
                   firstButton={firstButton}
                   numberOfAdditionalButtons={numberOfAdditionalButtons}
+                  selectedLifeStage={lifeStageRadioValue}
+                  ignoreLifeStage={species !== 'Chinook salmon'}
                 />
               </>
             )}
@@ -304,34 +299,35 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
                 <Heading size='md'>
                   Total Count: {calculateTotalCount()}
                 </Heading>
-                <Button bg='primary' onPress={handlePressSaveBatchCount}>
-                  <Text fontSize='lg' bold color='white'>
-                    Save Batch Count
-                  </Text>
-                </Button>
+                <HStack space={5}>
+                  <Button bg='primary' onPress={handlePressSaveBatchCount}>
+                    <Text fontSize='lg' bold color='white'>
+                      Save Batch Count
+                    </Text>
+                  </Button>
+                  <Button
+                    bg='primary'
+                    onPress={() => console.log('Fork Lengths: ', forkLengths)}
+                  >
+                    <Text fontSize='lg' bold color='white'>
+                      LOG
+                    </Text>
+                  </Button>
+                </HStack>
               </VStack>
               <VStack space={4}>
                 <Heading size='md'>
-                  Fork length of last fish entered ={' '}
-                  {lastEnteredForkLength ? lastEnteredForkLength : '_'}
+                  Fork length of last fish entered: {calculateLastFish()}
                 </Heading>
                 <Button
                   bg='primary'
                   onPress={() => handlePressRemoveFish()}
-                  isDisabled={!lastEnteredForkLength}
+                  isDisabled={calculateTotalCount() === 0}
                 >
                   <Text fontSize='lg' bold color='white'>
                     Remove Last Fish
                   </Text>
                 </Button>
-                {/* <Button
-                  bg='primary'
-                  onPress={() => console.log('Fork Lengths: ', forkLengths)}
-                >
-                  <Text fontSize='lg' bold color='white'>
-                    LOG
-                  </Text>
-                </Button> */}
               </VStack>
             </HStack>
           </VStack>
@@ -347,62 +343,12 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
           closeModal={() => setBatchCharacteristicsModalOpen(false)}
         />
       </CustomModal>
-      <Modal isOpen={showTableModal} onClose={() => setShowTableModal(false)}>
-        <Modal.Content maxWidth='400px'>
-          <Modal.CloseButton />
-          <Modal.Header>
-            <Heading color='black' fontSize='2xl'>
-              Edit Fork Length Count
-            </Heading>
-          </Modal.Header>
-          <Modal.Body>
-            <HStack alignItems='center'>
-              <Text color='black' fontSize='xl'>
-                Fork Length:{' '}
-              </Text>
-              <Text bold color='black' fontSize='2xl'>
-                {modalData.forkLength}
-              </Text>
-            </HStack>
-            <FormControl mt='3'>
-              <FormControl.Label>
-                <Text color='black' fontSize='xl'>
-                  Count
-                </Text>
-              </FormControl.Label>
-              <Input
-                size='2xl'
-                value={modalData.count}
-                isFocused
-                keyboardType='numeric'
-                onChangeText={handleChangeModalText}
-              />
-            </FormControl>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button.Group space={2}>
-              <Button
-                variant='ghost'
-                colorScheme='blueGray'
-                onPress={() => {
-                  setShowTableModal(false)
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                bg='primary'
-                onPress={() => {
-                  setShowTableModal(false)
-                  handleEditForkLengthCount()
-                }}
-              >
-                Save
-              </Button>
-            </Button.Group>
-          </Modal.Footer>
-        </Modal.Content>
-      </Modal>
+
+      <BatchCountTableModal
+        showTableModal={showTableModal}
+        setShowTableModal={setShowTableModal}
+        modalInitialData={modalInitialData}
+      />
     </>
   )
 }

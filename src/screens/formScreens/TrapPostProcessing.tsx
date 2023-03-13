@@ -26,10 +26,7 @@ import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import { QARanges } from '../../utils/utils'
-import { color } from 'native-base/lib/typescript/theme/styled-system'
 import { useCallback, useState } from 'react'
-import CustomModal from '../../components/Shared/CustomModal'
-import FishHoldingModalContent from '../../components/form/FishHoldingModalContent'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -45,9 +42,6 @@ const TrapPostProcessing = ({
   reduxState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [fishHoldingModalOpen, setFishHoldingModalOpen] = useState(
-    false as boolean
-  )
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
     ;(async () => {
@@ -61,21 +55,6 @@ const TrapPostProcessing = ({
         console.error(error)
       }
     })()
-  }
-  const handleModalChange = () => {
-    setFishHoldingModalOpen(!fishHoldingModalOpen)
-  }
-
-  const renderModalCallBack = () => {
-    return (
-      <CustomModal
-        isOpen={fishHoldingModalOpen}
-        closeModal={handleModalChange}
-        height='60%'
-      >
-        <FishHoldingModalContent closeModal={handleModalChange} />
-      </CustomModal>
-    )
   }
 
   const handleTrapStatusAtEndRadio = useCallback(
@@ -322,9 +301,7 @@ const TrapPostProcessing = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
-            toggleModal={handleModalChange}
           />
-          {renderModalCallBack()}
         </>
       )}
     </Formik>
