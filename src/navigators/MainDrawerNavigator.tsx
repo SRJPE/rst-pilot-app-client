@@ -7,6 +7,7 @@ import DataQualityControl from '../screens/QCData'
 import MarkRecaptureForm from '../screens/MarkRecaptureFormRoot'
 import Profile from '../screens/Profile'
 import PermitInfo from '../screens/PermitInfo'
+import SignIn from '../screens/SignIn'
 
 const Drawer = createDrawerNavigator()
 
@@ -15,23 +16,27 @@ export default function DrawerNavigator() {
     <Drawer.Navigator
       initialRouteName='Home'
       screenOptions={{ drawerType: 'front' }}
-      drawerContent={props => <DrawerMenu {...props} />}
+      drawerContent={(props) => <DrawerMenu {...props} />}
     >
       <Drawer.Screen
         name='Home'
         component={Home}
         // options={{ headerShown: false }}
       />
+      <Drawer.Screen name='Profile' component={Profile} />
+      <Drawer.Screen
+        name='Sign In'
+        component={SignIn}
+        options={{ headerShown: false }}
+      />
+      <Drawer.Screen name='Permit Info' component={PermitInfo} />
       <Drawer.Screen name='Generate Report' component={GenerateReport} />
       <Drawer.Screen
         name='Data Quality Control'
         component={DataQualityControl}
       />
-      <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
-
       <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
-      <Drawer.Screen name='Profile' component={Profile} />
-      <Drawer.Screen name='Permit Info' component={PermitInfo} />
+      <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
     </Drawer.Navigator>
   )
 }

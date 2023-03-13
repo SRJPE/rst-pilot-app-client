@@ -123,6 +123,12 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             title='Home'
           />
           <MenuButton
+            active={currentRoute === 'Sign In'}
+            onPress={() => handlePressMainNavButton('Sign In')}
+            icon='home'
+            title='Sign In'
+          />
+          <MenuButton
             active={currentRoute === 'Profile'}
             onPress={() => {
               handlePressMainNavButton('Profile')
