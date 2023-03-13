@@ -14,7 +14,6 @@ const NavButtons = ({
   values,
   isFormComplete,
   isPaperEntry,
-  toggleModal,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -23,7 +22,6 @@ const NavButtons = ({
   values?: any
   isFormComplete?: boolean
   isPaperEntry?: boolean
-  toggleModal?: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -31,14 +29,8 @@ const NavButtons = ({
   const activePage = navigationState.steps[activeStep]?.name
   const reduxState = useSelector((state: any) => state)
   const isPaperEntryStore = reduxState.visitSetup.isPaperEntry
-
-  const individualFishStore = useSelector(
-    (state: any) => state.fishInput.fishStore
-  )
-  const willBeHoldingFishForMarkRecapture = useSelector(
-    (state: any) =>
-      state.fishProcessing.values.willBeHoldingFishForMarkRecapture
-  )
+  const willBeHoldingFishForMarkRecapture =
+    reduxState.fishProcessing.values.willBeHoldingFishForMarkRecapture
 
   const navigateHelper = (destination: string) => {
     const formSteps = Object.values(navigationState?.steps) as any
@@ -60,11 +52,7 @@ const NavButtons = ({
     switch (activePage) {
       case 'Visit Setup':
         if (isPaperEntry) {
-          navigation.navigate('Trap Visit Form', { screen: 'Paper Entry' })
-          dispatch({
-            type: updateActiveStep,
-            payload: 14,
-          })
+          navigateHelper('Paper Entry')
         }
         break
       case 'Trap Operations':
@@ -106,6 +94,9 @@ const NavButtons = ({
         if (willBeHoldingFishForMarkRecapture) {
           navigateHelper('Fish Holding')
         }
+        break
+      case 'Fish Holding':
+        navigateHelper('Incomplete Sections')
         break
       case 'High Flows':
         navigateHelper('End Trapping')
@@ -150,6 +141,14 @@ const NavButtons = ({
       case 'Started Trapping':
         navigateHelper('Trap Operations')
         break
+      case 'Fish Holding':
+        navigateHelper('Trap Post-Processing')
+        break
+      case 'Incomplete Sections':
+        if (willBeHoldingFishForMarkRecapture) {
+          navigateHelper('Fish Holding')
+        }
+        break
       default:
         break
     }
@@ -159,41 +158,18 @@ const NavButtons = ({
     //if function truthy, submit form to check for errors and save to redux
     if (handleSubmit) {
       handleSubmit()
-
-      //if the active page is TPP, then only open modal if any fish have been marked for recapture
-      if (activePage === 'Trap Post-Processing') {
-        const haveAnyFishBeenMarkedForRecapture = Object.values(
-          individualFishStore
-        ).some((fish: any) => {
-          return fish.willBeUsedInRecapture === true
-        })
-        if (haveAnyFishBeenMarkedForRecapture) {
-          toggleModal()
-          return
-        }
-      }
-
       showSlideAlert(dispatch)
     }
-
-    if (activePage === 'Visit Setup' && isPaperEntry) {
-      navigation.navigate('Trap Visit Form', { screen: 'Paper Entry' })
-      dispatch({
-        type: updateActiveStep,
-        payload: 14,
-      })
-    } else {
-      //navigate Right
-      navigation.navigate('Trap Visit Form', {
-        screen: navigationState.steps[activeStep + 1]?.name,
-      })
-      dispatch({
-        type: updateActiveStep,
-        payload: navigationState.activeStep + 1,
-      })
-      //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
-      navigateFlowRightButton(values)
-    }
+    //navigate Right
+    navigation.navigate('Trap Visit Form', {
+      screen: navigationState.steps[activeStep + 1]?.name,
+    })
+    dispatch({
+      type: updateActiveStep,
+      payload: navigationState.activeStep + 1,
+    })
+    //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
+    navigateFlowRightButton(values)
   }
 
   const handleLeftButton = () => {

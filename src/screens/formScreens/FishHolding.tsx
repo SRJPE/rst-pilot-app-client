@@ -1,24 +1,25 @@
 import { useNavigation } from '@react-navigation/native'
-import { HStack, VStack, Text, Button, Divider, Heading } from 'native-base'
-import { memo, useCallback, useEffect, useState } from 'react'
+import { HStack, VStack, Text, Button, Heading, View } from 'native-base'
+import { useCallback, useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { FishStoreI } from '../../redux/reducers/formSlices/fishInputSlice'
-import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { saveTotalFishHolding } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import FishHoldingCard from '../../components/form/FishHoldingCard'
+import NavButtons from '../../components/formContainer/NavButtons'
+import {
+  markFishHoldingCompleted,
+  saveFishHolding,
+  SelectedFishStoreI,
+} from '../../redux/reducers/markRecaptureSlices/fishHoldingSlice'
 
 const FishHolding = ({
   fishStore,
-  handleMarkFishFormSubmit,
-  closeModal,
+  selectedFishStoreState,
 }: {
   fishStore: FishStoreI
-  handleMarkFishFormSubmit?: any
-  closeModal: any
+  selectedFishStoreState: SelectedFishStoreI
 }) => {
-  console.log('🚀 ~ fishStore', fishStore)
   const dispatch = useDispatch<AppDispatch>()
   const navigation: any = useNavigation()
   const [selectedFishStore, setSelectedFishStore] = useState({} as any)
@@ -27,7 +28,11 @@ const FishHolding = ({
   const [totalFish, setTotalFish] = useState(0 as number)
 
   useEffect(() => {
-    createSelectedFishStore()
+    if (Object.keys(selectedFishStoreState).length === 0) {
+      createSelectedFishStore()
+    } else {
+      setSelectedFishStore(selectedFishStoreState as SelectedFishStoreI)
+    }
     setSelectedLifeStagesAndRuns()
   }, [])
 
@@ -39,8 +44,8 @@ const FishHolding = ({
   const createSelectedFishStore = () => {
     const tempSelectedFishStore = {} as any
     for (const fish in fishStore) {
-      //only add fish that are marked for recapture
-      // if (!fishStore[fish].willBeUsedInRecapture) continue
+      //only add chinook to the list
+      if (fishStore[fish].species !== 'Chinook salmon') continue
       //do not add yolk sac fry to store
       if (fishStore[fish].lifeStage === 'yolk sac fry') continue
       //add remaining fish objects to selectedFishStore
@@ -129,21 +134,28 @@ const FishHolding = ({
 
   const handleSubmit = () => {
     dispatch(saveTotalFishHolding(totalFish))
+    dispatch(
+      saveFishHolding({
+        totalFishHolding: totalFish,
+        selectedFishStore: selectedFishStore,
+      })
+    )
+    dispatch(markFishHoldingCompleted(true))
   }
 
   //render new cards when selected runs or lifeStages change
   const renderFishHoldingCards = useCallback(() => {
     return (
-      <HStack space={10} justifyContent='center'>
-        <FishHoldingCard
-          cardContent={selectedRuns}
-          handlePressRemoveBadge={handlePressRemoveBadge}
-          cardTitle='Run'
-        />
+      <HStack space={10} justifyContent='center' h='475' mb='75'>
         <FishHoldingCard
           cardContent={selectedLifeStages}
           handlePressRemoveBadge={handlePressRemoveBadge}
           cardTitle='Life Stage'
+        />
+        <FishHoldingCard
+          cardContent={selectedRuns}
+          handlePressRemoveBadge={handlePressRemoveBadge}
+          cardTitle='Run'
         />
       </HStack>
     )
@@ -151,84 +163,60 @@ const FishHolding = ({
 
   return (
     <>
-      <CustomModalHeader
-        headerText={'Fish Holding'}
-        showHeaderButton={true}
-        closeModal={closeModal}
-        headerButton={
-          <Button
-            bg='primary'
-            mx='2'
-            px='10'
-            shadow='3'
-            onPress={() => {
-              navigation.navigate('Trap Visit Form', {
-                screen: 'Incomplete Sections',
-              })
-              dispatch(updateActiveStep(6))
-              handleSubmit()
-              // closeModal()
-            }}
-          >
-            <Text fontSize='xl' color='white'>
-              Save
-            </Text>
-          </Button>
-        }
-      />
-      <>
-        <Divider my={2} thickness='3' />
-        <VStack
-          alignItems='center'
-          paddingX='10'
-          paddingTop='7'
-          paddingBottom='3'
-          space={5}
-        >
-          <Heading color='black' fontSize='2xl'>
+      <View flex={1} bg='#fff' p='6%' borderColor='themeGrey' borderWidth='15'>
+        <VStack space={10}>
+          <Heading fontSize='28'>
             Which fish are you holding for mark recapture Trials?
           </Heading>
-          <HStack m='2%' space={10}>
+          <HStack>
             <Button
               bg='primary'
               alignSelf='flex-start'
               shadow='5'
+              ml='10'
               onPress={handleClearAll}
             >
               <Text fontWeight='bold' color='white'>
-                Clear all, I am not holding any fish.
+                Clear all, I am not holding any fish
               </Text>
             </Button>
             <Button
               bg='primary'
               alignSelf='flex-start'
               shadow='5'
+              ml='180'
               onPress={handleResetAll}
             >
               <Text fontWeight='bold' color='white'>
                 Reset All
               </Text>
             </Button>
-            {/* <Button
-              bg='primary'
-              alignSelf='flex-start'
-              shadow='5'
-              onPress={() => {
-                console.log('selectedFishStore: ', selectedFishStore)
-                console.log('selectedRuns: ', selectedRuns)
-                console.log('selectedLifeStages: ', selectedLifeStages)
-              }}
-            >
-              <Text fontWeight='bold' color='white'>
-                Log selectedFishStore
-              </Text>
-            </Button> */}
           </HStack>
           {renderFishHoldingCards()}
-          {/* this margin needs to be changed */}
-          <Heading mt='-10'>Total Fish Holding: {totalFish}</Heading>
         </VStack>
-      </>
+
+        <HStack space={10} justifyContent='center'>
+          {/* <Button
+            bg='primary'
+            alignSelf='flex-start'
+            shadow='5'
+            onPress={() => {
+              console.log('fishStore: ', fishStore)
+              console.log('selectedFishStore: ', selectedFishStore)
+              console.log('selectedRuns: ', selectedRuns)
+              console.log('selectedLifeStages: ', selectedLifeStages)
+              console.log('🚀 ~ totalFish:', totalFish)
+            }}
+          >
+            <Text fontWeight='bold' color='white'>
+              Log
+            </Text>
+          </Button> */}
+
+          <Heading>Total Fish Holding: {totalFish}</Heading>
+        </HStack>
+      </View>
+      <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
     </>
   )
 }
@@ -236,6 +224,7 @@ const FishHolding = ({
 const mapStateToProps = (state: RootState) => {
   return {
     fishStore: state.fishInput.fishStore,
+    selectedFishStoreState: state.fishHolding.values.selectedFishStore,
   }
 }
 

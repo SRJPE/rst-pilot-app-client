@@ -52,11 +52,7 @@ export default function FormStackNavigation() {
         name='Trap Post-Processing'
         component={TrapPostProcessing}
       />
-      <FormStack.Screen
-        name='Fish Holding'
-        component={FishHolding}
-        options={{ headerShown: false }}
-      />
+      <FormStack.Screen name='Fish Holding' component={FishHolding} />
       <FormStack.Screen
         name='Incomplete Sections'
         component={IncompleteSections}

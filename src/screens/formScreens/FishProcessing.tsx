@@ -9,7 +9,6 @@ import {
   HStack,
   Radio,
 } from 'native-base'
-import { useEffect } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
@@ -162,12 +161,12 @@ const FishProcessing = ({
                         if (value === 'true') {
                           setFieldValue(
                             'willBeHoldingFishForMarkRecapture',
-                            'true'
+                            true
                           )
                         } else {
                           setFieldValue(
                             'willBeHoldingFishForMarkRecapture',
-                            'false'
+                            false
                           )
                         }
                       }}
