@@ -3,6 +3,7 @@ import { Text, VStack, CircleIcon, Heading, View } from 'native-base'
 import BottomNavigation from '../components/home/HomeNavButtons'
 import TopIcons from '../components/home/TopIcons'
 import { StyleSheet } from 'react-native'
+import { AppLogo } from './SignIn'
 
 const styles = StyleSheet.create({
   landingContent: {
@@ -84,7 +85,8 @@ export default function Home({ navigation }: { navigation: any }) {
       <TopIcons />
 
       <View style={styles.landingContent}>
-        <CircleIcon size='300' color='primary' />
+        {/* <CircleIcon size='300' color='primary' /> */}
+        <AppLogo />
         <Heading fontWeight={300} fontSize={50} marginTop={5}>
           Welcome!
         </Heading>

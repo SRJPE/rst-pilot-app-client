@@ -37,7 +37,19 @@ const styles = StyleSheet.create({
   },
 })
 
-const SignIn = () => {
+export const AppLogo = () => {
+  return (
+    <View style={styles.circleLogo}>
+      <Image
+        source={require('../../assets/chinook_salmon.jpeg')}
+        style={[styles.salmonLogo, { transform: [{ rotate: '-50deg' }] }]}
+        alt='salmon logo'
+      />
+    </View>
+  )
+}
+
+const SignIn = ({ navigation }: { navigation: any }) => {
   const [email, setEmail] = useState('' as string)
   const [password, setPassword] = useState('' as string)
   const [show, setShow] = React.useState(false as boolean)
@@ -57,13 +69,14 @@ const SignIn = () => {
         resizeMode='cover'
       >
         <VStack justifyContent='center' alignItems='center' mt='125' space={10}>
-          <View style={styles.circleLogo}>
+          {/* <View style={styles.circleLogo}>
             <Image
               source={require('../../assets/chinook_salmon.jpeg')}
               style={[styles.salmonLogo, { transform: [{ rotate: '-50deg' }] }]}
               alt='salmon logo'
             />
-          </View>
+          </View> */}
+          <AppLogo />
           <Heading color='#FFF' fontWeight={400} fontSize='6xl'>
             Data Tackle{' '}
           </Heading>
@@ -130,8 +143,11 @@ const SignIn = () => {
             h='60px'
             w='400px'
             shadow='5'
-            // isDisabled={disableRightButton()}
-            // onPress={handleRightButton}
+            _disabled={{
+              opacity: '75',
+            }}
+            // isDisabled={email === '' || password === ''}
+            onPress={() => navigation.navigate('Home')}
           >
             <Text fontSize='xl' fontWeight='bold' color='white'>
               Sign In
@@ -155,52 +171,3 @@ const SignIn = () => {
   )
 }
 export default SignIn
-
-// <ScrollView keyboardShouldPersistTaps='never'>
-//   <View style={styles.circleLogo}>
-//     {/* <Image
-//       source={require('./assets/salmon_logo.png')}
-//       style={[styles.salmonLogo, { transform: [{ rotate: '-50deg' }] }]}
-//     /> */}
-//   </View>
-//   <Text style={styles.title}>Data Tackle</Text>
-//   <TextInput
-//     style={styles.input}
-//     onChangeText={setEmail}
-//     value={email}
-//     placeholder='Email'
-//     onBlur={Keyboard.dismiss()}
-//     keyboardType='default'
-//   />
-//   <TextInput
-//     style={styles.input}
-//     onChangeText={setPassword}
-//     value={password}
-//     placeholder='Password'
-//     onBlur={Keyboard.dismiss()}
-//     keyboardType='default'
-//   />
-//   <TouchableHighlight
-//     onPress={() =>
-//       Alert.prompt('SignIn Attempted', '', (text) =>
-//         console.log('test: ', text)
-//       )
-//     }
-//   >
-//     <View style={styles.SignInButton}>
-//       <Text style={styles.SignInButtonText}>Sign In</Text>
-//     </View>
-//   </TouchableHighlight>
-//   <View style={styles.fixToText}>
-//     <Button
-//       title='Forgot Password?'
-//       color='#FFFFFF'
-//       onPress={() => Alert.alert('Forgot Password? pressed')}
-//     />
-//     <Button
-//       title='Create Account'
-//       color='#FFFFFF'
-//       onPress={() => Alert.alert('Create Account pressed')}
-//     />
-//   </View>
-// </ScrollView>
