@@ -7,8 +7,8 @@ import {
   View,
   Avatar,
   HStack,
+  Radio,
 } from 'native-base'
-import { useEffect } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
@@ -58,7 +58,7 @@ const FishProcessing = ({
       initialErrors={
         reduxState.completed ? undefined : { fishProcessedResult: '' }
       }
-      onSubmit={values => {
+      onSubmit={(values) => {
         handleSubmit(values)
       }}
     >
@@ -66,6 +66,7 @@ const FishProcessing = ({
         handleChange,
         handleSubmit,
         setFieldTouched,
+        setFieldValue,
         touched,
         errors,
         values,
@@ -121,8 +122,8 @@ const FishProcessing = ({
               )}
 
               {values.fishProcessedResult === 'processed fish' && (
-                <VStack>
-                  <Heading mb='4'>Please sort fish by category:</Heading>
+                <VStack space={4}>
+                  <Heading>Please sort fish by category:</Heading>
 
                   <VStack space={2} alignItems='flex-start'>
                     <HStack space={2} alignItems='flex-start'>
@@ -142,6 +143,52 @@ const FishProcessing = ({
                       <Text>non-salmonid species</Text>
                     </HStack>
                   </VStack>
+                  <FormControl>
+                    <FormControl.Label>
+                      <Heading mb='4'>
+                        Will you be holding fish for mark recapture trial?
+                      </Heading>
+                    </FormControl.Label>
+                    <Radio.Group
+                      name='coneSetting'
+                      accessibilityLabel='cone setting'
+                      value={`${values.willBeHoldingFishForMarkRecapture}`}
+                      onChange={(value: any) => {
+                        setFieldTouched(
+                          'willBeHoldingFishForMarkRecapture',
+                          true
+                        )
+                        if (value === 'true') {
+                          setFieldValue(
+                            'willBeHoldingFishForMarkRecapture',
+                            true
+                          )
+                        } else {
+                          setFieldValue(
+                            'willBeHoldingFishForMarkRecapture',
+                            false
+                          )
+                        }
+                      }}
+                    >
+                      <Radio
+                        colorScheme='primary'
+                        value='true'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        Yes
+                      </Radio>
+                      <Radio
+                        colorScheme='primary'
+                        value='false'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        No
+                      </Radio>
+                    </Radio.Group>
+                  </FormControl>
                 </VStack>
               )}
             </VStack>
