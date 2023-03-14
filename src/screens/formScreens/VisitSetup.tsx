@@ -81,7 +81,6 @@ const VisitSetup = ({
 
   const handleSubmit = (values: any) => {
     // values.crew = ['temp1']
-    console.log('values: ', values)
     const programId = selectedProgramId
     const trapLocationId = selectedTrapLocationId
     const payload = {
@@ -92,7 +91,6 @@ const VisitSetup = ({
     if (!activeTabId) {
       if (values.trapName) {
         values.trapName.forEach((trapName: string) => {
-          console.log('trap name: ', trapName)
           const tabId = uid()
           dispatch(
             createTab({ tabId, tabName: trapName ?? values.trapSite })
