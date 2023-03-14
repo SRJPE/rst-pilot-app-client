@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { View } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
 
-export default function CrewDropDown({
+export default function TrapNameDropDown({
   list,
   setList,
   setFieldValue,
@@ -21,15 +21,34 @@ export default function CrewDropDown({
   const [value, setValue] = useState([] as Array<any>)
 
   useEffect(() => {
-    if (visitSetupState[tabId]?.values?.crew) {
-      setValue(visitSetupState[tabId]?.values?.crew)
+    if (visitSetupState[tabId]?.values?.trapName) {
+      const trapNameOrNames = visitSetupState[tabId]?.values?.trapName
+      if (Array.isArray(trapNameOrNames)) {
+        setValue(trapNameOrNames)
+      } else {
+        setValue([trapNameOrNames])
+      }
     }
   }, [tabId])
 
   useEffect(() => {
-    setFieldValue('crew', [...value])
-    setFieldTouched('crew', true)
+    setFieldValue('trapName', [...value])
+    setFieldTouched('trapName', true)
   }, [value])
+
+  const generateMarginBottom = () => {
+    if (list.length === 2) {
+      return 70
+    } else if (list.length === 3) {
+      return 100
+    } else if (list.length === 4) {
+      return 150
+    } else if (list.length > 4) {
+      return 200
+    } else {
+      return 50
+    }
+  }
 
   return (
     <View
@@ -38,6 +57,7 @@ export default function CrewDropDown({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        marginBottom: open ? generateMarginBottom() : 0,
       }}
     >
       <DropDownPicker
@@ -50,10 +70,9 @@ export default function CrewDropDown({
         multiple={true}
         mode='BADGE'
         badgeDotColors={['#007C7C']}
-        placeholder='Select your crew'
+        placeholder='Select trap names'
         searchPlaceholder='Search...'
         maxHeight={275}
-        // renderListItem={props => <CrewListItem {...props} />}
       />
     </View>
   )

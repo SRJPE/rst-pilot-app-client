@@ -27,12 +27,13 @@ import { uniqBy } from 'lodash'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import { uid } from 'uid'
+import TrapNameDropDown from '../../components/form/TrapNameDropDown'
 
 const mapStateToProps = (state: RootState) => {
   return {
     visitSetupState: state.visitSetup,
     visitSetupDefaultsState: state.visitSetupDefaults,
-    tabState: state.tabSlice,
+    activeTabId: state.tabSlice.activeTabId,
   }
 }
 
@@ -40,12 +41,12 @@ const VisitSetup = ({
   navigation,
   visitSetupState,
   visitSetupDefaultsState,
-  tabState,
+  activeTabId,
 }: {
   navigation: any
   visitSetupState: any
   visitSetupDefaultsState: any
-  tabState: any
+  activeTabId: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [isPaperEntry, setIsPaperEntry] = useState(false as boolean)
@@ -56,27 +57,31 @@ const VisitSetup = ({
     number | null
   >(null)
   const [showTrapNameField, setShowTrapNameField] = useState(false as boolean)
+  const [trapNameList, setTrapNameList] = useState<
+    { label: string; value: string }[]
+  >([])
   const [crewList, setCrewList] = useState<{ label: string; value: string }[]>(
     []
   )
 
   useEffect(() => {
     if (
-      visitSetupState[tabState.activeTabId]?.values?.programId !=
+      visitSetupState[activeTabId]?.values?.programId !=
       selectedProgramId
     ) {
       setSelectedProgramId(
-        visitSetupState[tabState.activeTabId]?.values?.programId
+        visitSetupState[activeTabId]?.values?.programId
       )
-      generateCrewList(visitSetupState[tabState.activeTabId]?.values?.programId)
+      generateCrewList(visitSetupState[activeTabId]?.values?.programId)
       shouldShowTrapNameField(
-        visitSetupState[tabState.activeTabId]?.values?.trapSite
+        visitSetupState[activeTabId]?.values?.trapSite
       )
     }
-  }, [tabState.activeTabId])
+  }, [activeTabId])
 
   const handleSubmit = (values: any) => {
     // values.crew = ['temp1']
+    console.log('values: ', values)
     const programId = selectedProgramId
     const trapLocationId = selectedTrapLocationId
     const payload = {
@@ -84,25 +89,38 @@ const VisitSetup = ({
       programId,
       trapLocationId,
     }
-    if (!tabState.activeTabId) {
-      const tabId = uid()
-      dispatch(
-        createTab({ tabId, tabName: values.trapName ?? values.trapSite })
-      )
-      dispatch(saveVisitSetup({ tabId, values: payload }))
-      dispatch(markVisitSetupCompleted({ tabId, completed: true }))
-      dispatch(markTrapVisitPaperEntry({ tabId, isPaperEntry }))
+    if (!activeTabId) {
+      if (values.trapName) {
+        values.trapName.forEach((trapName: string) => {
+          console.log('trap name: ', trapName)
+          const tabId = uid()
+          dispatch(
+            createTab({ tabId, tabName: trapName ?? values.trapSite })
+          )
+          dispatch(saveVisitSetup({ tabId, values: {...payload, trapName} }))
+          dispatch(markVisitSetupCompleted({ tabId, completed: true }))
+          dispatch(markTrapVisitPaperEntry({ tabId, isPaperEntry }))
+        })
+      } else {
+        const tabId = uid()
+        dispatch(
+          createTab({ tabId, tabName: values.trapName[0] ?? values.trapSite })
+        )
+        dispatch(saveVisitSetup({ tabId, values: payload }))
+        dispatch(markVisitSetupCompleted({ tabId, completed: true }))
+        dispatch(markTrapVisitPaperEntry({ tabId, isPaperEntry }))
+      }
     } else {
-      dispatch(saveVisitSetup({ tabId: tabState.activeTabId, values: payload }))
+      dispatch(saveVisitSetup({ tabId: activeTabId, values: payload }))
       dispatch(setTabName(values.trapName ?? values.trapSite))
       dispatch(
         markVisitSetupCompleted({
-          tabId: tabState.activeTabId,
+          tabId: activeTabId,
           completed: true,
         })
       )
       dispatch(
-        markTrapVisitPaperEntry({ tabId: tabState.activeTabId, isPaperEntry })
+        markTrapVisitPaperEntry({ tabId: activeTabId, isPaperEntry })
       )
     }
     dispatch(markStepCompleted([true, 'visitSetup']))
@@ -154,6 +172,7 @@ const VisitSetup = ({
     )
     if (trapNameValues.length > 1) {
       setShowTrapNameField(true)
+      updateTrapNameValues(trapSite)
     } else {
       setShowTrapNameField(false)
     }
@@ -179,14 +198,25 @@ const VisitSetup = ({
     setCrewList(payload)
   }
 
+  const updateTrapNameValues = (trapSite: string) => {
+    setTrapNameList(
+      visitSetupDefaultsState?.trapLocations
+        ?.filter((obj: any) => obj.siteName === trapSite)
+        ?.map((trapLocation: any) => ({
+          label: trapLocation?.trapName,
+          value: trapLocation?.trapName,
+        }))
+    )
+  }
+
   return (
     <Formik
       validationSchema={trapVisitSchema}
       enableReinitialize={true}
       initialValues={
-        tabState.activeTabId
-          ? visitSetupState[tabState.activeTabId]
-            ? visitSetupState[tabState.activeTabId].values
+        activeTabId
+          ? visitSetupState[activeTabId]
+            ? visitSetupState[activeTabId].values
             : visitSetupState['placeholderId'].values
           : visitSetupState['placeholderId'].values
       }
@@ -194,9 +224,8 @@ const VisitSetup = ({
       // maybe this is not needed for first step in form?
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
-      onSubmit={(values, { resetForm }) => {
+      onSubmit={(values) => {
         handleSubmit(values)
-        resetForm()
       }}
     >
       {({
@@ -315,24 +344,13 @@ const VisitSetup = ({
                           Trap Name
                         </Text>
                       </FormControl.Label>
-                      <CustomSelect
-                        selectedValue={values.trapName}
-                        placeholder='Trap Name'
-                        onValueChange={(itemValue: string) => {
-                          if (itemValue !== values.trapName) {
-                            updateSelectedTrapLocation({ trapName: itemValue })
-                          }
-                          setFieldValue('trapName', itemValue)
-                        }}
+                      <TrapNameDropDown
+                        list={trapNameList}
+                        setList={setTrapNameList}
+                        setFieldValue={setFieldValue}
                         setFieldTouched={setFieldTouched}
-                        selectOptions={visitSetupDefaultsState?.trapLocations
-                          ?.filter(
-                            (obj: any) => obj.siteName === values.trapSite
-                          )
-                          ?.map((trapLocation: any) => ({
-                            label: trapLocation?.trapName,
-                            value: trapLocation?.trapName,
-                          }))}
+                        visitSetupState={visitSetupState}
+                        tabId={activeTabId}
                       />
                       {touched.trapName &&
                         errors.trapName &&
@@ -340,7 +358,7 @@ const VisitSetup = ({
                     </FormControl>
                   )}
 
-                  <FormControl>
+                  <FormControl mt={showTrapNameField ? '12' : '0'}>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
                         Crew
@@ -348,12 +366,12 @@ const VisitSetup = ({
                     </FormControl.Label>
 
                     <CrewDropDown
-                      crewList={crewList}
-                      setCrewList={setCrewList}
+                      list={crewList}
+                      setList={setCrewList}
                       setFieldValue={setFieldValue}
                       setFieldTouched={setFieldTouched}
                       visitSetupState={visitSetupState}
-                      tabId={tabState.activeTabId}
+                      tabId={activeTabId}
                     />
                     {/* {touched.crew &&
                       errors.crew &&

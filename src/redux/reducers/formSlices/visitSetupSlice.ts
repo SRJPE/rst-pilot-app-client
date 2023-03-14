@@ -15,6 +15,7 @@ interface VisitSetupValuesI {
   trapLocationId: number | null
   stream: string
   trapSite: string
+  trapName?: string
   crew: Array<string>
 }
 
