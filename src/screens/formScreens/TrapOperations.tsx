@@ -40,19 +40,19 @@ const mapStateToProps = (state: RootState) => {
     selectedStream:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.stream,
-    tabState: state.tabSlice,
+    activeTabId: state.tabSlice.activeTabId,
   }
 }
 const TrapOperations = ({
   navigation,
   reduxState,
   selectedStream,
-  tabState,
+  activeTabId,
 }: {
   navigation: any
   reduxState: any
   selectedStream: string
-  tabState: any
+  activeTabId: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
@@ -61,8 +61,6 @@ const TrapOperations = ({
   const { whyTrapNotFunctioning } = dropdownValues
   const trapNotInServiceLabel = '- restart trapping'
   const trapNotInServiceIdentifier = 'trap not in service - restart trapping'
-
-  useEffect(() => {}, [tabState.activeTabId])
 
   const calculateTempWarning = (
     waterTemperatureValue: number,
@@ -83,7 +81,7 @@ const TrapOperations = ({
     }
   }
 
-  const handleSubmit = (values: any, errors: any) => {
+  const handleSubmit = (values: any) => {
     console.log('hit handle submit: ', { ...values })
     const newDate = new Date()
     if (values.trapStatus === trapNotInServiceIdentifier) {
@@ -91,13 +89,11 @@ const TrapOperations = ({
     }
     dispatch(
       saveTrapOperations({
-        tabId: tabState.activeTabId,
+        tabId: activeTabId,
         values: { ...values, trapVisitStopTime: new Date() },
       })
     )
-    dispatch(
-      markTrapOperationsCompleted({ tabId: tabState.activeTabId, value: true })
-    )
+    dispatch(markTrapOperationsCompleted({ tabId: activeTabId, value: true }))
     dispatch(markStepCompleted([true]))
     console.log('🚀 ~ handleSubmit ~ Status', values)
   }
@@ -137,19 +133,19 @@ const TrapOperations = ({
   return (
     <Formik
       validationSchema={trapOperationsSchema}
-      validateOnChange={false}
+      enableReinitialize={true}
       initialValues={
-        tabState.activeTabId
-          ? reduxState[tabState.activeTabId]
-            ? reduxState[tabState.activeTabId].values
+        activeTabId
+          ? reduxState[activeTabId]
+            ? reduxState[activeTabId].values
             : reduxState['placeholderId'].values
           : reduxState['placeholderId'].values
       }
       initialTouched={{ trapStatus: true }}
       // only create initial error when form is not completed
       // initialErrors={reduxState.completed ? undefined : { trapStatus: '' }}
-      onSubmit={(values: any, errors: any) => {
-        handleSubmit(values, errors)
+      onSubmit={(values: any) => {
+        handleSubmit(values)
       }}
     >
       {({

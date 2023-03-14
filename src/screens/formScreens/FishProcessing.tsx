@@ -57,6 +57,7 @@ const FishProcessing = ({
   return (
     <Formik
       validationSchema={fishProcessingSchema}
+      enableReinitialize={true}
       initialValues={
         tabState.activeTabId
           ? reduxState[tabState.activeTabId]

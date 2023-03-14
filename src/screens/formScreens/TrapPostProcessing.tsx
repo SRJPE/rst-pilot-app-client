@@ -109,6 +109,7 @@ const TrapPostProcessing = ({
   return (
     <Formik
       validationSchema={trapPostProcessingSchema}
+      enableReinitialize={true}
       initialValues={
         tabState.activeTabId
           ? reduxState[tabState.activeTabId]
