@@ -20,8 +20,8 @@ import {
 import CrewDropDown from '../../components/form/CrewDropDown'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../utils/helpers/yupValidations'
-import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
-import { createTab, setTabName } from '../../redux/reducers/formSlices/tabSlice'
+import { markStepCompleted, NavigationStateI } from '../../redux/reducers/formSlices/navigationSlice'
+import { createTab, setTabName, TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { uniqBy } from 'lodash'
 
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
@@ -33,7 +33,8 @@ const mapStateToProps = (state: RootState) => {
   return {
     visitSetupState: state.visitSetup,
     visitSetupDefaultsState: state.visitSetupDefaults,
-    activeTabId: state.tabSlice.activeTabId,
+    tabSlice: state.tabSlice,
+    navigationSlice: state.navigation
   }
 }
 
@@ -41,12 +42,14 @@ const VisitSetup = ({
   navigation,
   visitSetupState,
   visitSetupDefaultsState,
-  activeTabId,
+  tabSlice,
+  navigationSlice
 }: {
   navigation: any
   visitSetupState: any
   visitSetupDefaultsState: any
-  activeTabId: any
+  tabSlice: TabStateI
+  navigationSlice: NavigationStateI
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [isPaperEntry, setIsPaperEntry] = useState(false as boolean)
@@ -65,19 +68,23 @@ const VisitSetup = ({
   )
 
   useEffect(() => {
-    if (
-      visitSetupState[activeTabId]?.values?.programId !=
-      selectedProgramId
-    ) {
-      setSelectedProgramId(
-        visitSetupState[activeTabId]?.values?.programId
-      )
-      generateCrewList(visitSetupState[activeTabId]?.values?.programId)
-      shouldShowTrapNameField(
-        visitSetupState[activeTabId]?.values?.trapSite
-      )
+    if (tabSlice.activeTabId != null) {
+      console.log('visitSetup.tsx - tabSlice: ', tabSlice)
+    if (visitSetupState[tabSlice?.activeTabId]?.values?.programId != selectedProgramId) {
+      setSelectedProgramId(visitSetupState[tabSlice?.activeTabId]?.values?.programId)
+      generateCrewList(visitSetupState[tabSlice?.activeTabId]?.values?.programId)
+      shouldShowTrapNameField(visitSetupState[tabSlice?.activeTabId]?.values?.trapSite)
     }
-  }, [activeTabId])
+      if (tabSlice.tabs[tabSlice.activeTabId].activeStep != navigationSlice.activeStep) {
+        navigation.navigate('Trap Visit Form', {
+          screen:
+            navigationSlice.steps[
+              tabSlice.tabs[tabSlice.activeTabId].activeStep
+            ].name,
+        })
+      }
+    }
+  }, [tabSlice?.activeTabId])
 
   const handleSubmit = (values: any) => {
     // values.crew = ['temp1']
@@ -88,38 +95,44 @@ const VisitSetup = ({
       programId,
       trapLocationId,
     }
-    if (!activeTabId) {
+    if (!tabSlice?.activeTabId) {
       if (values.trapName) {
         values.trapName.forEach((trapName: string) => {
           const tabId = uid()
           dispatch(
-            createTab({ tabId, tabName: trapName ?? values.trapSite })
+            createTab({
+              tabId,
+              tabName: trapName ?? values.trapSite,
+              activeStep: 2,
+            })
           )
-          dispatch(saveVisitSetup({ tabId, values: {...payload, trapName} }))
+          dispatch(saveVisitSetup({ tabId, values: { ...payload, trapName } }))
           dispatch(markVisitSetupCompleted({ tabId, completed: true }))
           dispatch(markTrapVisitPaperEntry({ tabId, isPaperEntry }))
         })
       } else {
         const tabId = uid()
         dispatch(
-          createTab({ tabId, tabName: values.trapName[0] ?? values.trapSite })
+          createTab({
+            tabId,
+            tabName: values.trapName[0] ?? values.trapSite,
+            activeStep: 2,
+          })
         )
         dispatch(saveVisitSetup({ tabId, values: payload }))
         dispatch(markVisitSetupCompleted({ tabId, completed: true }))
         dispatch(markTrapVisitPaperEntry({ tabId, isPaperEntry }))
       }
     } else {
-      dispatch(saveVisitSetup({ tabId: activeTabId, values: payload }))
+      dispatch(saveVisitSetup({ tabId: tabSlice?.activeTabId, values: payload }))
       dispatch(setTabName(values.trapName ?? values.trapSite))
       dispatch(
         markVisitSetupCompleted({
-          tabId: activeTabId,
+          tabId: tabSlice?.activeTabId,
           completed: true,
         })
       )
-      dispatch(
-        markTrapVisitPaperEntry({ tabId: activeTabId, isPaperEntry })
-      )
+      dispatch(markTrapVisitPaperEntry({ tabId: tabSlice?.activeTabId, isPaperEntry }))
     }
     dispatch(markStepCompleted([true, 'visitSetup']))
     console.log('🚀 ~ handleSubmit ~ Visit', payload)
@@ -212,9 +225,9 @@ const VisitSetup = ({
       validationSchema={trapVisitSchema}
       enableReinitialize={true}
       initialValues={
-        activeTabId
-          ? visitSetupState[activeTabId]
-            ? visitSetupState[activeTabId].values
+        tabSlice?.activeTabId
+          ? visitSetupState[tabSlice?.activeTabId]
+            ? visitSetupState[tabSlice?.activeTabId].values
             : visitSetupState['placeholderId'].values
           : visitSetupState['placeholderId'].values
       }
@@ -348,7 +361,7 @@ const VisitSetup = ({
                         setFieldValue={setFieldValue}
                         setFieldTouched={setFieldTouched}
                         visitSetupState={visitSetupState}
-                        tabId={activeTabId}
+                        tabId={tabSlice?.activeTabId}
                       />
                       {touched.trapName &&
                         errors.trapName &&
@@ -369,7 +382,7 @@ const VisitSetup = ({
                       setFieldValue={setFieldValue}
                       setFieldTouched={setFieldTouched}
                       visitSetupState={visitSetupState}
-                      tabId={activeTabId}
+                      tabId={tabSlice?.activeTabId}
                     />
                     {/* {touched.crew &&
                       errors.crew &&

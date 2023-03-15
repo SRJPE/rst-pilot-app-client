@@ -24,7 +24,7 @@ const formSteps = {
   15: { name: 'Started Trapping', propName: 'startedTrapping' },
 }
 
-interface NavigationStateI {
+export interface NavigationStateI {
   activeStep: number
   steps: any
   isFormComplete?: boolean

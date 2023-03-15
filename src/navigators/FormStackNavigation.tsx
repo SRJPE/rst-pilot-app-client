@@ -1,4 +1,7 @@
-import { createNativeStackNavigator, NativeStackHeaderProps } from '@react-navigation/native-stack'
+import {
+  createNativeStackNavigator,
+  NativeStackHeaderProps,
+} from '@react-navigation/native-stack'
 import FishInput from '../screens/formScreens/FishInput'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import FishProcessing from '../screens/formScreens/FishProcessing'
@@ -31,11 +34,17 @@ import {
   createTab,
   deleteTab,
   setActiveTab,
+  setTabStep,
   TabStateI,
 } from '../redux/reducers/formSlices/tabSlice'
 import { ScrollView } from 'react-native-gesture-handler'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { uid } from 'uid'
+import {
+  NavigationStateI,
+  updateActiveStep,
+} from '../redux/reducers/formSlices/navigationSlice'
+import { useEffect } from 'react'
 
 const FormStack = createNativeStackNavigator()
 
@@ -45,7 +54,39 @@ function FormStackNavigation(props: any) {
     (state: any) => state.fishInput.modalOpen
   )
   const tabSlice = props.tabSlice as TabStateI
+  const navigationSlice = props.navigationSlice as NavigationStateI
   const nonTabBarScreens = ['Incomplete Sections', 'Add Fish', 'Batch Count']
+
+  useEffect(() => {
+    if (tabSlice.activeTabId) {
+      if (
+        tabSlice.tabs[tabSlice.activeTabId].activeStep !=
+        navigationSlice.activeStep
+      ) {
+        const { activeTabId } = tabSlice
+        const { activeStep } = navigationSlice
+        if (activeStep != null && activeTabId != null) {
+          dispatch(setTabStep({ tabId: activeTabId, activeStep }))
+        }
+      }
+    }
+  }, [navigationSlice.activeStep])
+
+  useEffect(() => {
+    if (tabSlice.activeTabId != null) {
+      if (tabSlice.tabs[tabSlice.activeTabId]?.activeStep) {
+        if (
+          tabSlice.tabs[tabSlice.activeTabId]?.activeStep !=
+          navigationSlice.activeStep
+        ) {
+          dispatch(
+            updateActiveStep(tabSlice.tabs[tabSlice.activeTabId].activeStep)
+          )
+        }
+      }
+    }
+  }, [tabSlice.activeTabId])
+
   const renderTabContent = (
     tabSlice: TabStateI,
     props: NativeStackHeaderProps
@@ -73,7 +114,7 @@ function FormStackNavigation(props: any) {
                         tabId == tabSlice.activeTabId ? 'white' : 'primary'
                       }
                     >
-                      {tabSlice.tabs[tabId]}
+                      {tabSlice.tabs[tabId].name}
                     </Text>
                     <Icon
                       onPress={() => dispatch(deleteTab(tabId))}
@@ -91,7 +132,9 @@ function FormStackNavigation(props: any) {
               <Icon
                 onPress={() => {
                   const tabId = uid()
-                  dispatch(createTab({ tabId, tabName: 'New Tab' }))
+                  dispatch(
+                    createTab({ tabId, tabName: 'New Tab', activeStep: 1 })
+                  )
                   dispatch(setActiveTab(tabId))
                   props.navigation.navigate('Trap Visit Form', {
                     screen: 'Visit Setup',
@@ -117,7 +160,7 @@ function FormStackNavigation(props: any) {
         tabSlice.activeTabId != null &&
         props.route.name != 'Incomplete Sections'
       ) {
-        return <Text>{tabSlice.tabs[tabSlice.activeTabId]}</Text>
+        return <Text>{tabSlice.tabs[tabSlice.activeTabId].name}</Text>
       } else {
         return <></>
       }
@@ -187,6 +230,7 @@ function FormStackNavigation(props: any) {
 const mapStateToProps = (state: RootState) => {
   return {
     tabSlice: state.tabSlice,
+    navigationSlice: state.navigation,
   }
 }
 

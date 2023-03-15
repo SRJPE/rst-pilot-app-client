@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { uid } from 'uid'
 
 export interface TabStateI {
   activeTabId: string | null
@@ -8,7 +7,12 @@ export interface TabStateI {
 
 // uid : tabName
 interface TabsI {
-  [id: string]: string
+  [id: string]: TabInfoI
+}
+
+interface TabInfoI {
+  name: string
+  activeStep: number
 }
 
 const initialState: TabStateI = {
@@ -22,19 +26,19 @@ export const tabsSlice = createSlice({
   reducers: {
     resetTabsSlice: () => initialState,
     createTab: (state, action) => {
-      const { tabId, tabName } = action.payload
+      const { tabId, tabName, activeStep } = action.payload
       if (Object.keys(state.tabs).length) {
-        state.tabs[tabId] = tabName
+        state.tabs[tabId] = { name: tabName, activeStep }
       } else {
         state.activeTabId = tabId
-        state.tabs[tabId] = tabName
+        state.tabs[tabId] = { name: tabName, activeStep }
       }
     },
     deleteTab: (state, action) => {
       const tabId = action.payload
       delete state.tabs[tabId]
       if (Object.keys(state.tabs)) {
-        state.activeTabId = state.tabs[Object.keys(state.tabs)[0]]
+        state.activeTabId = Object.keys(state.tabs)[0]
       } else {
         state.activeTabId = null
       }
@@ -43,12 +47,24 @@ export const tabsSlice = createSlice({
       state.activeTabId = action.payload
     },
     setTabName: (state, action) => {
-      if (state.activeTabId) state.tabs[state.activeTabId] = action.payload
+      if (state.activeTabId) state.tabs[state.activeTabId].name = action.payload
+    },
+    setTabStep: (state, action) => {
+      const { tabId, activeStep } = action.payload
+      if (state.tabs[tabId]) {
+        state.tabs[tabId].activeStep = activeStep
+      }
     },
   },
 })
 
-export const { resetTabsSlice, createTab, deleteTab, setActiveTab, setTabName } =
-  tabsSlice.actions
+export const {
+  resetTabsSlice,
+  createTab,
+  deleteTab,
+  setActiveTab,
+  setTabName,
+  setTabStep,
+} = tabsSlice.actions
 
 export default tabsSlice.reducer
