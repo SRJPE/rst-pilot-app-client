@@ -87,6 +87,7 @@ export const fishProcessingSchema = yup.object().shape({
       'no catch data, fish left in live box' || 'no catch data, fish released',
     then: yup.string().required('Reason for not processing required'),
   }),
+  // willBeHoldingFishForMarkRecapture:
 })
 
 export const addIndividualFishSchema = yup.object().shape({

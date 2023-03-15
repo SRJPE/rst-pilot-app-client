@@ -26,7 +26,6 @@ import {
   Text,
   Button,
   Box,
-  IconButton,
   Icon,
 } from 'native-base'
 import { AppDispatch, RootState } from '../redux/store'
@@ -45,6 +44,7 @@ import {
   updateActiveStep,
 } from '../redux/reducers/formSlices/navigationSlice'
 import { useEffect } from 'react'
+import FishHolding from '../screens/formScreens/FishHolding'
 
 const FormStack = createNativeStackNavigator()
 
@@ -204,6 +204,7 @@ function FormStackNavigation(props: any) {
         name='Trap Post-Processing'
         component={TrapPostProcessing}
       />
+      <FormStack.Screen name='Fish Holding' component={FishHolding} />
       <FormStack.Screen
         name='Incomplete Sections'
         component={IncompleteSections}

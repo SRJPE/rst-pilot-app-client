@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
 import { RootState } from '../../../redux/store'
+import { reformatBatchCountData } from '../../../utils/utils'
 
 const BatchCountDataTable = ({
   forkLengthsStore,
@@ -21,13 +22,24 @@ const BatchCountDataTable = ({
   }, [forkLengthsStore])
 
   const prepareDataForTable = () => {
+    const reformatedBatchCountData = reformatBatchCountData(forkLengthsStore)
     const storageArray: { forkLength: number; count: number }[] = []
-    Object.keys(forkLengthsStore).forEach((key: any) => {
-      storageArray.push({
+
+    Object.keys(reformatedBatchCountData).forEach((key: any) => {
+      const count = Object.values(reformatedBatchCountData[key]).reduce(
+        (a, b) => a + b
+      )
+      const forkLengthObject = {
         forkLength: Number(key),
-        count: forkLengthsStore[key],
+        count: count,
+      } as any
+      Object.keys(reformatedBatchCountData[key]).forEach((innerKey: string) => {
+        forkLengthObject[innerKey] = reformatedBatchCountData[key][innerKey]
       })
+
+      storageArray.push(forkLengthObject)
     })
+
     setProcessedData(sortByForkLength(storageArray))
   }
 
@@ -58,10 +70,8 @@ const BatchCountDataTable = ({
       <DataTable.Pagination
         page={page}
         onPageChange={(page: number) => setPage(page)}
-        numberOfPages={Math.ceil(
-          forkLengthsStore.length / numberOfItemsPerPage
-        )}
-        label={`Page ${page + 1} of ${forkLengthsStore.length || 1}`}
+        numberOfPages={Math.ceil(processedData.length / numberOfItemsPerPage)}
+        label={`Page ${page + 1} of ${processedData.length || 1}`}
         numberOfItemsPerPage={numberOfItemsPerPage}
         showFastPaginationControls
       />

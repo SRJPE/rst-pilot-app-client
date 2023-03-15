@@ -12,6 +12,7 @@ interface FishProcessingStateI {
 interface fishProcessingValuesI {
   fishProcessedResult: string
   reasonForNotProcessing: string
+  willBeHoldingFishForMarkRecapture: boolean
 }
 
 const initialState: InitialStateI = {
@@ -20,6 +21,7 @@ const initialState: InitialStateI = {
     values: {
       fishProcessedResult: '',
       reasonForNotProcessing: '',
+      willBeHoldingFishForMarkRecapture: false,
     },
   },
 }
