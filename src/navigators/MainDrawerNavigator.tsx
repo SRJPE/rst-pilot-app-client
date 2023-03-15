@@ -5,7 +5,8 @@ import TrapVisitForm from '../screens/TrapVisitFormRoot'
 import GenerateReport from '../screens/GenerateReport'
 import DataQualityControl from '../screens/QCData'
 import MarkRecaptureForm from '../screens/MarkRecaptureFormRoot'
-import Profile from '../screens/Profile'
+import CreateNewProgram from '../screens/CreateNewProgramRoot'
+import Profile from '../screens/accountScreens/Profile'
 import PermitInfo from '../screens/PermitInfo'
 import SignIn from '../screens/SignIn'
 
@@ -37,6 +38,7 @@ export default function DrawerNavigator() {
       />
       <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
       <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
+      <Drawer.Screen name='Create New Program' component={CreateNewProgram} />
     </Drawer.Navigator>
   )
 }
