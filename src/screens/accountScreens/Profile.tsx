@@ -14,8 +14,8 @@ import {
   VStack,
 } from 'native-base'
 import { useState } from 'react'
-import CustomModal from '../components/Shared/CustomModal'
-import EditAccountInfoModalContent from '../components/profile/EditAccountInfoModalContent'
+import CustomModal from '../../components/Shared/CustomModal'
+import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
 
 const Profile = ({ navigation }: { navigation: any }) => {
   const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] = useState(
@@ -121,6 +121,17 @@ const Profile = ({ navigation }: { navigation: any }) => {
               Sign out
             </Text>
           </Pressable>
+          <Button
+            mt='20'
+            alignSelf='center'
+            bg='primary'
+            color='white'
+            onPress={() => navigation.navigate('Create New Program')}
+          >
+            <Text fontSize='xl' fontWeight='bold' color='white'>
+              CREATE NEW PROGRAM
+            </Text>
+          </Button>
         </VStack>
       </Box>
       {/* --------- Modals --------- */}
