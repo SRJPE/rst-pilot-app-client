@@ -19,30 +19,45 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  circleLogo: {
-    borderRadius: 1000,
-    // borderWidth: 5,
+  // circleLogo: {
+  //   borderRadius: 1000,
+  //   // borderWidth: 5,
+  //   height: 450,
+  //   width: 450,
+  //   backgroundColor: '#FFFFFF',
+  // },
+  salmonLogo: {
+    // position: 'absolute',
     height: 450,
     width: 450,
-    backgroundColor: '#FFFFFF',
-  },
-  salmonLogo: {
-    position: 'absolute',
-    height: 360,
-    width: 285,
-    borderRadius: 40,
+    borderRadius: 1000,
     // borderWidth: 5,
-    left: '21%',
-    bottom: '13%',
+    // left: '21%',
+    // bottom: '13%',
   },
 })
 
-export const AppLogo = () => {
+export const AppLogo = ({ addBorder }: { addBorder?: boolean }) => {
   return (
-    <View style={styles.circleLogo}>
+    // <View style={styles.circleLogo}>
+    //   <Image
+    //     source={require('../../assets/chinook_salmon.jpeg')}
+    //     style={[styles.salmonLogo, { transform: [{ rotate: '-50deg' }] }]}
+    //     alt='salmon logo'
+    //   />
+    // </View>
+    <View
+    // style={styles.circleLogo}
+    >
       <Image
-        source={require('../../assets/chinook_salmon.jpeg')}
-        style={[styles.salmonLogo, { transform: [{ rotate: '-50deg' }] }]}
+        source={require('../../assets/chinook_salmon_rotated.jpeg')}
+        // style={[styles.salmonLogo, { transform: [{ rotate: '-50deg' }] }]}
+        // style={styles.salmonLogo}
+        height={375}
+        width={375}
+        borderRadius={1000}
+        borderColor={addBorder ? 'primary' : '#fff'}
+        borderWidth={addBorder ? 5 : 0}
         alt='salmon logo'
       />
     </View>
@@ -68,7 +83,7 @@ const SignIn = ({ navigation }: { navigation: any }) => {
         source={require('../../assets/background_image.png')}
         resizeMode='cover'
       >
-        <VStack justifyContent='center' alignItems='center' mt='125' space={10}>
+        <VStack justifyContent='center' alignItems='center' mt='120' space={10}>
           {/* <View style={styles.circleLogo}>
             <Image
               source={require('../../assets/chinook_salmon.jpeg')}
@@ -77,7 +92,7 @@ const SignIn = ({ navigation }: { navigation: any }) => {
             />
           </View> */}
           <AppLogo />
-          <Heading color='#FFF' fontWeight={400} fontSize='6xl'>
+          <Heading color='#FFF' fontWeight={300} fontSize='7xl' mb={16}>
             Data Tackle{' '}
           </Heading>
           <Input
@@ -85,7 +100,7 @@ const SignIn = ({ navigation }: { navigation: any }) => {
             variant='filled'
             fontSize='2xl'
             h='60px'
-            w='400px'
+            w='450px'
             placeholder='Email'
             onChangeText={handleChangeEmail}
             value={email}
@@ -106,7 +121,7 @@ const SignIn = ({ navigation }: { navigation: any }) => {
             variant='filled'
             fontSize='2xl'
             h='60px'
-            w='400px'
+            w='450px'
             placeholder='Password'
             onChangeText={handleChangePassword}
             value={password}
@@ -141,7 +156,7 @@ const SignIn = ({ navigation }: { navigation: any }) => {
             borderRadius={10}
             bg='primary'
             h='60px'
-            w='400px'
+            w='450px'
             shadow='5'
             _disabled={{
               opacity: '75',

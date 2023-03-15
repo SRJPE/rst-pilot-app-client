@@ -82,11 +82,13 @@ export default function Home({ navigation }: { navigation: any }) {
       justifyContent='space-between'
       // opacity={staggerOpen ? 0.25 : 1.0}
     >
-      <TopIcons />
+      {/* <TopIcons /> */}
 
       <View style={styles.landingContent}>
         {/* <CircleIcon size='300' color='primary' /> */}
-        <AppLogo />
+        <View my='12'>
+          <AppLogo addBorder />
+        </View>
         <Heading fontWeight={300} fontSize={50} marginTop={5}>
           Welcome!
         </Heading>
