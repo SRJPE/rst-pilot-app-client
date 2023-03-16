@@ -2,43 +2,35 @@ import React from 'react'
 import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
+import { useRoute } from '@react-navigation/native'
 
-const CreateNewProgramNavButtons = ({
-  navigation,
-  handleSubmit,
-  errors,
-  touched,
-  values,
-}: {
-  navigation?: any
-  handleSubmit?: any
-  errors?: any
-  touched?: any
-  values?: any
-}) => {
+const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const activePage = 'temp'
-  const handleRightButton = () => {}
-  const handleLeftButton = () => {}
+  const activePage = useRoute().name
+  console.log('🚀 ~ activePage:', activePage)
+
+  const handleRightButton = () => {
+    switch (activePage) {
+      case 'Permit Information':
+        navigation.navigate('Create New Program', {
+          screen: 'Permitting Information Input',
+        })
+        break
+
+      default:
+        console.log('Default hit')
+        break
+    }
+  }
+  const handleLeftButton = () => {
+    navigation.goBack()
+  }
   const disableRightButton = () => {
     return false
   }
 
-  const renderRightButtonText = (activePage: string) => {
-    let buttonText
-    switch (activePage) {
-      case 'Mark Recapture Complete':
-        buttonText = 'QC Data'
-        break
-      default:
-        buttonText = 'Next'
-        break
-    }
-    return buttonText
-  }
-
   return (
-    <Box bg='themeGrey' pb='12' pt='12' px='3' maxWidth='100%'>
+    <Box bg='#fff' py='8' maxWidth='100%'>
       <HStack justifyContent='space-evenly'>
         <Button
           alignSelf='flex-start'
@@ -47,7 +39,7 @@ const CreateNewProgramNavButtons = ({
           height='20'
           rounded='xs'
           borderRadius='5'
-          shadow='5'
+          shadow='2'
           // leftIcon={
           //   activePage === 'Release Trial' ? (
           //     <Icon as={Ionicons} name='home' size='lg' color='primary' />
@@ -55,10 +47,9 @@ const CreateNewProgramNavButtons = ({
           //     <></>
           //   )
           // }
-          onPress={handleLeftButton}
+          onPress={() => navigation.goBack()}
         >
           <Text fontSize='xl' fontWeight='bold' color='primary'>
-            {/* {activePage === 'Release Trial' ? 'Return Home' : 'Back'} */}
             Back
           </Text>
         </Button>
@@ -67,7 +58,7 @@ const CreateNewProgramNavButtons = ({
           rounded='xs'
           bg='primary'
           alignSelf='flex-start'
-          width='5%'
+          width='8%'
           borderRadius='5'
           shadow='5'
           onPress={() => console.log('🚀 ~ reduxState', reduxState)}
@@ -85,10 +76,10 @@ const CreateNewProgramNavButtons = ({
           borderRadius='5'
           shadow='5'
           isDisabled={disableRightButton()}
-          onPress={handleRightButton}
+          onPress={() => handleRightButton()}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
-            {renderRightButtonText(activePage) as string}
+            Next
           </Text>
         </Button>
       </HStack>
