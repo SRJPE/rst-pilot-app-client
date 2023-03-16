@@ -17,7 +17,9 @@ const CreateNewProgramButton = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const handleButtonPress = () => {
-    //  navigation.navigate('Trap Visit Form', { screen: name })
+    if (name === 'Trapping Protocols' || name === 'Crew Members') {
+      navigation.navigate('Create New Program', { screen: name })
+    }
     //  dispatch(updateActiveStep(step))
   }
 
