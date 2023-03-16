@@ -6,7 +6,6 @@ import {
   KeyboardAvoidingView,
   Pressable,
   VStack,
-  View,
   Image,
   Text,
   Button,
@@ -15,52 +14,23 @@ import {
 import { StyleSheet, ImageBackground } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  // circleLogo: {
-  //   borderRadius: 1000,
-  //   // borderWidth: 5,
-  //   height: 450,
-  //   width: 450,
-  //   backgroundColor: '#FFFFFF',
-  // },
-  salmonLogo: {
-    // position: 'absolute',
-    height: 450,
-    width: 450,
-    borderRadius: 1000,
-    // borderWidth: 5,
-    // left: '21%',
-    // bottom: '13%',
-  },
-})
-
-export const AppLogo = ({ addBorder }: { addBorder?: boolean }) => {
+export const AppLogo = ({
+  addBorder,
+  imageSize,
+}: {
+  addBorder?: boolean
+  imageSize?: number
+}) => {
   return (
-    // <View style={styles.circleLogo}>
-    //   <Image
-    //     source={require('../../assets/chinook_salmon.jpeg')}
-    //     style={[styles.salmonLogo, { transform: [{ rotate: '-50deg' }] }]}
-    //     alt='salmon logo'
-    //   />
-    // </View>
-    <View
-    // style={styles.circleLogo}
-    >
-      <Image
-        source={require('../../assets/chinook_salmon_rotated.jpeg')}
-        // style={[styles.salmonLogo, { transform: [{ rotate: '-50deg' }] }]}
-        // style={styles.salmonLogo}
-        height={375}
-        width={375}
-        borderRadius={1000}
-        borderColor={addBorder ? 'primary' : '#fff'}
-        borderWidth={addBorder ? 5 : 0}
-        alt='salmon logo'
-      />
-    </View>
+    <Image
+      source={require('../../assets/chinook_salmon_rotated.jpeg')}
+      height={imageSize}
+      width={imageSize}
+      borderRadius={1000}
+      borderColor={addBorder ? 'primary' : '#fff'}
+      borderWidth={addBorder ? 5 : 0}
+      alt='salmon logo'
+    />
   )
 }
 
@@ -79,19 +49,12 @@ const SignIn = ({ navigation }: { navigation: any }) => {
   return (
     <KeyboardAvoidingView flex='1' behavior='padding'>
       <ImageBackground
-        style={styles.container}
+        style={[{ flex: 1 }]}
         source={require('../../assets/background_image.png')}
         resizeMode='cover'
       >
         <VStack justifyContent='center' alignItems='center' mt='120' space={10}>
-          {/* <View style={styles.circleLogo}>
-            <Image
-              source={require('../../assets/chinook_salmon.jpeg')}
-              style={[styles.salmonLogo, { transform: [{ rotate: '-50deg' }] }]}
-              alt='salmon logo'
-            />
-          </View> */}
-          <AppLogo />
+          <AppLogo imageSize={375} />
           <Heading color='#FFF' fontWeight={300} fontSize='7xl' mb={16}>
             Data Tackle{' '}
           </Heading>

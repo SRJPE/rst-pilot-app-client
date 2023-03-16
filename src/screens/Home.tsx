@@ -87,7 +87,7 @@ export default function Home({ navigation }: { navigation: any }) {
       <View style={styles.landingContent}>
         {/* <CircleIcon size='300' color='primary' /> */}
         <View my='12'>
-          <AppLogo addBorder />
+          <AppLogo addBorder imageSize={375} />
         </View>
         <Heading fontWeight={300} fontSize={50} marginTop={5}>
           Welcome!
