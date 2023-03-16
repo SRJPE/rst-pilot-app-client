@@ -1,6 +1,6 @@
 import React from 'react'
 import { Avatar, Button, HStack, Icon, Pressable, Text } from 'native-base'
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 
@@ -17,9 +17,7 @@ const CreateNewProgramButton = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const handleButtonPress = () => {
-    if (name === 'Trapping Protocols' || name === 'Crew Members') {
-      navigation.navigate('Create New Program', { screen: name })
-    }
+    navigation.navigate('Create New Program', { screen: name })
     //  dispatch(updateActiveStep(step))
   }
 
