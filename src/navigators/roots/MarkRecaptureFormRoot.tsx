@@ -1,5 +1,5 @@
 import { VStack } from 'native-base'
-import MarkRecaptureStackNavigator from '../navigators/MarkRecaptureStackNavigator'
+import MarkRecaptureStackNavigator from '../MarkRecaptureStackNavigator'
 
 export default function MarkRecaptureForm({ navigation }: { navigation: any }) {
   return (

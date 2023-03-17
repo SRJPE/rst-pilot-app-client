@@ -1,5 +1,5 @@
 import { VStack } from 'native-base'
-import CreateNewProgramStackNavigator from '../navigators/CreateNewProgramNavigation'
+import CreateNewProgramStackNavigator from '../CreateNewProgramNavigation'
 
 export default function CreateNewProgram({ navigation }: { navigation: any }) {
   return (
