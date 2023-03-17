@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux'
 import { persistReducer } from 'redux-persist'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import SecureStore from 'expo-secure-store'
 import dropdownsSlice from './dropdownsSlice'
 import navigationSlice from './formSlices/navigationSlice'
 import visitSetupSlice from './formSlices/visitSetupSlice'
@@ -21,6 +22,7 @@ import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
 import releaseTrialDataEntrySlice from './markRecaptureSlices/releaseTrialDataEntrySlice'
 import addAnotherMarkSlice from './addAnotherMarkSlice'
 import fishHoldingSlice from './markRecaptureSlices/fishHoldingSlice'
+import userCredentialsSlice from './userCredentialsSlice'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
@@ -38,6 +40,11 @@ const trapVisitPostPersistConfig = {
   key: 'trapVisitPostPersistConfig',
   version: 1,
   storage: AsyncStorage,
+}
+const userCredentialsPersistConfig = {
+  key: 'userCredentialsPersistConfig',
+  version: 1,
+  storage: SecureStore,
 }
 
 export default combineReducers({
@@ -66,4 +73,5 @@ export default combineReducers({
   releaseTrial: releaseTrialSlice,
   releaseTrialDataEntry: releaseTrialDataEntrySlice,
   addAnotherMark: addAnotherMarkSlice,
+  userCredentials: persistReducer(dropdownsPersistConfig, userCredentialsSlice),
 })
