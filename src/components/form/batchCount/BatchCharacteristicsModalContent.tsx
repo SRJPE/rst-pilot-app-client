@@ -13,8 +13,9 @@ import {
   VStack,
 } from 'native-base'
 import React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { saveBatchCharacteristics } from '../../../redux/reducers/formSlices/fishInputSlice'
+import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
 import { alphabeticalSort, reorderTaxon } from '../../../utils/utils'
@@ -31,8 +32,10 @@ const initialFormValues = {
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
+  tabSlice
 }: {
   closeModal: any
+  tabSlice: TabStateI
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
@@ -48,9 +51,13 @@ const BatchCharacteristicsModalContent = ({
   )
 
   const handleFormSubmit = (values: any) => {
-    dispatch(saveBatchCharacteristics(values))
-    console.log('🚀 ~ BatchCount Values: ', values)
-    showSlideAlert(dispatch, 'Batch characteristics')
+    const activeTabId = tabSlice.activeTabId
+    if (activeTabId) {
+      const tabGroupId = tabSlice.tabs[activeTabId].groupId
+      dispatch(saveBatchCharacteristics({...values, tabGroupId }))
+      console.log('🚀 ~ BatchCount Values: ', values)
+      showSlideAlert(dispatch, 'Batch characteristics')
+    }
   }
 
   return (
@@ -279,4 +286,10 @@ const BatchCharacteristicsModalContent = ({
   )
 }
 
-export default BatchCharacteristicsModalContent
+const mapStateToProps = (state: RootState) => {
+  return {
+    tabSlice: state.tabSlice,
+  }
+}
+
+export default connect(mapStateToProps)(BatchCharacteristicsModalContent)

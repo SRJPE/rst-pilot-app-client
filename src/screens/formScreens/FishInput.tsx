@@ -27,19 +27,23 @@ import FishInputDataTable from '../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../components/form/PlusCountModalContent'
 import { Ionicons } from '@expo/vector-icons'
 import { useWindowDimensions } from 'react-native'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
     fishInputSliceState: state.fishInput,
+    tabSlice: state.tabSlice,
   }
 }
 
 const FishInput = ({
   navigation,
   fishInputSliceState,
+  tabSlice,
 }: {
   navigation: any
   fishInputSliceState: any
+  tabSlice: TabStateI
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addPlusCountModalOpen, setAddPlusCountModalOpen] = useState(
@@ -50,8 +54,16 @@ const FishInput = ({
     'Individual' | 'Batch'
   >('Individual')
   const [checkboxGroupValue, setCheckboxGroupValue] = useState(
-    fishInputSliceState.speciesCaptured.length > 1
-      ? ([...fishInputSliceState.speciesCaptured] as Array<string>)
+    tabSlice.activeTabId && fishInputSliceState[tabSlice.activeTabId]
+      ? fishInputSliceState[tabSlice.activeTabId].speciesCaptured.length > 1
+        ? ([
+            ...fishInputSliceState[tabSlice.activeTabId].speciesCaptured,
+          ] as Array<string>)
+        : (['YOY Chinook'] as Array<string>)
+      : fishInputSliceState['placeholderId'].speciesCaptured.length > 1
+      ? ([
+          ...fishInputSliceState['placeholderId'].speciesCaptured,
+        ] as Array<string>)
       : (['YOY Chinook'] as Array<string>)
   )
   const { height: screenHeight } = useWindowDimensions()
@@ -65,10 +77,16 @@ const FishInput = ({
     //   setShowError(true)
 
     // }
-    dispatch(saveFishInput(checkboxGroupValue))
-    dispatch(markFishInputCompleted(true))
-    dispatch(markStepCompleted([true, 'fishInput']))
-    console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
+    const activeTabId = tabSlice.activeTabId
+    if (activeTabId) {
+      let tabGroupId = tabSlice.tabs[activeTabId].groupId
+      dispatch(
+        saveFishInput({ tabGroupId, speciesCaptured: checkboxGroupValue })
+      )
+      dispatch(markFishInputCompleted({ tabGroupId, bool: true }))
+      dispatch(markStepCompleted([true, 'fishInput']))
+      console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
+    }
   }
 
   return (
@@ -199,8 +217,12 @@ const FishInput = ({
         <CustomModal
           isOpen={addPlusCountModalOpen}
           closeModal={() => {
-            setAddPlusCountModalOpen(false)
-            dispatch(markFishInputModalOpen(false))
+            const activeTabId = tabSlice.activeTabId
+            if (activeTabId) {
+              const tabGroupId = tabSlice.tabs[activeTabId].groupId
+              setAddPlusCountModalOpen(false)
+              dispatch(markFishInputModalOpen({ tabGroupId, bool: false }))
+            }
           }}
           height='1/2'
         >

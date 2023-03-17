@@ -51,6 +51,7 @@ import { Keyboard, useWindowDimensions } from 'react-native'
 import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const AddFishContent = ({
   route,
@@ -63,6 +64,7 @@ const AddFishContent = ({
   setActiveTab,
   closeModal,
   fishStore,
+  tabSlice,
 }: {
   route?: any
   saveIndividualFish: any
@@ -74,6 +76,7 @@ const AddFishContent = ({
   setActiveTab: any
   closeModal: any
   fishStore: FishStoreI
+  tabSlice: TabStateI
 }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
@@ -1138,9 +1141,13 @@ const AddFishContent = ({
               if (route.params?.editModeData) {
                 navigation.goBack()
               } else {
-                let payload = returnFormValues()
-                saveIndividualFish(payload)
-                navigation.goBack()
+                const activeTabId = tabSlice.activeTabId
+                if (activeTabId) {
+                  const tabGroupId = tabSlice.tabs[activeTabId].groupId
+                  let payload = returnFormValues()
+                  saveIndividualFish({ tabGroupId, formValues: payload })
+                  navigation.goBack()
+                }
               }
             }}
           >
@@ -1153,8 +1160,12 @@ const AddFishContent = ({
               flex='1'
               bg='#b71c1c'
               onPress={() => {
-                deleteFishEntry(route.params?.editModeData?.id)
-                navigation.goBack()
+                const activeTabId = tabSlice.activeTabId
+                if (activeTabId) {
+                  const tabGroupId = tabSlice.tabs[activeTabId].groupId
+                  deleteFishEntry({tabGroupId, id: route.params?.editModeData?.id})
+                  navigation.goBack()
+                }
               }}
             >
               <Text fontWeight='bold' color='white' fontSize='xl'>
@@ -1173,19 +1184,28 @@ const AddFishContent = ({
             isDisabled={route.params?.editModeData ? false : formHasError}
             onPress={() => {
               let payload = returnFormValues()
+              const activeTabId = tabSlice.activeTabId
               if (route.params?.editModeData) {
-                updateFishEntry({
-                  id: route.params?.editModeData?.id,
-                  ...payload,
-                  numFishCaught: count.value,
-                })
-                navigation.goBack()
+                if (activeTabId) {
+                  const tabGroupId = tabSlice.tabs[activeTabId].groupId
+                  updateFishEntry({
+                    tabGroupId,
+                    id: route.params?.editModeData?.id,
+                    ...payload,
+                    numFishCaught: count.value,
+                  })
+                  navigation.goBack()
+                }
               } else {
                 // bypasses formik to fix async issues.
                 // This should be fine since the button is only enabled when the form is valid
-                saveIndividualFish(payload)
-                showSlideAlert(dispatch, 'Fish')
-                resetFormState('other')
+                const activeTabId = tabSlice.activeTabId
+                if (activeTabId) {
+                  const tabGroupId = tabSlice.tabs[activeTabId].groupId
+                  saveIndividualFish({ tabGroupId, formValues: payload })
+                  showSlideAlert(dispatch, 'Fish')
+                  resetFormState('other')
+                }
               }
             }}
           >
@@ -1234,8 +1254,17 @@ const AddFishContent = ({
 }
 
 const mapStateToProps = (state: RootState) => {
+  let tabGroupId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.fishInput[state.tabSlice.tabs[state.tabSlice.activeTabId].groupId]
+  ) {
+    tabGroupId = state.tabSlice.tabs[state.tabSlice.activeTabId].groupId
+  }
+
   return {
-    fishStore: state.fishInput.fishStore,
+    fishStore: state.fishInput[tabGroupId].fishStore,
+    tabSlice: state.tabSlice,
   }
 }
 

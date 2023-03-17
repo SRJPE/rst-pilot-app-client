@@ -133,7 +133,7 @@ const VisitSetup = ({
         dispatch(
           createTab({
             tabId,
-            tabName: values.trapName[0] ?? values.trapSite,
+            tabName: values.trapSite,
             trapSite: values.trapSite,
           })
         )

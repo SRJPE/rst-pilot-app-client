@@ -33,8 +33,19 @@ import { Switch } from 'native-base'
 import BatchCountDataTable from '../../components/form/batchCount/BatchCountDataTable'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import BatchCountTableModal from '../../components/form/batchCount/BatchCountTableModal'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
-const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
+const BatchCount = ({
+  route,
+  fishInputSlice,
+  tabSlice,
+  tabGroupId,
+}: {
+  route: any
+  fishInputSlice: any
+  tabSlice: TabStateI
+  tabGroupId: string
+}) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
   const [firstButton, setFirstButton] = useState(0 as number)
@@ -50,7 +61,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     count: '',
   } as any)
   const { species, adiposeClipped, dead, existingMark, forkLengths } =
-    fishStore.batchCharacteristics
+    fishInputSlice[tabGroupId].batchCharacteristics
 
   const { height: screenHeight } = useWindowDimensions()
 
@@ -63,21 +74,33 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   }, [])
 
   const handlePressRemoveFish = () => {
-    dispatch(removeLastForkLengthEntered())
+    const activeTabId = tabSlice.activeTabId
+    if (activeTabId) {
+      const tabGroupId = tabSlice.tabs[activeTabId].groupId
+      dispatch(removeLastForkLengthEntered({ tabGroupId }))
+    }
   }
 
   const handlePressSaveBatchCount = () => {
-    dispatch(saveBatchCount())
-    showSlideAlert(dispatch, 'Batch Count')
-    // @ts-ignore
-    navigation.navigate('Trap Visit Form', {
-      screen: 'Fish Input',
-    })
+    const activeTabId = tabSlice.activeTabId
+    if (activeTabId) {
+      const tabGroupId = tabSlice.tabs[activeTabId].groupId
+      dispatch(saveBatchCount({ tabGroupId }))
+      showSlideAlert(dispatch, 'Batch Count')
+      // @ts-ignore
+      navigation.navigate('Trap Visit Form', {
+        screen: 'Fish Input',
+      })
+    }
   }
   const handlePressSaveAndStartNewBatchCount = () => {
-    dispatch(saveBatchCount())
-    showSlideAlert(dispatch, 'Batch Count')
-    setBatchCharacteristicsModalOpen(true)
+    const activeTabId = tabSlice.activeTabId
+    if (activeTabId) {
+      const tabGroupId = tabSlice.tabs[activeTabId].groupId
+      dispatch(saveBatchCount({ tabGroupId }))
+      showSlideAlert(dispatch, 'Batch Count')
+      setBatchCharacteristicsModalOpen(true)
+    }
   }
 
   const buttonNav = () => {
@@ -354,8 +377,18 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
 }
 
 const mapStateToProps = (state: RootState) => {
+  let tabGroupId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.fishInput[state.tabSlice.tabs[state.tabSlice.activeTabId].groupId]
+  ) {
+    tabGroupId = state.tabSlice.tabs[state.tabSlice.activeTabId].groupId
+  }
+
   return {
-    fishStore: state.fishInput,
+    fishInputSlice: state.fishInput,
+    tabSlice: state.tabSlice,
+    tabGroupId
   }
 }
 export default connect(mapStateToProps)(BatchCount)

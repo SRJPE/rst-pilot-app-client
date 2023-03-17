@@ -59,6 +59,10 @@ const FishInputDataTable = ({
   const [pageRows, setPageRows] = React.useState({})
 
   React.useEffect(() => {
+    console.log('this...', fishStore)
+  }, [])
+
+  React.useEffect(() => {
     const pageRows = generateRowsForPage()
     setPageRows(pageRows)
   }, [fishStore])
@@ -191,8 +195,16 @@ const FishInputDataTable = ({
 }
 
 const mapStateToProps = (state: RootState) => {
+  let activeTabId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.fishInput[state.tabSlice.tabs[state.tabSlice.activeTabId].groupId]
+  ) {
+    activeTabId = state.tabSlice.tabs[state.tabSlice.activeTabId].groupId
+  }
+
   return {
-    fishStore: state.fishInput.fishStore,
+    fishStore: state.fishInput[activeTabId].fishStore,
   }
 }
 

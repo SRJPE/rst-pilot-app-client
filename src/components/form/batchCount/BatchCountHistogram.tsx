@@ -136,8 +136,17 @@ const BatchCountHistogram = ({
   )
 }
 const mapStateToProps = (state: RootState) => {
+  let tabGroupId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.fishInput[state.tabSlice.tabs[state.tabSlice.activeTabId].groupId]
+  ) {
+    tabGroupId = state.tabSlice.tabs[state.tabSlice.activeTabId].groupId
+  }
+
   return {
-    forkLengthsStore: state.fishInput.batchCharacteristics.forkLengths,
+    forkLengthsStore:
+      state.fishInput[tabGroupId].batchCharacteristics.forkLengths,
   }
 }
 export default connect(mapStateToProps)(BatchCountHistogram)

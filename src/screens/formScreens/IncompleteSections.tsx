@@ -27,6 +27,7 @@ import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetup
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { flatten, uniq } from 'lodash'
 import { uid } from 'uid'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -69,7 +70,7 @@ const IncompleteSections = ({
   connectivityState: any
   fishInputState: any
   paperEntryState: any
-  tabState: any
+  tabState: TabStateI
 }) => {
   // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
@@ -157,8 +158,8 @@ const IncompleteSections = ({
       })
       return counter / numericRpms.length
     }
-    const tabIds = Object.keys(tabState.tabs)
 
+    const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach((id) => {
       const {
         rpm1: startRpm1,
@@ -276,51 +277,57 @@ const IncompleteSections = ({
     }
     const catchRawSubmissions: any[] = []
 
-    const fishStoreKeys = Object.keys(fishInputState.fishStore)
-    fishStoreKeys.forEach((key) => {
-      const fishValue = fishInputState.fishStore[key]
-      catchRawSubmissions.push({
-        uid: tempUID,
-        programId: 1,
-        trapVisitId: null,
-        taxonCode: returnTaxonCode(fishValue),
-        captureRunClass: returnNullableTableId(
-          runValues.indexOf(fishValue.run)
-        ),
-        // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
-        captureRunClassMethod: fishValue.run ? 6 : null,
-        // defaults to "none" (id: 1) if not selected
-        markType: 1, // Check w/ Erin
-        markedForRelease: fishValue.willBeUsedInRecapture,
-        adiposeClipped: fishValue.adiposeClipped,
-        dead: fishValue.dead,
-        lifeStage: returnNullableTableId(
-          lifeStageValues.indexOf(fishValue.lifeStage)
-        ),
-        forkLength:
-          fishValue.forkLength != null
-            ? parseInt(fishValue?.forkLength as any)
-            : null,
-        weight:
-          fishValue?.weight != null ? parseInt(fishValue?.weight as any) : null,
-        numFishCaught: fishValue?.numFishCaught,
-        plusCount: fishValue?.plusCount,
-        plusCountMethodology: fishValue?.plusCountMethod
-          ? returnNullableTableId(
-              plusCountMethodValues.indexOf(fishValue?.plusCountMethod)
-            )
-          : null,
-        isRandom: null, // Check w/ Erin
-        releaseId: null,
-        comments: null,
-        createdBy: null,
-        createdAt: currentDateTime,
-        updatedAt: null,
-        qcCompleted: null,
-        qcCompletedBy: null,
-        qcTime: null,
-        qcComments: null,
-      })
+    Object.keys(fishInputState).forEach((tabGroupId) => {
+      if (tabGroupId != 'placeholderId') {
+        const fishStoreKeys = Object.keys(fishInputState[tabGroupId].fishStore)
+        fishStoreKeys.forEach((key) => {
+          const fishValue = fishInputState[tabGroupId].fishStore[key]
+          catchRawSubmissions.push({
+            uid: tempUID,
+            programId: 1,
+            trapVisitId: null,
+            taxonCode: returnTaxonCode(fishValue),
+            captureRunClass: returnNullableTableId(
+              runValues.indexOf(fishValue.run)
+            ),
+            // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
+            captureRunClassMethod: fishValue.run ? 6 : null,
+            // defaults to "none" (id: 1) if not selected
+            markType: 1, // Check w/ Erin
+            markedForRelease: fishValue.willBeUsedInRecapture,
+            adiposeClipped: fishValue.adiposeClipped,
+            dead: fishValue.dead,
+            lifeStage: returnNullableTableId(
+              lifeStageValues.indexOf(fishValue.lifeStage)
+            ),
+            forkLength:
+              fishValue.forkLength != null
+                ? parseInt(fishValue?.forkLength as any)
+                : null,
+            weight:
+              fishValue?.weight != null
+                ? parseInt(fishValue?.weight as any)
+                : null,
+            numFishCaught: fishValue?.numFishCaught,
+            plusCount: fishValue?.plusCount,
+            plusCountMethodology: fishValue?.plusCountMethod
+              ? returnNullableTableId(
+                  plusCountMethodValues.indexOf(fishValue?.plusCountMethod)
+                )
+              : null,
+            isRandom: null, // Check w/ Erin
+            releaseId: null,
+            comments: null,
+            createdBy: null,
+            createdAt: currentDateTime,
+            updatedAt: null,
+            qcCompleted: null,
+            qcCompletedBy: null,
+            qcTime: null,
+            qcComments: null,
+          })
+        })
+      }
     })
 
     if (catchRawSubmissions.length) {
