@@ -102,7 +102,9 @@ const VisitSetup = ({
       programId,
       trapLocationId,
     }
+    // if no current tabs, create all new tabs
     if (!tabSlice?.activeTabId) {
+      // if trapName, iterate through all trap names and create tabs
       if (values.trapName) {
         values.trapName.forEach((trapName: string) => {
           const tabId = uid()
@@ -117,49 +119,91 @@ const VisitSetup = ({
             createTab({
               tabId,
               tabName: trapName ?? values.trapSite,
-              activeStep: !isPaperEntry ? 2 : 14,
             })
           )
           dispatch(markVisitSetupCompleted({ tabId, completed: true }))
           dispatch(markTrapVisitPaperEntry({ tabId, isPaperEntry }))
         })
-      } else {
+      }
+      // if not trapName, create single tab from trapSite
+      else {
         const tabId = uid()
         dispatch(saveVisitSetup({ tabId, isPaperEntry, values: payload }))
         dispatch(
           createTab({
             tabId,
             tabName: values.trapName[0] ?? values.trapSite,
-            activeStep: 2,
           })
         )
         dispatch(markVisitSetupCompleted({ tabId, completed: true }))
         dispatch(markTrapVisitPaperEntry({ tabId, isPaperEntry }))
       }
-    } else {
+    }
+    // if there are current tabs, create and overwrite tabs
+    else {
+      let currentTabsTrapNames: string[] = []
+      Object.keys(tabSlice.tabs).forEach((tabId) => {
+        currentTabsTrapNames.push(tabSlice.tabs[tabId].name)
+      })
+      // if trapNames, iterate through all trap names and create / overwrite tabs
       if (values.trapName) {
-        const currentTabsTrapNames: string[] = []
-        Object.keys(tabSlice.tabs).forEach((tabId) => {
-          currentTabsTrapNames.push(tabSlice.tabs[tabId].name)
-        })
         values.trapName.forEach((trapName: string) => {
-          if (currentTabsTrapNames.includes(trapName)) return
-          dispatch(
-            saveVisitSetup({ tabId: tabSlice?.activeTabId, values: payload })
-          )
-          if (
-            tabSlice.activeTabId &&
-            tabSlice.tabs[tabSlice.activeTabId].name === 'New Tab'
-          ) {
-            dispatch(setTabName(trapName ?? values.trapSite))
+          if (currentTabsTrapNames.includes(trapName)) {
+            const tabIds = Object.keys(tabSlice.tabs)
+            const tabIdToUpdate = tabIds.filter((id) => {
+              return tabSlice.tabs[id].name == trapName
+            })[0]
+            dispatch(
+              saveVisitSetup({
+                tabId: tabIdToUpdate,
+                values: payload,
+                isPaperEntry,
+              })
+            )
+            dispatch(
+              setTabName({
+                tabId: tabIdToUpdate,
+                name: trapName ?? values.trapSite,
+              })
+            )
+            delete currentTabsTrapNames[currentTabsTrapNames.indexOf(trapName)]
+          } else if (currentTabsTrapNames.includes('New Tab')) {
+            const tabIds = Object.keys(tabSlice.tabs)
+            const tabIdToUpdate = tabIds.filter((id) => {
+              return tabSlice.tabs[id].name == 'New Tab'
+            })[0]
+            dispatch(
+              saveVisitSetup({
+                tabId: tabIdToUpdate,
+                values: payload,
+                isPaperEntry,
+              })
+            )
+            dispatch(
+              setTabName({
+                tabId: tabIdToUpdate,
+                name: trapName ?? values.trapSite,
+              })
+            )
+            delete currentTabsTrapNames[currentTabsTrapNames.indexOf('New Tab')]
           } else {
             let tabId = uid()
-            createTab({
-              tabId,
-              tabName: trapName ?? values.trapSite,
-              activeStep: !isPaperEntry ? 2 : 14,
-            })
+            dispatch(
+              saveVisitSetup({
+                tabId: tabId,
+                values: payload,
+                isPaperEntry,
+              })
+            )
+            dispatch(
+              createTab({
+                tabId,
+                tabName: trapName ?? values.trapSite,
+                trapSite: values.trapSite,
+              })
+            )
           }
+
           dispatch(
             markVisitSetupCompleted({
               tabId: tabSlice?.activeTabId,
@@ -173,11 +217,19 @@ const VisitSetup = ({
             })
           )
         })
-      } else {
+      }
+      // if there are no additional trapNames overwrite current tab
+      else {
         dispatch(
-          saveVisitSetup({ tabId: tabSlice?.activeTabId, values: payload })
+          saveVisitSetup({
+            tabId: tabSlice?.activeTabId,
+            values: payload,
+            isPaperEntry,
+          })
         )
-        dispatch(setTabName(values.trapSite))
+        dispatch(
+          setTabName({ tabId: tabSlice.activeTabId, name: values.trapSite })
+        )
         dispatch(
           markVisitSetupCompleted({
             tabId: tabSlice?.activeTabId,
@@ -419,7 +471,7 @@ const VisitSetup = ({
                         setFieldValue={setFieldValue}
                         setFieldTouched={setFieldTouched}
                         visitSetupState={visitSetupState}
-                        tabId={tabSlice?.activeTabId}
+                        tabSlice={tabSlice}
                       />
                       {touched.trapName &&
                         errors.trapName &&

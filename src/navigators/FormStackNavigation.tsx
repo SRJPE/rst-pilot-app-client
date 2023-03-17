@@ -33,7 +33,6 @@ import {
   createTab,
   deleteTab,
   setActiveTab,
-  setTabStep,
   TabStateI,
 } from '../redux/reducers/formSlices/tabSlice'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -56,36 +55,6 @@ function FormStackNavigation(props: any) {
   const tabSlice = props.tabSlice as TabStateI
   const navigationSlice = props.navigationSlice as NavigationStateI
   const nonTabBarScreens = ['Incomplete Sections', 'Add Fish', 'Batch Count']
-
-  useEffect(() => {
-    if (tabSlice.activeTabId) {
-      if (
-        tabSlice.tabs[tabSlice.activeTabId].activeStep !=
-        navigationSlice.activeStep
-      ) {
-        const { activeTabId } = tabSlice
-        const { activeStep } = navigationSlice
-        if (activeStep != null && activeTabId != null) {
-          dispatch(setTabStep({ tabId: activeTabId, activeStep }))
-        }
-      }
-    }
-  }, [navigationSlice.activeStep])
-
-  useEffect(() => {
-    if (tabSlice.activeTabId != null) {
-      if (tabSlice.tabs[tabSlice.activeTabId]?.activeStep) {
-        if (
-          tabSlice.tabs[tabSlice.activeTabId]?.activeStep !=
-          navigationSlice.activeStep
-        ) {
-          dispatch(
-            updateActiveStep(tabSlice.tabs[tabSlice.activeTabId].activeStep)
-          )
-        }
-      }
-    }
-  }, [tabSlice.activeTabId])
 
   const renderTabContent = (
     tabSlice: TabStateI,
@@ -133,7 +102,7 @@ function FormStackNavigation(props: any) {
                 onPress={() => {
                   const tabId = uid()
                   dispatch(
-                    createTab({ tabId, tabName: 'New Tab', activeStep: 1 })
+                    createTab({ tabId, tabName: 'New Tab' })
                   )
                   dispatch(setActiveTab(tabId))
                   props.navigation.navigate('Trap Visit Form', {

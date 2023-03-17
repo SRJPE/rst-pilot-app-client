@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 export default function TrapNameDropDown({
   list,
@@ -8,33 +9,59 @@ export default function TrapNameDropDown({
   setFieldValue,
   setFieldTouched,
   visitSetupState,
-  tabId,
+  tabSlice,
 }: {
   list: any
   setList: any
   setFieldValue: any
   setFieldTouched: any
   visitSetupState: any
-  tabId: any
+  tabSlice: TabStateI
 }) {
   const [open, setOpen] = useState(false as boolean)
   const [value, setValue] = useState([] as Array<any>)
 
   useEffect(() => {
-    if (visitSetupState[tabId]?.values?.trapName) {
-      const trapNameOrNames = visitSetupState[tabId]?.values?.trapName
+    if (
+      tabSlice?.activeTabId &&
+      visitSetupState[tabSlice.activeTabId]?.values?.trapName
+    ) {
+      const trapNameOrNames =
+        visitSetupState[tabSlice.activeTabId]?.values?.trapName
+      const associatedActiveTrapNames = activeTrapNamesAssociatedToTab()
       if (Array.isArray(trapNameOrNames)) {
-        setValue(trapNameOrNames)
+        setValue([...trapNameOrNames, ...associatedActiveTrapNames])
       } else {
-        setValue([trapNameOrNames])
+        setValue([trapNameOrNames, ...associatedActiveTrapNames])
       }
     }
-  }, [tabId])
+  }, [tabSlice.activeTabId])
 
   useEffect(() => {
     setFieldValue('trapName', [...value])
     setFieldTouched('trapName', true)
   }, [value])
+
+  const activeTrapNamesAssociatedToTab = () => {
+    const associatedActiveTrapNames: string[] = []
+    const tabId = tabSlice.activeTabId
+    if (tabId) {
+      const tabs = tabSlice.tabs
+      const activeTrapSite = tabs[tabId].trapSite
+      const activeTrapName = tabs[tabId].name
+      Object.keys(tabs).forEach((id) => {
+        if (
+          activeTrapSite == tabs[id].trapSite &&
+          activeTrapName !== tabs[id].name
+        ) {
+          associatedActiveTrapNames.push(tabs[id].name)
+        }
+      })
+      return associatedActiveTrapNames
+    } else {
+      return []
+    }
+  }
 
   const generateMarginBottom = () => {
     if (list.length === 2) {

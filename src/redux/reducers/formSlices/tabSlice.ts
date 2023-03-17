@@ -12,7 +12,8 @@ interface TabsI {
 
 interface TabInfoI {
   name: string
-  activeStep: number
+  trapSite: string
+  timestamp: Date
 }
 
 const initialState: TabStateI = {
@@ -26,12 +27,13 @@ export const tabsSlice = createSlice({
   reducers: {
     resetTabsSlice: () => initialState,
     createTab: (state, action) => {
-      const { tabId, tabName, activeStep } = action.payload
+      const { tabId, tabName, trapSite } = action.payload
+      const timestamp = new Date()
       if (Object.keys(state.tabs).length) {
-        state.tabs[tabId] = { name: tabName, activeStep }
+        state.tabs[tabId] = { name: tabName, trapSite, timestamp }
       } else {
         state.activeTabId = tabId
-        state.tabs[tabId] = { name: tabName, activeStep }
+        state.tabs[tabId] = { name: tabName, trapSite, timestamp }
       }
     },
     deleteTab: (state, action) => {
@@ -47,13 +49,8 @@ export const tabsSlice = createSlice({
       state.activeTabId = action.payload
     },
     setTabName: (state, action) => {
-      if (state.activeTabId) state.tabs[state.activeTabId].name = action.payload
-    },
-    setTabStep: (state, action) => {
-      const { tabId, activeStep } = action.payload
-      if (state.tabs[tabId]) {
-        state.tabs[tabId].activeStep = activeStep
-      }
+      const {tabId, name} = action.payload
+      state.tabs[tabId].name = name
     },
   },
 })
@@ -64,7 +61,6 @@ export const {
   deleteTab,
   setActiveTab,
   setTabName,
-  setTabStep,
 } = tabsSlice.actions
 
 export default tabsSlice.reducer

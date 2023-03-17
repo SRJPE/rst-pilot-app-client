@@ -69,17 +69,24 @@ const PaperEntry = ({
 
   const handleSubmit = () => {
     const tabId = tabState.activeTabId
-    dispatch(
-      savePaperEntry({
-        tabId,
-        values: {
-          comments,
-          startDate,
-          endDate,
-        },
-      })
-    )
-    dispatch(markPaperEntryCompleted({ tabId, value: true }))
+    const tabs = tabState.tabs
+    const trapSite = tabs[tabId].trapSite
+
+    Object.keys(tabs).forEach((id) => {
+      if (trapSite == tabs[id].trapSite) {
+        dispatch(
+          savePaperEntry({
+            tabId,
+            values: {
+              comments,
+              startDate,
+              endDate,
+            },
+          })
+        )
+        dispatch(markPaperEntryCompleted({ tabId, value: true }))
+      }
+    })
   }
 
   return (
