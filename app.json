@@ -4,14 +4,14 @@
     "slug": "rst-pilot-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon_logo.png",
     "userInterfaceStyle": "light",
     "plugins": [
       ["expo-community-flipper"],
       ["react-native-flipper-performance-plugin"]
     ],
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash_logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -23,6 +23,9 @@
       "supportsTablet": true,
       "entitlements": {
         "com.apple.developer.networking.wifi-info": true
+      },
+      "config": {
+        "usesNonExemptEncryption": false
       }
     },
     "android": {
