@@ -4,7 +4,8 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const NavButtons = ({
   navigation,
@@ -14,6 +15,10 @@ const NavButtons = ({
   values,
   isFormComplete,
   isPaperEntry,
+  tabSlice,
+  visitSetupSlice,
+  fishProcessingSlice,
+  reduxState,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -22,15 +27,28 @@ const NavButtons = ({
   values?: any
   isFormComplete?: boolean
   isPaperEntry?: boolean
+  tabSlice: TabStateI
+  visitSetupSlice: any
+  fishProcessingSlice: any
+  reduxState: RootState
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
-  const reduxState = useSelector((state: any) => state)
-  const isPaperEntryStore = reduxState.visitSetup.isPaperEntry
+  const isPaperEntryStore =
+    isPaperEntry != null
+      ? isPaperEntry
+      : tabSlice.activeTabId
+      ? visitSetupSlice[tabSlice.activeTabId]
+        ? visitSetupSlice[tabSlice.activeTabId].isPaperEntry
+        : visitSetupSlice['placeholderId'].isPaperEntry
+      : false
+
   const willBeHoldingFishForMarkRecapture =
-    reduxState.fishProcessing.values.willBeHoldingFishForMarkRecapture
+    // fishProcessingSlice[tabSlice.activeTabId ?? 'placeholderId'].values
+    //   .willBeHoldingFishForMarkRecapture
+    false
 
   const navigateHelper = (destination: string) => {
     const formSteps = Object.values(navigationState?.steps) as any
@@ -310,6 +328,10 @@ const NavButtons = ({
 const mapStateToProps = (state: RootState) => {
   return {
     isFormComplete: state.navigation.isFormComplete,
+    tabSlice: state.tabSlice,
+    visitSetupSlice: state.visitSetup,
+    fishProcessingSlice: state.fishProcessing,
+    reduxState: state,
   }
 }
 

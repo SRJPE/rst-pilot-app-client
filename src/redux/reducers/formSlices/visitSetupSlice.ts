@@ -39,12 +39,8 @@ export const visitSetupSlice = createSlice({
   reducers: {
     resetVisitSetupSlice: () => initialState,
     saveVisitSetup: (state, action) => {
-      const { tabId, values } = action.payload
-      if (state[tabId]) {
-        state[tabId].values = values
-      } else {
-        state[tabId] = { completed: true, isPaperEntry: false, values }
-      }
+      const { tabId, values, isPaperEntry } = action.payload
+      state[tabId] = { completed: true, isPaperEntry, values }
     },
     markVisitSetupCompleted: (state, action) => {
       const { tabId, completed } = action.payload

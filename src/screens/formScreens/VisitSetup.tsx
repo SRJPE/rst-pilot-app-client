@@ -20,8 +20,15 @@ import {
 import CrewDropDown from '../../components/form/CrewDropDown'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapVisitSchema } from '../../utils/helpers/yupValidations'
-import { markStepCompleted, NavigationStateI } from '../../redux/reducers/formSlices/navigationSlice'
-import { createTab, setTabName, TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import {
+  markStepCompleted,
+  NavigationStateI,
+} from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  createTab,
+  setTabName,
+  TabStateI,
+} from '../../redux/reducers/formSlices/tabSlice'
 import { uniqBy } from 'lodash'
 
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
@@ -34,7 +41,7 @@ const mapStateToProps = (state: RootState) => {
     visitSetupState: state.visitSetup,
     visitSetupDefaultsState: state.visitSetupDefaults,
     tabSlice: state.tabSlice,
-    navigationSlice: state.navigation
+    navigationSlice: state.navigation,
   }
 }
 
@@ -43,7 +50,7 @@ const VisitSetup = ({
   visitSetupState,
   visitSetupDefaultsState,
   tabSlice,
-  navigationSlice
+  navigationSlice,
 }: {
   navigation: any
   visitSetupState: any
@@ -69,19 +76,19 @@ const VisitSetup = ({
 
   useEffect(() => {
     if (tabSlice.activeTabId != null) {
-      console.log('visitSetup.tsx - tabSlice: ', tabSlice)
-    if (visitSetupState[tabSlice?.activeTabId]?.values?.programId != selectedProgramId) {
-      setSelectedProgramId(visitSetupState[tabSlice?.activeTabId]?.values?.programId)
-      generateCrewList(visitSetupState[tabSlice?.activeTabId]?.values?.programId)
-      shouldShowTrapNameField(visitSetupState[tabSlice?.activeTabId]?.values?.trapSite)
-    }
-      if (tabSlice.tabs[tabSlice.activeTabId].activeStep != navigationSlice.activeStep) {
-        navigation.navigate('Trap Visit Form', {
-          screen:
-            navigationSlice.steps[
-              tabSlice.tabs[tabSlice.activeTabId].activeStep
-            ].name,
-        })
+      if (
+        visitSetupState[tabSlice?.activeTabId]?.values?.programId !=
+        selectedProgramId
+      ) {
+        setSelectedProgramId(
+          visitSetupState[tabSlice?.activeTabId]?.values?.programId
+        )
+        generateCrewList(
+          visitSetupState[tabSlice?.activeTabId]?.values?.programId
+        )
+        shouldShowTrapNameField(
+          visitSetupState[tabSlice?.activeTabId]?.values?.trapSite
+        )
       }
     }
   }, [tabSlice?.activeTabId])
@@ -100,18 +107,25 @@ const VisitSetup = ({
         values.trapName.forEach((trapName: string) => {
           const tabId = uid()
           dispatch(
+            saveVisitSetup({
+              tabId,
+              values: { ...payload, trapName },
+              isPaperEntry,
+            })
+          )
+          dispatch(
             createTab({
               tabId,
               tabName: trapName ?? values.trapSite,
-              activeStep: 2,
+              activeStep: !isPaperEntry ? 2 : 14,
             })
           )
-          dispatch(saveVisitSetup({ tabId, values: { ...payload, trapName } }))
           dispatch(markVisitSetupCompleted({ tabId, completed: true }))
           dispatch(markTrapVisitPaperEntry({ tabId, isPaperEntry }))
         })
       } else {
         const tabId = uid()
+        dispatch(saveVisitSetup({ tabId, isPaperEntry, values: payload }))
         dispatch(
           createTab({
             tabId,
@@ -119,20 +133,64 @@ const VisitSetup = ({
             activeStep: 2,
           })
         )
-        dispatch(saveVisitSetup({ tabId, values: payload }))
         dispatch(markVisitSetupCompleted({ tabId, completed: true }))
         dispatch(markTrapVisitPaperEntry({ tabId, isPaperEntry }))
       }
     } else {
-      dispatch(saveVisitSetup({ tabId: tabSlice?.activeTabId, values: payload }))
-      dispatch(setTabName(values.trapName ?? values.trapSite))
-      dispatch(
-        markVisitSetupCompleted({
-          tabId: tabSlice?.activeTabId,
-          completed: true,
+      if (values.trapName) {
+        const currentTabsTrapNames: string[] = []
+        Object.keys(tabSlice.tabs).forEach((tabId) => {
+          currentTabsTrapNames.push(tabSlice.tabs[tabId].name)
         })
-      )
-      dispatch(markTrapVisitPaperEntry({ tabId: tabSlice?.activeTabId, isPaperEntry }))
+        values.trapName.forEach((trapName: string) => {
+          if (currentTabsTrapNames.includes(trapName)) return
+          dispatch(
+            saveVisitSetup({ tabId: tabSlice?.activeTabId, values: payload })
+          )
+          if (
+            tabSlice.activeTabId &&
+            tabSlice.tabs[tabSlice.activeTabId].name === 'New Tab'
+          ) {
+            dispatch(setTabName(trapName ?? values.trapSite))
+          } else {
+            let tabId = uid()
+            createTab({
+              tabId,
+              tabName: trapName ?? values.trapSite,
+              activeStep: !isPaperEntry ? 2 : 14,
+            })
+          }
+          dispatch(
+            markVisitSetupCompleted({
+              tabId: tabSlice?.activeTabId,
+              completed: true,
+            })
+          )
+          dispatch(
+            markTrapVisitPaperEntry({
+              tabId: tabSlice?.activeTabId,
+              isPaperEntry,
+            })
+          )
+        })
+      } else {
+        dispatch(
+          saveVisitSetup({ tabId: tabSlice?.activeTabId, values: payload })
+        )
+        dispatch(setTabName(values.trapSite))
+        dispatch(
+          markVisitSetupCompleted({
+            tabId: tabSlice?.activeTabId,
+            completed: true,
+          })
+        )
+        dispatch(
+          markTrapVisitPaperEntry({
+            tabId: tabSlice?.activeTabId,
+            isPaperEntry,
+          })
+        )
+      }
     }
     dispatch(markStepCompleted([true, 'visitSetup']))
     console.log('🚀 ~ handleSubmit ~ Visit', payload)
