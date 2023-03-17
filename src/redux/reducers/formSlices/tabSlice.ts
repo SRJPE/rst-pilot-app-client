@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { uid } from 'uid'
 
 export interface TabStateI {
   activeTabId: string | null
@@ -14,6 +15,7 @@ interface TabInfoI {
   name: string
   trapSite: string
   timestamp: Date
+  groupId: string
 }
 
 const initialState: TabStateI = {
@@ -28,13 +30,17 @@ export const tabsSlice = createSlice({
     resetTabsSlice: () => initialState,
     createTab: (state, action) => {
       const { tabId, tabName, trapSite } = action.payload
-      const timestamp = new Date()
-      if (Object.keys(state.tabs).length) {
-        state.tabs[tabId] = { name: tabName, trapSite, timestamp }
-      } else {
+      if (!Object.keys(state.tabs).length) {
         state.activeTabId = tabId
-        state.tabs[tabId] = { name: tabName, trapSite, timestamp }
       }
+      const timestamp = new Date()
+      let groupId = uid()
+      Object.keys(state.tabs).forEach((id) => {
+        if (state.tabs[id].trapSite === trapSite) {
+          groupId = state.tabs[id].groupId
+        } 
+      })
+      state.tabs[tabId] = { name: tabName, trapSite, timestamp, groupId }
     },
     deleteTab: (state, action) => {
       const tabId = action.payload
@@ -49,7 +55,7 @@ export const tabsSlice = createSlice({
       state.activeTabId = action.payload
     },
     setTabName: (state, action) => {
-      const {tabId, name} = action.payload
+      const { tabId, name } = action.payload
       state.tabs[tabId].name = name
     },
   },

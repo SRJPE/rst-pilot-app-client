@@ -119,6 +119,7 @@ const VisitSetup = ({
             createTab({
               tabId,
               tabName: trapName ?? values.trapSite,
+              trapSite: values.trapSite
             })
           )
           dispatch(markVisitSetupCompleted({ tabId, completed: true }))
@@ -133,6 +134,7 @@ const VisitSetup = ({
           createTab({
             tabId,
             tabName: values.trapName[0] ?? values.trapSite,
+            trapSite: values.trapSite,
           })
         )
         dispatch(markVisitSetupCompleted({ tabId, completed: true }))
@@ -180,9 +182,10 @@ const VisitSetup = ({
               })
             )
             dispatch(
-              setTabName({
+              createTab({
                 tabId: tabIdToUpdate,
-                name: trapName ?? values.trapSite,
+                tabName: trapName ?? values.trapSite,
+                trapSite: values.trapSite,
               })
             )
             delete currentTabsTrapNames[currentTabsTrapNames.indexOf('New Tab')]
