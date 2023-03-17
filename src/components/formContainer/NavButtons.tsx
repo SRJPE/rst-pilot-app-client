@@ -46,9 +46,13 @@ const NavButtons = ({
       : false
 
   const willBeHoldingFishForMarkRecapture =
-    // fishProcessingSlice[tabSlice.activeTabId ?? 'placeholderId'].values
-    //   .willBeHoldingFishForMarkRecapture
-    false
+    tabSlice.activeTabId
+      ? fishProcessingSlice[tabSlice.activeTabId]
+        ? fishProcessingSlice[tabSlice.activeTabId].values
+            .willBeHoldingFishForMarkRecapture
+        : fishProcessingSlice['placeholderId'].values
+            .willBeHoldingFishForMarkRecapture
+      : false
 
   const navigateHelper = (destination: string) => {
     const formSteps = Object.values(navigationState?.steps) as any
