@@ -16,15 +16,16 @@ import {
 import { useState } from 'react'
 import CustomModal from '../../components/Shared/CustomModal'
 import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
+import { AppDispatch } from '../../redux/store'
+import { useDispatch } from 'react-redux'
+import { clearUserCredentials } from '../../redux/reducers/userCredentialsSlice'
 
 const Profile = ({ navigation }: { navigation: any }) => {
+  const dispatch = useDispatch<AppDispatch>()
   const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] = useState(
     false as boolean
   )
   return (
-    // <View flex={1} justifyContent='center' alignItems='center'>
-    //   <Text fontSize='xl'>Profile Placeholder</Text>
-    // </View>
     <>
       <Box overflow='hidden'>
         <Center
@@ -84,7 +85,6 @@ const Profile = ({ navigation }: { navigation: any }) => {
             <HStack justifyContent='space-between' alignItems='center'>
               <VStack space={4}>
                 <Heading>View Permit</Heading>
-                {/* <Text fontSize='2xl'>Monitoring Program Team Name</Text> */}
               </VStack>
               <IconButton
                 icon={<Icon as={Entypo} name='chevron-right' />}
@@ -115,7 +115,7 @@ const Profile = ({ navigation }: { navigation: any }) => {
           <Pressable
             mt='20'
             alignSelf='center'
-            onPress={() => navigation.navigate('Home')}
+            onPress={() => dispatch(clearUserCredentials())}
           >
             <Text fontSize='2xl' fontWeight='bold' color='#FF0000'>
               Sign out
