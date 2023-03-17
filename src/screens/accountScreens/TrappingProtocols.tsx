@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Center,
@@ -11,7 +11,13 @@ import {
 import { AppLogo } from '../SignIn'
 import { Feather } from '@expo/vector-icons'
 import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
+import CustomModal from '../../components/Shared/CustomModal'
+import ChooseFileModalContent from '../../components/createNewProgram/ChooseFileModalContent'
 const TrappingProtocols = ({ navigation }: { navigation: any }) => {
+  const [chooseFileModalOpen, setChooseFileModalOpen] = useState(
+    false as boolean
+  )
+
   return (
     <>
       <Box overflow='hidden' flex={1} bg='#fff'>
@@ -23,7 +29,10 @@ const TrappingProtocols = ({ navigation }: { navigation: any }) => {
           <Text fontSize='lg' color='grey'>
             Upload PDF of Rotary Screw Trap Monitoring Protocols
           </Text>
-          <Pressable alignSelf='center'>
+          <Pressable
+            alignSelf='center'
+            onPress={() => setChooseFileModalOpen(true)}
+          >
             <Center
               h='150'
               w='650'
@@ -37,6 +46,16 @@ const TrappingProtocols = ({ navigation }: { navigation: any }) => {
         </VStack>
       </Box>
       <CreateNewProgramNavButtons navigation={navigation} />
+      {/* --------- Modals --------- */}
+      <CustomModal
+        isOpen={chooseFileModalOpen}
+        closeModal={() => setChooseFileModalOpen(false)}
+        height='1/3'
+      >
+        <ChooseFileModalContent
+          closeModal={() => setChooseFileModalOpen(false)}
+        />
+      </CustomModal>
     </>
   )
 }

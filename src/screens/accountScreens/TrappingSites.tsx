@@ -17,7 +17,7 @@ import { Ionicons } from '@expo/vector-icons'
 import CustomModal from '../../components/Shared/CustomModal'
 import AddTrapModalContent from '../../components/createNewProgram/AddTrapModalContent'
 const TrappingSites = ({ navigation }: { navigation: any }) => {
-  const [AddTrapModalOpen, setAddTrapModalOpen] = useState(false as boolean)
+  const [addTrapModalOpen, setAddTrapModalOpen] = useState(false as boolean)
   return (
     <>
       <View bg='#fff' flex={1}>
@@ -72,8 +72,9 @@ const TrappingSites = ({ navigation }: { navigation: any }) => {
         </Box>
         <CreateNewProgramNavButtons navigation={navigation} />
       </View>
+      {/* --------- Modals --------- */}
       <CustomModal
-        isOpen={AddTrapModalOpen}
+        isOpen={addTrapModalOpen}
         closeModal={() => setAddTrapModalOpen(false)}
         height='1/2'
       >
