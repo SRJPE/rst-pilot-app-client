@@ -59,10 +59,6 @@ const FishInputDataTable = ({
   const [pageRows, setPageRows] = React.useState({})
 
   React.useEffect(() => {
-    console.log('this...', fishStore)
-  }, [])
-
-  React.useEffect(() => {
     const pageRows = generateRowsForPage()
     setPageRows(pageRows)
   }, [fishStore])
