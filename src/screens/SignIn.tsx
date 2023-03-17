@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Heading,
   Icon,
@@ -11,8 +11,28 @@ import {
   Button,
   HStack,
 } from 'native-base'
-import { StyleSheet, ImageBackground } from 'react-native'
+import { ImageBackground } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
+import * as WebBrowser from 'expo-web-browser'
+import {
+  AuthRequest,
+  AuthRequestConfig,
+  exchangeCodeAsync,
+  fetchDiscoveryAsync,
+  Prompt,
+  ResponseType,
+} from 'expo-auth-session'
+import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '../redux/store'
+import {
+  // @ts-ignore
+  REACT_APP_REDIRECT_URI,
+  // @ts-ignore
+  REACT_APP_CLIENT_ID,
+  // @ts-ignore
+  REACT_APP_TENANT_ID,
+} from '@env'
 
 export const AppLogo = ({
   addBorder,
@@ -34,10 +54,16 @@ export const AppLogo = ({
   )
 }
 
+WebBrowser.maybeCompleteAuthSession()
+
 const SignIn = ({ navigation }: { navigation: any }) => {
+  const dispatch = useDispatch<AppDispatch>()
   const [email, setEmail] = useState('' as string)
   const [password, setPassword] = useState('' as string)
   const [show, setShow] = React.useState(false as boolean)
+  const [discovery, setDiscovery]: any = useState({} as any)
+  const [authRequest, setAuthRequest]: any = useState({} as any)
+  const [authorizeResult, setAuthorizeResult]: any = useState({} as any)
 
   const handleChangeEmail = (text: string) => {
     setEmail(text)
@@ -45,6 +71,58 @@ const SignIn = ({ navigation }: { navigation: any }) => {
   const handleChangePassword = (text: string) => {
     setPassword(text)
   }
+
+  useEffect(() => {
+    const getSession = async () => {
+      const d = await fetchDiscoveryAsync(
+        `https://login.microsoftonline.com/${REACT_APP_TENANT_ID}/v2.0`
+      )
+
+      const authRequestOptions: AuthRequestConfig = {
+        prompt: Prompt.Login,
+        responseType: ResponseType.Code,
+        scopes: ['openid', 'profile', 'email', 'offline_access'],
+        usePKCE: true,
+        clientId: REACT_APP_CLIENT_ID,
+        redirectUri: REACT_APP_REDIRECT_URI,
+      }
+      const authRequest = new AuthRequest(authRequestOptions)
+      setAuthRequest(authRequest)
+      setDiscovery(d)
+    }
+    getSession()
+  }, [])
+
+  useEffect(() => {
+    const getCodeExchange = async () => {
+      const tokenResult = await exchangeCodeAsync(
+        {
+          code: authorizeResult.params.code,
+          clientId: REACT_APP_CLIENT_ID,
+          redirectUri: REACT_APP_REDIRECT_URI,
+          extraParams: {
+            code_verifier: authRequest.codeVerifier || '',
+          },
+        },
+        discovery
+      )
+      console.log('🚀 ~ getCodeExchange ~ tokenResult:', tokenResult)
+      dispatch(saveUserCredentials(tokenResult))
+    }
+
+    if (authorizeResult && authorizeResult.type == 'error') {
+      //Handle error
+    }
+
+    if (
+      authorizeResult &&
+      authorizeResult.type == 'success' &&
+      authRequest &&
+      authRequest.codeVerifier
+    ) {
+      getCodeExchange()
+    }
+  }, [authorizeResult, authRequest])
 
   return (
     <KeyboardAvoidingView flex='1' behavior='padding'>
@@ -115,22 +193,30 @@ const SignIn = ({ navigation }: { navigation: any }) => {
               </Pressable>
             }
           />
-          <Button
-            borderRadius={10}
-            bg='primary'
-            h='60px'
-            w='450px'
-            shadow='5'
-            _disabled={{
-              opacity: '75',
-            }}
-            // isDisabled={email === '' || password === ''}
-            onPress={() => navigation.navigate('Home')}
-          >
-            <Text fontSize='xl' fontWeight='bold' color='white'>
-              Sign In
-            </Text>
-          </Button>
+          {authRequest && discovery ? (
+            <Button
+              borderRadius={10}
+              bg='primary'
+              h='60px'
+              w='450px'
+              shadow='5'
+              _disabled={{
+                opacity: '75',
+              }}
+              // isDisabled={email === '' || password === ''}
+              // isDisabled={!authRequest.request}
+              onPress={async () => {
+                const authorizeResult = await authRequest.promptAsync(discovery)
+                setAuthorizeResult(authorizeResult)
+              }}
+            >
+              <Text fontSize='xl' fontWeight='bold' color='white'>
+                Sign In
+              </Text>
+            </Button>
+          ) : (
+            <></>
+          )}
           <HStack justifyContent='space-between' w='400px'>
             <Pressable>
               <Text color='#fff' fontSize='lg'>
