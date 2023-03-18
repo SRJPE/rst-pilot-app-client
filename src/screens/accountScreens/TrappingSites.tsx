@@ -76,7 +76,7 @@ const TrappingSites = ({ navigation }: { navigation: any }) => {
       <CustomModal
         isOpen={addTrapModalOpen}
         closeModal={() => setAddTrapModalOpen(false)}
-        height='1/2'
+        height='70%'
       >
         <AddTrapModalContent closeModal={() => setAddTrapModalOpen(false)} />
       </CustomModal>
