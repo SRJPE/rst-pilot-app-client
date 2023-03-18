@@ -99,7 +99,7 @@ const AddTrapModalContent = ({ closeModal }: { closeModal: any }) => {
               value={initialState.trapLongitude}
             />
           </FormControl>
-          <Pressable onPress={closeModal} alignSelf='flex-end'>
+          <Pressable alignSelf='flex-end'>
             <Icon
               as={MaterialIcons}
               name={'add-location-alt'}
@@ -191,7 +191,7 @@ const AddTrapModalContent = ({ closeModal }: { closeModal: any }) => {
               value={initialState.releaseSiteLongitude}
             />
           </FormControl>
-          <Pressable onPress={closeModal} alignSelf='flex-end'>
+          <Pressable alignSelf='flex-end'>
             <Icon
               as={MaterialIcons}
               name={'add-location-alt'}
