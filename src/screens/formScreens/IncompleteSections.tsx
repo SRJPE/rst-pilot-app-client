@@ -285,7 +285,6 @@ const IncompleteSections = ({
             return tabState.tabs[id].groupId === tabGroupId
           })[0]
         const programId = visitSetupState[activeTabId] ? visitSetupState[activeTabId].values.programId : 1
-        console.log('programId: ', programId)
         fishStoreKeys.forEach((key) => {
           const fishValue = fishInputState[tabGroupId].fishStore[key]
           catchRawSubmissions.push({
