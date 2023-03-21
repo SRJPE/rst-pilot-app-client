@@ -1,3 +1,4 @@
+import { Formik } from 'formik'
 import {
   Button,
   Divider,
@@ -9,219 +10,201 @@ import {
   VStack,
 } from 'native-base'
 import { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import {
+  IndividualCrewMemberValuesI,
+  IndividualCrewMemberState,
+  saveIndividualCrewMember,
+} from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
+import { AppDispatch } from '../../redux/store'
+import FormInputComponent from '../../components/Shared/FormInputComponent'
 
 import CustomModalHeader from '../Shared/CustomModalHeader'
+import RenderErrorMessage from '../Shared/RenderErrorMessage'
 
 const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
-  const [isLeadRadioValue, setIsLeadRadioValue] = useState(false)
-  const initialState = {
-    search: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    agency: '',
-    orchidID: '',
-    isLead: '',
+  const dispatch = useDispatch<AppDispatch>()
+
+  const handleAddCrewMemberSubmission = (
+    values: IndividualCrewMemberValuesI
+  ) => {
+    console.log('🚀 ~ handleAddTrapSubmission ~ values:', values)
+    dispatch(saveIndividualCrewMember(values))
   }
 
   return (
-    <>
-      <CustomModalHeader
-        headerText={'Add Crew Member'}
-        showHeaderButton={true}
-        closeModal={closeModal}
-        headerButton={
-          <Button
-            bg='primary'
-            mx='2'
-            px='10'
-            shadow='3'
-            // isDisabled={}
-            onPress={() => {
-              // handleSubmit()
-              closeModal()
-            }}
-          >
-            <Text fontSize='xl' color='white'>
-              Save
-            </Text>
-          </Button>
-        }
-      />
-      <Divider my='1%' thickness='3' />
-      <VStack mx='5%' my='2%' space={4}>
-        <FormControl>
-          <FormControl.Label>
-            <Text color='black' fontSize='xl'>
-              Search for existing User
-            </Text>
-          </FormControl.Label>
-          <Input
-            height='50px'
-            fontSize='16'
-            placeholder='Search for existing User'
-            // keyboardType='numeric'
-            // onChange={debouncedOnChange}
-            // onBlur={props.onBlur}
-            value={initialState.search}
+    <Formik
+      // validationSchema={trappingSitesSchema}
+      initialValues={IndividualCrewMemberState}
+      onSubmit={(values, { resetForm }) => {
+        handleAddCrewMemberSubmission(values)
+        resetForm()
+      }}
+    >
+      {({
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        setFieldValue,
+        setFieldTouched,
+        touched,
+        errors,
+        values,
+      }) => (
+        <>
+          <CustomModalHeader
+            headerText={'Add Crew Member'}
+            showHeaderButton={true}
+            closeModal={closeModal}
+            headerButton={
+              <Button
+                bg='primary'
+                mx='2'
+                px='10'
+                shadow='3'
+                // isDisabled={}
+                onPress={() => {
+                  handleSubmit()
+                  closeModal()
+                }}
+              >
+                <Text fontSize='xl' color='white'>
+                  Save
+                </Text>
+              </Button>
+            }
           />
-        </FormControl>
-        <Divider thickness='3' my='2%' />
-        <HStack space={10} justifyContent='space-between'>
-          <FormControl w='45%'>
-            <FormControl.Label>
-              <Text color='black' fontSize='xl'>
-                First Name
-              </Text>
-            </FormControl.Label>
-            <Input
-              height='50px'
-              fontSize='16'
-              placeholder='First Name'
-              // keyboardType='numeric'
-              // onChange={debouncedOnChange}
-              // onBlur={props.onBlur}
-              value={initialState.firstName}
-            />
-          </FormControl>
-          <FormControl w='45%'>
-            <FormControl.Label>
-              <Text color='black' fontSize='xl'>
-                Last Name
-              </Text>
-            </FormControl.Label>
-            <Input
-              height='50px'
-              fontSize='16'
-              placeholder='Last Name'
-              // keyboardType='numeric'
-              // onChange={debouncedOnChange}
-              // onBlur={props.onBlur}
-              value={initialState.lastName}
-            />
-          </FormControl>
-        </HStack>
-        {/* <FormControl>
-          <FormControl.Label>
-            <Text color='black' fontSize='xl'>
-              First Name
-            </Text>
-          </FormControl.Label>
-          <Input
-            height='50px'
-            fontSize='16'
-            placeholder='First Name'
-            // keyboardType='numeric'
-            // onChange={debouncedOnChange}
-            // onBlur={props.onBlur}
-            value={initialState.firstName}
-          />
-        </FormControl>
-        <FormControl>
-          <FormControl.Label>
-            <Text color='black' fontSize='xl'>
-              Last Name
-            </Text>
-          </FormControl.Label>
-          <Input
-            height='50px'
-            fontSize='16'
-            placeholder='Last Name'
-            // keyboardType='numeric'
-            // onChange={debouncedOnChange}
-            // onBlur={props.onBlur}
-            value={initialState.lastName}
-          />
-        </FormControl> */}
+          <Divider my='1%' thickness='3' />
+          <VStack mx='5%' my='2%' space={4}>
+            <FormControl>
+              <FormControl.Label>
+                <Text color='black' fontSize='xl'>
+                  Search for existing User
+                </Text>
+              </FormControl.Label>
+              <Input
+                height='50px'
+                fontSize='16'
+                placeholder='Search for existing User'
+                // keyboardType='numeric'
+                // onChange={debouncedOnChange}
+                // onBlur={props.onBlur}
+                value={''}
+              />
+            </FormControl>
+            <Divider thickness='3' my='2%' />
 
-        <HStack space={10} justifyContent='space-between'>
-          <FormControl w='45%'>
-            <FormControl.Label>
-              <Text color='black' fontSize='xl'>
-                Email
-              </Text>
-            </FormControl.Label>
-            <Input
-              height='50px'
-              fontSize='16'
-              placeholder='Email'
-              // keyboardType='numeric'
-              // onChange={debouncedOnChange}
-              // onBlur={props.onBlur}
-              value={initialState.email}
-            />
-          </FormControl>
-          <FormControl w='45%'>
-            <FormControl.Label>
-              <Text color='black' fontSize='xl'>
-                Agency
-              </Text>
-            </FormControl.Label>
-            <Input
-              height='50px'
-              fontSize='16'
-              placeholder='Agency'
-              // keyboardType='numeric'
-              // onChange={debouncedOnChange}
-              // onBlur={props.onBlur}
-              value={initialState.agency}
-            />
-          </FormControl>
-        </HStack>
-        <FormControl>
-          <FormControl.Label>
-            <Text color='black' fontSize='xl'>
-              Orchid ID (optional)
-            </Text>
-          </FormControl.Label>
-          <Input
-            height='50px'
-            fontSize='16'
-            placeholder='Orchid ID '
-            // keyboardType='numeric'
-            // onChange={debouncedOnChange}
-            // onBlur={props.onBlur}
-            value={initialState.orchidID}
-          />
-        </FormControl>
-        <FormControl w='30%'>
-          <FormControl.Label>
-            <Text color='black' fontSize='xl'>
-              Is Lead
-            </Text>
-          </FormControl.Label>
-          <Radio.Group
-            name='coneSetting'
-            accessibilityLabel='cone setting'
-            value={`${isLeadRadioValue}`}
-            onChange={(value: any) => {
-              if (value === 'true') {
-                setIsLeadRadioValue(true)
-              } else {
-                setIsLeadRadioValue(false)
-              }
-            }}
-          >
-            <Radio
-              colorScheme='primary'
-              value='false'
-              my={1}
-              _icon={{ color: 'primary' }}
-            >
-              No
-            </Radio>
-            <Radio
-              colorScheme='primary'
-              value='true'
-              my={1}
-              _icon={{ color: 'primary' }}
-            >
-              Yes
-            </Radio>
-          </Radio.Group>
-        </FormControl>
-      </VStack>
-    </>
+            <HStack justifyContent='space-between'>
+              <FormInputComponent
+                label={'First Name'}
+                touched={touched}
+                errors={errors}
+                value={values.firstName ? `${values.firstName}` : ''}
+                camelName={'firstName'}
+                width={'45%'}
+                onChangeText={handleChange('firstName')}
+                onBlur={handleBlur('firstName')}
+              />
+              <FormInputComponent
+                label={'Last Name'}
+                touched={touched}
+                errors={errors}
+                value={values.lastName ? `${values.lastName}` : ''}
+                camelName={'lastName'}
+                width={'45%'}
+                onChangeText={handleChange('lastName')}
+                onBlur={handleBlur('lastName')}
+              />
+            </HStack>
+
+            <HStack justifyContent='space-between'>
+              <FormInputComponent
+                label={'Phone Number'}
+                touched={touched}
+                errors={errors}
+                value={values.phoneNumber ? `${values.phoneNumber}` : ''}
+                camelName={'phoneNumber'}
+                // keyboardType={'phone'}
+                width={'45%'}
+                onChangeText={handleChange('phoneNumber')}
+                onBlur={handleBlur('phoneNumber')}
+              />
+              <FormInputComponent
+                label={'Email'}
+                touched={touched}
+                errors={errors}
+                value={values.email ? `${values.email}` : ''}
+                camelName={'email'}
+                width={'45%'}
+                onChangeText={handleChange('email')}
+                onBlur={handleBlur('email')}
+              />
+            </HStack>
+
+            <HStack justifyContent='space-between'>
+              <FormInputComponent
+                label={'Agency'}
+                touched={touched}
+                errors={errors}
+                value={values.agency ? `${values.agency}` : ''}
+                camelName={'agency'}
+                width={'45%'}
+                onChangeText={handleChange('agency')}
+                onBlur={handleBlur('agency')}
+              />
+              <FormInputComponent
+                label={'Orchid ID (optional)'}
+                touched={touched}
+                errors={errors}
+                value={values.orchidID ? `${values.orchidID}` : ''}
+                camelName={'orchidID'}
+                width={'45%'}
+                onChangeText={handleChange('orchidID')}
+                onBlur={handleBlur('orchidID')}
+              />
+            </HStack>
+
+            <FormControl w='30%'>
+              <FormControl.Label>
+                <Text color='black' fontSize='xl'>
+                  Is Lead
+                </Text>
+              </FormControl.Label>
+              <Radio.Group
+                name='coneSetting'
+                accessibilityLabel='cone setting'
+                value={`${values.isLead}`}
+                onChange={(value: any) => {
+                  setFieldTouched('coneSetting', true)
+                  if (value === 'true') {
+                    setFieldValue('isLead', true)
+                  } else {
+                    setFieldValue('isLead', false)
+                  }
+                }}
+              >
+                <Radio
+                  colorScheme='primary'
+                  value='false'
+                  my={1}
+                  _icon={{ color: 'primary' }}
+                >
+                  No
+                </Radio>
+                <Radio
+                  colorScheme='primary'
+                  value='true'
+                  my={1}
+                  _icon={{ color: 'primary' }}
+                >
+                  Yes
+                </Radio>
+              </Radio.Group>
+            </FormControl>
+          </VStack>
+        </>
+      )}
+    </Formik>
   )
 }
 
