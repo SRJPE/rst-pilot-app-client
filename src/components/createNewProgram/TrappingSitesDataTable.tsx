@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { DataTable } from 'react-native-paper'
-import { StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
-import { Icon, IconButton, Row, View } from 'native-base'
+import { Icon, IconButton } from 'native-base'
 import { Entypo } from '@expo/vector-icons'
 import { RootState } from '../../redux/store'
 import {
@@ -32,7 +31,6 @@ const TrappingSitesDataTable = ({
   )
 
   useEffect(() => {
-    // calculateXAxisTickValues()
     setProcessedData(Object.values(trappingSitesStore))
   }, [trappingSitesStore])
   return (
@@ -50,7 +48,6 @@ const TrappingSitesDataTable = ({
       </DataTable.Header>
       {processedData.map((trapObject: any, idx: number) => {
         return (
-          // <Row key={idx}>
           <DataTable.Row
             style={[{ height: 55 }]}
             key={idx}
@@ -73,7 +70,6 @@ const TrappingSitesDataTable = ({
               <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
             </IconButton>
           </DataTable.Row>
-          // </Row>
         )
       })}
     </DataTable>
