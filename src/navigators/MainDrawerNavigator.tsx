@@ -25,34 +25,34 @@ const DrawerNavigator = ({
       screenOptions={{ drawerType: 'front' }}
       drawerContent={(props) => <DrawerMenu {...props} />}
     >
-      {storedCredentialsStore === null ? (
+      {/* {storedCredentialsStore === null ? ( */}
+      <Drawer.Screen
+        name='Sign In'
+        component={SignIn}
+        options={{
+          headerShown: false,
+          // swipeEnabled: false,
+        }}
+      />
+      {/* ) : ( */}
+      <>
         <Drawer.Screen
-          name='Sign In'
-          component={SignIn}
-          options={{ headerShown: false }}
+          name='Home'
+          component={Home}
+          // options={{ headerShown: false }}
         />
-      ) : (
-        <>
-          <Drawer.Screen
-            name='Home'
-            component={Home}
-            // options={{ headerShown: false }}
-          />
-          <Drawer.Screen name='Profile' component={Profile} />
-          <Drawer.Screen name='Permit Info' component={PermitInfo} />
-          <Drawer.Screen name='Generate Report' component={GenerateReport} />
-          <Drawer.Screen
-            name='Data Quality Control'
-            component={DataQualityControl}
-          />
-          <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
-          <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
-          <Drawer.Screen
-            name='Create New Program'
-            component={CreateNewProgram}
-          />
-        </>
-      )}
+        <Drawer.Screen name='Profile' component={Profile} />
+        <Drawer.Screen name='Permit Info' component={PermitInfo} />
+        <Drawer.Screen name='Generate Report' component={GenerateReport} />
+        <Drawer.Screen
+          name='Data Quality Control'
+          component={DataQualityControl}
+        />
+        <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
+        <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
+        <Drawer.Screen name='Create New Program' component={CreateNewProgram} />
+      </>
+      {/* )} */}
     </Drawer.Navigator>
   )
 }
