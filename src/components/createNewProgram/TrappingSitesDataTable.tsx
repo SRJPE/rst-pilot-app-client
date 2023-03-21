@@ -4,6 +4,11 @@ import { StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
 import { Icon, IconButton, Row, View } from 'native-base'
 import { Entypo } from '@expo/vector-icons'
+import { RootState } from '../../redux/store'
+import {
+  IndividualTrappingSiteValuesI,
+  TrappingSitesStoreI,
+} from '../../redux/reducers/createNewProgramSlices/trappingSites'
 
 const headers = [
   'Name',
@@ -14,43 +19,31 @@ const headers = [
   'RS Name',
   'RS Latitude',
   'RS Longitude',
-]
-const testData = [
-  {
-    Name: 'Name 1',
-    Latitude: 0,
-    Longitude: 0,
-    'Cone Size': 0,
-    'Flow Gauge': 0,
-    'RS Name': 'RS Name',
-    'RS Latitude': 'RS Latitude',
-    'RS Longitude': 'RS Longitude',
-  },
-  {
-    Name: 'Name 2',
-    Latitude: 1,
-    Longitude: 1,
-    'Cone Size': 1,
-    'Flow Gauge': 1,
-    'RS Name': 'RS Name',
-    'RS Latitude': 'RS Latitude',
-    'RS Longitude': 'RS Longitude',
-  },
+  '',
 ]
 
-const TrappingSitesDataTable = ({}: // forkLengthsStore,
-// handleShowTableModal,
-{
-  // forkLengthsStore?: any
-  // handleShowTableModal?: any
+const TrappingSitesDataTable = ({
+  trappingSitesStore,
+}: {
+  trappingSitesStore: TrappingSitesStoreI
 }) => {
-  const [processedData, setProcessedData] = useState(testData as Array<any>)
+  const [processedData, setProcessedData] = useState(
+    [] as Array<IndividualTrappingSiteValuesI>
+  )
 
+  useEffect(() => {
+    // calculateXAxisTickValues()
+    setProcessedData(Object.values(trappingSitesStore))
+  }, [trappingSitesStore])
   return (
     <DataTable>
-      <DataTable.Header style={[{ paddingLeft: 0 }]}>
+      <DataTable.Header style={[{}]}>
         {headers.map((header: string, idx: number) => (
-          <DataTable.Title key={idx} numeric>
+          <DataTable.Title
+            key={idx}
+            numeric
+            style={[{ justifyContent: 'center', flexWrap: 'wrap' }]}
+          >
             {header}
           </DataTable.Title>
         ))}
@@ -88,4 +81,10 @@ const TrappingSitesDataTable = ({}: // forkLengthsStore,
   )
 }
 
-export default TrappingSitesDataTable
+const mapStateToProps = (state: RootState) => {
+  return {
+    trappingSitesStore: state.trappingSites.trappingSitesStore,
+  }
+}
+
+export default connect(mapStateToProps)(TrappingSitesDataTable)
