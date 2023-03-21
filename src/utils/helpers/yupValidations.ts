@@ -268,3 +268,42 @@ export const addAnotherMarkSchema = yup.object().shape({
   markPosition: yup.string().required('Mark position required'),
   // markNumber: yup.number().nullable().typeError('Input must be a number'),
 })
+
+/*----------------------------------------------------------------
+  CREATE NEW PROGRAM SCHEMAS
+----------------------------------------------------------------*/
+export const trappingSitesSchema = yup.object().shape({
+  trapName: yup.string().required('Trap name required'),
+
+  trapLatitude: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+  trapLongitude: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+  coneSize: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+  USGSStationNumber: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+  releaseSiteName: yup.string().required('Release site name required'),
+  releaseSiteLatitude: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+  releaseSiteLongitude: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+})
