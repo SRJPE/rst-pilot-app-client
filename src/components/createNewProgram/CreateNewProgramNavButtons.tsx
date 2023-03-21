@@ -7,7 +7,7 @@ import { useRoute } from '@react-navigation/native'
 const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
   const dispatch = useDispatch<AppDispatch>()
   const activePage = useRoute().name
-  console.log('🚀 ~ activePage:', activePage)
+  const reduxState = useSelector((state: any) => state)
 
   const handleRightButton = () => {
     switch (activePage) {
@@ -53,7 +53,7 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
             Back
           </Text>
         </Button>
-        {/* <Button
+        <Button
           height='20'
           rounded='xs'
           bg='primary'
@@ -66,7 +66,7 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
           <Text fontWeight='bold' color='white'>
             redux state
           </Text>
-        </Button> */}
+        </Button>
         <Button
           alignSelf='flex-start'
           bg='primary'
