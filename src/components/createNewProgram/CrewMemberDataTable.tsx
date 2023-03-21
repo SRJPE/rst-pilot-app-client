@@ -23,9 +23,7 @@ const CrewMemberDataTable = ({
 }: {
   crewMembersStore: CrewMembersStoreI
 }) => {
-  console.log('🚀 ~ crewMembersStore:', crewMembersStore)
   const [processedData, setProcessedData] = useState([] as Array<any>)
-  console.log('🚀 ~ processedData:', processedData)
 
   useEffect(() => {
     // calculateXAxisTickValues()

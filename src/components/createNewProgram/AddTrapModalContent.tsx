@@ -33,8 +33,6 @@ const AddTrapModalContent = ({ closeModal }: { closeModal: any }) => {
       validationSchema={trappingSitesSchema}
       initialValues={individualTrappingSiteState}
       onSubmit={(values, { resetForm }) => {
-        console.log('🚀 ~ AddTrapModalContent ~ values:', values)
-
         handleAddTrapSubmission(values)
         resetForm()
       }}
