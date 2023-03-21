@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ChangeEvent } from 'react'
 import { FormControl, HStack, Input, Text } from 'native-base'
 
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
@@ -7,7 +7,6 @@ import {
   NativeSyntheticEvent,
   TextInputFocusEventData,
 } from 'react-native'
-import { ChangeEvent } from 'react'
 
 interface FormInputComponentI {
   label: string
@@ -41,9 +40,10 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
           </Text>
         </FormControl.Label>
 
-        {touched.camelName &&
-          errors.camelName &&
+        {touched[camelName] &&
+          errors[camelName] &&
           RenderErrorMessage(errors, camelName)}
+        {/* <RenderErrorMessage errors={errors} inputName={camelName} /> */}
       </HStack>
       <Input
         height='50px'
