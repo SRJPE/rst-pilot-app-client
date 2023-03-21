@@ -3,6 +3,7 @@ import { uid } from 'uid'
 
 export interface TabStateI {
   activeTabId: string | null
+  previouslyActiveTabId: string | null
   tabs: TabsI
 }
 
@@ -20,6 +21,7 @@ interface TabInfoI {
 
 const initialState: TabStateI = {
   activeTabId: null,
+  previouslyActiveTabId: null,
   tabs: {},
 }
 
@@ -52,6 +54,7 @@ export const tabsSlice = createSlice({
       }
     },
     setActiveTab: (state, action) => {
+      state.previouslyActiveTabId = state.activeTabId
       state.activeTabId = action.payload
     },
     setTabName: (state, action) => {

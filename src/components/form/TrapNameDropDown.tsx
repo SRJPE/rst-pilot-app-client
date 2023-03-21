@@ -28,11 +28,10 @@ export default function TrapNameDropDown({
     ) {
       const trapNameOrNames =
         visitSetupState[tabSlice.activeTabId]?.values?.trapName
-      const associatedActiveTrapNames = activeTrapNamesAssociatedToTab()
       if (Array.isArray(trapNameOrNames)) {
-        setValue([...trapNameOrNames, ...associatedActiveTrapNames])
+        setValue([...trapNameOrNames])
       } else {
-        setValue([trapNameOrNames, ...associatedActiveTrapNames])
+        setValue([trapNameOrNames])
       }
     }
   }, [tabSlice.activeTabId])
@@ -41,27 +40,6 @@ export default function TrapNameDropDown({
     setFieldValue('trapName', [...value])
     setFieldTouched('trapName', true)
   }, [value])
-
-  const activeTrapNamesAssociatedToTab = () => {
-    const associatedActiveTrapNames: string[] = []
-    const tabId = tabSlice.activeTabId
-    if (tabId) {
-      const tabs = tabSlice.tabs
-      const activeTrapSite = tabs[tabId].trapSite
-      const activeTrapName = tabs[tabId].name
-      Object.keys(tabs).forEach((id) => {
-        if (
-          activeTrapSite == tabs[id].trapSite &&
-          activeTrapName !== tabs[id].name
-        ) {
-          associatedActiveTrapNames.push(tabs[id].name)
-        }
-      })
-      return associatedActiveTrapNames
-    } else {
-      return []
-    }
-  }
 
   const generateMarginBottom = () => {
     if (list.length === 2) {
