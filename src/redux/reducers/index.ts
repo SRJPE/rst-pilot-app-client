@@ -23,6 +23,7 @@ import releaseTrialDataEntrySlice from './markRecaptureSlices/releaseTrialDataEn
 import addAnotherMarkSlice from './addAnotherMarkSlice'
 import fishHoldingSlice from './markRecaptureSlices/fishHoldingSlice'
 import userCredentialsSlice from './userCredentialsSlice'
+import trappingSitesSlice from './createNewProgramSlices/trappingSites'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
@@ -74,4 +75,5 @@ export default combineReducers({
   releaseTrialDataEntry: releaseTrialDataEntrySlice,
   addAnotherMark: addAnotherMarkSlice,
   userCredentials: persistReducer(dropdownsPersistConfig, userCredentialsSlice),
+  trappingSites: trappingSitesSlice,
 })
