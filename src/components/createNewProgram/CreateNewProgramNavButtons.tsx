@@ -5,7 +5,6 @@ import { AppDispatch } from '../../redux/store'
 import { useRoute } from '@react-navigation/native'
 
 const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
-  const dispatch = useDispatch<AppDispatch>()
   const activePage = useRoute().name
   const reduxState = useSelector((state: any) => state)
 
@@ -25,6 +24,10 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
   const handleLeftButton = () => {
     navigation.goBack()
   }
+
+  const disableLeftButton = () => {
+    return activePage === 'Create New Program Home'
+  }
   const disableRightButton = () => {
     return false
   }
@@ -40,14 +43,8 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
           rounded='xs'
           borderRadius='5'
           shadow='2'
-          // leftIcon={
-          //   activePage === 'Release Trial' ? (
-          //     <Icon as={Ionicons} name='home' size='lg' color='primary' />
-          //   ) : (
-          //     <></>
-          //   )
-          // }
-          onPress={() => navigation.goBack()}
+          isDisabled={disableLeftButton()}
+          onPress={() => handleLeftButton()}
         >
           <Text fontSize='xl' fontWeight='bold' color='primary'>
             Back
