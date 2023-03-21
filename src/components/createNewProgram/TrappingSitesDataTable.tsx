@@ -8,7 +8,7 @@ import { RootState } from '../../redux/store'
 import {
   IndividualTrappingSiteValuesI,
   TrappingSitesStoreI,
-} from '../../redux/reducers/createNewProgramSlices/trappingSites'
+} from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 
 const headers = [
   'Name',
@@ -49,7 +49,6 @@ const TrappingSitesDataTable = ({
         ))}
       </DataTable.Header>
       {processedData.map((trapObject: any, idx: number) => {
-        console.log('🚀 ~ {processedData.map ~ trapObject:', trapObject)
         return (
           // <Row key={idx}>
           <DataTable.Row
