@@ -4,6 +4,8 @@ import { StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
 import { Icon, IconButton, Row, View } from 'native-base'
 import { Entypo } from '@expo/vector-icons'
+import { RootState } from '../../redux/store'
+import { CrewMembersStoreI } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 
 const headers = [
   'First Name',
@@ -13,47 +15,36 @@ const headers = [
   'Lead',
   'Agency',
   'Orchid ID',
-]
-const testData = [
-  {
-    'First Name': 'Name 1',
-    'Last Name': 'Name 2',
-    Phone: 0,
-    Email: 'email',
-    Lead: 'Lead',
-    Agency: ' Agency',
-    'Orchid ID': 'Orchid ID',
-  },
-  {
-    'First Name': 'Name 3',
-    'Last Name': 'Name 4',
-    Phone: 0,
-    Email: 'email',
-    Lead: 'Lead',
-    Agency: ' Agency',
-    'Orchid ID': 'Orchid ID',
-  },
+  '',
 ]
 
-const TrappingCrewDataTable = ({}: // forkLengthsStore,
-// handleShowTableModal,
-{
-  // forkLengthsStore?: any
-  // handleShowTableModal?: any
+const CrewMemberDataTable = ({
+  crewMembersStore,
+}: {
+  crewMembersStore: CrewMembersStoreI
 }) => {
-  const [processedData, setProcessedData] = useState(testData as Array<any>)
+  console.log('🚀 ~ crewMembersStore:', crewMembersStore)
+  const [processedData, setProcessedData] = useState([] as Array<any>)
+  console.log('🚀 ~ processedData:', processedData)
 
+  useEffect(() => {
+    // calculateXAxisTickValues()
+    setProcessedData(Object.values(crewMembersStore))
+  }, [crewMembersStore])
   return (
     <DataTable>
       <DataTable.Header style={[{ paddingLeft: 0 }]}>
         {headers.map((header: string, idx: number) => (
-          <DataTable.Title key={idx} numeric>
+          <DataTable.Title
+            key={idx}
+            numeric
+            style={[{ justifyContent: 'center', flexWrap: 'wrap' }]}
+          >
             {header}
           </DataTable.Title>
         ))}
       </DataTable.Header>
       {processedData.map((trapObject: any, idx: number) => {
-        console.log('🚀 ~ {processedData.map ~ trapObject:', trapObject)
         return (
           // <Row key={idx}>
           <DataTable.Row
@@ -65,7 +56,7 @@ const TrappingCrewDataTable = ({}: // forkLengthsStore,
             }
           >
             {Object.values(trapObject).map((callValue: any, idx: number) => (
-              <DataTable.Cell key={idx}>{callValue}</DataTable.Cell>
+              <DataTable.Cell key={idx}>{callValue.toString()}</DataTable.Cell>
             ))}
             <IconButton
               marginY={3}
@@ -85,4 +76,10 @@ const TrappingCrewDataTable = ({}: // forkLengthsStore,
   )
 }
 
-export default TrappingCrewDataTable
+const mapStateToProps = (state: RootState) => {
+  return {
+    crewMembersStore: state.crewMembers.crewMembersStore,
+  }
+}
+
+export default connect(mapStateToProps)(CrewMemberDataTable)
