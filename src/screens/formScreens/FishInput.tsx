@@ -13,7 +13,6 @@ import {
   ScrollView,
 } from 'native-base'
 import CustomModal from '../../components/Shared/CustomModal'
-import { Formik } from 'formik'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { AppDispatch, RootState } from '../../redux/store'
 import { connect, useDispatch } from 'react-redux'
@@ -27,23 +26,32 @@ import FishInputDataTable from '../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../components/form/PlusCountModalContent'
 import { Ionicons } from '@expo/vector-icons'
 import { useWindowDimensions } from 'react-native'
-import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const mapStateToProps = (state: RootState) => {
+  let activeTabId = state.tabSlice.activeTabId
+  let tabGroupId = 'placeholderId'
+  if (activeTabId) {
+    tabGroupId = state.tabSlice.tabs[activeTabId].groupId
+  }
+  let speciesCaptured = state.fishInput['placeholderId'].speciesCaptured
+  if (state.fishInput[tabGroupId]) {
+    speciesCaptured = state.fishInput[tabGroupId].speciesCaptured
+  }
+
   return {
-    fishInputSliceState: state.fishInput,
-    tabSlice: state.tabSlice,
+    tabGroupId,
+    speciesCaptured,
   }
 }
 
 const FishInput = ({
   navigation,
-  fishInputSliceState,
-  tabSlice,
+  tabGroupId,
+  speciesCaptured,
 }: {
   navigation: any
-  fishInputSliceState: any
-  tabSlice: TabStateI
+  tabGroupId: string
+  speciesCaptured: string[]
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addPlusCountModalOpen, setAddPlusCountModalOpen] = useState(
@@ -54,16 +62,8 @@ const FishInput = ({
     'Individual' | 'Batch'
   >('Individual')
   const [checkboxGroupValue, setCheckboxGroupValue] = useState(
-    tabSlice.activeTabId && fishInputSliceState[tabSlice.activeTabId]
-      ? fishInputSliceState[tabSlice.activeTabId].speciesCaptured.length > 1
-        ? ([
-            ...fishInputSliceState[tabSlice.activeTabId].speciesCaptured,
-          ] as Array<string>)
-        : (['YOY Chinook'] as Array<string>)
-      : fishInputSliceState['placeholderId'].speciesCaptured.length > 1
-      ? ([
-          ...fishInputSliceState['placeholderId'].speciesCaptured,
-        ] as Array<string>)
+    speciesCaptured.length > 1
+      ? ([...speciesCaptured] as Array<string>)
       : (['YOY Chinook'] as Array<string>)
   )
   const { height: screenHeight } = useWindowDimensions()
@@ -77,9 +77,7 @@ const FishInput = ({
     //   setShowError(true)
 
     // }
-    const activeTabId = tabSlice.activeTabId
-    if (activeTabId) {
-      let tabGroupId = tabSlice.tabs[activeTabId].groupId
+    if (tabGroupId && tabGroupId != 'placeholderId') {
       dispatch(
         saveFishInput({ tabGroupId, speciesCaptured: checkboxGroupValue })
       )
@@ -217,9 +215,7 @@ const FishInput = ({
         <CustomModal
           isOpen={addPlusCountModalOpen}
           closeModal={() => {
-            const activeTabId = tabSlice.activeTabId
-            if (activeTabId) {
-              const tabGroupId = tabSlice.tabs[activeTabId].groupId
+            if (tabGroupId && tabGroupId != 'placeholderId') {
               setAddPlusCountModalOpen(false)
               dispatch(markFishInputModalOpen({ tabGroupId, bool: false }))
             }
