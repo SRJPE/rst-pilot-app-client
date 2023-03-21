@@ -18,6 +18,9 @@ const RenderErrorMessage = (errors: any, inputName: string) => {
 }
 export default RenderErrorMessage
 
+// This is the functional component version of this component.
+// refactor needed throughout the app to implement
+
 // const RenderErrorMessage = ({
 //   errors,
 //   inputName,
