@@ -21,7 +21,8 @@ const DrawerNavigator = ({
 }) => {
   return (
     <Drawer.Navigator
-      initialRouteName='Sign In'
+      // initialRouteName='Sign In'
+      initialRouteName='Home'
       screenOptions={{ drawerType: 'front' }}
       drawerContent={(props) => <DrawerMenu {...props} />}
     >
