@@ -222,8 +222,16 @@ const FishHolding = ({
 }
 
 const mapStateToProps = (state: RootState) => {
+  let tabGroupId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.fishInput[state.tabSlice.tabs[state.tabSlice.activeTabId].groupId]
+  ) {
+    tabGroupId = state.tabSlice.tabs[state.tabSlice.activeTabId].groupId
+  }
+
   return {
-    fishStore: state.fishInput.fishStore,
+    fishStore: state.fishInput[tabGroupId].fishStore,
     selectedFishStoreState: state.fishHolding.values.selectedFishStore,
   }
 }
