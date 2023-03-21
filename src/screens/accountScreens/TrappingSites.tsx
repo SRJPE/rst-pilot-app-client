@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Box,
   Center,
@@ -6,6 +6,7 @@ import {
   HStack,
   Icon,
   Pressable,
+  ScrollView,
   Text,
   View,
   VStack,
@@ -16,8 +17,23 @@ import { AppLogo } from '../SignIn'
 import { Ionicons } from '@expo/vector-icons'
 import CustomModal from '../../components/Shared/CustomModal'
 import AddTrapModalContent from '../../components/createNewProgram/AddTrapModalContent'
-const TrappingSites = ({ navigation }: { navigation: any }) => {
+import { RootState } from '../../redux/store'
+import { connect } from 'react-redux'
+import { TrappingSitesStoreI } from '../../redux/reducers/createNewProgramSlices/trappingSites'
+const TrappingSites = ({
+  navigation,
+  trappingSitesStore,
+}: {
+  navigation: any
+  trappingSitesStore: TrappingSitesStoreI
+}) => {
   const [addTrapModalOpen, setAddTrapModalOpen] = useState(false as boolean)
+
+  useEffect(() => {
+    if (Object.values(trappingSitesStore).length === 0) {
+      setAddTrapModalOpen(true)
+    }
+  }, [])
   return (
     <>
       <View bg='#fff' flex={1}>
@@ -26,7 +42,9 @@ const TrappingSites = ({ navigation }: { navigation: any }) => {
             <AppLogo imageSize={200} />
           </Center>
           <Heading alignSelf='center'>Trapping Sites</Heading>
-          <TrappingSitesDataTable />
+          <ScrollView h={300}>
+            <TrappingSitesDataTable />
+          </ScrollView>
           <VStack py='5%' px='10%' space={5}>
             <Pressable onPress={() => setAddTrapModalOpen(true)}>
               <HStack alignItems='center'>
@@ -83,4 +101,10 @@ const TrappingSites = ({ navigation }: { navigation: any }) => {
     </>
   )
 }
-export default TrappingSites
+const mapStateToProps = (state: RootState) => {
+  return {
+    trappingSitesStore: state.trappingSites.trappingSitesStore,
+  }
+}
+
+export default connect(mapStateToProps)(TrappingSites)
