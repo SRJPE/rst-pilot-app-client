@@ -4,37 +4,32 @@ import IncompleteSectionButton from '../../components/form/IncompleteSectionButt
 import CreateNewProgramButton from '../../components/createNewProgram/CreateNewProgramButton'
 import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
 
-const CreateNewProgramHome = ({ navigation }: { navigation: any }) => {
-  const stepsArray = [
-    { name: 'Trapping Sites', propName: 'trappingSites', completed: false },
-    { name: 'Crew Members', propName: 'crewMembers', completed: false },
-    {
-      name: 'Efficiency Trial Protocols',
-      propName: 'efficiencyTrialProtocols',
-      completed: true,
-    },
-    {
-      name: 'Trapping Protocols',
-      propName: 'trappingProtocols',
-      completed: false,
-    },
-    {
-      name: 'Permit Information',
-      propName: 'permitInformation',
-      completed: false,
-    },
-  ]
+//slice needs to be made for main navigation (steps array will move there)
 
+const stepsArray = [
+  { name: 'Trapping Sites', propName: 'trappingSites', completed: false },
+  { name: 'Crew Members', propName: 'crewMembers', completed: false },
+  {
+    name: 'Efficiency Trial Protocols',
+    propName: 'efficiencyTrialProtocols',
+    completed: true,
+  },
+  {
+    name: 'Trapping Protocols',
+    propName: 'trappingProtocols',
+    completed: false,
+  },
+  {
+    name: 'Permit Information',
+    propName: 'permitInformation',
+    completed: false,
+  },
+]
+
+const CreateNewProgramHome = ({ navigation }: { navigation: any }) => {
   return (
     <>
-      <View
-        flex={1}
-        bg='#fff'
-        // justifyContent='center'
-        // alignItems='center'
-        // borderColor='themeGrey'
-        // borderWidth='15'
-      >
+      <View flex={1} bg='#fff'>
         <VStack space={10} p='15%'>
           <Heading>{`Welcome  {Program Name}`}</Heading>
           <Text fontSize='lg' color='grey'>
