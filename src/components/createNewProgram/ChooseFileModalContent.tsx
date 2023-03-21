@@ -1,14 +1,6 @@
 import { Divider, HStack } from 'native-base'
 import React from 'react'
-import {
-  Box,
-  Center,
-  Heading,
-  Icon,
-  Pressable,
-  Text,
-  VStack,
-} from 'native-base'
+import { Icon, Pressable, Text } from 'native-base'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 const ChooseFileModalContent = ({ closeModal }: { closeModal: any }) => {
   return (
