@@ -15,7 +15,7 @@ import {
   individualTrappingSiteState,
   IndividualTrappingSiteValuesI,
   saveIndividualTrapSite,
-} from '../../redux/reducers/createNewProgramSlices/trappingSites'
+} from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 import { AppDispatch } from '../../redux/store'
 import { trappingSitesSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
@@ -33,6 +33,8 @@ const AddTrapModalContent = ({ closeModal }: { closeModal: any }) => {
       validationSchema={trappingSitesSchema}
       initialValues={individualTrappingSiteState}
       onSubmit={(values, { resetForm }) => {
+        console.log('🚀 ~ AddTrapModalContent ~ values:', values)
+
         handleAddTrapSubmission(values)
         resetForm()
       }}
@@ -128,6 +130,7 @@ const AddTrapModalContent = ({ closeModal }: { closeModal: any }) => {
                 onChangeText={handleChange('coneSize')}
                 onBlur={handleBlur('coneSize')}
               />
+
               <FormInputComponent
                 label={'USGS station number'}
                 touched={touched}
