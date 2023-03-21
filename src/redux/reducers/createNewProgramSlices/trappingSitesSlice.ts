@@ -18,7 +18,7 @@ export interface IndividualTrappingSiteValuesI {
   trapName: string | null
   trapLatitude: number | null
   trapLongitude: number | null
-  coneSize: number | null | null
+  coneSize: number | null
   USGSStationNumber: number | null
   releaseSiteName: string | null
   releaseSiteLatitude: number | null
@@ -41,6 +41,7 @@ export const trappingSitesSlice = createSlice({
   reducers: {
     resetTrappingSitesSlice: () => initialState,
     saveIndividualTrapSite: (state, action) => {
+      console.log('🚀 ~ action:', action.payload)
       let trappingSitesStoreCopy = cloneDeep(state.trappingSitesStore)
       let id = null
       if (Object.keys(trappingSitesStoreCopy).length) {

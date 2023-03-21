@@ -19,7 +19,7 @@ import CustomModal from '../../components/Shared/CustomModal'
 import AddTrapModalContent from '../../components/createNewProgram/AddTrapModalContent'
 import { RootState } from '../../redux/store'
 import { connect } from 'react-redux'
-import { TrappingSitesStoreI } from '../../redux/reducers/createNewProgramSlices/trappingSites'
+import { TrappingSitesStoreI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 const TrappingSites = ({
   navigation,
   trappingSitesStore,
