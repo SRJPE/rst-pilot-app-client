@@ -36,23 +36,41 @@ const NavButtons = ({
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
-  const isPaperEntryStore =
-    isPaperEntry != null
-      ? isPaperEntry
-      : tabSlice.activeTabId
-      ? visitSetupSlice[tabSlice.activeTabId]
-        ? visitSetupSlice[tabSlice.activeTabId].isPaperEntry
-        : visitSetupSlice['placeholderId'].isPaperEntry
-      : false
+  const [isPaperEntryStore, setIsPaperEntryStore] = useState(false)
+  const [
+    willBeHoldingFishForMarkRecapture,
+    setWillBeHoldingFishForMarkRecapture,
+  ] = useState(false)
 
-  const willBeHoldingFishForMarkRecapture =
-    tabSlice.activeTabId
-      ? fishProcessingSlice[tabSlice.activeTabId]
-        ? fishProcessingSlice[tabSlice.activeTabId].values
-            .willBeHoldingFishForMarkRecapture
-        : fishProcessingSlice['placeholderId'].values
-            .willBeHoldingFishForMarkRecapture
-      : false
+  useEffect(() => {
+    setIsPaperEntryStore(checkIsPaperEntryStore)
+    setWillBeHoldingFishForMarkRecapture(checkWillBeHoldingFishForMarkRecapture)
+  }, [])
+
+  const checkIsPaperEntryStore = () => {
+    if (isPaperEntry != null) return isPaperEntry
+    if (tabSlice.activeTabId) {
+      if (visitSetupSlice[tabSlice.activeTabId]) {
+        return visitSetupSlice[tabSlice.activeTabId].isPaperEntry
+      } else {
+        return visitSetupSlice['placeholderId'].isPaperEntry
+      }
+    }
+    return false
+  }
+
+  const checkWillBeHoldingFishForMarkRecapture = () => {
+    if (tabSlice.activeTabId) {
+      if (fishProcessingSlice[tabSlice.activeTabId]) {
+        return fishProcessingSlice[tabSlice.activeTabId].values
+          .willBeHoldingFishForMarkRecapture
+      } else {
+        return fishProcessingSlice['placeholderId'].values
+          .willBeHoldingFishForMarkRecapture
+      }
+    }
+    return false
+  }
 
   const navigateHelper = (destination: string) => {
     const formSteps = Object.values(navigationState?.steps) as any
