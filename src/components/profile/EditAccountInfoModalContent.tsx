@@ -14,6 +14,8 @@ import {
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import { Input } from 'native-base'
 
+//just an initial outline
+
 const EditAccountInfoModalContent = ({ closeModal }: { closeModal: any }) => {
   return (
     <>
