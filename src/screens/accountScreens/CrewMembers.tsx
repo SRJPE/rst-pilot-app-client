@@ -9,6 +9,7 @@ import {
   Icon,
   Input,
   Pressable,
+  ScrollView,
   Text,
   View,
   VStack,
@@ -18,7 +19,16 @@ import CreateNewProgramNavButtons from '../../components/createNewProgram/Create
 import CustomModal from '../../components/Shared/CustomModal'
 import AddCrewMemberModalContent from '../../components/createNewProgram/AddCrewMemberModalContent'
 import { AppLogo } from '../SignIn'
-const CrewMembers = ({ navigation }: { navigation: any }) => {
+import CrewMemberDataTable from '../../components/createNewProgram/CrewMemberDataTable'
+import { connect } from 'react-redux'
+import { RootState } from '../../redux/store'
+const CrewMembers = ({
+  navigation,
+  crewMembersStore,
+}: {
+  navigation: any
+  crewMembersStore: any
+}) => {
   const [addCrewMemberModalOpen, setAddCrewMemberModalOpen] = useState(
     false as boolean
   )
@@ -55,56 +65,64 @@ const CrewMembers = ({ navigation }: { navigation: any }) => {
               'Please add some additional information about yourself and add your crew \nmembers. Accounts will be created for all crew'
             }
           </Text>
-          <HStack space={5} alignItems='center'>
-            <Icon
-              as={Ionicons}
-              name='person-circle'
-              size='5xl'
-              color='primary'
-            />
-            <Heading alignSelf='center'>You (Team Lead)</Heading>
-            <Pressable onPress={handleAddCrewMember}>
-              <Ionicons name='md-pencil' size={30} color='grey' />
-            </Pressable>
-          </HStack>
-          <Text>First Name:</Text>
-          <Text>Last Name:</Text>
-          <Text>Email:</Text>
-          <HStack space={10} alignItems='center'>
-            <FormControl w='45%'>
-              <FormControl.Label>
-                <Text color='black' fontSize='xl'>
-                  Agency
-                </Text>
-              </FormControl.Label>
-              <Input
-                height='50px'
-                fontSize='16'
-                placeholder='Agency'
-                // keyboardType='numeric'
-                // onChange={debouncedOnChange}
-                // onBlur={props.onBlur}
-                value={initialState.agency}
-              />
-            </FormControl>
-            <FormControl w='45%'>
-              <FormControl.Label>
-                <Text color='black' fontSize='xl'>
-                  Orchid ID (optional)
-                </Text>
-              </FormControl.Label>
-              <Input
-                height='50px'
-                fontSize='16'
-                placeholder='Orchid ID (optional)'
-                // keyboardType='numeric'
-                // onChange={debouncedOnChange}
-                // onBlur={props.onBlur}
-                value={initialState.orchidID}
-              />
-            </FormControl>
-          </HStack>
         </VStack>
+        {Object.values(crewMembersStore).length === 0 ? (
+          <VStack pb='5%' px='10%' space={5}>
+            <HStack space={5} alignItems='center'>
+              <Icon
+                as={Ionicons}
+                name='person-circle'
+                size='5xl'
+                color='primary'
+              />
+              <Heading alignSelf='center'>You (Team Lead)</Heading>
+              <Pressable onPress={handleAddCrewMember}>
+                <Ionicons name='md-pencil' size={30} color='grey' />
+              </Pressable>
+            </HStack>
+            <Text>First Name:</Text>
+            <Text>Last Name:</Text>
+            <Text>Email:</Text>
+            <HStack space={10} alignItems='center'>
+              <FormControl w='45%'>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Agency
+                  </Text>
+                </FormControl.Label>
+                <Input
+                  height='50px'
+                  fontSize='16'
+                  placeholder='Agency'
+                  // keyboardType='numeric'
+                  // onChange={debouncedOnChange}
+                  // onBlur={props.onBlur}
+                  value={initialState.agency}
+                />
+              </FormControl>
+              <FormControl w='45%'>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Orchid ID (optional)
+                  </Text>
+                </FormControl.Label>
+                <Input
+                  height='50px'
+                  fontSize='16'
+                  placeholder='Orchid ID (optional)'
+                  // keyboardType='numeric'
+                  // onChange={debouncedOnChange}
+                  // onBlur={props.onBlur}
+                  value={initialState.orchidID}
+                />
+              </FormControl>
+            </HStack>
+          </VStack>
+        ) : (
+          <ScrollView h={300}>
+            <CrewMemberDataTable />
+          </ScrollView>
+        )}
         <Divider my='1%' />
         <VStack py='5%' px='10%' space={5}>
           <Pressable onPress={() => setAddCrewMemberModalOpen(true)}>
@@ -137,4 +155,11 @@ const CrewMembers = ({ navigation }: { navigation: any }) => {
     </>
   )
 }
-export default CrewMembers
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    crewMembersStore: state.crewMembers.crewMembersStore,
+  }
+}
+
+export default connect(mapStateToProps)(CrewMembers)
