@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Text, VStack, CircleIcon, Heading, View } from 'native-base'
 import BottomNavigation from '../components/home/HomeNavButtons'
-import TopIcons from '../components/home/TopIcons'
 import { StyleSheet } from 'react-native'
 import { AppLogo } from './SignIn'
 
@@ -82,10 +81,7 @@ export default function Home({ navigation }: { navigation: any }) {
       justifyContent='space-between'
       // opacity={staggerOpen ? 0.25 : 1.0}
     >
-      {/* <TopIcons /> */}
-
       <View style={styles.landingContent}>
-        {/* <CircleIcon size='300' color='primary' /> */}
         <View my='12'>
           <AppLogo addBorder imageSize={375} />
         </View>
