@@ -9,7 +9,6 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import {
   IndividualCrewMemberValuesI,
@@ -20,7 +19,7 @@ import { AppDispatch } from '../../redux/store'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
 
 import CustomModalHeader from '../Shared/CustomModalHeader'
-import RenderErrorMessage from '../Shared/RenderErrorMessage'
+import { crewMembersSchema } from '../../utils/helpers/yupValidations'
 
 const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -34,7 +33,7 @@ const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
 
   return (
     <Formik
-      // validationSchema={trappingSitesSchema}
+      validationSchema={crewMembersSchema}
       initialValues={IndividualCrewMemberState}
       onSubmit={(values, { resetForm }) => {
         handleAddCrewMemberSubmission(values)
@@ -85,7 +84,7 @@ const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
               <Input
                 height='50px'
                 fontSize='16'
-                placeholder='Search for existing User'
+                // placeholder='Search for existing User' //implement search
                 // keyboardType='numeric'
                 // onChange={debouncedOnChange}
                 // onBlur={props.onBlur}
@@ -124,7 +123,7 @@ const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
                 errors={errors}
                 value={values.phoneNumber ? `${values.phoneNumber}` : ''}
                 camelName={'phoneNumber'}
-                // keyboardType={'phone'}
+                // keyboardType={'phone'} //add phone styling
                 width={'45%'}
                 onChangeText={handleChange('phoneNumber')}
                 onBlur={handleBlur('phoneNumber')}
