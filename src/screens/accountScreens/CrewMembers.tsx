@@ -42,19 +42,6 @@ const CrewMembers = ({
   return (
     <>
       <View flex={1} bg='#fff'>
-        {/* <Box
-          bg='primary'
-          _text={{
-            color: '#FFF',
-            fontWeight: '700',
-            fontSize: '2xl',
-          }}
-          px='6'
-          py='3'
-        >
-          Add Trapping Crew
-        </Box> */}
-
         <Center bg='primary' py='5%'>
           <AppLogo imageSize={200} />
         </Center>
