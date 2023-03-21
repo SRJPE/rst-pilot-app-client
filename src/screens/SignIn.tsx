@@ -43,7 +43,7 @@ export const AppLogo = ({
 }) => {
   return (
     <Image
-      source={require('../../assets/chinook_salmon_rotated.jpeg')}
+      source={require('../../assets/chinook_salmon.jpeg')}
       height={imageSize}
       width={imageSize}
       borderRadius={1000}
