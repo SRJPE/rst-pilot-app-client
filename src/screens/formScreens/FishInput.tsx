@@ -28,29 +28,28 @@ import { Ionicons } from '@expo/vector-icons'
 import { useWindowDimensions } from 'react-native'
 
 const mapStateToProps = (state: RootState) => {
-  let activeTabId = state.tabSlice.activeTabId
-  let tabGroupId = 'placeholderId'
-  if (activeTabId) {
-    tabGroupId = state.tabSlice.tabs[activeTabId].groupId
+  let activeTabId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.fishInput[state.tabSlice.activeTabId]
+  ) {
+    activeTabId = state.tabSlice.activeTabId
   }
-  let speciesCaptured = state.fishInput['placeholderId'].speciesCaptured
-  if (state.fishInput[tabGroupId]) {
-    speciesCaptured = state.fishInput[tabGroupId].speciesCaptured
-  }
+  let speciesCaptured = state.fishInput[activeTabId].speciesCaptured
 
   return {
-    tabGroupId,
+    activeTabId,
     speciesCaptured,
   }
 }
 
 const FishInput = ({
   navigation,
-  tabGroupId,
+  activeTabId,
   speciesCaptured,
 }: {
   navigation: any
-  tabGroupId: string
+  activeTabId: string
   speciesCaptured: string[]
 }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -77,11 +76,11 @@ const FishInput = ({
     //   setShowError(true)
 
     // }
-    if (tabGroupId && tabGroupId != 'placeholderId') {
+    if (activeTabId && activeTabId != 'placeholderId') {
       dispatch(
-        saveFishInput({ tabGroupId, speciesCaptured: checkboxGroupValue })
+        saveFishInput({ tabId: activeTabId, speciesCaptured: checkboxGroupValue })
       )
-      dispatch(markFishInputCompleted({ tabGroupId, bool: true }))
+      dispatch(markFishInputCompleted({ tabId: activeTabId, bool: true }))
       dispatch(markStepCompleted([true, 'fishInput']))
       console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
     }
@@ -215,9 +214,11 @@ const FishInput = ({
         <CustomModal
           isOpen={addPlusCountModalOpen}
           closeModal={() => {
-            if (tabGroupId && tabGroupId != 'placeholderId') {
+            if (activeTabId && activeTabId != 'placeholderId') {
               setAddPlusCountModalOpen(false)
-              dispatch(markFishInputModalOpen({ tabGroupId, bool: false }))
+              dispatch(
+                markFishInputModalOpen({ tabId: activeTabId, bool: false })
+              )
             }
           }}
           height='1/2'

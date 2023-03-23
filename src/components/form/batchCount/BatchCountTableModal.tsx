@@ -45,10 +45,9 @@ const BatchCountTableModal = ({
   const handleEditForkLengthCountSave = () => {
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
-      const tabGroupId = tabSlice.tabs[activeTabId].groupId
       dispatch(
         updateSingleForkLengthCount({
-          tabGroupId,
+          tabId: activeTabId,
           ...modalDataTemp,
           count: currentCount,
         })

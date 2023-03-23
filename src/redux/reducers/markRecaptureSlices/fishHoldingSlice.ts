@@ -1,6 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
+  [tabId: string]: FishHoldingStateI
+}
+
+interface FishHoldingStateI {
   completed: boolean
   values: FishHoldingValuesI
 }
@@ -30,10 +34,12 @@ export interface IndividualSelectedFishValuesI {
 }
 
 const initialState: InitialStateI = {
-  completed: false,
-  values: {
-    totalFishHolding: null,
-    selectedFishStore: {},
+  placeholderId: {
+    completed: false,
+    values: {
+      totalFishHolding: null,
+      selectedFishStore: {},
+    },
   },
 }
 
@@ -43,10 +49,18 @@ export const fishHoldingSlice = createSlice({
   reducers: {
     resetFishHoldingSlice: () => initialState,
     saveFishHolding: (state, action) => {
-      state.values = action.payload
+      const { tabId, values } = action.payload
+      if (state[tabId]) {
+        state[tabId].values = values
+      } else {
+        state[tabId] = { ...state['placeholderId'], values }
+      }
     },
     markFishHoldingCompleted: (state, action) => {
-      state.completed = action.payload
+      const { tabId, completed } = action.payload
+      if (state[tabId]) {
+        state[tabId].completed = completed
+      }
     },
   },
 })

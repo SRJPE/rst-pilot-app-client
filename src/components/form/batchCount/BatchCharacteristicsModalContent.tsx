@@ -32,7 +32,7 @@ const initialFormValues = {
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
-  tabSlice
+  tabSlice,
 }: {
   closeModal: any
   tabSlice: TabStateI
@@ -51,10 +51,9 @@ const BatchCharacteristicsModalContent = ({
   )
 
   const handleFormSubmit = (values: any) => {
-    const activeTabId = tabSlice.activeTabId
+    let activeTabId = tabSlice.activeTabId
     if (activeTabId) {
-      const tabGroupId = tabSlice.tabs[activeTabId].groupId
-      dispatch(saveBatchCharacteristics({...values, tabGroupId }))
+      dispatch(saveBatchCharacteristics({ ...values, tabId: activeTabId }))
       console.log('🚀 ~ BatchCount Values: ', values)
       showSlideAlert(dispatch, 'Batch characteristics')
     }

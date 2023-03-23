@@ -16,9 +16,11 @@ import {
 const FishHolding = ({
   fishStore,
   selectedFishStoreState,
+  fishHoldingTabId,
 }: {
   fishStore: FishStoreI
   selectedFishStoreState: SelectedFishStoreI
+  fishHoldingTabId: string
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation: any = useNavigation()
@@ -133,14 +135,21 @@ const FishHolding = ({
   }
 
   const handleSubmit = () => {
-    dispatch(saveTotalFishHolding(totalFish))
-    dispatch(
-      saveFishHolding({
-        totalFishHolding: totalFish,
-        selectedFishStore: selectedFishStore,
-      })
-    )
-    dispatch(markFishHoldingCompleted(true))
+    if (fishHoldingTabId) {
+      dispatch(saveTotalFishHolding(totalFish))
+      dispatch(
+        saveFishHolding({
+          tabId: fishHoldingTabId,
+          values: {
+            totalFishHolding: totalFish,
+            selectedFishStore: selectedFishStore,
+          },
+        })
+      )
+      dispatch(
+        markFishHoldingCompleted({ tabId: fishHoldingTabId, completed: true })
+      )
+    }
   }
 
   //render new cards when selected runs or lifeStages change
@@ -222,17 +231,27 @@ const FishHolding = ({
 }
 
 const mapStateToProps = (state: RootState) => {
-  let tabGroupId = 'placeholderId'
+  let fishInputTabId = 'placeholderId'
   if (
     state.tabSlice.activeTabId &&
-    state.fishInput[state.tabSlice.tabs[state.tabSlice.activeTabId].groupId]
+    state.fishInput[state.tabSlice.activeTabId]
   ) {
-    tabGroupId = state.tabSlice.tabs[state.tabSlice.activeTabId].groupId
+    fishInputTabId = state.tabSlice.activeTabId
+  }
+
+  let fishHoldingTabId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.fishHolding[state.tabSlice.activeTabId]
+  ) {
+    fishHoldingTabId = state.tabSlice.activeTabId
   }
 
   return {
-    fishStore: state.fishInput[tabGroupId].fishStore,
-    selectedFishStoreState: state.fishHolding.values.selectedFishStore,
+    fishStore: state.fishInput[fishInputTabId].fishStore,
+    selectedFishStoreState:
+      state.fishHolding[fishHoldingTabId].values.selectedFishStore,
+    fishHoldingTabId,
   }
 }
 

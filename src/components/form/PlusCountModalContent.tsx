@@ -47,8 +47,7 @@ const PlusCountModalContent = ({
   const handleFormSubmit = (values: any) => {
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
-      const tabGroupId = tabSlice.tabs[activeTabId].groupId
-      dispatch(savePlusCount({tabGroupId, ...values }))
+      dispatch(savePlusCount({ tabId: activeTabId, ...values }))
       console.log('🚀 ~ Plus Count Values: ', values)
       showSlideAlert(dispatch, 'Plus count')
     }

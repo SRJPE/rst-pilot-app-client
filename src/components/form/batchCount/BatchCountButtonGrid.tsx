@@ -29,10 +29,9 @@ const BatchCountButtonGrid = ({
   const handlePress = (num: number) => {
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
-      const tabGroupId = tabSlice.tabs[activeTabId].groupId
       dispatch(
         addForkLengthToBatchStore({
-          tabGroupId,
+          tabId: activeTabId,
           forkLength: num,
           lifeStage: ignoreLifeStage ? 'not recorded' : selectedLifeStage,
         })

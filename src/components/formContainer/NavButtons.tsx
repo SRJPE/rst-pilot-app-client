@@ -45,7 +45,7 @@ const NavButtons = ({
   useEffect(() => {
     setIsPaperEntryStore(checkIsPaperEntryStore)
     setWillBeHoldingFishForMarkRecapture(checkWillBeHoldingFishForMarkRecapture)
-  }, [])
+  }, [tabSlice.activeTabId])
 
   const checkIsPaperEntryStore = () => {
     if (isPaperEntry != null) return isPaperEntry

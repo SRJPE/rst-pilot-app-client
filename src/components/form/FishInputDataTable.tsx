@@ -194,9 +194,9 @@ const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
   if (
     state.tabSlice.activeTabId &&
-    state.fishInput[state.tabSlice.tabs[state.tabSlice.activeTabId].groupId]
+    state.fishInput[state.tabSlice.activeTabId]
   ) {
-    activeTabId = state.tabSlice.tabs[state.tabSlice.activeTabId].groupId
+    activeTabId = state.tabSlice.activeTabId
   }
 
   return {

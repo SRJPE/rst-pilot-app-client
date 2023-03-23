@@ -39,12 +39,12 @@ const BatchCount = ({
   route,
   fishInputSlice,
   tabSlice,
-  tabGroupId,
+  activeTabId,
 }: {
   route: any
   fishInputSlice: any
   tabSlice: TabStateI
-  tabGroupId: string
+  activeTabId: string
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
@@ -61,7 +61,7 @@ const BatchCount = ({
     count: '',
   } as any)
   const { species, adiposeClipped, dead, existingMark, forkLengths } =
-    fishInputSlice[tabGroupId].batchCharacteristics
+    fishInputSlice[activeTabId].batchCharacteristics
 
   const { height: screenHeight } = useWindowDimensions()
 
@@ -76,16 +76,14 @@ const BatchCount = ({
   const handlePressRemoveFish = () => {
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
-      const tabGroupId = tabSlice.tabs[activeTabId].groupId
-      dispatch(removeLastForkLengthEntered({ tabGroupId }))
+      dispatch(removeLastForkLengthEntered({ tabId: activeTabId }))
     }
   }
 
   const handlePressSaveBatchCount = () => {
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
-      const tabGroupId = tabSlice.tabs[activeTabId].groupId
-      dispatch(saveBatchCount({ tabGroupId }))
+      dispatch(saveBatchCount({ tabId: activeTabId }))
       showSlideAlert(dispatch, 'Batch Count')
       // @ts-ignore
       navigation.navigate('Trap Visit Form', {
@@ -96,8 +94,7 @@ const BatchCount = ({
   const handlePressSaveAndStartNewBatchCount = () => {
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
-      const tabGroupId = tabSlice.tabs[activeTabId].groupId
-      dispatch(saveBatchCount({ tabGroupId }))
+      dispatch(saveBatchCount({ tabId: activeTabId }))
       showSlideAlert(dispatch, 'Batch Count')
       setBatchCharacteristicsModalOpen(true)
     }
@@ -377,18 +374,18 @@ const BatchCount = ({
 }
 
 const mapStateToProps = (state: RootState) => {
-  let tabGroupId = 'placeholderId'
+  let activeTabId = 'placeholderId'
   if (
     state.tabSlice.activeTabId &&
-    state.fishInput[state.tabSlice.tabs[state.tabSlice.activeTabId].groupId]
+    state.fishInput[state.tabSlice.activeTabId]
   ) {
-    tabGroupId = state.tabSlice.tabs[state.tabSlice.activeTabId].groupId
+    activeTabId = state.tabSlice.activeTabId
   }
 
   return {
     fishInputSlice: state.fishInput,
     tabSlice: state.tabSlice,
-    tabGroupId
+    activeTabId,
   }
 }
 export default connect(mapStateToProps)(BatchCount)

@@ -1143,9 +1143,11 @@ const AddFishContent = ({
               } else {
                 const activeTabId = tabSlice.activeTabId
                 if (activeTabId) {
-                  const tabGroupId = tabSlice.tabs[activeTabId].groupId
                   let payload = returnFormValues()
-                  saveIndividualFish({ tabGroupId, formValues: payload })
+                  saveIndividualFish({
+                    tabId: activeTabId,
+                    formValues: payload,
+                  })
                   navigation.goBack()
                 }
               }
@@ -1162,8 +1164,10 @@ const AddFishContent = ({
               onPress={() => {
                 const activeTabId = tabSlice.activeTabId
                 if (activeTabId) {
-                  const tabGroupId = tabSlice.tabs[activeTabId].groupId
-                  deleteFishEntry({tabGroupId, id: route.params?.editModeData?.id})
+                  deleteFishEntry({
+                    tabId: activeTabId,
+                    id: route.params?.editModeData?.id,
+                  })
                   navigation.goBack()
                 }
               }}
@@ -1187,9 +1191,8 @@ const AddFishContent = ({
               const activeTabId = tabSlice.activeTabId
               if (route.params?.editModeData) {
                 if (activeTabId) {
-                  const tabGroupId = tabSlice.tabs[activeTabId].groupId
                   updateFishEntry({
-                    tabGroupId,
+                    tabId: activeTabId,
                     id: route.params?.editModeData?.id,
                     ...payload,
                     numFishCaught: count.value,
@@ -1201,8 +1204,10 @@ const AddFishContent = ({
                 // This should be fine since the button is only enabled when the form is valid
                 const activeTabId = tabSlice.activeTabId
                 if (activeTabId) {
-                  const tabGroupId = tabSlice.tabs[activeTabId].groupId
-                  saveIndividualFish({ tabGroupId, formValues: payload })
+                  saveIndividualFish({
+                    tabId: activeTabId,
+                    formValues: payload,
+                  })
                   showSlideAlert(dispatch, 'Fish')
                   resetFormState('other')
                 }
@@ -1254,16 +1259,16 @@ const AddFishContent = ({
 }
 
 const mapStateToProps = (state: RootState) => {
-  let tabGroupId = 'placeholderId'
+  let activeTabId = 'placeholderId'
   if (
     state.tabSlice.activeTabId &&
-    state.fishInput[state.tabSlice.tabs[state.tabSlice.activeTabId].groupId]
+    state.fishInput[state.tabSlice.activeTabId]
   ) {
-    tabGroupId = state.tabSlice.tabs[state.tabSlice.activeTabId].groupId
+    activeTabId = state.tabSlice.activeTabId
   }
 
   return {
-    fishStore: state.fishInput[tabGroupId].fishStore,
+    fishStore: state.fishInput[activeTabId].fishStore,
     tabSlice: state.tabSlice,
   }
 }
