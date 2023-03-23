@@ -111,7 +111,7 @@ const ReleaseTrial = ({
                         keyboardType='numeric'
                         onChangeText={handleChange('wildCount')}
                         onBlur={handleBlur('wildCount')}
-                        value={values.wildCount}
+                        value={`${values.wildCount}`}
                       />
                       {touched.wildCount &&
                         compareFishHoldingToWildCount(values.wildCount)}
