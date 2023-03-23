@@ -39,6 +39,7 @@ export const releaseTrialSlice = createSlice({
       state.values = action.payload
     },
     saveTotalFishHolding: (state, action) => {
+      state.values.wildCount = action.payload
       state.totalFishHolding = action.payload
     },
     markReleaseTrialCompleted: (state, action) => {
