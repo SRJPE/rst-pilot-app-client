@@ -20,14 +20,7 @@ import AddFish from '../screens/formScreens/AddFish'
 import PaperEntry from '../screens/formScreens/PaperEntry'
 import StartedTrapping from '../screens/formScreens/StartedTrapping'
 import BatchCount from '../screens/formScreens/BatchCount'
-import {
-  HStack,
-  VStack,
-  Text,
-  Button,
-  Box,
-  Icon,
-} from 'native-base'
+import { HStack, VStack, Text, Button, Box, Icon } from 'native-base'
 import { AppDispatch, RootState } from '../redux/store'
 import {
   createTab,
@@ -54,7 +47,12 @@ function FormStackNavigation(props: any) {
   )
   const tabSlice = props.tabSlice as TabStateI
   const navigationSlice = props.navigationSlice as NavigationStateI
-  const nonTabBarScreens = ['Incomplete Sections', 'Add Fish', 'Batch Count']
+  const nonTabBarScreens = [
+    'Paper Entry',
+    'Add Fish',
+    'Batch Count',
+    'Incomplete Sections',
+  ]
 
   const renderTabContent = (
     tabSlice: TabStateI,
@@ -101,9 +99,7 @@ function FormStackNavigation(props: any) {
               <Icon
                 onPress={() => {
                   const tabId = uid()
-                  dispatch(
-                    createTab({ tabId, tabName: 'New Tab' })
-                  )
+                  dispatch(createTab({ tabId, tabName: 'New Tab' }))
                   dispatch(setActiveTab(tabId))
                   props.navigation.navigate('Trap Visit Form', {
                     screen: 'Visit Setup',
@@ -124,12 +120,17 @@ function FormStackNavigation(props: any) {
       Object.keys(tabSlice.tabs).length &&
       nonTabBarScreens.includes(props.route.name)
     ) {
-      // just show tabname
       if (
+        tabSlice.activeTabId != null &&
+        props.route.name == 'Paper Entry'
+      ) {
+        return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].trapSite}</Text>
+      }
+      else if (
         tabSlice.activeTabId != null &&
         props.route.name != 'Incomplete Sections'
       ) {
-        return <Text>{tabSlice.tabs[tabSlice.activeTabId].name}</Text>
+        return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].name}</Text>
       } else {
         return <></>
       }
