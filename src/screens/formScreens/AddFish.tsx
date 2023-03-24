@@ -439,7 +439,15 @@ const AddFishContent = ({
         <Pressable onPress={Keyboard.dismiss}>
           <HStack space={10}>
             <CustomModalHeader
-              headerText={route.params?.editModeData ? 'Edit Fish' : 'Add Fish'}
+              headerText={
+                route.params?.editModeData
+                  ? tabSlice.activeTabId
+                    ? `Edit Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
+                    : 'Edit Fish'
+                  : tabSlice.activeTabId
+                  ? `Add Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
+                  : 'Add Fish'
+              }
               showHeaderButton={true}
               closeModal={closeModal}
               navigateBack={true}
