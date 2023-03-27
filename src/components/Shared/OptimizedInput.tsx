@@ -17,20 +17,20 @@ interface OptimizedInputI {
 }
 
 const OptimizedInput: React.FC<OptimizedInputI> = (props) => {
-  const [value, setValue] = useState(props.value)
-  const [t, setT] = useState(undefined)
-  const debouncedOnChange = useCallback(
-    (e: any) => {
-      e.persist()
-      setValue(e.nativeEvent.text)
-      if (t) clearTimeout(t)
-      setT(
-        // @ts-ignore
-        setTimeout(() => props.onChangeText(e.nativeEvent.text), 500)
-      )
-    },
-    [props.value]
-  )
+  // const [value, setValue] = useState(props.value)
+  // const [t, setT] = useState(undefined)
+  // const debouncedOnChange = useCallback(
+  //   (e: any) => {
+  //     e.persist()
+  //     setValue(e.nativeEvent.text)
+  //     if (t) clearTimeout(t)
+  //     setT(
+  //       // @ts-ignore
+  //       setTimeout(() => props.onChangeText(e.nativeEvent.text), 500)
+  //     )
+  //   },
+  //   [props.value]
+  // )
 
   return (
     <Input
@@ -38,9 +38,9 @@ const OptimizedInput: React.FC<OptimizedInputI> = (props) => {
       fontSize={props.fontSize}
       placeholder={props.placeholder}
       keyboardType={props.keyboardType}
-      onChange={debouncedOnChange}
+      onChange={(e) => props.onChangeText(e.nativeEvent.text)}
       onBlur={props.onBlur}
-      value={value}
+      value={props.value}
     />
   )
 }

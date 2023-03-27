@@ -1,6 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
+  [tabId: string]: VisitSetupStateI
+}
+
+interface VisitSetupStateI {
   completed: boolean
   isPaperEntry: false
   values: VisitSetupValuesI
@@ -11,18 +15,21 @@ interface VisitSetupValuesI {
   trapLocationId: number | null
   stream: string
   trapSite: string
+  trapName?: string
   crew: Array<string>
 }
 
 const initialState: InitialStateI = {
-  completed: false,
-  isPaperEntry: false,
-  values: {
-    programId: null,
-    trapLocationId: null,
-    stream: '',
-    trapSite: '',
-    crew: [],
+  placeholderId: {
+    completed: false,
+    isPaperEntry: false,
+    values: {
+      programId: null,
+      trapLocationId: null,
+      stream: '',
+      trapSite: '',
+      crew: [],
+    },
   },
 }
 
@@ -32,13 +39,16 @@ export const visitSetupSlice = createSlice({
   reducers: {
     resetVisitSetupSlice: () => initialState,
     saveVisitSetup: (state, action) => {
-      state.values = action.payload
+      const { tabId, values, isPaperEntry } = action.payload
+      state[tabId] = { completed: true, isPaperEntry, values }
     },
     markVisitSetupCompleted: (state, action) => {
-      state.completed = action.payload
+      const { tabId, completed } = action.payload
+      state[tabId].completed = completed
     },
     markTrapVisitPaperEntry: (state, action) => {
-      state.isPaperEntry = action.payload
+      const { tabId, isPaperEntry } = action.payload
+      state[tabId].isPaperEntry = isPaperEntry
     },
   },
 })

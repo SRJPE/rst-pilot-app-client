@@ -1,6 +1,9 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import {
+  createNativeStackNavigator,
+  NativeStackHeaderProps,
+} from '@react-navigation/native-stack'
 import FishInput from '../screens/formScreens/FishInput'
-import { useSelector } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import FishProcessing from '../screens/formScreens/FishProcessing'
 import VisitSetup from '../screens/formScreens/VisitSetup'
 import TrapOperations from '../screens/formScreens/TrapOperations'
@@ -17,18 +20,137 @@ import AddFish from '../screens/formScreens/AddFish'
 import PaperEntry from '../screens/formScreens/PaperEntry'
 import StartedTrapping from '../screens/formScreens/StartedTrapping'
 import BatchCount from '../screens/formScreens/BatchCount'
+import { HStack, VStack, Text, Button, Box, Icon } from 'native-base'
+import { AppDispatch, RootState } from '../redux/store'
+import {
+  createTab,
+  deleteTab,
+  setActiveTab,
+  TabStateI,
+} from '../redux/reducers/formSlices/tabSlice'
+import { ScrollView } from 'react-native-gesture-handler'
+import Ionicons from '@expo/vector-icons/Ionicons'
+import { uid } from 'uid'
+import {
+  NavigationStateI,
+  updateActiveStep,
+} from '../redux/reducers/formSlices/navigationSlice'
+import { useEffect } from 'react'
 import FishHolding from '../screens/formScreens/FishHolding'
 
 const FormStack = createNativeStackNavigator()
 
-export default function FormStackNavigation() {
+function FormStackNavigation(props: any) {
+  const dispatch = useDispatch<AppDispatch>()
   const fishInputModalOpen = useSelector(
     (state: any) => state.fishInput.modalOpen
   )
+  const tabSlice = props.tabSlice as TabStateI
+  const navigationSlice = props.navigationSlice as NavigationStateI
+  const nonTabBarScreens = [
+    'Paper Entry',
+    'Add Fish',
+    'Batch Count',
+    'Incomplete Sections',
+  ]
+
+  const renderTabContent = (
+    tabSlice: TabStateI,
+    props: NativeStackHeaderProps
+  ) => {
+    if (
+      Object.keys(tabSlice.tabs).length &&
+      !nonTabBarScreens.includes(props.route.name)
+    ) {
+      // show tabbar
+      return (
+        <Box px={'2%'} pt={'2%'}>
+          <ScrollView horizontal={true}>
+            <HStack alignItems={'center'} justifyContent='space-between'>
+              {Object.keys(tabSlice.tabs).map((tabId) => (
+                <Button
+                  bg={tabId == tabSlice.activeTabId ? 'primary' : 'secondary'}
+                  onPress={() => dispatch(setActiveTab(tabId))}
+                  key={tabId}
+                  mr={5}
+                >
+                  <HStack alignItems={'center'} justifyContent='space-between'>
+                    <Text
+                      fontSize='lg'
+                      color={
+                        tabId == tabSlice.activeTabId ? 'white' : 'primary'
+                      }
+                    >
+                      {tabSlice.tabs[tabId].name}
+                    </Text>
+                    <Icon
+                      onPress={() => dispatch(deleteTab(tabId))}
+                      as={Ionicons}
+                      name='ios-close-circle'
+                      color='#FFF'
+                      size={6}
+                      margin='0'
+                      padding='0'
+                      marginLeft={3}
+                    />
+                  </HStack>
+                </Button>
+              ))}
+              <Icon
+                onPress={() => {
+                  const tabId = uid()
+                  dispatch(createTab({ tabId, tabName: 'New Tab' }))
+                  dispatch(setActiveTab(tabId))
+                  props.navigation.navigate('Trap Visit Form', {
+                    screen: 'Visit Setup',
+                  })
+                }}
+                as={Ionicons}
+                name='ios-add-circle'
+                color='primary'
+                size={9}
+                margin='0'
+                padding='0'
+              />
+            </HStack>
+          </ScrollView>
+        </Box>
+      )
+    } else if (
+      Object.keys(tabSlice.tabs).length &&
+      nonTabBarScreens.includes(props.route.name)
+    ) {
+      if (
+        tabSlice.activeTabId != null &&
+        props.route.name == 'Paper Entry'
+      ) {
+        return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].trapSite}</Text>
+      }
+      else if (
+        tabSlice.activeTabId != null &&
+        props.route.name != 'Incomplete Sections'
+      ) {
+        return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].name}</Text>
+      } else {
+        return <></>
+      }
+    } else {
+      // show nothing
+      return <></>
+    }
+  }
+
   return (
     <FormStack.Navigator
       initialRouteName='Visit Setup'
-      screenOptions={{ header: (props) => <ProgressHeader {...props} /> }}
+      screenOptions={{
+        header: (props) => (
+          <VStack>
+            <ProgressHeader {...props} />
+            {renderTabContent(tabSlice, props)}
+          </VStack>
+        ),
+      }}
     >
       <FormStack.Screen name='Visit Setup' component={VisitSetup} />
       <FormStack.Screen name='Trap Operations' component={TrapOperations} />
@@ -75,3 +197,12 @@ export default function FormStackNavigation() {
     </FormStack.Navigator>
   )
 }
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    tabSlice: state.tabSlice,
+    navigationSlice: state.navigation,
+  }
+}
+
+export default connect(mapStateToProps, {})(FormStackNavigation)

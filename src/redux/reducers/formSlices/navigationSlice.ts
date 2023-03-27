@@ -26,7 +26,7 @@ const formSteps = {
   16: { name: 'Fish Holding', propName: 'FishHolding' },
 }
 
-interface NavigationStateI {
+export interface NavigationStateI {
   activeStep: number
   steps: any
   isFormComplete?: boolean

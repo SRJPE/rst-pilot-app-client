@@ -27,6 +27,7 @@ import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetup
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { flatten, uniq } from 'lodash'
 import { uid } from 'uid'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -40,6 +41,7 @@ const mapStateToProps = (state: RootState) => {
     connectivityState: state.connectivity,
     fishInputState: state.fishInput,
     paperEntryState: state.paperEntry,
+    tabState: state.tabSlice,
   }
 }
 
@@ -55,6 +57,7 @@ const IncompleteSections = ({
   connectivityState,
   fishInputState,
   paperEntryState,
+  tabState,
 }: {
   navigation: any
   navigationState: any
@@ -67,6 +70,7 @@ const IncompleteSections = ({
   connectivityState: any
   fishInputState: any
   paperEntryState: any
+  tabState: TabStateI
 }) => {
   // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
@@ -81,7 +85,7 @@ const IncompleteSections = ({
   }, [])
 
   const handleSubmit = () => {
-    saveTrapVisit()
+    saveTrapVisits()
     saveCatchRawSubmission()
     resetAllFormSlices()
     navigation.reset({
@@ -125,7 +129,7 @@ const IncompleteSections = ({
 
   const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
 
-  const saveTrapVisit = () => {
+  const saveTrapVisits = () => {
     const currentDateTime = new Date()
     const trapFunctioningValues = returnDefinitionArray(
       dropdownsState.values.trapFunctionality
@@ -142,16 +146,6 @@ const IncompleteSections = ({
     const trapStatusAtEndValues = returnDefinitionArray(
       dropdownsState.values.trapStatusAtEnd
     )
-    const {
-      rpm1: startRpm1,
-      rpm2: startRpm2,
-      rpm3: startRpm3,
-    } = trapOperationsState.values
-    const {
-      rpm1: endRpm1,
-      rpm2: endRpm2,
-      rpm3: endRpm3,
-    } = trapPostProcessingState.values
     const calculateRpmAvg = (rpms: (string | null)[]) => {
       const validRpms = rpms.filter((n) => n)
       if (!validRpms.length) {
@@ -164,83 +158,99 @@ const IncompleteSections = ({
       })
       return counter / numericRpms.length
     }
-    const selectedCrewNames: string[] = [...visitSetupState.values.crew] // ['james', 'steve']
-    const selectedCrewNamesMap: Record<string, boolean> =
-      selectedCrewNames.reduce(
-        (acc: Record<string, boolean>, name: string) => ({
-          ...acc,
-          [name]: true,
-        }),
-        {}
+
+    const tabIds = Object.keys(tabState.tabs)
+    tabIds.forEach((id) => {
+      const {
+        rpm1: startRpm1,
+        rpm2: startRpm2,
+        rpm3: startRpm3,
+      } = trapOperationsState[id].values
+      const {
+        rpm1: endRpm1,
+        rpm2: endRpm2,
+        rpm3: endRpm3,
+      } = trapPostProcessingState[id].values
+      const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
+      const selectedCrewNamesMap: Record<string, boolean> =
+        selectedCrewNames.reduce(
+          (acc: Record<string, boolean>, name: string) => ({
+            ...acc,
+            [name]: true,
+          }),
+          {}
+        )
+      const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
+      const selectedCrewIds = uniq(
+        allCrewObjects
+          .filter(
+            (obj: any) =>
+              selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
+          )
+          .map((obj: any) => obj.personnelId)
       )
-    const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
-    const selectedCrewIds = uniq(
-      allCrewObjects
-        .filter(
-          (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
-        )
-        .map((obj: any) => obj.personnelId)
-    )
+      const trapVisitSubmission = {
+        uid: tempUID,
+        crew: selectedCrewIds,
+        programId: visitSetupState[id].values.programId,
+        visitTypeId: null,
+        trapLocationId: visitSetupState[id].values.trapLocationId,
+        isPaperEntry: visitSetupState.isPaperEntry,
+        trapVisitTimeStart: visitSetupState.isPaperEntry
+          ? paperEntryState[id].values.startDate
+          : trapPostProcessingState[id].values.trapVisitStartTime,
+        trapVisitTimeEnd: visitSetupState.isPaperEntry
+          ? paperEntryState[id].values.endDate
+          : trapOperationsState[id].values.trapVisitStopTime,
+        fishProcessed: returnNullableTableId(
+          fishProcessedValues.indexOf(
+            fishProcessingState[id].values.fishProcessedResult
+          )
+        ),
+        whyFishNotProcessed: returnNullableTableId(
+          whyFishNotProcessedValues.indexOf(
+            fishProcessingState[id].values.fishProcessedResult
+          )
+        ),
+        sampleGearId: null,
+        coneDepth: trapOperationsState[id].values.coneDepth
+          ? parseInt(trapOperationsState[id].values.coneDepth)
+          : null,
+        trapInThalweg: null,
+        trapFunctioning: returnNullableTableId(
+          trapFunctioningValues.indexOf(
+            trapOperationsState[id].values.trapStatus
+          )
+        ),
+        whyTrapNotFunctioning: returnNullableTableId(
+          whyTrapNotFunctioningValues.indexOf(
+            trapOperationsState[id].values.reasonForNotFunc
+          )
+        ),
+        trapStatusAtEnd: returnNullableTableId(
+          trapStatusAtEndValues.indexOf(
+            `${trapPostProcessingState[id].values.endingTrapStatus}`.toLowerCase()
+          )
+        ),
+        totalRevolutions: trapOperationsState[id].values.totalRevolutions
+          ? parseInt(trapOperationsState[id].values.totalRevolutions)
+          : null,
+        rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
+        rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
+        inHalfConeConfiguration:
+          trapOperationsState[id].values.coneSetting === 'half' ? true : false,
+        debrisVolumeLiters: trapPostProcessingState[id].values.debrisVolume
+          ? parseInt(trapPostProcessingState[id].values.debrisVolume)
+          : null,
+        qcCompleted: null,
+        qcCompletedAt: null,
+        comments: paperEntryState[id]
+          ? paperEntryState[id].values.comments
+          : null,
+      }
 
-    const trapVisitSubmission = {
-      uid: tempUID,
-      crew: selectedCrewIds,
-      programId: visitSetupState.values.programId,
-      visitTypeId: null,
-      trapLocationId: visitSetupState.values.trapLocationId,
-      isPaperEntry: visitSetupState.isPaperEntry,
-      trapVisitTimeStart: visitSetupState.isPaperEntry
-        ? paperEntryState.values.startDate
-        : trapPostProcessingState.values.trapVisitStartTime,
-      trapVisitTimeEnd: visitSetupState.isPaperEntry
-        ? paperEntryState.values.endDate
-        : trapOperationsState.values.trapVisitStopTime,
-      fishProcessed: returnNullableTableId(
-        fishProcessedValues.indexOf(
-          fishProcessingState.values.fishProcessedResult
-        )
-      ),
-      whyFishNotProcessed: returnNullableTableId(
-        whyFishNotProcessedValues.indexOf(
-          fishProcessingState.values.fishProcessedResult
-        )
-      ),
-      sampleGearId: null,
-      coneDepth: trapOperationsState.values.coneDepth
-        ? parseInt(trapOperationsState.values.coneDepth)
-        : null,
-      trapInThalweg: null,
-      trapFunctioning: returnNullableTableId(
-        trapFunctioningValues.indexOf(trapOperationsState.values.trapStatus)
-      ),
-      whyTrapNotFunctioning: returnNullableTableId(
-        whyTrapNotFunctioningValues.indexOf(
-          trapOperationsState.values.reasonForNotFunc
-        )
-      ),
-      trapStatusAtEnd: returnNullableTableId(
-        trapStatusAtEndValues.indexOf(
-          `${trapPostProcessingState.values.endingTrapStatus}`.toLowerCase()
-        )
-      ),
-      totalRevolutions: trapOperationsState.values.totalRevolutions
-        ? parseInt(trapOperationsState.values.totalRevolutions)
-        : null,
-      rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
-      rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
-      inHalfConeConfiguration:
-        trapOperationsState.values.coneSetting === 'half' ? true : false,
-      debrisVolumeLiters: trapPostProcessingState.values.debrisVolume
-        ? parseInt(trapPostProcessingState.values.debrisVolume)
-        : null,
-      qcCompleted: null,
-      qcCompletedAt: null,
-      comments: paperEntryState.values.comments
-        ? paperEntryState.values.comments
-        : null,
-    }
-
-    dispatch(saveTrapVisitSubmission(trapVisitSubmission))
+      dispatch(saveTrapVisitSubmission(trapVisitSubmission))
+    })
   }
 
   const saveCatchRawSubmission = () => {
@@ -267,51 +277,62 @@ const IncompleteSections = ({
     }
     const catchRawSubmissions: any[] = []
 
-    const fishStoreKeys = Object.keys(fishInputState.fishStore)
-    fishStoreKeys.forEach((key) => {
-      const fishValue = fishInputState.fishStore[key]
-      catchRawSubmissions.push({
-        uid: tempUID,
-        programId: 1,
-        trapVisitId: null,
-        taxonCode: returnTaxonCode(fishValue),
-        captureRunClass: returnNullableTableId(
-          runValues.indexOf(fishValue.run)
-        ),
-        // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
-        captureRunClassMethod: fishValue.run ? 6 : null,
-        // defaults to "none" (id: 1) if not selected
-        markType: 1, // Check w/ Erin
-        markedForRelease: fishValue.willBeUsedInRecapture,
-        adiposeClipped: fishValue.adiposeClipped,
-        dead: fishValue.dead,
-        lifeStage: returnNullableTableId(
-          lifeStageValues.indexOf(fishValue.lifeStage)
-        ),
-        forkLength:
-          fishValue.forkLength != null
-            ? parseInt(fishValue?.forkLength as any)
-            : null,
-        weight:
-          fishValue?.weight != null ? parseInt(fishValue?.weight as any) : null,
-        numFishCaught: fishValue?.numFishCaught,
-        plusCount: fishValue?.plusCount,
-        plusCountMethodology: fishValue?.plusCountMethod
-          ? returnNullableTableId(
-              plusCountMethodValues.indexOf(fishValue?.plusCountMethod)
-            )
-          : null,
-        isRandom: null, // Check w/ Erin
-        releaseId: null,
-        comments: null,
-        createdBy: null,
-        createdAt: currentDateTime,
-        updatedAt: null,
-        qcCompleted: null,
-        qcCompletedBy: null,
-        qcTime: null,
-        qcComments: null,
-      })
+    Object.keys(fishInputState).forEach((tabGroupId) => {
+      if (tabGroupId != 'placeholderId') {
+        const fishStoreKeys = Object.keys(fishInputState[tabGroupId].fishStore)
+        const activeTabId = Object.keys(tabState.tabs)
+          .filter((id) => {
+            return tabState.tabs[id].groupId === tabGroupId
+          })[0]
+        const programId = visitSetupState[activeTabId] ? visitSetupState[activeTabId].values.programId : 1
+        fishStoreKeys.forEach((key) => {
+          const fishValue = fishInputState[tabGroupId].fishStore[key]
+          catchRawSubmissions.push({
+            uid: tempUID,
+            programId,
+            trapVisitId: null,
+            taxonCode: returnTaxonCode(fishValue),
+            captureRunClass: returnNullableTableId(
+              runValues.indexOf(fishValue.run)
+            ),
+            // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
+            captureRunClassMethod: fishValue.run ? 6 : null,
+            // defaults to "none" (id: 1) if not selected
+            markType: 1, // Check w/ Erin
+            markedForRelease: fishValue.willBeUsedInRecapture,
+            adiposeClipped: fishValue.adiposeClipped,
+            dead: fishValue.dead,
+            lifeStage: returnNullableTableId(
+              lifeStageValues.indexOf(fishValue.lifeStage)
+            ),
+            forkLength:
+              fishValue.forkLength != null
+                ? parseInt(fishValue?.forkLength as any)
+                : null,
+            weight:
+              fishValue?.weight != null
+                ? parseInt(fishValue?.weight as any)
+                : null,
+            numFishCaught: fishValue?.numFishCaught,
+            plusCount: fishValue?.plusCount,
+            plusCountMethodology: fishValue?.plusCountMethod
+              ? returnNullableTableId(
+                  plusCountMethodValues.indexOf(fishValue?.plusCountMethod)
+                )
+              : null,
+            isRandom: null, // Check w/ Erin
+            releaseId: null,
+            comments: null,
+            createdBy: null,
+            createdAt: currentDateTime,
+            updatedAt: null,
+            qcCompleted: null,
+            qcCompletedBy: null,
+            qcTime: null,
+            qcComments: null,
+          })
+        })
+      }
     })
 
     if (catchRawSubmissions.length) {

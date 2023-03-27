@@ -25,15 +25,18 @@ import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
 const mapStateToProps = (state: RootState) => {
   return {
     reduxState: state.fishProcessing,
+    tabState: state.tabSlice,
   }
 }
 
 const FishProcessing = ({
   navigation,
   reduxState,
+  tabState,
 }: {
   navigation: any
   reduxState: any
+  tabState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
@@ -43,8 +46,10 @@ const FishProcessing = ({
   } = dropdownValues.values
 
   const handleSubmit = (values: any) => {
-    dispatch(saveFishProcessing(values))
-    dispatch(markFishProcessingCompleted(true))
+    dispatch(saveFishProcessing({ tabId: tabState.activeTabId, values }))
+    dispatch(
+      markFishProcessingCompleted({ tabId: tabState.activeTabId, value: true })
+    )
     dispatch(markStepCompleted([true, 'fishProcessing']))
     console.log('🚀 ~ handleSubmit~ FishProcessing', values)
   }
@@ -52,12 +57,19 @@ const FishProcessing = ({
   return (
     <Formik
       validationSchema={fishProcessingSchema}
-      initialValues={reduxState.values}
+      enableReinitialize={true}
+      initialValues={
+        tabState.activeTabId
+          ? reduxState[tabState.activeTabId]
+            ? reduxState[tabState.activeTabId].values
+            : reduxState['placeholderId'].values
+          : reduxState['placeholderId'].values
+      }
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       initialTouched={{ fishProcessedResult: true }}
-      initialErrors={
-        reduxState.completed ? undefined : { fishProcessedResult: '' }
-      }
+      // initialErrors={
+      //   reduxState.completed ? undefined : { fishProcessedResult: '' }
+      // }
       onSubmit={(values) => {
         handleSubmit(values)
       }}

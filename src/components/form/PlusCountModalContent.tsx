@@ -10,8 +10,9 @@ import {
   HStack,
 } from 'native-base'
 import React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
@@ -29,7 +30,13 @@ const initialFormValues = {
   plusCountMethod: '',
 }
 
-const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
+const PlusCountModalContent = ({
+  closeModal,
+  tabSlice,
+}: {
+  closeModal: any
+  tabSlice: TabStateI
+}) => {
   const dispatch = useDispatch<AppDispatch>()
   const { lifeStage, run, plusCountMethodology, taxon } = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -38,9 +45,12 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
   const alphabeticalLifeStage = alphabeticalSort(lifeStage, 'definition')
 
   const handleFormSubmit = (values: any) => {
-    dispatch(savePlusCount(values))
-    console.log('🚀 ~ Plus Count Values: ', values)
-    showSlideAlert(dispatch, 'Plus count')
+    const activeTabId = tabSlice.activeTabId
+    if (activeTabId) {
+      dispatch(savePlusCount({ tabId: activeTabId, ...values }))
+      console.log('🚀 ~ Plus Count Values: ', values)
+      showSlideAlert(dispatch, 'Plus count')
+    }
   }
 
   return (
@@ -213,5 +223,9 @@ const PlusCountModalContent = ({ closeModal }: { closeModal: any }) => {
     </ScrollView>
   )
 }
-
-export default PlusCountModalContent
+const mapStateToProps = (state: RootState) => {
+  return {
+    tabSlice: state.tabSlice,
+  }
+}
+export default connect(mapStateToProps)(PlusCountModalContent)

@@ -20,6 +20,7 @@ import paperEntrySlice from './formSlices/paperEntrySlice'
 import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
 import releaseTrialDataEntrySlice from './markRecaptureSlices/releaseTrialDataEntrySlice'
 import addAnotherMarkSlice from './addAnotherMarkSlice'
+import tabSlice from './formSlices/tabSlice'
 import fishHoldingSlice from './markRecaptureSlices/fishHoldingSlice'
 
 const dropdownsPersistConfig = {
@@ -66,4 +67,5 @@ export default combineReducers({
   releaseTrial: releaseTrialSlice,
   releaseTrialDataEntry: releaseTrialDataEntrySlice,
   addAnotherMark: addAnotherMarkSlice,
+  tabSlice: tabSlice
 })
