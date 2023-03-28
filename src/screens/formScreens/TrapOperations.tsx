@@ -41,6 +41,8 @@ const mapStateToProps = (state: RootState) => {
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.stream,
     activeTabId: state.tabSlice.activeTabId,
+    previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
+    navigationSlice: state.navigation,
   }
 }
 const TrapOperations = ({
@@ -48,11 +50,15 @@ const TrapOperations = ({
   reduxState,
   selectedStream,
   activeTabId,
+  previouslyActiveTabId,
+  navigationSlice,
 }: {
   navigation: any
   reduxState: any
   selectedStream: string
-  activeTabId: any
+  activeTabId: string | null
+  previouslyActiveTabId: string | null
+  navigationSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
@@ -81,21 +87,22 @@ const TrapOperations = ({
     }
   }
 
-  const handleSubmit = (values: any) => {
-    console.log('hit handle submit: ', { ...values })
-    const newDate = new Date()
-    if (values.trapStatus === trapNotInServiceIdentifier) {
-      dispatch(updateTrapVisitStartTime(newDate))
+  const onSubmit = (values: any, tabId: string | null) => {
+    if (tabId) {
+      const newDate = new Date()
+      if (values.trapStatus === trapNotInServiceIdentifier) {
+        dispatch(updateTrapVisitStartTime(newDate))
+      }
+      dispatch(
+        saveTrapOperations({
+          tabId,
+          values: { ...values, trapVisitStopTime: new Date() },
+        })
+      )
+      dispatch(markTrapOperationsCompleted({ tabId, value: true }))
+      dispatch(markStepCompleted([true]))
+      console.log('🚀 ~ handleSubmit ~ Status', values)
     }
-    dispatch(
-      saveTrapOperations({
-        tabId: activeTabId,
-        values: { ...values, trapVisitStopTime: new Date() },
-      })
-    )
-    dispatch(markTrapOperationsCompleted({ tabId: activeTabId, value: true }))
-    dispatch(markStepCompleted([true]))
-    console.log('🚀 ~ handleSubmit ~ Status', values)
   }
 
   const inputUnit = (text: string, setFieldValue?: any) => {
@@ -145,7 +152,9 @@ const TrapOperations = ({
       // only create initial error when form is not completed
       // initialErrors={reduxState.completed ? undefined : { trapStatus: '' }}
       onSubmit={(values: any) => {
-        handleSubmit(values)
+        if (activeTabId) {
+          onSubmit(values, activeTabId)
+        }
       }}
     >
       {({
@@ -157,122 +166,131 @@ const TrapOperations = ({
         touched,
         errors,
         values,
-      }) => (
-        <KeyboardAvoidingView flex='1' behavior='padding'>
-          <ScrollView
-            bg='#fff'
-            p='6%'
-            borderColor='themeGrey'
-            borderWidth='15'
-            borderBottomWidth='0'
-            mb='15'
-          >
-            <Pressable onPress={Keyboard.dismiss}>
-              <VStack space={5}>
-                <Heading>Trap Operations</Heading>
-                <FormControl>
-                  <HStack space={2} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Is the Trap functioning normally?
-                      </Text>
-                    </FormControl.Label>
-                    <Popover placement='bottom left' trigger={popoverTrigger}>
-                      <Popover.Content
-                        accessibilityLabel='Trap Stats Info'
-                        w='600'
-                        mr='10'
-                      >
-                        <Popover.Arrow />
-                        <Popover.CloseButton />
-                        <Popover.Header>
-                          Please select one of the trap functioning dropdowns
-                          based on a visual inspection of the trap.
-                        </Popover.Header>
-                        <Popover.Body p={4}>
-                          <VStack space={2}>
-                            <HStack space={2} alignItems='flex-start'>
-                              <Avatar size={'2'} mt={'2'} />
-                              <Text fontSize='md'>
-                                Trap Functioning Normally: Trap rotating
-                                normally in the expected location in river.
-                              </Text>
-                            </HStack>
-                            <HStack space={2} alignItems='flex-start'>
-                              <Avatar size={'2'} mt={'2'} />
-                              <Text fontSize='md'>
-                                Trap Not Functioning: Trap not rotating or
-                                displaced in the river.
-                              </Text>
-                            </HStack>
-                            <HStack space={2} alignItems='flex-start'>
-                              <Avatar size={'2'} mt={'2'} />
-                              <Text fontSize='md'>
-                                Trap Functioning but not normally: The trap
-                                appears to be rotating but not consistently.
-                                There may be high flows or high debris levels
-                                that are affecting the trap.
-                              </Text>
-                            </HStack>
-                            <HStack space={2} alignItems='flex-start'>
-                              <Avatar size={'2'} mt={'2'} />
-                              <Text fontSize='md'>
-                                Trap Not in Service: Trap not set up for fishing
-                                upon arrival.
-                              </Text>
-                            </HStack>
-                          </VStack>
-                        </Popover.Body>
-                      </Popover.Content>
-                    </Popover>
-                  </HStack>
-                  <CustomSelect
-                    selectedValue={values.trapStatus}
-                    placeholder='Trap Status'
-                    onValueChange={handleChange('trapStatus')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues.trapFunctionality.map(
-                      (item: any) => {
-                        if (item.definition == 'trap not in service') {
-                          return {
-                            label: `${item.definition} ${trapNotInServiceLabel}`,
-                            value: `${item.definition} ${trapNotInServiceLabel}`,
-                          }
-                        } else {
-                          return {
-                            label: item.definition,
-                            value: item.definition,
+        resetForm,
+      }) => {
+        useEffect(() => {
+          if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
+            onSubmit(values, previouslyActiveTabId)
+            resetForm()
+          }
+        }, [previouslyActiveTabId])
+
+        return (
+          <KeyboardAvoidingView flex='1' behavior='padding'>
+            <ScrollView
+              bg='#fff'
+              p='6%'
+              borderColor='themeGrey'
+              borderWidth='15'
+              borderBottomWidth='0'
+              mb='15'
+            >
+              <Pressable onPress={Keyboard.dismiss}>
+                <VStack space={5}>
+                  <Heading>Trap Operations</Heading>
+                  <FormControl>
+                    <HStack space={2} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Is the Trap functioning normally?
+                        </Text>
+                      </FormControl.Label>
+                      <Popover placement='bottom left' trigger={popoverTrigger}>
+                        <Popover.Content
+                          accessibilityLabel='Trap Stats Info'
+                          w='600'
+                          mr='10'
+                        >
+                          <Popover.Arrow />
+                          <Popover.CloseButton />
+                          <Popover.Header>
+                            Please select one of the trap functioning dropdowns
+                            based on a visual inspection of the trap.
+                          </Popover.Header>
+                          <Popover.Body p={4}>
+                            <VStack space={2}>
+                              <HStack space={2} alignItems='flex-start'>
+                                <Avatar size={'2'} mt={'2'} />
+                                <Text fontSize='md'>
+                                  Trap Functioning Normally: Trap rotating
+                                  normally in the expected location in river.
+                                </Text>
+                              </HStack>
+                              <HStack space={2} alignItems='flex-start'>
+                                <Avatar size={'2'} mt={'2'} />
+                                <Text fontSize='md'>
+                                  Trap Not Functioning: Trap not rotating or
+                                  displaced in the river.
+                                </Text>
+                              </HStack>
+                              <HStack space={2} alignItems='flex-start'>
+                                <Avatar size={'2'} mt={'2'} />
+                                <Text fontSize='md'>
+                                  Trap Functioning but not normally: The trap
+                                  appears to be rotating but not consistently.
+                                  There may be high flows or high debris levels
+                                  that are affecting the trap.
+                                </Text>
+                              </HStack>
+                              <HStack space={2} alignItems='flex-start'>
+                                <Avatar size={'2'} mt={'2'} />
+                                <Text fontSize='md'>
+                                  Trap Not in Service: Trap not set up for
+                                  fishing upon arrival.
+                                </Text>
+                              </HStack>
+                            </VStack>
+                          </Popover.Body>
+                        </Popover.Content>
+                      </Popover>
+                    </HStack>
+                    <CustomSelect
+                      selectedValue={values.trapStatus}
+                      placeholder='Trap Status'
+                      onValueChange={handleChange('trapStatus')}
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={dropdownValues.trapFunctionality.map(
+                        (item: any) => {
+                          if (item.definition == 'trap not in service') {
+                            return {
+                              label: `${item.definition} ${trapNotInServiceLabel}`,
+                              value: `${item.definition} ${trapNotInServiceLabel}`,
+                            }
+                          } else {
+                            return {
+                              label: item.definition,
+                              value: item.definition,
+                            }
                           }
                         }
-                      }
-                    )}
-                  />
-                </FormControl>
-                {(values.trapStatus === 'trap functioning but not normally' ||
-                  values.trapStatus === 'trap not functioning') && (
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Reason For Trap Not Functioning
-                      </Text>
-                    </FormControl.Label>
-                    <CustomSelect
-                      selectedValue={values.reasonNotFunc}
-                      placeholder='Reason'
-                      onValueChange={handleChange('reasonNotFunc')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={whyTrapNotFunctioning}
+                      )}
                     />
-
-                    {touched.reasonNotFunc &&
-                      errors.reasonNotFunc &&
-                      RenderErrorMessage(errors, 'reasonNotFunc')}
                   </FormControl>
-                )}
-                {values.trapStatus.length > 0 &&
-                  values.trapStatus !== trapNotInServiceIdentifier && (
-                    <>
-                      {/* <FormControl w='47%'>
+                  {(values.trapStatus === 'trap functioning but not normally' ||
+                    values.trapStatus === 'trap not functioning') && (
+                    <FormControl>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Reason For Trap Not Functioning
+                        </Text>
+                      </FormControl.Label>
+                      <CustomSelect
+                        selectedValue={values.reasonNotFunc}
+                        placeholder='Reason'
+                        onValueChange={handleChange('reasonNotFunc')}
+                        setFieldTouched={setFieldTouched}
+                        selectOptions={whyTrapNotFunctioning}
+                      />
+
+                      {touched.reasonNotFunc &&
+                        errors.reasonNotFunc &&
+                        RenderErrorMessage(errors, 'reasonNotFunc')}
+                    </FormControl>
+                  )}
+                  {values.trapStatus.length > 0 &&
+                    values.trapStatus !== trapNotInServiceIdentifier && (
+                      <>
+                        {/* <FormControl w='47%'>
                           <HStack space={4} alignItems='center'>
                             <FormControl.Label>
                               <Text color='black' fontSize='xl'>
@@ -307,293 +325,296 @@ const TrapOperations = ({
                           </Text>
                         </FormControl> */}
 
-                      <FormControl w='30%'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Cone Setting
-                          </Text>
-                        </FormControl.Label>
-                        <Radio.Group
-                          name='coneSetting'
-                          accessibilityLabel='cone setting'
-                          value={`${values.coneSetting}`}
-                          onChange={(value: any) => {
-                            setFieldTouched('coneSetting', true)
-                            if (value === 'full') {
-                              setFieldValue('coneSetting', 'full')
-                            } else {
-                              setFieldValue('coneSetting', 'half')
-                            }
-                          }}
-                        >
-                          <Radio
-                            colorScheme='primary'
-                            value='full'
-                            my={1}
-                            _icon={{ color: 'primary' }}
-                          >
-                            Full
-                          </Radio>
-                          <Radio
-                            colorScheme='primary'
-                            value='half'
-                            my={1}
-                            _icon={{ color: 'primary' }}
-                          >
-                            Half
-                          </Radio>
-                        </Radio.Group>
-                      </FormControl>
-
-                      <FormControl>
-                        <HStack space={4} alignItems='center'>
+                        <FormControl w='30%'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
-                              RPM Before Cleaning
+                              Cone Setting
                             </Text>
                           </FormControl.Label>
-                          <Popover
-                            placement='bottom left'
-                            trigger={(triggerProps) => {
-                              return (
-                                <IconButton
-                                  {...triggerProps}
-                                  icon={
-                                    <Icon
-                                      as={MaterialIcons}
-                                      name='info-outline'
-                                      size='lg'
-                                    />
-                                  }
-                                ></IconButton>
-                              )
+                          <Radio.Group
+                            name='coneSetting'
+                            accessibilityLabel='cone setting'
+                            value={`${values.coneSetting}`}
+                            onChange={(value: any) => {
+                              setFieldTouched('coneSetting', true)
+                              if (value === 'full') {
+                                setFieldValue('coneSetting', 'full')
+                              } else {
+                                setFieldValue('coneSetting', 'half')
+                              }
                             }}
                           >
-                            <Popover.Content
-                              accessibilityLabel='RPM Info'
-                              w='600'
-                              mr='10'
+                            <Radio
+                              colorScheme='primary'
+                              value='full'
+                              my={1}
+                              _icon={{ color: 'primary' }}
                             >
-                              <Popover.Arrow />
-                              <Popover.Header>
-                                Take one or more measure of cone rotations. We
-                                will save the average in our database.
-                              </Popover.Header>
-                            </Popover.Content>
-                          </Popover>
-                          {((touched.rpm1 && errors.rpm1) ||
-                            (touched.rpm2 && errors.rpm2) ||
-                            (touched.rpm3 && errors.rpm3)) && (
-                            <HStack space={1}>
-                              <Icon
-                                marginTop={'.5'}
-                                as={Ionicons}
-                                name='alert-circle-outline'
-                                color='error'
-                              />
-                              <Text style={{ fontSize: 14, color: '#b71c1c' }}>
-                                At least one measurement is required
-                              </Text>
-                            </HStack>
-                          )}
-                        </HStack>
-                        <HStack space={8} justifyContent='space-between'>
-                          <FormControl w='30%'>
-                            <VStack>
-                              <OptimizedInput
-                                height='50px'
-                                fontSize='16'
-                                placeholder='Numeric Value'
-                                keyboardType='numeric'
-                                onChangeText={handleChange('rpm1')}
-                                onBlur={handleBlur('rpm1')}
-                                value={values.rpm1}
-                              />
-                              {Number(values.rpm1) > QARanges.RPM.max ? (
-                                <RenderWarningMessage />
-                              ) : (
-                                <></>
-                              )}
-                            </VStack>
-                          </FormControl>
-                          <FormControl w='30%'>
-                            <VStack>
-                              <OptimizedInput
-                                height='50px'
-                                fontSize='16'
-                                placeholder='Numeric Value (optional)'
-                                keyboardType='numeric'
-                                onChangeText={handleChange('rpm2')}
-                                onBlur={handleBlur('rpm2')}
-                                value={values.rpm2}
-                              />
-                              {Number(values.rpm2) > QARanges.RPM.max ? (
-                                <RenderWarningMessage />
-                              ) : (
-                                <></>
-                              )}
-                            </VStack>
-                          </FormControl>
-                          <FormControl w='30%'>
-                            <VStack>
-                              <OptimizedInput
-                                height='50px'
-                                fontSize='16'
-                                placeholder='Numeric Value (optional)'
-                                keyboardType='numeric'
-                                onChangeText={handleChange('rpm3')}
-                                onBlur={handleBlur('rpm3')}
-                                value={values.rpm3}
-                              />
-                              {Number(values.rpm3) > QARanges.RPM.max ? (
-                                <RenderWarningMessage />
-                              ) : (
-                                <></>
-                              )}
-                            </VStack>
-                          </FormControl>
-                        </HStack>
-                        <Text color='grey' mt='5' fontSize='17'>
-                          Please take 3 separate measures of cone rotations per
-                          minute before cleaning the trap.
-                        </Text>
-                      </FormControl>
-                      <FormControl w='47%'>
-                        <HStack space={4} alignItems='center'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Total Revolutions
-                            </Text>
-                          </FormControl.Label>
-                          {Number(values.totalRevolutions) >
-                            QARanges.totalRevolutions.max && (
-                            <RenderWarningMessage />
-                          )}
-                          {touched.totalRevolutions &&
-                            errors.totalRevolutions &&
-                            RenderErrorMessage(errors, 'totalRevolutions')}
-                        </HStack>
-                        <OptimizedInput
-                          height='50px'
-                          fontSize='16'
-                          placeholder='Numeric Value'
-                          keyboardType='numeric'
-                          onChangeText={handleChange('totalRevolutions')}
-                          onBlur={handleBlur('totalRevolutions')}
-                          value={values.totalRevolutions}
-                        />
-                      </FormControl>
-                      <Heading>Environmental Conditions</Heading>
-                      <HStack space={5} width='125%'>
-                        <FormControl w='1/4'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Flow Measure
-                            </Text>
-                          </FormControl.Label>
-                          <OptimizedInput
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Populated from CDEC'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('flowMeasure')}
-                            onBlur={handleBlur('flowMeasure')}
-                            value={values.flowMeasure}
-                          />
-                          {inputUnit(values.flowMeasureUnit)}
-                          {touched.flowMeasure &&
-                            Number(values.flowMeasure) >
-                              QARanges.flowMeasure[selectedStream] &&
-                            QARanges.flowMeasure[selectedStream]?.max && (
-                              <RenderWarningMessage />
-                            )}
-                          {touched.flowMeasure &&
-                            Number(values.flowMeasure) <
-                              QARanges.flowMeasure[selectedStream] &&
-                            QARanges.flowMeasure[selectedStream]?.min && (
-                              <RenderWarningMessage />
-                            )}
-                          {touched.flowMeasure &&
-                            errors.flowMeasure &&
-                            RenderErrorMessage(errors, 'flowMeasure')}
+                              Full
+                            </Radio>
+                            <Radio
+                              colorScheme='primary'
+                              value='half'
+                              my={1}
+                              _icon={{ color: 'primary' }}
+                            >
+                              Half
+                            </Radio>
+                          </Radio.Group>
                         </FormControl>
-                        <FormControl w='1/4'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Water Temperature
-                            </Text>
-                          </FormControl.Label>
-                          <OptimizedInput
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('waterTemperature')}
-                            onBlur={handleBlur('waterTemperature')}
-                            value={values.waterTemperature}
-                          />
-                          {inputUnit(
-                            values.waterTemperatureUnit,
-                            setFieldValue
-                          )}
-                          {calculateTempWarning(
-                            Number(values.waterTemperature),
-                            values.waterTemperatureUnit
-                          )}
-                          {touched.waterTemperature &&
-                            errors.waterTemperature &&
-                            RenderErrorMessage(errors, 'waterTemperature')}
-                        </FormControl>
-                        <FormControl w='1/4'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Water Turbidity
-                            </Text>
-                          </FormControl.Label>
 
+                        <FormControl>
+                          <HStack space={4} alignItems='center'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                RPM Before Cleaning
+                              </Text>
+                            </FormControl.Label>
+                            <Popover
+                              placement='bottom left'
+                              trigger={(triggerProps) => {
+                                return (
+                                  <IconButton
+                                    {...triggerProps}
+                                    icon={
+                                      <Icon
+                                        as={MaterialIcons}
+                                        name='info-outline'
+                                        size='lg'
+                                      />
+                                    }
+                                  ></IconButton>
+                                )
+                              }}
+                            >
+                              <Popover.Content
+                                accessibilityLabel='RPM Info'
+                                w='600'
+                                mr='10'
+                              >
+                                <Popover.Arrow />
+                                <Popover.Header>
+                                  Take one or more measure of cone rotations. We
+                                  will save the average in our database.
+                                </Popover.Header>
+                              </Popover.Content>
+                            </Popover>
+                            {((touched.rpm1 && errors.rpm1) ||
+                              (touched.rpm2 && errors.rpm2) ||
+                              (touched.rpm3 && errors.rpm3)) && (
+                              <HStack space={1}>
+                                <Icon
+                                  marginTop={'.5'}
+                                  as={Ionicons}
+                                  name='alert-circle-outline'
+                                  color='error'
+                                />
+                                <Text
+                                  style={{ fontSize: 14, color: '#b71c1c' }}
+                                >
+                                  At least one measurement is required
+                                </Text>
+                              </HStack>
+                            )}
+                          </HStack>
+                          <HStack space={8} justifyContent='space-between'>
+                            <FormControl w='30%'>
+                              <VStack>
+                                <OptimizedInput
+                                  height='50px'
+                                  fontSize='16'
+                                  placeholder='Numeric Value'
+                                  keyboardType='numeric'
+                                  onChangeText={handleChange('rpm1')}
+                                  onBlur={handleBlur('rpm1')}
+                                  value={values.rpm1}
+                                />
+                                {Number(values.rpm1) > QARanges.RPM.max ? (
+                                  <RenderWarningMessage />
+                                ) : (
+                                  <></>
+                                )}
+                              </VStack>
+                            </FormControl>
+                            <FormControl w='30%'>
+                              <VStack>
+                                <OptimizedInput
+                                  height='50px'
+                                  fontSize='16'
+                                  placeholder='Numeric Value (optional)'
+                                  keyboardType='numeric'
+                                  onChangeText={handleChange('rpm2')}
+                                  onBlur={handleBlur('rpm2')}
+                                  value={values.rpm2}
+                                />
+                                {Number(values.rpm2) > QARanges.RPM.max ? (
+                                  <RenderWarningMessage />
+                                ) : (
+                                  <></>
+                                )}
+                              </VStack>
+                            </FormControl>
+                            <FormControl w='30%'>
+                              <VStack>
+                                <OptimizedInput
+                                  height='50px'
+                                  fontSize='16'
+                                  placeholder='Numeric Value (optional)'
+                                  keyboardType='numeric'
+                                  onChangeText={handleChange('rpm3')}
+                                  onBlur={handleBlur('rpm3')}
+                                  value={values.rpm3}
+                                />
+                                {Number(values.rpm3) > QARanges.RPM.max ? (
+                                  <RenderWarningMessage />
+                                ) : (
+                                  <></>
+                                )}
+                              </VStack>
+                            </FormControl>
+                          </HStack>
+                          <Text color='grey' mt='5' fontSize='17'>
+                            Please take 3 separate measures of cone rotations
+                            per minute before cleaning the trap.
+                          </Text>
+                        </FormControl>
+                        <FormControl w='47%'>
+                          <HStack space={4} alignItems='center'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                Total Revolutions
+                              </Text>
+                            </FormControl.Label>
+                            {Number(values.totalRevolutions) >
+                              QARanges.totalRevolutions.max && (
+                              <RenderWarningMessage />
+                            )}
+                            {touched.totalRevolutions &&
+                              errors.totalRevolutions &&
+                              RenderErrorMessage(errors, 'totalRevolutions')}
+                          </HStack>
                           <OptimizedInput
                             height='50px'
                             fontSize='16'
                             placeholder='Numeric Value'
                             keyboardType='numeric'
-                            onChangeText={handleChange('waterTurbidity')}
-                            onBlur={handleBlur('waterTurbidity')}
-                            value={values.waterTurbidity}
+                            onChangeText={handleChange('totalRevolutions')}
+                            onBlur={handleBlur('totalRevolutions')}
+                            value={values.totalRevolutions}
                           />
-                          {inputUnit(values.waterTurbidityUnit)}
-                          {Number(values.waterTurbidity) >
-                            QARanges.waterTurbidity.max && (
-                            <RenderWarningMessage />
-                          )}
-                          {touched.waterTurbidity &&
-                            errors.waterTurbidity &&
-                            RenderErrorMessage(errors, 'waterTurbidity')}
                         </FormControl>
-                      </HStack>
-                      <Text
-                        color='black'
-                        fontSize='xl'
-                        alignSelf='center'
-                        pb='15%'
-                      >
-                        - Remove debris and begin fish processing -
-                      </Text>
-                    </>
-                  )}
-              </VStack>
-            </Pressable>
-          </ScrollView>
-          <NavButtons
-            navigation={navigation}
-            handleSubmit={handleSubmit}
-            errors={
-              values.trapStatus !== trapNotInServiceIdentifier ? errors : null
-            }
-            touched={touched}
-            values={values}
-          />
-        </KeyboardAvoidingView>
-      )}
+                        <Heading>Environmental Conditions</Heading>
+                        <HStack space={5} width='125%'>
+                          <FormControl w='1/4'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                Flow Measure
+                              </Text>
+                            </FormControl.Label>
+                            <OptimizedInput
+                              height='50px'
+                              fontSize='16'
+                              placeholder='Populated from CDEC'
+                              keyboardType='numeric'
+                              onChangeText={handleChange('flowMeasure')}
+                              onBlur={handleBlur('flowMeasure')}
+                              value={values.flowMeasure}
+                            />
+                            {inputUnit(values.flowMeasureUnit)}
+                            {touched.flowMeasure &&
+                              Number(values.flowMeasure) >
+                                QARanges.flowMeasure[selectedStream] &&
+                              QARanges.flowMeasure[selectedStream]?.max && (
+                                <RenderWarningMessage />
+                              )}
+                            {touched.flowMeasure &&
+                              Number(values.flowMeasure) <
+                                QARanges.flowMeasure[selectedStream] &&
+                              QARanges.flowMeasure[selectedStream]?.min && (
+                                <RenderWarningMessage />
+                              )}
+                            {touched.flowMeasure &&
+                              errors.flowMeasure &&
+                              RenderErrorMessage(errors, 'flowMeasure')}
+                          </FormControl>
+                          <FormControl w='1/4'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                Water Temperature
+                              </Text>
+                            </FormControl.Label>
+                            <OptimizedInput
+                              height='50px'
+                              fontSize='16'
+                              placeholder='Numeric Value'
+                              keyboardType='numeric'
+                              onChangeText={handleChange('waterTemperature')}
+                              onBlur={handleBlur('waterTemperature')}
+                              value={values.waterTemperature}
+                            />
+                            {inputUnit(
+                              values.waterTemperatureUnit,
+                              setFieldValue
+                            )}
+                            {calculateTempWarning(
+                              Number(values.waterTemperature),
+                              values.waterTemperatureUnit
+                            )}
+                            {touched.waterTemperature &&
+                              errors.waterTemperature &&
+                              RenderErrorMessage(errors, 'waterTemperature')}
+                          </FormControl>
+                          <FormControl w='1/4'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                Water Turbidity
+                              </Text>
+                            </FormControl.Label>
+
+                            <OptimizedInput
+                              height='50px'
+                              fontSize='16'
+                              placeholder='Numeric Value'
+                              keyboardType='numeric'
+                              onChangeText={handleChange('waterTurbidity')}
+                              onBlur={handleBlur('waterTurbidity')}
+                              value={values.waterTurbidity}
+                            />
+                            {inputUnit(values.waterTurbidityUnit)}
+                            {Number(values.waterTurbidity) >
+                              QARanges.waterTurbidity.max && (
+                              <RenderWarningMessage />
+                            )}
+                            {touched.waterTurbidity &&
+                              errors.waterTurbidity &&
+                              RenderErrorMessage(errors, 'waterTurbidity')}
+                          </FormControl>
+                        </HStack>
+                        <Text
+                          color='black'
+                          fontSize='xl'
+                          alignSelf='center'
+                          pb='15%'
+                        >
+                          - Remove debris and begin fish processing -
+                        </Text>
+                      </>
+                    )}
+                </VStack>
+              </Pressable>
+            </ScrollView>
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={handleSubmit}
+              errors={
+                values.trapStatus !== trapNotInServiceIdentifier ? errors : null
+              }
+              touched={touched}
+              values={values}
+            />
+          </KeyboardAvoidingView>
+        )
+      }}
     </Formik>
   )
 }

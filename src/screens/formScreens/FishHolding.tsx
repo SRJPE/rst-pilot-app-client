@@ -16,11 +16,15 @@ import {
 const FishHolding = ({
   fishStore,
   selectedFishStoreState,
-  fishHoldingTabId,
+  activeTabId,
+  previouslyActiveTabId,
+  navigationSlice,
 }: {
   fishStore: FishStoreI
   selectedFishStoreState: SelectedFishStoreI
-  fishHoldingTabId: string
+  activeTabId: string | null
+  previouslyActiveTabId: string | null
+  navigationSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation: any = useNavigation()
@@ -36,7 +40,13 @@ const FishHolding = ({
       setSelectedFishStore(selectedFishStoreState as SelectedFishStoreI)
     }
     setSelectedLifeStagesAndRuns()
-  }, [])
+  }, [activeTabId])
+
+  useEffect(() => {
+    if (previouslyActiveTabId && navigationSlice.activeStep === 16) {
+      handleSubmit(previouslyActiveTabId)
+    }
+  }, [previouslyActiveTabId])
 
   useEffect(() => {
     setSelectedLifeStagesAndRuns()
@@ -134,21 +144,19 @@ const FishHolding = ({
     calculateTotalFish()
   }
 
-  const handleSubmit = () => {
-    if (fishHoldingTabId) {
+  const handleSubmit = (tabId: string) => {
+    if (tabId) {
       dispatch(saveTotalFishHolding(totalFish))
       dispatch(
         saveFishHolding({
-          tabId: fishHoldingTabId,
+          tabId,
           values: {
             totalFishHolding: totalFish,
             selectedFishStore: selectedFishStore,
           },
         })
       )
-      dispatch(
-        markFishHoldingCompleted({ tabId: fishHoldingTabId, completed: true })
-      )
+      dispatch(markFishHoldingCompleted({ tabId, completed: true }))
     }
   }
 
@@ -225,7 +233,12 @@ const FishHolding = ({
           <Heading>Total Fish Holding: {totalFish}</Heading>
         </HStack>
       </View>
-      <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
+      <NavButtons
+        navigation={navigation}
+        handleSubmit={() => {
+          if (activeTabId) handleSubmit(activeTabId)
+        }}
+      />
     </>
   )
 }
@@ -251,7 +264,9 @@ const mapStateToProps = (state: RootState) => {
     fishStore: state.fishInput[fishInputTabId].fishStore,
     selectedFishStoreState:
       state.fishHolding[fishHoldingTabId].values.selectedFishStore,
-    fishHoldingTabId,
+    activeTabId: state.tabSlice.activeTabId,
+    previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
+    navigationSlice: state.navigation
   }
 }
 
