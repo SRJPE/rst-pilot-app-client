@@ -19,6 +19,7 @@ import {
 } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
+import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -44,6 +45,7 @@ const PaperEntry = ({
       ? (historicalDataStore[tabState.activeTabId].values.comments as string)
       : (historicalDataStore['placeholderId'].values.comments as string)
   )
+  const [dateError, setDateError] = useState('')
 
   useEffect(() => {
     //use the values from the store if they are not null
@@ -57,6 +59,14 @@ const PaperEntry = ({
     }
   }, [])
 
+  useEffect(() => {
+    if (Date.parse(endDate) < Date.parse(startDate)) {
+      setDateError('Start Date is later than End Date')
+    } else {
+      setDateError('')
+    }
+  }, [startDate, endDate])
+
   const onStartDateChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
     setStartDate(currentDate)
@@ -68,6 +78,8 @@ const PaperEntry = ({
   }
 
   const handleSubmit = () => {
+    if (dateError) return
+
     const tabId = tabState.activeTabId
     const tabs = tabState.tabs
     const trapSite = tabs[tabId].trapSite
@@ -76,7 +88,7 @@ const PaperEntry = ({
       if (trapSite == tabs[id].trapSite) {
         dispatch(
           savePaperEntry({
-            tabId,
+            tabId: id,
             values: {
               comments,
               startDate,
@@ -122,6 +134,8 @@ const PaperEntry = ({
             </Box>
           </HStack>
 
+          {dateError ? RenderErrorMessage({ dateError }, 'dateError') : <></>}
+
           <FormControl>
             <FormControl.Label>
               <Text color='black' fontSize='xl'>
@@ -141,7 +155,7 @@ const PaperEntry = ({
           </FormControl>
         </VStack>
       </View>
-      <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
+      <NavButtons navigation={navigation} handleSubmit={handleSubmit} errors={dateError}/>
     </>
   )
 }
