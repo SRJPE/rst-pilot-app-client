@@ -237,6 +237,39 @@ const IncompleteSections = ({
           : null,
         rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
         rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
+        trapVisitEnvironmental: [
+          {
+            measureName: 'flow measure',
+            measureValueNumeric: trapOperationsState[id].values.flowMeasure,
+            measureValueText:
+              trapOperationsState[id].values.flowMeasure.toString(),
+            measureUnit: 5,
+          },
+          {
+            measureName: 'water temperature',
+            measureValueNumeric:
+              trapOperationsState[id].values.waterTemperature,
+            measureValueText:
+              trapOperationsState[id].values.waterTemperature.toString(),
+            measureUnit:
+              trapOperationsState[id].values.waterTemperatureUnit === '°F'
+                ? 1
+                : 2,
+          },
+          {
+            measureName: 'water turbidity',
+            measureValueNumeric: trapOperationsState[id].values.waterTurbidity,
+            measureValueText:
+              trapOperationsState[id].values.waterTurbidity.toString(),
+            measureUnit: 25,
+          },
+        ],
+        trapCoordinates: {
+          xCoord: trapPostProcessingState[id].values.trapLatitude,
+          yCoord: trapPostProcessingState[id].values.trapLongitude,
+          datum: null,
+          projection: null,
+        },
         inHalfConeConfiguration:
           trapOperationsState[id].values.coneSetting === 'half' ? true : false,
         debrisVolumeLiters: trapPostProcessingState[id].values.debrisVolume
@@ -280,11 +313,12 @@ const IncompleteSections = ({
     Object.keys(fishInputState).forEach((tabGroupId) => {
       if (tabGroupId != 'placeholderId') {
         const fishStoreKeys = Object.keys(fishInputState[tabGroupId].fishStore)
-        const activeTabId = Object.keys(tabState.tabs)
-          .filter((id) => {
-            return tabState.tabs[id].groupId === tabGroupId
-          })[0]
-        const programId = visitSetupState[activeTabId] ? visitSetupState[activeTabId].values.programId : 1
+        const activeTabId = Object.keys(tabState.tabs).filter((id) => {
+          return tabState.tabs[id].groupId === tabGroupId
+        })[0]
+        const programId = visitSetupState[activeTabId]
+          ? visitSetupState[activeTabId].values.programId
+          : 1
         fishStoreKeys.forEach((key) => {
           const fishValue = fishInputState[tabGroupId].fishStore[key]
           catchRawSubmissions.push({
