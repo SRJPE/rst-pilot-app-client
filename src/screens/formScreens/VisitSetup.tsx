@@ -316,7 +316,7 @@ const VisitSetup = ({
     ]
     const crewMemberDefaults = visitSetupDefaultsState?.crewMembers
     crewMemberDefaults.forEach((crewList: any[]) => {
-      if (crewList[0].programId === programId) {
+      if (crewList.length && crewList[0].programId === programId) {
         payload = crewList.map((crewMember: any) => ({
           label: `${crewMember?.firstName} ${crewMember?.lastName}`,
           value: `${crewMember?.firstName} ${crewMember?.lastName}`,
