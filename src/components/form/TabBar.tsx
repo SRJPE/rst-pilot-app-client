@@ -1,14 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
 import { NativeStackHeaderProps } from '@react-navigation/native-stack'
-import {
-  Badge,
-  Box,
-  Icon,
-  ScrollView,
-  HStack,
-  Button,
-  Text,
-} from 'native-base'
+import { Badge, Box, Icon, ScrollView, HStack, Button, Text } from 'native-base'
+import { useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { uid } from 'uid'
 import {
@@ -22,9 +15,11 @@ import { AppDispatch, RootState } from '../../redux/store'
 const TabBar = ({
   headerProps,
   tabSlice,
+  trapOperationsSlice,
 }: {
   headerProps: NativeStackHeaderProps
   tabSlice: TabStateI
+  trapOperationsSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const nonTabBarScreens = [
@@ -33,6 +28,48 @@ const TabBar = ({
     'Batch Count',
     'Incomplete Sections',
   ]
+  const formSlicesToValidateDict = { 'Trap Operations': trapOperationsSlice }
+  const [tabErrors, setTabErrors] = useState({})
+  const [tabErrorCount, setTabErrorCount] = useState<{
+    [tabId: string]: number
+  }>({})
+
+  useEffect(() => {
+    generateTabErrorsAndCount()
+  }, [trapOperationsSlice])
+
+  const generateTabErrorsAndCount = () => {
+    let payload: any = {}
+    let payloadCount: {
+      [tabId: string]: number
+    } = {}
+    const tabIds = Object.keys(tabSlice.tabs)
+    const formSliceIds = Object.keys(formSlicesToValidateDict)
+
+    // for each tab ID
+    tabIds.forEach((tabId) => {
+      payload[tabId] = {}
+      payloadCount[tabId] = 0
+
+      // for each tab's form slices
+      formSliceIds.forEach((formSliceId) => {
+        let formSlice =
+          formSlicesToValidateDict[
+            formSliceId as keyof typeof formSlicesToValidateDict
+          ]
+
+        if (formSlice[tabId] && formSlice[tabId].errors) {
+          payload[tabId][formSliceId] = formSlice[tabId].errors
+          payloadCount[tabId] += Object.keys(formSlice[tabId].errors).length
+        }
+      })
+    })
+
+    // console.log('payload: ', payload)
+    // console.log('payloadCount: ', payloadCount)
+    setTabErrors(payload)
+    setTabErrorCount(payloadCount)
+  }
 
   if (
     Object.keys(tabSlice.tabs).length &&
@@ -44,31 +81,57 @@ const TabBar = ({
         <ScrollView horizontal={true}>
           <HStack alignItems={'center'} justifyContent='space-between'>
             {Object.keys(tabSlice.tabs).map((tabId) => (
-              <Button
-                bg={tabId == tabSlice.activeTabId ? 'primary' : 'secondary'}
-                onPress={() => dispatch(setActiveTab(tabId))}
-                key={tabId}
-                mr={5}
-              >
-                <HStack alignItems={'center'} justifyContent='space-between'>
-                  <Text
-                    fontSize='lg'
-                    color={tabId == tabSlice.activeTabId ? 'white' : 'primary'}
+              <>
+                <Button
+                  size={'lg'}
+                  height={'16'}
+                  bg={tabId == tabSlice.activeTabId ? 'primary' : 'secondary'}
+                  onPress={() => dispatch(setActiveTab(tabId))}
+                  key={`button-${tabId}`}
+                  mr={5}
+                >
+                  <HStack alignItems={'center'} justifyContent='space-between'>
+                    <Text
+                      fontSize='lg'
+                      color={
+                        tabId == tabSlice.activeTabId ? 'white' : 'primary'
+                      }
+                    >
+                      {tabSlice.tabs[tabId].name}
+                    </Text>
+                    <Icon
+                      onPress={() => dispatch(deleteTab(tabId))}
+                      as={Ionicons}
+                      name='ios-close-circle'
+                      color='#FFF'
+                      size={6}
+                      margin='0'
+                      padding='0'
+                      marginLeft={3}
+                    />
+                  </HStack>
+                </Button>
+                {tabErrorCount[tabId] ? (
+                  <Badge
+                    colorScheme='danger'
+                    rounded='full'
+                    mb={'50px'}
+                    ml={-9}
+                    mr={3}
+                    zIndex={1}
+                    variant='solid'
+                    alignSelf='flex-end'
+                    _text={{
+                      fontSize: 16,
+                    }}
+                    key={`badge-${tabId}`}
                   >
-                    {tabSlice.tabs[tabId].name}
-                  </Text>
-                  <Icon
-                    onPress={() => dispatch(deleteTab(tabId))}
-                    as={Ionicons}
-                    name='ios-close-circle'
-                    color='#FFF'
-                    size={6}
-                    margin='0'
-                    padding='0'
-                    marginLeft={3}
-                  />
-                </HStack>
-              </Button>
+                    {tabErrorCount[tabId]}
+                  </Badge>
+                ) : (
+                  <></>
+                )}
+              </>
             ))}
             <Icon
               onPress={() => {
@@ -116,6 +179,7 @@ const TabBar = ({
 const mapStateToProps = (state: RootState) => {
   return {
     tabSlice: state.tabSlice,
+    trapOperationsSlice: state.trapOperations,
   }
 }
 
