@@ -437,6 +437,12 @@ const VisitSetup = ({
                     placeholder='Stream'
                     onValueChange={(itemValue: string) => {
                       setFieldValue('stream', itemValue)
+                      if (itemValue === 'Mill Creek') {
+                        setFieldValue('trapSite', 'Mill Creek RST')
+                      }
+                      if (itemValue === 'Deer Creek') {
+                        setFieldValue('trapSite', 'Deer Creek RST')
+                      }
                       updateSelectedProgram(itemValue)
                     }}
                     setFieldTouched={setFieldTouched}
