@@ -198,17 +198,10 @@ const IncompleteSections = ({
         isPaperEntry: visitSetupState[id].isPaperEntry,
         trapVisitTimeStart: visitSetupState[id].isPaperEntry
           ? paperEntryState[id].values.startDate
-          : trapPostProcessingState[
-              id
-            ].values.trapVisitStartTime.toLocaleString('en-US', {
-              timeZone: 'America/Los_Angeles',
-            }),
+          : trapPostProcessingState[id].values.trapVisitStartTime,
         trapVisitTimeEnd: visitSetupState[id].isPaperEntry
           ? paperEntryState[id].values.endDate
-          : trapOperationsState[id].values.trapVisitStopTime.toLocaleString(
-              'en-US',
-              { timeZone: 'America/Los_Angeles' }
-            ),
+          : trapOperationsState[id].values.trapVisitStopTime,
         fishProcessed: returnNullableTableId(
           fishProcessedValues.indexOf(
             fishProcessingState[id].values.fishProcessedResult
