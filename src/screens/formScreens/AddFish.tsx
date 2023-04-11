@@ -807,24 +807,26 @@ const AddFishContent = ({
                         />
                       </FormControl>
                     )}
-                    <FormControl w='1/2' paddingRight='9'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Run
-                        </Text>
-                      </FormControl.Label>
-                      <CustomSelect
-                        selectedValue={run.value as string}
-                        placeholder={'Run'}
-                        onValueChange={(value: string) =>
-                          setRun({ ...run, value })
-                        }
-                        setFieldTouched={() =>
-                          setRun({ ...run, touched: true })
-                        }
-                        selectOptions={dropdownValues?.run}
-                      />
-                    </FormControl>
+                    {(species.value !== 'Chinook salmon') && (
+                      <FormControl w='1/2' paddingRight='9'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Run
+                          </Text>
+                        </FormControl.Label>
+                        <CustomSelect
+                          selectedValue={run.value as string}
+                          placeholder={'Run'}
+                          onValueChange={(value: string) =>
+                            setRun({ ...run, value })
+                          }
+                          setFieldTouched={() =>
+                            setRun({ ...run, touched: true })
+                          }
+                          selectOptions={dropdownValues?.run}
+                        />
+                      </FormControl>
+                    )}
                   </HStack>
                   {species.value === 'Chinook salmon' && (
                     <FormControl w='1/2'>
