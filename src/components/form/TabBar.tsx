@@ -9,6 +9,8 @@ import {
   deleteTab,
   setActiveTab,
   TabStateI,
+  updateErrorCount,
+  updateErrorDetails,
 } from '../../redux/reducers/formSlices/tabSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 
@@ -16,10 +18,14 @@ const TabBar = ({
   headerProps,
   tabSlice,
   trapOperationsSlice,
+  fishProcessingSlice,
+  trapPostProcessingSlice,
 }: {
   headerProps: NativeStackHeaderProps
   tabSlice: TabStateI
   trapOperationsSlice: any
+  fishProcessingSlice: any
+  trapPostProcessingSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const nonTabBarScreens = [
@@ -28,19 +34,19 @@ const TabBar = ({
     'Batch Count',
     'Incomplete Sections',
   ]
-  const formSlicesToValidateDict = { 'Trap Operations': trapOperationsSlice }
-  const [tabErrors, setTabErrors] = useState({})
-  const [tabErrorCount, setTabErrorCount] = useState<{
-    [tabId: string]: number
-  }>({})
+  const formSlicesToValidateDict = {
+    'Trap Operations': trapOperationsSlice,
+    'Fish Processing': fishProcessingSlice,
+    'Trap Post-Processing': trapPostProcessingSlice
+  }
 
   useEffect(() => {
     generateTabErrorsAndCount()
-  }, [trapOperationsSlice])
+  }, [trapOperationsSlice, fishProcessingSlice, trapPostProcessingSlice])
 
   const generateTabErrorsAndCount = () => {
-    let payload: any = {}
-    let payloadCount: {
+    let tabsErrorDetails: any = {}
+    let tabsErrorCount: {
       [tabId: string]: number
     } = {}
     const tabIds = Object.keys(tabSlice.tabs)
@@ -48,8 +54,8 @@ const TabBar = ({
 
     // for each tab ID
     tabIds.forEach((tabId) => {
-      payload[tabId] = {}
-      payloadCount[tabId] = 0
+      tabsErrorDetails[tabId] = {}
+      tabsErrorCount[tabId] = 0
 
       // for each tab's form slices
       formSliceIds.forEach((formSliceId) => {
@@ -59,16 +65,19 @@ const TabBar = ({
           ]
 
         if (formSlice[tabId] && formSlice[tabId].errors) {
-          payload[tabId][formSliceId] = formSlice[tabId].errors
-          payloadCount[tabId] += Object.keys(formSlice[tabId].errors).length
+          tabsErrorDetails[tabId][formSliceId] = formSlice[tabId].errors
+          tabsErrorCount[tabId] += Object.keys(formSlice[tabId].errors).length
         }
       })
     })
 
-    // console.log('payload: ', payload)
-    // console.log('payloadCount: ', payloadCount)
-    setTabErrors(payload)
-    setTabErrorCount(payloadCount)
+    Object.keys(tabsErrorCount).forEach((tabId) => {
+      dispatch(updateErrorCount({tabId, errorCount: tabsErrorCount[tabId]}))
+    })
+
+    Object.keys(tabsErrorDetails).forEach((tabId) => {
+      dispatch(updateErrorDetails({tabId, errorDetails: tabsErrorDetails[tabId]}))
+    })
   }
 
   if (
@@ -111,7 +120,7 @@ const TabBar = ({
                     />
                   </HStack>
                 </Button>
-                {tabErrorCount[tabId] ? (
+                {tabSlice.tabs[tabId].errorCount ? (
                   <Badge
                     colorScheme='danger'
                     rounded='full'
@@ -126,7 +135,7 @@ const TabBar = ({
                     }}
                     key={`badge-${tabId}`}
                   >
-                    {tabErrorCount[tabId]}
+                    {tabSlice.tabs[tabId].errorCount}
                   </Badge>
                 ) : (
                   <></>
@@ -180,6 +189,8 @@ const mapStateToProps = (state: RootState) => {
   return {
     tabSlice: state.tabSlice,
     trapOperationsSlice: state.trapOperations,
+    fishProcessingSlice: state.fishProcessing,
+    trapPostProcessingSlice: state.trapPostProcessing
   }
 }
 

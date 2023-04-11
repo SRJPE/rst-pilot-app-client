@@ -7,6 +7,7 @@ interface InitialStateI {
 interface TrapOperationsStateI {
   completed: boolean
   values: TrapOperationsValuesI
+  errors: {[name: string]: any}
 }
 
 export interface TrapOperationsValuesI {
@@ -18,7 +19,6 @@ export interface TrapOperationsValuesI {
   waterTemperatureUnit: string
   waterTurbidity: number | null
   waterTurbidityUnit: string
-
   coneSetting: string | null
   totalRevolutions: number | null
   rpm1: number | null
@@ -46,6 +46,7 @@ const initialState: InitialStateI = {
       rpm3: null,
       trapVisitStopTime: null,
     },
+    errors: {},
   },
 }
 
@@ -55,7 +56,7 @@ export const trapOperationsSlice = createSlice({
   reducers: {
     resetTrapOperationsSlice: () => initialState,
     saveTrapOperations: (state, action) => {
-      const { tabId, values } = action.payload
+      const { tabId, values, errors} = action.payload
       state[tabId] = {
         completed: true,
         values: {
@@ -64,6 +65,7 @@ export const trapOperationsSlice = createSlice({
             ? state[tabId].values.trapVisitStopTime
             : action.payload.values.trapVisitStopTime,
         },
+        errors
       }
     },
     markTrapOperationsCompleted: (state, action) => {

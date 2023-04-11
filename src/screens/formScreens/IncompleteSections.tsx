@@ -362,6 +362,7 @@ const IncompleteSections = ({
                 navigation={navigation}
                 key={idx}
                 step={idx + 1}
+                tabState={tabState}
               />
             )
           })}

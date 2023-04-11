@@ -1,26 +1,29 @@
-import { Button, Icon, Text } from 'native-base'
+import { Badge, Button, HStack, Icon, Text } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import { useEffect, useState } from 'react'
 
 const IncompleteSectionButton = ({
   name,
   completed,
   navigation,
   step,
+  tabState,
 }: {
   name: string
   completed: boolean
   navigation: any
   step: number
+  tabState: TabStateI
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const handleButtonPress = () => {
     navigation.navigate('Trap Visit Form', { screen: name })
     dispatch(updateActiveStep(step))
   }
-
   const calculateMargin = () => {
     switch (name) {
       case 'Visit Setup':
@@ -34,9 +37,21 @@ const IncompleteSectionButton = ({
       case 'Trap Post-Processing':
         return 135
       default:
-        break
+        return 0
     }
   }
+  const badgeMargin = 3
+  const [pageErrors, setPageErrors] = useState({})
+
+  useEffect(() => {
+    Object.keys(tabState.tabs).forEach((tabId) => {
+      Object.keys(tabState.tabs[tabId].errorDetails).forEach((pageName) => {
+        if (pageName === name) {
+          setPageErrors(tabState.tabs[tabId].errorDetails[pageName])
+        }
+      })
+    })
+  }, [tabState.tabs])
 
   return (
     <Button
@@ -90,14 +105,40 @@ const IncompleteSectionButton = ({
       }
       onPress={handleButtonPress}
     >
-      <Text
-        fontSize='md'
-        fontWeight='bold'
-        color={completed ? '#FFFFFF' : 'primary'}
-        mr={calculateMargin()}
-      >
-        {name}
-      </Text>
+      {Object.keys(pageErrors).length ? (
+        <HStack justifyContent={'start'}>
+          <Text
+            fontSize='md'
+            fontWeight='bold'
+            color={completed ? '#FFFFFF' : 'primary'}
+            mr={badgeMargin}
+          >
+            {name}
+          </Text>
+          <Badge
+            colorScheme='danger'
+            rounded='full'
+            zIndex={1}
+            variant='solid'
+            alignSelf='flex-end'
+            mr={calculateMargin() - badgeMargin}
+            _text={{
+              fontSize: 16,
+            }}
+          >
+            {Object.keys(pageErrors).length}
+          </Badge>
+        </HStack>
+      ) : (
+        <Text
+          fontSize='md'
+          fontWeight='bold'
+          color={completed ? '#FFFFFF' : 'primary'}
+          mr={calculateMargin()}
+        >
+          {name}
+        </Text>
+      )}
     </Button>
   )
 }
