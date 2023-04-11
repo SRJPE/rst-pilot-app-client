@@ -195,13 +195,20 @@ const IncompleteSections = ({
         programId: visitSetupState[id].values.programId,
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
-        isPaperEntry: visitSetupState.isPaperEntry,
-        trapVisitTimeStart: visitSetupState.isPaperEntry
+        isPaperEntry: visitSetupState[id].isPaperEntry,
+        trapVisitTimeStart: visitSetupState[id].isPaperEntry
           ? paperEntryState[id].values.startDate
-          : trapPostProcessingState[id].values.trapVisitStartTime,
-        trapVisitTimeEnd: visitSetupState.isPaperEntry
+          : trapPostProcessingState[
+              id
+            ].values.trapVisitStartTime.toLocaleString('en-US', {
+              timeZone: 'America/Los_Angeles',
+            }),
+        trapVisitTimeEnd: visitSetupState[id].isPaperEntry
           ? paperEntryState[id].values.endDate
-          : trapOperationsState[id].values.trapVisitStopTime,
+          : trapOperationsState[id].values.trapVisitStopTime.toLocaleString(
+              'en-US',
+              { timeZone: 'America/Los_Angeles' }
+            ),
         fishProcessed: returnNullableTableId(
           fishProcessedValues.indexOf(
             fishProcessingState[id].values.fishProcessedResult
@@ -209,7 +216,7 @@ const IncompleteSections = ({
         ),
         whyFishNotProcessed: returnNullableTableId(
           whyFishNotProcessedValues.indexOf(
-            fishProcessingState[id].values.fishProcessedResult
+            fishProcessingState[id].values.reasonForNotProcessing
           )
         ),
         sampleGearId: null,
@@ -224,7 +231,7 @@ const IncompleteSections = ({
         ),
         whyTrapNotFunctioning: returnNullableTableId(
           whyTrapNotFunctioningValues.indexOf(
-            trapOperationsState[id].values.reasonForNotFunc
+            trapOperationsState[id].values.reasonNotFunc
           )
         ),
         trapStatusAtEnd: returnNullableTableId(
