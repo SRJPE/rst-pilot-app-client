@@ -51,6 +51,7 @@ function FormStackNavigation(props: any) {
     'Paper Entry',
     'Add Fish',
     'Batch Count',
+    'Fish Holding',
     'Incomplete Sections',
   ]
 
@@ -120,13 +121,16 @@ function FormStackNavigation(props: any) {
       Object.keys(tabSlice.tabs).length &&
       nonTabBarScreens.includes(props.route.name)
     ) {
-      if (
+      if (tabSlice.activeTabId != null && props.route.name == 'Paper Entry') {
+        return (
+          <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].trapSite}</Text>
+        )
+      } else if (
         tabSlice.activeTabId != null &&
-        props.route.name == 'Paper Entry'
+        props.route.name == 'Fish Holding'
       ) {
-        return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].trapSite}</Text>
-      }
-      else if (
+        return <></>
+      } else if (
         tabSlice.activeTabId != null &&
         props.route.name != 'Incomplete Sections'
       ) {

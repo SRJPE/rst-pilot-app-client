@@ -13,13 +13,42 @@ import {
   SelectedFishStoreI,
 } from '../../redux/reducers/markRecaptureSlices/fishHoldingSlice'
 
+const mapStateToProps = (state: RootState) => {
+  // let fishInputTabId = 'placeholderId'
+  // if (
+  //   state.tabSlice.activeTabId &&
+  //   state.fishInput[state.tabSlice.activeTabId]
+  // ) {
+  //   fishInputTabId = state.tabSlice.activeTabId
+  // }
+
+  // let fishHoldingTabId = 'placeholderId'
+  // if (
+  //   state.tabSlice.activeTabId &&
+  //   state.fishHolding[state.tabSlice.activeTabId]
+  // ) {
+  //   fishHoldingTabId = state.tabSlice.activeTabId
+  // }
+
+  return {
+    fishStoreALL: state.fishInput,
+    // fishStore: state.fishInput[fishInputTabId].fishStore,
+    selectedFishStoreState: state.fishHolding.values.selectedFishStore,
+    activeTabId: state.tabSlice.activeTabId,
+    previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
+    navigationSlice: state.navigation,
+  }
+}
+
 const FishHolding = ({
+  fishStoreALL,
   fishStore,
   selectedFishStoreState,
   activeTabId,
   previouslyActiveTabId,
   navigationSlice,
 }: {
+  fishStoreALL: any
   fishStore: FishStoreI
   selectedFishStoreState: SelectedFishStoreI
   activeTabId: string | null
@@ -29,12 +58,17 @@ const FishHolding = ({
   const dispatch = useDispatch<AppDispatch>()
   const navigation: any = useNavigation()
   const [selectedFishStore, setSelectedFishStore] = useState({} as any)
+  // console.log('🚀 ~ selectedFishStore:', selectedFishStore)
   const [selectedLifeStages, setSelectedLifeStages] = useState([] as Array<any>)
   const [selectedRuns, setSelectedRuns] = useState([] as Array<any>)
   const [totalFish, setTotalFish] = useState(0 as number)
 
   useEffect(() => {
-    if (Object.keys(selectedFishStoreState).length === 0) {
+    if (
+      selectedFishStoreState &&
+      Object.keys(selectedFishStoreState).length === 0
+    ) {
+      console.log('selectedFishStore is truthy')
       createSelectedFishStore()
     } else {
       setSelectedFishStore(selectedFishStoreState as SelectedFishStoreI)
@@ -53,16 +87,58 @@ const FishHolding = ({
     calculateTotalFish()
   }, [selectedFishStore])
 
-  const createSelectedFishStore = () => {
-    const tempSelectedFishStore = {} as any
-    for (const fish in fishStore) {
-      //only add chinook to the list
-      if (fishStore[fish].species !== 'Chinook salmon') continue
-      //do not add yolk sac fry to store
-      if (fishStore[fish].lifeStage === 'yolk sac fry') continue
-      //add remaining fish objects to selectedFishStore
-      tempSelectedFishStore[fish] = fishStore[fish]
+  const combineFishStoreForAllTabs = () => {
+    // console.log('🚀 ~ combineFishStoreForAllTabs ~ fishStoreALL:', fishStoreALL)
+    let combinedFishStore = {} as any
+    let count = 0 as number
+    for (let individualFishStore in fishStoreALL) {
+      if (individualFishStore === 'placeholderId') continue
+      // console.log(
+      //   individualFishStore,
+      //   fishStoreALL[individualFishStore].fishStore
+      // )
+      // combinedFishStore.push(fishStoreALL[individualFishStore])
+      for (let fish in fishStoreALL[individualFishStore].fishStore) {
+        // console.log(
+        //   '🚀 ~ combineFishStoreForAllTabs ~ fishStoreALL[individualFishStore].fishStore[fish]:',
+        //   fishStoreALL[individualFishStore].fishStore[fish]
+        // )
+        combinedFishStore[count] =
+          fishStoreALL[individualFishStore].fishStore[fish]
+        count++
+      }
     }
+    // console.log(
+    //   '🚀 ~ combineFishStoreForAllTabs ~ combinedFishStore:',
+    //   combinedFishStore
+    // )
+    return combinedFishStore
+  }
+
+  const createSelectedFishStore = () => {
+    // console.log('🚀 ~ fishStore:', fishStore)
+    const tempSelectedFishStore = {} as any
+
+    const fishStoreForAllTabs = combineFishStoreForAllTabs()
+
+    // console.log('🚀 ~ fishStoreForAllTabs:', fishStoreForAllTabs)
+
+    for (const fish in fishStoreForAllTabs) {
+      // console.log(
+      //   '🚀 ~ createSelectedFishStore ~ fishStoreForAllTabs[fish]:',
+      //   fishStoreForAllTabs[fish]
+      // )
+      //only add chinook to the list
+      if (fishStoreForAllTabs[fish].species !== 'Chinook salmon') continue
+      //do not add yolk sac fry to store
+      if (fishStoreForAllTabs[fish].lifeStage === 'yolk sac fry') continue
+      //add remaining fish objects to selectedFishStore
+      tempSelectedFishStore[fish] = fishStoreForAllTabs[fish]
+    }
+    // console.log(
+    //   '🚀 ~ createSelectedFishStore ~ tempSelectedFishStore:',
+    //   tempSelectedFishStore
+    // )
     //set the temp fish store the state
     setSelectedFishStore(tempSelectedFishStore)
   }
@@ -71,6 +147,10 @@ const FishHolding = ({
     const lifeStagesNamesArray: string[] = []
     const runNamesArray: string[] = []
     //for each fish in the fish Store
+    // console.log(
+    //   '🚀 ~ setSelectedLifeStagesAndRuns ~ selectedFishStore:',
+    //   selectedFishStore
+    // )
     for (const fish in selectedFishStore) {
       //add to the temp store arr
       lifeStagesNamesArray.push(selectedFishStore[fish].lifeStage)
@@ -149,11 +229,8 @@ const FishHolding = ({
       dispatch(saveTotalFishHolding(totalFish))
       dispatch(
         saveFishHolding({
-          tabId,
-          values: {
-            totalFishHolding: totalFish,
-            selectedFishStore: selectedFishStore,
-          },
+          totalFishHolding: totalFish,
+          selectedFishStore: selectedFishStore,
         })
       )
       dispatch(markFishHoldingCompleted({ tabId, completed: true }))
@@ -241,33 +318,6 @@ const FishHolding = ({
       />
     </>
   )
-}
-
-const mapStateToProps = (state: RootState) => {
-  let fishInputTabId = 'placeholderId'
-  if (
-    state.tabSlice.activeTabId &&
-    state.fishInput[state.tabSlice.activeTabId]
-  ) {
-    fishInputTabId = state.tabSlice.activeTabId
-  }
-
-  let fishHoldingTabId = 'placeholderId'
-  if (
-    state.tabSlice.activeTabId &&
-    state.fishHolding[state.tabSlice.activeTabId]
-  ) {
-    fishHoldingTabId = state.tabSlice.activeTabId
-  }
-
-  return {
-    fishStore: state.fishInput[fishInputTabId].fishStore,
-    selectedFishStoreState:
-      state.fishHolding[fishHoldingTabId].values.selectedFishStore,
-    activeTabId: state.tabSlice.activeTabId,
-    previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
-    navigationSlice: state.navigation
-  }
 }
 
 export default connect(mapStateToProps)(FishHolding)
