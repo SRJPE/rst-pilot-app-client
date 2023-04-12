@@ -113,7 +113,7 @@ export default function MarkRecaptureNavButtons({
             {activePage === 'Release Trial' ? 'Return Home' : 'Back'}
           </Text>
         </Button>
-        {/* <Button
+        <Button
           height='20'
           rounded='xs'
           bg='primary'
@@ -126,7 +126,7 @@ export default function MarkRecaptureNavButtons({
           <Text fontWeight='bold' color='white'>
             redux state
           </Text>
-        </Button> */}
+        </Button>
         <Button
           alignSelf='flex-start'
           bg='primary'
@@ -135,7 +135,7 @@ export default function MarkRecaptureNavButtons({
           rounded='xs'
           borderRadius='5'
           shadow='5'
-          isDisabled={disableRightButton()}
+          // isDisabled={disableRightButton()}
           onPress={handleRightButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
