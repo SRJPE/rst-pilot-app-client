@@ -65,6 +65,10 @@ const TrapPostProcessing = ({
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
     ;(async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted') {
+        return
+      }
       try {
         let currentLocation = await Location.getCurrentPositionAsync({})
         setFieldValue('trapLatitude', currentLocation.coords.latitude)
@@ -275,7 +279,6 @@ const TrapPostProcessing = ({
                       w='1/2'
                       bg='primary'
                       px='10'
-                      isDisabled={true}
                       onPress={() => {
                         getCurrentLocation(setFieldTouched, setFieldValue)
                       }}

@@ -8,7 +8,13 @@
     "userInterfaceStyle": "light",
     "plugins": [
       ["expo-community-flipper"],
-      ["react-native-flipper-performance-plugin"]
+      ["react-native-flipper-performance-plugin"],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ]
     ],
     "splash": {
       "image": "./assets/splash.png",

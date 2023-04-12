@@ -230,12 +230,10 @@ export const saveFishSlice = createSlice({
             run: 'not recorded', //updated
             weight: null,
             lifeStage:
-              state[tabId].batchCharacteristics.species ===
-              'Chinook salmon'
+              state[tabId].batchCharacteristics.species === 'Chinook salmon'
                 ? innerKey
                 : 'not recorded', //updated
-            adiposeClipped:
-              state[tabId].batchCharacteristics.adiposeClipped,
+            adiposeClipped: state[tabId].batchCharacteristics.adiposeClipped,
             existingMark: state[tabId].batchCharacteristics.existingMark,
             dead: state[tabId].batchCharacteristics.dead,
             willBeUsedInRecapture: null,
@@ -268,9 +266,7 @@ export const saveFishSlice = createSlice({
       const { tabId, formValues } = action.payload
       // if (state[tabId]) {}
       let fishStoreCopy = cloneDeep(
-        state[tabId]
-          ? state[tabId].fishStore
-          : state['placeholderId'].fishStore
+        state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
       )
       let id = null
       if (Object.keys(fishStoreCopy).length) {
@@ -281,7 +277,7 @@ export const saveFishSlice = createSlice({
         id = 0
       }
       fishStoreCopy[id] = { ...formValues, numFishCaught: 1 }
-      console.log('🚀 ~ fishStoreCopy[id]', fishStoreCopy)
+
       if (state[tabId]) {
         state[tabId].fishStore = fishStoreCopy
       } else {
@@ -294,6 +290,7 @@ export const saveFishSlice = createSlice({
     savePlusCount: (state, action) => {
       const { tabId, species, count, run, lifeStage, plusCountMethod } =
         action.payload
+
       const plusCountEntry = {
         species,
         numFishCaught: count,
@@ -309,7 +306,9 @@ export const saveFishSlice = createSlice({
         plusCount: true,
       } as IndividualFishValuesI
 
-      let fishStoreCopy = cloneDeep(state[tabId].fishStore)
+      let fishStoreCopy = cloneDeep(
+        state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
+      )
       let id = null
       if (Object.keys(fishStoreCopy).length) {
         // @ts-ignore
@@ -317,6 +316,14 @@ export const saveFishSlice = createSlice({
         id = largestId + 1
       } else {
         id = 0
+      }
+      if (state[tabId]) {
+        state[tabId].fishStore = fishStoreCopy
+      } else {
+        state[tabId] = {
+          ...initialState['placeholderId'],
+          fishStore: fishStoreCopy,
+        }
       }
 
       fishStoreCopy[id] = plusCountEntry
