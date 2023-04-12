@@ -89,10 +89,10 @@ const AddAnotherMarkModalContent = ({
                 mx='2'
                 px='10'
                 shadow='3'
-                isDisabled={
-                  (touched && Object.keys(touched).length === 0) ||
-                  (errors && Object.keys(errors).length > 0)
-                }
+                // isDisabled={
+                //   (touched && Object.keys(touched).length === 0) ||
+                //   (errors && Object.keys(errors).length > 0)
+                // }
                 onPress={() => {
                   handleSubmit()
                   closeModal()
