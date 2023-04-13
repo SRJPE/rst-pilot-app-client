@@ -12,6 +12,7 @@ import {
   saveFishHolding,
   SelectedFishStoreI,
 } from '../../redux/reducers/markRecaptureSlices/fishHoldingSlice'
+import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 
 const mapStateToProps = (state: RootState) => {
   // let fishInputTabId = 'placeholderId'
@@ -37,6 +38,8 @@ const mapStateToProps = (state: RootState) => {
     activeTabId: state.tabSlice.activeTabId,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
+    visitSetupState: state.visitSetup,
+    tabState: state.tabSlice,
   }
 }
 
@@ -47,6 +50,8 @@ const FishHolding = ({
   activeTabId,
   previouslyActiveTabId,
   navigationSlice,
+  visitSetupState,
+  tabState,
 }: {
   fishStoreALL: any
   fishStore: FishStoreI
@@ -54,6 +59,8 @@ const FishHolding = ({
   activeTabId: string | null
   previouslyActiveTabId: string | null
   navigationSlice: any
+  visitSetupState: any
+  tabState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation: any = useNavigation()
@@ -224,9 +231,16 @@ const FishHolding = ({
     calculateTotalFish()
   }
 
+  const tabIds = Object.keys(tabState.tabs)
   const handleSubmit = (tabId: string) => {
     if (tabId) {
       dispatch(saveTotalFishHolding(totalFish))
+      dispatch(
+        saveTrapVisitInformation({
+          crew: visitSetupState[tabIds[0]].values.crew,
+          programId: visitSetupState[tabIds[0]].values.programId,
+        })
+      )
       dispatch(
         saveFishHolding({
           totalFishHolding: totalFish,
