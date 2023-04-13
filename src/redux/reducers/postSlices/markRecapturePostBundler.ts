@@ -11,10 +11,14 @@ interface InitialStateI {
     | 'submission-successful'
   markRecaptureSubmissions: MarkRecaptureSubmissionI[]
   previousMarkRecaptureSubmissions: MarkRecaptureSubmissionI[]
+  markRecaptureReleaseCrewSubmissions: MarkRecaptureSubmissionI[]
+  previousMarkRecaptureReleaseCrewSubmissions: MarkRecaptureSubmissionI[]
+  markRecaptureReleaseMarksSubmissions: MarkRecaptureSubmissionI[]
+  previousMarkRecaptureReleaseMarksSubmissions: MarkRecaptureSubmissionI[]
 }
 
 interface MarkRecaptureSubmissionI {
-  id: number
+  id?: number
   programId?: number
   releasePurposeId?: number
   releaseSiteId?: number
@@ -23,8 +27,9 @@ interface MarkRecaptureSubmissionI {
   markColor?: number
   markType?: number
   markPosition?: number
+  marksArray?: any[]
   runHatcheryFish?: number
-  runHatcheryFishWeight?: number
+  hatcheryFishWeight?: number
   totalWildFishReleased?: number
   totalHatcheryFishReleased?: number
   totalWildFishDead?: number
@@ -38,26 +43,58 @@ const initialState: InitialStateI = {
   submissionStatus: 'not-submitted',
   markRecaptureSubmissions: [],
   previousMarkRecaptureSubmissions: [],
+  markRecaptureReleaseCrewSubmissions: [],
+  previousMarkRecaptureReleaseCrewSubmissions: [],
+  markRecaptureReleaseMarksSubmissions: [],
+  previousMarkRecaptureReleaseMarksSubmissions: [],
 }
 
 export const postMarkRecaptureSubmissions = createAsyncThunk(
-  'markRecapturePostBundler/markRecaptureSubmissions',
+  'markRecapturePostBundler/postMarkRecaptureSubmissions',
   async (_, thunkAPI) => {
     const state = thunkAPI.getState() as RootState
     let payload: {
       markRecaptureResponse: any[]
+      markRecaptureReleaseCrewResponse: any[]
+      markRecaptureReleaseMarksResponse: any[]
     } = {
       markRecaptureResponse: [],
+      markRecaptureReleaseCrewResponse: [],
+      markRecaptureReleaseMarksResponse: [],
     }
-
+    //get submissions
     const markRecaptureSubmissions =
       state.markRecaptureFormPostBundler.markRecaptureSubmissions
 
     await Promise.all(
       markRecaptureSubmissions.map(async (markRecaptureSubmission: any) => {
-        console.log('hit inside of markRecap Promise')
+        const markRecaptureSubmissionCopy = cloneDeep(markRecaptureSubmission)
+        console.log(
+          '🚀 ~ hit... markRecaptureSubmissionCopy:',
+          markRecaptureSubmissionCopy
+        )
+        // submit mark recapture (release trial)
+        const apiResponse: APIResponseI = await api.post(
+          'release/',
+          markRecaptureSubmissionCopy
+        )
+        // get response from server
+        const {
+          createdReleaseResponse,
+          createdReleaseCrewResponse,
+          createdReleaseMarksResponse,
+        } = apiResponse.data
+        // save to payload
+        payload.markRecaptureResponse.push(createdReleaseResponse)
+        payload.markRecaptureReleaseCrewResponse.push(
+          createdReleaseCrewResponse
+        )
+        payload.markRecaptureReleaseMarksResponse.push(
+          createdReleaseMarksResponse
+        )
       })
     )
+    return payload
   }
 )
 
@@ -77,18 +114,30 @@ export const markRecapturePostBundler = createSlice({
 
     [postMarkRecaptureSubmissions.fulfilled.type]: (state, action) => {
       const markRecapturePostResult = action.payload.markRecaptureResponse
-      // const catchRawPostResult = action.payload.catchRawResponse
+      const markRecaptureReleaseCrewPostResult =
+        action.payload.markRecaptureReleaseCrewResponse
+      const markRecaptureReleaseMarksPostResult =
+        action.payload.markRecaptureReleaseMarksResponse
+
       state.submissionStatus = 'submission-successful'
       state.previousMarkRecaptureSubmissions = [
         ...state.previousMarkRecaptureSubmissions,
         ...markRecapturePostResult,
       ]
       state.markRecaptureSubmissions = []
-      // state.previousCatchRawSubmissions = [
-      //   ...state.previousCatchRawSubmissions,
-      //   ...catchRawPostResult,
-      // ]
-      // state.catchRawSubmissions = []
+
+      state.previousMarkRecaptureReleaseCrewSubmissions = [
+        ...state.previousMarkRecaptureReleaseCrewSubmissions,
+        ...markRecaptureReleaseCrewPostResult,
+      ]
+      state.markRecaptureReleaseCrewSubmissions = []
+
+      state.previousMarkRecaptureReleaseMarksSubmissions = [
+        ...state.previousMarkRecaptureReleaseMarksSubmissions,
+        ...markRecaptureReleaseMarksPostResult,
+      ]
+      state.markRecaptureReleaseMarksSubmissions = []
+
       console.log('successful mark Recap post processing: ', action.payload)
     },
 
