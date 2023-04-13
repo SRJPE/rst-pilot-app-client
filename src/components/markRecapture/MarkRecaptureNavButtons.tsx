@@ -82,6 +82,9 @@ export default function MarkRecaptureNavButtons({
       case 'Mark Recapture Complete':
         buttonText = 'QC Data'
         break
+      case 'Release Data Entry':
+        buttonText = 'Save'
+        break
       default:
         buttonText = 'Next'
         break
