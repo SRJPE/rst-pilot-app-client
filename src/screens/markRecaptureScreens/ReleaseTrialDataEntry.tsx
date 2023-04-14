@@ -35,6 +35,8 @@ import {
 } from '../../redux/reducers/postSlices/markRecapturePostBundler'
 import { ReleaseMarkI } from '../../redux/reducers/addAnotherMarkSlice'
 import { flatten, uniq } from 'lodash'
+import { resetReleaseTrialDataEntrySlice } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
+import { resetReleaseTrialSlice } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -96,7 +98,7 @@ const ReleaseDataEntry = ({
     })
   }
 
-  const saveMarkRecaptureSubmissions = () => {
+  const saveMarkRecaptureSubmissions = (formValues: any) => {
     const runValues = returnDefinitionArray(dropdownsState.values.run)
     const markTypeValues = returnDefinitionArray(dropdownsState.values.markType)
     const markColorValues = returnDefinitionArray(
@@ -132,24 +134,24 @@ const ReleaseDataEntry = ({
       programId: releaseTrialDataEntryState.values.programId,
       // releasePurposeId: null, //left as null
       releaseSiteId: returnNullableTableId(
-        releaseSiteValues.indexOf(
-          releaseTrialDataEntryState.values.releaseLocation
-        )
+        releaseSiteValues.indexOf(formValues.releaseLocation)
       ),
-      releasedAt: releaseTrialDataEntryState.values.releaseTime.toLocaleString(
-        'en-US',
-        {
-          //remove when merged with dev
-          timeZone: 'America/Los_Angeles',
-        }
-      ),
-      markedAt: releaseTrialDataEntryState.values.markedTime.toLocaleString(
-        'en-US',
-        {
-          //remove when merged with dev
-          timeZone: 'America/Los_Angeles',
-        }
-      ),
+      releasedAt: releaseTime,
+      // .toLocaleString(
+      //   'en-US',
+      //   {
+      //     //remove when merged with dev
+      //     timeZone: 'America/Los_Angeles',
+      //   }
+      // ),
+      markedAt: markedTime,
+      // .toLocaleString(
+      //   'en-US',
+      //   {
+      //     //remove when merged with dev
+      //     timeZone: 'America/Los_Angeles',
+      //   }
+      // ),
       marksArray: releaseTrialDataEntryState.values.appliedMarks.map(
         (markObj: any) => {
           return {
@@ -174,9 +176,6 @@ const ReleaseDataEntry = ({
       totalWildFishDead: Number(releaseTrialState.values.deadWildCount),
       totalHatcheryFishDead: Number(releaseTrialState.values.deadHatcheryCount),
       releaseCrew: selectedCrewIds,
-      markColor: 1, // remove
-      markType: 1, // remove
-      markPosition: 1, // remove
     }
 
     dispatch(saveMarkRecaptureSubmission(markRecaptureSubmission))
@@ -186,20 +185,33 @@ const ReleaseDataEntry = ({
     }
   }
 
-  const handleSubmit = async (values: any) => {
-    await dispatch(
-      saveReleaseTrialDataEntry({
+  const handleSubmit = (values: any) => {
+    try {
+      dispatch(
+        saveReleaseTrialDataEntry({
+          ...values,
+          releaseTime: releaseTime,
+          markedTime: markedTime,
+        })
+      )
+      console.log('🚀 ~ handleSubmit ~ ReleaseTrialDataEntry', {
         ...values,
         releaseTime: releaseTime,
         markedTime: markedTime,
       })
-    )
-    await dispatch(markReleaseTrialDataEntryCompleted(true))
-    console.log('🚀 ~ handleSubmit ~ ReleaseTrialDataEntry', values)
+      dispatch(markReleaseTrialDataEntryCompleted(true))
 
-    //wait for screen form data to be dispatched to store and then make POST
-    saveMarkRecaptureSubmissions()
+      saveMarkRecaptureSubmissions(values)
+      // resetAllFormSlices()
+    } catch (error) {
+      console.error(error)
+    }
   }
+
+  // const resetAllFormSlices = () => {
+  //   dispatch(resetReleaseTrialSlice())
+  //   dispatch(resetReleaseTrialDataEntrySlice())
+  // }
 
   return (
     <Formik
@@ -302,7 +314,10 @@ const ReleaseDataEntry = ({
                   />
                 </Box>
               </VStack>
-              <Button bg='grey' onPress={() => saveMarkRecaptureSubmissions()}>
+              <Button
+                bg='grey'
+                onPress={() => saveMarkRecaptureSubmissions(values)}
+              >
                 Test save to store
               </Button>
             </VStack>
