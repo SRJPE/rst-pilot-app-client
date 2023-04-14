@@ -18,7 +18,7 @@ import CustomSelect from '../../components/Shared/CustomSelect'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { AppDispatch, RootState } from '../../redux/store'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { releaseTrialDataEntrySchema } from '../../utils/helpers/yupValidations'
 import {
@@ -33,7 +33,6 @@ import {
   postMarkRecaptureSubmissions,
   saveMarkRecaptureSubmission,
 } from '../../redux/reducers/postSlices/markRecapturePostBundler'
-import { ReleaseMarkI } from '../../redux/reducers/addAnotherMarkSlice'
 import { flatten, uniq } from 'lodash'
 import { resetReleaseTrialDataEntrySlice } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { resetReleaseTrialSlice } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
@@ -54,32 +53,27 @@ const ReleaseDataEntry = ({
   navigation,
   releaseTrialState,
   releaseTrialDataEntryState,
-  visitSetupState,
   visitSetupDefaultsState,
   connectivityState,
-  tabState,
   dropdownsState,
 }: {
   navigation: any
   releaseTrialState: any
   releaseTrialDataEntryState: any
-  visitSetupState: any
   visitSetupDefaultsState: any
   connectivityState: any
-  tabState: any
   dropdownsState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const dropdownValues = useSelector((state: any) => state.dropdowns)
-  const tabIds = Object.keys(tabState.tabs)
-  const filteredReleaseSites = visitSetupDefaultsState.releaseSites.filter(
-    (releaseSite: any) =>
-      releaseSite.trapLocationsId ===
-      visitSetupState[tabIds[0]].values.trapLocationId //REFACTOR later
-  )
   const [markedTime, setMarkedTime] = useState(new Date() as any)
   const [releaseTime, setReleaseTime] = useState(new Date() as any)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
+  const filteredReleaseSites = visitSetupDefaultsState.releaseSites.filter(
+    (releaseSite: any) =>
+      releaseTrialDataEntryState.values.trapLocationIds.indexOf(
+        releaseSite.trapLocationsId
+      ) !== -1
+  )
 
   const onReleaseTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
@@ -110,8 +104,7 @@ const ReleaseDataEntry = ({
         return releaseSiteObj.releaseSiteName
       }
     )
-
-    //crew data lookup string => ID
+    //crew data lookup (string => ID)
     const selectedCrewNamesMap: Record<string, boolean> =
       releaseTrialDataEntryState.values.crew.reduce(
         (acc: Record<string, boolean>, name: string) => ({
@@ -137,21 +130,7 @@ const ReleaseDataEntry = ({
         releaseSiteValues.indexOf(formValues.releaseLocation)
       ),
       releasedAt: releaseTime,
-      // .toLocaleString(
-      //   'en-US',
-      //   {
-      //     //remove when merged with dev
-      //     timeZone: 'America/Los_Angeles',
-      //   }
-      // ),
       markedAt: markedTime,
-      // .toLocaleString(
-      //   'en-US',
-      //   {
-      //     //remove when merged with dev
-      //     timeZone: 'America/Los_Angeles',
-      //   }
-      // ),
       marksArray: releaseTrialDataEntryState.values.appliedMarks.map(
         (markObj: any) => {
           return {
@@ -194,11 +173,7 @@ const ReleaseDataEntry = ({
           markedTime: markedTime,
         })
       )
-      console.log('🚀 ~ handleSubmit ~ ReleaseTrialDataEntry', {
-        ...values,
-        releaseTime: releaseTime,
-        markedTime: markedTime,
-      })
+
       dispatch(markReleaseTrialDataEntryCompleted(true))
 
       saveMarkRecaptureSubmissions(values)
@@ -335,8 +310,6 @@ const ReleaseDataEntry = ({
             height='1/2'
           >
             <AddAnotherMarkModalContent
-              //add new submission function
-              // handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
               closeModal={() => setAddMarkModalOpen(false)}
             />
           </CustomModal>
