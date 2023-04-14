@@ -11,8 +11,9 @@ export interface ReleaseTrialValuesI {
   releaseLocation: string | null
   markedTime: any | null
   releaseTime: any | null
-  crew: Array<any>
-  programId?: number | null
+  crew: Array<string>
+  trapLocationIds: Array<number>
+  programId: number | null
 }
 
 const initialState: InitialStateI = {
@@ -23,6 +24,7 @@ const initialState: InitialStateI = {
     markedTime: null,
     releaseTime: null,
     crew: [],
+    trapLocationIds: [],
     programId: null,
   },
 }
@@ -38,6 +40,7 @@ export const releaseTrialDataEntrySlice = createSlice({
     saveTrapVisitInformation: (state, action) => {
       state.values.crew = action.payload.crew
       state.values.programId = action.payload.programId
+      state.values.trapLocationIds = action.payload.trapLocationIds
     },
     addMarkToAppliedMarks: (state, action) => {
       state.values.appliedMarks = [...state.values.appliedMarks, action.payload]
