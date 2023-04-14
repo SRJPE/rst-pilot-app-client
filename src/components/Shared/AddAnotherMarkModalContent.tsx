@@ -1,16 +1,5 @@
-import Ionicons from '@expo/vector-icons/Ionicons'
 import { Formik } from 'formik'
-import {
-  FormControl,
-  Input,
-  View,
-  VStack,
-  Text,
-  Button,
-  Divider,
-  HStack,
-} from 'native-base'
-import React from 'react'
+import { FormControl, View, VStack, Text, Button, Divider } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { addMarkToAppliedMarks } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -22,26 +11,15 @@ import CustomSelect from '../Shared/CustomSelect'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
 import RenderWarningMessage from '../Shared/RenderWarningMessage'
 
-const initialFormValues = {
-  type: '',
-  number: '',
-  position: '',
-  crewMemberTagging: '',
-  comments: '',
-}
-
 const mapStateToProps = (state: RootState) => {
   return {
     addAnotherMarkValues: state.addAnotherMark.values,
   }
 }
-
 /*
-
 Make sure to take BisMark Brown into account 
   => {values.markType !== 'Bismark Brown' && ( <render other dropdowns> )
 */
-
 const AddAnotherMarkModalContent = ({
   handleMarkFishFormSubmit,
   closeModal,
@@ -64,15 +42,14 @@ const AddAnotherMarkModalContent = ({
     <Formik
       validationSchema={addAnotherMarkSchema}
       initialValues={addAnotherMarkValues}
+      initialErrors={{ markType: '' }}
       onSubmit={(values) => {
         handleSubmit(values)
       }}
     >
       {({
         handleChange,
-        handleBlur,
         handleSubmit,
-        setFieldValue,
         setFieldTouched,
         touched,
         errors,
@@ -89,10 +66,7 @@ const AddAnotherMarkModalContent = ({
                 mx='2'
                 px='10'
                 shadow='3'
-                // isDisabled={
-                //   (touched && Object.keys(touched).length === 0) ||
-                //   (errors && Object.keys(errors).length > 0)
-                // }
+                isDisabled={Object.keys(errors).length > 0}
                 onPress={() => {
                   handleSubmit()
                   closeModal()
