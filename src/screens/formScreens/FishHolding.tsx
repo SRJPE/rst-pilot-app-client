@@ -16,8 +16,7 @@ import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlic
 
 const mapStateToProps = (state: RootState) => {
   return {
-    fishStoreALL: state.fishInput,
-    // fishStore: state.fishInput[fishInputTabId].fishStore,
+    fishInput: state.fishInput,
     selectedFishStoreState: state.fishHolding.values.selectedFishStore,
     activeTabId: state.tabSlice.activeTabId,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
@@ -28,8 +27,7 @@ const mapStateToProps = (state: RootState) => {
 }
 
 const FishHolding = ({
-  fishStoreALL,
-  fishStore,
+  fishInput,
   selectedFishStoreState,
   activeTabId,
   previouslyActiveTabId,
@@ -37,8 +35,7 @@ const FishHolding = ({
   visitSetupState,
   tabState,
 }: {
-  fishStoreALL: any
-  fishStore: FishStoreI
+  fishInput: any
   selectedFishStoreState: SelectedFishStoreI
   activeTabId: string | null
   previouslyActiveTabId: string | null
@@ -49,7 +46,6 @@ const FishHolding = ({
   const dispatch = useDispatch<AppDispatch>()
   const navigation: any = useNavigation()
   const [selectedFishStore, setSelectedFishStore] = useState({} as any)
-  // console.log('🚀 ~ selectedFishStore:', selectedFishStore)
   const [selectedLifeStages, setSelectedLifeStages] = useState([] as Array<any>)
   const [selectedRuns, setSelectedRuns] = useState([] as Array<any>)
   const [totalFish, setTotalFish] = useState(0 as number)
@@ -81,11 +77,11 @@ const FishHolding = ({
   const combineFishStoreForAllTabs = () => {
     let combinedFishStore = {} as any
     let count = 0 as number
-    for (let individualFishStore in fishStoreALL) {
+    for (let individualFishStore in fishInput) {
       if (individualFishStore === 'placeholderId') continue
-      for (let fish in fishStoreALL[individualFishStore].fishStore) {
+      for (let fish in fishInput[individualFishStore].fishStore) {
         combinedFishStore[count] =
-          fishStoreALL[individualFishStore].fishStore[fish]
+          fishInput[individualFishStore].fishStore[fish]
         count++
       }
     }
@@ -185,24 +181,36 @@ const FishHolding = ({
     setSelectedLifeStagesAndRuns()
     calculateTotalFish()
   }
+  const findTrapLocationIds = () => {
+    let container = [] as any
+    for (let tabId in visitSetupState) {
+      if (tabId === 'placeholderId') continue
+      container.push(visitSetupState[tabId].values.trapLocationId)
+    }
+    return container
+  }
 
   const tabIds = Object.keys(tabState.tabs)
   const handleSubmit = (tabId: string) => {
     if (tabId) {
+      //saves for release trial
       dispatch(saveTotalFishHolding(totalFish))
+      //saves for releaseTrial data entry
       dispatch(
         saveTrapVisitInformation({
           crew: visitSetupState[tabIds[0]].values.crew,
           programId: visitSetupState[tabIds[0]].values.programId,
+          trapLocationIds: findTrapLocationIds(),
         })
       )
+      // saves to fish holding
       dispatch(
         saveFishHolding({
           totalFishHolding: totalFish,
           selectedFishStore: selectedFishStore,
         })
       )
-      dispatch(markFishHoldingCompleted({ tabId, completed: true }))
+      dispatch(markFishHoldingCompleted(true))
     }
   }
 
@@ -257,25 +265,7 @@ const FishHolding = ({
           </HStack>
           {renderFishHoldingCards()}
         </VStack>
-
         <HStack space={10} justifyContent='center'>
-          {/* <Button
-            bg='primary'
-            alignSelf='flex-start'
-            shadow='5'
-            onPress={() => {
-              console.log('fishStore: ', fishStore)
-              console.log('selectedFishStore: ', selectedFishStore)
-              console.log('selectedRuns: ', selectedRuns)
-              console.log('selectedLifeStages: ', selectedLifeStages)
-              console.log('🚀 ~ totalFish:', totalFish)
-            }}
-          >
-            <Text fontWeight='bold' color='white'>
-              Log
-            </Text>
-          </Button> */}
-
           <Heading>Total Fish Holding: {totalFish}</Heading>
         </HStack>
       </View>
