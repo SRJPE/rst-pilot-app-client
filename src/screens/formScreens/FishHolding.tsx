@@ -15,22 +15,6 @@ import {
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 
 const mapStateToProps = (state: RootState) => {
-  // let fishInputTabId = 'placeholderId'
-  // if (
-  //   state.tabSlice.activeTabId &&
-  //   state.fishInput[state.tabSlice.activeTabId]
-  // ) {
-  //   fishInputTabId = state.tabSlice.activeTabId
-  // }
-
-  // let fishHoldingTabId = 'placeholderId'
-  // if (
-  //   state.tabSlice.activeTabId &&
-  //   state.fishHolding[state.tabSlice.activeTabId]
-  // ) {
-  //   fishHoldingTabId = state.tabSlice.activeTabId
-  // }
-
   return {
     fishStoreALL: state.fishInput,
     // fishStore: state.fishInput[fishInputTabId].fishStore,
@@ -95,46 +79,25 @@ const FishHolding = ({
   }, [selectedFishStore])
 
   const combineFishStoreForAllTabs = () => {
-    // console.log('🚀 ~ combineFishStoreForAllTabs ~ fishStoreALL:', fishStoreALL)
     let combinedFishStore = {} as any
     let count = 0 as number
     for (let individualFishStore in fishStoreALL) {
       if (individualFishStore === 'placeholderId') continue
-      // console.log(
-      //   individualFishStore,
-      //   fishStoreALL[individualFishStore].fishStore
-      // )
-      // combinedFishStore.push(fishStoreALL[individualFishStore])
       for (let fish in fishStoreALL[individualFishStore].fishStore) {
-        // console.log(
-        //   '🚀 ~ combineFishStoreForAllTabs ~ fishStoreALL[individualFishStore].fishStore[fish]:',
-        //   fishStoreALL[individualFishStore].fishStore[fish]
-        // )
         combinedFishStore[count] =
           fishStoreALL[individualFishStore].fishStore[fish]
         count++
       }
     }
-    // console.log(
-    //   '🚀 ~ combineFishStoreForAllTabs ~ combinedFishStore:',
-    //   combinedFishStore
-    // )
+
     return combinedFishStore
   }
 
   const createSelectedFishStore = () => {
-    // console.log('🚀 ~ fishStore:', fishStore)
     const tempSelectedFishStore = {} as any
-
     const fishStoreForAllTabs = combineFishStoreForAllTabs()
 
-    // console.log('🚀 ~ fishStoreForAllTabs:', fishStoreForAllTabs)
-
     for (const fish in fishStoreForAllTabs) {
-      // console.log(
-      //   '🚀 ~ createSelectedFishStore ~ fishStoreForAllTabs[fish]:',
-      //   fishStoreForAllTabs[fish]
-      // )
       //only add chinook to the list
       if (fishStoreForAllTabs[fish].species !== 'Chinook salmon') continue
       //do not add yolk sac fry to store
@@ -142,10 +105,6 @@ const FishHolding = ({
       //add remaining fish objects to selectedFishStore
       tempSelectedFishStore[fish] = fishStoreForAllTabs[fish]
     }
-    // console.log(
-    //   '🚀 ~ createSelectedFishStore ~ tempSelectedFishStore:',
-    //   tempSelectedFishStore
-    // )
     //set the temp fish store the state
     setSelectedFishStore(tempSelectedFishStore)
   }
@@ -154,10 +113,6 @@ const FishHolding = ({
     const lifeStagesNamesArray: string[] = []
     const runNamesArray: string[] = []
     //for each fish in the fish Store
-    // console.log(
-    //   '🚀 ~ setSelectedLifeStagesAndRuns ~ selectedFishStore:',
-    //   selectedFishStore
-    // )
     for (const fish in selectedFishStore) {
       //add to the temp store arr
       lifeStagesNamesArray.push(selectedFishStore[fish].lifeStage)
