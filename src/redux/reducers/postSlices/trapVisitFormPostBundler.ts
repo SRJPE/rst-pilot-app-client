@@ -124,15 +124,17 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           (catchSubmission: any) => catchSubmission.uid === uid
         )
         // submit all linked catch_raw's and give id from trap_visit response
-        Promise.all(linkedCatchRawSubmissions.map( async (catchSubmission: any) => {
-          const catchSubmissionCopy = cloneDeep(catchSubmission)
-          delete catchSubmissionCopy['uid']
-          console.log('hit... catchSubmissionCopy: ', catchSubmissionCopy)
-          await api.post('catch-raw/', {
-            ...catchSubmissionCopy,
-            trapVisitId: createdTrapVisitResponse[0].id,
+        Promise.all(
+          linkedCatchRawSubmissions.map(async (catchSubmission: any) => {
+            const catchSubmissionCopy = cloneDeep(catchSubmission)
+            delete catchSubmissionCopy['uid']
+            console.log('hit... catchSubmissionCopy: ', catchSubmissionCopy)
+            await api.post('catch-raw/', {
+              ...catchSubmissionCopy,
+              trapVisitId: createdTrapVisitResponse.id,
+            })
           })
-        }))
+        )
       })
     )
 

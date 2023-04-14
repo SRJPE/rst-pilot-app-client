@@ -63,9 +63,6 @@ const VisitSetup = ({
   const [selectedProgramId, setSelectedProgramId] = useState<number | null>(
     null
   )
-  const [selectedTrapLocationId, setSelectedTrapLocationId] = useState<
-    number | null
-  >(null)
   const [showTrapNameField, setShowTrapNameField] = useState(false as boolean)
   const [trapNameList, setTrapNameList] = useState<
     { label: string; value: string }[]
@@ -96,11 +93,9 @@ const VisitSetup = ({
   const onSubmit = (values: any, tabId: string | null) => {
     // values.crew = ['temp1']
     const programId = selectedProgramId
-    const trapLocationId = selectedTrapLocationId
     const payload = {
       ...values,
       programId,
-      trapLocationId,
     }
     // if no current tabs, create all new tabs
     if (!tabId) {
@@ -111,7 +106,11 @@ const VisitSetup = ({
           dispatch(
             saveVisitSetup({
               tabId: newTabId,
-              values: { ...payload, trapName },
+              values: {
+                ...payload,
+                trapName,
+                trapLocationId: getTrapLocationId({ trapName }),
+              },
               isPaperEntry,
             })
           )
@@ -132,7 +131,14 @@ const VisitSetup = ({
       else {
         const newTabId = uid()
         dispatch(
-          saveVisitSetup({ tabId: newTabId, isPaperEntry, values: payload })
+          saveVisitSetup({
+            tabId: newTabId,
+            isPaperEntry,
+            values: {
+              ...payload,
+              trapLocationId: getTrapLocationId({ trapSite: values.trapSite }),
+            },
+          })
         )
         dispatch(
           createTab({
@@ -161,7 +167,10 @@ const VisitSetup = ({
             dispatch(
               saveVisitSetup({
                 tabId: tabIdToUpdate,
-                values: payload,
+                values: {
+                  ...payload,
+                  trapLocationId: getTrapLocationId({ trapName }),
+                },
                 isPaperEntry,
               })
             )
@@ -182,7 +191,10 @@ const VisitSetup = ({
             dispatch(
               saveVisitSetup({
                 tabId: tabIdToUpdate,
-                values: payload,
+                values: {
+                  ...payload,
+                  trapLocationId: getTrapLocationId({ trapName }),
+                },
                 isPaperEntry,
               })
             )
@@ -201,7 +213,10 @@ const VisitSetup = ({
             dispatch(
               saveVisitSetup({
                 tabId,
-                values: payload,
+                values: {
+                  ...payload,
+                  trapLocationId: getTrapLocationId({ trapName }),
+                },
                 isPaperEntry,
               })
             )
@@ -233,7 +248,14 @@ const VisitSetup = ({
         dispatch(
           saveVisitSetup({
             tabId,
-            values: payload,
+            values: {
+              ...payload,
+              trapLocationId: getTrapLocationId(
+                values.trapName
+                  ? { trapName: values.trapName }
+                  : { trapSite: values.trapSite }
+              ),
+            },
             isPaperEntry,
           })
         )
@@ -266,7 +288,7 @@ const VisitSetup = ({
     generateCrewList(programId)
   }
 
-  const updateSelectedTrapLocation = ({
+  const getTrapLocationId = ({
     trapSite,
     trapName,
   }: {
@@ -274,6 +296,7 @@ const VisitSetup = ({
     trapName?: string
   }) => {
     let trapLocationId = null
+    
     if (trapSite) {
       const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
         (obj: any) => obj.siteName === trapSite
@@ -292,7 +315,7 @@ const VisitSetup = ({
       }
     }
 
-    setSelectedTrapLocationId(trapLocationId)
+    return trapLocationId
   }
 
   const shouldShowTrapNameField = (trapSite: string) => {
@@ -367,7 +390,10 @@ const VisitSetup = ({
         values,
       }) => {
         useEffect(() => {
-          if (tabSlice.previouslyActiveTabId && navigationSlice.activeStep === 1) {
+          if (
+            tabSlice.previouslyActiveTabId &&
+            navigationSlice.activeStep === 1
+          ) {
             onSubmit(values, tabSlice.previouslyActiveTabId)
           }
         }, [tabSlice.previouslyActiveTabId])
@@ -413,16 +439,9 @@ const VisitSetup = ({
                       setFieldValue('stream', itemValue)
                       if (itemValue === 'Mill Creek') {
                         setFieldValue('trapSite', 'Mill Creek RST')
-                        updateSelectedTrapLocation({
-                          trapSite: 'Mill Creek RST',
-                        })
-                      } else if (itemValue === 'Deer Creek') {
+                      }
+                      if (itemValue === 'Deer Creek') {
                         setFieldValue('trapSite', 'Deer Creek RST')
-                        updateSelectedTrapLocation({
-                          trapSite: 'Deer Creek RST',
-                        })
-                      } else {
-                        updateSelectedTrapLocation({})
                       }
                       updateSelectedProgram(itemValue)
                     }}
@@ -455,7 +474,6 @@ const VisitSetup = ({
                         onValueChange={(itemValue: string) => {
                           if (itemValue !== values.trapSite) {
                             shouldShowTrapNameField(itemValue)
-                            updateSelectedTrapLocation({ trapSite: itemValue })
                           }
                           setFieldValue('trapSite', itemValue)
                         }}
