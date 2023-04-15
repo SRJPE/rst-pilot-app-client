@@ -70,7 +70,7 @@ const ReleaseDataEntry = ({
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
   const filteredReleaseSites = visitSetupDefaultsState.releaseSites.filter(
     (releaseSite: any) =>
-      releaseTrialDataEntryState.values.trapLocationIds.indexOf(
+      releaseTrialDataEntryState.trapLocationIds.indexOf(
         releaseSite.trapLocationsId
       ) !== -1
   )
@@ -106,7 +106,7 @@ const ReleaseDataEntry = ({
     )
     //crew data lookup (string => ID)
     const selectedCrewNamesMap: Record<string, boolean> =
-      releaseTrialDataEntryState.values.crew.reduce(
+      releaseTrialDataEntryState.crew.reduce(
         (acc: Record<string, boolean>, name: string) => ({
           ...acc,
           [name]: true,
@@ -124,7 +124,7 @@ const ReleaseDataEntry = ({
     )
 
     const markRecaptureSubmission = {
-      programId: releaseTrialDataEntryState.values.programId,
+      programId: releaseTrialDataEntryState.programId,
       // releasePurposeId: null, //left as null
       releaseSiteId: returnNullableTableId(
         releaseSiteValues.indexOf(formValues.releaseLocation)
@@ -289,12 +289,6 @@ const ReleaseDataEntry = ({
                   />
                 </Box>
               </VStack>
-              <Button
-                bg='grey'
-                onPress={() => saveMarkRecaptureSubmissions(values)}
-              >
-                Test save to store
-              </Button>
             </VStack>
           </View>
           <MarkRecaptureNavButtons

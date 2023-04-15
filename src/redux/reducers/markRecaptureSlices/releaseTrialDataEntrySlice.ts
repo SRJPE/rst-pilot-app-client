@@ -3,6 +3,9 @@ import { ReleaseMarkI } from '../addAnotherMarkSlice'
 
 interface InitialStateI {
   completed: boolean
+  crew: Array<string>
+  trapLocationIds: Array<number>
+  programId: number | null
   values: ReleaseTrialValuesI
 }
 
@@ -11,21 +14,18 @@ export interface ReleaseTrialValuesI {
   releaseLocation: string | null
   markedTime: any | null
   releaseTime: any | null
-  crew: Array<string>
-  trapLocationIds: Array<number>
-  programId: number | null
 }
 
 const initialState: InitialStateI = {
   completed: false,
+  crew: [],
+  trapLocationIds: [],
+  programId: null,
   values: {
     appliedMarks: [],
     releaseLocation: null,
     markedTime: null,
     releaseTime: null,
-    crew: [],
-    trapLocationIds: [],
-    programId: null,
   },
 }
 
@@ -38,9 +38,9 @@ export const releaseTrialDataEntrySlice = createSlice({
       state.values = action.payload
     },
     saveTrapVisitInformation: (state, action) => {
-      state.values.crew = action.payload.crew
-      state.values.programId = action.payload.programId
-      state.values.trapLocationIds = action.payload.trapLocationIds
+      state.crew = action.payload.crew
+      state.programId = action.payload.programId
+      state.trapLocationIds = action.payload.trapLocationIds
     },
     addMarkToAppliedMarks: (state, action) => {
       state.values.appliedMarks = [...state.values.appliedMarks, action.payload]
