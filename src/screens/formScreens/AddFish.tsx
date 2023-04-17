@@ -807,7 +807,7 @@ const AddFishContent = ({
                         />
                       </FormControl>
                     )}
-                    {(species.value !== 'Chinook salmon') && (
+                    {(species.value == 'Chinook salmon') && (
                       <FormControl w='1/2' paddingRight='9'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
