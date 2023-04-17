@@ -182,11 +182,12 @@ const TrapPostProcessing = ({
                     </FormControl.Label>
                     {Number(values.debrisVolume) >
                       QARanges.debrisVolume.max && <RenderWarningMessage />}
-                    {
-                      // touched.debrisVolume &&
-                      errors.debrisVolume &&
+                    {tabSlice.incompleteSectionTouched
+                      ? errors.reasonNotFunc &&
                         RenderErrorMessage(errors, 'debrisVolume')
-                    }
+                      : touched.reasonNotFunc &&
+                        errors.reasonNotFunc &&
+                        RenderErrorMessage(errors, 'debrisVolume')}
                   </HStack>
                   <Input
                     height='50px'

@@ -27,7 +27,7 @@ import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetup
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { flatten, uniq } from 'lodash'
 import { uid } from 'uid'
-import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import { setIncompleteSectionTouched, TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -81,6 +81,7 @@ const IncompleteSections = ({
   ) as Array<any>
 
   useEffect(() => {
+    dispatch(setIncompleteSectionTouched(true))
     dispatch(checkIfFormIsComplete())
   }, [])
 
