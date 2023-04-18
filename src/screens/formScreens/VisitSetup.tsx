@@ -70,6 +70,7 @@ const VisitSetup = ({
   const [crewList, setCrewList] = useState<{ label: string; value: string }[]>(
     []
   )
+  const [crewDropDownOpen, setCrewDropDownOpen] = useState(false as boolean)
 
   useEffect(() => {
     if (tabSlice.activeTabId != null) {
@@ -339,7 +340,7 @@ const VisitSetup = ({
     ]
     const crewMemberDefaults = visitSetupDefaultsState?.crewMembers
     crewMemberDefaults.forEach((crewList: any[]) => {
-      if (crewList[0].programId === programId) {
+      if (crewList.length && crewList[0].programId === programId) {
         payload = crewList.map((crewMember: any) => ({
           label: `${crewMember?.firstName} ${crewMember?.lastName}`,
           value: `${crewMember?.firstName} ${crewMember?.lastName}`,
@@ -397,6 +398,11 @@ const VisitSetup = ({
             onSubmit(values, tabSlice.previouslyActiveTabId)
           }
         }, [tabSlice.previouslyActiveTabId])
+
+        useEffect(() => {
+          console.log('crew: ', values.crew)
+          console.log('errors: ', errors)
+        }, [errors])
 
         return (
           <>
@@ -516,7 +522,7 @@ const VisitSetup = ({
                       </FormControl>
                     )}
 
-                    <FormControl mt={showTrapNameField ? '12' : '0'}>
+                    <FormControl mt={showTrapNameField ? '12' : '0'} mb={10}>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
                           Crew
@@ -524,6 +530,8 @@ const VisitSetup = ({
                       </FormControl.Label>
 
                       <CrewDropDown
+                        open={crewDropDownOpen}
+                        setOpen={setCrewDropDownOpen}
                         list={crewList}
                         setList={setCrewList}
                         setFieldValue={setFieldValue}
@@ -531,10 +539,14 @@ const VisitSetup = ({
                         visitSetupState={visitSetupState}
                         tabId={tabSlice?.activeTabId}
                       />
-                      {/* {touched.crew &&
-                      errors.crew &&
-                      RenderErrorMessage(errors, 'crew')} */}
                     </FormControl>
+                    {touched.crew &&
+                      !values.crew.length &&
+                      !crewDropDownOpen &&
+                      RenderErrorMessage(
+                        { crew: 'Must include at least one crew member' },
+                        'crew'
+                      )}
                   </>
                 )}
               </VStack>
@@ -542,7 +554,11 @@ const VisitSetup = ({
             <NavButtons
               navigation={navigation}
               handleSubmit={handleSubmit}
-              errors={errors}
+              errors={
+                values.crew.length
+                  ? errors
+                  : { ...errors, crew: Boolean(values.crew.length) }
+              }
               touched={touched}
               isPaperEntry={isPaperEntry}
             />

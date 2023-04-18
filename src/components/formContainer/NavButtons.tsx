@@ -239,9 +239,9 @@ const NavButtons = ({
 
   const disableRightButton = () => {
     //if paper entry then never disable the right button
-    if (isPaperEntryStore) {
-      return false
-    }
+    // if (isPaperEntryStore) {
+    //   return false
+    // }
     if (activePage === 'Incomplete Sections') {
       //if form is complete, then do not disable button
       // return isFormComplete ? false : true
