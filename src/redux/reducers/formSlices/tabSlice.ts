@@ -5,6 +5,7 @@ export interface TabStateI {
   activeTabId: string | null
   previouslyActiveTabId: string | null
   tabs: TabsI
+  incompleteSectionTouched: boolean
 }
 
 // uid : tabName
@@ -17,12 +18,19 @@ interface TabInfoI {
   trapSite: string
   timestamp: Date
   groupId: string
+  errorCount: number
+  errorDetails: ErrorDetailsI
+}
+
+interface ErrorDetailsI {
+  [pageName: string]: string
 }
 
 const initialState: TabStateI = {
   activeTabId: null,
   previouslyActiveTabId: null,
   tabs: {},
+  incompleteSectionTouched: false,
 }
 
 export const tabsSlice = createSlice({
@@ -40,9 +48,18 @@ export const tabsSlice = createSlice({
       Object.keys(state.tabs).forEach((id) => {
         if (state.tabs[id].trapSite === trapSite) {
           groupId = state.tabs[id].groupId
-        } 
+        }
       })
-      state.tabs[tabId] = { name: tabName, trapSite, timestamp, groupId }
+      const errorCount = 0
+      const errorDetails = {}
+      state.tabs[tabId] = {
+        name: tabName,
+        trapSite,
+        timestamp,
+        groupId,
+        errorCount,
+        errorDetails,
+      }
     },
     deleteTab: (state, action) => {
       const tabId = action.payload
@@ -61,6 +78,17 @@ export const tabsSlice = createSlice({
       const { tabId, name } = action.payload
       state.tabs[tabId].name = name
     },
+    updateErrorCount: (state, action) => {
+      const { tabId, errorCount } = action.payload
+      state.tabs[tabId].errorCount = errorCount
+    },
+    updateErrorDetails: (state, action) => {
+      const { tabId, errorDetails } = action.payload
+      state.tabs[tabId].errorDetails = errorDetails
+    },
+    setIncompleteSectionTouched: (state, action) => {
+      state.incompleteSectionTouched = action.payload
+    }
   },
 })
 
@@ -70,6 +98,9 @@ export const {
   deleteTab,
   setActiveTab,
   setTabName,
+  updateErrorCount,
+  updateErrorDetails,
+  setIncompleteSectionTouched,
 } = tabsSlice.actions
 
 export default tabsSlice.reducer

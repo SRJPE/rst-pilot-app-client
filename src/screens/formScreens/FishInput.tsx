@@ -26,6 +26,7 @@ import FishInputDataTable from '../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../components/form/PlusCountModalContent'
 import { Ionicons } from '@expo/vector-icons'
 import { useWindowDimensions } from 'react-native'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
@@ -40,6 +41,8 @@ const mapStateToProps = (state: RootState) => {
   return {
     activeTabId,
     speciesCaptured,
+    tabSlice: state.tabSlice,
+    fishInputSlice: state.fishInput
   }
 }
 
@@ -47,10 +50,14 @@ const FishInput = ({
   navigation,
   activeTabId,
   speciesCaptured,
+  tabSlice,
+  fishInputSlice
 }: {
   navigation: any
   activeTabId: string
   speciesCaptured: string[]
+  tabSlice: TabStateI
+  fishInputSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addPlusCountModalOpen, setAddPlusCountModalOpen] = useState(
@@ -81,7 +88,11 @@ const FishInput = ({
         saveFishInput({ tabId: activeTabId, speciesCaptured: checkboxGroupValue })
       )
       dispatch(markFishInputCompleted({ tabId: activeTabId, bool: true }))
-      dispatch(markStepCompleted([true, 'fishInput']))
+      let stepCompletedCheck = true
+      Object.keys(tabSlice.tabs).forEach(tabId => {
+        if (!fishInputSlice[tabId]) stepCompletedCheck = false
+      })
+      if (stepCompletedCheck) dispatch(markStepCompleted([true, 'fishInput']))
       console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
     }
   }

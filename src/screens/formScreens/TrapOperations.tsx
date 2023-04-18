@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { Form, Formik } from 'formik'
+import React, { useEffect } from 'react'
+import { Formik, yupToFormErrors } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
@@ -33,6 +33,7 @@ import { QARanges } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import OptimizedInput from '../../components/Shared/OptimizedInput'
 import { updateTrapVisitStartTime } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -43,6 +44,7 @@ const mapStateToProps = (state: RootState) => {
     activeTabId: state.tabSlice.activeTabId,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
+    tabSlice: state.tabSlice,
   }
 }
 const TrapOperations = ({
@@ -52,6 +54,7 @@ const TrapOperations = ({
   activeTabId,
   previouslyActiveTabId,
   navigationSlice,
+  tabSlice,
 }: {
   navigation: any
   reduxState: any
@@ -59,6 +62,7 @@ const TrapOperations = ({
   activeTabId: string | null
   previouslyActiveTabId: string | null
   navigationSlice: any
+  tabSlice: TabStateI
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
@@ -87,20 +91,38 @@ const TrapOperations = ({
     }
   }
 
+  const checkForErrors = (values: any) => {
+    try {
+      trapOperationsSchema.validateSync(values, {
+        abortEarly: false,
+        context: { values },
+      })
+      return {}
+    } catch (err) {
+      return yupToFormErrors(err)
+    }
+  }
+
   const onSubmit = (values: any, tabId: string | null) => {
     if (tabId) {
       const newDate = new Date()
       if (values.trapStatus === trapNotInServiceIdentifier) {
         dispatch(updateTrapVisitStartTime(newDate))
       }
+      const errors = checkForErrors(values)
       dispatch(
         saveTrapOperations({
           tabId,
           values: { ...values, trapVisitStopTime: new Date() },
+          errors,
         })
       )
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
-      dispatch(markStepCompleted([true]))
+      let stepCompletedCheck = true
+      Object.keys(tabSlice.tabs).forEach((tabId) => {
+        if (!reduxState[tabId]) stepCompletedCheck = false
+      })
+      if (stepCompletedCheck) dispatch(markStepCompleted([true]))
       console.log('🚀 ~ handleSubmit ~ Status', values)
     }
   }
@@ -149,6 +171,11 @@ const TrapOperations = ({
           : reduxState['placeholderId'].values
       }
       initialTouched={{ trapStatus: true }}
+      initialErrors={
+        activeTabId && reduxState[activeTabId]
+          ? reduxState[activeTabId].errors
+          : null
+      }
       // only create initial error when form is not completed
       // initialErrors={reduxState.completed ? undefined : { trapStatus: '' }}
       onSubmit={(values: any) => {
@@ -156,6 +183,7 @@ const TrapOperations = ({
           onSubmit(values, activeTabId)
         }
       }}
+      validateOnChange={true}
     >
       {({
         handleChange,
@@ -281,10 +309,12 @@ const TrapOperations = ({
                         setFieldTouched={setFieldTouched}
                         selectOptions={whyTrapNotFunctioning}
                       />
-
-                      {touched.reasonNotFunc &&
-                        errors.reasonNotFunc &&
-                        RenderErrorMessage(errors, 'reasonNotFunc')}
+                      {tabSlice.incompleteSectionTouched
+                        ? errors.reasonNotFunc &&
+                          RenderErrorMessage(errors, 'reasonNotFunc')
+                        : touched.reasonNotFunc &&
+                          errors.reasonNotFunc &&
+                          RenderErrorMessage(errors, 'reasonNotFunc')}
                     </FormControl>
                   )}
                   {values.trapStatus.length > 0 &&
@@ -399,23 +429,40 @@ const TrapOperations = ({
                                 </Popover.Header>
                               </Popover.Content>
                             </Popover>
-                            {((touched.rpm1 && errors.rpm1) ||
-                              (touched.rpm2 && errors.rpm2) ||
-                              (touched.rpm3 && errors.rpm3)) && (
-                              <HStack space={1}>
-                                <Icon
-                                  marginTop={'.5'}
-                                  as={Ionicons}
-                                  name='alert-circle-outline'
-                                  color='error'
-                                />
-                                <Text
-                                  style={{ fontSize: 14, color: '#b71c1c' }}
-                                >
-                                  At least one measurement is required
-                                </Text>
-                              </HStack>
-                            )}
+                            {tabSlice.incompleteSectionTouched
+                              ? (errors.rpm1 || errors.rpm2 || errors.rpm3) && (
+                                  <HStack space={1}>
+                                    <Icon
+                                      marginTop={'.5'}
+                                      as={Ionicons}
+                                      name='alert-circle-outline'
+                                      color='error'
+                                    />
+                                    <Text
+                                      style={{ fontSize: 14, color: '#b71c1c' }}
+                                    >
+                                      At least one measurement is required
+                                    </Text>
+                                  </HStack>
+                                )
+                              : (touched.rpm1 ||
+                                  touched.rpm2 ||
+                                  touched.rpm3) &&
+                                (errors.rpm1 || errors.rpm2 || errors.rpm3) && (
+                                  <HStack space={1}>
+                                    <Icon
+                                      marginTop={'.5'}
+                                      as={Ionicons}
+                                      name='alert-circle-outline'
+                                      color='error'
+                                    />
+                                    <Text
+                                      style={{ fontSize: 14, color: '#b71c1c' }}
+                                    >
+                                      At least one measurement is required
+                                    </Text>
+                                  </HStack>
+                                )}
                           </HStack>
                           <HStack space={8} justifyContent='space-between'>
                             <FormControl w='30%'>
@@ -489,9 +536,12 @@ const TrapOperations = ({
                               QARanges.totalRevolutions.max && (
                               <RenderWarningMessage />
                             )}
-                            {touched.totalRevolutions &&
-                              errors.totalRevolutions &&
-                              RenderErrorMessage(errors, 'totalRevolutions')}
+                            {tabSlice.incompleteSectionTouched
+                              ? errors.totalRevolutions &&
+                                RenderErrorMessage(errors, 'totalRevolutions')
+                              : touched.totalRevolutions &&
+                                errors.totalRevolutions &&
+                                RenderErrorMessage(errors, 'totalRevolutions')}
                           </HStack>
                           <OptimizedInput
                             height='50px'
@@ -533,9 +583,12 @@ const TrapOperations = ({
                               QARanges.flowMeasure[selectedStream]?.min && (
                                 <RenderWarningMessage />
                               )}
-                            {touched.flowMeasure &&
-                              errors.flowMeasure &&
-                              RenderErrorMessage(errors, 'flowMeasure')}
+                            {tabSlice.incompleteSectionTouched
+                              ? errors.totalRevolutions &&
+                                RenderErrorMessage(errors, 'flowMeasure')
+                              : touched.totalRevolutions &&
+                                errors.totalRevolutions &&
+                                RenderErrorMessage(errors, 'flowMeasure')}
                           </FormControl>
                           <FormControl w='1/4'>
                             <FormControl.Label>
@@ -560,9 +613,12 @@ const TrapOperations = ({
                               Number(values.waterTemperature),
                               values.waterTemperatureUnit
                             )}
-                            {touched.waterTemperature &&
-                              errors.waterTemperature &&
-                              RenderErrorMessage(errors, 'waterTemperature')}
+                            {tabSlice.incompleteSectionTouched
+                              ? errors.totalRevolutions &&
+                                RenderErrorMessage(errors, 'waterTemperature')
+                              : touched.totalRevolutions &&
+                                errors.totalRevolutions &&
+                                RenderErrorMessage(errors, 'waterTemperature')}
                           </FormControl>
                           <FormControl w='1/4'>
                             <FormControl.Label>
@@ -585,9 +641,12 @@ const TrapOperations = ({
                               QARanges.waterTurbidity.max && (
                               <RenderWarningMessage />
                             )}
-                            {touched.waterTurbidity &&
-                              errors.waterTurbidity &&
-                              RenderErrorMessage(errors, 'waterTurbidity')}
+                            {tabSlice.incompleteSectionTouched
+                              ? errors.totalRevolutions &&
+                                RenderErrorMessage(errors, 'waterTurbidity')
+                              : touched.totalRevolutions &&
+                                errors.totalRevolutions &&
+                                RenderErrorMessage(errors, 'waterTurbidity')}
                           </FormControl>
                         </HStack>
                         <Text

@@ -1,4 +1,4 @@
-import { Formik } from 'formik'
+import { Formik, yupToFormErrors } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
@@ -93,20 +93,37 @@ const TrapPostProcessing = ({
     []
   )
 
+  const checkForErrors = (values: any) => {
+    try {
+      trapPostProcessingSchema.validateSync(values, {
+        abortEarly: false,
+        context: { values },
+      })
+      return {}
+    } catch (err) {
+      return yupToFormErrors(err)
+    }
+  }
+
   const onSubmit = (values: any, tabId: string) => {
     let trapVisitStartTime = null
     if (values.endingTrapStatus == 'Restart Trap') {
       trapVisitStartTime = new Date()
     }
-
+    const errors = checkForErrors(values)
     dispatch(
       saveTrapPostProcessing({
         tabId,
         values: { ...values, trapVisitStartTime },
+        errors,
       })
     )
     dispatch(markTrapPostProcessingCompleted({ tabId, value: true }))
-    dispatch(markStepCompleted([true]))
+    let stepCompletedCheck = true
+    Object.keys(tabSlice.tabs).forEach((tabId) => {
+      if (!reduxState[tabId]) stepCompletedCheck = false
+    })
+    if (stepCompletedCheck) dispatch(markStepCompleted([true]))
     console.log('🚀 ~ onSubmit ~ TrapPostProcessing', values)
   }
 
@@ -116,7 +133,11 @@ const TrapPostProcessing = ({
       enableReinitialize={true}
       initialValues={reduxState[activeTabId].values}
       initialTouched={{ debrisVolume: true }}
-      // initialErrors={reduxState.completed ? undefined : { debrisVolume: '' }}
+      initialErrors={
+        activeTabId && reduxState[activeTabId]
+          ? reduxState[activeTabId].errors
+          : null
+      }
       onSubmit={(values) => {
         if (activeTabId != 'placeholderId') {
           onSubmit(values, activeTabId)
@@ -124,6 +145,7 @@ const TrapPostProcessing = ({
           if (tabSlice.activeTabId) onSubmit(values, tabSlice.activeTabId)
         }
       }}
+      validateOnChange={true}
     >
       {({
         handleChange,
@@ -164,9 +186,12 @@ const TrapPostProcessing = ({
                     </FormControl.Label>
                     {Number(values.debrisVolume) >
                       QARanges.debrisVolume.max && <RenderWarningMessage />}
-                    {touched.debrisVolume &&
-                      errors.debrisVolume &&
-                      RenderErrorMessage(errors, 'debrisVolume')}
+                    {tabSlice.incompleteSectionTouched
+                      ? errors.reasonNotFunc &&
+                        RenderErrorMessage(errors, 'debrisVolume')
+                      : touched.reasonNotFunc &&
+                        errors.reasonNotFunc &&
+                        RenderErrorMessage(errors, 'debrisVolume')}
                   </HStack>
                   <Input
                     height='50px'
@@ -195,9 +220,7 @@ const TrapPostProcessing = ({
                         RPM After Cleaning
                       </Text>
                     </FormControl.Label>
-                    {((touched.rpm1 && errors.rpm1) ||
-                      (touched.rpm2 && errors.rpm2) ||
-                      (touched.rpm3 && errors.rpm3)) && (
+                    {(errors.rpm1 || errors.rpm2 || errors.rpm3) && (
                       <HStack space={1}>
                         <Icon
                           marginTop={'.5'}

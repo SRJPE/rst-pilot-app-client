@@ -1,4 +1,4 @@
-import { Formik } from 'formik'
+import { Formik, yupToFormErrors } from 'formik'
 import {
   FormControl,
   Heading,
@@ -63,11 +63,29 @@ const FishProcessing = ({
     whyFishNotProcessed: whyFishNotProcessedDropdowns,
   } = dropdownValues.values
 
+  const checkForErrors = (values: any) => {
+    try {
+      fishProcessingSchema.validateSync(values, {
+        abortEarly: false,
+        context: { values },
+      })
+      return {}
+    } catch (err) {
+      return yupToFormErrors(err)
+    }
+  }
+
   const onSubmit = (values: any, tabId: string | null) => {
     if (tabId) {
-      dispatch(saveFishProcessing({ tabId, values }))
+      const errors = checkForErrors(values)
+      dispatch(saveFishProcessing({ tabId, values, errors }))
       dispatch(markFishProcessingCompleted({ tabId, value: true }))
-      dispatch(markStepCompleted([true, 'fishProcessing']))
+      let stepCompletedCheck = true
+      Object.keys(tabSlice.tabs).forEach((tabId) => {
+        if (!reduxState[tabId]) stepCompletedCheck = false
+      })
+      if (stepCompletedCheck)
+        dispatch(markStepCompleted([true, 'fishProcessing']))
       console.log('🚀 ~ handleSubmit~ FishProcessing', values)
     }
   }
@@ -79,9 +97,11 @@ const FishProcessing = ({
       initialValues={reduxState[activeTabId].values}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       initialTouched={{ fishProcessedResult: true }}
-      // initialErrors={
-      //   reduxState.completed ? undefined : { fishProcessedResult: '' }
-      // }
+      initialErrors={
+        activeTabId && reduxState[activeTabId]
+          ? reduxState[activeTabId].errors
+          : null
+      }
       onSubmit={(values) => {
         if (activeTabId != 'placeholderId') {
           onSubmit(values, activeTabId)
@@ -89,6 +109,7 @@ const FishProcessing = ({
           if (tabSlice.activeTabId) onSubmit(values, tabSlice.activeTabId)
         }
       }}
+      validateOnChange={true}
     >
       {({
         handleChange,
@@ -131,9 +152,12 @@ const FishProcessing = ({
                     setFieldTouched={setFieldTouched}
                     selectOptions={fishProcessedDropdowns}
                   />
-                  {touched.fishProcessed &&
-                    errors.fishProcessed &&
-                    RenderErrorMessage(errors, 'fishProcessed')}
+                  {tabSlice.incompleteSectionTouched
+                    ? errors.reasonNotFunc &&
+                      RenderErrorMessage(errors, 'fishProcessed')
+                    : touched.reasonNotFunc &&
+                      errors.reasonNotFunc &&
+                      RenderErrorMessage(errors, 'fishProcessed')}
                 </FormControl>
                 {(values.fishProcessedResult ===
                   'no catch data, fish left in live box' ||
@@ -152,9 +176,12 @@ const FishProcessing = ({
                       setFieldTouched={setFieldTouched}
                       selectOptions={whyFishNotProcessedDropdowns}
                     />
-                    {touched.reasonForNotProcessing &&
-                      errors.reasonForNotProcessing &&
-                      RenderErrorMessage(errors, 'reasonForNotProcessing')}
+                    {tabSlice.incompleteSectionTouched
+                      ? errors.reasonNotFunc &&
+                        RenderErrorMessage(errors, 'reasonForNotProcessing')
+                      : touched.reasonNotFunc &&
+                        errors.reasonNotFunc &&
+                        RenderErrorMessage(errors, 'reasonForNotProcessing')}
                   </FormControl>
                 )}
 

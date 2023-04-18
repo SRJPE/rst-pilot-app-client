@@ -7,6 +7,7 @@ interface InitialStateI {
 interface TrapPostProcessingStateI {
   completed: boolean
   values: trapPostProcessingValuesI
+  errors: { [name: string]: any }
 }
 
 export interface trapPostProcessingValuesI {
@@ -33,6 +34,7 @@ const initialState: InitialStateI = {
       endingTrapStatus: 'Restart Trap',
       trapVisitStartTime: null,
     },
+    errors: {},
   },
 }
 
@@ -42,7 +44,7 @@ export const trapPostProcessingSlice = createSlice({
   reducers: {
     resetTrapPostProcessingSlice: () => initialState,
     saveTrapPostProcessing: (state, action) => {
-      const { tabId, values } = action.payload
+      const { tabId, values, errors } = action.payload
       state[tabId] = {
         completed: true,
         values: {
@@ -51,6 +53,7 @@ export const trapPostProcessingSlice = createSlice({
             ? state[tabId].values.trapVisitStartTime
             : values.trapVisitStartTime,
         },
+        errors
       }
     },
     updateTrapVisitStartTime: (state, action) => {

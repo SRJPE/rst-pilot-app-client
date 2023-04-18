@@ -3,6 +3,8 @@ import { View } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
 
 export default function CrewDropDown({
+  open,
+  setOpen,
   list,
   setList,
   setFieldValue,
@@ -10,6 +12,8 @@ export default function CrewDropDown({
   visitSetupState,
   tabId,
 }: {
+  open: boolean
+  setOpen: any
   list: any
   setList: any
   setFieldValue: any
@@ -17,7 +21,6 @@ export default function CrewDropDown({
   visitSetupState: any
   tabId: any
 }) {
-  const [open, setOpen] = useState(false as boolean)
   const [value, setValue] = useState([] as Array<any>)
 
   useEffect(() => {
@@ -28,7 +31,7 @@ export default function CrewDropDown({
 
   useEffect(() => {
     setFieldValue('crew', [...value])
-    setFieldTouched('crew', true)
+    if (value.length) setFieldTouched('crew', true)
   }, [value])
 
   return (

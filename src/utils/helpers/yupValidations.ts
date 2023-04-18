@@ -30,7 +30,7 @@ export const trapOperationsSchema = yup.object().shape({
   waterTurbidity: yup
     .number()
     .nullable()
-    // .required('Water Turbidity Required')
+    .required('Water Turbidity Required')
     .typeError('Input must be a number'),
   waterTurbidityUnit: yup.string(),
 
@@ -41,7 +41,7 @@ export const trapOperationsSchema = yup.object().shape({
     //   return originalValue === '' ? undefined : value
     // })
     .nullable()
-    // .required('Total Required')
+    .required('Total Revolutions Required')
     .typeError('Input must be a number'),
   rpm1: yup
     .number()
