@@ -267,3 +267,51 @@ export const addAnotherMarkSchema = yup.object().shape({
   markColor: yup.string().required('Mark color required'),
   markPosition: yup.string().required('Mark position required'),
 })
+
+/*----------------------------------------------------------------
+  CREATE NEW PROGRAM SCHEMAS
+----------------------------------------------------------------*/
+export const trappingSitesSchema = yup.object().shape({
+  trapName: yup.string().required('Trap name required'),
+
+  trapLatitude: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+  trapLongitude: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+  coneSize: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+  USGSStationNumber: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+  releaseSiteName: yup.string().required('Release site name required'),
+  releaseSiteLatitude: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+  releaseSiteLongitude: yup
+    .number()
+    // .nullable()
+    .required('Trap latitude required')
+    .typeError('Input must be a number'),
+})
+export const crewMembersSchema = yup.object().shape({
+  firstName: yup.string().required('First name required'),
+  lastName: yup.string().required('Last name required'),
+  phoneNumber: yup.string().required('Phone number required'),
+  email: yup.string().required('Email required'),
+  // isLead: false,
+  agency: yup.string().required('Agency required'),
+  orchidID: yup.string().nullable(),
+})
