@@ -34,8 +34,7 @@ import {
   saveMarkRecaptureSubmission,
 } from '../../redux/reducers/postSlices/markRecapturePostBundler'
 import { flatten, uniq } from 'lodash'
-import { resetReleaseTrialDataEntrySlice } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
-import { resetReleaseTrialSlice } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
+import { ReleaseMarkI } from '../../redux/reducers/addAnotherMarkSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -47,6 +46,22 @@ const mapStateToProps = (state: RootState) => {
     tabState: state.tabSlice,
     dropdownsState: state.dropdowns,
   }
+}
+
+export interface MarkRecaptureSubmissionI {
+  programId: number
+  releasePurposeId?: null | null
+  releaseSiteId: number
+  releasedAt: Date
+  markedAt: Date
+  marksArray: Array<ReleaseMarkI>
+  runHatcheryFish: number
+  hatcheryFishWeight: number
+  totalWildFishReleased: number
+  totalHatcheryFishReleased: number
+  totalWildFishDead: number
+  totalHatcheryFishDead: number
+  releaseCrew: Array<string>
 }
 
 const ReleaseDataEntry = ({
@@ -123,7 +138,7 @@ const ReleaseDataEntry = ({
         .map((obj: any) => obj.personnelId)
     )
 
-    const markRecaptureSubmission = {
+    const markRecaptureSubmission: MarkRecaptureSubmissionI = {
       programId: releaseTrialDataEntryState.programId,
       // releasePurposeId: null, //left as null
       releaseSiteId: returnNullableTableId(
@@ -175,18 +190,11 @@ const ReleaseDataEntry = ({
       )
 
       dispatch(markReleaseTrialDataEntryCompleted(true))
-
       saveMarkRecaptureSubmissions(values)
-      // resetAllFormSlices()
     } catch (error) {
       console.error(error)
     }
   }
-
-  // const resetAllFormSlices = () => {
-  //   dispatch(resetReleaseTrialSlice())
-  //   dispatch(resetReleaseTrialDataEntrySlice())
-  // }
 
   return (
     <Formik

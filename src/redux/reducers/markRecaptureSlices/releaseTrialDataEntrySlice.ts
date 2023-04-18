@@ -12,8 +12,8 @@ interface InitialStateI {
 export interface ReleaseTrialValuesI {
   appliedMarks: Array<ReleaseMarkI>
   releaseLocation: string | null
-  markedTime: any | null
-  releaseTime: any | null
+  markedTime: Date | null
+  releaseTime: Date | null
 }
 
 const initialState: InitialStateI = {
