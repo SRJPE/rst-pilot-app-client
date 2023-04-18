@@ -46,7 +46,7 @@ const trapVisitPostPersistConfig = {
 const userCredentialsPersistConfig = {
   key: 'userCredentialsPersistConfig',
   version: 1,
-  storage: SecureStore,
+  storage: AsyncStorage,
 }
 
 export default combineReducers({
@@ -75,7 +75,10 @@ export default combineReducers({
   releaseTrial: releaseTrialSlice,
   releaseTrialDataEntry: releaseTrialDataEntrySlice,
   addAnotherMark: addAnotherMarkSlice,
-  userCredentials: persistReducer(dropdownsPersistConfig, userCredentialsSlice),
+  userCredentials: persistReducer(
+    userCredentialsPersistConfig,
+    userCredentialsSlice
+  ),
   trappingSites: trappingSitesSlice,
   crewMembers: crewMembersSlice,
 })
