@@ -58,17 +58,16 @@ export default function MarkRecaptureNavButtons({
 
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen or Mark Recapture Complete screen
-    if (
-      activePage === 'Release Trial' ||
-      activePage === 'Mark Recapture Complete'
-    ) {
-      if (activePage === 'Mark Recapture Complete') {
-        clearFormValues && clearFormValues()
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Release Trial' }],
-        })
-      }
+    if (activePage === 'Release Trial') {
+      navigation.navigate('Home')
+      return
+    }
+    if (activePage === 'Mark Recapture Complete') {
+      clearFormValues && clearFormValues()
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Release Trial' }],
+      })
       navigation.navigate('Home')
       return
     }
