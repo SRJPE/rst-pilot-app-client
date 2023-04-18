@@ -51,6 +51,7 @@ import { Keyboard, useWindowDimensions } from 'react-native'
 import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const AddFishContent = ({
   route,
@@ -63,6 +64,7 @@ const AddFishContent = ({
   setActiveTab,
   closeModal,
   fishStore,
+  tabSlice,
 }: {
   route?: any
   saveIndividualFish: any
@@ -74,6 +76,7 @@ const AddFishContent = ({
   setActiveTab: any
   closeModal: any
   fishStore: FishStoreI
+  tabSlice: TabStateI
 }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
@@ -436,7 +439,15 @@ const AddFishContent = ({
         <Pressable onPress={Keyboard.dismiss}>
           <HStack space={10}>
             <CustomModalHeader
-              headerText={route.params?.editModeData ? 'Edit Fish' : 'Add Fish'}
+              headerText={
+                route.params?.editModeData
+                  ? tabSlice.activeTabId
+                    ? `Edit Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
+                    : 'Edit Fish'
+                  : tabSlice.activeTabId
+                  ? `Add Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
+                  : 'Add Fish'
+              }
               showHeaderButton={true}
               closeModal={closeModal}
               navigateBack={true}
@@ -796,24 +807,26 @@ const AddFishContent = ({
                         />
                       </FormControl>
                     )}
-                    <FormControl w='1/2' paddingRight='9'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Run
-                        </Text>
-                      </FormControl.Label>
-                      <CustomSelect
-                        selectedValue={run.value as string}
-                        placeholder={'Run'}
-                        onValueChange={(value: string) =>
-                          setRun({ ...run, value })
-                        }
-                        setFieldTouched={() =>
-                          setRun({ ...run, touched: true })
-                        }
-                        selectOptions={dropdownValues?.run}
-                      />
-                    </FormControl>
+                    {(species.value == 'Chinook salmon') && (
+                      <FormControl w='1/2' paddingRight='9'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Run
+                          </Text>
+                        </FormControl.Label>
+                        <CustomSelect
+                          selectedValue={run.value as string}
+                          placeholder={'Run'}
+                          onValueChange={(value: string) =>
+                            setRun({ ...run, value })
+                          }
+                          setFieldTouched={() =>
+                            setRun({ ...run, touched: true })
+                          }
+                          selectOptions={dropdownValues?.run}
+                        />
+                      </FormControl>
+                    )}
                   </HStack>
                   {species.value === 'Chinook salmon' && (
                     <FormControl w='1/2'>
@@ -1138,9 +1151,15 @@ const AddFishContent = ({
               if (route.params?.editModeData) {
                 navigation.goBack()
               } else {
-                let payload = returnFormValues()
-                saveIndividualFish(payload)
-                navigation.goBack()
+                const activeTabId = tabSlice.activeTabId
+                if (activeTabId) {
+                  let payload = returnFormValues()
+                  saveIndividualFish({
+                    tabId: activeTabId,
+                    formValues: payload,
+                  })
+                  navigation.goBack()
+                }
               }
             }}
           >
@@ -1153,8 +1172,14 @@ const AddFishContent = ({
               flex='1'
               bg='#b71c1c'
               onPress={() => {
-                deleteFishEntry(route.params?.editModeData?.id)
-                navigation.goBack()
+                const activeTabId = tabSlice.activeTabId
+                if (activeTabId) {
+                  deleteFishEntry({
+                    tabId: activeTabId,
+                    id: route.params?.editModeData?.id,
+                  })
+                  navigation.goBack()
+                }
               }}
             >
               <Text fontWeight='bold' color='white' fontSize='xl'>
@@ -1173,19 +1198,29 @@ const AddFishContent = ({
             isDisabled={route.params?.editModeData ? false : formHasError}
             onPress={() => {
               let payload = returnFormValues()
+              const activeTabId = tabSlice.activeTabId
               if (route.params?.editModeData) {
-                updateFishEntry({
-                  id: route.params?.editModeData?.id,
-                  ...payload,
-                  numFishCaught: count.value,
-                })
-                navigation.goBack()
+                if (activeTabId) {
+                  updateFishEntry({
+                    tabId: activeTabId,
+                    id: route.params?.editModeData?.id,
+                    ...payload,
+                    numFishCaught: count.value,
+                  })
+                  navigation.goBack()
+                }
               } else {
                 // bypasses formik to fix async issues.
                 // This should be fine since the button is only enabled when the form is valid
-                saveIndividualFish(payload)
-                showSlideAlert(dispatch, 'Fish')
-                resetFormState('other')
+                const activeTabId = tabSlice.activeTabId
+                if (activeTabId) {
+                  saveIndividualFish({
+                    tabId: activeTabId,
+                    formValues: payload,
+                  })
+                  showSlideAlert(dispatch, 'Fish')
+                  resetFormState('other')
+                }
               }
             }}
           >
@@ -1234,8 +1269,17 @@ const AddFishContent = ({
 }
 
 const mapStateToProps = (state: RootState) => {
+  let activeTabId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.fishInput[state.tabSlice.activeTabId]
+  ) {
+    activeTabId = state.tabSlice.activeTabId
+  }
+
   return {
-    fishStore: state.fishInput.fishStore,
+    fishStore: state.fishInput[activeTabId].fishStore,
+    tabSlice: state.tabSlice,
   }
 }
 

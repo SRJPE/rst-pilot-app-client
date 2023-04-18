@@ -309,8 +309,11 @@ const AddGeneticsModalContent = ({
   )
 }
 const mapStateToProps = (state: RootState) => {
+  const activeTabId = state.tabSlice.activeTabId
   return {
-    crewMembers: state.visitSetup.values.crew,
+    crewMembers: activeTabId
+      ? state.visitSetup[activeTabId].values.crew
+      : state.visitSetup['placeholderId'].values.crew,
   }
 }
 

@@ -12,13 +12,36 @@ import {
   saveFishHolding,
   SelectedFishStoreI,
 } from '../../redux/reducers/markRecaptureSlices/fishHoldingSlice'
+import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    fishInput: state.fishInput,
+    selectedFishStoreState: state.fishHolding.values.selectedFishStore,
+    activeTabId: state.tabSlice.activeTabId,
+    previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
+    navigationSlice: state.navigation,
+    visitSetupState: state.visitSetup,
+    tabState: state.tabSlice,
+  }
+}
 
 const FishHolding = ({
-  fishStore,
+  fishInput,
   selectedFishStoreState,
+  activeTabId,
+  previouslyActiveTabId,
+  navigationSlice,
+  visitSetupState,
+  tabState,
 }: {
-  fishStore: FishStoreI
+  fishInput: any
   selectedFishStoreState: SelectedFishStoreI
+  activeTabId: string | null
+  previouslyActiveTabId: string | null
+  navigationSlice: any
+  visitSetupState: any
+  tabState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation: any = useNavigation()
@@ -28,28 +51,55 @@ const FishHolding = ({
   const [totalFish, setTotalFish] = useState(0 as number)
 
   useEffect(() => {
-    if (Object.keys(selectedFishStoreState).length === 0) {
+    if (
+      selectedFishStoreState &&
+      Object.keys(selectedFishStoreState).length === 0
+    ) {
+      console.log('selectedFishStore is truthy')
       createSelectedFishStore()
     } else {
       setSelectedFishStore(selectedFishStoreState as SelectedFishStoreI)
     }
     setSelectedLifeStagesAndRuns()
-  }, [])
+  }, [activeTabId])
+
+  useEffect(() => {
+    if (previouslyActiveTabId && navigationSlice.activeStep === 16) {
+      handleSubmit(previouslyActiveTabId)
+    }
+  }, [previouslyActiveTabId])
 
   useEffect(() => {
     setSelectedLifeStagesAndRuns()
     calculateTotalFish()
   }, [selectedFishStore])
 
+  const combineFishStoreForAllTabs = () => {
+    let combinedFishStore = {} as any
+    let count = 0 as number
+    for (let individualFishStore in fishInput) {
+      if (individualFishStore === 'placeholderId') continue
+      for (let fish in fishInput[individualFishStore].fishStore) {
+        combinedFishStore[count] =
+          fishInput[individualFishStore].fishStore[fish]
+        count++
+      }
+    }
+
+    return combinedFishStore
+  }
+
   const createSelectedFishStore = () => {
     const tempSelectedFishStore = {} as any
-    for (const fish in fishStore) {
+    const fishStoreForAllTabs = combineFishStoreForAllTabs()
+
+    for (const fish in fishStoreForAllTabs) {
       //only add chinook to the list
-      if (fishStore[fish].species !== 'Chinook salmon') continue
+      if (fishStoreForAllTabs[fish].species !== 'Chinook salmon') continue
       //do not add yolk sac fry to store
-      if (fishStore[fish].lifeStage === 'yolk sac fry') continue
+      if (fishStoreForAllTabs[fish].lifeStage === 'yolk sac fry') continue
       //add remaining fish objects to selectedFishStore
-      tempSelectedFishStore[fish] = fishStore[fish]
+      tempSelectedFishStore[fish] = fishStoreForAllTabs[fish]
     }
     //set the temp fish store the state
     setSelectedFishStore(tempSelectedFishStore)
@@ -131,16 +181,37 @@ const FishHolding = ({
     setSelectedLifeStagesAndRuns()
     calculateTotalFish()
   }
+  const findTrapLocationIds = () => {
+    let container = [] as any
+    for (let tabId in visitSetupState) {
+      if (tabId === 'placeholderId') continue
+      container.push(visitSetupState[tabId].values.trapLocationId)
+    }
+    return container
+  }
 
-  const handleSubmit = () => {
-    dispatch(saveTotalFishHolding(totalFish))
-    dispatch(
-      saveFishHolding({
-        totalFishHolding: totalFish,
-        selectedFishStore: selectedFishStore,
-      })
-    )
-    dispatch(markFishHoldingCompleted(true))
+  const tabIds = Object.keys(tabState.tabs)
+  const handleSubmit = (tabId: string) => {
+    if (tabId) {
+      //saves for release trial
+      dispatch(saveTotalFishHolding(totalFish))
+      //saves for releaseTrial data entry
+      dispatch(
+        saveTrapVisitInformation({
+          crew: visitSetupState[tabIds[0]].values.crew,
+          programId: visitSetupState[tabIds[0]].values.programId,
+          trapLocationIds: findTrapLocationIds(),
+        })
+      )
+      // saves to fish holding
+      dispatch(
+        saveFishHolding({
+          totalFishHolding: totalFish,
+          selectedFishStore: selectedFishStore,
+        })
+      )
+      dispatch(markFishHoldingCompleted(true))
+    }
   }
 
   //render new cards when selected runs or lifeStages change
@@ -194,38 +265,18 @@ const FishHolding = ({
           </HStack>
           {renderFishHoldingCards()}
         </VStack>
-
         <HStack space={10} justifyContent='center'>
-          {/* <Button
-            bg='primary'
-            alignSelf='flex-start'
-            shadow='5'
-            onPress={() => {
-              console.log('fishStore: ', fishStore)
-              console.log('selectedFishStore: ', selectedFishStore)
-              console.log('selectedRuns: ', selectedRuns)
-              console.log('selectedLifeStages: ', selectedLifeStages)
-              console.log('🚀 ~ totalFish:', totalFish)
-            }}
-          >
-            <Text fontWeight='bold' color='white'>
-              Log
-            </Text>
-          </Button> */}
-
           <Heading>Total Fish Holding: {totalFish}</Heading>
         </HStack>
       </View>
-      <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
+      <NavButtons
+        navigation={navigation}
+        handleSubmit={() => {
+          if (activeTabId) handleSubmit(activeTabId)
+        }}
+      />
     </>
   )
-}
-
-const mapStateToProps = (state: RootState) => {
-  return {
-    fishStore: state.fishInput.fishStore,
-    selectedFishStoreState: state.fishHolding.values.selectedFishStore,
-  }
 }
 
 export default connect(mapStateToProps)(FishHolding)

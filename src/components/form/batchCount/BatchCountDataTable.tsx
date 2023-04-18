@@ -79,8 +79,17 @@ const BatchCountDataTable = ({
   )
 }
 const mapStateToProps = (state: RootState) => {
+  let activeTabId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.fishInput[state.tabSlice.activeTabId]
+  ) {
+    activeTabId = state.tabSlice.activeTabId
+  }
+
   return {
-    forkLengthsStore: state.fishInput.batchCharacteristics.forkLengths,
+    forkLengthsStore:
+      state.fishInput[activeTabId].batchCharacteristics.forkLengths,
   }
 }
 

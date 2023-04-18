@@ -17,18 +17,28 @@ import AddFish from '../screens/formScreens/AddFish'
 import PaperEntry from '../screens/formScreens/PaperEntry'
 import StartedTrapping from '../screens/formScreens/StartedTrapping'
 import BatchCount from '../screens/formScreens/BatchCount'
+import { VStack } from 'native-base'
 import FishHolding from '../screens/formScreens/FishHolding'
+import TabBar from '../components/form/TabBar'
 
 const FormStack = createNativeStackNavigator()
 
-export default function FormStackNavigation() {
+function FormStackNavigation() {
   const fishInputModalOpen = useSelector(
     (state: any) => state.fishInput.modalOpen
   )
+
   return (
     <FormStack.Navigator
       initialRouteName='Visit Setup'
-      screenOptions={{ header: (props) => <ProgressHeader {...props} /> }}
+      screenOptions={{
+        header: (props) => (
+          <VStack>
+            <ProgressHeader {...props} />
+            <TabBar headerProps={props} />
+          </VStack>
+        ),
+      }}
     >
       <FormStack.Screen name='Visit Setup' component={VisitSetup} />
       <FormStack.Screen name='Trap Operations' component={TrapOperations} />
@@ -75,3 +85,5 @@ export default function FormStackNavigation() {
     </FormStack.Navigator>
   )
 }
+
+export default FormStackNavigation

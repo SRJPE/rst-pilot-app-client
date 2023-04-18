@@ -3,22 +3,35 @@ import { View } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
 
 export default function CrewDropDown({
-  crewList,
-  setCrewList,
+  open,
+  setOpen,
+  list,
+  setList,
   setFieldValue,
   setFieldTouched,
+  visitSetupState,
+  tabId,
 }: {
-  crewList: any
-  setCrewList: any,
+  open: boolean
+  setOpen: any
+  list: any
+  setList: any
   setFieldValue: any
   setFieldTouched: any
+  visitSetupState: any
+  tabId: any
 }) {
-  const [open, setOpen] = useState(false as boolean)
   const [value, setValue] = useState([] as Array<any>)
 
   useEffect(() => {
+    if (visitSetupState[tabId]?.values?.crew) {
+      setValue(visitSetupState[tabId]?.values?.crew)
+    }
+  }, [tabId])
+
+  useEffect(() => {
     setFieldValue('crew', [...value])
-    setFieldTouched('crew', true)
+    if (value.length) setFieldTouched('crew', true)
   }, [value])
 
   return (
@@ -33,10 +46,10 @@ export default function CrewDropDown({
       <DropDownPicker
         open={open}
         value={value}
-        items={crewList}
+        items={list}
         setOpen={setOpen}
         setValue={setValue}
-        setItems={setCrewList}
+        setItems={setList}
         multiple={true}
         mode='BADGE'
         badgeDotColors={['#007C7C']}

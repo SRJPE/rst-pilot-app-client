@@ -10,6 +10,7 @@ interface InitialStateI {
   status: string
   programs: ProgramI[]
   trapLocations: TrapLocationI[]
+  releaseSites: ReleaseSiteI[]
   crewMembers: CrewMemberI[][]
 }
 
@@ -46,6 +47,16 @@ interface TrapLocationI {
   createdAt: string | null
   updatedAt: string | null
 }
+interface ReleaseSiteI {
+  id: number
+  releaseSiteCoordinateSystem: null
+  releaseSiteDatum: null
+  releaseSiteName: string | null
+  releaseSiteProjection: null
+  releaseSiteXCoord: string | null
+  releaseSiteYCoord: string | null
+  trapLocationsId: number
+}
 
 interface CrewMemberI {
   id: number
@@ -70,7 +81,8 @@ const initialState: InitialStateI = {
   status: uninitializedStatus,
   programs: [],
   trapLocations: [],
-  crewMembers: []
+  releaseSites: [],
+  crewMembers: [],
 }
 
 // Async actions API calls
@@ -87,8 +99,7 @@ export const getVisitSetupDefaults = createAsyncThunk(
 export const visitSetupDefaultsSlice = createSlice({
   name: 'visitSetupDefaults',
   initialState: initialState,
-  reducers: {
-  },
+  reducers: {},
   extraReducers: {
     [getVisitSetupDefaults.pending.type]: (state, action) => {
       state.status = pendingStatus
@@ -98,6 +109,7 @@ export const visitSetupDefaultsSlice = createSlice({
       state.status = fulfilledStatus
       state.programs = action.payload.programs
       state.trapLocations = action.payload.trapLocations
+      state.releaseSites = action.payload.releaseSites
       state.crewMembers = action.payload.crewMembers
     },
 

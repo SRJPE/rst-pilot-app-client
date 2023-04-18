@@ -27,16 +27,16 @@ import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 
 const mapStateToProps = (state: RootState) => {
   return {
-    reduxState: state.releaseTrial,
+    releaseTrialStore: state.releaseTrial,
   }
 }
 
 const ReleaseTrial = ({
   navigation,
-  reduxState,
+  releaseTrialStore,
 }: {
   navigation: any
-  reduxState: any
+  releaseTrialStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector((state: any) => state.dropdowns)
@@ -44,7 +44,7 @@ const ReleaseTrial = ({
 
   const compareFishHoldingToWildCount = (wildCount: string) => {
     const message = `This value does not match the \npreviously confirmed value.`
-    if (reduxState.totalFishHolding !== Number(wildCount)) {
+    if (releaseTrialStore.totalFishHolding !== Number(wildCount)) {
       return <RenderWarningMessage messageToRender={message} />
     }
   }
@@ -59,10 +59,12 @@ const ReleaseTrial = ({
   return (
     <Formik
       validationSchema={releaseTrialSchema}
-      initialValues={reduxState.values}
+      initialValues={releaseTrialStore.values}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       initialTouched={{ willSupplement: true }}
-      initialErrors={reduxState.completed ? undefined : { wildCount: '' }}
+      initialErrors={
+        releaseTrialStore.completed ? undefined : { wildCount: '' }
+      }
       onSubmit={(values) => {
         handleSubmit(values)
       }}
@@ -111,7 +113,7 @@ const ReleaseTrial = ({
                         keyboardType='numeric'
                         onChangeText={handleChange('wildCount')}
                         onBlur={handleBlur('wildCount')}
-                        value={values.wildCount}
+                        value={`${values.wildCount}`}
                       />
                       {touched.wildCount &&
                         compareFishHoldingToWildCount(values.wildCount)}

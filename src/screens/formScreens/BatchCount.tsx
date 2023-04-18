@@ -33,8 +33,19 @@ import { Switch } from 'native-base'
 import BatchCountDataTable from '../../components/form/batchCount/BatchCountDataTable'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import BatchCountTableModal from '../../components/form/batchCount/BatchCountTableModal'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
-const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
+const BatchCount = ({
+  route,
+  fishInputSlice,
+  tabSlice,
+  activeTabId,
+}: {
+  route: any
+  fishInputSlice: any
+  tabSlice: TabStateI
+  activeTabId: string
+}) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
   const [firstButton, setFirstButton] = useState(0 as number)
@@ -50,7 +61,7 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
     count: '',
   } as any)
   const { species, adiposeClipped, dead, existingMark, forkLengths } =
-    fishStore.batchCharacteristics
+    fishInputSlice[activeTabId].batchCharacteristics
 
   const { height: screenHeight } = useWindowDimensions()
 
@@ -63,21 +74,30 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
   }, [])
 
   const handlePressRemoveFish = () => {
-    dispatch(removeLastForkLengthEntered())
+    const activeTabId = tabSlice.activeTabId
+    if (activeTabId) {
+      dispatch(removeLastForkLengthEntered({ tabId: activeTabId }))
+    }
   }
 
   const handlePressSaveBatchCount = () => {
-    dispatch(saveBatchCount())
-    showSlideAlert(dispatch, 'Batch Count')
-    // @ts-ignore
-    navigation.navigate('Trap Visit Form', {
-      screen: 'Fish Input',
-    })
+    const activeTabId = tabSlice.activeTabId
+    if (activeTabId) {
+      dispatch(saveBatchCount({ tabId: activeTabId }))
+      showSlideAlert(dispatch, 'Batch Count')
+      // @ts-ignore
+      navigation.navigate('Trap Visit Form', {
+        screen: 'Fish Input',
+      })
+    }
   }
   const handlePressSaveAndStartNewBatchCount = () => {
-    dispatch(saveBatchCount())
-    showSlideAlert(dispatch, 'Batch Count')
-    setBatchCharacteristicsModalOpen(true)
+    const activeTabId = tabSlice.activeTabId
+    if (activeTabId) {
+      dispatch(saveBatchCount({ tabId: activeTabId }))
+      showSlideAlert(dispatch, 'Batch Count')
+      setBatchCharacteristicsModalOpen(true)
+    }
   }
 
   const buttonNav = () => {
@@ -124,7 +144,15 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
         <Pressable onPress={Keyboard.dismiss}>
           <HStack space={10}>
             <CustomModalHeader
-              headerText={route.params?.editModeData ? 'Edit Fish' : 'Add Fish'}
+              headerText={
+                route.params?.editModeData
+                  ? tabSlice.activeTabId
+                    ? `Edit Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
+                    : 'Edit Fish'
+                  : tabSlice.activeTabId
+                  ? `Add Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
+                  : 'Add Fish'
+              }
               showHeaderButton={true}
               navigateBack={true}
               headerButton={AddFishModalHeaderButton({
@@ -354,8 +382,18 @@ const BatchCount = ({ route, fishStore }: { route: any; fishStore: any }) => {
 }
 
 const mapStateToProps = (state: RootState) => {
+  let activeTabId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.fishInput[state.tabSlice.activeTabId]
+  ) {
+    activeTabId = state.tabSlice.activeTabId
+  }
+
   return {
-    fishStore: state.fishInput,
+    fishInputSlice: state.fishInput,
+    tabSlice: state.tabSlice,
+    activeTabId,
   }
 }
 export default connect(mapStateToProps)(BatchCount)

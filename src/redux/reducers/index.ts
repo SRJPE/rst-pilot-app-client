@@ -14,6 +14,7 @@ import addMarksOrTagsSlice from './formSlices/addMarksOrTagsSlice'
 import addGeneticSamplesSlice from './formSlices/addGeneticSamplesSlice'
 import visitSetupDefaultsSlice from './visitSetupDefaults'
 import trapVisitFormPostBundler from './postSlices/trapVisitFormPostBundler'
+import markRecapturePostBundler from './postSlices/markRecapturePostBundler'
 import connectivitySlice from './connectivitySlice'
 import slideAlertSlice from './slideAlertSlice'
 import paperEntrySlice from './formSlices/paperEntrySlice'
@@ -21,6 +22,7 @@ import paperEntrySlice from './formSlices/paperEntrySlice'
 import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
 import releaseTrialDataEntrySlice from './markRecaptureSlices/releaseTrialDataEntrySlice'
 import addAnotherMarkSlice from './addAnotherMarkSlice'
+import tabSlice from './formSlices/tabSlice'
 import fishHoldingSlice from './markRecaptureSlices/fishHoldingSlice'
 import userCredentialsSlice from './userCredentialsSlice'
 import trappingSitesSlice from './createNewProgramSlices/trappingSitesSlice'
@@ -48,6 +50,11 @@ const userCredentialsPersistConfig = {
   version: 1,
   storage: AsyncStorage,
 }
+const markRecaptureFormPostPersistConfig = {
+  key: 'markRecaptureFormPostPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
 
 export default combineReducers({
   dropdowns: persistReducer(dropdownsPersistConfig, dropdownsSlice),
@@ -69,6 +76,10 @@ export default combineReducers({
     trapVisitPostPersistConfig,
     trapVisitFormPostBundler
   ),
+  markRecaptureFormPostBundler: persistReducer(
+    markRecaptureFormPostPersistConfig,
+    markRecapturePostBundler
+  ),
   connectivity: connectivitySlice,
   paperEntry: paperEntrySlice,
   fishHolding: fishHoldingSlice,
@@ -81,4 +92,5 @@ export default combineReducers({
   ),
   trappingSites: trappingSitesSlice,
   crewMembers: crewMembersSlice,
+  tabSlice: tabSlice,
 })

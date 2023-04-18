@@ -19,36 +19,53 @@ import {
 } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
+import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 
 const mapStateToProps = (state: RootState) => {
   return {
-    historicalDataStore: state.paperEntry.values,
+    historicalDataStore: state.paperEntry,
+    tabState: state.tabSlice,
   }
 }
 
 const PaperEntry = ({
   navigation,
   historicalDataStore,
+  tabState,
 }: {
   navigation: any
   historicalDataStore: any
+  tabState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [endDate, setEndDate] = useState(new Date('01/01/2022') as any)
   const [startDate, setStartDate] = useState(new Date('01/01/2022') as any)
   const [comments, setComments] = useState(
-    historicalDataStore.comments as string
+    historicalDataStore[tabState.activeTabId]
+      ? (historicalDataStore[tabState.activeTabId].values.comments as string)
+      : (historicalDataStore['placeholderId'].values.comments as string)
   )
+  const [dateError, setDateError] = useState('')
 
   useEffect(() => {
     //use the values from the store if they are not null
-    if (historicalDataStore.startDate) {
-      setStartDate(historicalDataStore.startDate)
-    }
-    if (historicalDataStore.endDate) {
-      setEndDate(historicalDataStore.endDate)
+    if (historicalDataStore[tabState.activeTabId]) {
+      if (historicalDataStore[tabState.activeTabId].values.startDate) {
+        setStartDate(historicalDataStore[tabState.activeTabId].values.startDate)
+      }
+      if (historicalDataStore[tabState.activeTabId].values.endDate) {
+        setEndDate(historicalDataStore[tabState.activeTabId].values.endDate)
+      }
     }
   }, [])
+
+  useEffect(() => {
+    if (Date.parse(endDate) < Date.parse(startDate)) {
+      setDateError('Start Date is later than End Date')
+    } else {
+      setDateError('')
+    }
+  }, [startDate, endDate])
 
   const onStartDateChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
@@ -61,14 +78,27 @@ const PaperEntry = ({
   }
 
   const handleSubmit = () => {
-    dispatch(
-      savePaperEntry({
-        comments,
-        startDate,
-        endDate,
-      })
-    )
-    dispatch(markPaperEntryCompleted(true))
+    if (dateError) return
+
+    const tabId = tabState.activeTabId
+    const tabs = tabState.tabs
+    const trapSite = tabs[tabId].trapSite
+
+    Object.keys(tabs).forEach((id) => {
+      if (trapSite == tabs[id].trapSite) {
+        dispatch(
+          savePaperEntry({
+            tabId: id,
+            values: {
+              comments,
+              startDate,
+              endDate,
+            },
+          })
+        )
+        dispatch(markPaperEntryCompleted({ tabId, value: true }))
+      }
+    })
   }
 
   return (
@@ -104,6 +134,8 @@ const PaperEntry = ({
             </Box>
           </HStack>
 
+          {dateError ? RenderErrorMessage({ dateError }, 'dateError') : <></>}
+
           <FormControl>
             <FormControl.Label>
               <Text color='black' fontSize='xl'>
@@ -123,7 +155,7 @@ const PaperEntry = ({
           </FormControl>
         </VStack>
       </View>
-      <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
+      <NavButtons navigation={navigation} handleSubmit={handleSubmit} errors={dateError}/>
     </>
   )
 }

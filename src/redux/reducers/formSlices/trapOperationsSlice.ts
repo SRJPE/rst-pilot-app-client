@@ -1,8 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
+  [tabId: string]: TrapOperationsStateI
+}
+
+interface TrapOperationsStateI {
   completed: boolean
   values: TrapOperationsValuesI
+  errors: {[name: string]: any}
 }
 
 export interface TrapOperationsValuesI {
@@ -14,7 +19,6 @@ export interface TrapOperationsValuesI {
   waterTemperatureUnit: string
   waterTurbidity: number | null
   waterTurbidityUnit: string
-
   coneSetting: string | null
   totalRevolutions: number | null
   rpm1: number | null
@@ -24,23 +28,25 @@ export interface TrapOperationsValuesI {
 }
 
 const initialState: InitialStateI = {
-  completed: false,
-  values: {
-    trapStatus: '',
-    reasonNotFunc: '',
-    flowMeasure: null,
-    flowMeasureUnit: 'cfs',
-    waterTemperature: null,
-    waterTemperatureUnit: '°F',
-    waterTurbidity: null,
-    waterTurbidityUnit: 'ntu',
-
-    coneSetting: 'full',
-    totalRevolutions: null,
-    rpm1: null,
-    rpm2: null,
-    rpm3: null,
-    trapVisitStopTime: null,
+  placeholderId: {
+    completed: false,
+    values: {
+      trapStatus: '',
+      reasonNotFunc: '',
+      flowMeasure: null,
+      flowMeasureUnit: 'cfs',
+      waterTemperature: null,
+      waterTemperatureUnit: '°F',
+      waterTurbidity: null,
+      waterTurbidityUnit: 'ntu',
+      coneSetting: 'full',
+      totalRevolutions: null,
+      rpm1: null,
+      rpm2: null,
+      rpm3: null,
+      trapVisitStopTime: null,
+    },
+    errors: {},
   },
 }
 
@@ -50,14 +56,21 @@ export const trapOperationsSlice = createSlice({
   reducers: {
     resetTrapOperationsSlice: () => initialState,
     saveTrapOperations: (state, action) => {
-      state.values = {
-        ...action.payload,
-        trapVisitStopTime:
-          state.values.trapVisitStopTime ?? action.payload.trapVisitStopTime,
+      const { tabId, values, errors} = action.payload
+      state[tabId] = {
+        completed: true,
+        values: {
+          ...values,
+          trapVisitStopTime: state[tabId]
+            ? state[tabId].values.trapVisitStopTime
+            : action.payload.values.trapVisitStopTime,
+        },
+        errors
       }
     },
     markTrapOperationsCompleted: (state, action) => {
-      state.completed = action.payload
+      const { tabId, value } = action.payload
+      state[tabId].completed = value
     },
   },
 })

@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { Ionicons } from '@expo/vector-icons'
 import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
+import { useRoute } from '@react-navigation/native'
 
 export default function MarkRecaptureNavButtons({
   navigation,
@@ -10,12 +11,15 @@ export default function MarkRecaptureNavButtons({
   errors,
   touched,
   values,
+  clearFormValues,
 }: {
   navigation?: any
   handleSubmit?: any
   errors?: any
   touched?: any
+
   values?: any
+  clearFormValues?: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector(
@@ -23,6 +27,7 @@ export default function MarkRecaptureNavButtons({
   )
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
+  // const activePage = useRoute()
   const reduxState = useSelector((state: any) => state)
 
   const handleRightButton = () => {
@@ -30,9 +35,15 @@ export default function MarkRecaptureNavButtons({
     if (handleSubmit) {
       handleSubmit()
     }
-    //if Mark Recapture complete go to QA and return
+    //if Mark Recapture complete lear form values and go to QA and return
+
     if (activePage === 'Mark Recapture Complete') {
+      clearFormValues && clearFormValues()
       navigation.navigate('Data Quality Control')
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Release Trial' }],
+      })
       return
     }
     //navigate Right
@@ -46,14 +57,23 @@ export default function MarkRecaptureNavButtons({
   }
 
   const handleLeftButton = () => {
-    //   //navigate back to home screen from visit setup screen
+    //navigate back to home screen from visit setup screen or Mark Recapture Complete screen
     if (activePage === 'Release Trial') {
+      navigation.navigate('Home')
+      return
+    }
+    if (activePage === 'Mark Recapture Complete') {
+      clearFormValues && clearFormValues()
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Release Trial' }],
+      })
       navigation.navigate('Home')
       return
     }
 
     //   //if function truthy, submit form to save to redux
-    if (handleSubmit) {
+    if (handleSubmit && activePage !== 'Release Data Entry') {
       handleSubmit()
     }
     //navigate left
@@ -82,12 +102,17 @@ export default function MarkRecaptureNavButtons({
       case 'Mark Recapture Complete':
         buttonText = 'QC Data'
         break
+      case 'Release Data Entry':
+        buttonText = 'Save'
+        break
       default:
         buttonText = 'Next'
         break
     }
     return buttonText
   }
+  const renderHomeButton =
+    activePage === 'Release Trial' || activePage === 'Mark Recapture Complete'
 
   return (
     <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>
@@ -101,7 +126,7 @@ export default function MarkRecaptureNavButtons({
           borderRadius='5'
           shadow='5'
           leftIcon={
-            activePage === 'Release Trial' ? (
+            renderHomeButton ? (
               <Icon as={Ionicons} name='home' size='lg' color='primary' />
             ) : (
               <></>
@@ -110,10 +135,10 @@ export default function MarkRecaptureNavButtons({
           onPress={handleLeftButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='primary'>
-            {activePage === 'Release Trial' ? 'Return Home' : 'Back'}
+            {renderHomeButton ? 'Return Home' : 'Back'}
           </Text>
         </Button>
-        {/* <Button
+        <Button
           height='20'
           rounded='xs'
           bg='primary'
@@ -126,7 +151,7 @@ export default function MarkRecaptureNavButtons({
           <Text fontWeight='bold' color='white'>
             redux state
           </Text>
-        </Button> */}
+        </Button>
         <Button
           alignSelf='flex-start'
           bg='primary'

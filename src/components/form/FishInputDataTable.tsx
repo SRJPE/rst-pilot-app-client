@@ -191,8 +191,16 @@ const FishInputDataTable = ({
 }
 
 const mapStateToProps = (state: RootState) => {
+  let activeTabId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.fishInput[state.tabSlice.activeTabId]
+  ) {
+    activeTabId = state.tabSlice.activeTabId
+  }
+
   return {
-    fishStore: state.fishInput.fishStore,
+    fishStore: state.fishInput[activeTabId].fishStore,
   }
 }
 

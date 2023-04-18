@@ -4,7 +4,8 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const NavButtons = ({
   navigation,
@@ -14,6 +15,10 @@ const NavButtons = ({
   values,
   isFormComplete,
   isPaperEntry,
+  tabSlice,
+  visitSetupSlice,
+  fishProcessingSlice,
+  reduxState,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -22,15 +27,50 @@ const NavButtons = ({
   values?: any
   isFormComplete?: boolean
   isPaperEntry?: boolean
+  tabSlice: TabStateI
+  visitSetupSlice: any
+  fishProcessingSlice: any
+  reduxState: RootState
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
-  const reduxState = useSelector((state: any) => state)
-  const isPaperEntryStore = reduxState.visitSetup.isPaperEntry
-  const willBeHoldingFishForMarkRecapture =
-    reduxState.fishProcessing.values.willBeHoldingFishForMarkRecapture
+  const [isPaperEntryStore, setIsPaperEntryStore] = useState(false)
+  const [
+    willBeHoldingFishForMarkRecapture,
+    setWillBeHoldingFishForMarkRecapture,
+  ] = useState(false)
+
+  useEffect(() => {
+    setIsPaperEntryStore(checkIsPaperEntryStore)
+    setWillBeHoldingFishForMarkRecapture(checkWillBeHoldingFishForMarkRecapture)
+  }, [tabSlice.activeTabId])
+
+  const checkIsPaperEntryStore = () => {
+    if (isPaperEntry != null) return isPaperEntry
+    if (tabSlice.activeTabId) {
+      if (visitSetupSlice[tabSlice.activeTabId]) {
+        return visitSetupSlice[tabSlice.activeTabId].isPaperEntry
+      } else {
+        return visitSetupSlice['placeholderId'].isPaperEntry
+      }
+    }
+    return false
+  }
+
+  const checkWillBeHoldingFishForMarkRecapture = () => {
+    if (tabSlice.activeTabId) {
+      if (fishProcessingSlice[tabSlice.activeTabId]) {
+        return fishProcessingSlice[tabSlice.activeTabId].values
+          .willBeHoldingFishForMarkRecapture
+      } else {
+        return fishProcessingSlice['placeholderId'].values
+          .willBeHoldingFishForMarkRecapture
+      }
+    }
+    return false
+  }
 
   const navigateHelper = (destination: string) => {
     const formSteps = Object.values(navigationState?.steps) as any
@@ -199,9 +239,9 @@ const NavButtons = ({
 
   const disableRightButton = () => {
     //if paper entry then never disable the right button
-    if (isPaperEntryStore) {
-      return false
-    }
+    // if (isPaperEntryStore) {
+    //   return false
+    // }
     if (activePage === 'Incomplete Sections') {
       //if form is complete, then do not disable button
       // return isFormComplete ? false : true
@@ -310,6 +350,10 @@ const NavButtons = ({
 const mapStateToProps = (state: RootState) => {
   return {
     isFormComplete: state.navigation.isFormComplete,
+    tabSlice: state.tabSlice,
+    visitSetupSlice: state.visitSetup,
+    fishProcessingSlice: state.fishProcessing,
+    reduxState: state,
   }
 }
 

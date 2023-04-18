@@ -1,4 +1,4 @@
-import { Formik } from 'formik'
+import { Formik, yupToFormErrors } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
@@ -26,25 +26,49 @@ import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import { QARanges } from '../../utils/utils'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 const mapStateToProps = (state: RootState) => {
+  let activeTabId = 'placeholderId'
+  if (
+    state.tabSlice.activeTabId &&
+    state.trapPostProcessing[state.tabSlice.activeTabId]
+  ) {
+    activeTabId = state.tabSlice.activeTabId
+  }
+
   return {
     reduxState: state.trapPostProcessing,
+    tabSlice: state.tabSlice,
+    activeTabId,
+    previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
+    navigationSlice: state.navigation,
   }
 }
 
 const TrapPostProcessing = ({
   navigation,
   reduxState,
+  tabSlice,
+  activeTabId,
+  previouslyActiveTabId,
+  navigationSlice,
 }: {
   navigation: any
   reduxState: any
+  tabSlice: any
+  activeTabId: string
+  previouslyActiveTabId: string | null
+  navigationSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
     ;(async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted') {
+        return
+      }
       try {
         let currentLocation = await Location.getCurrentPositionAsync({})
         setFieldValue('trapLatitude', currentLocation.coords.latitude)
@@ -69,27 +93,59 @@ const TrapPostProcessing = ({
     []
   )
 
-  const handleSubmit = (values: any) => {
+  const checkForErrors = (values: any) => {
+    try {
+      trapPostProcessingSchema.validateSync(values, {
+        abortEarly: false,
+        context: { values },
+      })
+      return {}
+    } catch (err) {
+      return yupToFormErrors(err)
+    }
+  }
+
+  const onSubmit = (values: any, tabId: string) => {
     let trapVisitStartTime = null
     if (values.endingTrapStatus == 'Restart Trap') {
       trapVisitStartTime = new Date()
     }
-
-    dispatch(saveTrapPostProcessing({ ...values, trapVisitStartTime }))
-    dispatch(markTrapPostProcessingCompleted(true))
-    dispatch(markStepCompleted([true]))
-    console.log('🚀 ~ handleSubmit ~ TrapPostProcessing', values)
+    const errors = checkForErrors(values)
+    dispatch(
+      saveTrapPostProcessing({
+        tabId,
+        values: { ...values, trapVisitStartTime },
+        errors,
+      })
+    )
+    dispatch(markTrapPostProcessingCompleted({ tabId, value: true }))
+    let stepCompletedCheck = true
+    Object.keys(tabSlice.tabs).forEach((tabId) => {
+      if (!reduxState[tabId]) stepCompletedCheck = false
+    })
+    if (stepCompletedCheck) dispatch(markStepCompleted([true]))
+    console.log('🚀 ~ onSubmit ~ TrapPostProcessing', values)
   }
 
   return (
     <Formik
       validationSchema={trapPostProcessingSchema}
-      initialValues={reduxState.values}
+      enableReinitialize={true}
+      initialValues={reduxState[activeTabId].values}
       initialTouched={{ debrisVolume: true }}
-      initialErrors={reduxState.completed ? undefined : { debrisVolume: '' }}
+      initialErrors={
+        activeTabId && reduxState[activeTabId]
+          ? reduxState[activeTabId].errors
+          : null
+      }
       onSubmit={(values) => {
-        handleSubmit(values)
+        if (activeTabId != 'placeholderId') {
+          onSubmit(values, activeTabId)
+        } else {
+          if (tabSlice.activeTabId) onSubmit(values, tabSlice.activeTabId)
+        }
       }}
+      validateOnChange={true}
     >
       {({
         handleChange,
@@ -100,210 +156,219 @@ const TrapPostProcessing = ({
         touched,
         errors,
         values,
-      }) => (
-        <>
-          <Pressable
-            flex={1}
-            bg='#fff'
-            p='6%'
-            borderColor='themeGrey'
-            borderWidth='15'
-            onPress={Keyboard.dismiss}
-          >
-            <VStack space={10}>
-              <Heading>Trap Post-Processing</Heading>
-              <FormControl w='1/2'>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Debris Volume
-                    </Text>
-                  </FormControl.Label>
-                  {Number(values.debrisVolume) > QARanges.debrisVolume.max && (
-                    <RenderWarningMessage />
-                  )}
-                  {touched.debrisVolume &&
-                    errors.debrisVolume &&
-                    RenderErrorMessage(errors, 'debrisVolume')}
-                </HStack>
-                <Input
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Numeric Value'
-                  keyboardType='numeric'
-                  onChangeText={handleChange('debrisVolume')}
-                  onBlur={handleBlur('debrisVolume')}
-                  value={values.debrisVolume}
-                />
-                <Text
-                  color='#A1A1A1'
-                  position='absolute'
-                  top={50}
-                  right={4}
-                  fontSize={16}
-                >
-                  {'gal'}
-                </Text>
-              </FormControl>
+        resetForm,
+      }) => {
+        useEffect(() => {
+          if (previouslyActiveTabId && navigationSlice.activeStep === 5) {
+            onSubmit(values, previouslyActiveTabId)
+            resetForm()
+          }
+        }, [previouslyActiveTabId])
 
-              <FormControl>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      RPM After Cleaning
-                    </Text>
-                  </FormControl.Label>
-                  {((touched.rpm1 && errors.rpm1) ||
-                    (touched.rpm2 && errors.rpm2) ||
-                    (touched.rpm3 && errors.rpm3)) && (
-                    <HStack space={1}>
-                      <Icon
-                        marginTop={'.5'}
-                        as={Ionicons}
-                        name='alert-circle-outline'
-                        color='error'
-                      />
-                      <Text style={{ fontSize: 16, color: '#b71c1c' }}>
-                        At least one measurement is required
+        return (
+          <>
+            <Pressable
+              flex={1}
+              bg='#fff'
+              p='6%'
+              borderColor='themeGrey'
+              borderWidth='15'
+              onPress={Keyboard.dismiss}
+            >
+              <VStack space={10}>
+                <Heading>Trap Post-Processing</Heading>
+                <FormControl w='1/2'>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Debris Volume
                       </Text>
-                    </HStack>
-                  )}
-                </HStack>
+                    </FormControl.Label>
+                    {Number(values.debrisVolume) >
+                      QARanges.debrisVolume.max && <RenderWarningMessage />}
+                    {tabSlice.incompleteSectionTouched
+                      ? errors.reasonNotFunc &&
+                        RenderErrorMessage(errors, 'debrisVolume')
+                      : touched.reasonNotFunc &&
+                        errors.reasonNotFunc &&
+                        RenderErrorMessage(errors, 'debrisVolume')}
+                  </HStack>
+                  <Input
+                    height='50px'
+                    fontSize='16'
+                    placeholder='Numeric Value'
+                    keyboardType='numeric'
+                    onChangeText={handleChange('debrisVolume')}
+                    onBlur={handleBlur('debrisVolume')}
+                    value={values.debrisVolume}
+                  />
+                  <Text
+                    color='#A1A1A1'
+                    position='absolute'
+                    top={50}
+                    right={4}
+                    fontSize={16}
+                  >
+                    {'gal'}
+                  </Text>
+                </FormControl>
 
-                <HStack space={8} justifyContent='space-between'>
-                  <FormControl w='30%'>
-                    <VStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('rpm1')}
-                        onBlur={handleBlur('rpm1')}
-                        value={values.rpm1}
-                      />
-                      {Number(values.rpm1) > QARanges.RPM.max ? (
-                        <RenderWarningMessage />
-                      ) : (
-                        <></>
-                      )}
-                    </VStack>
-                  </FormControl>
-                  <FormControl w='30%'>
-                    <VStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value (optional)'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('rpm2')}
-                        onBlur={handleBlur('rpm2')}
-                        value={values.rpm2}
-                      />
-                      {Number(values.rpm2) > QARanges.RPM.max ? (
-                        <RenderWarningMessage />
-                      ) : (
-                        <></>
-                      )}
-                    </VStack>
-                  </FormControl>
+                <FormControl>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        RPM After Cleaning
+                      </Text>
+                    </FormControl.Label>
+                    {(errors.rpm1 || errors.rpm2 || errors.rpm3) && (
+                      <HStack space={1}>
+                        <Icon
+                          marginTop={'.5'}
+                          as={Ionicons}
+                          name='alert-circle-outline'
+                          color='error'
+                        />
+                        <Text style={{ fontSize: 16, color: '#b71c1c' }}>
+                          At least one measurement is required
+                        </Text>
+                      </HStack>
+                    )}
+                  </HStack>
 
-                  <FormControl w='30%'>
-                    <VStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value (optional)'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('rpm3')}
-                        onBlur={handleBlur('rpm3')}
-                        value={values.rpm3}
-                      />
-                      {Number(values.rpm3) > QARanges.RPM.max ? (
-                        <RenderWarningMessage />
-                      ) : (
-                        <></>
-                      )}
-                    </VStack>
-                  </FormControl>
-                </HStack>
-                <Text color='grey' my='5' fontSize='17'>
-                  Take one or more measure of cone rotations. We will save the
-                  average in our database.
-                </Text>
+                  <HStack space={8} justifyContent='space-between'>
+                    <FormControl w='30%'>
+                      <VStack>
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={handleChange('rpm1')}
+                          onBlur={handleBlur('rpm1')}
+                          value={values.rpm1}
+                        />
+                        {Number(values.rpm1) > QARanges.RPM.max ? (
+                          <RenderWarningMessage />
+                        ) : (
+                          <></>
+                        )}
+                      </VStack>
+                    </FormControl>
+                    <FormControl w='30%'>
+                      <VStack>
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value (optional)'
+                          keyboardType='numeric'
+                          onChangeText={handleChange('rpm2')}
+                          onBlur={handleBlur('rpm2')}
+                          value={values.rpm2}
+                        />
+                        {Number(values.rpm2) > QARanges.RPM.max ? (
+                          <RenderWarningMessage />
+                        ) : (
+                          <></>
+                        )}
+                      </VStack>
+                    </FormControl>
 
-                <HStack space={3} alignItems='center' mt='5'>
-                  <Button
-                    w='1/2'
-                    bg='primary'
-                    px='10'
-                    isDisabled={true}
-                    onPress={() => {
-                      getCurrentLocation(setFieldTouched, setFieldValue)
+                    <FormControl w='30%'>
+                      <VStack>
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value (optional)'
+                          keyboardType='numeric'
+                          onChangeText={handleChange('rpm3')}
+                          onBlur={handleBlur('rpm3')}
+                          value={values.rpm3}
+                        />
+                        {Number(values.rpm3) > QARanges.RPM.max ? (
+                          <RenderWarningMessage />
+                        ) : (
+                          <></>
+                        )}
+                      </VStack>
+                    </FormControl>
+                  </HStack>
+                  <Text color='grey' my='5' fontSize='17'>
+                    Take one or more measure of cone rotations. We will save the
+                    average in our database.
+                  </Text>
+
+                  <HStack space={3} alignItems='center' mt='5'>
+                    <Button
+                      w='1/2'
+                      bg='primary'
+                      px='10'
+                      onPress={() => {
+                        getCurrentLocation(setFieldTouched, setFieldValue)
+                      }}
+                    >
+                      <Text fontSize='xl' color='white'>
+                        Drop Pin at Current Location
+                      </Text>
+                    </Button>
+                    {values.trapLatitude && (
+                      <HStack space={3}>
+                        <Text fontSize='xl' color='black'>
+                          {`Lat: ${values.trapLatitude}`}
+                        </Text>
+                        <Text fontSize='xl' color='black'>
+                          {`Long: ${values.trapLongitude}`}
+                        </Text>
+                      </HStack>
+                    )}
+                  </HStack>
+                </FormControl>
+                <FormControl w='30%'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Trap Status at End
+                    </Text>
+                  </FormControl.Label>
+                  <Radio.Group
+                    name='endingTrapStatus'
+                    accessibilityLabel='Ending Trap Status'
+                    value={`${values.endingTrapStatus}`}
+                    onChange={(newValue: any) => {
+                      handleTrapStatusAtEndRadio(
+                        newValue,
+                        setFieldTouched,
+                        setFieldValue
+                      )
                     }}
                   >
-                    <Text fontSize='xl' color='white'>
-                      Drop Pin at Current Location
-                    </Text>
-                  </Button>
-                  {values.trapLatitude && (
-                    <HStack space={3}>
-                      <Text fontSize='xl' color='black'>
-                        {`Lat: ${values.trapLatitude}`}
-                      </Text>
-                      <Text fontSize='xl' color='black'>
-                        {`Long: ${values.trapLongitude}`}
-                      </Text>
-                    </HStack>
-                  )}
-                </HStack>
-              </FormControl>
-              <FormControl w='30%'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Trap Status at End
-                  </Text>
-                </FormControl.Label>
-                <Radio.Group
-                  name='endingTrapStatus'
-                  accessibilityLabel='Ending Trap Status'
-                  value={`${values.endingTrapStatus}`}
-                  onChange={(newValue: any) => {
-                    handleTrapStatusAtEndRadio(
-                      newValue,
-                      setFieldTouched,
-                      setFieldValue
-                    )
-                  }}
-                >
-                  <Radio
-                    colorScheme='primary'
-                    value='Restart Trap'
-                    my={1}
-                    _icon={{ color: 'primary' }}
-                  >
-                    Restart Trap
-                  </Radio>
-                  <Radio
-                    colorScheme='primary'
-                    value='End Trapping'
-                    my={1}
-                    _icon={{ color: 'primary' }}
-                  >
-                    End Trapping
-                  </Radio>
-                </Radio.Group>
-              </FormControl>
-            </VStack>
-          </Pressable>
-          <NavButtons
-            navigation={navigation}
-            handleSubmit={handleSubmit}
-            errors={errors}
-            touched={touched}
-          />
-        </>
-      )}
+                    <Radio
+                      colorScheme='primary'
+                      value='Restart Trap'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
+                      Restart Trap
+                    </Radio>
+                    <Radio
+                      colorScheme='primary'
+                      value='End Trapping'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
+                      End Trapping
+                    </Radio>
+                  </Radio.Group>
+                </FormControl>
+              </VStack>
+            </Pressable>
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={handleSubmit}
+              errors={errors}
+              touched={touched}
+            />
+          </>
+        )
+      }}
     </Formik>
   )
 }

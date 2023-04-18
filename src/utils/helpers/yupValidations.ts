@@ -30,7 +30,7 @@ export const trapOperationsSchema = yup.object().shape({
   waterTurbidity: yup
     .number()
     .nullable()
-    // .required('Water Turbidity Required')
+    .required('Water Turbidity Required')
     .typeError('Input must be a number'),
   waterTurbidityUnit: yup.string(),
 
@@ -41,7 +41,7 @@ export const trapOperationsSchema = yup.object().shape({
     //   return originalValue === '' ? undefined : value
     // })
     .nullable()
-    // .required('Total Required')
+    .required('Total Revolutions Required')
     .typeError('Input must be a number'),
   rpm1: yup
     .number()
@@ -266,7 +266,6 @@ export const addAnotherMarkSchema = yup.object().shape({
   markType: yup.string().required('Mark type required'),
   markColor: yup.string().required('Mark color required'),
   markPosition: yup.string().required('Mark position required'),
-  // markNumber: yup.number().nullable().typeError('Input must be a number'),
 })
 
 /*----------------------------------------------------------------
