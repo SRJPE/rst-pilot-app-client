@@ -2,14 +2,13 @@ import { createSlice } from '@reduxjs/toolkit'
 
 interface InitialStateI {
   completed: boolean
-  values: ReleaseTrialValuesI
+  values: ReleaseMarkI
 }
 
-export interface ReleaseTrialValuesI {
+export interface ReleaseMarkI {
   markType: string | null
   markColor: string | null
   markPosition: string | null
-  markNumber?: number | null
 }
 
 const initialState: InitialStateI = {
@@ -18,7 +17,6 @@ const initialState: InitialStateI = {
     markType: null,
     markColor: null,
     markPosition: null,
-    markNumber: null,
   },
 }
 

@@ -12,19 +12,36 @@ import {
   saveFishHolding,
   SelectedFishStoreI,
 } from '../../redux/reducers/markRecaptureSlices/fishHoldingSlice'
+import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    fishInput: state.fishInput,
+    selectedFishStoreState: state.fishHolding.values.selectedFishStore,
+    activeTabId: state.tabSlice.activeTabId,
+    previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
+    navigationSlice: state.navigation,
+    visitSetupState: state.visitSetup,
+    tabState: state.tabSlice,
+  }
+}
 
 const FishHolding = ({
-  fishStore,
+  fishInput,
   selectedFishStoreState,
   activeTabId,
   previouslyActiveTabId,
   navigationSlice,
+  visitSetupState,
+  tabState,
 }: {
-  fishStore: FishStoreI
+  fishInput: any
   selectedFishStoreState: SelectedFishStoreI
   activeTabId: string | null
   previouslyActiveTabId: string | null
   navigationSlice: any
+  visitSetupState: any
+  tabState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation: any = useNavigation()
@@ -34,7 +51,11 @@ const FishHolding = ({
   const [totalFish, setTotalFish] = useState(0 as number)
 
   useEffect(() => {
-    if (Object.keys(selectedFishStoreState).length === 0) {
+    if (
+      selectedFishStoreState &&
+      Object.keys(selectedFishStoreState).length === 0
+    ) {
+      console.log('selectedFishStore is truthy')
       createSelectedFishStore()
     } else {
       setSelectedFishStore(selectedFishStoreState as SelectedFishStoreI)
@@ -53,15 +74,32 @@ const FishHolding = ({
     calculateTotalFish()
   }, [selectedFishStore])
 
+  const combineFishStoreForAllTabs = () => {
+    let combinedFishStore = {} as any
+    let count = 0 as number
+    for (let individualFishStore in fishInput) {
+      if (individualFishStore === 'placeholderId') continue
+      for (let fish in fishInput[individualFishStore].fishStore) {
+        combinedFishStore[count] =
+          fishInput[individualFishStore].fishStore[fish]
+        count++
+      }
+    }
+
+    return combinedFishStore
+  }
+
   const createSelectedFishStore = () => {
     const tempSelectedFishStore = {} as any
-    for (const fish in fishStore) {
+    const fishStoreForAllTabs = combineFishStoreForAllTabs()
+
+    for (const fish in fishStoreForAllTabs) {
       //only add chinook to the list
-      if (fishStore[fish].species !== 'Chinook salmon') continue
+      if (fishStoreForAllTabs[fish].species !== 'Chinook salmon') continue
       //do not add yolk sac fry to store
-      if (fishStore[fish].lifeStage === 'yolk sac fry') continue
+      if (fishStoreForAllTabs[fish].lifeStage === 'yolk sac fry') continue
       //add remaining fish objects to selectedFishStore
-      tempSelectedFishStore[fish] = fishStore[fish]
+      tempSelectedFishStore[fish] = fishStoreForAllTabs[fish]
     }
     //set the temp fish store the state
     setSelectedFishStore(tempSelectedFishStore)
@@ -143,20 +181,36 @@ const FishHolding = ({
     setSelectedLifeStagesAndRuns()
     calculateTotalFish()
   }
+  const findTrapLocationIds = () => {
+    let container = [] as any
+    for (let tabId in visitSetupState) {
+      if (tabId === 'placeholderId') continue
+      container.push(visitSetupState[tabId].values.trapLocationId)
+    }
+    return container
+  }
 
+  const tabIds = Object.keys(tabState.tabs)
   const handleSubmit = (tabId: string) => {
     if (tabId) {
+      //saves for release trial
       dispatch(saveTotalFishHolding(totalFish))
+      //saves for releaseTrial data entry
       dispatch(
-        saveFishHolding({
-          tabId,
-          values: {
-            totalFishHolding: totalFish,
-            selectedFishStore: selectedFishStore,
-          },
+        saveTrapVisitInformation({
+          crew: visitSetupState[tabIds[0]].values.crew,
+          programId: visitSetupState[tabIds[0]].values.programId,
+          trapLocationIds: findTrapLocationIds(),
         })
       )
-      dispatch(markFishHoldingCompleted({ tabId, completed: true }))
+      // saves to fish holding
+      dispatch(
+        saveFishHolding({
+          totalFishHolding: totalFish,
+          selectedFishStore: selectedFishStore,
+        })
+      )
+      dispatch(markFishHoldingCompleted(true))
     }
   }
 
@@ -211,25 +265,7 @@ const FishHolding = ({
           </HStack>
           {renderFishHoldingCards()}
         </VStack>
-
         <HStack space={10} justifyContent='center'>
-          {/* <Button
-            bg='primary'
-            alignSelf='flex-start'
-            shadow='5'
-            onPress={() => {
-              console.log('fishStore: ', fishStore)
-              console.log('selectedFishStore: ', selectedFishStore)
-              console.log('selectedRuns: ', selectedRuns)
-              console.log('selectedLifeStages: ', selectedLifeStages)
-              console.log('🚀 ~ totalFish:', totalFish)
-            }}
-          >
-            <Text fontWeight='bold' color='white'>
-              Log
-            </Text>
-          </Button> */}
-
           <Heading>Total Fish Holding: {totalFish}</Heading>
         </HStack>
       </View>
@@ -241,33 +277,6 @@ const FishHolding = ({
       />
     </>
   )
-}
-
-const mapStateToProps = (state: RootState) => {
-  let fishInputTabId = 'placeholderId'
-  if (
-    state.tabSlice.activeTabId &&
-    state.fishInput[state.tabSlice.activeTabId]
-  ) {
-    fishInputTabId = state.tabSlice.activeTabId
-  }
-
-  let fishHoldingTabId = 'placeholderId'
-  if (
-    state.tabSlice.activeTabId &&
-    state.fishHolding[state.tabSlice.activeTabId]
-  ) {
-    fishHoldingTabId = state.tabSlice.activeTabId
-  }
-
-  return {
-    fishStore: state.fishInput[fishInputTabId].fishStore,
-    selectedFishStoreState:
-      state.fishHolding[fishHoldingTabId].values.selectedFishStore,
-    activeTabId: state.tabSlice.activeTabId,
-    previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
-    navigationSlice: state.navigation
-  }
 }
 
 export default connect(mapStateToProps)(FishHolding)

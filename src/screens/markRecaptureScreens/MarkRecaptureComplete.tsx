@@ -1,11 +1,18 @@
 import { Heading, Image, View, VStack } from 'native-base'
 import MarkRecaptureNavButtons from '../../components/markRecapture/MarkRecaptureNavButtons'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '../../redux/store'
+import { resetReleaseTrialSlice } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
+import { resetReleaseTrialDataEntrySlice } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 
-export default function MarkRecaptureComplete({
-  navigation,
-}: {
-  navigation: any
-}) {
+const MarkRecaptureComplete = ({ navigation }: { navigation: any }) => {
+  const dispatch = useDispatch<AppDispatch>()
+
+  const clearFormValues = () => {
+    dispatch(resetReleaseTrialSlice())
+    dispatch(resetReleaseTrialDataEntrySlice())
+  }
+
   return (
     <>
       <View
@@ -30,7 +37,11 @@ export default function MarkRecaptureComplete({
           </Heading>
         </VStack>
       </View>
-      <MarkRecaptureNavButtons navigation={navigation} />
+      <MarkRecaptureNavButtons
+        navigation={navigation}
+        clearFormValues={clearFormValues}
+      />
     </>
   )
 }
+export default MarkRecaptureComplete
