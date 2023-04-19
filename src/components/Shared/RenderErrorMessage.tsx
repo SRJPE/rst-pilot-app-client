@@ -17,3 +17,28 @@ const RenderErrorMessage = (errors: any, inputName: string) => {
   )
 }
 export default RenderErrorMessage
+
+// This is the functional component version of this component.
+// refactor needed throughout the app to implement
+
+// const RenderErrorMessage = ({
+//   errors,
+//   inputName,
+// }: {
+//   errors: any
+//   inputName: string
+// }) => {
+//   return (
+//     <HStack space={1}>
+//       <Icon
+//         marginTop={'.5'}
+//         as={Ionicons}
+//         name='alert-circle-outline'
+//         color='error'
+//       />
+//       <Text style={{ fontSize: 16, color: '#b71c1c' }}>
+//         {errors[inputName] as string}
+//       </Text>
+//     </HStack>
+//   )
+// }
