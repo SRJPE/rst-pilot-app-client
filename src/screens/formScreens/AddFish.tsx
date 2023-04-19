@@ -589,7 +589,7 @@ const AddFishContent = ({
                         onChangeText={(value) => setCount({ ...count, value })}
                         // TODO - onBlur logic?
                         // onBlur={handleBlur('numFishCaught')}
-                        value={count.value as string}
+                        value={`${count.value}`}
                       />
                     </FormControl>
                   </HStack>
