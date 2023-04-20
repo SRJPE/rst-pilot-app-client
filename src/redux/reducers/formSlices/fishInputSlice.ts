@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
 import { reformatBatchCountData } from '../../../utils/utils'
+import { ReleaseMarkI } from '../addAnotherMarkSlice'
 
 interface InitialStateI {
   [tabId: string]: FishInputStateI
@@ -24,7 +25,7 @@ export interface IndividualFishValuesI {
   weight?: number | null
   lifeStage: string
   adiposeClipped: boolean | null
-  existingMark: string
+  existingMarks: Array<ReleaseMarkI>
   dead: boolean | null
   willBeUsedInRecapture: boolean | null
   plusCountMethod: string // | number
@@ -81,7 +82,7 @@ export const saveFishSlice = createSlice({
         species,
         adiposeClipped,
         dead,
-        existingMark,
+        existingMarks,
         forkLengths,
       } = action.payload
       let fishStoreCopy = cloneDeep(
@@ -92,6 +93,10 @@ export const saveFishSlice = createSlice({
 
       for (let key in reformatedBatchCountData) {
         for (let innerKey in reformatedBatchCountData[key]) {
+          console.log(
+            '🚀 ~ reformatedBatchCountData:',
+            reformatedBatchCountData[key][innerKey]
+          )
           const batchCountEntry = {
             species: species,
             numFishCaught: reformatedBatchCountData[key][innerKey], //updated
@@ -100,7 +105,7 @@ export const saveFishSlice = createSlice({
             weight: null,
             lifeStage: species === 'Chinook salmon' ? innerKey : 'not recorded', //updated
             adiposeClipped: adiposeClipped,
-            existingMark: existingMark,
+            existingMarks: existingMarks,
             dead: dead,
             willBeUsedInRecapture: null,
             plusCountMethod: null,
@@ -164,7 +169,7 @@ export const saveFishSlice = createSlice({
         weight: null,
         lifeStage,
         adiposeClipped: null,
-        existingMark: '',
+        existingMarks: [],
         dead: null,
         willBeUsedInRecapture: null,
         plusCountMethod,

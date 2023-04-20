@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
 import { reformatBatchCountData } from '../../../utils/utils'
+import { ReleaseMarkI } from '../addAnotherMarkSlice'
 
 export interface BatchStoreI {
   [id: number]: singleBatchRawI
@@ -14,7 +15,7 @@ export interface batchCharacteristicsI {
   species: string
   adiposeClipped: boolean
   dead: boolean
-  existingMark: string
+  existingMarks: Array<ReleaseMarkI>
   forkLengths?: BatchStoreI
 }
 export const initialState: batchCharacteristicsI = {
@@ -22,7 +23,7 @@ export const initialState: batchCharacteristicsI = {
   species: '',
   adiposeClipped: false,
   dead: false,
-  existingMark: '', //refactor to an array
+  existingMarks: [], //refactor to an array
   forkLengths: {},
 }
 
@@ -33,14 +34,15 @@ export const batchCountSlice = createSlice({
     resetBatchCountSlice: () => initialState,
     saveBatchCharacteristics: (state, action) => {
       console.log('🚀 ~ action.payload:', action.payload)
-      const { tabId, species, adiposeClipped, dead, existingMark } =
+      const { tabId, species, adiposeClipped, dead, existingMarks } =
         action.payload
       const forkLengthsCopy = cloneDeep(state.forkLengths) as any
       state.tabId = tabId
       state.species = species
       state.adiposeClipped = adiposeClipped
       state.dead = dead
-      state.existingMark = existingMark
+      // state.existingMarks = [...state.existingMarks, existingMarks]
+      state.existingMarks = existingMarks
       state.forkLengths = forkLengthsCopy
       // const payload = {
       //   species,
@@ -50,6 +52,12 @@ export const batchCountSlice = createSlice({
       //   forkLengths: forkLengthsCopy,
       // }
       // state = payload
+    },
+    addMarkToBatchCountExistingMarks: (state, action) => {
+      state.existingMarks = [...state.existingMarks, action.payload]
+    },
+    removeMarkToBatchCountExistingMarks: (state, action) => {
+      state.existingMarks = action.payload
     },
     addForkLengthToBatchStore: (state, action) => {
       const forkLengthsCopy = cloneDeep(state.forkLengths) || {
@@ -130,6 +138,7 @@ export const batchCountSlice = createSlice({
 export const {
   resetBatchCountSlice,
   saveBatchCharacteristics,
+  addMarkToBatchCountExistingMarks,
   removeLastForkLengthEntered,
   updateSingleForkLengthCount,
   addForkLengthToBatchStore,

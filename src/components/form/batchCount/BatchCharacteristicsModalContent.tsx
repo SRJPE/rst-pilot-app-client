@@ -12,7 +12,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import React from 'react'
+import React, { memo, useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { saveBatchCharacteristics } from '../../../redux/reducers/formSlices/batchCountSlice'
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
@@ -22,6 +22,9 @@ import { alphabeticalSort, reorderTaxon } from '../../../utils/utils'
 import CustomModalHeader from '../../Shared/CustomModalHeader'
 import CustomSelect from '../../Shared/CustomSelect'
 import RenderErrorMessage from '../../Shared/RenderErrorMessage'
+import MarkBadgeList from '../../markRecapture/MarkBadgeList'
+import CustomModal from '../../Shared/CustomModal'
+import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
 
 const initialFormValues = {
   species: '',
@@ -33,11 +36,14 @@ const initialFormValues = {
 const BatchCharacteristicsModalContent = ({
   closeModal,
   tabSlice,
+  batchCountStore,
 }: {
   closeModal: any
   tabSlice: TabStateI
+  batchCountStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
 
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -131,8 +137,8 @@ const BatchCharacteristicsModalContent = ({
                 />
               </FormControl>
 
-              <HStack space={10} justifyContent='space-between'>
-                <VStack space={4}>
+              <HStack space={10}>
+                <VStack space={4} w={'20%'}>
                   <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
@@ -207,77 +213,46 @@ const BatchCharacteristicsModalContent = ({
                     </Radio.Group>
                   </FormControl>
                 </VStack>
-                <FormControl w='full'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Add Existing Mark
-                    </Text>
-                  </FormControl.Label>
 
-                  <HStack>
-                    <Button
-                      bg={
-                        values.existingMark === 'CWT' ? 'primary' : 'secondary'
-                      }
-                      py='1'
-                      px='12'
-                      shadow='3'
-                      borderRadius='5'
-                      marginRight='10'
-                      onPress={() => setFieldValue('existingMark', 'CWT')}
-                    >
-                      <Text
-                        color={
-                          values.existingMark === 'CWT' ? 'white' : 'primary'
-                        }
-                      >
-                        CWT
+                <VStack space={4} w={'100%'}>
+                  <Text color='black' fontSize='xl'>
+                    Add Existing Mark
+                  </Text>
+                  <MarkBadgeList
+                    badgeListContent={batchCountStore.existingMarks || []}
+                    setFieldValue={setFieldValue}
+                    setFieldTouched={setFieldTouched}
+                    field='existingMarks'
+                  />
+                  <Pressable onPress={() => setAddMarkModalOpen(true)}>
+                    <HStack alignItems='center'>
+                      <Icon
+                        as={Ionicons}
+                        name={'add-circle'}
+                        size='3xl'
+                        color='primary'
+                        marginRight='1'
+                      />
+                      <Text color='primary' fontSize='lg'>
+                        Add Another Mark
                       </Text>
-                    </Button>
-                    <Button
-                      bg={
-                        values.existingMark === 'Fin Clip'
-                          ? 'primary'
-                          : 'secondary'
-                      }
-                      color='#007C7C'
-                      py='1'
-                      px='12'
-                      shadow='3'
-                      borderRadius='5'
-                      marginRight='10'
-                      onPress={() => setFieldValue('existingMark', 'Fin Clip')}
-                    >
-                      <Text
-                        color={
-                          values.existingMark === 'Fin Clip'
-                            ? 'white'
-                            : 'primary'
-                        }
-                      >
-                        Fin Clip
-                      </Text>
-                    </Button>
-                    <Pressable
-                    // onPress={() => setAddMarkModalOpen(true)}
-                    >
-                      <HStack alignItems='center'>
-                        <Icon
-                          as={Ionicons}
-                          name={'add-circle'}
-                          size='3xl'
-                          color='primary'
-                          marginRight='1'
-                        />
-                        <Text color='primary' fontSize='lg'>
-                          Add Another Mark
-                        </Text>
-                      </HStack>
-                    </Pressable>
-                  </HStack>
-                </FormControl>
+                    </HStack>
+                  </Pressable>
+                </VStack>
               </HStack>
             </VStack>
+            {/* --------- Modals --------- */}
+
+            <CustomModal
+              isOpen={addMarkModalOpen}
+              closeModal={() => setAddMarkModalOpen(false)}
+              height='1/2'
+            >
+              <AddAnotherMarkModalContent
+                closeModal={() => setAddMarkModalOpen(false)}
+                screenName={'batchCount'}
+              />
+            </CustomModal>
           </>
         )}
       </Formik>
@@ -288,7 +263,8 @@ const BatchCharacteristicsModalContent = ({
 const mapStateToProps = (state: RootState) => {
   return {
     tabSlice: state.tabSlice,
+    batchCountStore: state.batchCount,
   }
 }
 
-export default connect(mapStateToProps)(BatchCharacteristicsModalContent)
+export default connect(mapStateToProps)(memo(BatchCharacteristicsModalContent))

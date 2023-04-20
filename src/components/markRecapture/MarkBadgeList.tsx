@@ -16,17 +16,25 @@ const MarkBadgeList = ({
   badgeListContent,
   setFieldValue,
   setFieldTouched,
+  field,
+  setExistingMarks,
+  existingMarks,
 }: {
-  badgeListContent: Array<any>
-  setFieldValue: any
-  setFieldTouched: any
+  badgeListContent: any
+  setFieldValue?: any
+  setFieldTouched?: any
+  field: string
+  setExistingMarks?: any
+  existingMarks?: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
   //sets the field value to be the current badgeListContent and updates on change
   useEffect(() => {
-    setFieldValue('appliedMarks', badgeListContent)
-    setFieldTouched('appliedMarks')
+    if (setFieldValue && setFieldTouched) {
+      setFieldValue(field, badgeListContent)
+      setFieldTouched(field)
+    }
   }, [badgeListContent])
 
   const handleRemoveBadge = (index: number) => {
@@ -34,44 +42,54 @@ const MarkBadgeList = ({
     const badgeListCopy = [...badgeListContent]
     //find selected badge in the list and remove it.
     badgeListCopy.splice(index, 1)
-    //update store with the spliced copy
-    dispatch(removeMarkFromAppliedMarks(badgeListCopy))
+
+    //add removal function for other version of component
+    if (setExistingMarks !== null) {
+      setExistingMarks({
+        ...existingMarks,
+        value: badgeListCopy.splice(index, 1),
+      })
+    } else {
+      //update store with the spliced copy
+      dispatch(removeMarkFromAppliedMarks(badgeListCopy))
+    }
   }
 
   return (
     <>
       <ScrollView maxHeight='60%'>
         <VStack space={5}>
-          {badgeListContent.map((badge: markBadgeI, index: number) => {
-            const { markType, markColor, markPosition } = badge
-            //TO-DO: incorporate the abbreviation lookup table
-            return (
-              <Badge
-                key={index}
-                bg='primary'
-                shadow='3'
-                borderRadius='5'
-                w='60%'
-                endIcon={
-                  <IconButton
-                    onPress={() => {
-                      handleRemoveBadge(index)
-                    }}
-                    size='md'
-                    _icon={{
-                      color: 'white',
-                      as: Ionicons,
-                      name: 'close',
-                    }}
-                  />
-                }
-              >
-                <Text color='white' fontWeight='500' fontSize='md'>
-                  {`${markType} - ${markColor} - ${markPosition}`}
-                </Text>
-              </Badge>
-            )
-          })}
+          {badgeListContent.length > 0 &&
+            badgeListContent.map((badge: markBadgeI, index: number) => {
+              const { markType, markColor, markPosition } = badge
+              //TO-DO: incorporate the abbreviation lookup table
+              return (
+                <Badge
+                  key={index}
+                  bg='primary'
+                  shadow='3'
+                  borderRadius='5'
+                  w='60%'
+                  endIcon={
+                    <IconButton
+                      onPress={() => {
+                        handleRemoveBadge(index)
+                      }}
+                      size='md'
+                      _icon={{
+                        color: 'white',
+                        as: Ionicons,
+                        name: 'close',
+                      }}
+                    />
+                  }
+                >
+                  <Text color='white' fontWeight='500' fontSize='md'>
+                    {`${markType} - ${markColor} - ${markPosition}`}
+                  </Text>
+                </Badge>
+              )
+            })}
         </VStack>
       </ScrollView>
     </>
