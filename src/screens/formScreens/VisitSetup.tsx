@@ -297,7 +297,7 @@ const VisitSetup = ({
     trapName?: string
   }) => {
     let trapLocationId = null
-    
+
     if (trapSite) {
       const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
         (obj: any) => obj.siteName === trapSite
@@ -399,10 +399,10 @@ const VisitSetup = ({
           }
         }, [tabSlice.previouslyActiveTabId])
 
-        useEffect(() => {
-          console.log('crew: ', values.crew)
-          console.log('errors: ', errors)
-        }, [errors])
+        // useEffect(() => {
+        //   console.log('crew: ', values.crew)
+        //   console.log('errors: ', errors)
+        // }, [errors])
 
         return (
           <>
