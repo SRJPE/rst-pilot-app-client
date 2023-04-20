@@ -33,7 +33,6 @@ export const batchCountSlice = createSlice({
   reducers: {
     resetBatchCountSlice: () => initialState,
     saveBatchCharacteristics: (state, action) => {
-      console.log('🚀 ~ action.payload:', action.payload)
       const { tabId, species, adiposeClipped, dead, existingMarks } =
         action.payload
       const forkLengthsCopy = cloneDeep(state.forkLengths) as any

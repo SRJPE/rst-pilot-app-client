@@ -60,7 +60,10 @@ const BatchCharacteristicsModalContent = ({
     let activeTabId = tabSlice.activeTabId
     if (activeTabId) {
       dispatch(saveBatchCharacteristics({ ...values, tabId: activeTabId }))
-      console.log('🚀 ~ BatchCount Values: ', { ...values, tabId: activeTabId })
+      console.log('🚀 ~handleFormSubmit BatchCount Values: ', {
+        ...values,
+        tabId: activeTabId,
+      })
       showSlideAlert(dispatch, 'Batch characteristics')
     }
   }

@@ -93,10 +93,6 @@ export const saveFishSlice = createSlice({
 
       for (let key in reformatedBatchCountData) {
         for (let innerKey in reformatedBatchCountData[key]) {
-          console.log(
-            '🚀 ~ reformatedBatchCountData:',
-            reformatedBatchCountData[key][innerKey]
-          )
           const batchCountEntry = {
             species: species,
             numFishCaught: reformatedBatchCountData[key][innerKey], //updated

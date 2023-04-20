@@ -54,7 +54,6 @@ const FishInputDataTable = ({
   navigation: any
   fishStore: FishStoreI
 }) => {
-  console.log('🚀 ~ fishStore:', fishStore)
   const numberOfItemsPerPage = 5
   const [page, setPage] = React.useState(0)
   const [pageRows, setPageRows] = React.useState({})
