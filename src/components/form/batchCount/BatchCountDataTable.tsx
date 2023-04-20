@@ -3,7 +3,6 @@ import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
 import { RootState } from '../../../redux/store'
 import { reformatBatchCountData } from '../../../utils/utils'
-
 const BatchCountDataTable = ({
   forkLengthsStore,
   handleShowTableModal,
@@ -16,15 +15,12 @@ const BatchCountDataTable = ({
   const [processedData, setProcessedData] = useState(
     [] as { forkLength: number; count: number }[]
   )
-
   useEffect(() => {
     prepareDataForTable()
   }, [forkLengthsStore])
-
   const prepareDataForTable = () => {
     const reformatedBatchCountData = reformatBatchCountData(forkLengthsStore)
     const storageArray: { forkLength: number; count: number }[] = []
-
     Object.keys(reformatedBatchCountData).forEach((key: any) => {
       const count = Object.values(reformatedBatchCountData[key]).reduce(
         (a, b) => a + b
@@ -36,17 +32,13 @@ const BatchCountDataTable = ({
       Object.keys(reformatedBatchCountData[key]).forEach((innerKey: string) => {
         forkLengthObject[innerKey] = reformatedBatchCountData[key][innerKey]
       })
-
       storageArray.push(forkLengthObject)
     })
-
     setProcessedData(sortByForkLength(storageArray))
   }
-
   const sortByForkLength = (data: { forkLength: number; count: number }[]) => {
     return data.sort((a, b) => a.forkLength - b.forkLength)
   }
-
   return (
     <DataTable>
       <DataTable.Header>
@@ -66,7 +58,6 @@ const BatchCountDataTable = ({
           </DataTable.Row>
         )
       })}
-
       <DataTable.Pagination
         page={page}
         onPageChange={(page: number) => setPage(page)}
@@ -79,17 +70,8 @@ const BatchCountDataTable = ({
   )
 }
 const mapStateToProps = (state: RootState) => {
-  let activeTabId = 'placeholderId'
-  if (
-    state.tabSlice.activeTabId &&
-    state.fishInput[state.tabSlice.activeTabId]
-  ) {
-    activeTabId = state.tabSlice.activeTabId
-  }
-
   return {
-    forkLengthsStore:
-      state.fishInput[activeTabId].batchCharacteristics.forkLengths,
+    forkLengthsStore: state.batchCount.forkLengths,
   }
 }
 

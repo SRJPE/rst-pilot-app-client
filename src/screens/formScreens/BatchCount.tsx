@@ -26,8 +26,9 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { capitalize } from 'lodash'
 import {
   removeLastForkLengthEntered,
-  saveBatchCount,
-} from '../../redux/reducers/formSlices/fishInputSlice'
+  resetBatchCountSlice,
+} from '../../redux/reducers/formSlices/batchCountSlice'
+import { saveBatchCount } from '../../redux/reducers/formSlices/fishInputSlice'
 import BatchCountHistogram from '../../components/form/batchCount/BatchCountHistogram'
 import { Switch } from 'native-base'
 import BatchCountDataTable from '../../components/form/batchCount/BatchCountDataTable'
@@ -40,11 +41,15 @@ const BatchCount = ({
   fishInputSlice,
   tabSlice,
   activeTabId,
+  batchCountStore,
+  reduxStore,
 }: {
   route: any
   fishInputSlice: any
   tabSlice: TabStateI
   activeTabId: string
+  batchCountStore: any
+  reduxStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
@@ -60,8 +65,9 @@ const BatchCount = ({
     forkLength: '',
     count: '',
   } as any)
-  const { species, adiposeClipped, dead, existingMark, forkLengths } =
-    fishInputSlice[activeTabId].batchCharacteristics
+
+  const { tabId, species, adiposeClipped, dead, existingMark, forkLengths } =
+    batchCountStore
 
   const { height: screenHeight } = useWindowDimensions()
 
@@ -74,16 +80,14 @@ const BatchCount = ({
   }, [])
 
   const handlePressRemoveFish = () => {
-    const activeTabId = tabSlice.activeTabId
-    if (activeTabId) {
-      dispatch(removeLastForkLengthEntered({ tabId: activeTabId }))
-    }
+    dispatch(removeLastForkLengthEntered())
   }
 
   const handlePressSaveBatchCount = () => {
-    const activeTabId = tabSlice.activeTabId
-    if (activeTabId) {
-      dispatch(saveBatchCount({ tabId: activeTabId }))
+    if (tabId) {
+      // dispatch(saveBatchCount({ tabId: tabId, forkLengths }))
+      dispatch(saveBatchCount({ ...batchCountStore }))
+      dispatch(resetBatchCountSlice())
       showSlideAlert(dispatch, 'Batch Count')
       // @ts-ignore
       navigation.navigate('Trap Visit Form', {
@@ -92,12 +96,11 @@ const BatchCount = ({
     }
   }
   const handlePressSaveAndStartNewBatchCount = () => {
-    const activeTabId = tabSlice.activeTabId
-    if (activeTabId) {
-      dispatch(saveBatchCount({ tabId: activeTabId }))
-      showSlideAlert(dispatch, 'Batch Count')
-      setBatchCharacteristicsModalOpen(true)
-    }
+    dispatch(saveBatchCount({ ...batchCountStore }))
+    dispatch(resetBatchCountSlice())
+
+    showSlideAlert(dispatch, 'Batch Count')
+    setBatchCharacteristicsModalOpen(true)
   }
 
   const buttonNav = () => {
@@ -145,13 +148,16 @@ const BatchCount = ({
           <HStack space={10}>
             <CustomModalHeader
               headerText={
-                route.params?.editModeData
-                  ? tabSlice.activeTabId
-                    ? `Edit Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
-                    : 'Edit Fish'
-                  : tabSlice.activeTabId
-                  ? `Add Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
-                  : 'Add Fish'
+                // route.params?.editModeData
+                //   ? tabSlice.activeTabId
+                //     ? `Edit Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
+                //     : 'Edit Fish'
+                //   :
+                tabSlice.activeTabId
+                  ? `Add Batch Count - ${
+                      tabSlice.tabs[tabSlice.activeTabId].name
+                    }`
+                  : 'Add Batch Count'
               }
               showHeaderButton={true}
               navigateBack={true}
@@ -335,10 +341,10 @@ const BatchCount = ({
                   </Button>
                   <Button
                     bg='primary'
-                    onPress={() => console.log('Fork Lengths: ', forkLengths)}
+                    onPress={() => console.log('Redux Store: ', reduxStore)}
                   >
                     <Text fontSize='lg' bold color='white'>
-                      LOG
+                      LOG REDUX
                     </Text>
                   </Button>
                 </HStack>
@@ -394,6 +400,8 @@ const mapStateToProps = (state: RootState) => {
     fishInputSlice: state.fishInput,
     tabSlice: state.tabSlice,
     activeTabId,
+    batchCountStore: state.batchCount,
+    reduxStore: state,
   }
 }
 export default connect(mapStateToProps)(BatchCount)

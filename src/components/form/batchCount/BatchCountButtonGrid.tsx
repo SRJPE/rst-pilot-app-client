@@ -1,9 +1,8 @@
 import { Box, Pressable, Text } from 'native-base'
 import React, { useEffect, useState } from 'react'
-import { connect, useDispatch } from 'react-redux'
-import { addForkLengthToBatchStore } from '../../../redux/reducers/formSlices/fishInputSlice'
-import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
-import { AppDispatch, RootState } from '../../../redux/store'
+import { useDispatch } from 'react-redux'
+import { addForkLengthToBatchStore } from '../../../redux/reducers/formSlices/batchCountSlice'
+import { AppDispatch } from '../../../redux/store'
 import { createArray } from '../../../utils/utils'
 
 const BatchCountButtonGrid = ({
@@ -11,13 +10,11 @@ const BatchCountButtonGrid = ({
   numberOfAdditionalButtons,
   selectedLifeStage,
   ignoreLifeStage,
-  tabSlice
 }: {
   firstButton: number
   numberOfAdditionalButtons: number
   selectedLifeStage?: string
   ignoreLifeStage?: boolean
-  tabSlice: TabStateI
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
   const dispatch = useDispatch<AppDispatch>()
@@ -27,16 +24,12 @@ const BatchCountButtonGrid = ({
   }, [firstButton])
 
   const handlePress = (num: number) => {
-    const activeTabId = tabSlice.activeTabId
-    if (activeTabId) {
-      dispatch(
-        addForkLengthToBatchStore({
-          tabId: activeTabId,
-          forkLength: num,
-          lifeStage: ignoreLifeStage ? 'not recorded' : selectedLifeStage,
-        })
-      )
-    }
+    dispatch(
+      addForkLengthToBatchStore({
+        forkLength: num,
+        lifeStage: ignoreLifeStage ? 'not recorded' : selectedLifeStage,
+      })
+    )
   }
 
   return (
@@ -77,10 +70,4 @@ const BatchCountButtonGrid = ({
   )
 }
 
-const mapStateToProps = (state: RootState) => {
-  return {
-    tabSlice: state.tabSlice,
-  }
-}
-
-export default connect(mapStateToProps)(BatchCountButtonGrid)
+export default BatchCountButtonGrid

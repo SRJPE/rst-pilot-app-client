@@ -14,7 +14,7 @@ import {
 } from 'native-base'
 import React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { saveBatchCharacteristics } from '../../../redux/reducers/formSlices/fishInputSlice'
+import { saveBatchCharacteristics } from '../../../redux/reducers/formSlices/batchCountSlice'
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
@@ -54,7 +54,7 @@ const BatchCharacteristicsModalContent = ({
     let activeTabId = tabSlice.activeTabId
     if (activeTabId) {
       dispatch(saveBatchCharacteristics({ ...values, tabId: activeTabId }))
-      console.log('🚀 ~ BatchCount Values: ', values)
+      console.log('🚀 ~ BatchCount Values: ', { ...values, tabId: activeTabId })
       showSlideAlert(dispatch, 'Batch characteristics')
     }
   }

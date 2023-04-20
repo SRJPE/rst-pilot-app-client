@@ -8,24 +8,22 @@ import {
   Text,
 } from 'native-base'
 import { useEffect, useState } from 'react'
-import { connect, useDispatch } from 'react-redux'
-import { updateSingleForkLengthCount } from '../../../redux/reducers/formSlices/fishInputSlice'
-import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
-import { AppDispatch, RootState } from '../../../redux/store'
+import { useDispatch } from 'react-redux'
+import { updateSingleForkLengthCount } from '../../../redux/reducers/formSlices/batchCountSlice'
+import { AppDispatch } from '../../../redux/store'
 
 const BatchCountTableModal = ({
   showTableModal,
   setShowTableModal,
   modalInitialData,
-  tabSlice,
 }: {
   showTableModal: any
   setShowTableModal: any
   modalInitialData: any
-  tabSlice: TabStateI
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [modalDataTemp, setModalDataTemp] = useState({} as any)
+
   const [currentCount, setCurrentCount] = useState(0 as any)
 
   useEffect(() => {
@@ -43,16 +41,9 @@ const BatchCountTableModal = ({
   }, [modalDataTemp])
 
   const handleEditForkLengthCountSave = () => {
-    const activeTabId = tabSlice.activeTabId
-    if (activeTabId) {
-      dispatch(
-        updateSingleForkLengthCount({
-          tabId: activeTabId,
-          ...modalDataTemp,
-          count: currentCount,
-        })
-      )
-    }
+    dispatch(
+      updateSingleForkLengthCount({ ...modalDataTemp, count: currentCount })
+    )
   }
 
   return (
@@ -144,9 +135,4 @@ const BatchCountTableModal = ({
   )
 }
 
-const mapStateToProps = (state: RootState) => {
-  return {
-    tabSlice: state.tabSlice,
-  }
-}
-export default connect(mapStateToProps)(BatchCountTableModal)
+export default BatchCountTableModal
