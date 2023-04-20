@@ -27,7 +27,10 @@ import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetup
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { flatten, uniq } from 'lodash'
 import { uid } from 'uid'
-import { setIncompleteSectionTouched, TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import {
+  setIncompleteSectionTouched,
+  TabStateI,
+} from '../../redux/reducers/formSlices/tabSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -296,6 +299,11 @@ const IncompleteSections = ({
       dropdownsState.values.plusCountMethodology
     )
     const runValues = returnDefinitionArray(dropdownsState.values.run)
+    const markTypeValues = returnDefinitionArray(dropdownsState.values.markType)
+    const markColorValues = returnDefinitionArray(
+      dropdownsState.values.markColor
+    )
+    const bodyPartValues = returnDefinitionArray(dropdownsState.values.bodyPart)
     const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
       let code = null
       dropdownsState.values.taxon.forEach((taxonValue: any) => {
@@ -322,6 +330,8 @@ const IncompleteSections = ({
           : 1
         fishStoreKeys.forEach((key) => {
           const fishValue = fishInputState[tabGroupId].fishStore[key]
+          console.log('🚀 ~ fishStoreKeys.forEach ~ fishValue:', fishValue)
+
           catchRawSubmissions.push({
             uid: tempUID,
             programId,
@@ -331,7 +341,7 @@ const IncompleteSections = ({
               runValues.indexOf(fishValue.run)
             ),
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
-            captureRunClassMethod: fishValue.run ? 6 : null,
+            captureRunClassMethod: fishValue.run ? 5 : null,
             // defaults to "none" (id: 1) if not selected
             markType: 1, // Check w/ Erin
             markedForRelease: fishValue.willBeUsedInRecapture,
@@ -365,6 +375,19 @@ const IncompleteSections = ({
             qcCompletedBy: null,
             qcTime: null,
             qcComments: null,
+            existingMarks: fishValue.existingMarks.map((markObj: any) => {
+              return {
+                markTypeId: returnNullableTableId(
+                  markTypeValues.indexOf(markObj.markType)
+                ),
+                markColorId: returnNullableTableId(
+                  markColorValues.indexOf(markObj.markColor)
+                ),
+                markPositionId: returnNullableTableId(
+                  bodyPartValues.indexOf(markObj.markPosition)
+                ),
+              }
+            }),
           })
         })
       }
