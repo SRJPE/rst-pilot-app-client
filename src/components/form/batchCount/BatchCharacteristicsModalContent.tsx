@@ -30,7 +30,7 @@ const initialFormValues = {
   species: '',
   adiposeClipped: false,
   dead: false,
-  existingMark: '',
+  existingMarks: [],
 }
 
 const BatchCharacteristicsModalContent = ({
@@ -217,12 +217,12 @@ const BatchCharacteristicsModalContent = ({
                   </FormControl>
                 </VStack>
 
-                <VStack space={4} w={'100%'}>
+                <VStack space={4} w={'120%'}>
                   <Text color='black' fontSize='xl'>
                     Add Existing Mark
                   </Text>
                   <MarkBadgeList
-                    badgeListContent={batchCountStore.existingMarks || []}
+                    badgeListContent={batchCountStore.existingMarks}
                     setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
                     field='existingMarks'
