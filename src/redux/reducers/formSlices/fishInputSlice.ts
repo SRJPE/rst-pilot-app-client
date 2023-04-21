@@ -19,6 +19,7 @@ export interface FishStoreI {
 }
 
 export interface IndividualFishValuesI {
+  UID: string | null
   species: string
   forkLength: number | null
   run: string
@@ -34,6 +35,7 @@ export interface IndividualFishValuesI {
 }
 
 export const individualFishInitialState = {
+  UID: null,
   species: '',
   numFishCaught: null,
   forkLength: null,
@@ -41,7 +43,7 @@ export const individualFishInitialState = {
   weight: null,
   lifeStage: '',
   adiposeClipped: false,
-  existingMark: '',
+  existingMarks: [],
   dead: false,
   willBeUsedInRecapture: false,
   plusCountMethod: '',
@@ -129,7 +131,7 @@ export const saveFishSlice = createSlice({
       }
     },
     saveIndividualFish: (state, action) => {
-      const { tabId, formValues } = action.payload
+      const { tabId, formValues, UID } = action.payload
       // if (state[tabId]) {}
       let fishStoreCopy = cloneDeep(
         state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
@@ -142,7 +144,7 @@ export const saveFishSlice = createSlice({
       } else {
         id = 0
       }
-      fishStoreCopy[id] = { ...formValues, numFishCaught: 1 }
+      fishStoreCopy[id] = { ...formValues, UID, numFishCaught: 1 }
 
       if (state[tabId]) {
         state[tabId].fishStore = fishStoreCopy
@@ -158,6 +160,7 @@ export const saveFishSlice = createSlice({
         action.payload
 
       const plusCountEntry = {
+        UID: null,
         species,
         numFishCaught: count,
         forkLength: null,
@@ -231,11 +234,7 @@ export const {
   deleteFishEntry,
   markFishInputCompleted,
   markFishInputModalOpen,
-  // saveBatchCharacteristics,
-  // removeLastForkLengthEntered,
   saveBatchCount,
-  // updateSingleForkLengthCount,
-  // addForkLengthToBatchStore,
 } = saveFishSlice.actions
 
 export default saveFishSlice.reducer
