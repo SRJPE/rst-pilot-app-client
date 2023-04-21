@@ -339,14 +339,14 @@ const BatchCount = ({
                       Save Batch Count
                     </Text>
                   </Button>
-                  <Button
+                  {/* <Button
                     bg='primary'
                     onPress={() => console.log('Redux Store: ', reduxStore)}
                   >
                     <Text fontSize='lg' bold color='white'>
                       LOG REDUX
                     </Text>
-                  </Button>
+                  </Button> */}
                 </HStack>
               </VStack>
               <VStack space={4}>
