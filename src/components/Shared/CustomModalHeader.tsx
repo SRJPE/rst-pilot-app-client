@@ -34,35 +34,29 @@ const CustomModalHeader = ({
           justifyContent='space-between'
           alignItems='center'
           marginTop={2}
-          mr='5'
+          space={5}
+          w='100%'
         >
           <HStack alignItems='center'>
-            {
-              <Button
-                size='lg'
-                onPress={() => {
-                  if (navigateBack) {
-                    // navigation.goBack()
-                    navigation.navigate('Trap Visit Form', {
-                      screen: 'Fish Input',
-                    })
-                  }
-                  if (closeModal) {
-                    closeModal()
-                  }
-                }}
-              >
-                <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
-              </Button>
-            }
-            <Heading marginLeft='10'>{headerText}</Heading>
+            <Button
+              size='lg'
+              onPress={() => {
+                if (navigateBack) {
+                  // navigation.goBack()
+                  navigation.navigate('Trap Visit Form', {
+                    screen: 'Fish Input',
+                  })
+                }
+                if (closeModal) {
+                  closeModal()
+                }
+              }}
+            >
+              <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
+            </Button>
+            <Heading>{headerText}</Heading>
           </HStack>
-          {/* QUICK FIX */}
-          {headerText === 'Add Fish' ? (
-            <Box ml='340'>{headerButton ? headerButton : <></>}</Box>
-          ) : (
-            <Box ml='200'>{headerButton ? headerButton : <></>}</Box>
-          )}
+          <Box mr='5'>{headerButton}</Box>
         </HStack>
       </>
     )
