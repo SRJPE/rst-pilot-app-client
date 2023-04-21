@@ -57,7 +57,7 @@ const MarkBadgeList = ({
 
   return (
     <>
-      <ScrollView maxHeight='60%'>
+      <ScrollView maxHeight='220'>
         <VStack space={5}>
           {badgeListContent.length > 0 &&
             badgeListContent.map((badge: markBadgeI, index: number) => {
