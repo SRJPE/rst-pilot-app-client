@@ -29,12 +29,14 @@ const formSteps = {
 export interface NavigationStateI {
   activeStep: number
   steps: any
+  previousPageWasIncompleteSections?: boolean
   isFormComplete?: boolean
 }
 
 const initialState: NavigationStateI = {
   activeStep: 1,
   steps: formSteps,
+  previousPageWasIncompleteSections: false,
   isFormComplete: false,
 }
 
@@ -43,6 +45,10 @@ export const navigationSlice = createSlice({
   initialState: initialState,
   reducers: {
     resetNavigationSlice: () => initialState,
+    togglePreviousPageWasIncompleteSections: (state) => {
+      state.previousPageWasIncompleteSections =
+        !state.previousPageWasIncompleteSections
+    },
     updateActiveStep: (state, action) => {
       state.activeStep = action.payload
     },
@@ -81,6 +87,7 @@ export const {
   updateActiveStep,
   markStepCompleted,
   checkIfFormIsComplete,
+  togglePreviousPageWasIncompleteSections,
 } = navigationSlice.actions
 
 export default navigationSlice.reducer

@@ -1,11 +1,15 @@
 import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  togglePreviousPageWasIncompleteSections,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { useEffect, useState } from 'react'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import { useNavigation, useRoute } from '@react-navigation/native'
 
 const NavButtons = ({
   navigation,
@@ -33,7 +37,9 @@ const NavButtons = ({
   reduxState: RootState
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+
   const navigationState = useSelector((state: any) => state.navigation)
+  console.log('🚀 ~ navigationState:', navigationState)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
   const [isPaperEntryStore, setIsPaperEntryStore] = useState(false)
@@ -200,16 +206,25 @@ const NavButtons = ({
       handleSubmit()
       showSlideAlert(dispatch)
     }
+    if (navigationState.previousPageWasIncompleteSections) {
+      navigation.navigate('Trap Visit Form', {
+        screen: 'Incomplete Sections',
+      })
+      dispatch(updateActiveStep(6))
+      dispatch(togglePreviousPageWasIncompleteSections())
+    }
     //navigate Right
-    navigation.navigate('Trap Visit Form', {
-      screen: navigationState.steps[activeStep + 1]?.name,
-    })
-    dispatch({
-      type: updateActiveStep,
-      payload: navigationState.activeStep + 1,
-    })
-    //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
-    navigateFlowRightButton(values)
+    else {
+      navigation.navigate('Trap Visit Form', {
+        screen: navigationState.steps[activeStep + 1]?.name,
+      })
+      dispatch({
+        type: updateActiveStep,
+        payload: navigationState.activeStep + 1,
+      })
+      //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
+      navigateFlowRightButton(values)
+    }
   }
 
   const handleLeftButton = () => {
@@ -290,6 +305,9 @@ const NavButtons = ({
         buttonText = 'Next'
         break
     }
+    if (navigationState.previousPageWasIncompleteSections) {
+      buttonText = 'Return to Incomplete Sections'
+    }
     return buttonText
   }
 
@@ -316,7 +334,7 @@ const NavButtons = ({
           </Text>
         </Button>
 
-        <Button
+        {/* <Button
           height='20'
           bg='primary'
           alignSelf='flex-start'
@@ -327,7 +345,7 @@ const NavButtons = ({
           <Text fontWeight='bold' color='white'>
             redux state
           </Text>
-        </Button>
+        </Button> */}
 
         <Button
           alignSelf='flex-start'
