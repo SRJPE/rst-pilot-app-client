@@ -7,7 +7,7 @@ interface InitialStateI {
 }
 
 export interface GeneticSampleValuesI {
-  id: string
+  UID: string
   sampleId: string
   mucusSwab: boolean
   finClip: boolean

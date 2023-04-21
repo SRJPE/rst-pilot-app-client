@@ -164,16 +164,12 @@ export const addMarksOrTagsSchema = yup.object().shape({
 })
 
 export const addGeneticsSampleSchema = yup.object().shape({
-  sampleIdNumber: yup
+  sampleId: yup
     .string()
     .matches(/^[A-Z0-9_]*$/, 'Invalid Input.')
     .required('Sample ID Number required'),
-  mucusSwabCollected: yup
-    .boolean()
-    .required('Mucus Swab collection status required'),
-  finClipCollected: yup
-    .boolean()
-    .required('Fin Clip collection status required'),
+  mucusSwab: yup.boolean().required('Mucus Swab collection status required'),
+  finClip: yup.boolean().required('Fin Clip collection status required'),
   crewMemberCollectingSample: yup.string().required('Crew Member required'),
   // comments: yup.string(),
 })

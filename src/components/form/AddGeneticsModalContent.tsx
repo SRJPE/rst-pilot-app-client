@@ -21,9 +21,9 @@ import CustomSelect from '../Shared/CustomSelect'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
 
 const initialFormValues = {
-  sampleIdNumber: '',
-  mucusSwabCollected: false,
-  finClipCollected: false,
+  sampleId: '',
+  mucusSwab: false,
+  finClip: false,
   crewMemberCollectingSample: '',
   comments: '',
 }
@@ -144,18 +144,18 @@ const AddGeneticsModalContent = ({
                           </Text>
                         </FormControl.Label>
 
-                        {touched.sampleIdNumber &&
-                          errors.sampleIdNumber &&
-                          RenderErrorMessage(errors, 'sampleIdNumber')}
+                        {touched.sampleId &&
+                          errors.sampleId &&
+                          RenderErrorMessage(errors, 'sampleId')}
                       </HStack>
                       <Input
                         height='50px'
                         fontSize='16'
                         placeholder='Write a comment'
                         keyboardType='default'
-                        onChangeText={handleChange('sampleIdNumber')}
-                        onBlur={handleBlur('sampleIdNumber')}
-                        value={values.sampleIdNumber}
+                        onChangeText={handleChange('sampleId')}
+                        onBlur={handleBlur('sampleId')}
+                        value={values.sampleId}
                       />
                     </FormControl>
 
@@ -166,14 +166,14 @@ const AddGeneticsModalContent = ({
                         </Text>
                       </FormControl.Label>
                       <Radio.Group
-                        name='mucusSwabCollected'
+                        name='mucusSwab'
                         accessibilityLabel='Mucus Swab Collected'
-                        value={`${values.mucusSwabCollected}`}
+                        value={`${values.mucusSwab}`}
                         onChange={(value: any) => {
                           if (value === 'true') {
-                            setFieldValue('mucusSwabCollected', true)
+                            setFieldValue('mucusSwab', true)
                           } else {
-                            setFieldValue('mucusSwabCollected', false)
+                            setFieldValue('mucusSwab', false)
                           }
                         }}
                       >
@@ -203,14 +203,14 @@ const AddGeneticsModalContent = ({
                         </Text>
                       </FormControl.Label>
                       <Radio.Group
-                        name='finClipCollected'
+                        name='finClip'
                         accessibilityLabel='Fin Clip Collected'
-                        value={`${values.finClipCollected}`}
+                        value={`${values.finClip}`}
                         onChange={(value: any) => {
                           if (value === 'true') {
-                            setFieldValue('finClipCollected', true)
+                            setFieldValue('finClip', true)
                           } else {
-                            setFieldValue('finClipCollected', false)
+                            setFieldValue('finClip', false)
                           }
                         }}
                       >
