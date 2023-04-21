@@ -217,7 +217,7 @@ const FishHolding = ({
   //render new cards when selected runs or lifeStages change
   const renderFishHoldingCards = useCallback(() => {
     return (
-      <HStack space={10} justifyContent='center' h='475' mb='75'>
+      <HStack space={10} justifyContent='center' h='70%'>
         <FishHoldingCard
           cardContent={selectedLifeStages}
           handlePressRemoveBadge={handlePressRemoveBadge}
@@ -234,8 +234,8 @@ const FishHolding = ({
 
   return (
     <>
-      <View flex={1} bg='#fff' p='6%' borderColor='themeGrey' borderWidth='15'>
-        <VStack space={10}>
+      <View flex={1} bg='#fff' p='5%' borderColor='themeGrey' borderWidth='15'>
+        <VStack space={8}>
           <Heading fontSize='28'>
             Which fish are you holding for mark recapture Trials?
           </Heading>
@@ -264,10 +264,8 @@ const FishHolding = ({
             </Button>
           </HStack>
           {renderFishHoldingCards()}
+          <Heading alignSelf='center'>Total Fish Holding: {totalFish}</Heading>
         </VStack>
-        <HStack space={10} justifyContent='center'>
-          <Heading>Total Fish Holding: {totalFish}</Heading>
-        </HStack>
       </View>
       <NavButtons
         navigation={navigation}
