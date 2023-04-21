@@ -45,7 +45,8 @@ const mapStateToProps = (state: RootState) => {
     fishInputState: state.fishInput,
     paperEntryState: state.paperEntry,
     tabState: state.tabSlice,
-    addGeneticSamplesState: state.addGeneticSamples.values,
+    addGeneticSamplesState: state.addGeneticSamples,
+    appliedMarksState: state.addMarksOrTags,
   }
 }
 
@@ -63,6 +64,7 @@ const IncompleteSections = ({
   paperEntryState,
   tabState,
   addGeneticSamplesState,
+  appliedMarksState,
 }: {
   navigation: any
   navigationState: any
@@ -77,6 +79,7 @@ const IncompleteSections = ({
   paperEntryState: any
   tabState: TabStateI
   addGeneticSamplesState: any
+  appliedMarksState: any
 }) => {
   // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
@@ -329,6 +332,7 @@ const IncompleteSections = ({
       return code
     }
     const catchRawSubmissions: any[] = []
+    const appliedMarksStateCopy = cloneDeep(appliedMarksState.values)
 
     Object.keys(fishInputState).forEach((tabGroupId) => {
       if (tabGroupId != 'placeholderId') {
@@ -342,25 +346,23 @@ const IncompleteSections = ({
         fishStoreKeys.forEach((key) => {
           const fishValue = fishInputState[tabGroupId].fishStore[key]
           console.log('🚀 ~ fishStoreKeys.forEach ~ fishValue:', fishValue)
-          const prepareGeneticSampleData = () => {
-            const addGeneticSamplesStateCopy = cloneDeep(addGeneticSamplesState)
-            const filteredData = addGeneticSamplesStateCopy.filter(
-              (geneticSampleObject: any) => {
-                return geneticSampleObject.UID === fishValue.UID
-              }
-            )
+          const filterAndPrepareData = (data: Array<any>) => {
+            const dataCopy = cloneDeep(data)
+            const filteredData = dataCopy.filter((obj: any) => {
+              return obj.UID === fishValue.UID
+            })
             console.log(
               '🚀 ~ prepareGeneticSampleData ~ filteredData:',
               filteredData
             )
-            return filteredData.map((geneticSampleObject: any) => {
-              // geneticSampleObject.crewMemberCollectingSample =
+            return filteredData.map((obj: any) => {
+              // obj.crewMember =
               //   findCrewIdsFromSelectedCrewNames(
-              //     geneticSampleObject.crewMemberCollectingSample
+              //     obj.crewMember
               //   )
-              geneticSampleObject.crewMemberCollectingSample = 1 //refactor later to dynamic value
-              geneticSampleObject
-              return geneticSampleObject
+              obj.crewMember = 1 //refactor later to dynamic value
+
+              return obj
             })
           }
           // const selectedCrewNames: string[] = [
@@ -441,19 +443,46 @@ const IncompleteSections = ({
                 ),
               }
             }),
-            geneticSamplingData: prepareGeneticSampleData(),
+            geneticSamplingData: filterAndPrepareData(
+              addGeneticSamplesState.values
+            ),
 
             // geneticSamplingData: addGeneticSamplesState.filter(
             //   (geneticSampleObject: any) => {
             //     return geneticSampleObject.id === fishValue.UID
             //   }
             // ),
+            appliedMarks: filterAndPrepareData(
+              appliedMarksStateCopy.map((markObj: any) => {
+                let markTypeId = markObj.markType
+                let markPositionId = markObj.markPosition
+                delete markObj.markType
+                delete markObj.markPosition
+                return {
+                  markTypeId: returnNullableTableId(
+                    markTypeValues.indexOf(markTypeId)
+                  ),
+                  // markColorId: returnNullableTableId(
+                  //   markColorValues.indexOf(markObj.markColor)
+                  // ),
+                  markPositionId: returnNullableTableId(
+                    bodyPartValues.indexOf(markPositionId)
+                  ),
+
+                  ...markObj,
+                }
+              })
+            ),
           })
         })
       }
     })
 
     if (catchRawSubmissions.length) {
+      console.log(
+        '🚀 ~ saveCatchRawSubmission ~ catchRawSubmissions:',
+        catchRawSubmissions
+      )
       dispatch(saveCatchRawSubmissions(catchRawSubmissions))
     }
   }
