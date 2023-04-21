@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { cloneDeep } from 'lodash'
 import { uid } from 'uid'
 
 interface InitialStateI {
@@ -6,10 +7,10 @@ interface InitialStateI {
 }
 
 export interface MarkOrTagFishValuesI {
-  id: string
-  type: string
-  number: string
-  position: string
+  UID: string
+  markType: string
+  markColor: string
+  markPosition: string
   crewMemberTagging: string
   comments?: string
 }
@@ -24,7 +25,9 @@ export const addMarksOrTagsSlice = createSlice({
   reducers: {
     resetMarksOrTagsSlice: () => initialState,
     saveMarkOrTagData: (state, action) => {
-      state.values.push({ ...action.payload, id: uid() })
+      let markOrTagDataCopy = cloneDeep(state.values)
+      markOrTagDataCopy.push(action.payload)
+      state.values = markOrTagDataCopy
     },
   },
 })

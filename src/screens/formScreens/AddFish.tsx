@@ -108,7 +108,7 @@ const AddFishContent = ({
   )
 
   const handleMarkFishFormSubmit = (values: any) => {
-    saveMarkOrTagData(values)
+    saveMarkOrTagData({ ...values, UID: fishUID })
   }
 
   const handleGeneticSampleFormSubmit = (values: any) => {
