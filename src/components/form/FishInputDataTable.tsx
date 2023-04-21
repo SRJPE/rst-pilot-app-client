@@ -69,7 +69,7 @@ const FishInputDataTable = ({
   }, [page])
 
   const generateRowsForPage = () => {
-    console.log('🚀 ~ generateRowsForPage ~ fishStore:', fishStore)
+    // console.log('🚀 ~ generateRowsForPage ~ fishStore:', fishStore)
 
     const pageRowsIndexes = Object.keys(fishStore).slice(
       page * numberOfItemsPerPage,
@@ -79,7 +79,7 @@ const FishInputDataTable = ({
     pageRowsIndexes.forEach((idx) => {
       pageRowsSliced[Number(idx)] = fishStore[Number(idx)]
     })
-    console.log('🚀 ~ generateRowsForPage ~ pageRowsSliced:', pageRowsSliced)
+    // console.log('🚀 ~ generateRowsForPage ~ pageRowsSliced:', pageRowsSliced)
     // for (let key in pageRowsSliced) {
     //   console.log(
     //     '🚀 ~ generateRowsForPage ~ pageRowsSliced VALUE:',
@@ -92,7 +92,7 @@ const FishInputDataTable = ({
     let sortedPageRows = sortPageRows(pageRowsSliced)
 
     let paddedPageRows = addEmptyRows(sortedPageRows)
-    console.log('🚀 ~ generateRowsForPage ~ paddedPageRows:', paddedPageRows)
+    // console.log('🚀 ~ generateRowsForPage ~ paddedPageRows:', paddedPageRows)
     return paddedPageRows
   }
 
@@ -116,7 +116,7 @@ const FishInputDataTable = ({
       delete dataObj.UID
 
       const dataObjKeys = Object.keys(dataObj)
-      console.log('🚀 ~ keys.forEach ~ dataObjKeys:', dataObjKeys)
+      // console.log('🚀 ~ keys.forEach ~ dataObjKeys:', dataObjKeys)
       dataObjKeys.forEach((dataObjKey) => {
         if (dataObj[dataObjKey] === '') {
           dataObj[dataObjKey] = '---'
