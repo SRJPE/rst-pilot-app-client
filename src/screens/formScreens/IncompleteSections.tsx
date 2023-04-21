@@ -45,6 +45,7 @@ const mapStateToProps = (state: RootState) => {
     fishInputState: state.fishInput,
     paperEntryState: state.paperEntry,
     tabState: state.tabSlice,
+    addGeneticSamplesState: state.addGeneticSamples.values,
   }
 }
 
@@ -61,6 +62,7 @@ const IncompleteSections = ({
   fishInputState,
   paperEntryState,
   tabState,
+  addGeneticSamplesState,
 }: {
   navigation: any
   navigationState: any
@@ -74,6 +76,7 @@ const IncompleteSections = ({
   fishInputState: any
   paperEntryState: any
   tabState: TabStateI
+  addGeneticSamplesState: any
 }) => {
   // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
@@ -388,6 +391,11 @@ const IncompleteSections = ({
                 ),
               }
             }),
+            geneticSamplingData: addGeneticSamplesState.filter(
+              (geneticSampleObject: any) => {
+                return geneticSampleObject.id === fishValue.UID
+              }
+            ),
           })
         })
       }
