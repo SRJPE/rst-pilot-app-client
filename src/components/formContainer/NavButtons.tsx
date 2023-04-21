@@ -37,9 +37,7 @@ const NavButtons = ({
   reduxState: RootState
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-
   const navigationState = useSelector((state: any) => state.navigation)
-  console.log('🚀 ~ navigationState:', navigationState)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
   const [isPaperEntryStore, setIsPaperEntryStore] = useState(false)
@@ -206,25 +204,23 @@ const NavButtons = ({
       handleSubmit()
       showSlideAlert(dispatch)
     }
-    if (navigationState.previousPageWasIncompleteSections) {
-      navigation.navigate('Trap Visit Form', {
-        screen: 'Incomplete Sections',
-      })
-      dispatch(updateActiveStep(6))
-      dispatch(togglePreviousPageWasIncompleteSections())
-    }
+    // if (navigationState.previousPageWasIncompleteSections) {
+    //   navigation.navigate('Trap Visit Form', {
+    //     screen: 'Incomplete Sections',
+    //   })
+    //   dispatch(updateActiveStep(6))
+    //   dispatch(togglePreviousPageWasIncompleteSections())
+    //   navigateFlowRightButton(values)
+    // }
     //navigate Right
-    else {
-      navigation.navigate('Trap Visit Form', {
-        screen: navigationState.steps[activeStep + 1]?.name,
-      })
-      dispatch({
-        type: updateActiveStep,
-        payload: navigationState.activeStep + 1,
-      })
-      //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
-      navigateFlowRightButton(values)
-    }
+    // else {
+    navigation.navigate('Trap Visit Form', {
+      screen: navigationState.steps[activeStep + 1]?.name,
+    })
+    dispatch(updateActiveStep(navigationState.activeStep + 1))
+    //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
+    navigateFlowRightButton(values)
+    // }
   }
 
   const handleLeftButton = () => {
@@ -305,9 +301,9 @@ const NavButtons = ({
         buttonText = 'Next'
         break
     }
-    if (navigationState.previousPageWasIncompleteSections) {
-      buttonText = 'Return to Incomplete Sections'
-    }
+    // if (navigationState.previousPageWasIncompleteSections) {
+    //   buttonText = 'Return to Incomplete Sections'
+    // }
     return buttonText
   }
 
