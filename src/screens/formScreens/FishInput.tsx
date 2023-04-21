@@ -42,7 +42,7 @@ const mapStateToProps = (state: RootState) => {
     activeTabId,
     speciesCaptured,
     tabSlice: state.tabSlice,
-    fishInputSlice: state.fishInput
+    fishInputSlice: state.fishInput,
   }
 }
 
@@ -51,7 +51,7 @@ const FishInput = ({
   activeTabId,
   speciesCaptured,
   tabSlice,
-  fishInputSlice
+  fishInputSlice,
 }: {
   navigation: any
   activeTabId: string
@@ -85,11 +85,14 @@ const FishInput = ({
     // }
     if (activeTabId && activeTabId != 'placeholderId') {
       dispatch(
-        saveFishInput({ tabId: activeTabId, speciesCaptured: checkboxGroupValue })
+        saveFishInput({
+          tabId: activeTabId,
+          speciesCaptured: checkboxGroupValue,
+        })
       )
       dispatch(markFishInputCompleted({ tabId: activeTabId, bool: true }))
       let stepCompletedCheck = true
-      Object.keys(tabSlice.tabs).forEach(tabId => {
+      Object.keys(tabSlice.tabs).forEach((tabId) => {
         if (!fishInputSlice[tabId]) stepCompletedCheck = false
       })
       if (stepCompletedCheck) dispatch(markStepCompleted([true, 'fishInput']))
@@ -103,14 +106,14 @@ const FishInput = ({
         flex={1}
         scrollEnabled={screenHeight < 1180}
         bg='#fff'
-        py='10%'
+        py='4%'
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <Heading mb={showError ? '3' : '8'} px='10%'>
+        <Heading mb={showError ? '3' : '8'} px='5%'>
           Which species were captured?
         </Heading>
-        <VStack space={8}>
+        <VStack space={6}>
           <FormControl>
             {showError && (
               <HStack space={1}>
@@ -170,7 +173,7 @@ const FishInput = ({
             </Checkbox.Group>
           </FormControl>
 
-          <HStack space={10} px='10%'>
+          <HStack space={10} px='5%'>
             <Button
               bg='primary'
               p='3'

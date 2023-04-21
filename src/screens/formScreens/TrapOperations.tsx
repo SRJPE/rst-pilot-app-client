@@ -320,79 +320,76 @@ const TrapOperations = ({
                   {values.trapStatus.length > 0 &&
                     values.trapStatus !== trapNotInServiceIdentifier && (
                       <>
-                        {/* <FormControl w='47%'>
-                          <HStack space={4} alignItems='center'>
+                        <HStack>
+                          <FormControl w='30%'>
                             <FormControl.Label>
                               <Text color='black' fontSize='xl'>
-                                Cone Depth (optional)
+                                Cone Setting
                               </Text>
                             </FormControl.Label>
-                            {Number(values.coneDepth) >
-                              QARanges.coneDepth.max && (
-                              <RenderWarningMessage />
-                            )}
-                            {touched.coneDepth &&
-                              errors.coneDepth &&
-                              RenderErrorMessage(errors, 'coneDepth')}
-                          </HStack>
-                          <OptimizedInput
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('coneDepth')}
-                            onBlur={handleBlur('coneDepth')}
-                            value={values.coneDepth}
-                          />
-                          <Text
-                            color='#A1A1A1'
-                            position='absolute'
-                            top={50}
-                            right={4}
-                            fontSize={16}
-                          >
-                            {'in'}
-                          </Text>
-                        </FormControl> */}
-
-                        <FormControl w='30%'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Cone Setting
-                            </Text>
-                          </FormControl.Label>
-                          <Radio.Group
-                            name='coneSetting'
-                            accessibilityLabel='cone setting'
-                            value={`${values.coneSetting}`}
-                            onChange={(value: any) => {
-                              setFieldTouched('coneSetting', true)
-                              if (value === 'full') {
-                                setFieldValue('coneSetting', 'full')
-                              } else {
-                                setFieldValue('coneSetting', 'half')
-                              }
-                            }}
-                          >
-                            <Radio
-                              colorScheme='primary'
-                              value='full'
-                              my={1}
-                              _icon={{ color: 'primary' }}
+                            <Radio.Group
+                              name='coneSetting'
+                              accessibilityLabel='cone setting'
+                              value={`${values.coneSetting}`}
+                              onChange={(value: any) => {
+                                setFieldTouched('coneSetting', true)
+                                if (value === 'full') {
+                                  setFieldValue('coneSetting', 'full')
+                                } else {
+                                  setFieldValue('coneSetting', 'half')
+                                }
+                              }}
                             >
-                              Full
-                            </Radio>
-                            <Radio
-                              colorScheme='primary'
-                              value='half'
-                              my={1}
-                              _icon={{ color: 'primary' }}
-                            >
-                              Half
-                            </Radio>
-                          </Radio.Group>
-                        </FormControl>
-
+                              <Radio
+                                colorScheme='primary'
+                                value='full'
+                                my={1}
+                                _icon={{ color: 'primary' }}
+                              >
+                                Full
+                              </Radio>
+                              <Radio
+                                colorScheme='primary'
+                                value='half'
+                                my={1}
+                                _icon={{ color: 'primary' }}
+                              >
+                                Half
+                              </Radio>
+                            </Radio.Group>
+                          </FormControl>
+                          <FormControl w='47%'>
+                            <HStack space={4} alignItems='center'>
+                              <FormControl.Label>
+                                <Text color='black' fontSize='xl'>
+                                  Total Revolutions
+                                </Text>
+                              </FormControl.Label>
+                              {Number(values.totalRevolutions) >
+                                QARanges.totalRevolutions.max && (
+                                <RenderWarningMessage />
+                              )}
+                              {tabSlice.incompleteSectionTouched
+                                ? errors.totalRevolutions &&
+                                  RenderErrorMessage(errors, 'totalRevolutions')
+                                : touched.totalRevolutions &&
+                                  errors.totalRevolutions &&
+                                  RenderErrorMessage(
+                                    errors,
+                                    'totalRevolutions'
+                                  )}
+                            </HStack>
+                            <OptimizedInput
+                              height='50px'
+                              fontSize='16'
+                              placeholder='Numeric Value'
+                              keyboardType='numeric'
+                              onChangeText={handleChange('totalRevolutions')}
+                              onBlur={handleBlur('totalRevolutions')}
+                              value={values.totalRevolutions}
+                            />
+                          </FormControl>
+                        </HStack>
                         <FormControl>
                           <HStack space={4} alignItems='center'>
                             <FormControl.Label>
@@ -525,34 +522,7 @@ const TrapOperations = ({
                             per minute before cleaning the trap.
                           </Text>
                         </FormControl>
-                        <FormControl w='47%'>
-                          <HStack space={4} alignItems='center'>
-                            <FormControl.Label>
-                              <Text color='black' fontSize='xl'>
-                                Total Revolutions
-                              </Text>
-                            </FormControl.Label>
-                            {Number(values.totalRevolutions) >
-                              QARanges.totalRevolutions.max && (
-                              <RenderWarningMessage />
-                            )}
-                            {tabSlice.incompleteSectionTouched
-                              ? errors.totalRevolutions &&
-                                RenderErrorMessage(errors, 'totalRevolutions')
-                              : touched.totalRevolutions &&
-                                errors.totalRevolutions &&
-                                RenderErrorMessage(errors, 'totalRevolutions')}
-                          </HStack>
-                          <OptimizedInput
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('totalRevolutions')}
-                            onBlur={handleBlur('totalRevolutions')}
-                            value={values.totalRevolutions}
-                          />
-                        </FormControl>
+
                         <Heading>Environmental Conditions</Heading>
                         <HStack space={5} width='125%'>
                           <FormControl w='1/4'>
