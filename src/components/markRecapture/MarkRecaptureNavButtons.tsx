@@ -138,7 +138,7 @@ export default function MarkRecaptureNavButtons({
             {renderHomeButton ? 'Return Home' : 'Back'}
           </Text>
         </Button>
-        <Button
+        {/* <Button
           height='20'
           rounded='xs'
           bg='primary'
@@ -151,7 +151,7 @@ export default function MarkRecaptureNavButtons({
           <Text fontWeight='bold' color='white'>
             redux state
           </Text>
-        </Button>
+        </Button> */}
         <Button
           alignSelf='flex-start'
           bg='primary'
