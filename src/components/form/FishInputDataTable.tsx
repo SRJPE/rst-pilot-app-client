@@ -15,7 +15,7 @@ const headers = [
   'Weight',
   'Life Stage',
   'Clipped',
-  'Mark',
+  'Marks',
   'Dead',
   'Recapture',
   '',
@@ -29,7 +29,7 @@ const sortedDataByHeaders = [
   'weight',
   'lifeStage',
   'adiposeClipped',
-  'existingMark',
+  'existingMarks',
   'dead',
   'willBeUsedInRecapture',
 ]
@@ -42,7 +42,7 @@ const emptyTableData = {
   weight: '---',
   lifeStage: '---',
   adiposeClipped: '---',
-  existingMark: '---',
+  existingMarks: '---',
   dead: '---',
   willBeUsedInRecapture: '---',
 }
@@ -69,6 +69,8 @@ const FishInputDataTable = ({
   }, [page])
 
   const generateRowsForPage = () => {
+    console.log('🚀 ~ generateRowsForPage ~ fishStore:', fishStore)
+
     const pageRowsIndexes = Object.keys(fishStore).slice(
       page * numberOfItemsPerPage,
       page * numberOfItemsPerPage + numberOfItemsPerPage
@@ -77,8 +79,20 @@ const FishInputDataTable = ({
     pageRowsIndexes.forEach((idx) => {
       pageRowsSliced[Number(idx)] = fishStore[Number(idx)]
     })
+    console.log('🚀 ~ generateRowsForPage ~ pageRowsSliced:', pageRowsSliced)
+    // for (let key in pageRowsSliced) {
+    //   console.log(
+    //     '🚀 ~ generateRowsForPage ~ pageRowsSliced VALUE:',
+    //     pageRowsSliced[key]
+    //   )
+
+    //   pageRowsSliced[key].UID = null
+    //   pageRowsSliced[key].existingMarks = null
+    // }
     let sortedPageRows = sortPageRows(pageRowsSliced)
+
     let paddedPageRows = addEmptyRows(sortedPageRows)
+    console.log('🚀 ~ generateRowsForPage ~ paddedPageRows:', paddedPageRows)
     return paddedPageRows
   }
 
@@ -98,7 +112,11 @@ const FishInputDataTable = ({
     const keys = Object.keys(obj)
     keys.forEach((key) => {
       let dataObj: any = cloneDeep(obj[Number(key)])
+      dataObj.existingMarks = dataObj.existingMarks.length
+      delete dataObj.UID
+
       const dataObjKeys = Object.keys(dataObj)
+      console.log('🚀 ~ keys.forEach ~ dataObjKeys:', dataObjKeys)
       dataObjKeys.forEach((dataObjKey) => {
         if (dataObj[dataObjKey] === '') {
           dataObj[dataObjKey] = '---'
