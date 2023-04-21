@@ -156,8 +156,8 @@ export const addIndividualFishSchemaOtherSpecies = yup.object().shape({
 })
 
 export const addMarksOrTagsSchema = yup.object().shape({
-  type: yup.string().required('Mark Type is required'),
-  number: yup.number().typeError('Input must be a number'),
+  markType: yup.string().required('Mark Type is required'),
+  markNumber: yup.number().typeError('Input must be a number'),
   // position: yup.string()
   // crewMemberTagging: yup.string()
   // comments: yup.string(),
@@ -170,7 +170,7 @@ export const addGeneticsSampleSchema = yup.object().shape({
     .required('Sample ID Number required'),
   mucusSwab: yup.boolean().required('Mucus Swab collection status required'),
   finClip: yup.boolean().required('Fin Clip collection status required'),
-  crewMemberCollectingSample: yup.string().required('Crew Member required'),
+  crewMember: yup.string().required('Crew Member required'),
   // comments: yup.string(),
 })
 

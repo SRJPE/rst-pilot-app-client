@@ -24,7 +24,7 @@ const initialFormValues = {
   sampleId: '',
   mucusSwab: false,
   finClip: false,
-  crewMemberCollectingSample: '',
+  crewMember: '',
   comments: '',
 }
 
@@ -241,19 +241,14 @@ const AddGeneticsModalContent = ({
                           </Text>
                         </FormControl.Label>
 
-                        {touched.crewMemberCollectingSample &&
-                          errors.crewMemberCollectingSample &&
-                          RenderErrorMessage(
-                            errors,
-                            'crewMemberCollectingSample'
-                          )}
+                        {touched.crewMember &&
+                          errors.crewMember &&
+                          RenderErrorMessage(errors, 'crewMember')}
                       </HStack>
                       <CustomSelect
-                        selectedValue={values.crewMemberCollectingSample}
+                        selectedValue={values.crewMember}
                         placeholder={'Crew Member'}
-                        onValueChange={handleChange(
-                          'crewMemberCollectingSample'
-                        )}
+                        onValueChange={handleChange('crewMember')}
                         setFieldTouched={setFieldTouched}
                         selectOptions={
                           crewMembers.length

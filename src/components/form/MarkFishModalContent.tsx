@@ -23,10 +23,11 @@ import RenderErrorMessage from '../Shared/RenderErrorMessage'
 import RenderWarningMessage from '../Shared/RenderWarningMessage'
 
 const initialFormValues = {
-  type: '',
-  number: '',
-  position: '',
-  crewMemberTagging: '',
+  markType: '',
+  markNumber: '',
+  markPosition: '',
+  // markColor: '',
+  crewMember: '',
   comments: '',
 }
 
@@ -62,7 +63,7 @@ const MarkFishModalContent = ({
       <Formik
         validationSchema={addMarksOrTagsSchema}
         initialValues={initialFormValues}
-        onSubmit={values => handleFormSubmit(values)}
+        onSubmit={(values) => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -110,14 +111,14 @@ const MarkFishModalContent = ({
                         Type
                       </Text>
                     </FormControl.Label>
-                    {touched.type &&
-                      errors.type &&
-                      RenderErrorMessage(errors, 'type')}
+                    {touched.markType &&
+                      errors.markType &&
+                      RenderErrorMessage(errors, 'markType')}
                   </HStack>
                   <CustomSelect
-                    selectedValue={values.type}
+                    selectedValue={values.markType}
                     placeholder={'Type'}
-                    onValueChange={handleChange('type')}
+                    onValueChange={handleChange('markType')}
                     setFieldTouched={setFieldTouched}
                     selectOptions={dropdownValues.markType.map((item: any) => ({
                       label: item.definition,
@@ -133,20 +134,21 @@ const MarkFishModalContent = ({
                         Number
                       </Text>
                     </FormControl.Label>
-                    {Number(values.number) > QARanges.markNumber.max &&
-                      RenderWarningMessage()}
-                    {touched.number &&
-                      errors.number &&
-                      RenderErrorMessage(errors, 'number')}
+                    {Number(values.markNumber) > QARanges.markNumber.max && (
+                      <RenderWarningMessage />
+                    )}
+                    {touched.markNumber &&
+                      errors.markNumber &&
+                      RenderErrorMessage(errors, 'markNumber')}
                   </HStack>
                   <Input
                     height='50px'
                     fontSize='16'
                     placeholder='Enter number'
                     keyboardType='numeric'
-                    onChangeText={handleChange('number')}
-                    onBlur={handleBlur('number')}
-                    value={values.number}
+                    onChangeText={handleChange('markNumber')}
+                    onBlur={handleBlur('markNumber')}
+                    value={values.markNumber}
                   />
                 </FormControl>
 
@@ -157,14 +159,14 @@ const MarkFishModalContent = ({
                         Position
                       </Text>
                     </FormControl.Label>
-                    {touched.position &&
-                      errors.position &&
-                      RenderErrorMessage(errors, 'position')}
+                    {touched.markPosition &&
+                      errors.markPosition &&
+                      RenderErrorMessage(errors, 'markPosition')}
                   </HStack>
                   <CustomSelect
-                    selectedValue={values.position}
+                    selectedValue={values.markPosition}
                     placeholder={'Mark Position'}
-                    onValueChange={handleChange('position')}
+                    onValueChange={handleChange('markPosition')}
                     setFieldTouched={setFieldTouched}
                     selectOptions={
                       dropdownValues.bodyPart
@@ -198,14 +200,14 @@ const MarkFishModalContent = ({
                         Crew Member Tagging
                       </Text>
                     </FormControl.Label>
-                    {touched.crewMemberTagging &&
-                      errors.crewMemberTagging &&
-                      RenderErrorMessage(errors, 'crewMemberTagging')}
+                    {touched.crewMember &&
+                      errors.crewMember &&
+                      RenderErrorMessage(errors, 'crewMember')}
                   </HStack>
                   <CustomSelect
-                    selectedValue={values.crewMemberTagging}
+                    selectedValue={values.crewMember}
                     placeholder={'Crew Member'}
-                    onValueChange={handleChange('crewMemberTagging')}
+                    onValueChange={handleChange('crewMember')}
                     setFieldTouched={setFieldTouched}
                     selectOptions={crewMembers.map((item: any) => ({
                       label: item,

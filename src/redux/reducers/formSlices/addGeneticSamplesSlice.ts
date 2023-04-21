@@ -11,7 +11,7 @@ export interface GeneticSampleValuesI {
   sampleId: string
   mucusSwab: boolean
   finClip: boolean
-  crewMemberCollectingSample: string
+  crewMember: string
   comments?: string
 }
 

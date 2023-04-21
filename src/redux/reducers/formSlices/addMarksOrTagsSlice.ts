@@ -9,9 +9,10 @@ interface InitialStateI {
 export interface MarkOrTagFishValuesI {
   UID: string
   markType: string
-  markColor: string
+  markNumber: string
+  // markColor: string
   markPosition: string
-  crewMemberTagging: string
+  crewMember: string
   comments?: string
 }
 
