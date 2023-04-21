@@ -411,12 +411,12 @@ const IncompleteSections = ({
       <View
         flex={1}
         bg='#fff'
-        justifyContent='center'
+        // justifyContent='center'
         // alignItems='center'
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={10} p='10'>
+        <VStack space={10} p='15%'>
           <Heading textAlign='center'>
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>
