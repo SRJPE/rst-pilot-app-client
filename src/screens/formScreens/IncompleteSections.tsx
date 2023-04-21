@@ -25,7 +25,7 @@ import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/tr
 import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
-import { flatten, uniq } from 'lodash'
+import { cloneDeep, flatten, uniq } from 'lodash'
 import { uid } from 'uid'
 import {
   setIncompleteSectionTouched,
@@ -135,6 +135,28 @@ const IncompleteSections = ({
   }
 
   const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
+  const findCrewIdsFromSelectedCrewNames = (
+    selectedCrewNames: Array<string>
+  ) => {
+    // ['james', 'steve']
+    const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
+
+    const selectedCrewNamesMap: any = selectedCrewNames.reduce(
+      (acc, name: string) => ({
+        ...acc,
+        [name]: true,
+      }),
+      {}
+    )
+
+    return uniq(
+      allCrewObjects
+        .filter(
+          (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
+        )
+        .map((obj: any) => obj.personnelId)
+    )
+  }
 
   const saveTrapVisits = () => {
     const currentDateTime = new Date()
@@ -179,23 +201,9 @@ const IncompleteSections = ({
         rpm3: endRpm3,
       } = trapPostProcessingState[id].values
       const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
-      const selectedCrewNamesMap: Record<string, boolean> =
-        selectedCrewNames.reduce(
-          (acc: Record<string, boolean>, name: string) => ({
-            ...acc,
-            [name]: true,
-          }),
-          {}
-        )
-      const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
-      const selectedCrewIds = uniq(
-        allCrewObjects
-          .filter(
-            (obj: any) =>
-              selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
-          )
-          .map((obj: any) => obj.personnelId)
-      )
+
+      const selectedCrewIds =
+        findCrewIdsFromSelectedCrewNames(selectedCrewNames)
       const trapVisitSubmission = {
         uid: tempUID,
         crew: selectedCrewIds,
@@ -334,7 +342,49 @@ const IncompleteSections = ({
         fishStoreKeys.forEach((key) => {
           const fishValue = fishInputState[tabGroupId].fishStore[key]
           console.log('🚀 ~ fishStoreKeys.forEach ~ fishValue:', fishValue)
-
+          const prepareGeneticSampleData = () => {
+            const addGeneticSamplesStateCopy = cloneDeep(addGeneticSamplesState)
+            const filteredData = addGeneticSamplesStateCopy.filter(
+              (geneticSampleObject: any) => {
+                return geneticSampleObject.UID === fishValue.UID
+              }
+            )
+            console.log(
+              '🚀 ~ prepareGeneticSampleData ~ filteredData:',
+              filteredData
+            )
+            return filteredData.map((geneticSampleObject: any) => {
+              // geneticSampleObject.crewMemberCollectingSample =
+              //   findCrewIdsFromSelectedCrewNames(
+              //     geneticSampleObject.crewMemberCollectingSample
+              //   )
+              geneticSampleObject.crewMemberCollectingSample = 1 //refactor later to dynamic value
+              geneticSampleObject
+              return geneticSampleObject
+            })
+          }
+          // const selectedCrewNames: string[] = [
+          //   ...visitSetupState[id].values.crew,
+          // ] // ['james', 'steve']
+          // const selectedCrewNamesMap: Record<string, boolean> =
+          //   selectedCrewNames.reduce(
+          //     (acc: Record<string, boolean>, name: string) => ({
+          //       ...acc,
+          //       [name]: true,
+          //     }),
+          //     {}
+          //   )
+          // const allCrewObjects = flatten(
+          //   visitSetupDefaultState.crewMembers
+          // ) // [{..., name: 'james', programId: 1},]
+          // const selectedCrewIds = uniq(
+          //   allCrewObjects
+          //     .filter(
+          //       (obj: any) =>
+          //         selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
+          //     )
+          //     .map((obj: any) => obj.personnelId)
+          // )
           catchRawSubmissions.push({
             uid: tempUID,
             programId,
@@ -391,11 +441,13 @@ const IncompleteSections = ({
                 ),
               }
             }),
-            geneticSamplingData: addGeneticSamplesState.filter(
-              (geneticSampleObject: any) => {
-                return geneticSampleObject.id === fishValue.UID
-              }
-            ),
+            geneticSamplingData: prepareGeneticSampleData(),
+
+            // geneticSamplingData: addGeneticSamplesState.filter(
+            //   (geneticSampleObject: any) => {
+            //     return geneticSampleObject.id === fishValue.UID
+            //   }
+            // ),
           })
         })
       }
