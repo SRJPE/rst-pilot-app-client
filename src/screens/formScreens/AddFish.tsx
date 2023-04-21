@@ -53,6 +53,7 @@ import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import MarkBadgeList from '../../components/markRecapture/MarkBadgeList'
+import { uid } from 'uid'
 
 const AddFishContent = ({
   route,
@@ -83,6 +84,7 @@ const AddFishContent = ({
   const dispatch = useDispatch<AppDispatch>()
   // @ts-ignore
   const lastAddedFish = fishStore[Object.keys(fishStore).pop()]
+  const [fishUID, setFishUID] = useState(uid() as string)
 
   const [validationSchema, setValidationSchema] = useState<
     'default' | 'optionalLifeStage' | 'otherSpecies'
@@ -110,8 +112,12 @@ const AddFishContent = ({
   }
 
   const handleGeneticSampleFormSubmit = (values: any) => {
-    saveGeneticSampleData(values)
+    saveGeneticSampleData({ ...values, id: fishUID })
   }
+
+  useEffect(() => {
+    setFishUID(uid())
+  }, [])
 
   const renderForkLengthWarning = (
     forkLengthValue: number,
@@ -409,6 +415,7 @@ const AddFishContent = ({
     setDead(stateDefaults[identifier].dead)
     setPlusCountMethod(stateDefaults[identifier].plusCountMethod)
     setFormHasError(true)
+    setFishUID(uid())
   }
 
   const returnFormValues = () => {
@@ -1111,6 +1118,7 @@ const AddFishContent = ({
                   saveIndividualFish({
                     tabId: activeTabId,
                     formValues: payload,
+                    UID: fishUID,
                   })
                   navigation.goBack()
                 }
