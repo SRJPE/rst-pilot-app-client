@@ -112,7 +112,7 @@ const AddFishContent = ({
   }
 
   const handleGeneticSampleFormSubmit = (values: any) => {
-    saveGeneticSampleData({ ...values, id: fishUID })
+    saveGeneticSampleData({ ...values, UID: fishUID })
   }
 
   useEffect(() => {
