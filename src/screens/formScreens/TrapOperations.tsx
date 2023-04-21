@@ -207,14 +207,16 @@ const TrapOperations = ({
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
               bg='#fff'
-              p='6%'
+              px='5%'
+              py='3%'
               borderColor='themeGrey'
               borderWidth='15'
               borderBottomWidth='0'
-              mb='15'
+              borderTopWidth='0'
+              my='15'
             >
               <Pressable onPress={Keyboard.dismiss}>
-                <VStack space={5}>
+                <VStack space={4}>
                   <Heading>Trap Operations</Heading>
                   <FormControl>
                     <HStack space={2} alignItems='center'>

@@ -409,11 +409,12 @@ const VisitSetup = ({
             <View
               flex={1}
               bg='#fff'
-              p='6%'
+              px='5%'
+              py='3%'
               borderColor='themeGrey'
               borderWidth='15'
             >
-              <VStack space={5}>
+              <VStack space={4}>
                 <FormControl>
                   <HStack space={6} alignItems='center'>
                     <FormControl.Label>
