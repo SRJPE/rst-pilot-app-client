@@ -24,9 +24,9 @@ import RenderWarningMessage from '../Shared/RenderWarningMessage'
 
 const initialFormValues = {
   markType: '',
-  markNumber: '',
+  markCode: '',
   markPosition: '',
-  // markColor: '',
+  markColor: '',
   crewMember: '',
   comments: '',
 }
@@ -131,24 +131,24 @@ const MarkFishModalContent = ({
                   <HStack space={4} alignItems='center'>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
-                        Number
+                        Code
                       </Text>
                     </FormControl.Label>
-                    {Number(values.markNumber) > QARanges.markNumber.max && (
+                    {Number(values.markCode) > QARanges.markNumber.max && (
                       <RenderWarningMessage />
                     )}
-                    {touched.markNumber &&
-                      errors.markNumber &&
-                      RenderErrorMessage(errors, 'markNumber')}
+                    {touched.markCode &&
+                      errors.markCode &&
+                      RenderErrorMessage(errors, 'markCode')}
                   </HStack>
                   <Input
                     height='50px'
                     fontSize='16'
-                    placeholder='Enter number'
+                    placeholder='Mark Code'
                     keyboardType='numeric'
-                    onChangeText={handleChange('markNumber')}
-                    onBlur={handleBlur('markNumber')}
-                    value={values.markNumber}
+                    onChangeText={handleChange('markCode')}
+                    onBlur={handleBlur('markCode')}
+                    value={values.markCode}
                   />
                 </FormControl>
 
@@ -179,19 +179,32 @@ const MarkFishModalContent = ({
                   />
                 </FormControl>
 
-                <HStack alignItems='center' opacity={0.25}>
-                  <Icon
-                    as={Ionicons}
-                    name={'add-circle'}
-                    size='3xl'
-                    opacity={0.75}
-                    color='primary'
-                    marginRight='1'
+                <FormControl>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Color (optional)
+                      </Text>
+                    </FormControl.Label>
+                    {touched.markColor &&
+                      errors.markColor &&
+                      RenderErrorMessage(errors, 'markColor')}
+                  </HStack>
+                  <CustomSelect
+                    selectedValue={values.markColor}
+                    placeholder={'Mark Color'}
+                    onValueChange={handleChange('markColor')}
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={
+                      dropdownValues.markColor
+                        ? dropdownValues.markColor.map((item: any) => ({
+                            label: item.definition,
+                            value: item.definition,
+                          }))
+                        : []
+                    }
                   />
-                  <Text color='primary' fontSize='xl'>
-                    Add another tag
-                  </Text>
-                </HStack>
+                </FormControl>
 
                 <FormControl>
                   <HStack space={4} alignItems='center'>

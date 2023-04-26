@@ -157,9 +157,9 @@ export const addIndividualFishSchemaOtherSpecies = yup.object().shape({
 
 export const addMarksOrTagsSchema = yup.object().shape({
   markType: yup.string().required('Mark Type is required'),
-  markNumber: yup.number().typeError('Input must be a number'),
+  markCode: yup.number().typeError('Input must be a number'),
   // position: yup.string()
-  // crewMemberTagging: yup.string()
+  crewMember: yup.string().required('Crew Member is required'),
   // comments: yup.string(),
 })
 
