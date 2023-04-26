@@ -139,12 +139,14 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
               createdCatchRawResponse,
               createdGeneticSamplingDataResponse,
               createdExistingMarksResponse,
+              createdMarkAppliedResponse,
             } = apiResponse.data
 
             payload.catchRawResponse.push({
               createdCatchRawResponse,
               createdGeneticSamplingDataResponse,
               createdExistingMarksResponse,
+              createdMarkAppliedResponse,
             })
           })
         )
