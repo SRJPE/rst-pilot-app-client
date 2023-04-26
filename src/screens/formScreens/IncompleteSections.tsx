@@ -152,13 +152,15 @@ const IncompleteSections = ({
       {}
     )
 
-    return uniq(
+    const filteredNames = uniq(
       allCrewObjects
         .filter(
           (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
         )
         .map((obj: any) => obj.personnelId)
     )
+    //if the array contains a single string, return the string
+    return filteredNames.length === 1 ? filteredNames[0] : filteredNames
   }
 
   const saveTrapVisits = () => {
@@ -331,8 +333,8 @@ const IncompleteSections = ({
       })
       return code
     }
+
     const catchRawSubmissions: any[] = []
-    const appliedMarksStateCopy = cloneDeep(appliedMarksState.values)
 
     Object.keys(fishInputState).forEach((tabGroupId) => {
       if (tabGroupId != 'placeholderId') {
@@ -343,50 +345,48 @@ const IncompleteSections = ({
         const programId = visitSetupState[activeTabId]
           ? visitSetupState[activeTabId].values.programId
           : 1
+
         fishStoreKeys.forEach((key) => {
           const fishValue = fishInputState[tabGroupId].fishStore[key]
-          console.log('🚀 ~ fishStoreKeys.forEach ~ fishValue:', fishValue)
+
           const filterAndPrepareData = (data: Array<any>) => {
-            const dataCopy = cloneDeep(data)
+            let dataCopy = cloneDeep(data)
+            //before I filter the data I need to prepare the appliedMarks Array
+            //if the data is NOT from genetic sample:
+            if (dataCopy[0]?.finClip === undefined) {
+              dataCopy = dataCopy.map((markObj: any) => {
+                let markTypeId = markObj.markType
+                let markPositionId = markObj.markPosition
+                delete markObj.markType
+                delete markObj.markPosition
+                return {
+                  markTypeId: returnNullableTableId(
+                    markTypeValues.indexOf(markTypeId)
+                  ),
+                  // markColorId: returnNullableTableId(
+                  //   markColorValues.indexOf(markObj.markColor)
+                  // ),
+                  markPositionId: returnNullableTableId(
+                    bodyPartValues.indexOf(markPositionId)
+                  ),
+
+                  ...markObj,
+                }
+              })
+            }
+
             const filteredData = dataCopy.filter((obj: any) => {
               return obj.UID === fishValue.UID
             })
-            console.log(
-              '🚀 ~ prepareGeneticSampleData ~ filteredData:',
-              filteredData
-            )
-            return filteredData.map((obj: any) => {
-              // obj.crewMember =
-              //   findCrewIdsFromSelectedCrewNames(
-              //     obj.crewMember
-              //   )
-              obj.crewMember = 1 //refactor later to dynamic value
 
+            return filteredData.map((obj: any) => {
+              obj.crewMember = findCrewIdsFromSelectedCrewNames([
+                obj.crewMember,
+              ])
               return obj
             })
           }
-          // const selectedCrewNames: string[] = [
-          //   ...visitSetupState[id].values.crew,
-          // ] // ['james', 'steve']
-          // const selectedCrewNamesMap: Record<string, boolean> =
-          //   selectedCrewNames.reduce(
-          //     (acc: Record<string, boolean>, name: string) => ({
-          //       ...acc,
-          //       [name]: true,
-          //     }),
-          //     {}
-          //   )
-          // const allCrewObjects = flatten(
-          //   visitSetupDefaultState.crewMembers
-          // ) // [{..., name: 'james', programId: 1},]
-          // const selectedCrewIds = uniq(
-          //   allCrewObjects
-          //     .filter(
-          //       (obj: any) =>
-          //         selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
-          //     )
-          //     .map((obj: any) => obj.personnelId)
-          // )
+
           catchRawSubmissions.push({
             uid: tempUID,
             programId,
@@ -425,7 +425,7 @@ const IncompleteSections = ({
             comments: null,
             createdBy: null,
             createdAt: currentDateTime,
-            updatedAt: null,
+            updatedAt: currentDateTime,
             qcCompleted: null,
             qcCompletedBy: null,
             qcTime: null,
@@ -446,43 +446,13 @@ const IncompleteSections = ({
             geneticSamplingData: filterAndPrepareData(
               addGeneticSamplesState.values
             ),
-
-            // geneticSamplingData: addGeneticSamplesState.filter(
-            //   (geneticSampleObject: any) => {
-            //     return geneticSampleObject.id === fishValue.UID
-            //   }
-            // ),
-            appliedMarks: filterAndPrepareData(
-              appliedMarksStateCopy.map((markObj: any) => {
-                let markTypeId = markObj.markType
-                let markPositionId = markObj.markPosition
-                delete markObj.markType
-                delete markObj.markPosition
-                return {
-                  markTypeId: returnNullableTableId(
-                    markTypeValues.indexOf(markTypeId)
-                  ),
-                  // markColorId: returnNullableTableId(
-                  //   markColorValues.indexOf(markObj.markColor)
-                  // ),
-                  markPositionId: returnNullableTableId(
-                    bodyPartValues.indexOf(markPositionId)
-                  ),
-
-                  ...markObj,
-                }
-              })
-            ),
+            appliedMarks: filterAndPrepareData(appliedMarksState.values),
           })
         })
       }
     })
 
     if (catchRawSubmissions.length) {
-      console.log(
-        '🚀 ~ saveCatchRawSubmission ~ catchRawSubmissions:',
-        catchRawSubmissions
-      )
       dispatch(saveCatchRawSubmissions(catchRawSubmissions))
     }
   }
