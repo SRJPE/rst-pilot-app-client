@@ -18,6 +18,7 @@ import {
   VStack,
   Pressable,
   Center,
+  Badge,
 } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -54,6 +55,14 @@ import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkMo
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import MarkBadgeList from '../../components/markRecapture/MarkBadgeList'
 import { uid } from 'uid'
+
+export interface ReleaseMarkI {
+  id?: number
+  releaseId?: number
+  bodyPart: number
+  markType: number
+  markColor: number
+}
 
 const AddFishContent = ({
   route,
@@ -358,7 +367,6 @@ const AddFishContent = ({
     lifeStage,
     adiposeClipped,
     existingMarks,
-    // existingMark,
     dead,
     plusCountMethod,
   ])
@@ -418,6 +426,50 @@ const AddFishContent = ({
     setFishUID(uid())
   }
 
+  //RECENT MARKS ADDITIONS
+  const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
+
+  const returnDefinitionArray = (dropdownsArray: any[]) => {
+    return dropdownsArray.map((dropdownObj: any) => {
+      return dropdownObj.definition
+    })
+  }
+
+  const markTypeValues = returnDefinitionArray(dropdownValues.markType)
+  const markColorValues = returnDefinitionArray(dropdownValues.markColor)
+  const bodyPartValues = returnDefinitionArray(dropdownValues.bodyPart)
+
+  const decodedRecentReleaseMarks = (twoMostRecentReleaseMarks: any) => {
+    return twoMostRecentReleaseMarks.map((mark: ReleaseMarkI) => {
+      return {
+        ...mark,
+        markType: markTypeValues[mark.markType - 1],
+        markColor: markColorValues[mark.markColor - 1],
+        bodyPart: bodyPartValues[mark.bodyPart - 1],
+      }
+    })
+  }
+
+  const handlePressRecentExistingMarkButton = (
+    selectedRecentReleaseMark: ReleaseMarkI
+  ) => {
+    if (
+      recentExistingMarks.some(
+        (mark) => mark.id === selectedRecentReleaseMark.id
+      )
+    ) {
+      setRecentExistingMarks(
+        recentExistingMarks.filter(
+          (mark) => mark.id !== selectedRecentReleaseMark.id
+        )
+      )
+    } else {
+      setRecentExistingMarks([
+        ...recentExistingMarks,
+        selectedRecentReleaseMark,
+      ])
+    }
+  }
   const returnFormValues = () => {
     let values = {
       species: species.value,
@@ -426,7 +478,8 @@ const AddFishContent = ({
       weight: weight.value,
       lifeStage: lifeStage.value,
       adiposeClipped: adiposeClipped.value,
-      existingMarks: existingMarks.value,
+      // @ts-ignore
+      existingMarks: [...existingMarks.value, ...recentExistingMarks],
       dead: dead.value,
       plusCountMethod: plusCountMethod.value,
     }
@@ -836,66 +889,166 @@ const AddFishContent = ({
                       </FormControl>
                     )}
                   </HStack>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl w='1/2'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Dead
-                        </Text>
-                      </FormControl.Label>
-                      <Radio.Group
-                        name='dead'
-                        accessibilityLabel='dead'
-                        value={`${dead.value}`}
-                        onChange={(value: any) => {
-                          if (value === 'true') {
-                            setDead({ ...dead, value: true })
-                          } else {
-                            setDead({ ...dead, value: false })
-                          }
-                        }}
-                      >
-                        <Radio
-                          colorScheme='primary'
-                          value='true'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          Yes
-                        </Radio>
-                        <Radio
-                          colorScheme='primary'
-                          value='false'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          No
-                        </Radio>
-                      </Radio.Group>
-                    </FormControl>
-                    {species.value === 'Chinook salmon' && (
-                      <FormControl w='1/2'>
+                  <HStack space={4} w='80%'>
+                    {(species.value == 'Chinook salmon' ||
+                      species.value == 'Steelhead / rainbow trout') && (
+                      <FormControl w='full'>
+                        <HStack space={2} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Add Existing Mark
+                            </Text>
+                          </FormControl.Label>
+                          <Popover
+                            placement='top right'
+                            trigger={(triggerProps) => {
+                              return (
+                                <IconButton
+                                  {...triggerProps}
+                                  icon={
+                                    <Icon
+                                      as={MaterialIcons}
+                                      name='info-outline'
+                                      size='xl'
+                                    />
+                                  }
+                                ></IconButton>
+                              )
+                            }}
+                          >
+                            <Popover.Content
+                              accessibilityLabel='Existing Mark  Info'
+                              w='600'
+                              ml='10'
+                            >
+                              <Popover.Arrow />
+                              <Popover.CloseButton />
+                              <Popover.Header>
+                                Click on one more existing mark buttons to add
+                                marks.
+                              </Popover.Header>
+                              <Popover.Body p={4}>
+                                <VStack space={2}>
+                                  <Text fontSize='md'>
+                                    The existing mark buttons display
+                                    abbreviated versions of marks recently used
+                                    for efficiency trials. If you catch a fish
+                                    with other existing marks, please click on
+                                    “select another mark type”. This will open
+                                    up a window where you can specify mark type,
+                                    color, position, and code if applicable.
+                                  </Text>
+                                  <Divider />
+
+                                  <Text fontSize='md'>
+                                    Abbreviations follow a consistent format
+                                    “mark type abbreviation - color abbreviation
+                                    - position abbreviation”. All of these
+                                    fields are only applicable to some mark
+                                    types. Any fields that are not applicable to
+                                    a particular mark type are left blank.
+                                  </Text>
+                                  <Text fontSize='md'>
+                                    Below are some examples of common marks:
+                                  </Text>
+                                  <HStack space={2} alignItems='flex-start'>
+                                    <Avatar size={'2'} mt={'2'} />
+                                    <Text fontSize='md'>
+                                      CWT: Coded wire tag
+                                    </Text>
+                                  </HStack>
+                                  <HStack space={2} alignItems='flex-start'>
+                                    <Avatar size={'2'} mt={'2'} />
+                                    <Text fontSize='md'>Fin Clip</Text>
+                                  </HStack>
+                                </VStack>
+                              </Popover.Body>
+                            </Popover.Content>
+                          </Popover>
+                        </HStack>
+                        <VStack space={4}>
+                          <VStack space={5}>
+                            {dropdownValues.twoMostRecentReleaseMarks.length >
+                              0 &&
+                              decodedRecentReleaseMarks(
+                                dropdownValues.twoMostRecentReleaseMarks
+                              ).map((recentReleaseMark: any, index: number) => {
+                                const { id, markType, markColor, bodyPart } =
+                                  recentReleaseMark
+                                return (
+                                  <Button
+                                    key={index}
+                                    bg={
+                                      recentExistingMarks.some(
+                                        (mark: ReleaseMarkI) => mark.id === id
+                                      )
+                                        ? 'primary'
+                                        : 'secondary'
+                                    }
+                                    shadow='3'
+                                    borderRadius='5'
+                                    w='90%'
+                                    onPress={() => {
+                                      handlePressRecentExistingMarkButton(
+                                        recentReleaseMark
+                                      )
+                                    }}
+                                  >
+                                    <Text
+                                      color={
+                                        recentExistingMarks.some(
+                                          (mark: ReleaseMarkI) => mark.id === id
+                                        )
+                                          ? 'white'
+                                          : 'primary'
+                                      }
+                                      fontWeight='500'
+                                      fontSize='md'
+                                    >
+                                      {`${markType} - ${markColor} - ${bodyPart}`}
+                                    </Text>
+                                  </Button>
+                                )
+                              })}
+                          </VStack>
+                          <MarkBadgeList
+                            badgeListContent={existingMarks.value}
+                            field='existingMarks'
+                            setExistingMarks={setExistingMarks}
+                          />
+                          <Pressable onPress={() => setAddMarkModalOpen(true)}>
+                            <HStack alignItems='center'>
+                              <Icon
+                                as={Ionicons}
+                                name={'add-circle'}
+                                size='3xl'
+                                color='primary'
+                                marginRight='1'
+                              />
+                              <Text color='primary' fontSize='lg'>
+                                Add Another Mark
+                              </Text>
+                            </HStack>
+                          </Pressable>
+                        </VStack>
+                      </FormControl>
+                    )}
+                    <VStack space={6}>
+                      <FormControl w='2/3'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
-                            Adipose Clipped
+                            Dead
                           </Text>
                         </FormControl.Label>
-
                         <Radio.Group
-                          name='adiposeClipped'
-                          accessibilityLabel='adipose clipped'
-                          value={`${adiposeClipped.value}`}
+                          name='dead'
+                          accessibilityLabel='dead'
+                          value={`${dead.value}`}
                           onChange={(value: any) => {
                             if (value === 'true') {
-                              setAdiposeClipped({
-                                ...adiposeClipped,
-                                value: true,
-                              })
+                              setDead({ ...dead, value: true })
                             } else {
-                              setAdiposeClipped({
-                                ...adiposeClipped,
-                                value: false,
-                              })
+                              setDead({ ...dead, value: false })
                             }
                           }}
                         >
@@ -917,105 +1070,53 @@ const AddFishContent = ({
                           </Radio>
                         </Radio.Group>
                       </FormControl>
-                    )}
-                  </HStack>
-                  {(species.value == 'Chinook salmon' ||
-                    species.value == 'Steelhead / rainbow trout') && (
-                    <FormControl w='full'>
-                      <HStack space={2} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Add Existing Mark
-                          </Text>
-                        </FormControl.Label>
-                        <Popover
-                          placement='top right'
-                          trigger={(triggerProps) => {
-                            return (
-                              <IconButton
-                                {...triggerProps}
-                                icon={
-                                  <Icon
-                                    as={MaterialIcons}
-                                    name='info-outline'
-                                    size='xl'
-                                  />
-                                }
-                              ></IconButton>
-                            )
-                          }}
-                        >
-                          <Popover.Content
-                            accessibilityLabel='Existing Mark  Info'
-                            w='600'
-                            ml='10'
-                          >
-                            <Popover.Arrow />
-                            <Popover.CloseButton />
-                            <Popover.Header>
-                              Click on one more existing mark buttons to add
-                              marks.
-                            </Popover.Header>
-                            <Popover.Body p={4}>
-                              <VStack space={2}>
-                                <Text fontSize='md'>
-                                  The existing mark buttons display abbreviated
-                                  versions of marks recently used for efficiency
-                                  trials. If you catch a fish with other
-                                  existing marks, please click on “select
-                                  another mark type”. This will open up a window
-                                  where you can specify mark type, color,
-                                  position, and code if applicable.
-                                </Text>
-                                <Divider />
-
-                                <Text fontSize='md'>
-                                  Abbreviations follow a consistent format “mark
-                                  type abbreviation - color abbreviation -
-                                  position abbreviation”. All of these fields
-                                  are only applicable to some mark types. Any
-                                  fields that are not applicable to a particular
-                                  mark type are left blank.
-                                </Text>
-                                <Text fontSize='md'>
-                                  Below are some examples of common marks:
-                                </Text>
-                                <HStack space={2} alignItems='flex-start'>
-                                  <Avatar size={'2'} mt={'2'} />
-                                  <Text fontSize='md'>CWT: Coded wire tag</Text>
-                                </HStack>
-                                <HStack space={2} alignItems='flex-start'>
-                                  <Avatar size={'2'} mt={'2'} />
-                                  <Text fontSize='md'>Fin Clip</Text>
-                                </HStack>
-                              </VStack>
-                            </Popover.Body>
-                          </Popover.Content>
-                        </Popover>
-                      </HStack>
-                      <VStack space={4}>
-                        <MarkBadgeList
-                          badgeListContent={existingMarks.value}
-                          field='existingMarks'
-                          setExistingMarks={setExistingMarks}
-                        />
-                        <Pressable onPress={() => setAddMarkModalOpen(true)}>
-                          <HStack alignItems='center'>
-                            <Icon
-                              as={Ionicons}
-                              name={'add-circle'}
-                              size='3xl'
-                              color='primary'
-                              marginRight='1'
-                            />
-                            <Text color='primary' fontSize='lg'>
-                              Add Another Mark
+                      {species.value === 'Chinook salmon' && (
+                        <FormControl w='2/3'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Adipose Clipped
                             </Text>
-                          </HStack>
-                        </Pressable>
-                      </VStack>
-                    </FormControl>
-                  )}
+                          </FormControl.Label>
+
+                          <Radio.Group
+                            name='adiposeClipped'
+                            accessibilityLabel='adipose clipped'
+                            value={`${adiposeClipped.value}`}
+                            onChange={(value: any) => {
+                              if (value === 'true') {
+                                setAdiposeClipped({
+                                  ...adiposeClipped,
+                                  value: true,
+                                })
+                              } else {
+                                setAdiposeClipped({
+                                  ...adiposeClipped,
+                                  value: false,
+                                })
+                              }
+                            }}
+                          >
+                            <Radio
+                              colorScheme='primary'
+                              value='true'
+                              my={1}
+                              _icon={{ color: 'primary' }}
+                            >
+                              Yes
+                            </Radio>
+                            <Radio
+                              colorScheme='primary'
+                              value='false'
+                              my={1}
+                              _icon={{ color: 'primary' }}
+                            >
+                              No
+                            </Radio>
+                          </Radio.Group>
+                        </FormControl>
+                      )}
+                    </VStack>
+                  </HStack>
                   {species.value === 'other' && (
                     <FormControl w='full'>
                       <FormControl.Label>

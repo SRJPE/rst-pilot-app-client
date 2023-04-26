@@ -357,19 +357,20 @@ const IncompleteSections = ({
               dataCopy = dataCopy.map((markObj: any) => {
                 let markTypeId = markObj.markType
                 let markPositionId = markObj.markPosition
+                let markColorId = markObj.markColor
                 delete markObj.markType
                 delete markObj.markPosition
+                delete markObj.markColor
                 return {
                   markTypeId: returnNullableTableId(
                     markTypeValues.indexOf(markTypeId)
                   ),
-                  // markColorId: returnNullableTableId(
-                  //   markColorValues.indexOf(markObj.markColor)
-                  // ),
+                  markColorId: returnNullableTableId(
+                    markColorValues.indexOf(markColorId)
+                  ),
                   markPositionId: returnNullableTableId(
                     bodyPartValues.indexOf(markPositionId)
                   ),
-
                   ...markObj,
                 }
               })
@@ -385,6 +386,17 @@ const IncompleteSections = ({
               ])
               return obj
             })
+          }
+
+          const findReleaseIdFromExistingMarks = () => {
+            let releaseId = null
+            fishValue.existingMarks.forEach((existingMark: any) => {
+              if (existingMark.releaseId) {
+                releaseId = existingMark.releaseId
+              } else {
+              }
+            })
+            return releaseId
           }
 
           catchRawSubmissions.push({
@@ -421,7 +433,7 @@ const IncompleteSections = ({
                 )
               : null,
             isRandom: null, // Check w/ Erin
-            releaseId: null,
+            releaseId: findReleaseIdFromExistingMarks(),
             comments: null,
             createdBy: null,
             createdAt: currentDateTime,
@@ -432,6 +444,8 @@ const IncompleteSections = ({
             qcComments: null,
             existingMarks: fishValue.existingMarks.map((markObj: any) => {
               return {
+                releaseId:
+                  markObj.releaseId !== undefined ? markObj.releaseId : null,
                 markTypeId: returnNullableTableId(
                   markTypeValues.indexOf(markObj.markType)
                 ),
