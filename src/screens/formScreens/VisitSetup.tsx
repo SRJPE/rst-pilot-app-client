@@ -399,11 +399,6 @@ const VisitSetup = ({
           }
         }, [tabSlice.previouslyActiveTabId])
 
-        // useEffect(() => {
-        //   console.log('crew: ', values.crew)
-        //   console.log('errors: ', errors)
-        // }, [errors])
-
         return (
           <>
             <View

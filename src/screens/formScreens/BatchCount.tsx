@@ -85,7 +85,6 @@ const BatchCount = ({
 
   const handlePressSaveBatchCount = () => {
     if (tabId) {
-      // dispatch(saveBatchCount({ tabId: tabId, forkLengths }))
       dispatch(saveBatchCount({ ...batchCountStore }))
       dispatch(resetBatchCountSlice())
       showSlideAlert(dispatch, 'Batch Count')

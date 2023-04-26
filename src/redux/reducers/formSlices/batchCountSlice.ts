@@ -23,7 +23,7 @@ export const initialState: batchCharacteristicsI = {
   species: '',
   adiposeClipped: false,
   dead: false,
-  existingMarks: [], //refactor to an array
+  existingMarks: [],
   forkLengths: {},
 }
 
@@ -40,17 +40,8 @@ export const batchCountSlice = createSlice({
       state.species = species
       state.adiposeClipped = adiposeClipped
       state.dead = dead
-      // state.existingMarks = [...state.existingMarks, existingMarks]
       state.existingMarks = existingMarks
       state.forkLengths = forkLengthsCopy
-      // const payload = {
-      //   species,
-      //   adiposeClipped,
-      //   dead,
-      //   existingMark,
-      //   forkLengths: forkLengthsCopy,
-      // }
-      // state = payload
     },
     addMarkToBatchCountExistingMarks: (state, action) => {
       state.existingMarks = [...state.existingMarks, action.payload]

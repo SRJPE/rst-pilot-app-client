@@ -123,18 +123,3 @@ const IncompleteSectionButton = ({
 }
 
 export default IncompleteSectionButton
-//  {Object.keys(pageErrors).length && (
-//           <Badge
-//             colorScheme='danger'
-//             rounded='full'
-//             zIndex={1}
-//             variant='solid'
-//             alignSelf='flex-end'
-//             _text={{
-//               fontSize: 16,
-//             }}
-//           >
-//             {/* <Text>{Object.keys(pageErrors).length.toString()}</Text> */}
-//           </Badge>
-
-//         )}

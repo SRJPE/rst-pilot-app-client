@@ -132,7 +132,6 @@ export const saveFishSlice = createSlice({
     },
     saveIndividualFish: (state, action) => {
       const { tabId, formValues, UID } = action.payload
-      // if (state[tabId]) {}
       let fishStoreCopy = cloneDeep(
         state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
       )

@@ -57,9 +57,7 @@ const AddAnotherMarkModalContent = ({
         ...existingMarks,
         value: [...existingMarksArray, values],
       })
-      // setExistingMark([...existingMarks,values])
     }
-
     showSlideAlert(dispatch, 'Mark or tag')
   }
 

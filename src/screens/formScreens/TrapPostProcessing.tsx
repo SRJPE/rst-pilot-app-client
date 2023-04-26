@@ -71,7 +71,6 @@ const TrapPostProcessing = ({
       }
       try {
         let currentLocation = await Location.getCurrentPositionAsync({})
-        console.log('🚀 ~ ; ~ currentLocation:', currentLocation)
         setFieldValue('trapLatitude', currentLocation.coords.latitude)
         setFieldValue('trapLongitude', currentLocation.coords.longitude)
         setFieldTouched('trapLatitude', true)
