@@ -30,6 +30,7 @@ interface ValuesI {
   visitType: any[]
   lightCondition: any[]
   plusCountMethodology: any[]
+  twoMostRecentReleaseMarks: any[]
 }
 
 interface APIResponseI {
@@ -55,7 +56,8 @@ const initialState: InitialStateI = {
     coneDebrisVolume: [],
     visitType: [],
     lightCondition: [],
-    plusCountMethodology: []
+    plusCountMethodology: [],
+    twoMostRecentReleaseMarks: [],
   },
 }
 
