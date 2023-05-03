@@ -23,6 +23,7 @@ import releaseTrialSlice from './markRecaptureSlices/releaseTrialSlice'
 import releaseTrialDataEntrySlice from './markRecaptureSlices/releaseTrialDataEntrySlice'
 import addAnotherMarkSlice from './addAnotherMarkSlice'
 import tabSlice from './formSlices/tabSlice'
+import batchCountSlice from './formSlices/batchCountSlice'
 import fishHoldingSlice from './markRecaptureSlices/fishHoldingSlice'
 import userCredentialsSlice from './userCredentialsSlice'
 import trappingSitesSlice from './createNewProgramSlices/trappingSitesSlice'
@@ -93,4 +94,5 @@ export default combineReducers({
   trappingSites: trappingSitesSlice,
   crewMembers: crewMembersSlice,
   tabSlice: tabSlice,
+  batchCount: batchCountSlice,
 })

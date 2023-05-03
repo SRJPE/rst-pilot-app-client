@@ -2,6 +2,7 @@ import { Formik } from 'formik'
 import { FormControl, View, VStack, Text, Button, Divider } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { addMarkToAppliedMarks } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
+import { addMarkToBatchCountExistingMarks } from '../../redux/reducers/formSlices/batchCountSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addAnotherMarkSchema } from '../../utils/helpers/yupValidations'
@@ -10,6 +11,7 @@ import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
 import RenderWarningMessage from '../Shared/RenderWarningMessage'
+import { ReleaseMarkI } from '../../redux/reducers/addAnotherMarkSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -24,17 +26,38 @@ const AddAnotherMarkModalContent = ({
   handleMarkFishFormSubmit,
   closeModal,
   addAnotherMarkValues,
+  screenName,
+  existingMarks,
+  setExistingMarks,
+  existingMarksArray,
 }: {
   handleMarkFishFormSubmit?: any
   closeModal: any
   addAnotherMarkValues: any
+  screenName: string
+  existingMarks?: any
+  setExistingMarks?: any
+  existingMarksArray?: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const { markType, markColor, bodyPart } = dropdownValues.values
 
-  const handleSubmit = (values: any) => {
-    dispatch(addMarkToAppliedMarks(values))
+  const handleSubmit = (values: ReleaseMarkI) => {
+    console.log('🚀 ~ handleSubmit ~ values:', values)
+    //if the modal is opened in batch count
+    if (screenName === 'batchCount') {
+      dispatch(addMarkToBatchCountExistingMarks(values))
+    } else if (screenName === 'markRecaptureRelease') {
+      //if the modal is opened in mark recapture / release
+      dispatch(addMarkToAppliedMarks(values))
+    } else if (screenName === 'addIndividualFish') {
+      setExistingMarks({
+        ...existingMarks,
+        value: [...existingMarksArray, values],
+      })
+    }
     showSlideAlert(dispatch, 'Mark or tag')
   }
 

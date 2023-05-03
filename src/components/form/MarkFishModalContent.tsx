@@ -23,10 +23,11 @@ import RenderErrorMessage from '../Shared/RenderErrorMessage'
 import RenderWarningMessage from '../Shared/RenderWarningMessage'
 
 const initialFormValues = {
-  type: '',
-  number: '',
-  position: '',
-  crewMemberTagging: '',
+  markType: '',
+  markCode: '',
+  markPosition: '',
+  markColor: '',
+  crewMember: '',
   comments: '',
 }
 
@@ -62,7 +63,7 @@ const MarkFishModalContent = ({
       <Formik
         validationSchema={addMarksOrTagsSchema}
         initialValues={initialFormValues}
-        onSubmit={values => handleFormSubmit(values)}
+        onSubmit={(values) => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -110,14 +111,14 @@ const MarkFishModalContent = ({
                         Type
                       </Text>
                     </FormControl.Label>
-                    {touched.type &&
-                      errors.type &&
-                      RenderErrorMessage(errors, 'type')}
+                    {touched.markType &&
+                      errors.markType &&
+                      RenderErrorMessage(errors, 'markType')}
                   </HStack>
                   <CustomSelect
-                    selectedValue={values.type}
+                    selectedValue={values.markType}
                     placeholder={'Type'}
-                    onValueChange={handleChange('type')}
+                    onValueChange={handleChange('markType')}
                     setFieldTouched={setFieldTouched}
                     selectOptions={dropdownValues.markType.map((item: any) => ({
                       label: item.definition,
@@ -130,23 +131,24 @@ const MarkFishModalContent = ({
                   <HStack space={4} alignItems='center'>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
-                        Number
+                        Code
                       </Text>
                     </FormControl.Label>
-                    {Number(values.number) > QARanges.markNumber.max &&
-                      RenderWarningMessage()}
-                    {touched.number &&
-                      errors.number &&
-                      RenderErrorMessage(errors, 'number')}
+                    {Number(values.markCode) > QARanges.markNumber.max && (
+                      <RenderWarningMessage />
+                    )}
+                    {touched.markCode &&
+                      errors.markCode &&
+                      RenderErrorMessage(errors, 'markCode')}
                   </HStack>
                   <Input
                     height='50px'
                     fontSize='16'
-                    placeholder='Enter number'
+                    placeholder='Mark Code'
                     keyboardType='numeric'
-                    onChangeText={handleChange('number')}
-                    onBlur={handleBlur('number')}
-                    value={values.number}
+                    onChangeText={handleChange('markCode')}
+                    onBlur={handleBlur('markCode')}
+                    value={values.markCode}
                   />
                 </FormControl>
 
@@ -157,14 +159,14 @@ const MarkFishModalContent = ({
                         Position
                       </Text>
                     </FormControl.Label>
-                    {touched.position &&
-                      errors.position &&
-                      RenderErrorMessage(errors, 'position')}
+                    {touched.markPosition &&
+                      errors.markPosition &&
+                      RenderErrorMessage(errors, 'markPosition')}
                   </HStack>
                   <CustomSelect
-                    selectedValue={values.position}
+                    selectedValue={values.markPosition}
                     placeholder={'Mark Position'}
-                    onValueChange={handleChange('position')}
+                    onValueChange={handleChange('markPosition')}
                     setFieldTouched={setFieldTouched}
                     selectOptions={
                       dropdownValues.bodyPart
@@ -177,19 +179,32 @@ const MarkFishModalContent = ({
                   />
                 </FormControl>
 
-                <HStack alignItems='center' opacity={0.25}>
-                  <Icon
-                    as={Ionicons}
-                    name={'add-circle'}
-                    size='3xl'
-                    opacity={0.75}
-                    color='primary'
-                    marginRight='1'
+                <FormControl>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Color (optional)
+                      </Text>
+                    </FormControl.Label>
+                    {touched.markColor &&
+                      errors.markColor &&
+                      RenderErrorMessage(errors, 'markColor')}
+                  </HStack>
+                  <CustomSelect
+                    selectedValue={values.markColor}
+                    placeholder={'Mark Color'}
+                    onValueChange={handleChange('markColor')}
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={
+                      dropdownValues.markColor
+                        ? dropdownValues.markColor.map((item: any) => ({
+                            label: item.definition,
+                            value: item.definition,
+                          }))
+                        : []
+                    }
                   />
-                  <Text color='primary' fontSize='xl'>
-                    Add another tag
-                  </Text>
-                </HStack>
+                </FormControl>
 
                 <FormControl>
                   <HStack space={4} alignItems='center'>
@@ -198,14 +213,14 @@ const MarkFishModalContent = ({
                         Crew Member Tagging
                       </Text>
                     </FormControl.Label>
-                    {touched.crewMemberTagging &&
-                      errors.crewMemberTagging &&
-                      RenderErrorMessage(errors, 'crewMemberTagging')}
+                    {touched.crewMember &&
+                      errors.crewMember &&
+                      RenderErrorMessage(errors, 'crewMember')}
                   </HStack>
                   <CustomSelect
-                    selectedValue={values.crewMemberTagging}
+                    selectedValue={values.crewMember}
                     placeholder={'Crew Member'}
-                    onValueChange={handleChange('crewMemberTagging')}
+                    onValueChange={handleChange('crewMember')}
                     setFieldTouched={setFieldTouched}
                     selectOptions={crewMembers.map((item: any) => ({
                       label: item,

@@ -15,7 +15,7 @@ const headers = [
   'Weight',
   'Life Stage',
   'Clipped',
-  'Mark',
+  'Marks',
   'Dead',
   'Recapture',
   '',
@@ -29,7 +29,7 @@ const sortedDataByHeaders = [
   'weight',
   'lifeStage',
   'adiposeClipped',
-  'existingMark',
+  'existingMarks',
   'dead',
   'willBeUsedInRecapture',
 ]
@@ -42,7 +42,7 @@ const emptyTableData = {
   weight: '---',
   lifeStage: '---',
   adiposeClipped: '---',
-  existingMark: '---',
+  existingMarks: '---',
   dead: '---',
   willBeUsedInRecapture: '---',
 }
@@ -77,6 +77,7 @@ const FishInputDataTable = ({
     pageRowsIndexes.forEach((idx) => {
       pageRowsSliced[Number(idx)] = fishStore[Number(idx)]
     })
+
     let sortedPageRows = sortPageRows(pageRowsSliced)
     let paddedPageRows = addEmptyRows(sortedPageRows)
     return paddedPageRows
@@ -95,16 +96,21 @@ const FishInputDataTable = ({
 
   const sortPageRows = (obj: FishStoreI) => {
     let sortedRows: any = {}
+
     const keys = Object.keys(obj)
     keys.forEach((key) => {
       let dataObj: any = cloneDeep(obj[Number(key)])
-      const dataObjKeys = Object.keys(dataObj)
+      dataObj.existingMarks = dataObj.existingMarks.length
+      delete dataObj.UID
+      let dataObjPadded = { ...emptyTableData, ...dataObj }
+
+      const dataObjKeys = Object.keys(dataObjPadded)
       dataObjKeys.forEach((dataObjKey) => {
-        if (dataObj[dataObjKey] === '') {
-          dataObj[dataObjKey] = '---'
+        if (dataObjPadded[dataObjKey] === '') {
+          dataObjPadded[dataObjKey] = '---'
         }
       })
-      sortedRows[Number(key)] = dataObj
+      sortedRows[Number(key)] = dataObjPadded
     })
     return sortedRows
   }

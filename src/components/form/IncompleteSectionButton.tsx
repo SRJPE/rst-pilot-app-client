@@ -1,8 +1,11 @@
-import { Badge, Button, HStack, Icon, Text } from 'native-base'
+import { Badge, Button, HStack, Icon, Pressable, Text } from 'native-base'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
-import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  togglePreviousPageWasIncompleteSections,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { useEffect, useState } from 'react'
 
@@ -20,27 +23,15 @@ const IncompleteSectionButton = ({
   tabState: TabStateI
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+
   const handleButtonPress = () => {
-    navigation.navigate('Trap Visit Form', { screen: name })
+    navigation.navigate('Trap Visit Form', {
+      screen: name,
+    })
     dispatch(updateActiveStep(step))
+    dispatch(togglePreviousPageWasIncompleteSections())
   }
-  const calculateMargin = () => {
-    switch (name) {
-      case 'Visit Setup':
-        return 220
-      case 'Trap Operations':
-        return 213
-      case 'Fish Processing':
-        return 181
-      case 'Fish Input':
-        return 228
-      case 'Trap Post-Processing':
-        return 135
-      default:
-        return 0
-    }
-  }
-  const badgeMargin = 3
+
   const [pageErrors, setPageErrors] = useState({})
 
   useEffect(() => {
@@ -57,88 +48,76 @@ const IncompleteSectionButton = ({
     <Button
       rounded='xs'
       alignSelf='center'
-      w='75%'
+      w='100%'
+      h='11%'
       borderRadius='5'
       variant={'outline'}
       bg={completed ? 'primary' : 'white'}
       justifyContent='space-between'
-      _stack={{
-        //this property accesses the the HStack inside the button
-        space: '10',
-        alignItems: 'center',
-        // alignSelf: 'flex-end',
-        // justifyContent: 'space-between',
-        // marginX: '5',
-      }}
-      _icon={
-        {
-          // mx: '5',
-        }
-      }
       leftIcon={
         completed ? (
           <Icon
             as={Ionicons}
             name='checkmark-circle-outline'
-            size='2xl'
+            size='5xl'
+            ml='2'
             color={completed ? '#FFFFFF' : 'primary'}
           />
         ) : (
           <Icon
             as={Ionicons}
             name='warning-outline'
-            size='2xl'
+            size='5xl'
             color={completed ? '#FFFFFF' : 'primary'}
           />
         )
       }
-      endIcon={
-        <Button onPress={handleButtonPress}>
-          <Text
-            fontSize='16'
-            color={completed ? '#FFFFFF' : 'primary'}
-            alignSelf='flex-end'
-          >
-            {completed ? 'Completed' : 'Edit'}
-          </Text>
-        </Button>
-      }
       onPress={handleButtonPress}
     >
-      {Object.keys(pageErrors).length ? (
-        <HStack justifyContent={'start'}>
-          <Text
-            fontSize='md'
-            fontWeight='bold'
-            color={completed ? '#FFFFFF' : 'primary'}
-            mr={badgeMargin}
-          >
-            {name}
-          </Text>
+      <HStack justifyContent='space-between' alignItems='center' width='480px'>
+        <Text
+          fontSize='xl'
+          fontWeight='bold'
+          color={completed ? '#FFFFFF' : 'primary'}
+          ml='10'
+        >
+          {`${name}`}
+        </Text>
+
+        {Object.keys(pageErrors).length ? (
           <Badge
             colorScheme='danger'
             rounded='full'
             zIndex={1}
+            size='xl'
+            h='10'
+            w='10'
             variant='solid'
             alignSelf='flex-end'
-            mr={calculateMargin() - badgeMargin}
             _text={{
               fontSize: 16,
+              color: 'white',
             }}
           >
-            {Object.keys(pageErrors).length}
+            <Text color='white' fontWeight='bold' fontSize='xl'>
+              {Object.keys(pageErrors).length.toString()}
+            </Text>
           </Badge>
-        </HStack>
-      ) : (
-        <Text
-          fontSize='md'
-          fontWeight='bold'
-          color={completed ? '#FFFFFF' : 'primary'}
-          mr={calculateMargin()}
-        >
-          {name}
-        </Text>
-      )}
+        ) : (
+          <></>
+        )}
+
+        <Pressable onPress={handleButtonPress}>
+          <Text
+            fontSize='xl'
+            color={completed ? '#FFFFFF' : 'primary'}
+            alignSelf='flex-end'
+            mr='5'
+          >
+            {completed ? 'Completed' : 'Edit'}
+          </Text>
+        </Pressable>
+      </HStack>
     </Button>
   )
 }

@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
 import { reformatBatchCountData } from '../../../utils/utils'
+import { ReleaseMarkI } from '../addAnotherMarkSlice'
 
 interface InitialStateI {
   [tabId: string]: FishInputStateI
@@ -9,7 +10,6 @@ interface InitialStateI {
 interface FishInputStateI {
   completed: boolean
   modalOpen: boolean
-  batchCharacteristics: any
   speciesCaptured: Array<string>
   fishStore: FishStoreI
 }
@@ -19,13 +19,14 @@ export interface FishStoreI {
 }
 
 export interface IndividualFishValuesI {
+  UID: string | null
   species: string
   forkLength: number | null
   run: string
   weight?: number | null
   lifeStage: string
   adiposeClipped: boolean | null
-  existingMark: string
+  existingMarks: Array<ReleaseMarkI>
   dead: boolean | null
   willBeUsedInRecapture: boolean | null
   plusCountMethod: string // | number
@@ -34,6 +35,7 @@ export interface IndividualFishValuesI {
 }
 
 export const individualFishInitialState = {
+  UID: null,
   species: '',
   numFishCaught: null,
   forkLength: null,
@@ -41,7 +43,7 @@ export const individualFishInitialState = {
   weight: null,
   lifeStage: '',
   adiposeClipped: false,
-  existingMark: '',
+  existingMarks: [],
   dead: false,
   willBeUsedInRecapture: false,
   plusCountMethod: '',
@@ -51,34 +53,11 @@ export const individualFishInitialState = {
 export interface FishInputValuesI {
   speciesCaptured: Array<string>
 }
-export interface BatchStoreI {
-  [id: number]: singleBatchRawI
-}
-export interface singleBatchRawI {
-  forkLength: number
-  lifeStage: string
-}
-
-export interface batchCharacteristicsI {
-  species: string
-  adiposeClipped: boolean
-  dead: boolean
-  existingMark: string
-  forkLengths?: BatchStoreI
-}
-export const batchCharacteristicsInitialState: batchCharacteristicsI = {
-  species: '',
-  adiposeClipped: false,
-  dead: false,
-  existingMark: '',
-  forkLengths: {},
-}
 
 const initialState: InitialStateI = {
   placeholderId: {
     completed: false,
     modalOpen: false,
-    batchCharacteristics: batchCharacteristicsInitialState,
     speciesCaptured: [],
     fishStore: {},
   },
@@ -99,143 +78,33 @@ export const saveFishSlice = createSlice({
       }
     },
 
-    saveBatchCharacteristics: (state, action) => {
-      const { tabId, species, adiposeClipped, dead, existingMark } =
-        action.payload
-
-      if (state[tabId]) {
-        state[tabId].batchCharacteristics = {
-          ...state[tabId].batchCharacteristics,
-          species,
-          adiposeClipped,
-          dead,
-          existingMark,
-        }
-      } else {
-        const payload = {
-          ...initialState.placeholderId,
-          batchCharacteristics: {
-            ...batchCharacteristicsInitialState,
-            species,
-            adiposeClipped,
-            dead,
-            existingMark,
-          },
-        }
-        state[tabId] = payload
-      }
-    },
-
-    addForkLengthToBatchStore: (state, action) => {
-      const { tabId, forkLength, lifeStage } = action.payload
-      const forkLengthsCopy = cloneDeep(
-        state[tabId].batchCharacteristics.forkLengths
-      ) || {
-        ...state[tabId].batchCharacteristics.forkLengths,
-      }
-      const fishEntry = {
-        forkLength,
-        lifeStage,
-      } as any
-      let id = null
-      if (Object.keys(forkLengthsCopy).length) {
-        // @ts-ignore
-        const largestId = Math.max(...Object.keys(forkLengthsCopy))
-        id = largestId + 1
-      } else {
-        id = 0
-      }
-      forkLengthsCopy[id] = fishEntry
-      state[tabId].batchCharacteristics.forkLengths = forkLengthsCopy
-    },
-
-    removeLastForkLengthEntered: (state, action) => {
-      const { tabId } = action.payload
-      const forkLengthsCopy = cloneDeep(
-        state[tabId].batchCharacteristics.forkLengths
-      ) as any
-      if (Object.keys(forkLengthsCopy).length) {
-        // @ts-ignore
-        const largestId = Math.max(...Object.keys(forkLengthsCopy))
-        delete forkLengthsCopy[largestId]
-      }
-      state[tabId].batchCharacteristics.forkLengths = forkLengthsCopy
-    },
-
-    updateSingleForkLengthCount: (state, action) => {
-      const { tabId, forkLength } = action.payload
-
-      const forkLengthsState: any = cloneDeep(
-        state[tabId].batchCharacteristics.forkLengths
-      )
-
-      /*
-        AT A GIVEN FORK LENGTH...
-
-        for each property in the forkLengthsState object besides the first two (FL & Count)
-        store the life stage and count as a prop in a object
-         delete all props with the same fork length
-        create entries in the store to fill in the new values.
-      */
-
-      const lifeStagesToUpdate = {} as any
-      for (let key in action.payload) {
-        if (key === 'forkLength' || key === 'count') continue
-        lifeStagesToUpdate[key] = Number(action.payload[key])
-      }
-
-      for (let key in forkLengthsState) {
-        if (forkLengthsState[key].forkLength === Number(forkLength)) {
-          delete forkLengthsState[key]
-        }
-      }
-
-      for (let key in lifeStagesToUpdate) {
-        let count = lifeStagesToUpdate[key]
-        //iterate again
-        while (count > 0) {
-          const fishEntry = {
-            forkLength: Number(forkLength),
-            lifeStage: key,
-          } as any
-          let id = null
-          if (Object.keys(forkLengthsState).length) {
-            // @ts-ignore
-            const largestId = Math.max(...Object.keys(forkLengthsState))
-            id = largestId + 1
-          } else {
-            id = 0
-          }
-          forkLengthsState[id] = fishEntry
-          count--
-        }
-      }
-      state[tabId].batchCharacteristics.forkLengths = forkLengthsState
-    },
-
     saveBatchCount: (state, action) => {
-      const { tabId } = action.payload
-      let fishStoreCopy = cloneDeep(state[tabId].fishStore)
-      const forkLengthsCopy = cloneDeep(
-        state[tabId].batchCharacteristics.forkLengths
+      const {
+        tabId,
+        species,
+        adiposeClipped,
+        dead,
+        existingMarks,
+        forkLengths,
+      } = action.payload
+      let fishStoreCopy = cloneDeep(
+        state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
       )
-      const reformatedBatchCountData = reformatBatchCountData(forkLengthsCopy)
+
+      const reformatedBatchCountData = reformatBatchCountData(forkLengths)
 
       for (let key in reformatedBatchCountData) {
         for (let innerKey in reformatedBatchCountData[key]) {
           const batchCountEntry = {
-            species: state[tabId].batchCharacteristics.species,
+            species: species,
             numFishCaught: reformatedBatchCountData[key][innerKey], //updated
             forkLength: key, //updated
             run: 'not recorded', //updated
             weight: null,
-            lifeStage:
-              state[tabId].batchCharacteristics.species === 'Chinook salmon'
-                ? innerKey
-                : 'not recorded', //updated
-            adiposeClipped: state[tabId].batchCharacteristics.adiposeClipped,
-            existingMark: state[tabId].batchCharacteristics.existingMark,
-            dead: state[tabId].batchCharacteristics.dead,
+            lifeStage: species === 'Chinook salmon' ? innerKey : 'not recorded', //updated
+            adiposeClipped: adiposeClipped,
+            existingMarks: existingMarks,
+            dead: dead,
             willBeUsedInRecapture: null,
             plusCountMethod: null,
             plusCount: false,
@@ -252,19 +121,17 @@ export const saveFishSlice = createSlice({
           fishStoreCopy[id] = batchCountEntry
         }
       }
-
-      state[tabId].fishStore = fishStoreCopy
-      state[tabId].batchCharacteristics = {
-        species: '',
-        adiposeClipped: false,
-        dead: false,
-        existingMark: '',
-        forkLengths: {},
+      if (state[tabId]) {
+        state[tabId].fishStore = fishStoreCopy
+      } else {
+        state[tabId] = {
+          ...initialState['placeholderId'],
+          fishStore: fishStoreCopy,
+        }
       }
     },
     saveIndividualFish: (state, action) => {
-      const { tabId, formValues } = action.payload
-      // if (state[tabId]) {}
+      const { tabId, formValues, UID } = action.payload
       let fishStoreCopy = cloneDeep(
         state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
       )
@@ -276,7 +143,7 @@ export const saveFishSlice = createSlice({
       } else {
         id = 0
       }
-      fishStoreCopy[id] = { ...formValues, numFishCaught: 1 }
+      fishStoreCopy[id] = { ...formValues, UID, numFishCaught: 1 }
 
       if (state[tabId]) {
         state[tabId].fishStore = fishStoreCopy
@@ -292,6 +159,7 @@ export const saveFishSlice = createSlice({
         action.payload
 
       const plusCountEntry = {
+        UID: null,
         species,
         numFishCaught: count,
         forkLength: null,
@@ -299,7 +167,7 @@ export const saveFishSlice = createSlice({
         weight: null,
         lifeStage,
         adiposeClipped: null,
-        existingMark: '',
+        existingMarks: [],
         dead: null,
         willBeUsedInRecapture: null,
         plusCountMethod,
@@ -365,11 +233,7 @@ export const {
   deleteFishEntry,
   markFishInputCompleted,
   markFishInputModalOpen,
-  saveBatchCharacteristics,
-  removeLastForkLengthEntered,
   saveBatchCount,
-  updateSingleForkLengthCount,
-  addForkLengthToBatchStore,
 } = saveFishSlice.actions
 
 export default saveFishSlice.reducer

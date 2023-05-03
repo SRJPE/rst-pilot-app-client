@@ -170,7 +170,8 @@ const TrapPostProcessing = ({
             <Pressable
               flex={1}
               bg='#fff'
-              p='6%'
+              px='5%'
+              py='3%'
               borderColor='themeGrey'
               borderWidth='15'
               onPress={Keyboard.dismiss}
@@ -297,9 +298,10 @@ const TrapPostProcessing = ({
                     average in our database.
                   </Text>
 
-                  <HStack space={3} alignItems='center' mt='5'>
+                  <HStack space={3} mt='5'>
                     <Button
                       w='1/2'
+                      // h='12%'
                       bg='primary'
                       px='10'
                       onPress={() => {
@@ -310,16 +312,19 @@ const TrapPostProcessing = ({
                         Drop Pin at Current Location
                       </Text>
                     </Button>
-                    {values.trapLatitude && (
-                      <HStack space={3}>
-                        <Text fontSize='xl' color='black'>
-                          {`Lat: ${values.trapLatitude}`}
-                        </Text>
-                        <Text fontSize='xl' color='black'>
-                          {`Long: ${values.trapLongitude}`}
-                        </Text>
-                      </HStack>
-                    )}
+
+                    <VStack space={3} alignSelf='center'>
+                      <Text fontSize='xl' color='black'>
+                        {values.trapLatitude
+                          ? `Lat:  ${values.trapLatitude}`
+                          : 'Lat:'}
+                      </Text>
+                      <Text fontSize='xl' color='black'>
+                        {values.trapLongitude
+                          ? `Lat:  ${values.trapLongitude}`
+                          : 'Lat:'}
+                      </Text>
+                    </VStack>
                   </HStack>
                 </FormControl>
                 <FormControl w='30%'>

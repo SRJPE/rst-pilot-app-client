@@ -7,11 +7,11 @@ interface InitialStateI {
 }
 
 export interface GeneticSampleValuesI {
-  id: string
-  sampleIdNumber: string
-  mucusSwabCollected: boolean
-  finClipCollected: boolean
-  crewMemberCollectingSample: string
+  UID: string
+  sampleId: string
+  mucusSwab: boolean
+  finClip: boolean
+  crewMember: string
   comments?: string
 }
 
@@ -25,10 +25,8 @@ export const addGeneticSamplesSlice = createSlice({
   reducers: {
     resetGeneticSamplesSlice: () => initialState,
     saveGeneticSampleData: (state: any, action: any) => {
-      // console.log('🚀 ~ payload Genetic!!!', action.payload)
-      // state.values.push({ ...action.payload, id: uid() })
       let geneticSamplesCopy = cloneDeep(state.values)
-      geneticSamplesCopy.push({ ...action.payload, id: uid() })
+      geneticSamplesCopy.push(action.payload)
       state.values = geneticSamplesCopy
     },
   },

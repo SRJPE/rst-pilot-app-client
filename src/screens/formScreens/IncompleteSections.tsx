@@ -25,9 +25,12 @@ import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/tr
 import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
-import { flatten, uniq } from 'lodash'
+import { cloneDeep, flatten, uniq } from 'lodash'
 import { uid } from 'uid'
-import { setIncompleteSectionTouched, TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import {
+  setIncompleteSectionTouched,
+  TabStateI,
+} from '../../redux/reducers/formSlices/tabSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -42,6 +45,8 @@ const mapStateToProps = (state: RootState) => {
     fishInputState: state.fishInput,
     paperEntryState: state.paperEntry,
     tabState: state.tabSlice,
+    addGeneticSamplesState: state.addGeneticSamples,
+    appliedMarksState: state.addMarksOrTags,
   }
 }
 
@@ -58,6 +63,8 @@ const IncompleteSections = ({
   fishInputState,
   paperEntryState,
   tabState,
+  addGeneticSamplesState,
+  appliedMarksState,
 }: {
   navigation: any
   navigationState: any
@@ -71,6 +78,8 @@ const IncompleteSections = ({
   fishInputState: any
   paperEntryState: any
   tabState: TabStateI
+  addGeneticSamplesState: any
+  appliedMarksState: any
 }) => {
   // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
@@ -129,6 +138,30 @@ const IncompleteSections = ({
   }
 
   const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
+  const findCrewIdsFromSelectedCrewNames = (
+    selectedCrewNames: Array<string>
+  ) => {
+    // ['james', 'steve']
+    const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
+
+    const selectedCrewNamesMap: any = selectedCrewNames.reduce(
+      (acc, name: string) => ({
+        ...acc,
+        [name]: true,
+      }),
+      {}
+    )
+
+    const filteredNames = uniq(
+      allCrewObjects
+        .filter(
+          (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
+        )
+        .map((obj: any) => obj.personnelId)
+    )
+    //if the array contains a single string, return the string
+    return filteredNames.length === 1 ? filteredNames[0] : filteredNames
+  }
 
   const saveTrapVisits = () => {
     const currentDateTime = new Date()
@@ -173,23 +206,9 @@ const IncompleteSections = ({
         rpm3: endRpm3,
       } = trapPostProcessingState[id].values
       const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
-      const selectedCrewNamesMap: Record<string, boolean> =
-        selectedCrewNames.reduce(
-          (acc: Record<string, boolean>, name: string) => ({
-            ...acc,
-            [name]: true,
-          }),
-          {}
-        )
-      const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
-      const selectedCrewIds = uniq(
-        allCrewObjects
-          .filter(
-            (obj: any) =>
-              selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
-          )
-          .map((obj: any) => obj.personnelId)
-      )
+
+      const selectedCrewIds =
+        findCrewIdsFromSelectedCrewNames(selectedCrewNames)
       const trapVisitSubmission = {
         uid: tempUID,
         crew: selectedCrewIds,
@@ -296,6 +315,11 @@ const IncompleteSections = ({
       dropdownsState.values.plusCountMethodology
     )
     const runValues = returnDefinitionArray(dropdownsState.values.run)
+    const markTypeValues = returnDefinitionArray(dropdownsState.values.markType)
+    const markColorValues = returnDefinitionArray(
+      dropdownsState.values.markColor
+    )
+    const bodyPartValues = returnDefinitionArray(dropdownsState.values.bodyPart)
     const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
       let code = null
       dropdownsState.values.taxon.forEach((taxonValue: any) => {
@@ -309,6 +333,7 @@ const IncompleteSections = ({
       })
       return code
     }
+
     const catchRawSubmissions: any[] = []
 
     Object.keys(fishInputState).forEach((tabGroupId) => {
@@ -320,8 +345,60 @@ const IncompleteSections = ({
         const programId = visitSetupState[activeTabId]
           ? visitSetupState[activeTabId].values.programId
           : 1
+
         fishStoreKeys.forEach((key) => {
           const fishValue = fishInputState[tabGroupId].fishStore[key]
+
+          const filterAndPrepareData = (data: Array<any>) => {
+            let dataCopy = cloneDeep(data)
+            //before I filter the data I need to prepare the appliedMarks Array
+            //if the data is NOT from genetic sample:
+            if (dataCopy[0]?.finClip === undefined) {
+              dataCopy = dataCopy.map((markObj: any) => {
+                let markTypeId = markObj.markType
+                let markPositionId = markObj.markPosition
+                let markColorId = markObj.markColor
+                delete markObj.markType
+                delete markObj.markPosition
+                delete markObj.markColor
+                return {
+                  markTypeId: returnNullableTableId(
+                    markTypeValues.indexOf(markTypeId)
+                  ),
+                  markColorId: returnNullableTableId(
+                    markColorValues.indexOf(markColorId)
+                  ),
+                  markPositionId: returnNullableTableId(
+                    bodyPartValues.indexOf(markPositionId)
+                  ),
+                  ...markObj,
+                }
+              })
+            }
+
+            const filteredData = dataCopy.filter((obj: any) => {
+              return obj.UID === fishValue.UID
+            })
+
+            return filteredData.map((obj: any) => {
+              obj.crewMember = findCrewIdsFromSelectedCrewNames([
+                obj.crewMember,
+              ])
+              return obj
+            })
+          }
+
+          const findReleaseIdFromExistingMarks = () => {
+            let releaseId = null
+            fishValue.existingMarks.forEach((existingMark: any) => {
+              if (existingMark.releaseId) {
+                releaseId = existingMark.releaseId
+              } else {
+              }
+            })
+            return releaseId
+          }
+
           catchRawSubmissions.push({
             uid: tempUID,
             programId,
@@ -331,7 +408,7 @@ const IncompleteSections = ({
               runValues.indexOf(fishValue.run)
             ),
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
-            captureRunClassMethod: fishValue.run ? 6 : null,
+            captureRunClassMethod: fishValue.run ? 5 : null,
             // defaults to "none" (id: 1) if not selected
             markType: 1, // Check w/ Erin
             markedForRelease: fishValue.willBeUsedInRecapture,
@@ -356,15 +433,34 @@ const IncompleteSections = ({
                 )
               : null,
             isRandom: null, // Check w/ Erin
-            releaseId: null,
+            releaseId: findReleaseIdFromExistingMarks(),
             comments: null,
             createdBy: null,
             createdAt: currentDateTime,
-            updatedAt: null,
+            updatedAt: currentDateTime,
             qcCompleted: null,
             qcCompletedBy: null,
             qcTime: null,
             qcComments: null,
+            existingMarks: fishValue.existingMarks.map((markObj: any) => {
+              return {
+                releaseId:
+                  markObj.releaseId !== undefined ? markObj.releaseId : null,
+                markTypeId: returnNullableTableId(
+                  markTypeValues.indexOf(markObj.markType)
+                ),
+                markColorId: returnNullableTableId(
+                  markColorValues.indexOf(markObj.markColor)
+                ),
+                markPositionId: returnNullableTableId(
+                  bodyPartValues.indexOf(markObj.markPosition)
+                ),
+              }
+            }),
+            geneticSamplingData: filterAndPrepareData(
+              addGeneticSamplesState.values
+            ),
+            appliedMarks: filterAndPrepareData(appliedMarksState.values),
           })
         })
       }
@@ -380,12 +476,12 @@ const IncompleteSections = ({
       <View
         flex={1}
         bg='#fff'
-        justifyContent='center'
+        // justifyContent='center'
         // alignItems='center'
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={10} p='10'>
+        <VStack space={10} p='15%'>
           <Heading textAlign='center'>
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>

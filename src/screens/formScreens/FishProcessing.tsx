@@ -133,7 +133,8 @@ const FishProcessing = ({
             <View
               flex={1}
               bg='#fff'
-              p='6%'
+              px='5%'
+              py='3%'
               borderColor='themeGrey'
               borderWidth='15'
             >
