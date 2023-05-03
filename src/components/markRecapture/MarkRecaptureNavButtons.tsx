@@ -28,7 +28,6 @@ export default function MarkRecaptureNavButtons({
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
   // const activePage = useRoute()
-  const reduxState = useSelector((state: any) => state)
 
   const handleRightButton = () => {
     //   //if function truthy, submit form to check for errors and save to redux
@@ -138,20 +137,6 @@ export default function MarkRecaptureNavButtons({
             {renderHomeButton ? 'Return Home' : 'Back'}
           </Text>
         </Button>
-        {/* <Button
-          height='20'
-          rounded='xs'
-          bg='primary'
-          alignSelf='flex-start'
-          width='5%'
-          borderRadius='5'
-          shadow='5'
-          onPress={() => console.log('🚀 ~ reduxState', reduxState)}
-        >
-          <Text fontWeight='bold' color='white'>
-            redux state
-          </Text>
-        </Button> */}
         <Button
           alignSelf='flex-start'
           bg='primary'

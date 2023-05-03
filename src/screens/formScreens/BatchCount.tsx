@@ -37,19 +37,11 @@ import BatchCountTableModal from '../../components/form/batchCount/BatchCountTab
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const BatchCount = ({
-  route,
-  fishInputSlice,
   tabSlice,
-  activeTabId,
   batchCountStore,
-  reduxStore,
 }: {
-  route: any
-  fishInputSlice: any
   tabSlice: TabStateI
-  activeTabId: string
   batchCountStore: any
-  reduxStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
@@ -147,11 +139,6 @@ const BatchCount = ({
           <HStack space={10}>
             <CustomModalHeader
               headerText={
-                // route.params?.editModeData
-                //   ? tabSlice.activeTabId
-                //     ? `Edit Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
-                //     : 'Edit Fish'
-                //   :
                 tabSlice.activeTabId
                   ? `Add Batch Count - ${
                       tabSlice.tabs[tabSlice.activeTabId].name
@@ -234,7 +221,6 @@ const BatchCount = ({
                 <Text fontSize='16'>Show Table</Text>
               </HStack>
             </HStack>
-            {/* using scrollView to patch the table overflow issues*/}
             {showTable ? (
               <ScrollView height='376'>
                 <BatchCountDataTable
@@ -338,14 +324,6 @@ const BatchCount = ({
                       Save Batch Count
                     </Text>
                   </Button>
-                  {/* <Button
-                    bg='primary'
-                    onPress={() => console.log('Redux Store: ', reduxStore)}
-                  >
-                    <Text fontSize='lg' bold color='white'>
-                      LOG REDUX
-                    </Text>
-                  </Button> */}
                 </HStack>
               </VStack>
               <VStack space={4}>
@@ -387,20 +365,9 @@ const BatchCount = ({
 }
 
 const mapStateToProps = (state: RootState) => {
-  let activeTabId = 'placeholderId'
-  if (
-    state.tabSlice.activeTabId &&
-    state.fishInput[state.tabSlice.activeTabId]
-  ) {
-    activeTabId = state.tabSlice.activeTabId
-  }
-
   return {
-    fishInputSlice: state.fishInput,
     tabSlice: state.tabSlice,
-    activeTabId,
     batchCountStore: state.batchCount,
-    reduxStore: state,
   }
 }
 export default connect(mapStateToProps)(BatchCount)
