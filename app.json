@@ -8,8 +8,6 @@
     "icon": "./assets/icon_logo.png",
     "userInterfaceStyle": "light",
     "plugins": [
-      ["expo-community-flipper"],
-      ["react-native-flipper-performance-plugin"],
       [
         "expo-location",
         {
