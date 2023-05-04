@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "rst-pilot-app",
+    "owner": "flowwest",
     "slug": "rst-pilot-app",
     "version": "1.0.0",
     "orientation": "portrait",
