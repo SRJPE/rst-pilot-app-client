@@ -1,5 +1,5 @@
 import React from 'react'
-import * as Print from 'expo-print'
+import { printToFileAsync } from 'expo-print'
 import * as FileSystem from 'expo-file-system'
 import { shareAsync } from 'expo-sharing'
 
@@ -55,9 +55,8 @@ const useSavePdf = () => {
 
   const createAndSavePDF = async (html: string) => {
     try {
-      const { uri } = await Print.printToFileAsync({ html })
-
-      await shareAsync(uri)
+      // const { uri } = await Print.printToFileAsync({ html })
+      // await shareAsync(uri)
     } catch (error) {
       console.error(error)
     }
