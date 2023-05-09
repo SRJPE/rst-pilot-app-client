@@ -38,7 +38,7 @@ export default function MarkRecaptureNavButtons({
 
     if (activePage === 'Mark Recapture Complete') {
       clearFormValues && clearFormValues()
-      navigation.navigate('Data Quality Control')
+      navigation.navigate('Quality Control')
       navigation.reset({
         index: 0,
         routes: [{ name: 'Release Trial' }],
