@@ -22,6 +22,7 @@ import {
   updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
 import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
+import AppLogo from '../Shared/AppLogo'
 
 const DrawerMenu = (props: DrawerContentComponentProps) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -102,19 +103,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             }}
           />
         </HStack>
-        <Avatar
-          // source={require('../../assets/chinook_salmon.jpeg')}
-          size='xl'
-          borderRadius={100}
-          mb={6}
-          backgroundColor='primary'
-          borderColor='primary'
-          borderWidth={3}
-          ml='2'
-        />
-        <Heading ml='2' size='xl' fontWeight='400'>
-          Data Tackle
-        </Heading>
+        <AppLogo imageSize={225} />
         <DrawerContentScrollView>
           <MenuButton
             active={currentRoute === 'Home'}
