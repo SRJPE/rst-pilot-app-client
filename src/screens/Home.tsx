@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Text, VStack, CircleIcon, Heading, View } from 'native-base'
 import BottomNavigation from '../components/home/HomeNavButtons'
 import { StyleSheet } from 'react-native'
-import { AppLogo } from './SignIn'
+import AppLogo from '../components/Shared/AppLogo'
 
 const styles = StyleSheet.create({
   landingContent: {
