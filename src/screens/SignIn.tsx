@@ -33,26 +33,7 @@ import {
   // @ts-ignore
   REACT_APP_TENANT_ID,
 } from '@env'
-
-export const AppLogo = ({
-  addBorder,
-  imageSize,
-}: {
-  addBorder?: boolean
-  imageSize?: number
-}) => {
-  return (
-    <Image
-      source={require('../../assets/chinook_salmon.jpeg')}
-      height={imageSize}
-      width={imageSize}
-      borderRadius={1000}
-      borderColor={addBorder ? 'primary' : '#fff'}
-      borderWidth={addBorder ? 5 : 0}
-      alt='salmon logo'
-    />
-  )
-}
+import AppLogo from '../components/Shared/AppLogo'
 
 WebBrowser.maybeCompleteAuthSession()
 
