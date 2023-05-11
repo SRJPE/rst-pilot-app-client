@@ -14,6 +14,11 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
           screen: 'Permitting Information Input',
         })
         break
+      case 'Trapping Sites':
+        navigation.navigate('Create New Program', {
+          screen: 'Multiple Traps',
+        })
+        break
 
       default:
         console.log('Default hit')
