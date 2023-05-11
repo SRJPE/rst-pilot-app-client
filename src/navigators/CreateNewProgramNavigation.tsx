@@ -1,12 +1,13 @@
 import { createStackNavigator } from '@react-navigation/stack'
 
-import CreateNewProgramHome from '../screens/accountScreens/CreateNewProgramHome'
-import TrappingSites from '../screens/accountScreens/TrappingSites'
-import CrewMembers from '../screens/accountScreens/CrewMembers'
-import EfficiencyTrialProtocols from '../screens/accountScreens/EfficiencyTrialProtocols'
-import TrappingProtocols from '../screens/accountScreens/TrappingProtocols'
-import PermitInformation from '../screens/accountScreens/PermitInformation'
-import PermittingInformationInput from '../screens/accountScreens/PermittingInformationInput'
+import CreateNewProgramHome from '../screens/accountScreens/createNewProgram/CreateNewProgramHome'
+import TrappingSites from '../screens/accountScreens/createNewProgram/TrappingSites'
+import CrewMembers from '../screens/accountScreens/createNewProgram/CrewMembers'
+import EfficiencyTrialProtocols from '../screens/accountScreens/createNewProgram/EfficiencyTrialProtocols'
+import TrappingProtocols from '../screens/accountScreens/createNewProgram/TrappingProtocols'
+import PermitInformation from '../screens/accountScreens/createNewProgram/PermitInformation'
+import PermittingInformationInput from '../screens/accountScreens/createNewProgram/PermittingInformationInput'
+import MultipleTraps from '../screens/accountScreens/createNewProgram/MultipleTraps'
 
 const CreateNewProgram = createStackNavigator()
 
@@ -23,6 +24,10 @@ export default function CreateNewProgramStackNavigator() {
       <CreateNewProgram.Screen
         name='Trapping Sites'
         component={TrappingSites}
+      />
+      <CreateNewProgram.Screen
+        name='Multiple Traps'
+        component={MultipleTraps}
       />
       <CreateNewProgram.Screen name='Crew Members' component={CrewMembers} />
       <CreateNewProgram.Screen

@@ -12,16 +12,16 @@ import {
   View,
   VStack,
 } from 'native-base'
-import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
-import TrappingSitesDataTable from '../../components/createNewProgram/TrappingSitesDataTable'
-import { AppLogo } from '../SignIn'
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
+import TrappingSitesDataTable from '../../../components/createNewProgram/TrappingSitesDataTable'
+import { AppLogo } from '../../SignIn'
 import { Ionicons } from '@expo/vector-icons'
-import CustomModal from '../../components/Shared/CustomModal'
-import AddTrapModalContent from '../../components/createNewProgram/AddTrapModalContent'
-import GroupTrapSiteModalContent from '../../components/createNewProgram/GroupTrapSiteModalContent'
-import { RootState } from '../../redux/store'
+import GroupTrapSiteModalContent from '../../../components/createNewProgram/GroupTrapSiteModalContent'
+import CustomModal from '../../../components/Shared/CustomModal'
+import AddTrapModalContent from '../../../components/createNewProgram/AddTrapModalContent'
+import { RootState } from '../../../redux/store'
 import { connect } from 'react-redux'
-import { TrappingSitesStoreI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
+import { TrappingSitesStoreI } from '../../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 const TrappingSites = ({
   navigation,
   trappingSitesStore,

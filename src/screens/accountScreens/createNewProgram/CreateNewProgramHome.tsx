@@ -1,8 +1,8 @@
 import React from 'react'
 import { Text, Heading, View, VStack } from 'native-base'
-import IncompleteSectionButton from '../../components/form/IncompleteSectionButton'
-import CreateNewProgramButton from '../../components/createNewProgram/CreateNewProgramButton'
-import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
+import IncompleteSectionButton from '../../../components/form/IncompleteSectionButton'
+import CreateNewProgramButton from '../../../components/createNewProgram/CreateNewProgramButton'
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
 
 //slice needs to be made for main navigation (steps array will move there)
 

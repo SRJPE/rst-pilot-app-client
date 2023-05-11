@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
 import { Ionicons } from '@expo/vector-icons'
 const PermittingInformationInput = ({ navigation }: { navigation: any }) => {
   const initialState = {

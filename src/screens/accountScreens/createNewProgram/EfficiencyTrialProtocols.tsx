@@ -9,11 +9,11 @@ import {
   View,
   VStack,
 } from 'native-base'
-import { AppLogo } from '../SignIn'
+import { AppLogo } from '../../SignIn'
 import { Feather } from '@expo/vector-icons'
-import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
-import CustomModal from '../../components/Shared/CustomModal'
-import ChooseFileModalContent from '../../components/createNewProgram/ChooseFileModalContent'
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
+import CustomModal from '../../../components/Shared/CustomModal'
+import ChooseFileModalContent from '../../../components/createNewProgram/ChooseFileModalContent'
 
 const EfficiencyTrialProtocols = ({ navigation }: { navigation: any }) => {
   const [chooseFileModalOpen, setChooseFileModalOpen] = useState(
