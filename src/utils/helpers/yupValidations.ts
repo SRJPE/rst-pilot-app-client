@@ -164,9 +164,7 @@ export const addMarksOrTagsSchema = yup.object().shape({
 })
 
 export const addGeneticsSampleSchema = yup.object().shape({
-  sampleId: yup
-    .string()
-    .required('Sample ID Number required'),
+  sampleId: yup.string().required('Sample ID Number required'),
   mucusSwab: yup.boolean().required('Mucus Swab collection status required'),
   finClip: yup.boolean().required('Fin Clip collection status required'),
   crewMember: yup.string().required('Crew Member required'),
@@ -206,7 +204,7 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),
@@ -222,7 +220,7 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),
@@ -234,7 +232,7 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),
@@ -308,5 +306,13 @@ export const crewMembersSchema = yup.object().shape({
   email: yup.string().required('Email required'),
   // isLead: false,
   agency: yup.string().required('Agency required'),
+  orchidID: yup.string().nullable(),
+})
+export const groupTrapSitesSchema = yup.object().shape({
+  numberOfTrapSites: yup
+    .number()
+    .min(2)
+    .required('Number of trap sites required'),
+
   orchidID: yup.string().nullable(),
 })

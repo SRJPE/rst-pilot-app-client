@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import {
+  Button,
   Box,
   Center,
   Heading,
@@ -17,6 +18,7 @@ import { AppLogo } from '../SignIn'
 import { Ionicons } from '@expo/vector-icons'
 import CustomModal from '../../components/Shared/CustomModal'
 import AddTrapModalContent from '../../components/createNewProgram/AddTrapModalContent'
+import GroupTrapSiteModalContent from '../../components/createNewProgram/GroupTrapSiteModalContent'
 import { RootState } from '../../redux/store'
 import { connect } from 'react-redux'
 import { TrappingSitesStoreI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
@@ -28,6 +30,7 @@ const TrappingSites = ({
   trappingSitesStore: TrappingSitesStoreI
 }) => {
   const [addTrapModalOpen, setAddTrapModalOpen] = useState(false as boolean)
+  const [groupTrapModalOpen, setGroupTrapModalOpen] = useState(false as boolean)
 
   useEffect(() => {
     if (Object.values(trappingSitesStore).length === 0) {
@@ -64,7 +67,7 @@ const TrappingSites = ({
         </Box>
         <Box
           bg='secondary'
-          h='23%'
+          // h='23%'
           mx='5%'
           borderRadius={20}
           alignSelf='flex-end'
@@ -86,6 +89,21 @@ const TrappingSites = ({
               (b) there are multiple trap locations that are rotated through
               time but all trap locations represent the same site location.{' '}
             </Text>
+            <Button
+              alignSelf='flex-start'
+              bg='primary'
+              width='45%'
+              height='20'
+              rounded='xs'
+              borderRadius='5'
+              shadow='2'
+              mt={5}
+              onPress={() => setGroupTrapModalOpen(true)}
+            >
+              <Text fontSize='xl' fontWeight='bold' color='white'>
+                Group
+              </Text>
+            </Button>
           </VStack>
         </Box>
         <CreateNewProgramNavButtons navigation={navigation} />
@@ -97,6 +115,15 @@ const TrappingSites = ({
         height='70%'
       >
         <AddTrapModalContent closeModal={() => setAddTrapModalOpen(false)} />
+      </CustomModal>
+      <CustomModal
+        isOpen={groupTrapModalOpen}
+        closeModal={() => setGroupTrapModalOpen(false)}
+        height='100%'
+      >
+        <GroupTrapSiteModalContent
+          closeModal={() => setGroupTrapModalOpen(false)}
+        />
       </CustomModal>
     </>
   )
