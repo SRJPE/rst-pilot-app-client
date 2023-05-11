@@ -15,13 +15,13 @@ import {
   VStack,
 } from 'native-base'
 import { Ionicons } from '@expo/vector-icons'
-import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
-import CustomModal from '../../components/Shared/CustomModal'
-import AddCrewMemberModalContent from '../../components/createNewProgram/AddCrewMemberModalContent'
-import { AppLogo } from '../SignIn'
-import CrewMemberDataTable from '../../components/createNewProgram/CrewMemberDataTable'
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
+import CustomModal from '../../../components/Shared/CustomModal'
+import AddCrewMemberModalContent from '../../../components/createNewProgram/AddCrewMemberModalContent'
+import { AppLogo } from '../../SignIn'
+import CrewMemberDataTable from '../../../components/createNewProgram/CrewMemberDataTable'
 import { connect } from 'react-redux'
-import { RootState } from '../../redux/store'
+import { RootState } from '../../../redux/store'
 const CrewMembers = ({
   navigation,
   crewMembersStore,
