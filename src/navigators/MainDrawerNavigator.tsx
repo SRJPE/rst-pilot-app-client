@@ -40,7 +40,7 @@ const DrawerNavigator = ({
         <Drawer.Screen
           name='Home'
           component={Home}
-          // options={{ headerShown: false }}
+          options={{ headerShown: false }}
         />
         <Drawer.Screen name='Profile' component={Profile} />
         <Drawer.Screen name='Permit Info' component={PermitInfo} />
