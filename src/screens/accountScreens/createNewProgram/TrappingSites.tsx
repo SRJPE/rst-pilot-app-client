@@ -16,7 +16,7 @@ import CreateNewProgramNavButtons from '../../../components/createNewProgram/Cre
 import TrappingSitesDataTable from '../../../components/createNewProgram/TrappingSitesDataTable'
 import { AppLogo } from '../../SignIn'
 import { Ionicons } from '@expo/vector-icons'
-import GroupTrapSiteModalContent from '../../../components/createNewProgram/GroupTrapSiteModalContent'
+
 import CustomModal from '../../../components/Shared/CustomModal'
 import AddTrapModalContent from '../../../components/createNewProgram/AddTrapModalContent'
 import { RootState } from '../../../redux/store'
@@ -30,7 +30,6 @@ const TrappingSites = ({
   trappingSitesStore: TrappingSitesStoreI
 }) => {
   const [addTrapModalOpen, setAddTrapModalOpen] = useState(false as boolean)
-  const [groupTrapModalOpen, setGroupTrapModalOpen] = useState(false as boolean)
 
   useEffect(() => {
     if (Object.values(trappingSitesStore).length === 0) {
@@ -98,7 +97,7 @@ const TrappingSites = ({
               borderRadius='5'
               shadow='2'
               mt={5}
-              onPress={() => setGroupTrapModalOpen(true)}
+              onPress={() => {}}
             >
               <Text fontSize='xl' fontWeight='bold' color='white'>
                 Group
@@ -115,15 +114,6 @@ const TrappingSites = ({
         height='70%'
       >
         <AddTrapModalContent closeModal={() => setAddTrapModalOpen(false)} />
-      </CustomModal>
-      <CustomModal
-        isOpen={groupTrapModalOpen}
-        closeModal={() => setGroupTrapModalOpen(false)}
-        height='100%'
-      >
-        <GroupTrapSiteModalContent
-          closeModal={() => setGroupTrapModalOpen(false)}
-        />
       </CustomModal>
     </>
   )

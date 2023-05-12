@@ -16,6 +16,7 @@ import {
   Switch,
   HStack,
   Divider,
+  Pressable,
 } from 'native-base'
 import CrewDropDown from '../../components/form/CrewDropDown'
 import NavButtons from '../../components/formContainer/NavButtons'
@@ -154,7 +155,7 @@ const VisitSetup = ({
     }
     // if there are current tabs, create and overwrite tabs
     else {
-      let currentTabsTrapNames = Object.keys(tabSlice.tabs).map((id) => {
+      let currentTabsTrapNames = Object.keys(tabSlice.tabs).map(id => {
         return tabSlice.tabs[id].name
       })
       // if trapNames, iterate through all trap names and create / overwrite tabs
@@ -162,7 +163,7 @@ const VisitSetup = ({
         values.trapName.forEach((trapName: string) => {
           if (currentTabsTrapNames.includes(trapName)) {
             const tabIds = Object.keys(tabSlice.tabs)
-            const tabIdToUpdate = tabIds.filter((id) => {
+            const tabIdToUpdate = tabIds.filter(id => {
               return tabSlice.tabs[id].name == trapName
             })[0]
             dispatch(
@@ -181,12 +182,12 @@ const VisitSetup = ({
                 name: trapName ?? values.trapSite,
               })
             )
-            currentTabsTrapNames = currentTabsTrapNames.filter((name) => {
+            currentTabsTrapNames = currentTabsTrapNames.filter(name => {
               return name != trapName
             })
           } else if (currentTabsTrapNames.includes('New Tab')) {
             const tabIds = Object.keys(tabSlice.tabs)
-            const tabIdToUpdate = tabIds.filter((id) => {
+            const tabIdToUpdate = tabIds.filter(id => {
               return tabSlice.tabs[id].name == 'New Tab'
             })[0]
             dispatch(
@@ -206,7 +207,7 @@ const VisitSetup = ({
                 trapSite: values.trapSite,
               })
             )
-            currentTabsTrapNames = currentTabsTrapNames.filter((name) => {
+            currentTabsTrapNames = currentTabsTrapNames.filter(name => {
               return name != 'New Tab'
             })
           } else {
@@ -361,6 +362,9 @@ const VisitSetup = ({
         }))
     )
   }
+  const closeCrewDropDownOnBlue = () => {
+    setCrewDropDownOpen(false)
+  }
 
   return (
     <Formik
@@ -377,7 +381,7 @@ const VisitSetup = ({
       // maybe this is not needed for first step in form?
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
-      onSubmit={(values) => {
+      onSubmit={values => {
         onSubmit(values, tabSlice?.activeTabId)
       }}
     >
@@ -400,7 +404,7 @@ const VisitSetup = ({
         }, [tabSlice.previouslyActiveTabId])
 
         return (
-          <>
+          <Pressable flex={1} onPress={() => closeCrewDropDownOnBlue()}>
             <View
               flex={1}
               bg='#fff'
@@ -558,7 +562,7 @@ const VisitSetup = ({
               touched={touched}
               isPaperEntry={isPaperEntry}
             />
-          </>
+          </Pressable>
         )
       }}
     </Formik>
