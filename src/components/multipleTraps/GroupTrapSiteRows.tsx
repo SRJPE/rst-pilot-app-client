@@ -3,6 +3,7 @@ import GroupTrapSiteCard from '../form/GroupTrapSiteCard'
 import { IndividualTrappingSiteValuesI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 import { useFormikContext } from 'formik'
 import { GroupTrapSiteValues } from './interfaces'
+import { Spacer, Box, Divider } from 'native-base'
 
 const GroupTrapSiteRows = ({
   //numberOfTrapSites,
@@ -17,7 +18,9 @@ const GroupTrapSiteRows = ({
   let elements = []
   for (let i = 1; i <= numberOfTrapSites; i++) {
     elements.push(
-      <GroupTrapSiteCard trappingSites={trappingSites} cardId={i} key={i} />
+      <>
+        <GroupTrapSiteCard trappingSites={trappingSites} cardId={i} key={i} />
+      </>
     )
   }
   return <>{elements}</>

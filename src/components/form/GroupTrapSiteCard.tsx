@@ -4,7 +4,8 @@ import { useFormikContext } from 'formik'
 import DropDownPicker from 'react-native-dropdown-picker'
 import { Box, FormControl, Text, VStack, Input, Spacer } from 'native-base'
 import { IndividualTrappingSiteValuesI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
-import { GroupTrapSiteValues } from '../createNewProgram/GroupTrapSiteModalContent'
+import { GroupTrapSiteValues } from '../multipleTraps/interfaces'
+
 import { current } from '@reduxjs/toolkit'
 import { TouchableWithoutFeedback } from 'react-native'
 
@@ -45,35 +46,42 @@ const GroupTrapSiteCard = ({
 
   return (
     <>
-      <VStack w='230' space={5} marginTop={cardId > 3 ? 5 : 0}>
-        <FormControl>
-          <FormControl.Label>
-            <Text color='black' fontSize='xl'>
-              Name of Trapping Site
-            </Text>
-          </FormControl.Label>
-          <Input
-            height='50px'
-            fontSize='16'
-            onChangeText={text => {
-              const currentKey = Object.keys(values).find(key =>
-                key.includes(`trapSiteGroup-${cardId}`)
-              )
+      <TouchableWithoutFeedback
+        onPress={() => {
+          console.log('hit')
+          setOpen(false)
+        }}
+      >
+        <VStack
+          w='100%'
+          space={5}
+          marginTop={cardId > 3 ? 5 : 0}
+          borderWidth={1}
+          padding={5}
+          borderRadius={5}
+        >
+          <FormControl>
+            <FormControl.Label>
+              <Text color='black' fontSize='xl'>
+                Name of Trapping Site
+              </Text>
+            </FormControl.Label>
+            <Input
+              height='50px'
+              fontSize='16'
+              onChangeText={text => {
+                const currentKey = Object.keys(values).find(key =>
+                  key.includes(`trapSiteGroup-${cardId}`)
+                )
 
-              setFieldValue(`trapSiteGroup-${cardId}`, {
-                ...values[`trapSiteGroup-${cardId}`],
-                trapSiteName: text,
-              })
-            }}
-          />
-        </FormControl>
-        <Box h='2xs' bg='secondary' borderRadius={10}>
-          <TouchableWithoutFeedback
-            onPress={() => {
-              console.log('hit')
-              setOpen(false)
-            }}
-          >
+                setFieldValue(`trapSiteGroup-${cardId}`, {
+                  ...values[`trapSiteGroup-${cardId}`],
+                  trapSiteName: text,
+                })
+              }}
+            />
+          </FormControl>
+          <Box borderRadius={10}>
             <DropDownPicker
               open={open}
               value={dropdownValue}
@@ -82,17 +90,22 @@ const GroupTrapSiteCard = ({
               setValue={setDropdownValue}
               setItems={setItems}
               multiple={true}
-              mode='BADGE'
+              mode='SIMPLE'
               badgeDotColors={['#007C7C']}
               placeholder='Select Traps'
               searchPlaceholder='Search...'
-              maxHeight={275}
+              // maxHeight={275}
 
               // renderListItem={props => <CrewListItem {...props} />}
             />
-          </TouchableWithoutFeedback>
-        </Box>
-      </VStack>
+            <VStack m={5}>
+              {values[`trapSiteGroup-${cardId}`].groupItems.map(item => (
+                <Text fontSize={16}>• {item}</Text>
+              ))}
+            </VStack>
+          </Box>
+        </VStack>
+      </TouchableWithoutFeedback>
       <Box>
         <Spacer size={4} />
       </Box>
