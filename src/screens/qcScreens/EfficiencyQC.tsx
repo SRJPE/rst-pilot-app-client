@@ -1,13 +1,8 @@
-import { useState } from 'react'
 import { Button, HStack, View, VStack, Text, ScrollView } from 'native-base'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
 
-export default function CatchMeasureQC({ navigation }: { navigation: any }) {
-  const [activeButtons, setActiveButtons] = useState<
-    ('Fork Length' | 'Weight')[]
-  >(['Fork Length'])
-
+export default function CatchFishCountQC({ navigation }: { navigation: any }) {
   const data = [
     { label: 'Point 1', x: 1, y: 10, extraInfo: 'woop woop!' },
     { label: 'Point 2', x: 2, y: 20, extraInfo: 'woop woop!' },
@@ -15,38 +10,6 @@ export default function CatchMeasureQC({ navigation }: { navigation: any }) {
     { label: 'Point 4', x: 4, y: 25, extraInfo: 'woop woop!' },
     { label: 'Point 5', x: 5, y: 12, extraInfo: 'woop woop!' },
   ]
-
-  const GraphMenuButton = ({
-    buttonName,
-  }: {
-    buttonName: 'Fork Length' | 'Weight'
-  }) => {
-    return (
-      <Button
-        bg={activeButtons.includes(buttonName) ? 'primary' : 'secondary'}
-        marginX={0.5}
-        flex={1}
-        onPress={() => {
-          let activeButtonsCopy = [...activeButtons]
-          if (activeButtons.includes(buttonName)) {
-            activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
-            setActiveButtons(activeButtonsCopy)
-          } else {
-            activeButtonsCopy.unshift(buttonName)
-            setActiveButtons(activeButtonsCopy)
-          }
-        }}
-      >
-        <Text
-          fontSize='lg'
-          color={activeButtons.includes(buttonName) ? 'secondary' : 'primary'}
-          fontWeight={'bold'}
-        >
-          {buttonName}
-        </Text>
-      </Button>
-    )
-  }
 
   return (
     <>
@@ -60,36 +23,24 @@ export default function CatchMeasureQC({ navigation }: { navigation: any }) {
       >
         <VStack alignItems={'center'} flex={1}>
           <CustomModalHeader
-            headerText={'Fork Length, Weight, Lifestage, Run'}
+            headerText={'QC Efficiency Data'}
             showHeaderButton={false}
             closeModal={() => navigation.goBack()}
           />
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
             Edit values by selecting a point on the plot below. Grey density
-            lines show historic fork length distribution
+            lines show historic efficiency distributions
           </Text>
 
-          <HStack>
-            <GraphMenuButton buttonName={'Fork Length'} />
-            <GraphMenuButton buttonName={'Weight'} />
-            <View flex={3}></View>
-          </HStack>
-
           <ScrollView>
-            {activeButtons.map((buttonName) => {
-              return (
-                <Graph
-                  key={buttonName}
-                  chartType='line'
-                  data={data}
-                  title={buttonName}
-                  barColor='grey'
-                  selectedBarColor='green'
-                  height={400}
-                  width={600}
-                />
-              )
-            })}
+            <Graph
+              chartType='line'
+              data={data}
+              barColor='grey'
+              selectedBarColor='green'
+              height={400}
+              width={600}
+            />
           </ScrollView>
 
           <View flex={1}></View>

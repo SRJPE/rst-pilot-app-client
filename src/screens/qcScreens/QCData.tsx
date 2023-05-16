@@ -179,6 +179,7 @@ export default function DataQualityControl({
           setActiveButton(
             activeButton != 'efficiencyBtn' ? 'efficiencyBtn' : ''
           )
+          navigation.navigate('EfficiencyQC')
         }}
       >
         <Text fontSize='xl' color='white' fontWeight={'bold'}>

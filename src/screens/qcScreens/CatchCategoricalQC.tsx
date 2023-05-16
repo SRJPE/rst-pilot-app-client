@@ -1,15 +1,24 @@
 import { useState } from 'react'
-import { Button, HStack, View, VStack, Text } from 'native-base'
+import { Button, HStack, View, VStack, Text, ScrollView } from 'native-base'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
+import Graph from '../../components/Shared/Graph'
 
 export default function CatchCategoricalQC({
   navigation,
 }: {
   navigation: any
 }) {
-  const [activeButton, setActiveButton] = useState<
-    'Adipose Clipped' | 'Species' | 'Marks' | 'Mortalities' | ''
-  >('')
+  const [activeButtons, setActiveButtons] = useState<
+    ('Adipose Clipped' | 'Species' | 'Marks' | 'Mortalities')[]
+  >(['Adipose Clipped'])
+
+  const data = [
+    { label: 'Point 1', x: 1, y: 10, extraInfo: 'woop woop!' },
+    { label: 'Point 2', x: 2, y: 20, extraInfo: 'woop woop!' },
+    { label: 'Point 3', x: 3, y: 15, extraInfo: 'woop woop!' },
+    { label: 'Point 4', x: 4, y: 25, extraInfo: 'woop woop!' },
+    { label: 'Point 5', x: 5, y: 12, extraInfo: 'woop woop!' },
+  ]
 
   const GraphMenuButton = ({
     buttonName,
@@ -18,16 +27,23 @@ export default function CatchCategoricalQC({
   }) => {
     return (
       <Button
-        bg={activeButton === buttonName ? 'primary' : 'secondary'}
+        bg={activeButtons.includes(buttonName) ? 'primary' : 'secondary'}
         marginX={0.5}
         flex={1}
         onPress={() => {
-          setActiveButton(activeButton != buttonName ? buttonName : '')
+          let activeButtonsCopy = [...activeButtons]
+          if (activeButtons.includes(buttonName)) {
+            activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
+            setActiveButtons(activeButtonsCopy)
+          } else {
+            activeButtonsCopy.unshift(buttonName)
+            setActiveButtons(activeButtonsCopy)
+          }
         }}
       >
         <Text
           fontSize='lg'
-          color={activeButton === buttonName ? 'secondary' : 'primary'}
+          color={activeButtons.includes(buttonName) ? 'secondary' : 'primary'}
           fontWeight={'bold'}
         >
           {buttonName}
@@ -63,6 +79,23 @@ export default function CatchCategoricalQC({
             <GraphMenuButton buttonName={'Marks'} />
             <GraphMenuButton buttonName={'Mortalities'} />
           </HStack>
+
+          <ScrollView>
+            {activeButtons.map((buttonName) => {
+              return (
+                <Graph
+                  key={buttonName}
+                  chartType='line'
+                  data={data}
+                  title={buttonName}
+                  barColor='grey'
+                  selectedBarColor='green'
+                  height={400}
+                  width={600}
+                />
+              )
+            })}
+          </ScrollView>
 
           <View flex={1}></View>
 

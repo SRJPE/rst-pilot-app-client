@@ -5,6 +5,7 @@ import CatchMeasureQC from "../screens/qcScreens/CatchMeasureQC"
 import CatchCategoricalQC from "../screens/qcScreens/CatchCategoricalQC"
 import CatchFishCountQC from "../screens/qcScreens/CatchFishCountQC"
 import PartialRecordsQC from "../screens/qcScreens/PartialRecordsQc"
+import EfficiencyQC from "../screens/qcScreens/EfficiencyQC"
 
 const DataQualityControl = createStackNavigator()
 
@@ -31,6 +32,10 @@ export default function QCNavigation() {
       <DataQualityControl.Screen
         name='PartialRecordsQC'
         component={PartialRecordsQC}
+      />
+      <DataQualityControl.Screen
+        name='EfficiencyQC'
+        component={EfficiencyQC}
       />
     </DataQualityControl.Navigator>
   )
