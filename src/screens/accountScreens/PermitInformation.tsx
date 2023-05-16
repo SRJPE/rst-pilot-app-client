@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Center, Checkbox, Heading, Text, View, VStack } from 'native-base'
-import { AppLogo } from '../SignIn'
+import AppLogo from '../../components/Shared/AppLogo'
 import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
 
 const PermitInformation = ({ navigation }: { navigation: any }) => {
