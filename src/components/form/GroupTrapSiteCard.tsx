@@ -1,58 +1,41 @@
 import { useEffect, useState } from 'react'
-import { View } from 'native-base'
 import { useFormikContext } from 'formik'
-import {
-  Box,
-  FormControl,
-  Text,
-  VStack,
-  Input,
-  Spacer,
-  Checkbox,
-} from 'native-base'
-import { MaterialIcons } from '@expo/vector-icons'
-import {
-  IndividualTrappingSiteValuesI,
-  TrappingSitesStoreI,
-} from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
-import { GroupTrapSiteValues } from '../multipleTraps/interfaces'
-
-import { current } from '@reduxjs/toolkit'
-import { TouchableWithoutFeedback } from 'react-native'
+import { FormControl, Text, VStack, Input, Checkbox, Flex } from 'native-base'
+import { TrappingSitesStoreI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
+import { GroupTrapKey, GroupTrapSiteValues } from '../multipleTraps/interfaces'
+import { cloneDeep } from 'lodash'
 
 const GroupTrapSiteCard = ({
   trappingSitesStore,
-  dropdownItems,
+  selectedItemsState,
   cardId,
 }: {
-  dropdownItems: any[]
+  selectedItemsState: any[]
   trappingSitesStore: TrappingSitesStoreI
   cardId: number
 }) => {
-  const [selectedItems, setSelectedItems] = dropdownItems
+  const [selectedItems, setSelectedItems] = selectedItemsState
   const [dropdownValue, setDropdownValue] = useState([])
-  const [open, setOpen] = useState(false)
   const trappingSites = Object.values(trappingSitesStore)
 
-  const { setFieldValue, values, touched } =
-    useFormikContext<GroupTrapSiteValues>()
+  const { setFieldValue, values } = useFormikContext<GroupTrapSiteValues>()
+
+  console.log('🚀 ~ values:', values)
+  const cardIdentifier: GroupTrapKey = `trapSiteGroup-${cardId}`
 
   useEffect(() => {
-    setFieldValue(`trapSiteGroup-${cardId}`, {
-      ...values[`trapSiteGroup-${cardId}`],
+    setFieldValue(cardIdentifier, {
+      ...cloneDeep(values[cardIdentifier]),
       groupItems: [...dropdownValue],
     })
     const formattedSelected = dropdownValue.map(value => ({
       value,
-      assignedTo: values[`trapSiteGroup-${cardId}`].trapSiteName,
+      assignedTo: values[cardIdentifier].trapSiteName,
     }))
     setSelectedItems((prevSelected: any) => {
       const filteredArray = prevSelected.filter(
-        (item: any) =>
-          item.assignedTo !== values[`trapSiteGroup-${cardId}`].trapSiteName
+        (item: any) => item.assignedTo !== values[cardIdentifier].trapSiteName
       )
-      console.log('🚀 ~ setSelectedItems ~ filteredArray:', filteredArray)
-
       return [...filteredArray, ...formattedSelected]
     })
   }, [dropdownValue])
@@ -60,46 +43,45 @@ const GroupTrapSiteCard = ({
   return (
     <>
       <VStack
-        w='100%'
         space={5}
-        marginTop={cardId > 3 ? 5 : 0}
+        marginTop={cardId > 2 ? 5 : 0}
         borderWidth={1}
         padding={5}
         borderRadius={5}
+        flexBasis='48%'
+        h='2xs'
+        maxH='sm'
       >
         <FormControl>
           <FormControl.Label>
-            <Text color='black' fontSize='xl'>
+            <Text color='black' fontSize='xl' mb={2}>
               Name of Trapping Site
             </Text>
           </FormControl.Label>
           <Input
-            placeholder='Enter trap site name to make group selections'
+            placeholder='Enter trap site name to make selections'
             height='50px'
             fontSize='16'
             onChangeText={text => {
               const currentKey = Object.keys(values).find(key =>
-                key.includes(`trapSiteGroup-${cardId}`)
+                key.includes(cardIdentifier)
               )
 
               setSelectedItems((prevSelected: any) => {
-                const renamedArray = prevSelected.reduce(
-                  (acc: any, cur: any) => {
-                    if (
-                      cur.assignedTo ===
-                      values[`trapSiteGroup-${cardId}`].trapSiteName
-                    ) {
-                      cur.assignedTo = text
-                    }
-                    acc.push(cur)
-                    return acc
-                  },
-                  []
-                )
+                const stateCopy = cloneDeep(prevSelected)
+                console.log('🚀 ~ setSelectedItems ~ stateCopy:', stateCopy)
+
+                const renamedArray = stateCopy.reduce((acc: any, cur: any) => {
+                  if (cur.assignedTo === values[cardIdentifier].trapSiteName) {
+                    cur.assignedTo = text
+                  }
+                  acc.push(cur)
+                  return acc
+                }, [])
                 return renamedArray
               })
-              setFieldValue(`trapSiteGroup-${cardId}`, {
-                ...values[`trapSiteGroup-${cardId}`],
+              setFieldValue(cardIdentifier, {
+                ...values[cardIdentifier],
                 trapSiteName: text,
               })
             }}
@@ -112,41 +94,43 @@ const GroupTrapSiteCard = ({
               setDropdownValue(values)
             }}
           >
-            {trappingSites.map(site => {
-              const alreadySelected = selectedItems.find(
-                (selectedItem: any) =>
-                  selectedItem.value === site.trapName &&
-                  selectedItem.assignedTo !==
-                    values[`trapSiteGroup-${cardId}`].trapSiteName
-              )
-              const emptyInputValue =
-                values[`trapSiteGroup-${cardId}`].trapSiteName === ''
-              return (
-                <Checkbox
-                  key={site.trapName!}
-                  value={site.trapName!}
-                  mb={3}
-                  isDisabled={alreadySelected || emptyInputValue}
-                >
-                  <Text
-                    color={
-                      alreadySelected || emptyInputValue ? 'gray.400' : 'black'
-                    }
+            <Flex direction='row' wrap='wrap'>
+              {trappingSites.map(site => {
+                const alreadySelected = selectedItems.find(
+                  (selectedItem: any) =>
+                    selectedItem.value === site.trapName &&
+                    selectedItem.assignedTo !==
+                      values[cardIdentifier].trapSiteName
+                )
+                const emptyInputValue =
+                  values[cardIdentifier].trapSiteName === ''
+                return (
+                  <Checkbox
+                    key={site.trapName!}
+                    value={site.trapName!}
+                    mb={3}
+                    mr={5}
+                    _checked={{ bg: 'primary', borderColor: 'primary' }}
+                    isDisabled={alreadySelected || emptyInputValue}
                   >
-                    {!alreadySelected
-                      ? site.trapName
-                      : `${site.trapName} (Currently assigned to ${alreadySelected.assignedTo})`}
-                  </Text>
-                </Checkbox>
-              )
-            })}
+                    <Text
+                      color={
+                        alreadySelected || emptyInputValue
+                          ? 'gray.400'
+                          : 'black'
+                      }
+                    >
+                      {!alreadySelected
+                        ? site.trapName
+                        : `${site.trapName} (Currently assigned to ${alreadySelected.assignedTo})`}
+                    </Text>
+                  </Checkbox>
+                )
+              })}
+            </Flex>
           </Checkbox.Group>
         </FormControl>
       </VStack>
-
-      <Box>
-        <Spacer size={4} />
-      </Box>
     </>
   )
 }

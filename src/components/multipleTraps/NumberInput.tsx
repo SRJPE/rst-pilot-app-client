@@ -4,7 +4,7 @@ import { useFormikContext } from 'formik'
 import { GroupTrapSiteValues } from './interfaces'
 import { MaterialIcons } from '@expo/vector-icons'
 
-const NumberInput = ({ trappingSites }: any) => {
+const NumberInput = ({ trappingSites, setSelectedItems }: any) => {
   const trappingSitesArray = Object.values(trappingSites)
 
   const { values, setFieldValue, setValues } =
@@ -19,6 +19,16 @@ const NumberInput = ({ trappingSites }: any) => {
         onPress={() => {
           if (values.numberOfTrapSites > 0) {
             const valuesCopy = cloneDeep(values)
+            setSelectedItems((prevState: any[]) => {
+              const stateCopy = cloneDeep(prevState)
+              const filteredItems = stateCopy.filter(
+                item =>
+                  item.assignedTo !==
+                  valuesCopy[`trapSiteGroup-${values.numberOfTrapSites}`]
+                    .trapSiteName
+              )
+              return filteredItems
+            })
             delete valuesCopy[`trapSiteGroup-${values.numberOfTrapSites}`]
             valuesCopy.numberOfTrapSites = values.numberOfTrapSites - 1
             setValues(valuesCopy)
@@ -48,7 +58,7 @@ const NumberInput = ({ trappingSites }: any) => {
         w={50}
         h={50}
         onPress={() => {
-          if (values.numberOfTrapSites < trappingSitesArray.length) {
+          if (values.numberOfTrapSites < trappingSitesArray.length + 3) {
             setFieldValue('numberOfTrapSites', values.numberOfTrapSites + 1)
             setFieldValue(`trapSiteGroup-${values.numberOfTrapSites + 1}`, {
               trapSiteName: '',

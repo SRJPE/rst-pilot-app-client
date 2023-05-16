@@ -6,17 +6,21 @@ import {
 } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 import { useFormikContext } from 'formik'
 import { GroupTrapSiteValues } from './interfaces'
-import { Spacer, Box, Divider } from 'native-base'
+import { Spacer, Box, Divider, Flex } from 'native-base'
+import { TouchableWithoutFeedback, Keyboard } from 'react-native'
 
 const GroupTrapSiteRows = ({
   //numberOfTrapSites,
   trappingSitesStore,
+  selectedItemState,
 }: {
   //numberOfTrapSites: number
   trappingSitesStore: TrappingSitesStoreI
+  selectedItemState: any[]
 }) => {
   const trappingSites = Object.values(trappingSitesStore)
-  const [selectedItems, setSelectedItems] = useState([]) as any[]
+  const [selectedItems, setSelectedItems] = selectedItemState
+
   console.log('🚀 ~ selectedItems:', selectedItems)
 
   const [items, setItems] = useState(
@@ -35,14 +39,31 @@ const GroupTrapSiteRows = ({
       <>
         <GroupTrapSiteCard
           trappingSitesStore={trappingSitesStore}
-          dropdownItems={[selectedItems, setSelectedItems]}
+          selectedItemsState={[selectedItems, setSelectedItems]}
           cardId={i}
           key={i}
         />
+        {i % 2 !== 0 && (
+          <Box>
+            <Spacer size={4} />
+          </Box>
+        )}
       </>
     )
   }
-  return <>{elements}</>
+  return (
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <Flex
+        flexDirection='row'
+        flexWrap='wrap'
+        justifyContent='flex-start'
+        width='100%'
+        h='100%'
+      >
+        {elements}
+      </Flex>
+    </TouchableWithoutFeedback>
+  )
 }
 
 export default GroupTrapSiteRows

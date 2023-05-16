@@ -10,7 +10,7 @@ import {
 } from 'native-base'
 import { Formik } from 'formik'
 import { groupTrapSitesSchema } from '../../../utils/helpers/yupValidations'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, TouchableWithoutFeedback, Keyboard } from 'react-native'
 import { RootState } from '../../../redux/store'
 import { connect } from 'react-redux'
 import { TrappingSitesStoreI } from '../../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
@@ -28,6 +28,7 @@ const MultipleTraps = ({
   navigation: any
   trappingSitesStore: TrappingSitesStoreI
 }) => {
+  const [selectedItems, setSelectedItems] = useState([]) as any[]
   const handleGroupTrapSiteSubmission = (values: {
     numberOfTrapSites: number
   }) => {
@@ -62,18 +63,19 @@ const MultipleTraps = ({
                   Number of Trapping Sites
                 </Text>
               </FormControl.Label>
-              <NumberInput trappingSites={trappingSitesStore} />
+              <NumberInput
+                trappingSites={trappingSitesStore}
+                setSelectedItems={setSelectedItems}
+              />
             </FormControl>
             <Divider thickness='3' my='2%' width='95%' />
-            <ChipsDisplay trappingSitesStore={trappingSitesStore} />
-            <Divider thickness='3' my='2%' width='95%' />
-            <Flex
-              flexDirection='row'
-              flexWrap='wrap'
-              justifyContent='flex-start'
-            >
-              <GroupTrapSiteRows trappingSitesStore={trappingSitesStore} />
-            </Flex>
+            {/* <ChipsDisplay trappingSitesStore={trappingSitesStore} />
+            <Divider thickness='3' my='2%' width='95%' /> */}
+
+            <GroupTrapSiteRows
+              trappingSitesStore={trappingSitesStore}
+              selectedItemState={[selectedItems, setSelectedItems]}
+            />
           </>
         </Formik>
       </View>
