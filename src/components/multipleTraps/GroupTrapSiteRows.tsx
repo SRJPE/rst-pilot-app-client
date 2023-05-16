@@ -1,17 +1,31 @@
-import React from 'react'
+import React, { useState } from 'react'
 import GroupTrapSiteCard from '../form/GroupTrapSiteCard'
-import { IndividualTrappingSiteValuesI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
+import {
+  IndividualTrappingSiteValuesI,
+  TrappingSitesStoreI,
+} from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 import { useFormikContext } from 'formik'
 import { GroupTrapSiteValues } from './interfaces'
 import { Spacer, Box, Divider } from 'native-base'
 
 const GroupTrapSiteRows = ({
   //numberOfTrapSites,
-  trappingSites,
+  trappingSitesStore,
 }: {
   //numberOfTrapSites: number
-  trappingSites: IndividualTrappingSiteValuesI[]
+  trappingSitesStore: TrappingSitesStoreI
 }) => {
+  const trappingSites = Object.values(trappingSitesStore)
+  const [selectedItems, setSelectedItems] = useState([]) as any[]
+  console.log('🚀 ~ selectedItems:', selectedItems)
+
+  const [items, setItems] = useState(
+    trappingSites.map(site => ({
+      label: site.trapName!,
+      value: site.trapName!,
+      disabled: false,
+    }))
+  )
   const {
     values: { numberOfTrapSites },
   } = useFormikContext<GroupTrapSiteValues>()
@@ -19,7 +33,12 @@ const GroupTrapSiteRows = ({
   for (let i = 1; i <= numberOfTrapSites; i++) {
     elements.push(
       <>
-        <GroupTrapSiteCard trappingSites={trappingSites} cardId={i} key={i} />
+        <GroupTrapSiteCard
+          trappingSitesStore={trappingSitesStore}
+          dropdownItems={[selectedItems, setSelectedItems]}
+          cardId={i}
+          key={i}
+        />
       </>
     )
   }

@@ -88,21 +88,6 @@ const TrappingSites = ({
               (b) there are multiple trap locations that are rotated through
               time but all trap locations represent the same site location.{' '}
             </Text>
-            <Button
-              alignSelf='flex-start'
-              bg='primary'
-              width='45%'
-              height='20'
-              rounded='xs'
-              borderRadius='5'
-              shadow='2'
-              mt={5}
-              onPress={() => {}}
-            >
-              <Text fontSize='xl' fontWeight='bold' color='white'>
-                Group
-              </Text>
-            </Button>
           </VStack>
         </Box>
         <CreateNewProgramNavButtons navigation={navigation} />

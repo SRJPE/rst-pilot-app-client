@@ -19,6 +19,7 @@ import NumberInput from '../../../components/multipleTraps/NumberInput'
 import ChipsDisplay from '../../../components/multipleTraps/ChipsDisplay'
 import { GroupTrapSiteValues } from '../../../components/multipleTraps/interfaces'
 import GroupTrapSiteRows from '../../../components/multipleTraps/GroupTrapSiteRows'
+import { useState, useCallback } from 'react'
 
 const MultipleTraps = ({
   navigation,
@@ -32,6 +33,7 @@ const MultipleTraps = ({
   }) => {
     // dispatch(saveIndividualCrewMember(values))
   }
+
   return (
     <>
       <View
@@ -39,7 +41,6 @@ const MultipleTraps = ({
         //justifyContent='center'
         alignItems='center'
         bg='hsl(0,0%, 100%)'
-        borderWidth={2}
         padding={5}
       >
         <Formik
@@ -71,9 +72,7 @@ const MultipleTraps = ({
               flexWrap='wrap'
               justifyContent='flex-start'
             >
-              <GroupTrapSiteRows
-                trappingSites={Object.values(trappingSitesStore)}
-              />
+              <GroupTrapSiteRows trappingSitesStore={trappingSitesStore} />
             </Flex>
           </>
         </Formik>

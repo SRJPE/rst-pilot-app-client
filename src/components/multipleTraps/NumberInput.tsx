@@ -2,6 +2,7 @@ import { HStack, Button, Text, Input } from 'native-base'
 import { cloneDeep } from 'lodash'
 import { useFormikContext } from 'formik'
 import { GroupTrapSiteValues } from './interfaces'
+import { MaterialIcons } from '@expo/vector-icons'
 
 const NumberInput = ({ trappingSites }: any) => {
   const trappingSitesArray = Object.values(trappingSites)
@@ -14,6 +15,7 @@ const NumberInput = ({ trappingSites }: any) => {
         size='sm'
         bg='primary'
         w={50}
+        h={50}
         onPress={() => {
           if (values.numberOfTrapSites > 0) {
             const valuesCopy = cloneDeep(values)
@@ -23,7 +25,9 @@ const NumberInput = ({ trappingSites }: any) => {
           }
         }}
       >
-        <Text color='white'>-</Text>
+        <Text color='white' fontSize={28} paddingBottom={10}>
+          -
+        </Text>
       </Button>
       <Input
         height='50px'
@@ -42,6 +46,7 @@ const NumberInput = ({ trappingSites }: any) => {
         size='sm'
         bg='primary'
         w={50}
+        h={50}
         onPress={() => {
           if (values.numberOfTrapSites < trappingSitesArray.length) {
             setFieldValue('numberOfTrapSites', values.numberOfTrapSites + 1)
@@ -52,7 +57,9 @@ const NumberInput = ({ trappingSites }: any) => {
           }
         }}
       >
-        <Text color='white'>+</Text>
+        <Text color='white' fontSize={24} paddingBottom={10}>
+          +
+        </Text>
       </Button>
     </HStack>
   )
