@@ -30,9 +30,11 @@ const TrappingSites = ({
   trappingSitesStore: TrappingSitesStoreI
 }) => {
   const [addTrapModalOpen, setAddTrapModalOpen] = useState(false as boolean)
+  const trapSitesArray = Object.values(trappingSitesStore)
 
   useEffect(() => {
-    if (Object.values(trappingSitesStore).length === 0) {
+    console.log('🚀 ~ trapSitesArray:', trapSitesArray)
+    if (trapSitesArray.length === 0) {
       setAddTrapModalOpen(true)
     }
   }, [])
@@ -40,11 +42,13 @@ const TrappingSites = ({
     <>
       <View bg='#fff' flex={1}>
         <Box flex={1} bg='#fff'>
-          <Center bg='primary' py='5%'>
-            <AppLogo imageSize={200} />
+          <Center bg='primary' py={5}>
+            <AppLogo imageSize={100} />
           </Center>
-          <Heading alignSelf='center'>Trapping Sites</Heading>
-          <ScrollView h={300}>
+          <Heading mt={5} alignSelf='center'>
+            Trapping Sites
+          </Heading>
+          <ScrollView h={300} p={5}>
             <TrappingSitesDataTable />
           </ScrollView>
           <VStack py='5%' px='10%' space={5}>
@@ -64,33 +68,42 @@ const TrappingSites = ({
             </Pressable>
           </VStack>
         </Box>
-        <Box
-          bg='secondary'
-          // h='23%'
-          mx='5%'
-          borderRadius={20}
-          alignSelf='flex-end'
-        >
-          <VStack m='3%'>
-            <Text fontSize='2xl' mb='4'>
-              You Added multiple traps to one stream. Do these traps belong to a
-              single site?
-            </Text>
-            <Text fontSize='md' mb='4'>
-              A site is a monitoring location with multiple traps that are
-              either:
-            </Text>
-            <Text fontSize='md'>
-              (a) being run simultaneously and can be summed together to
-              represent daily catch; or
-            </Text>
-            <Text fontSize='md'>
-              (b) there are multiple trap locations that are rotated through
-              time but all trap locations represent the same site location.{' '}
-            </Text>
-          </VStack>
-        </Box>
-        <CreateNewProgramNavButtons navigation={navigation} />
+        {trapSitesArray.length > 1 && (
+          <Box
+            bg='secondary'
+            // h='23%'
+            mx='5%'
+            mb={5}
+            borderRadius={20}
+            alignSelf='flex-end'
+          >
+            <VStack m='3%'>
+              <Text fontSize='2xl' mb='4'>
+                You Added multiple traps to one stream. Do these traps belong to
+                a single site?
+              </Text>
+              <Text fontSize='md' mb='4'>
+                A site is a monitoring location with multiple traps that are
+                either:
+              </Text>
+              <Text fontSize='md'>
+                (a) being run simultaneously and can be summed together to
+                represent daily catch; or
+              </Text>
+              <Text fontSize='md'>
+                (b) there are multiple trap locations that are rotated through
+                time but all trap locations represent the same site location.{' '}
+              </Text>
+              <CreateNewProgramNavButtons
+                navigation={navigation}
+                variant='multipleTrapsDialog'
+              />
+            </VStack>
+          </Box>
+        )}
+        {trapSitesArray.length <= 1 && (
+          <CreateNewProgramNavButtons navigation={navigation} />
+        )}
       </View>
       {/* --------- Modals --------- */}
       <CustomModal

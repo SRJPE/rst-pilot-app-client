@@ -49,8 +49,9 @@ const GroupTrapSiteCard = ({
         padding={5}
         borderRadius={5}
         flexBasis='48%'
-        h='2xs'
-        maxH='sm'
+        minH='2xs'
+        //height='md'
+        //maxH='md'
       >
         <FormControl>
           <FormControl.Label>
@@ -88,6 +89,7 @@ const GroupTrapSiteCard = ({
           />
         </FormControl>
         <FormControl>
+          <FormControl.Label marginBottom={2}>Traps:</FormControl.Label>
           <Checkbox.Group
             value={dropdownValue}
             onChange={values => {

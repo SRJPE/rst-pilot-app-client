@@ -7,7 +7,7 @@ import {
 import { useFormikContext } from 'formik'
 import { GroupTrapSiteValues } from './interfaces'
 import { Spacer, Box, Divider, Flex } from 'native-base'
-import { TouchableWithoutFeedback, Keyboard } from 'react-native'
+import { TouchableWithoutFeedback, Keyboard, ScrollView } from 'react-native'
 
 const GroupTrapSiteRows = ({
   //numberOfTrapSites,
@@ -18,18 +18,10 @@ const GroupTrapSiteRows = ({
   trappingSitesStore: TrappingSitesStoreI
   selectedItemState: any[]
 }) => {
-  const trappingSites = Object.values(trappingSitesStore)
   const [selectedItems, setSelectedItems] = selectedItemState
 
   console.log('🚀 ~ selectedItems:', selectedItems)
 
-  const [items, setItems] = useState(
-    trappingSites.map(site => ({
-      label: site.trapName!,
-      value: site.trapName!,
-      disabled: false,
-    }))
-  )
   const {
     values: { numberOfTrapSites },
   } = useFormikContext<GroupTrapSiteValues>()
@@ -53,15 +45,18 @@ const GroupTrapSiteRows = ({
   }
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <Flex
-        flexDirection='row'
-        flexWrap='wrap'
-        justifyContent='flex-start'
-        width='100%'
-        h='100%'
-      >
-        {elements}
-      </Flex>
+      <ScrollView style={{ width: '100%' }}>
+        <Flex
+          flexDirection='row'
+          flexWrap='wrap'
+          justifyContent='flex-start'
+          //alignItems=''
+          //width='100%'
+          h='100%'
+        >
+          {elements}
+        </Flex>
+      </ScrollView>
     </TouchableWithoutFeedback>
   )
 }

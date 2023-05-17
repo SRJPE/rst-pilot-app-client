@@ -17,7 +17,7 @@ const NumberInput = ({ trappingSites, setSelectedItems }: any) => {
         w={50}
         h={50}
         onPress={() => {
-          if (values.numberOfTrapSites > 0) {
+          if (values.numberOfTrapSites > 1) {
             const valuesCopy = cloneDeep(values)
             setSelectedItems((prevState: any[]) => {
               const stateCopy = cloneDeep(prevState)

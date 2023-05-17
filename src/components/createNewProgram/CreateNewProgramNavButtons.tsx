@@ -4,8 +4,38 @@ import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { useRoute } from '@react-navigation/native'
 
-const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
+const CreateNewProgramNavButtons = ({
+  navigation,
+  variant,
+}: {
+  navigation?: any
+  variant?: string
+}) => {
   const activePage = useRoute().name
+
+  const isMultipleTrapsVariant = variant === 'multipleTrapsDialog'
+
+  const { leftButtonText, rightButtonText } = (() => {
+    switch (activePage) {
+      case 'Trapping Sites':
+        if (isMultipleTrapsVariant) {
+          return {
+            leftButtonText: 'Save and Exit',
+            rightButtonText: 'Group Traps',
+          }
+        } else {
+          return { leftButtonText: 'Back', rightButtonText: 'Next' }
+        }
+      case 'Multiple Traps':
+        console.log('🚀 ~ activePage:', activePage)
+        return {
+          leftButtonText: 'Cancel',
+          rightButtonText: 'Save',
+        }
+      default:
+        return { leftButtonText: 'Back', rightButtonText: 'Next' }
+    }
+  })()
 
   const handleRightButton = () => {
     switch (activePage) {
@@ -15,10 +45,21 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
         })
         break
       case 'Trapping Sites':
-        navigation.navigate('Create New Program', {
-          screen: 'Multiple Traps',
-        })
+        if (isMultipleTrapsVariant) {
+          //*****
+          // Add dispatch function to save trap site group data to redux store
+          //*****
+          navigation.navigate('Create New Program', {
+            screen: 'Multiple Traps',
+          })
+        } else {
+          console.log('Navigating to next Screen')
+        }
         break
+      case 'Multiple Traps':
+        navigation.navigate('Create New Program', {
+          screen: 'Trapping Sites',
+        })
 
       default:
         console.log('Default hit')
@@ -37,11 +78,16 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
   }
 
   return (
-    <Box bg='#fff' py='8' maxWidth='100%'>
+    <Box
+      bg={isMultipleTrapsVariant ? 'transparent' : '#fff'}
+      p={isMultipleTrapsVariant ? 0 : 8}
+      pt={8}
+      maxWidth='100%'
+    >
       <HStack justifyContent='space-evenly'>
         <Button
           alignSelf='flex-start'
-          bg='secondary'
+          bg={isMultipleTrapsVariant ? 'primary' : 'secondary'}
           width='45%'
           height='20'
           rounded='xs'
@@ -50,8 +96,12 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
           isDisabled={disableLeftButton()}
           onPress={() => handleLeftButton()}
         >
-          <Text fontSize='xl' fontWeight='bold' color='primary'>
-            Back
+          <Text
+            fontSize='xl'
+            fontWeight='bold'
+            color={isMultipleTrapsVariant ? 'white' : 'primary'}
+          >
+            {leftButtonText}
           </Text>
         </Button>
         <Button
@@ -66,7 +116,7 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
           onPress={() => handleRightButton()}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
-            Next
+            {rightButtonText}
           </Text>
         </Button>
       </HStack>

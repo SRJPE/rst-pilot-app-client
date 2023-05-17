@@ -48,7 +48,8 @@ const MultipleTraps = ({
           validationSchema={groupTrapSitesSchema}
           initialValues={
             {
-              numberOfTrapSites: 0,
+              numberOfTrapSites: 1,
+              'trapSiteGroup-1': { groupItems: [], trapSiteName: '' },
             } as GroupTrapSiteValues
           }
           onSubmit={(values, { resetForm }) => {
