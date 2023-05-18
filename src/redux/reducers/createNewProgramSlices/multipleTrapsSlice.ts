@@ -1,20 +1,24 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
 
-interface InitialStateI {
+type TrapGroup = { trapSiteName: string; groupItems: any[] }
+type GroupTrapKey = `trapSiteGroup-${number}`
+// | 'trapSiteGroup-1'| 'trapSiteGroup-2' | 'trapSiteGroup-3' | 'trapSiteGroup-4' | 'trapSiteGroup-5' | 'trapSiteGroup-6'
+export interface GroupTrapSiteValuesI {
+  numberOfTrapSites?: number
+  [key: GroupTrapKey]: TrapGroup
+}
+
+export interface MultipleTrapsInitialStateI {
   completed: boolean
-  numberOfTrappingSites: number | null
-  multipleTrapsStore: MultipleTrapsStoreI
+  groupTrapSiteValues: GroupTrapSiteValuesI
 }
 
-const initialState: InitialStateI = {
+const initialState: MultipleTrapsInitialStateI = {
   completed: false,
-  numberOfTrappingSites: null,
-  multipleTrapsStore: {},
-}
-
-export interface MultipleTrapsStoreI {
-  [siteName: string]: Array<string>
+  groupTrapSiteValues: {
+    'trapSiteGroup-1': { groupItems: [], trapSiteName: '' },
+  },
 }
 
 export const multipleTrapsSlice = createSlice({
@@ -23,9 +27,11 @@ export const multipleTrapsSlice = createSlice({
   reducers: {
     resetTrappingSitesSlice: () => initialState,
     saveMultipleTraps: (state, action) => {
-      let multipleTrapsStoreCopy = cloneDeep(state.multipleTrapsStore)
-      console.log('🚀 ~ payload:', action.payload)
-      console.log('🚀 ~ multipleTrapsStoreCopy:', multipleTrapsStoreCopy)
+      let multipleTrapsStorePayload = cloneDeep(action.payload)
+      delete multipleTrapsStorePayload.numberOfTrapSites
+
+      state.groupTrapSiteValues = multipleTrapsStorePayload
+      console.log('🚀 ~ state:', state)
     },
   },
 })

@@ -7,9 +7,11 @@ import { useRoute } from '@react-navigation/native'
 const CreateNewProgramNavButtons = ({
   navigation,
   variant,
+  handleSubmit,
 }: {
   navigation?: any
   variant?: string
+  handleSubmit?: Function
 }) => {
   const activePage = useRoute().name
 
@@ -27,7 +29,6 @@ const CreateNewProgramNavButtons = ({
           return { leftButtonText: 'Back', rightButtonText: 'Next' }
         }
       case 'Multiple Traps':
-        console.log('🚀 ~ activePage:', activePage)
         return {
           leftButtonText: 'Cancel',
           rightButtonText: 'Save',
@@ -37,7 +38,7 @@ const CreateNewProgramNavButtons = ({
     }
   })()
 
-  const handleRightButton = () => {
+  const handleRightButton = async () => {
     switch (activePage) {
       case 'Permit Information':
         navigation.navigate('Create New Program', {
@@ -46,9 +47,6 @@ const CreateNewProgramNavButtons = ({
         break
       case 'Trapping Sites':
         if (isMultipleTrapsVariant) {
-          //*****
-          // Add dispatch function to save trap site group data to redux store
-          //*****
           navigation.navigate('Create New Program', {
             screen: 'Multiple Traps',
           })
@@ -57,10 +55,14 @@ const CreateNewProgramNavButtons = ({
         }
         break
       case 'Multiple Traps':
+        //*****
+        // Add dispatch function to save trap site group data to redux store
+        //*****
+        handleSubmit && handleSubmit()
         navigation.navigate('Create New Program', {
           screen: 'Trapping Sites',
         })
-
+        break
       default:
         console.log('Default hit')
         break

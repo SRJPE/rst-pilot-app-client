@@ -4,31 +4,43 @@ import { FormControl, Text, VStack, Input, Checkbox, Flex } from 'native-base'
 import { TrappingSitesStoreI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 import { GroupTrapKey, GroupTrapSiteValues } from '../multipleTraps/interfaces'
 import { cloneDeep } from 'lodash'
+import {
+  GroupTrapSiteValuesI,
+  MultipleTrapsInitialStateI,
+} from '../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
 
 const GroupTrapSiteCard = ({
   trappingSitesStore,
   selectedItemsState,
   cardId,
+  multipleTrapSitesStore,
 }: {
   selectedItemsState: any[]
   trappingSitesStore: TrappingSitesStoreI
+  multipleTrapSitesStore: GroupTrapSiteValuesI
   cardId: number
 }) => {
   const [selectedItems, setSelectedItems] = selectedItemsState
-  const [dropdownValue, setDropdownValue] = useState([])
+  const [selectedCheckboxes, setSelectedCheckboxes] = useState<string[]>([])
+
   const trappingSites = Object.values(trappingSitesStore)
 
   const { setFieldValue, values } = useFormikContext<GroupTrapSiteValues>()
 
-  console.log('🚀 ~ values:', values)
   const cardIdentifier: GroupTrapKey = `trapSiteGroup-${cardId}`
+
+  useEffect(() => {
+    const cardValues = values[cardIdentifier]
+
+    setSelectedCheckboxes(cardValues.groupItems)
+  }, [cardIdentifier])
 
   useEffect(() => {
     setFieldValue(cardIdentifier, {
       ...cloneDeep(values[cardIdentifier]),
-      groupItems: [...dropdownValue],
+      groupItems: [...selectedCheckboxes],
     })
-    const formattedSelected = dropdownValue.map(value => ({
+    const formattedSelected = selectedCheckboxes.map(value => ({
       value,
       assignedTo: values[cardIdentifier].trapSiteName,
     }))
@@ -36,14 +48,16 @@ const GroupTrapSiteCard = ({
       const filteredArray = prevSelected.filter(
         (item: any) => item.assignedTo !== values[cardIdentifier].trapSiteName
       )
+
       return [...filteredArray, ...formattedSelected]
     })
-  }, [dropdownValue])
+  }, [selectedCheckboxes])
 
   return (
     <>
       <VStack
         space={5}
+        bgColor={'secondary'}
         marginTop={cardId > 2 ? 5 : 0}
         borderWidth={1}
         padding={5}
@@ -63,6 +77,7 @@ const GroupTrapSiteCard = ({
             placeholder='Enter trap site name to make selections'
             height='50px'
             fontSize='16'
+            defaultValue={values[cardIdentifier].trapSiteName}
             onChangeText={text => {
               const currentKey = Object.keys(values).find(key =>
                 key.includes(cardIdentifier)
@@ -70,7 +85,6 @@ const GroupTrapSiteCard = ({
 
               setSelectedItems((prevSelected: any) => {
                 const stateCopy = cloneDeep(prevSelected)
-                console.log('🚀 ~ setSelectedItems ~ stateCopy:', stateCopy)
 
                 const renamedArray = stateCopy.reduce((acc: any, cur: any) => {
                   if (cur.assignedTo === values[cardIdentifier].trapSiteName) {
@@ -91,12 +105,12 @@ const GroupTrapSiteCard = ({
         <FormControl>
           <FormControl.Label marginBottom={2}>Traps:</FormControl.Label>
           <Checkbox.Group
-            value={dropdownValue}
+            value={selectedCheckboxes}
             onChange={values => {
-              setDropdownValue(values)
+              setSelectedCheckboxes(values)
             }}
           >
-            <Flex direction='row' wrap='wrap'>
+            <Flex direction='column' wrap='nowrap'>
               {trappingSites.map(site => {
                 const alreadySelected = selectedItems.find(
                   (selectedItem: any) =>
@@ -138,8 +152,3 @@ const GroupTrapSiteCard = ({
 }
 
 export default GroupTrapSiteCard
-
-interface DropdownValues {
-  value: string
-  label: string
-}

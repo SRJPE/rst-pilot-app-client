@@ -8,19 +8,23 @@ import { useFormikContext } from 'formik'
 import { GroupTrapSiteValues } from './interfaces'
 import { Spacer, Box, Divider, Flex } from 'native-base'
 import { TouchableWithoutFeedback, Keyboard, ScrollView } from 'react-native'
+import {
+  GroupTrapSiteValuesI,
+  MultipleTrapsInitialStateI,
+} from '../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
 
 const GroupTrapSiteRows = ({
   //numberOfTrapSites,
   trappingSitesStore,
   selectedItemState,
+  multipleTrapSitesStore,
 }: {
   //numberOfTrapSites: number
   trappingSitesStore: TrappingSitesStoreI
+  multipleTrapSitesStore: GroupTrapSiteValuesI
   selectedItemState: any[]
 }) => {
   const [selectedItems, setSelectedItems] = selectedItemState
-
-  console.log('🚀 ~ selectedItems:', selectedItems)
 
   const {
     values: { numberOfTrapSites },
@@ -30,6 +34,7 @@ const GroupTrapSiteRows = ({
     elements.push(
       <>
         <GroupTrapSiteCard
+          multipleTrapSitesStore={multipleTrapSitesStore}
           trappingSitesStore={trappingSitesStore}
           selectedItemsState={[selectedItems, setSelectedItems]}
           cardId={i}
