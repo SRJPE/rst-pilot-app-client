@@ -40,18 +40,15 @@ const TrappingSites = ({
   }, [])
   return (
     <>
-      <View bg='#fff' flex={1}>
+      <View bg='#fff' flex={1} px={6}>
         <Box flex={1} bg='#fff'>
-          <Center bg='primary' py={5}>
-            <AppLogo imageSize={100} />
-          </Center>
-          <Heading mt={5} alignSelf='center'>
+          <Heading mt={5} alignSelf='left'>
             Trapping Sites
           </Heading>
-          <ScrollView h={300} p={5}>
+          <ScrollView h={300}>
             <TrappingSitesDataTable />
           </ScrollView>
-          <VStack py='5%' px='10%' space={5}>
+          <VStack my='5%' space={5}>
             <Pressable onPress={() => setAddTrapModalOpen(true)}>
               <HStack alignItems='center'>
                 <Icon
@@ -72,7 +69,7 @@ const TrappingSites = ({
           <Box
             bg='secondary'
             // h='23%'
-            mx='5%'
+            //mx='5%'
             mb={5}
             borderRadius={20}
             alignSelf='flex-end'

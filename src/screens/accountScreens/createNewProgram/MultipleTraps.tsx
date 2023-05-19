@@ -1,13 +1,4 @@
-import {
-  Text,
-  View,
-  Divider,
-  HStack,
-  Box,
-  Flex,
-  VStack,
-  FormControl,
-} from 'native-base'
+import { Text, View, Divider, Heading, FormControl } from 'native-base'
 import { Formik } from 'formik'
 import { groupTrapSitesSchema } from '../../../utils/helpers/yupValidations'
 import { RootState } from '../../../redux/store'
@@ -16,11 +7,9 @@ import { TrappingSitesStoreI } from '../../../redux/reducers/createNewProgramSli
 import { GroupTrapSiteValuesI } from '../../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
 import NumberInput from '../../../components/multipleTraps/NumberInput'
-import ChipsDisplay from '../../../components/multipleTraps/ChipsDisplay'
-import GroupTrapSiteRows from '../../../components/multipleTraps/GroupTrapSiteRows'
-import { useState, useCallback, useEffect } from 'react'
-import { clone, cloneDeep } from 'lodash'
-import { numOfFormSteps } from '../../../redux/reducers/formSlices/navigationSlice'
+import GroupTrapSiteCards from '../../../components/multipleTraps/GroupTrapSiteCards'
+import { useState, useEffect } from 'react'
+import { cloneDeep } from 'lodash'
 import { AppDispatch } from '../../../redux/store'
 import { saveMultipleTraps } from '../../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
 
@@ -52,18 +41,14 @@ const MultipleTraps = ({
   const dispatch = useDispatch<AppDispatch>()
   const handleGroupTrapSiteSubmission = (values: GroupTrapSiteValuesI) => {
     dispatch(saveMultipleTraps(values))
-    //saveMultipleTraps
   }
 
   return (
     <>
-      <View
-        flex={1}
-        //justifyContent='center'
-        alignItems='center'
-        bg='hsl(0,0%, 100%)'
-        padding={5}
-      >
+      <View flex={1} alignItems='center' bg='hsl(0,0%, 100%)' padding={6}>
+        <Heading mb={5} alignSelf='left'>
+          Group Traps into Sites
+        </Heading>
         <Formik
           validationSchema={groupTrapSitesSchema}
           initialValues={{
@@ -79,9 +64,9 @@ const MultipleTraps = ({
           {({ values }) => (
             <>
               <FormControl>
-                <FormControl.Label>
+                <FormControl.Label mb={3}>
                   <Text color='black' fontSize='xl'>
-                    Number of Trapping Sites
+                    Please indicate the number of trapping sites
                   </Text>
                 </FormControl.Label>
                 <NumberInput
@@ -89,11 +74,8 @@ const MultipleTraps = ({
                   setSelectedItems={setSelectedItems}
                 />
               </FormControl>
-              <Divider thickness='3' my='2%' width='95%' />
-              {/* <ChipsDisplay trappingSitesStore={trappingSitesStore} />
-            <Divider thickness='3' my='2%' width='95%' /> */}
-
-              <GroupTrapSiteRows
+              <Divider thickness='3' my={6} width='98%' />
+              <GroupTrapSiteCards
                 trappingSitesStore={trappingSitesStore}
                 multipleTrapSitesStore={multipleTrapsStore}
                 selectedItemState={[selectedItems, setSelectedItems]}

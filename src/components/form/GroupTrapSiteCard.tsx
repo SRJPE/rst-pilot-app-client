@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useFormikContext } from 'formik'
-import { FormControl, Text, VStack, Input, Checkbox, Flex } from 'native-base'
+import {
+  FormControl,
+  Text,
+  VStack,
+  Input,
+  Checkbox,
+  Flex,
+  Box,
+} from 'native-base'
 import { TrappingSitesStoreI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 import { GroupTrapKey, GroupTrapSiteValues } from '../multipleTraps/interfaces'
 import { cloneDeep } from 'lodash'
-import {
-  GroupTrapSiteValuesI,
-  MultipleTrapsInitialStateI,
-} from '../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
+import { GroupTrapSiteValuesI } from '../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
 
 const GroupTrapSiteCard = ({
   trappingSitesStore,
@@ -59,10 +64,10 @@ const GroupTrapSiteCard = ({
         space={5}
         bgColor={'secondary'}
         marginTop={cardId > 2 ? 5 : 0}
-        borderWidth={1}
+        shadow={5}
         padding={5}
-        borderRadius={5}
-        flexBasis='48%'
+        borderRadius={20}
+        flexBasis='48.5%'
         minH='2xs'
         //height='md'
         //maxH='md'
@@ -77,6 +82,11 @@ const GroupTrapSiteCard = ({
             placeholder='Enter trap site name to make selections'
             height='50px'
             fontSize='16'
+            bg='white'
+            borderColor='hsla(0,0%,0%,.55)'
+            _input={{
+              borderColor: 'black',
+            }}
             defaultValue={values[cardIdentifier].trapSiteName}
             onChangeText={text => {
               const currentKey = Object.keys(values).find(key =>
@@ -110,7 +120,7 @@ const GroupTrapSiteCard = ({
               setSelectedCheckboxes(values)
             }}
           >
-            <Flex direction='column' wrap='nowrap'>
+            <Flex direction='row' wrap='wrap'>
               {trappingSites.map(site => {
                 const alreadySelected = selectedItems.find(
                   (selectedItem: any) =>
@@ -121,26 +131,30 @@ const GroupTrapSiteCard = ({
                 const emptyInputValue =
                   values[cardIdentifier].trapSiteName === ''
                 return (
-                  <Checkbox
-                    key={site.trapName!}
-                    value={site.trapName!}
+                  <Box
+                    bg='hsl(13, 80%, 86%)'
                     mb={3}
-                    mr={5}
-                    _checked={{ bg: 'primary', borderColor: 'primary' }}
-                    isDisabled={alreadySelected || emptyInputValue}
+                    mr={2}
+                    p={3}
+                    borderRadius={50}
+                    display={alreadySelected ? 'none' : 'default'}
                   >
-                    <Text
-                      color={
-                        alreadySelected || emptyInputValue
-                          ? 'gray.400'
-                          : 'black'
-                      }
+                    <Checkbox
+                      key={site.trapName!}
+                      value={site.trapName!}
+                      _checked={{ bg: 'primary', borderColor: 'primary' }}
+                      isDisabled={alreadySelected || emptyInputValue}
+                      style={{
+                        borderRadius: 50,
+                        borderColor: 'hsla(0,0%,0%,.6)',
+                        borderWidth: 1,
+                      }}
                     >
-                      {!alreadySelected
-                        ? site.trapName
-                        : `${site.trapName} (Currently assigned to ${alreadySelected.assignedTo})`}
-                    </Text>
-                  </Checkbox>
+                      <Text color={'white'} fontSize={16} fontWeight={700}>
+                        {site.trapName}
+                      </Text>
+                    </Checkbox>
+                  </Box>
                 )
               })}
             </Flex>

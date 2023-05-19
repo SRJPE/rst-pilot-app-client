@@ -1,7 +1,5 @@
 import React from 'react'
-import { Box, HStack, Text, Button, Icon } from 'native-base'
-import { useSelector, useDispatch } from 'react-redux'
-import { AppDispatch } from '../../redux/store'
+import { Box, HStack, Text, Button } from 'native-base'
 import { useRoute } from '@react-navigation/native'
 
 const CreateNewProgramNavButtons = ({
@@ -82,8 +80,9 @@ const CreateNewProgramNavButtons = ({
   return (
     <Box
       bg={isMultipleTrapsVariant ? 'transparent' : '#fff'}
-      p={isMultipleTrapsVariant ? 0 : 8}
-      pt={8}
+      p={8}
+      pb={isMultipleTrapsVariant ? 3 : 8}
+      mx={isMultipleTrapsVariant ? 4 : 0}
       maxWidth='100%'
     >
       <HStack justifyContent='space-evenly'>
