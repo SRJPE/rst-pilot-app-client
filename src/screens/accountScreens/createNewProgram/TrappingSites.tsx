@@ -33,7 +33,6 @@ const TrappingSites = ({
   const trapSitesArray = Object.values(trappingSitesStore)
 
   useEffect(() => {
-    console.log('🚀 ~ trapSitesArray:', trapSitesArray)
     if (trapSitesArray.length === 0) {
       setAddTrapModalOpen(true)
     }
@@ -42,15 +41,15 @@ const TrappingSites = ({
     <>
       <View bg='#fff' flex={1} px={6}>
         <Box flex={1} bg='#fff'>
-          <Heading mt={5} alignSelf='left'>
-            Trapping Sites
-          </Heading>
-          <ScrollView h={300}>
-            <TrappingSitesDataTable />
-          </ScrollView>
-          <VStack my='5%' space={5}>
+          <HStack
+            my={5}
+            space={5}
+            alignItems='center'
+            justifyContent='space-between'
+          >
+            <Heading alignSelf='left'>Trapping Sites</Heading>
             <Pressable onPress={() => setAddTrapModalOpen(true)}>
-              <HStack alignItems='center'>
+              <HStack alignItems='center' justifyContent='flex-end'>
                 <Icon
                   as={Ionicons}
                   name={'add-circle'}
@@ -63,7 +62,10 @@ const TrappingSites = ({
                 </Text>
               </HStack>
             </Pressable>
-          </VStack>
+          </HStack>
+          <ScrollView h={300}>
+            <TrappingSitesDataTable />
+          </ScrollView>
         </Box>
         {trapSitesArray.length > 1 && (
           <Box
