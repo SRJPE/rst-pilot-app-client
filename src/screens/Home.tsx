@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Text, VStack, CircleIcon, Heading, View } from 'native-base'
+import { Text, VStack, Heading, View, IconButton } from 'native-base'
 import BottomNavigation from '../components/home/HomeNavButtons'
 import { StyleSheet } from 'react-native'
 import AppLogo from '../components/Shared/AppLogo'
+import { Entypo } from '@expo/vector-icons'
 
 const styles = StyleSheet.create({
-  landingContent: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
   recentItemsContainer: {
     minHeight: 75,
     alignSelf: 'flex-end',
@@ -76,23 +71,31 @@ export default function Home({ navigation }: { navigation: any }) {
 
   return (
     <VStack
-      height='full'
+      flex={1}
+      space={5}
       alignItems='center'
       justifyContent='space-between'
+      bg='#FFFFFF'
       // opacity={staggerOpen ? 0.25 : 1.0}
     >
-      <View style={styles.landingContent}>
-        <View my='12'>
-          <AppLogo addBorder imageSize={375} />
-        </View>
-        <Heading fontWeight={300} fontSize={50} marginTop={5}>
-          Welcome!
-        </Heading>
-        <Text fontWeight={300} fontSize={23} marginTop={5}>
-          Select the action you would like to perform.
-        </Text>
+      <View ml='10' mt='10' alignSelf='flex-start'>
+        <IconButton
+          onPress={() => navigation.openDrawer()}
+          _icon={{
+            as: Entypo,
+            name: 'menu',
+            size: 12,
+            color: 'primary',
+          }}
+        />
       </View>
-
+      <AppLogo imageSize={400} />
+      <Heading fontWeight={300} fontSize={50}>
+        Welcome!
+      </Heading>
+      <Text fontWeight={300} fontSize={23}>
+        Select the action you would like to perform.
+      </Text>
       <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
         <Text fontWeight={300} fontSize={20} marginBottom={5}>
           Recent Items

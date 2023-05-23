@@ -13,13 +13,14 @@ import {
 } from 'native-base'
 import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
 import TrappingSitesDataTable from '../../components/createNewProgram/TrappingSitesDataTable'
+import AppLogo from '../../components/Shared/AppLogo'
 import { Ionicons } from '@expo/vector-icons'
 import CustomModal from '../../components/Shared/CustomModal'
 import AddTrapModalContent from '../../components/createNewProgram/AddTrapModalContent'
 import { RootState } from '../../redux/store'
 import { connect } from 'react-redux'
 import { TrappingSitesStoreI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
-import AppLogo from '../../components/Shared/AppLogo'
+
 
 const TrappingSites = ({
   navigation,
