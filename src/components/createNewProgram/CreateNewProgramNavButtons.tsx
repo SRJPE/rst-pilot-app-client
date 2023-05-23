@@ -1,17 +1,62 @@
 import React from 'react'
 import { Box, HStack, Text, Button, Icon } from 'native-base'
-import { useSelector, useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { useRoute } from '@react-navigation/native'
+import { markCreateNewProgramStepCompleted } from '../../redux/reducers/createNewProgramSlices/createNewProgramHomeSlice'
 
-const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
+const CreateNewProgramNavButtons = ({
+  navigation,
+  handleSubmit,
+}: {
+  navigation?: any
+  handleSubmit?: any
+}) => {
+  const dispatch = useDispatch<AppDispatch>()
   const activePage = useRoute().name
+
+  //TODO:
+  //if a section is completed, navigate to the final page of that section when green button clicked
 
   const handleRightButton = () => {
     switch (activePage) {
+      case 'Crew Members':
+        dispatch(markCreateNewProgramStepCompleted('crewMembers'))
+        navigation.goBack()
+        break
+      case 'Efficiency Trial Protocols':
+        navigation.navigate('Create New Program', {
+          screen: 'Hatchery Information',
+        })
+        break
+      case 'Hatchery Information':
+        handleSubmit()
+        dispatch(markCreateNewProgramStepCompleted('efficiencyTrialProtocols'))
+        navigation.navigate('Create New Program', {
+          screen: 'Create New Program Home',
+        })
+        break
+      case 'Trapping Protocols':
+        navigation.navigate('Create New Program', {
+          screen: 'Trapping Protocols Table',
+        })
+        break
+      case 'Trapping Protocols Table':
+        dispatch(markCreateNewProgramStepCompleted('trappingProtocols'))
+        navigation.navigate('Create New Program', {
+          screen: 'Create New Program Home',
+        })
+        break
       case 'Permit Information':
         navigation.navigate('Create New Program', {
           screen: 'Permitting Information Input',
+        })
+        break
+      case 'Permitting Information Input':
+        handleSubmit()
+        dispatch(markCreateNewProgramStepCompleted('permitInformation'))
+        navigation.navigate('Create New Program', {
+          screen: 'Create New Program Home',
         })
         break
 
@@ -21,11 +66,45 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
     }
   }
   const handleLeftButton = () => {
+    // if (activePage === 'Create New Program Home') {
+    //   navigation.navigate('Monitoring Program', {
+    //     screen: 'Monitoring Program Home',
+    //   })
+    // } else {
+    //   navigation.goBack()
+    // }
     navigation.goBack()
   }
 
+  const handleRightButtonText = () => {
+    let rightButtonText = 'Next'
+    switch (activePage) {
+      case 'Crew Members':
+        rightButtonText = 'Save Crew Members and Exit'
+        break
+      case 'Hatchery Information':
+        rightButtonText = 'Save and Exit'
+        break
+      case 'Trapping Protocols Table':
+        rightButtonText = 'Save Trapping Protocols and Exit'
+        break
+      case 'Permitting Information Input':
+        rightButtonText = 'Save Permitting Information and Exit'
+        break
+
+      default:
+        console.log('Default hit')
+        break
+    }
+    return rightButtonText
+  }
+
+  const handleLeftButtonText = () => {
+    return 'Back'
+  }
   const disableLeftButton = () => {
-    return activePage === 'Create New Program Home'
+    // return activePage === 'Create New Program Home'
+    return false
   }
   const disableRightButton = () => {
     return false
@@ -46,7 +125,7 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
           onPress={() => handleLeftButton()}
         >
           <Text fontSize='xl' fontWeight='bold' color='primary'>
-            Back
+            {handleLeftButtonText()}
           </Text>
         </Button>
         <Button
@@ -61,7 +140,7 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
           onPress={() => handleRightButton()}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
-            Next
+            {handleRightButtonText()}
           </Text>
         </Button>
       </HStack>

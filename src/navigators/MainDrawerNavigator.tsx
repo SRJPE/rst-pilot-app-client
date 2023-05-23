@@ -5,12 +5,12 @@ import TrapVisitForm from './roots/TrapVisitFormRoot'
 import GenerateReport from '../screens/GenerateReport'
 import DataQualityControl from '../screens/QCData'
 import MarkRecaptureForm from './roots/MarkRecaptureFormRoot'
-import CreateNewProgram from './roots/CreateNewProgramRoot'
 import Profile from '../screens/accountScreens/Profile'
 import PermitInfo from '../screens/PermitInfo'
 import SignIn from '../screens/SignIn'
 import { connect } from 'react-redux'
 import { RootState } from '../redux/store'
+import MonitoringProgram from './roots/MonitoringProgramRoot'
 
 const Drawer = createDrawerNavigator()
 
@@ -51,7 +51,10 @@ const DrawerNavigator = ({
         />
         <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
         <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
-        <Drawer.Screen name='Create New Program' component={CreateNewProgram} />
+        <Drawer.Screen
+          name='Monitoring Program'
+          component={MonitoringProgram}
+        />
       </>
       {/* )} */}
     </Drawer.Navigator>
