@@ -45,8 +45,8 @@ const MultipleTraps = ({
 
   return (
     <>
-      <View flex={1} alignItems='center' bg='hsl(0,0%, 100%)' padding={6}>
-        <Heading mb={5} alignSelf='left'>
+      <View flex={1} alignItems='center' bg='hsl(0,0%, 100%)'>
+        <Heading mx={6} mt={6} alignSelf='left'>
           Group Traps into Sites
         </Heading>
         <Formik
@@ -63,7 +63,7 @@ const MultipleTraps = ({
         >
           {({ values }) => (
             <>
-              <FormControl>
+              <FormControl padding={6}>
                 <FormControl.Label mb={3}>
                   <Text color='black' fontSize='xl'>
                     Please indicate the number of trapping sites
@@ -74,7 +74,7 @@ const MultipleTraps = ({
                   setSelectedItems={setSelectedItems}
                 />
               </FormControl>
-              <Divider thickness='3' my={6} width='98%' />
+              <Divider thickness='3' my={6} width='95%' />
               <GroupTrapSiteCards
                 trappingSitesStore={trappingSitesStore}
                 multipleTrapSitesStore={multipleTrapsStore}

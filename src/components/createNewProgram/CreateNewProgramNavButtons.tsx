@@ -80,10 +80,9 @@ const CreateNewProgramNavButtons = ({
   return (
     <Box
       bg={isMultipleTrapsVariant ? 'transparent' : '#fff'}
-      p={8}
-      pb={isMultipleTrapsVariant ? 3 : 8}
-      mx={isMultipleTrapsVariant ? 4 : 0}
-      maxWidth='100%'
+      p={isMultipleTrapsVariant ? 0 : 8}
+      mt={isMultipleTrapsVariant ? 8 : 0}
+      width='100%'
     >
       <HStack justifyContent='space-evenly'>
         <Button

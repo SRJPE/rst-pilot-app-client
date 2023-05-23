@@ -56,6 +56,7 @@ const GroupTrapSiteCards = ({
           //alignItems=''
           //width='100%'
           h='100%'
+          px={6}
         >
           <Text mb={1} fontSize={15}>
             To assign a trap to a site, select the trap token within the site
