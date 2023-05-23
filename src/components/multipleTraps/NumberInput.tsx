@@ -10,13 +10,6 @@ const NumberInput = ({ trappingSites, setSelectedItems }: any) => {
   const { values, setFieldValue, setValues } =
     useFormikContext<GroupTrapSiteValues>()
 
-  const clearGroupValues = () => {
-    setValues({
-      numberOfTrapSites: 1,
-      'trapSiteGroup-1': { groupItems: [], trapSiteName: '' },
-    })
-    setSelectedItems([])
-  }
   return (
     <HStack space={5}>
       <Button
@@ -78,14 +71,6 @@ const NumberInput = ({ trappingSites, setSelectedItems }: any) => {
         <Text color='white' fontSize={24} paddingBottom={10}>
           +
         </Text>
-      </Button>
-      <Button
-        variant='outline'
-        borderColor='primary'
-        marginLeft='auto'
-        onPress={clearGroupValues}
-      >
-        <Text color='primary'>Clear Groups</Text>
       </Button>
     </HStack>
   )

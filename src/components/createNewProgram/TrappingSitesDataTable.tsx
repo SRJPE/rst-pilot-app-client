@@ -9,21 +9,23 @@ import {
   TrappingSitesStoreI,
 } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 import { GroupTrapSiteValuesI } from '../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
+import { current } from '@reduxjs/toolkit'
 
 interface Header {
-  content: string
+  colData: string
+  label: string
   numeric: boolean
   flex: number
 }
 const headers: Header[] = [
-  { content: 'Name', numeric: false, flex: 3 },
-  { content: 'Latitude', numeric: true, flex: 1 },
-  { content: 'Longitude', numeric: true, flex: 1 },
-  { content: 'Cone Size', numeric: true, flex: 1 },
-  { content: 'Flow Gauge', numeric: true, flex: 1 },
-  { content: 'RS Name', numeric: false, flex: 3 },
-  { content: 'RS Latitude', numeric: true, flex: 1 },
-  { content: 'RS Longitude', numeric: true, flex: 1 },
+  { colData: 'trapName', label: 'Name', numeric: false, flex: 2 },
+  // { label: 'Latitude', numeric: true, flex: 1 },
+  // { label: 'Longitude', numeric: true, flex: 1 },
+  { colData: 'coneSize', label: 'Cone Size', numeric: true, flex: 1 },
+  { colData: 'USGSStationNumber', label: 'Flow Gauge', numeric: true, flex: 1 },
+  { colData: 'releaseSiteName', label: 'RS Name', numeric: false, flex: 1 },
+  // { label: 'RS Latitude', numeric: true, flex: 1 },
+  // { label: 'RS Longitude', numeric: true, flex: 1 },
 ]
 
 const TrappingSitesDataTable = ({
@@ -62,7 +64,7 @@ const TrappingSitesDataTable = ({
   return (
     <DataTable style={{}}>
       <DataTable.Header style={[{}]}>
-        {headers.map(({ content, numeric, flex }, idx: number) => (
+        {headers.map(({ label, numeric, flex }, idx: number) => (
           <DataTable.Title
             key={idx}
             numeric={numeric}
@@ -72,13 +74,13 @@ const TrappingSitesDataTable = ({
               flex: flex,
             }}
           >
-            {content}
+            {label}
           </DataTable.Title>
         ))}
         {hasMultipleTrapSites && (
           <DataTable.Title
             style={{
-              // borderWidth: 1,
+              //borderWidth: 1,
               paddingHorizontal: 10,
               flex: 2,
             }}
@@ -90,7 +92,7 @@ const TrappingSitesDataTable = ({
           style={{
             // borderWidth: 1,
             paddingHorizontal: 10,
-            flex: 2,
+            flex: 1,
           }}
         >
           {''}
@@ -106,21 +108,30 @@ const TrappingSitesDataTable = ({
               // handleShowTableModal(trapObject)
             }
           >
-            {Object.values(trapObject).map((callValue: any, idx: number) => {
-              return (
-                <DataTable.Cell
-                  numeric={headers.at(idx)?.numeric}
-                  key={idx}
-                  style={{
-                    //borderWidth: 1,
-                    paddingHorizontal: 10,
-                    flex: headers.at(idx)?.flex,
-                  }}
-                >
-                  {callValue}
-                </DataTable.Cell>
-              )
-            })}
+            {Object.entries(trapObject).map(
+              (keyValuePair: any, idx: number) => {
+                const [key, cellValue] = keyValuePair
+                const currentCol = headers.find(
+                  header => header.colData === key
+                )
+
+                if (currentCol)
+                  return (
+                    <DataTable.Cell
+                      numeric={currentCol.numeric}
+                      key={idx}
+                      style={{
+                        // borderWidth: 1,
+                        paddingHorizontal: 10,
+                        flex: currentCol.flex,
+                      }}
+                    >
+                      {cellValue}
+                    </DataTable.Cell>
+                  )
+              }
+            )}
+
             {hasMultipleTrapSites && (
               <DataTable.Cell
                 style={{
@@ -134,7 +145,7 @@ const TrappingSitesDataTable = ({
             )}
             <DataTable.Cell
               style={{
-                flex: 2,
+                flex: 1,
                 justifyContent: 'flex-end',
                 paddingHorizontal: 10,
                 //borderWidth: 1,
@@ -156,7 +167,6 @@ const TrappingSitesDataTable = ({
           </DataTable.Row>
         )
       })}
-      {/* </ScrollView> */}
     </DataTable>
   )
 }
