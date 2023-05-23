@@ -64,7 +64,7 @@ export default function BottomNavigation({
   const { isOpen, onToggle, onClose } = useDisclose()
 
   const handlePressQCData = useCallback(() => {
-    navigation.navigate('Quality Control')
+    navigation.navigate('Data Quality Control')
     onClose()
   }, [navigation])
   const handlePressTrapVisit = useCallback(() => {

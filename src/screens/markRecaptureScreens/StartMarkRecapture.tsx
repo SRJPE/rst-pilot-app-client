@@ -25,7 +25,7 @@ export default function StartMarkRecapture({
     navigation.navigate('Home')
   }
   const handlePressQCData = () => {
-    navigation.navigate('Quality Control')
+    navigation.navigate('Data Quality Control')
   }
   const handlePressReturnToTrapVisit = () => {
     navigation.navigate('Trap Visit Form', { screen: 'Incomplete Sections' })
