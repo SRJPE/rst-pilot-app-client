@@ -6,16 +6,14 @@ import {
   Icon,
   Pressable,
   Text,
-  View,
   VStack,
 } from 'native-base'
-import AppLogo from '../../components/Shared/AppLogo'
+import AppLogo from '../../../components/Shared/AppLogo'
 import { Feather } from '@expo/vector-icons'
-import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
-import CustomModal from '../../components/Shared/CustomModal'
-import ChooseFileModalContent from '../../components/createNewProgram/ChooseFileModalContent'
-
-const EfficiencyTrialProtocols = ({ navigation }: { navigation: any }) => {
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
+import CustomModal from '../../../components/Shared/CustomModal'
+import ChooseFileModalContent from '../../../components/createNewProgram/ChooseFileModalContent'
+const TrappingProtocols = ({ navigation }: { navigation: any }) => {
   const [chooseFileModalOpen, setChooseFileModalOpen] = useState(
     false as boolean
   )
@@ -27,9 +25,9 @@ const EfficiencyTrialProtocols = ({ navigation }: { navigation: any }) => {
           <AppLogo imageSize={200} />
         </Center>
         <VStack py='5%' px='10%' space={5}>
-          <Heading alignSelf='center'>Efficiency Trial Protocols</Heading>
+          <Heading alignSelf='center'>Rotary Screw Trap Protocols</Heading>
           <Text fontSize='lg' color='grey'>
-            Upload PDF of Efficiency Monitoring Protocols
+            Upload PDF of Rotary Screw Trap Monitoring Protocols
           </Text>
           <Pressable
             alignSelf='center'
@@ -62,4 +60,4 @@ const EfficiencyTrialProtocols = ({ navigation }: { navigation: any }) => {
   )
 }
 
-export default EfficiencyTrialProtocols
+export default TrappingProtocols

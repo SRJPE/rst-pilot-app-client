@@ -15,14 +15,14 @@ import {
   VStack,
 } from 'native-base'
 import { Ionicons } from '@expo/vector-icons'
-import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
-import CustomModal from '../../components/Shared/CustomModal'
-import AddCrewMemberModalContent from '../../components/createNewProgram/AddCrewMemberModalContent'
-import AppLogo from '../../components/Shared/AppLogo'
-import CrewMemberDataTable from '../../components/createNewProgram/CrewMemberDataTable'
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
+import CustomModal from '../../../components/Shared/CustomModal'
+import AddCrewMemberModalContent from '../../../components/createNewProgram/AddCrewMemberModalContent'
+import AppLogo from '../../../components/Shared/AppLogo'
+import CrewMemberDataTable from '../../../components/createNewProgram/CrewMemberDataTable'
 import { connect, useDispatch } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
-import { saveIndividualCrewMember } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
+import { AppDispatch, RootState } from '../../../redux/store'
+import { saveIndividualCrewMember } from '../../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 
 export const sampleTeamLead = {
   firstName: 'John',

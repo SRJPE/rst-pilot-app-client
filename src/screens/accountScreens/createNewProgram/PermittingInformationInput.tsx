@@ -11,18 +11,18 @@ import {
 } from 'native-base'
 import DateTimePicker from '@react-native-community/datetimepicker'
 
-import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
 import { Ionicons } from '@expo/vector-icons'
-import CustomModal from '../../components/Shared/CustomModal'
-import ChooseFileModalContent from '../../components/createNewProgram/ChooseFileModalContent'
-import AddTakeAndMortalityModalContent from '../../components/createNewProgram/AddTakeAndMortalityModalContent'
-import TakeAndMortalityDataTable from '../../components/createNewProgram/TakeAndMortalityDataTable'
+import CustomModal from '../../../components/Shared/CustomModal'
+import ChooseFileModalContent from '../../../components/createNewProgram/ChooseFileModalContent'
+import AddTakeAndMortalityModalContent from '../../../components/createNewProgram/AddTakeAndMortalityModalContent'
+import TakeAndMortalityDataTable from '../../../components/createNewProgram/TakeAndMortalityDataTable'
 import { connect, useDispatch } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
+import { AppDispatch, RootState } from '../../../redux/store'
 import { Formik } from 'formik'
-import FormInputComponent from '../../components/Shared/FormInputComponent'
-import { savePermitInformationValues } from '../../redux/reducers/createNewProgramSlices/permitInformationSlice'
-import { permittingInformationSchema } from '../../utils/helpers/yupValidations'
+import FormInputComponent from '../../../components/Shared/FormInputComponent'
+import { savePermitInformationValues } from '../../../redux/reducers/createNewProgramSlices/permitInformationSlice'
+import { permittingInformationSchema } from '../../../utils/helpers/yupValidations'
 const PermittingInformationInput = ({
   navigation,
   permitInformationStore,

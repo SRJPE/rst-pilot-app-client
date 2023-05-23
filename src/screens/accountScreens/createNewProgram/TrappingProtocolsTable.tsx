@@ -10,12 +10,12 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import AppLogo from '../../components/Shared/AppLogo'
-import TrappingProtocolsDataTable from '../../components/createNewProgram/TrappingProtocolsDataTable'
+import AppLogo from '../../../components/Shared/AppLogo'
+import TrappingProtocolsDataTable from '../../../components/createNewProgram/TrappingProtocolsDataTable'
 import { Ionicons } from '@expo/vector-icons'
-import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
-import CustomModal from '../../components/Shared/CustomModal'
-import AddTrappingProtocolModalContent from '../../components/createNewProgram/AddTrappingProtocolModalContent'
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
+import CustomModal from '../../../components/Shared/CustomModal'
+import AddTrappingProtocolModalContent from '../../../components/createNewProgram/AddTrappingProtocolModalContent'
 const TrappingProtocolsTable = ({ navigation }: { navigation: any }) => {
   const [addTrappingProtocolModalOpen, setAddTrappingProtocolModalOpen] =
     useState(false as boolean)

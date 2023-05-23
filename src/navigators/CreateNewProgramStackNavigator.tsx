@@ -1,14 +1,14 @@
 import { createStackNavigator } from '@react-navigation/stack'
 
-import CreateNewProgramHome from '../screens/accountScreens/CreateNewProgramHome'
-import TrappingSites from '../screens/accountScreens/TrappingSites'
-import CrewMembers from '../screens/accountScreens/CrewMembers'
-import EfficiencyTrialProtocols from '../screens/accountScreens/EfficiencyTrialProtocols'
-import PermitInformation from '../screens/accountScreens/PermitInformation'
-import PermittingInformationInput from '../screens/accountScreens/PermittingInformationInput'
-import TrappingProtocols from '../screens/accountScreens/TrappingProtocols'
-import TrappingProtocolsTable from '../screens/accountScreens/TrappingProtocolsTable'
-import HatcheryInformation from '../screens/accountScreens/HatcheryInformation'
+import CreateNewProgramHome from '../screens/accountScreens/createNewProgram/CreateNewProgramHome'
+import TrappingSites from '../screens/accountScreens/createNewProgram/TrappingSites'
+import CrewMembers from '../screens/accountScreens/createNewProgram/CrewMembers'
+import EfficiencyTrialProtocols from '../screens/accountScreens/createNewProgram/EfficiencyTrialProtocols'
+import PermitInformation from '../screens/accountScreens/createNewProgram/PermitInformation'
+import PermittingInformationInput from '../screens/accountScreens/createNewProgram/PermittingInformationInput'
+import TrappingProtocols from '../screens/accountScreens/createNewProgram/TrappingProtocols'
+import TrappingProtocolsTable from '../screens/accountScreens/createNewProgram/TrappingProtocolsTable'
+import HatcheryInformation from '../screens/accountScreens/createNewProgram/HatcheryInformation'
 
 const CreateNewProgram = createStackNavigator()
 

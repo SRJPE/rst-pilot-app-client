@@ -10,21 +10,21 @@ import {
   View,
   VStack,
 } from 'native-base'
-import AppLogo from '../../components/Shared/AppLogo'
+import AppLogo from '../../../components/Shared/AppLogo'
 import { Feather } from '@expo/vector-icons'
-import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
-import CustomModal from '../../components/Shared/CustomModal'
-import ChooseFileModalContent from '../../components/createNewProgram/ChooseFileModalContent'
-import CustomSelect from '../../components/Shared/CustomSelect'
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
+import CustomModal from '../../../components/Shared/CustomModal'
+import ChooseFileModalContent from '../../../components/createNewProgram/ChooseFileModalContent'
+import CustomSelect from '../../../components/Shared/CustomSelect'
 import { Formik } from 'formik'
-import { AppDispatch, RootState } from '../../redux/store'
+import { AppDispatch, RootState } from '../../../redux/store'
 import { connect, useDispatch } from 'react-redux'
 import {
   EfficiencyTrialProtocolsInitialStateI,
   saveHatcheryInformationValues,
-} from '../../redux/reducers/createNewProgramSlices/efficiencyTrialProtocolsSlice'
-import FormInputComponent from '../../components/Shared/FormInputComponent'
-import { hatcheryInformationSchema } from '../../utils/helpers/yupValidations'
+} from '../../../redux/reducers/createNewProgramSlices/efficiencyTrialProtocolsSlice'
+import FormInputComponent from '../../../components/Shared/FormInputComponent'
+import { hatcheryInformationSchema } from '../../../utils/helpers/yupValidations'
 
 const sampleHatcheryDropDowns = [
   { label: 'Hatchery 1', value: 'h1' },
