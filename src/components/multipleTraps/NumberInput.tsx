@@ -10,6 +10,9 @@ const NumberInput = ({ trappingSites, setSelectedItems }: any) => {
   const { values, setFieldValue, setValues } =
     useFormikContext<GroupTrapSiteValues>()
 
+  const maxNumOfTrapGroups = trappingSitesArray.length - 1
+  const minNumOfTrapGroups = 1
+
   return (
     <HStack space={5}>
       <Button
@@ -17,8 +20,9 @@ const NumberInput = ({ trappingSites, setSelectedItems }: any) => {
         bg='primary'
         w={50}
         h={50}
+        isDisabled={values.numberOfTrapSites === minNumOfTrapGroups}
         onPress={() => {
-          if (values.numberOfTrapSites > 1) {
+          if (values.numberOfTrapSites > minNumOfTrapGroups) {
             const valuesCopy = cloneDeep(values)
             setSelectedItems((prevState: any[]) => {
               const stateCopy = cloneDeep(prevState)
@@ -54,12 +58,13 @@ const NumberInput = ({ trappingSites, setSelectedItems }: any) => {
         }}
       />
       <Button
+        isDisabled={values.numberOfTrapSites === maxNumOfTrapGroups}
         size='sm'
         bg='primary'
         w={50}
         h={50}
         onPress={() => {
-          if (values.numberOfTrapSites < trappingSitesArray.length + 3) {
+          if (values.numberOfTrapSites < trappingSitesArray.length - 1) {
             setFieldValue('numberOfTrapSites', values.numberOfTrapSites + 1)
             setFieldValue(`trapSiteGroup-${values.numberOfTrapSites + 1}`, {
               trapSiteName: '',

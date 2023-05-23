@@ -6,10 +6,12 @@ const CreateNewProgramNavButtons = ({
   navigation,
   variant,
   handleSubmit,
+  disableRightButtonBool,
 }: {
   navigation?: any
   variant?: string
   handleSubmit?: Function
+  disableRightButtonBool?: boolean
 }) => {
   const activePage = useRoute().name
 
@@ -112,7 +114,11 @@ const CreateNewProgramNavButtons = ({
           rounded='xs'
           borderRadius='5'
           shadow='5'
-          isDisabled={disableRightButton()}
+          isDisabled={
+            disableRightButtonBool !== undefined
+              ? disableRightButtonBool
+              : disableRightButton()
+          }
           onPress={() => handleRightButton()}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>

@@ -8,7 +8,7 @@ import { GroupTrapSiteValuesI } from '../../../redux/reducers/createNewProgramSl
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
 import NumberInput from '../../../components/multipleTraps/NumberInput'
 import GroupTrapSiteCards from '../../../components/multipleTraps/GroupTrapSiteCards'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { cloneDeep } from 'lodash'
 import { AppDispatch } from '../../../redux/store'
 import { saveMultipleTraps } from '../../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
@@ -39,9 +39,27 @@ const MultipleTraps = ({
     setSelectedItems(formattedArray)
   }, [multipleTrapsStore])
   const dispatch = useDispatch<AppDispatch>()
+
   const handleGroupTrapSiteSubmission = (values: GroupTrapSiteValuesI) => {
     dispatch(saveMultipleTraps(values))
   }
+
+  const disableSaveButton = useCallback((values: GroupTrapSiteValuesI) => {
+    const formHasEmptyGroupValues = Object.values(values).reduce(
+      (acc, currentValue) => {
+        if (currentValue.groupItems) {
+          acc =
+            currentValue.groupItems.length > 0 &&
+            currentValue.trapSiteName !== ''
+              ? false
+              : true
+        }
+        return acc
+      },
+      null
+    )
+    return formHasEmptyGroupValues
+  }, [])
 
   return (
     <>
@@ -83,6 +101,7 @@ const MultipleTraps = ({
               <CreateNewProgramNavButtons
                 handleSubmit={() => handleGroupTrapSiteSubmission(values)}
                 navigation={navigation}
+                disableRightButtonBool={disableSaveButton(values)}
               />
             </>
           )}
