@@ -9,7 +9,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import AppLogo from '../../components/Shared/AppLogo'
+import AppLogo from '../../../components/Shared/AppLogo'
 import { Feather } from '@expo/vector-icons'
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
 import CustomModal from '../../../components/Shared/CustomModal'
