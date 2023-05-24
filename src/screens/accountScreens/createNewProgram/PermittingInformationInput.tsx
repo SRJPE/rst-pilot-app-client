@@ -101,8 +101,8 @@ const PermittingInformationInput = ({
               <Text fontSize='2xl' color='grey' ml='5%' mt='5%'>
                 Enter Based on your 4d Permit
               </Text>
-              <Divider mb='5%' />
-              <VStack px='5%' space={3}>
+              <Divider mb='2' />
+              <VStack px='5%' py='2' space={3}>
                 <HStack space={260}>
                   <VStack space={2}>
                     <Text color='black' fontSize='xl'>
@@ -185,9 +185,12 @@ const PermittingInformationInput = ({
                 <Text fontSize='2xl' color='grey'>
                   Frequency of trap checks during inclement weather
                 </Text>
-                <ScrollView h={150}>
-                  <TakeAndMortalityDataTable />
-                </ScrollView>
+              </VStack>
+              <ScrollView h={150}>
+                <TakeAndMortalityDataTable />
+              </ScrollView>
+              <Divider my='1%' />
+              <VStack py='5%' px='10%' space={5}>
                 <Pressable
                   onPress={() => setAddTakeAndMortalityModalOpen(true)}
                 >
@@ -223,6 +226,8 @@ const PermittingInformationInput = ({
             <CreateNewProgramNavButtons
               navigation={navigation}
               handleSubmit={handleSubmit}
+              touched={touched}
+              errors={errors}
             />
           </>
         )}

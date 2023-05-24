@@ -35,41 +35,35 @@ const CreateNewProgramHome = ({
   return (
     <>
       <View flex={1} bg='#fff'>
-        <VStack space={10} px='15%' py='10%'>
-          <VStack space={2}>
+        <VStack space={10} px='15%' py='5%'>
+          <VStack space={4}>
             <HStack space={5}>
               <Heading mb='4'>Create New Program</Heading>
-              <Button
-                bg='primary'
-                height='10'
-                rounded='xs'
-                borderRadius='5'
-                shadow='5'
-                onPress={() =>
-                  console.log('🚀 ~ CRPStore:', {
-                    trappingSitesStore,
-                    crewMembersStore,
-                    efficiencyTrialProtocolsStore,
-                    trappingProtocolsStore,
-                    permitInformationStore,
-                  })
-                }
-              >
-                <Text fontSize='md' color='white'>
-                  DEV LOG
-                </Text>
-              </Button>
             </HStack>
-            <VStack space={2} borderWidth={2} padding='2'>
-              <Text fontSize='lg'>
+            <VStack
+              space={2}
+              w='80%'
+              padding='2'
+              bg='secondary'
+              borderWidth={2}
+              borderRadius='5'
+              borderColor='primary'
+            >
+              <Text fontSize='lg' fontWeight='500'>
                 {`Program Name: ${monitoringProgramName}`}
               </Text>
-              <Text fontSize='lg'>{`Stream Name: ${streamName}`}</Text>
-              <Text fontSize='lg'>{`Funding Agency: ${fundingAgency}`}</Text>
+              <Text
+                fontSize='lg'
+                fontWeight='500'
+              >{`Stream Name: ${streamName}`}</Text>
+              <Text
+                fontSize='lg'
+                fontWeight='500'
+              >{`Funding Agency: ${fundingAgency}`}</Text>
             </VStack>
-            <Text fontSize='lg' color='grey'>
+            <Text fontSize='lg' color='grey' mb='-4'>
               {
-                'Please fill in some important program information \nbefore you can begin trapping.'
+                'Please fill in some important program information before you can \nbegin trapping.'
               }
             </Text>
           </VStack>
@@ -87,7 +81,7 @@ const CreateNewProgramHome = ({
           })}
         </VStack>
       </View>
-      <CreateNewProgramNavButtons />
+      <CreateNewProgramNavButtons navigation={navigation} />
     </>
   )
 }

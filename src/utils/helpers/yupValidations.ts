@@ -360,5 +360,9 @@ export const takeAndMortalitySchema = yup.object().shape({
     .required('Indirect Mortality required')
     .typeError('Input must be a number'),
 })
-
-//TODO: monitoring Program create new program main title info
+export const setUpNewProgramSchema = yup.object().shape({
+  monitoringProgramName: yup.string().required('Program name required'),
+  streamName: yup.string().required('Stream name required'),
+  fundingAgency: yup.string().required('Funding agency required'),
+  program: yup.string(),
+})

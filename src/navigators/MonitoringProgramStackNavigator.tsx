@@ -6,7 +6,6 @@ import CreateNewProgram from './roots/CreateNewProgramRoot'
 import MonitoringProgramExisting from '../screens/accountScreens/MonitoringProgramExisting'
 import MonitoringProgramNew from '../screens/accountScreens/MonitoringProgramNew'
 import MonitoringProgramJoined from '../screens/accountScreens/MonitoringProgramJoined'
-import MonitoringProgramNewCopy from '../screens/accountScreens/MonitoringProgramNewCopy'
 
 const MonitoringProgram = createStackNavigator()
 
@@ -28,10 +27,7 @@ export default function MonitoringProgramStackNavigator() {
         name='Monitoring Program New'
         component={MonitoringProgramNew}
       />
-      <MonitoringProgram.Screen
-        name='Monitoring Program New Copy'
-        component={MonitoringProgramNewCopy}
-      />
+
       <MonitoringProgram.Screen
         name='Monitoring Program Joined'
         component={MonitoringProgramJoined}

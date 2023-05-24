@@ -9,6 +9,7 @@ import PermittingInformationInput from '../screens/accountScreens/createNewProgr
 import TrappingProtocols from '../screens/accountScreens/createNewProgram/TrappingProtocols'
 import TrappingProtocolsTable from '../screens/accountScreens/createNewProgram/TrappingProtocolsTable'
 import HatcheryInformation from '../screens/accountScreens/createNewProgram/HatcheryInformation'
+import CreateNewProgramComplete from '../screens/accountScreens/createNewProgram/CreateNewProgramComplete'
 
 const CreateNewProgram = createStackNavigator()
 
@@ -50,6 +51,10 @@ export default function CreateNewProgramStackNavigator() {
       <CreateNewProgram.Screen
         name='Permitting Information Input'
         component={PermittingInformationInput}
+      />
+      <CreateNewProgram.Screen
+        name='Create New Program Complete'
+        component={CreateNewProgramComplete}
       />
     </CreateNewProgram.Navigator>
   )

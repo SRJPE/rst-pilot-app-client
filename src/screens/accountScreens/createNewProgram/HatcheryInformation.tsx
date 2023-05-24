@@ -7,7 +7,6 @@ import {
   Icon,
   Pressable,
   Text,
-  View,
   VStack,
 } from 'native-base'
 import AppLogo from '../../../components/Shared/AppLogo'
@@ -150,6 +149,8 @@ const HatcheryInformation = ({
             <CreateNewProgramNavButtons
               navigation={navigation}
               handleSubmit={handleSubmit}
+              touched={touched}
+              errors={errors}
             />
           </>
         )}

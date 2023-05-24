@@ -10,8 +10,10 @@ const headers = ['Species', 'Run', 'Life Stage', 'Number Measured', '']
 
 const TrappingProtocolsDataTable = ({
   trappingProtocolsStore,
+  handleShowTableModal,
 }: {
   trappingProtocolsStore: any
+  handleShowTableModal?: any
 }) => {
   const [processedData, setProcessedData] = useState(
     [] as Array<IndividualTrappingSiteValuesI>
@@ -35,14 +37,7 @@ const TrappingProtocolsDataTable = ({
       </DataTable.Header>
       {processedData.map((trappingProtocolObject: any, idx: number) => {
         return (
-          <DataTable.Row
-            style={[{ height: 55 }]}
-            key={idx}
-            onPress={
-              () => {}
-              // handleShowTableModal(trappingProtocolObject)
-            }
-          >
+          <DataTable.Row style={[{ height: 55 }]} key={idx}>
             {Object.values(trappingProtocolObject).map(
               (callValue: any, idx: number) => (
                 <DataTable.Cell key={idx}>{callValue}</DataTable.Cell>
@@ -54,8 +49,10 @@ const TrappingProtocolsDataTable = ({
               bg='primary'
               colorScheme='primary'
               size='sm'
-              onPress={() =>
-                console.log('TRAP OBJECT ROW DATA: ', trappingProtocolObject)
+              onPress={
+                () =>
+                  console.log('TRAP OBJECT ROW DATA: ', trappingProtocolObject)
+                // handleShowTableModal(trappingProtocolObject)
               }
             >
               <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />

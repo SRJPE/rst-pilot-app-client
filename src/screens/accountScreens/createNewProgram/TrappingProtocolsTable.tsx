@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
-  Box,
   Center,
+  Divider,
   HStack,
   Heading,
   Icon,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   Text,
   VStack,
+  View,
 } from 'native-base'
 import AppLogo from '../../../components/Shared/AppLogo'
 import TrappingProtocolsDataTable from '../../../components/createNewProgram/TrappingProtocolsDataTable'
@@ -22,7 +23,7 @@ const TrappingProtocolsTable = ({ navigation }: { navigation: any }) => {
 
   return (
     <>
-      <Box overflow='hidden' flex={1} bg='#fff'>
+      <View flex={1} bg='#fff'>
         <Center bg='primary' py='5%'>
           <AppLogo imageSize={200} />
         </Center>
@@ -32,28 +33,28 @@ const TrappingProtocolsTable = ({ navigation }: { navigation: any }) => {
             How many of the following species, life stage, and run do you
             measure on each trapping day:
           </Text>
-          <ScrollView h={300}>
-            <TrappingProtocolsDataTable />
-          </ScrollView>
-
-          <VStack py='5%' px='10%' space={5}>
-            <Pressable onPress={() => setAddTrappingProtocolModalOpen(true)}>
-              <HStack alignItems='center'>
-                <Icon
-                  as={Ionicons}
-                  name={'add-circle'}
-                  size='3xl'
-                  color='primary'
-                  marginRight='1'
-                />
-                <Text color='primary' fontSize='xl'>
-                  Add Trapping Protocol
-                </Text>
-              </HStack>
-            </Pressable>
-          </VStack>
         </VStack>
-      </Box>
+        <ScrollView h={300}>
+          <TrappingProtocolsDataTable />
+        </ScrollView>
+        <Divider my='1%' />
+        <VStack py='5%' px='10%' space={5}>
+          <Pressable onPress={() => setAddTrappingProtocolModalOpen(true)}>
+            <HStack alignItems='center'>
+              <Icon
+                as={Ionicons}
+                name={'add-circle'}
+                size='3xl'
+                color='primary'
+                marginRight='1'
+              />
+              <Text color='primary' fontSize='xl'>
+                Add Trapping Protocol
+              </Text>
+            </HStack>
+          </Pressable>
+        </VStack>
+      </View>
       <CreateNewProgramNavButtons navigation={navigation} />
       {/* --------- Modals --------- */}
       <CustomModal
