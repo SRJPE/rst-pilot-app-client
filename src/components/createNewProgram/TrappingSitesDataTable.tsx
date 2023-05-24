@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
-import { Icon, IconButton, ScrollView } from 'native-base'
+import { Icon, IconButton, Text } from 'native-base'
 import { Entypo } from '@expo/vector-icons'
 import { RootState } from '../../redux/store'
 import {
@@ -9,7 +9,6 @@ import {
   TrappingSitesStoreI,
 } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 import { GroupTrapSiteValuesI } from '../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
-import { current } from '@reduxjs/toolkit'
 
 interface Header {
   colData: string
@@ -19,13 +18,9 @@ interface Header {
 }
 const headers: Header[] = [
   { colData: 'trapName', label: 'Name', numeric: false, flex: 2 },
-  // { label: 'Latitude', numeric: true, flex: 1 },
-  // { label: 'Longitude', numeric: true, flex: 1 },
   { colData: 'coneSize', label: 'Cone Size', numeric: true, flex: 1 },
   { colData: 'USGSStationNumber', label: 'Flow Gauge', numeric: true, flex: 1 },
   { colData: 'releaseSiteName', label: 'RS Name', numeric: false, flex: 1 },
-  // { label: 'RS Latitude', numeric: true, flex: 1 },
-  // { label: 'RS Longitude', numeric: true, flex: 1 },
 ]
 
 const TrappingSitesDataTable = ({
@@ -69,7 +64,6 @@ const TrappingSitesDataTable = ({
             key={idx}
             numeric={numeric}
             style={{
-              // borderWidth: 1,
               paddingHorizontal: 10,
               flex: flex,
             }}
@@ -80,7 +74,6 @@ const TrappingSitesDataTable = ({
         {hasMultipleTrapSites && (
           <DataTable.Title
             style={{
-              //borderWidth: 1,
               paddingHorizontal: 10,
               flex: 2,
             }}
@@ -90,7 +83,6 @@ const TrappingSitesDataTable = ({
         )}
         <DataTable.Title
           style={{
-            // borderWidth: 1,
             paddingHorizontal: 10,
             flex: 1,
           }}
@@ -121,7 +113,6 @@ const TrappingSitesDataTable = ({
                       numeric={currentCol.numeric}
                       key={idx}
                       style={{
-                        // borderWidth: 1,
                         paddingHorizontal: 10,
                         flex: currentCol.flex,
                       }}
@@ -135,7 +126,6 @@ const TrappingSitesDataTable = ({
             {hasMultipleTrapSites && (
               <DataTable.Cell
                 style={{
-                  // borderWidth: 1,
                   paddingHorizontal: 10,
                   flex: 2,
                 }}
@@ -148,11 +138,9 @@ const TrappingSitesDataTable = ({
                 flex: 1,
                 justifyContent: 'flex-end',
                 paddingHorizontal: 10,
-                //borderWidth: 1,
               }}
             >
               <IconButton
-                //marginY={3}
                 variant='solid'
                 bg='primary'
                 colorScheme='primary'
@@ -167,6 +155,13 @@ const TrappingSitesDataTable = ({
           </DataTable.Row>
         )
       })}
+      {processedData.length < 1 && (
+        <DataTable.Row>
+          <Text flex={1} textAlign='center' pt={3}>
+            No Data Available
+          </Text>
+        </DataTable.Row>
+      )}
     </DataTable>
   )
 }
