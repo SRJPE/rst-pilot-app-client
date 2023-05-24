@@ -27,6 +27,7 @@ import {
   updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
 import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
+import AppLogo from '../Shared/AppLogo'
 
 const DUMMY_USER = {
   firstName: 'John',
@@ -106,6 +107,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
         alignItems='center'
         justifyContent='space-between'
       >
+        <AppLogo imageSize={225} />
         <VStack>
           <Text fontSize='2xl' color='white'>
             Hello,
