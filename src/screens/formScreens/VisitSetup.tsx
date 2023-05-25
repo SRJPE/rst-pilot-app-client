@@ -16,7 +16,6 @@ import {
   Switch,
   HStack,
   Divider,
-  Pressable,
 } from 'native-base'
 import CrewDropDown from '../../components/form/CrewDropDown'
 import NavButtons from '../../components/formContainer/NavButtons'
@@ -362,9 +361,6 @@ const VisitSetup = ({
         }))
     )
   }
-  const closeCrewDropDownOnBlue = () => {
-    setCrewDropDownOpen(false)
-  }
 
   return (
     <Formik
@@ -404,7 +400,7 @@ const VisitSetup = ({
         }, [tabSlice.previouslyActiveTabId])
 
         return (
-          <Pressable flex={1} onPress={() => closeCrewDropDownOnBlue()}>
+          <>
             <View
               flex={1}
               bg='#fff'
@@ -562,7 +558,7 @@ const VisitSetup = ({
               touched={touched}
               isPaperEntry={isPaperEntry}
             />
-          </Pressable>
+          </>
         )
       }}
     </Formik>
