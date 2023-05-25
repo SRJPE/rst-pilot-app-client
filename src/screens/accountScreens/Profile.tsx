@@ -16,6 +16,7 @@ import {
 import { useState } from 'react'
 import CustomModal from '../../components/Shared/CustomModal'
 import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
+import MonitoringProgramInfoModalContent from '../../components/profile/MonitoringProgramModalContent'
 import { AppDispatch } from '../../redux/store'
 import { useDispatch } from 'react-redux'
 import { clearUserCredentials } from '../../redux/reducers/userCredentialsSlice'
@@ -25,6 +26,8 @@ const Profile = ({ navigation }: { navigation: any }) => {
   const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] = useState(
     false as boolean
   )
+  const [monitoringProgramInfoModalOpen, setMonitoringProgramInfoModalOpen] =
+    useState(false as boolean)
   return (
     <>
       <Box overflow='hidden'>
@@ -72,6 +75,7 @@ const Profile = ({ navigation }: { navigation: any }) => {
                 <Text fontSize='2xl'>Monitoring Program Team Name</Text>
               </VStack>
               <IconButton
+                onPress={() => setMonitoringProgramInfoModalOpen(true)}
                 icon={<Icon as={Entypo} name='chevron-right' />}
                 borderRadius='full'
                 _icon={{
@@ -142,6 +146,15 @@ const Profile = ({ navigation }: { navigation: any }) => {
       >
         <EditAccountInfoModalContent
           closeModal={() => setEditAccountInfoModalOpen(false)}
+        />
+      </CustomModal>
+      <CustomModal
+        isOpen={monitoringProgramInfoModalOpen}
+        closeModal={() => setMonitoringProgramInfoModalOpen(false)}
+        // height='1/1'
+      >
+        <MonitoringProgramInfoModalContent
+          closeModal={() => setMonitoringProgramInfoModalOpen(false)}
         />
       </CustomModal>
     </>
