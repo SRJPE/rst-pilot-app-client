@@ -103,6 +103,23 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
     <>
       <VStack bg='primary' pt={8}>
         <AppLogo imageSize={175} />
+        <IconButton
+          onPress={() => navigation.closeDrawer()}
+          borderWidth={2}
+          borderRadius={100}
+          variant='solid'
+          position='absolute'
+          right={2}
+          top={5}
+          backgroundColor='primary'
+          borderColor='primary'
+          _icon={{
+            as: Ionicons,
+            name: 'chevron-back',
+            size: 10,
+            color: 'white',
+          }}
+        />
         <HStack p={7} alignItems='center' justifyContent='space-between'>
           <VStack>
             <Text fontSize='2xl' color='white' bold mt={3}>
