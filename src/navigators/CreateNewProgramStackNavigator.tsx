@@ -16,7 +16,7 @@ const CreateNewProgram = createStackNavigator()
 export default function CreateNewProgramStackNavigator() {
   return (
     <CreateNewProgram.Navigator
-      initialRouteName='Create New  Program Home'
+      initialRouteName='Create New Program Home'
       screenOptions={{ headerShown: false }}
     >
       <CreateNewProgram.Screen
