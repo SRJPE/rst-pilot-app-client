@@ -120,7 +120,11 @@ const TabBar = ({
                     />
                   </HStack>
                 </Button>
-                {(tabSlice.incompleteSectionTouched && tabSlice.tabs[tabId].errorDetails[headerProps.route.name]) ? (
+                {tabSlice.incompleteSectionTouched &&
+                tabSlice.tabs[tabId].errorDetails[headerProps.route.name] &&
+                Object.keys(
+                  tabSlice.tabs[tabId].errorDetails[headerProps.route.name]
+                ).length ? (
                   <Badge
                     colorScheme='danger'
                     rounded='full'
