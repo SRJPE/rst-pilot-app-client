@@ -164,9 +164,7 @@ export const addMarksOrTagsSchema = yup.object().shape({
 })
 
 export const addGeneticsSampleSchema = yup.object().shape({
-  sampleId: yup
-    .string()
-    .required('Sample ID Number required'),
+  sampleId: yup.string().required('Sample ID Number required'),
   mucusSwab: yup.boolean().required('Mucus Swab collection status required'),
   finClip: yup.boolean().required('Fin Clip collection status required'),
   crewMember: yup.string().required('Crew Member required'),
@@ -265,10 +263,10 @@ export const addAnotherMarkSchema = yup.object().shape({
 
 /*----------------------------------------------------------------
   CREATE NEW PROGRAM SCHEMAS
-----------------------------------------------------------------*/
+  ----------------------------------------------------------------*/
+//needs to be completed:
 export const trappingSitesSchema = yup.object().shape({
   trapName: yup.string().required('Trap name required'),
-
   trapLatitude: yup
     .number()
     // .nullable()
@@ -277,12 +275,12 @@ export const trappingSitesSchema = yup.object().shape({
   trapLongitude: yup
     .number()
     // .nullable()
-    .required('Trap latitude required')
+    .required('Trap Longitude required')
     .typeError('Input must be a number'),
   coneSize: yup
     .number()
     // .nullable()
-    .required('Trap latitude required')
+    .required('Cone Size required')
     .typeError('Input must be a number'),
   USGSStationNumber: yup
     .number()
@@ -304,9 +302,67 @@ export const trappingSitesSchema = yup.object().shape({
 export const crewMembersSchema = yup.object().shape({
   firstName: yup.string().required('First name required'),
   lastName: yup.string().required('Last name required'),
-  phoneNumber: yup.string().required('Phone number required'),
-  email: yup.string().required('Email required'),
-  // isLead: false,
+  phoneNumber: yup
+    .string()
+    .required('Phone number required')
+    .matches(
+      /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/,
+      'Phone number is not valid'
+    ),
+  email: yup
+    .string()
+    .required('Email required')
+    .email('Email format is not valid'),
   agency: yup.string().required('Agency required'),
   orchidID: yup.string().nullable(),
+})
+export const hatcheryInformationSchema = yup.object().shape({
+  hatchery: yup.string().required('Hatchery required'),
+  frequencyOfReceivingFish: yup.string().required('Frequency required'),
+  expectedNumberOfFishReceivedAtEachPickup: yup
+    .number()
+    .required('Number of fish required')
+    .typeError('Input must be a number'),
+})
+export const trappingProtocolsSchema = yup.object().shape({
+  species: yup.string().required('Species required'),
+  run: yup.string().required('Run required'),
+  lifeStage: yup.string().required('Life Stage required'),
+  numberMeasured: yup
+    .number()
+    .required('Number Measured required')
+    .typeError('Input must be a number'),
+})
+export const permittingInformationSchema = yup.object().shape({
+  waterTemperatureThreshold: yup
+    .number()
+    .required('Temperature threshold required')
+    .typeError('Input must be a number'),
+  flowThreshold: yup
+    .number()
+    .required('Flow threshold required')
+    .typeError('Input must be a number'),
+  trapCheckFrequency: yup
+    .number()
+    .required('Trap check frequency required')
+    .typeError('Input must be a number'),
+})
+export const takeAndMortalitySchema = yup.object().shape({
+  species: yup.string().required('Species required'),
+  listingUnitOrStock: yup.string().required('Required value'),
+  lifeStage: yup.string().required('Species required'),
+  expectedTake: yup
+    .number()
+    .required('Expected Take required')
+    .typeError('Input must be a number'),
+  indirectMortality: yup
+    .number()
+    .required('Indirect Mortality required')
+    .typeError('Input must be a number'),
+})
+export const setUpNewProgramSchema = yup.object().shape({
+  monitoringProgramName: yup.string().required('Program name required'),
+  streamName: yup.string().required('Stream name required'),
+  fundingAgency: yup.string().required('Funding agency required'),
+  program: yup.string(),
 })

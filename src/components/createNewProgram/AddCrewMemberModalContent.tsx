@@ -61,7 +61,11 @@ const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
                 mx='2'
                 px='10'
                 shadow='3'
-                // isDisabled={}
+                isDisabled={
+                  Object.values(touched).length === 0 ||
+                  (Object.values(touched).length > 0 &&
+                    Object.values(errors).length > 0)
+                }
                 onPress={() => {
                   handleSubmit()
                   closeModal()
@@ -81,13 +85,10 @@ const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
                   Search for existing User
                 </Text>
               </FormControl.Label>
-              <Input
+              <Input //TODO: implement search
                 height='50px'
                 fontSize='16'
-                // placeholder='Search for existing User' //implement search
-                // keyboardType='numeric'
-                // onChange={debouncedOnChange}
-                // onBlur={props.onBlur}
+                placeholder='Search for existing User'
                 value={''}
               />
             </FormControl>
@@ -123,7 +124,7 @@ const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
                 errors={errors}
                 value={values.phoneNumber ? `${values.phoneNumber}` : ''}
                 camelName={'phoneNumber'}
-                // keyboardType={'phone'} //add phone styling
+                // keyboardType={'phone'} //TODO add phone styling
                 width={'45%'}
                 onChangeText={handleChange('phoneNumber')}
                 onBlur={handleBlur('phoneNumber')}

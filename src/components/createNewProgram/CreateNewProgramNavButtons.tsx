@@ -1,34 +1,181 @@
 import React from 'react'
 import { Box, HStack, Text, Button, Icon } from 'native-base'
-import { useSelector, useDispatch } from 'react-redux'
-import { AppDispatch } from '../../redux/store'
+import { connect, useDispatch } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/store'
 import { useRoute } from '@react-navigation/native'
+import { markCreateNewProgramStepCompleted } from '../../redux/reducers/createNewProgramSlices/createNewProgramHomeSlice'
+import { TrappingProtocolsStoreI } from '../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
+import { CrewMembersStoreI } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 
-const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
+const CreateNewProgramNavButtons = ({
+  crewMembersStore,
+  trappingProtocolsStore,
+  navigation,
+  handleSubmit,
+  errors,
+  touched,
+}: {
+  crewMembersStore: CrewMembersStoreI
+  trappingProtocolsStore: TrappingProtocolsStoreI
+  navigation?: any
+  handleSubmit?: any
+  errors?: any
+  touched?: any
+}) => {
+  const dispatch = useDispatch<AppDispatch>()
   const activePage = useRoute().name
+
+  //TODO:
+  //if a section is completed, navigate to the final page of that section when green button clicked
 
   const handleRightButton = () => {
     switch (activePage) {
+      case 'Crew Members':
+        dispatch(markCreateNewProgramStepCompleted('crewMembers'))
+        navigation.goBack()
+        break
+      case 'Efficiency Trial Protocols':
+        navigation.navigate('Create New Program', {
+          screen: 'Hatchery Information',
+        })
+        break
+      case 'Hatchery Information':
+        handleSubmit()
+        dispatch(markCreateNewProgramStepCompleted('efficiencyTrialProtocols'))
+        navigation.navigate('Create New Program', {
+          screen: 'Create New Program Home',
+        })
+        break
+      case 'Trapping Protocols':
+        navigation.navigate('Create New Program', {
+          screen: 'Trapping Protocols Table',
+        })
+        break
+      case 'Trapping Protocols Table':
+        dispatch(markCreateNewProgramStepCompleted('trappingProtocols'))
+        navigation.navigate('Create New Program', {
+          screen: 'Create New Program Home',
+        })
+        break
       case 'Permit Information':
         navigation.navigate('Create New Program', {
           screen: 'Permitting Information Input',
         })
         break
+      case 'Permitting Information Input':
+        handleSubmit()
+        dispatch(markCreateNewProgramStepCompleted('permitInformation'))
+        navigation.navigate('Create New Program', {
+          screen: 'Create New Program Home',
+        })
+        break
+      case 'Create New Program Home':
+        navigation.navigate('Create New Program', {
+          screen: 'Create New Program Complete',
+        })
+        break
+      case 'Create New Program Complete':
+        navigation.navigate('Home')
+        break
 
       default:
-        console.log('Default hit')
         break
     }
   }
   const handleLeftButton = () => {
-    navigation.goBack()
+    if (activePage === 'Create New Program Home') {
+      navigation.navigate('Monitoring Program', {
+        screen: 'Monitoring Program New',
+      })
+    } else {
+    }
+
+    switch (activePage) {
+      case 'Create New Program Home':
+        navigation.navigate('Monitoring Program', {
+          screen: 'Monitoring Program New',
+        })
+        break
+      case 'Create New Program Complete':
+        navigation.navigate('Monitoring Program', {
+          screen: 'Monitoring Program New',
+        })
+        break
+      default:
+        navigation.goBack()
+        break
+    }
   }
 
+  const handleRightButtonText = () => {
+    let rightButtonText = 'Next'
+    switch (activePage) {
+      case 'Crew Members':
+        rightButtonText = 'Save Crew Members and Exit'
+        break
+      case 'Hatchery Information':
+        rightButtonText = 'Save and Exit'
+        break
+      case 'Trapping Protocols Table':
+        rightButtonText = 'Save Trapping Protocols and Exit'
+        break
+      case 'Permitting Information Input':
+        rightButtonText = 'Save Permitting Information and Exit'
+        break
+      case 'Create New Program Complete':
+        rightButtonText = 'Go Home'
+        break
+
+      default:
+        break
+    }
+    return rightButtonText
+  }
+
+  const handleLeftButtonText = () => {
+    let leftButtonText = 'Back'
+    switch (activePage) {
+      case 'Create New Program Complete':
+        leftButtonText = 'Add Another Program'
+        break
+      default:
+        break
+    }
+    return leftButtonText
+  }
   const disableLeftButton = () => {
-    return activePage === 'Create New Program Home'
+    // return activePage === 'Create New Program Home'
+    return false
   }
   const disableRightButton = () => {
-    return false
+    let shouldBeDisabled = false
+
+    switch (activePage) {
+      case 'Crew Members':
+        if (Object.values(crewMembersStore).length === 0) {
+          shouldBeDisabled = true
+        }
+        break
+      case 'Hatchery Information':
+        shouldBeDisabled =
+          Object.keys(touched).length === 0 || Object.keys(errors).length > 0
+
+        break
+      case 'Trapping Protocols Table':
+        if (Object.values(trappingProtocolsStore).length === 0) {
+          shouldBeDisabled = true
+        }
+        break
+      case 'Permitting Information Input':
+        shouldBeDisabled =
+          Object.keys(touched).length === 0 || Object.keys(errors).length > 0
+
+        break
+      default:
+        shouldBeDisabled = false
+        break
+    }
+    return shouldBeDisabled
   }
 
   return (
@@ -46,7 +193,7 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
           onPress={() => handleLeftButton()}
         >
           <Text fontSize='xl' fontWeight='bold' color='primary'>
-            Back
+            {handleLeftButtonText()}
           </Text>
         </Button>
         <Button
@@ -61,12 +208,22 @@ const CreateNewProgramNavButtons = ({ navigation }: { navigation?: any }) => {
           onPress={() => handleRightButton()}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
-            Next
+            {handleRightButtonText()}
           </Text>
         </Button>
       </HStack>
     </Box>
   )
 }
+const mapStateToProps = (state: RootState) => {
+  return {
+    createNewProgramHomeStore: state.createNewProgramHome,
+    trappingSitesStore: state.trappingSites,
+    crewMembersStore: state.crewMembers.crewMembersStore,
+    efficiencyTrialProtocolsStore: state.efficiencyTrialProtocols,
+    trappingProtocolsStore: state.trappingProtocols.trappingProtocolsStore,
+    permitInformationStore: state.permitInformation,
+  }
+}
 
-export default CreateNewProgramNavButtons
+export default connect(mapStateToProps)(CreateNewProgramNavButtons)
