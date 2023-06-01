@@ -52,7 +52,6 @@ export const permitInformationSlice = createSlice({
   reducers: {
     resetPermitInformationSlice: () => initialState,
     savePermitInformationValues: (state, action) => {
-      console.log('🚀 ~ action.payload:', action.payload)
       state.values = action.payload
     },
     saveIndividualTakeAndMortality: (state, action) => {
