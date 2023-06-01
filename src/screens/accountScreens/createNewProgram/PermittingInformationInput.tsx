@@ -183,7 +183,7 @@ const PermittingInformationInput = ({
                   onBlur={handleBlur('trapCheckFrequency')}
                 />
                 <Text fontSize='2xl' color='grey'>
-                  Frequency of trap checks during inclement weather
+                  Expected take and indirect mortality for RST
                 </Text>
               </VStack>
               <ScrollView h={150}>
