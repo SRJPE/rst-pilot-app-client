@@ -83,7 +83,6 @@ const IncompleteSections = ({
 }) => {
   // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
-  const [tempUID, setTempUID] = useState<string>(uid())
   const stepsArray = Object.values(navigationState.steps).slice(
     0,
     numOfFormSteps - 1
@@ -159,12 +158,11 @@ const IncompleteSections = ({
         )
         .map((obj: any) => obj.personnelId)
     )
-    //if the array contains a single string, return the string
-    return filteredNames.length === 1 ? filteredNames[0] : filteredNames
+    // return array
+    return filteredNames
   }
 
   const saveTrapVisits = () => {
-    const currentDateTime = new Date()
     const trapFunctioningValues = returnDefinitionArray(
       dropdownsState.values.trapFunctionality
     )
@@ -210,7 +208,7 @@ const IncompleteSections = ({
       const selectedCrewIds =
         findCrewIdsFromSelectedCrewNames(selectedCrewNames)
       const trapVisitSubmission = {
-        uid: tempUID,
+        uid: id,
         crew: selectedCrewIds,
         programId: visitSetupState[id].values.programId,
         visitTypeId: null,
@@ -336,18 +334,15 @@ const IncompleteSections = ({
 
     const catchRawSubmissions: any[] = []
 
-    Object.keys(fishInputState).forEach((tabGroupId) => {
-      if (tabGroupId != 'placeholderId') {
-        const fishStoreKeys = Object.keys(fishInputState[tabGroupId].fishStore)
-        const activeTabId = Object.keys(tabState.tabs).filter((id) => {
-          return tabState.tabs[id].groupId === tabGroupId
-        })[0]
-        const programId = visitSetupState[activeTabId]
-          ? visitSetupState[activeTabId].values.programId
+    Object.keys(fishInputState).forEach((tabId) => {
+      if (tabId != 'placeholderId') {
+        const fishStoreKeys = Object.keys(fishInputState[tabId].fishStore)
+        const programId = Object.keys(visitSetupState).includes(tabId)
+          ? visitSetupState[tabId].values.programId
           : 1
 
         fishStoreKeys.forEach((key) => {
-          const fishValue = fishInputState[tabGroupId].fishStore[key]
+          const fishValue = fishInputState[tabId].fishStore[key]
 
           const filterAndPrepareData = (data: Array<any>) => {
             let dataCopy = cloneDeep(data)
@@ -400,7 +395,7 @@ const IncompleteSections = ({
           }
 
           catchRawSubmissions.push({
-            uid: tempUID,
+            uid: tabId,
             programId,
             trapVisitId: null,
             taxonCode: returnTaxonCode(fishValue),
