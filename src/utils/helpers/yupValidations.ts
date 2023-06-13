@@ -366,3 +366,11 @@ export const setUpNewProgramSchema = yup.object().shape({
   fundingAgency: yup.string().required('Funding agency required'),
   program: yup.string(),
 })
+export const groupTrapSitesSchema = yup.object().shape({
+  numberOfTrapSites: yup
+    .number()
+    .min(2)
+    .required('Number of trap sites required'),
+
+  orchidID: yup.string().nullable(),
+})

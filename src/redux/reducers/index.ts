@@ -32,6 +32,7 @@ import createNewProgramHomeSlice from './createNewProgramSlices/createNewProgram
 import trappingProtocolsSlice from './createNewProgramSlices/trappingProtocolsSlice'
 import efficiencyTrialProtocolsSlice from './createNewProgramSlices/efficiencyTrialProtocolsSlice'
 import permitInformationSlice from './createNewProgramSlices/permitInformationSlice'
+import multipleTrapsSlice from './createNewProgramSlices/multipleTrapsSlice'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
@@ -103,4 +104,5 @@ export default combineReducers({
   trappingProtocols: trappingProtocolsSlice,
   efficiencyTrialProtocols: efficiencyTrialProtocolsSlice,
   permitInformation: permitInformationSlice,
+  multipleTraps: multipleTrapsSlice,
 })

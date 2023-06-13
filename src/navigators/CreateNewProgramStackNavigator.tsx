@@ -11,6 +11,8 @@ import TrappingProtocolsTable from '../screens/accountScreens/createNewProgram/T
 import HatcheryInformation from '../screens/accountScreens/createNewProgram/HatcheryInformation'
 import CreateNewProgramComplete from '../screens/accountScreens/createNewProgram/CreateNewProgramComplete'
 
+import MultipleTraps from '../screens/accountScreens/createNewProgram/MultipleTraps'
+
 const CreateNewProgram = createStackNavigator()
 
 export default function CreateNewProgramStackNavigator() {
@@ -26,6 +28,10 @@ export default function CreateNewProgramStackNavigator() {
       <CreateNewProgram.Screen
         name='Trapping Sites'
         component={TrappingSites}
+      />
+      <CreateNewProgram.Screen
+        name='Multiple Traps'
+        component={MultipleTraps}
       />
       <CreateNewProgram.Screen name='Crew Members' component={CrewMembers} />
       <CreateNewProgram.Screen

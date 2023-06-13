@@ -14,6 +14,8 @@ const CreateNewProgramNavButtons = ({
   handleSubmit,
   errors,
   touched,
+  variant,
+  disableRightButtonBool,
 }: {
   crewMembersStore: CrewMembersStoreI
   trappingProtocolsStore: TrappingProtocolsStoreI
@@ -21,14 +23,36 @@ const CreateNewProgramNavButtons = ({
   handleSubmit?: any
   errors?: any
   touched?: any
+  variant?: string
+  disableRightButtonBool?: boolean
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const activePage = useRoute().name
 
-  //TODO:
-  //if a section is completed, navigate to the final page of that section when green button clicked
+  const isMultipleTrapsVariant = variant === 'multipleTrapsDialog'
 
-  const handleRightButton = () => {
+  const { leftButtonText, rightButtonText } = (() => {
+    switch (activePage) {
+      case 'Trapping Sites':
+        if (isMultipleTrapsVariant) {
+          return {
+            leftButtonText: 'Save and Exit',
+            rightButtonText: 'Group Traps',
+          }
+        } else {
+          return { leftButtonText: 'Back', rightButtonText: 'Next' }
+        }
+      case 'Multiple Traps':
+        return {
+          leftButtonText: 'Cancel',
+          rightButtonText: 'Save',
+        }
+      default:
+        return { leftButtonText: 'Back', rightButtonText: 'Next' }
+    }
+  })()
+
+  const handleRightButton = async () => {
     switch (activePage) {
       case 'Crew Members':
         dispatch(markCreateNewProgramStepCompleted('crewMembers'))
@@ -60,6 +84,24 @@ const CreateNewProgramNavButtons = ({
       case 'Permit Information':
         navigation.navigate('Create New Program', {
           screen: 'Permitting Information Input',
+        })
+        break
+      case 'Trapping Sites':
+        if (isMultipleTrapsVariant) {
+          navigation.navigate('Create New Program', {
+            screen: 'Multiple Traps',
+          })
+        } else {
+          console.log('Navigating to next Screen')
+        }
+        break
+      case 'Multiple Traps':
+        //*****
+        // Add dispatch function to save trap site group data to redux store
+        //*****
+        handleSubmit && handleSubmit()
+        navigation.navigate('Create New Program', {
+          screen: 'Trapping Sites',
         })
         break
       case 'Permitting Information Input':
@@ -179,11 +221,16 @@ const CreateNewProgramNavButtons = ({
   }
 
   return (
-    <Box bg='#fff' py='8' maxWidth='100%'>
+    <Box
+      bg={isMultipleTrapsVariant ? 'transparent' : '#fff'}
+      p={isMultipleTrapsVariant ? 0 : 8}
+      mt={isMultipleTrapsVariant ? 8 : 0}
+      width='100%'
+    >
       <HStack justifyContent='space-evenly'>
         <Button
           alignSelf='flex-start'
-          bg='secondary'
+          bg={isMultipleTrapsVariant ? 'primary' : 'secondary'}
           width='45%'
           height='20'
           rounded='xs'
@@ -204,7 +251,11 @@ const CreateNewProgramNavButtons = ({
           rounded='xs'
           borderRadius='5'
           shadow='5'
-          isDisabled={disableRightButton()}
+          isDisabled={
+            disableRightButtonBool !== undefined
+              ? disableRightButtonBool
+              : disableRightButton()
+          }
           onPress={() => handleRightButton()}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
