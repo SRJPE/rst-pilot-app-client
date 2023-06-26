@@ -15,12 +15,14 @@ import { useNavigation } from '@react-navigation/native'
 
 const CustomModalHeader = ({
   headerText,
+  headerFontSize,
   showHeaderButton,
   headerButton,
   closeModal,
   navigateBack,
 }: {
   headerText: string
+  headerFontSize?: number
   showHeaderButton: boolean
   headerButton?: any
   closeModal?: any
@@ -54,7 +56,7 @@ const CustomModalHeader = ({
             >
               <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
             </Button>
-            <Heading>{headerText}</Heading>
+            <Heading fontSize={headerFontSize}>{headerText}</Heading>
           </HStack>
           <Box mr='5'>{headerButton}</Box>
         </HStack>
@@ -76,7 +78,12 @@ const CustomModalHeader = ({
           >
             <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
           </Button>
-          <Heading flex={1} textAlign='center' mr='24'>
+          <Heading
+            flex={1}
+            textAlign='center'
+            mr='24'
+            fontSize={headerFontSize}
+          >
             {headerText}
           </Heading>
         </HStack>

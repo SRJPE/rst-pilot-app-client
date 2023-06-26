@@ -5,7 +5,9 @@ import {
   VictoryBar,
   VictoryChart,
   VictoryLine,
+  VictoryScatter,
   VictoryTheme,
+  VictoryZoomContainer,
 } from 'victory-native'
 
 export default function Graph({
@@ -19,7 +21,7 @@ export default function Graph({
   backgroundColor,
   onPointClick,
 }: {
-  chartType: 'graph' | 'line'
+  chartType: 'bar' | 'line'
   title?: string
   data: any
   height: number
@@ -27,22 +29,22 @@ export default function Graph({
   barColor: string
   selectedBarColor: string
   backgroundColor?: string
-  onPointClick?: () => void
+  onPointClick?: (pointClicked: any) => void
 }) {
-  const handlePointClick = () => {
-    console.log('hit!')
+  const handlePointClick = (datum: any) => {
     if (onPointClick) {
-      onPointClick()
+      onPointClick(datum)
     }
   }
 
   const chartTypeComponent = () => {
     switch (chartType) {
-      case 'graph':
+      case 'bar':
         return (
           <VictoryBar
             data={data}
             style={{ data: { fill: barColor } }}
+            barWidth={({ index }) => 2}
             x='x'
             y='y'
             events={[
@@ -64,8 +66,7 @@ export default function Graph({
                       {
                         target: 'data',
                         mutation: (props) => {
-                          console.log(data.datum)
-                          handlePointClick()
+                          handlePointClick(data.datum)
                           const fill = props.style?.fill
                           return fill === selectedBarColor
                             ? null
@@ -105,8 +106,7 @@ export default function Graph({
                       {
                         target: 'data',
                         mutation: (props) => {
-                          console.log(data.datum)
-                          handlePointClick()
+                          handlePointClick(data.datum)
                           const fill = props.style?.fill
                           return fill === selectedBarColor
                             ? null
@@ -131,6 +131,10 @@ export default function Graph({
         </Text>
       )}
       <VictoryChart
+        domain={{ y: [0, 100] }}
+        containerComponent={
+          <VictoryZoomContainer zoomDomain={{ y: [0, 100] }} />
+        }
         theme={VictoryTheme.material}
         domainPadding={30}
         width={width}
@@ -149,6 +153,43 @@ export default function Graph({
           }}
         />
         {chartTypeComponent()}
+        <VictoryScatter
+          data={data}
+          style={{ data: { fill: barColor } }}
+          x='x'
+          y='y'
+          events={[
+            {
+              target: 'data',
+              eventHandlers: {
+                onPressIn: (event, data) => {
+                  return [
+                    {
+                      target: 'data',
+                      eventKey: 'all',
+                      mutation: (props) => {
+                        const fill = props.style?.fill
+                        return fill === barColor
+                          ? null
+                          : { style: { fill: barColor } }
+                      },
+                    },
+                    {
+                      target: 'data',
+                      mutation: (props) => {
+                        handlePointClick(data.datum)
+                        const fill = props.style?.fill
+                        return fill === selectedBarColor
+                          ? null
+                          : { style: { fill: selectedBarColor } }
+                      },
+                    },
+                  ]
+                },
+              },
+            },
+          ]}
+        />
       </VictoryChart>
     </View>
   )

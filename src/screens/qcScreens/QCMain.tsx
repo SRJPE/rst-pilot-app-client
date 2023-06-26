@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Box, Button, Center, Icon, Text, View, VStack } from 'native-base'
 import { LayoutAnimation, TouchableOpacity } from 'react-native'
 
-export default function DataQualityControl({
+export default function QCMain({
   navigation,
+  // route,
 }: {
   navigation: any
+  // route: any
 }) {
   const [activeButton, setActiveButton] = useState<
     'trapBtn' | 'catchBtn' | 'efficiencyBtn' | ''
@@ -24,7 +26,7 @@ export default function DataQualityControl({
         w='4/5'
         bg={activeButton === 'trapBtn' ? 'themeOrange' : 'primary'}
         onPress={() => {
-          setActiveButton(activeButton != 'trapBtn' ? 'trapBtn' : '')
+          setActiveButton('trapBtn')
           navigation.navigate('Trap QC')
         }}
       >
@@ -34,7 +36,7 @@ export default function DataQualityControl({
       </Button>
       {/* ------------------------------------------------------------------------------------ */}
       <Accordion
-      activeButton={activeButton}
+        activeButton={activeButton}
         headerComponent={
           <View
             marginTop={25}
@@ -50,7 +52,7 @@ export default function DataQualityControl({
           </View>
         }
         headerOnPress={() => {
-          setActiveButton(activeButton != 'catchBtn' ? 'catchBtn' : '')
+          setActiveButton('catchBtn')
         }}
       >
         <>
@@ -67,10 +69,7 @@ export default function DataQualityControl({
             alignItems='center'
             onPress={() => {
               setActiveCatchOption(
-                activeCatchOption !=
-                  'Measured Variables and Associated Categories'
-                  ? 'Measured Variables and Associated Categories'
-                  : ''
+                'Measured Variables and Associated Categories'
               )
               navigation.navigate('CatchMeasureQC')
             }}
@@ -95,11 +94,7 @@ export default function DataQualityControl({
             justifyContent='center'
             alignItems='center'
             onPress={() => {
-              setActiveCatchOption(
-                activeCatchOption != 'Categorical Observations'
-                  ? 'Categorical Observations'
-                  : ''
-              )
+              setActiveCatchOption('Categorical Observations')
               navigation.navigate('CatchCategoricalQC')
             }}
           >
@@ -123,11 +118,7 @@ export default function DataQualityControl({
             justifyContent='center'
             alignItems='center'
             onPress={() => {
-              setActiveCatchOption(
-                activeCatchOption != 'Total Fish Counts'
-                  ? 'Total Fish Counts'
-                  : ''
-              )
+              setActiveCatchOption('Total Fish Counts')
               navigation.navigate('CatchFishCountQC')
             }}
           >
@@ -151,11 +142,7 @@ export default function DataQualityControl({
             justifyContent='center'
             alignItems='center'
             onPress={() => {
-              setActiveCatchOption(
-                activeCatchOption != 'Partial Records'
-                  ? 'Partial Records'
-                  : ''
-              )
+              setActiveCatchOption('Partial Records')
               navigation.navigate('PartialRecordsQC')
             }}
           >
@@ -176,9 +163,7 @@ export default function DataQualityControl({
         w='4/5'
         bg={activeButton === 'efficiencyBtn' ? 'themeOrange' : 'primary'}
         onPress={() => {
-          setActiveButton(
-            activeButton != 'efficiencyBtn' ? 'efficiencyBtn' : ''
-          )
+          setActiveButton('efficiencyBtn')
           navigation.navigate('EfficiencyQC')
         }}
       >
@@ -192,7 +177,7 @@ export default function DataQualityControl({
         w='90%'
         bg='primary'
         onPress={() => {
-          navigation.navigate('Home')
+          navigation.goBack()
         }}
       >
         <Text fontSize='xl' color='white' fontWeight={'bold'}>
@@ -207,7 +192,7 @@ const Accordion = ({
   headerComponent,
   headerOnPress,
   children,
-  activeButton
+  activeButton,
 }: {
   headerComponent: JSX.Element
   headerOnPress: () => void

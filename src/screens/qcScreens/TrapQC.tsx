@@ -1,18 +1,143 @@
-import { useState } from 'react'
-import { Button, Center, HStack, Text, View, VStack } from 'native-base'
+import { useEffect, useState } from 'react'
+import { Box, Button, Center, HStack, Text, View, VStack } from 'native-base'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
 import { ScrollView } from 'react-native-gesture-handler'
+import CustomModal from '../../components/Shared/CustomModal'
+import GraphModalContent from '../../components/Shared/GraphModalContent'
+import { connect, useDispatch } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/store'
+import { trapVisitQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import sampleWaterTurbidityData from './sample_trap_visit_env_data'
 
-export default function TrapQC({ navigation }: { navigation: any }) {
+interface GraphDataI {
+  Temperature: any[]
+  Turbidity: any[]
+  'RPM At Start': any[]
+  'RPM At End': any[]
+  Counter: any[]
+  Debris: any[]
+}
+
+function TrapQC({
+  navigation,
+  cachedTrapVisits,
+}: {
+  navigation: any
+  cachedTrapVisits: any[]
+}) {
+  const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
-    ('Temperature' | 'Turbidity' | 'RPMs' | 'Counter' | 'Debris')[]
+    (
+      | 'Temperature'
+      | 'Turbidity'
+      | 'RPM At Start'
+      | 'RPM At End'
+      | 'Counter'
+      | 'Debris'
+    )[]
   >(['Temperature'])
+  const [graphData, setGraphData] = useState<GraphDataI>({
+    Temperature: [],
+    Turbidity: [],
+    'RPM At Start': [],
+    'RPM At End': [],
+    Counter: [],
+    Debris: [],
+  })
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [pointClicked, setPointClicked] = useState<any | null>(null)
+
+  useEffect(() => {
+    let tempData: any[] = []
+    let turbidityData: any[] = []
+    let rpmAtStartData: any[] = []
+    let rpmAtEndData: any[] = []
+    let counterData: any[] = []
+    let debrisData: any[] = []
+
+    Object.values(cachedTrapVisits).forEach((response: any, idx: number) => {
+      const trapVisitId = response.createdTrapCoordinatesResponse.trapVisitId
+
+      let temp = response.createdTrapVisitEnvironmentalResponse.filter(
+        (item: any) => {
+          return item.measureName === 'water temperature'
+        }
+      )[0]
+      tempData.push({
+        trapVisitId,
+        x: idx + 1,
+        y: Number(temp.measureValueNumeric),
+      })
+
+      let turbidity = response.createdTrapVisitEnvironmentalResponse.filter(
+        (item: any) => {
+          return item.measureName === 'water turbidity'
+        }
+      )[0]
+      turbidityData.push({
+        trapVisitId,
+        x: idx + 1,
+        y: Number(turbidity.measureValueNumeric),
+      })
+
+      let rpmAtStart = {
+        trapVisitId,
+        x: idx + 1,
+        y: Number(response.createdTrapVisitResponse.rpmAtStart),
+      }
+      rpmAtStartData.push(rpmAtStart)
+
+      let rpmAtEnd = {
+        trapVisitId,
+        x: idx + 1,
+        y: Number(response.createdTrapVisitResponse.rpmAtEnd),
+      }
+      rpmAtEndData.push(rpmAtEnd)
+
+      let counter = {
+        trapVisitId,
+        x: idx + 1,
+        y: response.createdTrapVisitResponse.totalRevolutions,
+      }
+      counterData.push(counter)
+
+      let debris = {
+        trapVisitId,
+        x: idx + 1,
+        y: response.createdTrapVisitResponse.debrisVolumeLiters,
+      }
+      debrisData.push(debris)
+    })
+
+    // sampleWaterTurbidityData.forEach((envItem, idx) => {
+    //   turbidityData.push({
+    //     trapVisitId: envItem.trapVisitId,
+    //     x: idx + 1,
+    //     y: Number(envItem.measureValueNumeric),
+    //   })
+    // })
+
+    setGraphData({
+      Temperature: tempData,
+      Turbidity: turbidityData,
+      'RPM At Start': rpmAtStartData,
+      'RPM At End': rpmAtEndData,
+      Counter: counterData,
+      Debris: debrisData,
+    })
+  }, [cachedTrapVisits])
 
   const GraphMenuButton = ({
     buttonName,
   }: {
-    buttonName: 'Temperature' | 'Turbidity' | 'RPMs' | 'Counter' | 'Debris'
+    buttonName:
+      | 'Temperature'
+      | 'Turbidity'
+      | 'RPM At Start'
+      | 'RPM At End'
+      | 'Counter'
+      | 'Debris'
   }) => {
     return (
       <Button
@@ -31,7 +156,7 @@ export default function TrapQC({ navigation }: { navigation: any }) {
         }}
       >
         <Text
-          fontSize='lg'
+          fontSize='sm'
           color={activeButtons.includes(buttonName) ? 'secondary' : 'primary'}
           fontWeight={'bold'}
         >
@@ -41,13 +166,22 @@ export default function TrapQC({ navigation }: { navigation: any }) {
     )
   }
 
-  const data = [
-    { label: 'Point 1', x: 1, y: 10, extraInfo: 'woop woop!' },
-    { label: 'Point 2', x: 2, y: 20, extraInfo: 'woop woop!' },
-    { label: 'Point 3', x: 3, y: 15, extraInfo: 'woop woop!' },
-    { label: 'Point 4', x: 4, y: 25, extraInfo: 'woop woop!' },
-    { label: 'Point 5', x: 5, y: 12, extraInfo: 'woop woop!' },
-  ]
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setPointClicked(null)
+  }
+
+  const handlePointClicked = (datum: any) => {
+    setPointClicked(datum)
+    setIsModalOpen(true)
+  }
+
+  const handleModalSubmit = (submission: any) => {
+    if (pointClicked) {
+      const trapVisitId = submission['Temperature']['trapVisitId']
+      dispatch(trapVisitQCSubmission({ trapVisitId, submission }))
+    }
+  }
 
   return (
     <>
@@ -69,10 +203,11 @@ export default function TrapQC({ navigation }: { navigation: any }) {
             Edit values by selecting a point on a plot below.
           </Text>
 
-          <HStack w={'full'} justifyContent='space-evenly'>
+          <HStack w={'full'} justifyContent='space-evenly' mb={'10'}>
             <GraphMenuButton buttonName={'Temperature'} />
             <GraphMenuButton buttonName={'Turbidity'} />
-            <GraphMenuButton buttonName={'RPMs'} />
+            <GraphMenuButton buttonName={'RPM At Start'} />
+            <GraphMenuButton buttonName={'RPM At End'} />
             <GraphMenuButton buttonName={'Counter'} />
             <GraphMenuButton buttonName={'Debris'} />
           </HStack>
@@ -82,8 +217,9 @@ export default function TrapQC({ navigation }: { navigation: any }) {
               return (
                 <Graph
                   key={buttonName}
-                  chartType='graph'
-                  data={data}
+                  chartType='bar'
+                  data={graphData[buttonName]}
+                  onPointClick={(datum) => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'
@@ -128,6 +264,36 @@ export default function TrapQC({ navigation }: { navigation: any }) {
           </HStack>
         </VStack>
       </View>
+      {pointClicked ? (
+        <CustomModal
+          isOpen={isModalOpen}
+          closeModal={() => handleCloseModal()}
+          height='1/2'
+        >
+          <GraphModalContent
+            closeModal={() => handleCloseModal()}
+            pointClicked={pointClicked}
+            onSubmit={(submission: any) => handleModalSubmit(submission)}
+            headerText={'Table of Selected Points'}
+            modalData={graphData}
+          />
+        </CustomModal>
+      ) : (
+        <></>
+      )}
     </>
   )
 }
+
+const mapStateToProps = (state: RootState) => {
+  let cachedTrapVisits = [
+    ...state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
+    ...state.trapVisitFormPostBundler.qcTrapVisitSubmissions,
+  ]
+
+  return {
+    cachedTrapVisits: cachedTrapVisits ?? [],
+  }
+}
+
+export default connect(mapStateToProps)(TrapQC)

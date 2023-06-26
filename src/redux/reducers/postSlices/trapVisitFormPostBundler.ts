@@ -14,6 +14,8 @@ interface InitialStateI {
   previousTrapVisitSubmissions: TrapVisitSubmissionI[]
   catchRawSubmissions: CatchRawSubmissionI[]
   previousCatchRawSubmissions: CatchRawSubmissionI[]
+  qcTrapVisitSubmissions: any[]
+  qcCatchRawSubmissions: any[]
 }
 
 interface TrapVisitSubmissionI {
@@ -81,6 +83,8 @@ const initialState: InitialStateI = {
   previousTrapVisitSubmissions: [],
   catchRawSubmissions: [],
   previousCatchRawSubmissions: [],
+  qcTrapVisitSubmissions: [],
+  qcCatchRawSubmissions: [],
 }
 
 // Async actions API calls
@@ -189,7 +193,7 @@ const getIndexOfDuplicateTrapVisit = ({
   const trapVisitTimeStart = new Date(errorDuplicateValues[2])
 
   let index = -1
-  
+
   failedTrapVisitSubmissions.forEach((submission, idx) => {
     const submissionTimeStart = new Date(submission.trapVisitTimeStart)
     if (
@@ -218,6 +222,99 @@ export const trapVisitPostBundler = createSlice({
         ...action.payload,
       ]
       state.submissionStatus = 'not-submitted'
+    },
+    trapVisitQCSubmission: (state, action) => {
+      let { trapVisitId, submission } = action.payload
+      let visitHasNotStartedQC = false
+      let visitHasNotStartedQCIdx = -1
+
+      state.previousTrapVisitSubmissions.forEach(
+        (trapVisit: any, idx: number) => {
+          if (trapVisit.createdTrapVisitResponse.id === trapVisitId) {
+            visitHasNotStartedQC = true
+            visitHasNotStartedQCIdx = idx
+          }
+        }
+      )
+
+      // if trap visit has not started QC
+      if (visitHasNotStartedQC && visitHasNotStartedQCIdx != -1) {
+        let trapVisitToQC: any =
+          state.previousTrapVisitSubmissions[visitHasNotStartedQCIdx]
+
+        //env data
+        trapVisitToQC.createdTrapVisitEnvironmentalResponse.forEach(
+          (envMeasure: any) => {
+            if (envMeasure.measureName === 'water temperature') {
+              envMeasure.measureValueNumeric = submission['Temperature'].y
+              envMeasure.measureValueText = submission['Temperature'].y
+            }
+
+            if (envMeasure.measureName === 'water turbidity') {
+              envMeasure.measureValueNumeric = submission['Turbidity'].y
+              envMeasure.measureValueText = submission['Turbidity'].y
+            }
+          }
+        )
+
+        //trap visit record data
+        trapVisitToQC.createdTrapVisitResponse.totalRevolutions =
+          submission['Counter'].y
+        trapVisitToQC.createdTrapVisitResponse.debrisVolumeLiters =
+          submission['Debris'].y
+        trapVisitToQC.createdTrapVisitResponse.rpmAtStart = submission['RPM At Start'].y
+        trapVisitToQC.createdTrapVisitResponse.rpmAtEnd = submission['RPM At End'].y
+
+        state.previousTrapVisitSubmissions = [
+          ...state.previousTrapVisitSubmissions.slice(
+            0,
+            visitHasNotStartedQCIdx
+          ),
+          ...state.previousTrapVisitSubmissions.slice(
+            visitHasNotStartedQCIdx + 1
+          ),
+        ]
+        state.qcTrapVisitSubmissions.push(trapVisitToQC)
+      }
+      // if trap visit has started QC
+      else {
+        let qcTrapVisitIdx = -1
+        state.qcTrapVisitSubmissions.forEach((trapVisit, idx) => {
+          if (trapVisit.createdTrapVisitResponse.id === trapVisitId) {
+            qcTrapVisitIdx = idx
+          }
+        })
+        let qcTrapVisit: any = state.qcTrapVisitSubmissions[qcTrapVisitIdx]
+
+        // env data
+        qcTrapVisit.createdTrapVisitEnvironmentalResponse.forEach(
+          (envMeasure: any) => {
+            if (envMeasure.measureName === 'water temperature') {
+              envMeasure.measureValueNumeric = submission['Temperature'].y
+              envMeasure.measureValueText = submission['Temperature'].y
+            }
+
+            if (envMeasure.measureName === 'water turbidity') {
+              envMeasure.measureValueNumeric = submission['Turbidity'].y
+              envMeasure.measureValueText = submission['Turbidity'].y
+            }
+          }
+        )
+
+        //trap visit record data
+        qcTrapVisit.createdTrapVisitResponse.totalRevolutions =
+          submission['Counter'].y
+        qcTrapVisit.createdTrapVisitResponse.debrisVolumeLiters =
+          submission['Debris'].y
+        qcTrapVisit.createdTrapVisitResponse.rpmAtStart = submission['RPM At Start'].y
+        qcTrapVisit.createdTrapVisitResponse.rpmAtEnd = submission['RPM At End'].y
+
+        state.qcTrapVisitSubmissions = [
+          ...state.qcTrapVisitSubmissions.slice(0, qcTrapVisitIdx),
+          ...state.qcTrapVisitSubmissions.slice(qcTrapVisitIdx + 1),
+        ]
+        state.qcTrapVisitSubmissions.push(qcTrapVisit)
+      }
     },
   },
   extraReducers: {
@@ -256,7 +353,9 @@ export const trapVisitPostBundler = createSlice({
             errorDetail,
             failedTrapVisitSubmissions,
           })
-          state.previousTrapVisitSubmissions.push(state.trapVisitSubmissions[index])
+          state.previousTrapVisitSubmissions.push(
+            state.trapVisitSubmissions[index]
+          )
           state.trapVisitSubmissions.splice(index, 1)
         }
       }
@@ -265,7 +364,10 @@ export const trapVisitPostBundler = createSlice({
   },
 })
 
-export const { saveTrapVisitSubmission, saveCatchRawSubmissions } =
-  trapVisitPostBundler.actions
+export const {
+  saveTrapVisitSubmission,
+  saveCatchRawSubmissions,
+  trapVisitQCSubmission,
+} = trapVisitPostBundler.actions
 
 export default trapVisitPostBundler.reducer
