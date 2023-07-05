@@ -164,9 +164,7 @@ export const addMarksOrTagsSchema = yup.object().shape({
 })
 
 export const addGeneticsSampleSchema = yup.object().shape({
-  sampleId: yup
-    .string()
-    .required('Sample ID Number required'),
+  sampleId: yup.string().required('Sample ID Number required'),
   mucusSwab: yup.boolean().required('Mucus Swab collection status required'),
   finClip: yup.boolean().required('Fin Clip collection status required'),
   crewMember: yup.string().required('Crew Member required'),
@@ -261,6 +259,10 @@ export const addAnotherMarkSchema = yup.object().shape({
   markType: yup.string().required('Mark type required'),
   markColor: yup.string().required('Mark color required'),
   markPosition: yup.string().required('Mark position required'),
+})
+export const batchCharacteristicsSchema = yup.object().shape({
+  species: yup.string().required('Species required'),
+  fishCondition: yup.string().required('Fish Condition required'),
 })
 
 /*----------------------------------------------------------------
