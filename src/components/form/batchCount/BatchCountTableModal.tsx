@@ -72,6 +72,21 @@ const BatchCountTableModal = ({
               {currentCount}
             </Text>
           </HStack>
+          <HStack
+            alignItems='center'
+            space={2}
+            bg='secondary'
+            borderRadius='5'
+            py='2'
+            px='3'
+            my='2'
+          >
+            <Text color='black' fontSize='md'>
+              To change metadata (dead, mark, or condition) of fish at this fork
+              length, reset count to zero and re-enter correct values for all
+              fish at this fork length.
+            </Text>
+          </HStack>
           {Object.keys(modalInitialData).map((key: string) => {
             if (key !== 'forkLength' && key !== 'count') {
               return (
@@ -100,15 +115,6 @@ const BatchCountTableModal = ({
         </Modal.Body>
         <Modal.Footer>
           <Button.Group space={2}>
-            <Button
-              variant='ghost'
-              colorScheme='blueGray'
-              onPress={() => {
-                console.log('🚀 ~ modalDataTemp', modalDataTemp)
-              }}
-            >
-              Log
-            </Button>
             <Button
               variant='ghost'
               colorScheme='blueGray'
