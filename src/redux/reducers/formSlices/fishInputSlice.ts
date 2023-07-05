@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, isEqual } from 'lodash'
 import { reformatBatchCountData } from '../../../utils/utils'
 import { ReleaseMarkI } from '../addAnotherMarkSlice'
 
@@ -24,6 +24,7 @@ export interface IndividualFishValuesI {
   forkLength: number | null
   run: string
   weight?: number | null
+  fishCondition: string | null
   lifeStage: string
   adiposeClipped: boolean | null
   existingMarks: Array<ReleaseMarkI>
@@ -41,6 +42,7 @@ export const individualFishInitialState = {
   forkLength: null,
   run: '',
   weight: null,
+  fishCondition: '',
   lifeStage: '',
   adiposeClipped: false,
   existingMarks: [],
@@ -83,43 +85,83 @@ export const saveFishSlice = createSlice({
         tabId,
         species,
         adiposeClipped,
-        dead,
         existingMarks,
         forkLengths,
+        fishCondition: fishConditionValue,
       } = action.payload
       let fishStoreCopy = cloneDeep(
         state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
       )
 
-      const reformatedBatchCountData = reformatBatchCountData(forkLengths)
+      interface FishEntry {
+        forkLength: number
+        lifeStage: string
+        dead: boolean
+        existingMark: boolean
+        fishCondition: boolean
+      }
 
-      for (let key in reformatedBatchCountData) {
-        for (let innerKey in reformatedBatchCountData[key]) {
-          const batchCountEntry = {
-            species: species,
-            numFishCaught: reformatedBatchCountData[key][innerKey], //updated
-            forkLength: key, //updated
-            run: 'not recorded', //updated
-            weight: null,
-            lifeStage: species === 'Chinook salmon' ? innerKey : 'not recorded', //updated
-            adiposeClipped: adiposeClipped,
-            existingMarks: existingMarks,
-            dead: dead,
-            willBeUsedInRecapture: null,
-            plusCountMethod: null,
-            plusCount: false,
-          } as any
-          let id = null
-          if (Object.keys(fishStoreCopy).length) {
-            // @ts-ignore
-            const largestId = Math.max(...Object.keys(fishStoreCopy))
-            id = largestId + 1
-          } else {
-            id = 0
+      interface PreparedFishEntry {
+        count: number
+        fishEntryData: FishEntry
+      }
+
+      function organizeFishEntries(
+        inputData: Record<string, FishEntry>
+      ): PreparedFishEntry[] {
+        const preparedFishEntries: PreparedFishEntry[] = []
+
+        for (const value of Object.values(inputData)) {
+          let foundMatch = false
+
+          for (const entry of preparedFishEntries) {
+            if (isEqual(entry.fishEntryData, value)) {
+              entry.count++
+              foundMatch = true
+              break
+            }
           }
 
-          fishStoreCopy[id] = batchCountEntry
+          if (!foundMatch) {
+            preparedFishEntries.push({
+              count: 1,
+              fishEntryData: cloneDeep(value),
+            })
+          }
         }
+
+        return preparedFishEntries
+      }
+      const organizedFishEntriesResult = organizeFishEntries(forkLengths)
+
+      for (const value of Object.values(organizedFishEntriesResult)) {
+        const { forkLength, lifeStage, dead, existingMark, fishCondition } =
+          value.fishEntryData
+        const batchCountEntry = {
+          species: species,
+          numFishCaught: value.count,
+          forkLength: forkLength,
+          run: 'not recorded', //updated
+          weight: null,
+          lifeStage: species === 'Chinook salmon' ? lifeStage : 'not recorded', //updated
+          adiposeClipped: adiposeClipped,
+          existingMarks: existingMark ? existingMarks : [],
+          dead: dead,
+          fishCondition: fishCondition ? fishConditionValue : false,
+          willBeUsedInRecapture: null,
+          plusCountMethod: null,
+          plusCount: false,
+        } as any
+        let id = null
+        if (Object.keys(fishStoreCopy).length) {
+          // @ts-ignore
+          const largestId = Math.max(...Object.keys(fishStoreCopy))
+          id = largestId + 1
+        } else {
+          id = 0
+        }
+
+        fishStoreCopy[id] = batchCountEntry
       }
       if (state[tabId]) {
         state[tabId].fishStore = fishStoreCopy
@@ -165,6 +207,7 @@ export const saveFishSlice = createSlice({
         forkLength: null,
         run,
         weight: null,
+        fishCondition: null,
         lifeStage,
         adiposeClipped: null,
         existingMarks: [],
