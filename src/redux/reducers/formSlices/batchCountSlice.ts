@@ -9,12 +9,15 @@ export interface BatchStoreI {
 export interface singleBatchRawI {
   forkLength: number
   lifeStage: string
+  dead: boolean
+  fishCondition: boolean
+  existingMark: boolean
 }
 export interface batchCharacteristicsI {
   tabId: string | null
   species: string
   adiposeClipped: boolean
-  dead: boolean
+  fishCondition: string
   existingMarks: Array<ReleaseMarkI>
   forkLengths?: BatchStoreI
 }
@@ -22,7 +25,7 @@ export const initialState: batchCharacteristicsI = {
   tabId: null,
   species: '',
   adiposeClipped: false,
-  dead: false,
+  fishCondition: '',
   existingMarks: [],
   forkLengths: {},
 }
@@ -33,20 +36,18 @@ export const batchCountSlice = createSlice({
   reducers: {
     resetBatchCountSlice: () => initialState,
     saveBatchCharacteristics: (state, action) => {
-      const { tabId, species, adiposeClipped, dead, existingMarks } =
-        action.payload
+      const { tabId, species, adiposeClipped, fishCondition } = action.payload
       const forkLengthsCopy = cloneDeep(state.forkLengths) as any
       state.tabId = tabId
       state.species = species
       state.adiposeClipped = adiposeClipped
-      state.dead = dead
-      state.existingMarks = existingMarks
+      state.fishCondition = fishCondition
       state.forkLengths = forkLengthsCopy
     },
     addMarkToBatchCountExistingMarks: (state, action) => {
       state.existingMarks = [...state.existingMarks, action.payload]
     },
-    removeMarkToBatchCountExistingMarks: (state, action) => {
+    removeMarkFromBatchCountExistingMarks: (state, action) => {
       state.existingMarks = action.payload
     },
     addForkLengthToBatchStore: (state, action) => {
@@ -56,6 +57,9 @@ export const batchCountSlice = createSlice({
       const fishEntry = {
         forkLength: action.payload.forkLength,
         lifeStage: action.payload.lifeStage,
+        dead: action.payload.dead,
+        existingMark: action.payload.existingMark,
+        fishCondition: action.payload.fishCondition,
       } as any
       let id = null
       if (Object.keys(forkLengthsCopy).length) {
@@ -129,6 +133,7 @@ export const {
   resetBatchCountSlice,
   saveBatchCharacteristics,
   addMarkToBatchCountExistingMarks,
+  removeMarkFromBatchCountExistingMarks,
   removeLastForkLengthEntered,
   updateSingleForkLengthCount,
   addForkLengthToBatchStore,
