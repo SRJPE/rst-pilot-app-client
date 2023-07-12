@@ -1,13 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
 
-interface InitialStateI {
-  completed: boolean
+export interface TrappingSitesInitialStateI {
   trappingSitesStore: TrappingSitesStoreI
 }
 
-const initialState: InitialStateI = {
-  completed: false,
+const initialState: TrappingSitesInitialStateI = {
   trappingSitesStore: {},
 }
 

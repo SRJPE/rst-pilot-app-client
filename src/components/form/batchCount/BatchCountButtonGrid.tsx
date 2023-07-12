@@ -10,11 +10,19 @@ const BatchCountButtonGrid = ({
   numberOfAdditionalButtons,
   selectedLifeStage,
   ignoreLifeStage,
+  deadToggle,
+  markToggle,
+  conditionToggle,
+  handleToggles,
 }: {
   firstButton: number
   numberOfAdditionalButtons: number
   selectedLifeStage?: string
   ignoreLifeStage?: boolean
+  deadToggle: boolean
+  markToggle: boolean
+  conditionToggle: boolean
+  handleToggles: any
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
   const dispatch = useDispatch<AppDispatch>()
@@ -28,8 +36,12 @@ const BatchCountButtonGrid = ({
       addForkLengthToBatchStore({
         forkLength: num,
         lifeStage: ignoreLifeStage ? 'not recorded' : selectedLifeStage,
+        dead: deadToggle,
+        existingMark: markToggle,
+        fishCondition: conditionToggle,
       })
     )
+    handleToggles('reset')
   }
 
   return (

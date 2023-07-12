@@ -158,7 +158,7 @@ const IncompleteSections = ({
         )
         .map((obj: any) => obj.personnelId)
     )
-    // return array
+    //if the array contains a single string, return the string in an array
     return filteredNames
   }
 

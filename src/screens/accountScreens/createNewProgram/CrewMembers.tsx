@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import {
-  Box,
+  Button,
   Center,
   Divider,
   FormControl,
@@ -15,13 +15,22 @@ import {
   VStack,
 } from 'native-base'
 import { Ionicons } from '@expo/vector-icons'
-import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
-import CustomModal from '../../components/Shared/CustomModal'
-import AddCrewMemberModalContent from '../../components/createNewProgram/AddCrewMemberModalContent'
-import { AppLogo } from '../SignIn'
-import CrewMemberDataTable from '../../components/createNewProgram/CrewMemberDataTable'
-import { connect } from 'react-redux'
-import { RootState } from '../../redux/store'
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
+import CustomModal from '../../../components/Shared/CustomModal'
+import AddCrewMemberModalContent from '../../../components/createNewProgram/AddCrewMemberModalContent'
+import AppLogo from '../../../components/Shared/AppLogo'
+import CrewMemberDataTable from '../../../components/createNewProgram/CrewMemberDataTable'
+import { connect, useDispatch } from 'react-redux'
+import { AppDispatch, RootState } from '../../../redux/store'
+import { saveIndividualCrewMember } from '../../../redux/reducers/createNewProgramSlices/crewMembersSlice'
+
+export const sampleTeamLead = {
+  firstName: 'John',
+  lastName: 'Doe',
+  phoneNumber: '1234567890',
+  email: 'test@flowwest.com',
+}
+
 const CrewMembers = ({
   navigation,
   crewMembersStore,
@@ -29,15 +38,23 @@ const CrewMembers = ({
   navigation: any
   crewMembersStore: any
 }) => {
+  const dispatch = useDispatch<AppDispatch>()
+  const [agency, setAgency] = useState('' as string)
+  const [orchidID, setOrchidID] = useState('' as string)
   const [addCrewMemberModalOpen, setAddCrewMemberModalOpen] = useState(
     false as boolean
   )
+  const { firstName, lastName, phoneNumber, email } = sampleTeamLead
 
-  const initialState = {
-    agency: '',
-    orchidID: '',
+  const handleSaveTeamLeadInformation = () => {
+    let values = {
+      ...sampleTeamLead,
+      isLead: true,
+      agency,
+      orchidID,
+    }
+    dispatch(saveIndividualCrewMember(values))
   }
-  const handleAddCrewMember = () => {}
 
   return (
     <>
@@ -55,21 +72,37 @@ const CrewMembers = ({
         </VStack>
         {Object.values(crewMembersStore).length === 0 ? (
           <VStack pb='5%' px='10%' space={5}>
-            <HStack space={5} alignItems='center'>
-              <Icon
-                as={Ionicons}
-                name='person-circle'
-                size='5xl'
-                color='primary'
-              />
-              <Heading alignSelf='center'>You (Team Lead)</Heading>
-              <Pressable onPress={handleAddCrewMember}>
+            <HStack
+              space={5}
+              alignItems='center'
+              justifyContent='space-between'
+            >
+              <HStack
+                space={5}
+                alignItems='center'
+                justifyContent='space-between'
+              >
+                <Icon
+                  as={Ionicons}
+                  name='person-circle'
+                  size='5xl'
+                  color='primary'
+                />
+                <Heading alignSelf='center'>You (Team Lead)</Heading>
+              </HStack>
+              {/* <Pressable onPress={handleAddCrewMember}>
                 <Ionicons name='md-pencil' size={30} color='grey' />
-              </Pressable>
+              </Pressable> */}
+              <Button bg='primary' onPress={handleSaveTeamLeadInformation}>
+                <Text fontSize='xl' color='white'>
+                  Save your information
+                </Text>
+              </Button>
             </HStack>
-            <Text>First Name:</Text>
-            <Text>Last Name:</Text>
-            <Text>Email:</Text>
+            <Text>First Name: {firstName}</Text>
+            <Text>Last Name: {lastName}</Text>
+            <Text>Phone Number: {phoneNumber}</Text>
+            <Text>Email: {email}</Text>
             <HStack space={10} alignItems='center'>
               <FormControl w='45%'>
                 <FormControl.Label>
@@ -81,10 +114,8 @@ const CrewMembers = ({
                   height='50px'
                   fontSize='16'
                   placeholder='Agency'
-                  // keyboardType='numeric'
-                  // onChange={debouncedOnChange}
-                  // onBlur={props.onBlur}
-                  value={initialState.agency}
+                  onChangeText={(newValue) => setAgency(newValue)}
+                  value={agency}
                 />
               </FormControl>
               <FormControl w='45%'>
@@ -97,10 +128,8 @@ const CrewMembers = ({
                   height='50px'
                   fontSize='16'
                   placeholder='Orchid ID (optional)'
-                  // keyboardType='numeric'
-                  // onChange={debouncedOnChange}
-                  // onBlur={props.onBlur}
-                  value={initialState.orchidID}
+                  onChangeText={(newValue) => setOrchidID(newValue)}
+                  value={orchidID}
                 />
               </FormControl>
             </HStack>

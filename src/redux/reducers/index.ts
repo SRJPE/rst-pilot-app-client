@@ -28,6 +28,10 @@ import fishHoldingSlice from './markRecaptureSlices/fishHoldingSlice'
 import userCredentialsSlice from './userCredentialsSlice'
 import trappingSitesSlice from './createNewProgramSlices/trappingSitesSlice'
 import crewMembersSlice from './createNewProgramSlices/crewMembersSlice'
+import createNewProgramHomeSlice from './createNewProgramSlices/createNewProgramHomeSlice'
+import trappingProtocolsSlice from './createNewProgramSlices/trappingProtocolsSlice'
+import efficiencyTrialProtocolsSlice from './createNewProgramSlices/efficiencyTrialProtocolsSlice'
+import permitInformationSlice from './createNewProgramSlices/permitInformationSlice'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
@@ -95,4 +99,8 @@ export default combineReducers({
   crewMembers: crewMembersSlice,
   tabSlice: tabSlice,
   batchCount: batchCountSlice,
+  createNewProgramHome: createNewProgramHomeSlice,
+  trappingProtocols: trappingProtocolsSlice,
+  efficiencyTrialProtocols: efficiencyTrialProtocolsSlice,
+  permitInformation: permitInformationSlice,
 })

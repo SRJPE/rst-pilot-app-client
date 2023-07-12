@@ -126,10 +126,10 @@ const Profile = ({ navigation }: { navigation: any }) => {
             alignSelf='center'
             bg='primary'
             color='white'
-            onPress={() => navigation.navigate('Create New Program')}
+            onPress={() => navigation.navigate('Monitoring Program')}
           >
             <Text fontSize='xl' fontWeight='bold' color='white'>
-              CREATE NEW PROGRAM
+              MONITORING PROGRAM
             </Text>
           </Button>
         </VStack>

@@ -18,7 +18,6 @@ const CreateNewProgramButton = ({
   const dispatch = useDispatch<AppDispatch>()
   const handleButtonPress = () => {
     navigation.navigate('Create New Program', { screen: name })
-    //  dispatch(updateActiveStep(step))
   }
 
   return (
@@ -28,6 +27,7 @@ const CreateNewProgramButton = ({
       w='100%'
       h='10%'
       borderRadius='5'
+      borderWidth='2'
       borderColor='primary'
       variant={'outline'}
       bg={completed ? 'primary' : 'white'}
