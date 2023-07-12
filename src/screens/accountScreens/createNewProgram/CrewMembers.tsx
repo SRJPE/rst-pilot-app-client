@@ -25,6 +25,7 @@ import { AppDispatch, RootState } from '../../../redux/store'
 import { saveIndividualCrewMember } from '../../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 
 export const sampleTeamLead = {
+  //to be replaced when a logged in user is persisted
   firstName: 'John',
   lastName: 'Doe',
   phoneNumber: '1234567890',
@@ -40,7 +41,7 @@ const CrewMembers = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [agency, setAgency] = useState('' as string)
-  const [orchidID, setOrchidID] = useState('' as string)
+  const [orcidId, setOrcidId] = useState('' as string)
   const [addCrewMemberModalOpen, setAddCrewMemberModalOpen] = useState(
     false as boolean
   )
@@ -51,7 +52,7 @@ const CrewMembers = ({
       ...sampleTeamLead,
       isLead: true,
       agency,
-      orchidID,
+      orcidId,
     }
     dispatch(saveIndividualCrewMember(values))
   }
@@ -90,9 +91,6 @@ const CrewMembers = ({
                 />
                 <Heading alignSelf='center'>You (Team Lead)</Heading>
               </HStack>
-              {/* <Pressable onPress={handleAddCrewMember}>
-                <Ionicons name='md-pencil' size={30} color='grey' />
-              </Pressable> */}
               <Button bg='primary' onPress={handleSaveTeamLeadInformation}>
                 <Text fontSize='xl' color='white'>
                   Save your information
@@ -121,15 +119,15 @@ const CrewMembers = ({
               <FormControl w='45%'>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
-                    Orchid ID (optional)
+                    Orcid ID (optional)
                   </Text>
                 </FormControl.Label>
                 <Input
                   height='50px'
                   fontSize='16'
-                  placeholder='Orchid ID (optional)'
-                  onChangeText={(newValue) => setOrchidID(newValue)}
-                  value={orchidID}
+                  placeholder='Orcid ID (optional)'
+                  onChangeText={(newValue) => setOrcidId(newValue)}
+                  value={orcidId}
                 />
               </FormControl>
             </HStack>
