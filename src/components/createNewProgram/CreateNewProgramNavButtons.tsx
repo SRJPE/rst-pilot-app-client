@@ -16,6 +16,9 @@ const CreateNewProgramNavButtons = ({
   touched,
   variant,
   disableRightButtonBool,
+  formIsCompleteAndValid,
+  POSTMonitoringProgramSubmissions,
+  clearFormValues,
 }: {
   crewMembersStore: CrewMembersStoreI
   trappingProtocolsStore: TrappingProtocolsStoreI
@@ -25,32 +28,14 @@ const CreateNewProgramNavButtons = ({
   touched?: any
   variant?: string
   disableRightButtonBool?: boolean
+  formIsCompleteAndValid?: boolean
+  POSTMonitoringProgramSubmissions?: Function
+  clearFormValues?: Function
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const activePage = useRoute().name
 
   const isMultipleTrapsVariant = variant === 'multipleTrapsDialog'
-
-  const { leftButtonText, rightButtonText } = (() => {
-    switch (activePage) {
-      case 'Trapping Sites':
-        if (isMultipleTrapsVariant) {
-          return {
-            leftButtonText: 'Save and Exit',
-            rightButtonText: 'Group Traps',
-          }
-        } else {
-          return { leftButtonText: 'Back', rightButtonText: 'Next' }
-        }
-      case 'Multiple Traps':
-        return {
-          leftButtonText: 'Cancel',
-          rightButtonText: 'Save',
-        }
-      default:
-        return { leftButtonText: 'Back', rightButtonText: 'Next' }
-    }
-  })()
 
   const handleRightButton = async () => {
     switch (activePage) {
@@ -92,7 +77,10 @@ const CreateNewProgramNavButtons = ({
             screen: 'Multiple Traps',
           })
         } else {
-          console.log('Navigating to next Screen')
+          dispatch(markCreateNewProgramStepCompleted('trappingSites'))
+          navigation.navigate('Create New Program', {
+            screen: 'Create New Program Home',
+          })
         }
         break
       case 'Multiple Traps':
@@ -112,12 +100,22 @@ const CreateNewProgramNavButtons = ({
         })
         break
       case 'Create New Program Home':
-        navigation.navigate('Create New Program', {
-          screen: 'Create New Program Complete',
-        })
+        //post submission
+        if (POSTMonitoringProgramSubmissions) {
+          POSTMonitoringProgramSubmissions()
+          navigation.navigate('Create New Program', {
+            screen: 'Create New Program Complete',
+          })
+        }
         break
       case 'Create New Program Complete':
+        clearFormValues && clearFormValues()
         navigation.navigate('Home')
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Create New Program Home' }],
+        })
+
         break
 
       default:
@@ -125,13 +123,6 @@ const CreateNewProgramNavButtons = ({
     }
   }
   const handleLeftButton = () => {
-    if (activePage === 'Create New Program Home') {
-      navigation.navigate('Monitoring Program', {
-        screen: 'Monitoring Program New',
-      })
-    } else {
-    }
-
     switch (activePage) {
       case 'Create New Program Home':
         navigation.navigate('Monitoring Program', {
@@ -142,6 +133,25 @@ const CreateNewProgramNavButtons = ({
         navigation.navigate('Monitoring Program', {
           screen: 'Monitoring Program New',
         })
+
+        clearFormValues && clearFormValues()
+        navigation.navigate('Monitoring Program', {
+          screen: 'Monitoring Program New',
+        })
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Create New Program Home' }],
+        })
+        break
+      case 'Trapping Sites':
+        if (isMultipleTrapsVariant) {
+          dispatch(markCreateNewProgramStepCompleted('trappingSites'))
+          navigation.navigate('Create New Program', {
+            screen: 'Create New Program Home',
+          })
+        } else {
+          navigation.goBack()
+        }
         break
       default:
         navigation.goBack()
@@ -152,6 +162,15 @@ const CreateNewProgramNavButtons = ({
   const handleRightButtonText = () => {
     let rightButtonText = 'Next'
     switch (activePage) {
+      case 'Trapping Sites':
+        if (isMultipleTrapsVariant) {
+          rightButtonText = 'Group Traps'
+        }
+        break
+      case 'Multiple Traps':
+        rightButtonText = 'Save'
+
+        break
       case 'Crew Members':
         rightButtonText = 'Save Crew Members and Exit'
         break
@@ -180,6 +199,15 @@ const CreateNewProgramNavButtons = ({
       case 'Create New Program Complete':
         leftButtonText = 'Add Another Program'
         break
+      case 'Trapping Sites':
+        if (isMultipleTrapsVariant) {
+          leftButtonText = 'Save and Exit'
+        }
+        break
+      case 'Multiple Traps':
+        leftButtonText = 'Cancel'
+
+        break
       default:
         break
     }
@@ -193,6 +221,11 @@ const CreateNewProgramNavButtons = ({
     let shouldBeDisabled = false
 
     switch (activePage) {
+      case 'Create New Program Home':
+        if (!formIsCompleteAndValid) {
+          shouldBeDisabled = true
+        }
+        break
       case 'Crew Members':
         if (Object.values(crewMembersStore).length === 0) {
           shouldBeDisabled = true
@@ -209,8 +242,9 @@ const CreateNewProgramNavButtons = ({
         }
         break
       case 'Permitting Information Input':
-        shouldBeDisabled =
-          Object.keys(touched).length === 0 || Object.keys(errors).length > 0
+        // expand validation
+        // shouldBeDisabled =
+        //   Object.keys(touched).length === 0 || Object.keys(errors).length > 0
 
         break
       default:
@@ -239,7 +273,11 @@ const CreateNewProgramNavButtons = ({
           isDisabled={disableLeftButton()}
           onPress={() => handleLeftButton()}
         >
-          <Text fontSize='xl' fontWeight='bold' color='primary'>
+          <Text
+            fontSize='xl'
+            fontWeight='bold'
+            color={isMultipleTrapsVariant ? 'white' : 'primary'}
+          >
             {handleLeftButtonText()}
           </Text>
         </Button>
