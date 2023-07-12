@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import {
   Box,
   Divider,
+  FormControl,
   HStack,
   Icon,
   Pressable,
@@ -10,19 +11,20 @@ import {
   VStack,
 } from 'native-base'
 import DateTimePicker from '@react-native-community/datetimepicker'
-
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
 import { Ionicons } from '@expo/vector-icons'
 import CustomModal from '../../../components/Shared/CustomModal'
 import ChooseFileModalContent from '../../../components/createNewProgram/ChooseFileModalContent'
 import AddTakeAndMortalityModalContent from '../../../components/createNewProgram/AddTakeAndMortalityModalContent'
 import TakeAndMortalityDataTable from '../../../components/createNewProgram/TakeAndMortalityDataTable'
-import { connect, useDispatch } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
 import { Formik } from 'formik'
 import FormInputComponent from '../../../components/Shared/FormInputComponent'
 import { savePermitInformationValues } from '../../../redux/reducers/createNewProgramSlices/permitInformationSlice'
 import { permittingInformationSchema } from '../../../utils/helpers/yupValidations'
+import CustomSelect from '../../../components/Shared/CustomSelect'
+
 const PermittingInformationInput = ({
   navigation,
   permitInformationStore,
@@ -31,6 +33,9 @@ const PermittingInformationInput = ({
   permitInformationStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
   const [chooseFileModalOpen, setChooseFileModalOpen] = useState(
     false as boolean
   )
@@ -49,10 +54,10 @@ const PermittingInformationInput = ({
   const onExpirationDateChange = (event: any, selectedDate: any) => {
     setExpirationDate(selectedDate)
   }
-  const { waterTemperatureThreshold, flowThreshold, trapCheckFrequency } =
-    permitInformationStore.values
 
   const handleAddPermittingInformationSubmission = (values: any) => {
+    delete values.dateIssued
+    delete values.dateExpired
     dispatch(
       savePermitInformationValues({
         ...values,
@@ -61,15 +66,12 @@ const PermittingInformationInput = ({
       })
     )
   }
+
   return (
     <>
       <Formik
         validationSchema={permittingInformationSchema}
-        initialValues={{
-          waterTemperatureThreshold,
-          flowThreshold,
-          trapCheckFrequency,
-        }}
+        initialValues={permitInformationStore.values}
         onSubmit={(values) => {
           handleAddPermittingInformationSubmission(values)
         }}
@@ -167,21 +169,24 @@ const PermittingInformationInput = ({
                 <Text fontSize='2xl' color='grey'>
                   Frequency of trap checks during inclement weather
                 </Text>
-                <FormInputComponent
-                  label={'Trap Check Frequency'}
-                  touched={touched}
-                  errors={errors}
-                  value={
-                    values.trapCheckFrequency
-                      ? `${values.trapCheckFrequency}`
-                      : ''
-                  }
-                  camelName={'trapCheckFrequency'}
-                  keyboardType={'numeric'}
-                  width={'40%'}
-                  onChangeText={handleChange('trapCheckFrequency')}
-                  onBlur={handleBlur('trapCheckFrequency')}
-                />
+                <FormControl w='40%'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Trap Check Frequency
+                    </Text>
+                  </FormControl.Label>
+                  <CustomSelect
+                    selectedValue={values.trapCheckFrequency}
+                    placeholder={'Trap Check Frequency'}
+                    onValueChange={(value: any) =>
+                      handleChange('trapCheckFrequency')(value)
+                    }
+                    setFieldTouched={() =>
+                      setFieldTouched('trapCheckFrequency')
+                    }
+                    selectOptions={dropdownValues?.frequency}
+                  />
+                </FormControl>
                 <Text fontSize='2xl' color='grey'>
                   Expected take and indirect mortality for RST
                 </Text>
