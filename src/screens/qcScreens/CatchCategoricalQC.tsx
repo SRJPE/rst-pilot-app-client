@@ -1,24 +1,170 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, HStack, View, VStack, Text, ScrollView } from 'native-base'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
+import { RootState } from '../../redux/store'
+import { connect } from 'react-redux'
 
-export default function CatchCategoricalQC({
+interface GraphDataI {
+  'Adipose Clipped': any[]
+  Species: any[]
+  Marks: any[]
+  Mortalities: any[]
+}
+
+function CatchCategoricalQC({
   navigation,
+  route,
+  qcCatchRawSubmissions,
+  taxon,
 }: {
   navigation: any
+  route: any
+  qcCatchRawSubmissions: any
+  taxon: any
 }) {
   const [activeButtons, setActiveButtons] = useState<
     ('Adipose Clipped' | 'Species' | 'Marks' | 'Mortalities')[]
   >(['Adipose Clipped'])
+  const [graphData, setGraphData] = useState<GraphDataI>({
+    'Adipose Clipped': [],
+    Species: [],
+    Marks: [],
+    Mortalities: [],
+  })
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [pointClicked, setPointClicked] = useState<any | null>(null)
 
-  const data = [
-    { label: 'Point 1', x: 1, y: 10, extraInfo: 'woop woop!' },
-    { label: 'Point 2', x: 2, y: 20, extraInfo: 'woop woop!' },
-    { label: 'Point 3', x: 3, y: 15, extraInfo: 'woop woop!' },
-    { label: 'Point 4', x: 4, y: 25, extraInfo: 'woop woop!' },
-    { label: 'Point 5', x: 5, y: 12, extraInfo: 'woop woop!' },
-  ]
+  useEffect(() => {
+    const previousCatchRaw = route.params.previousCatchRaw
+    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+
+    let adiposeClippedData: any[] = []
+    let speciesData: any[] = []
+    let marksData: any[] = []
+    let deadData: any[] = []
+
+    qcData.forEach((catchResponse: any, idx: number) => {
+      const {
+        id,
+        adiposeClipped,
+        taxonCode,
+        dead,
+        numFishCaught,
+        createdAt,
+        qcCompleted,
+      } = catchResponse.createdCatchRawResponse
+      const qcNotStarted = qcCompleted ? false : true
+
+      const createdExistingMarksResponse =
+        catchResponse.createdExistingMarksResponse ?? []
+      const createdMarkAppliedResponse =
+        catchResponse.createdMarkAppliedResponse ?? []
+
+      const dateTime = new Date(createdAt)
+
+      const marks = [
+        ...createdExistingMarksResponse,
+        ...createdMarkAppliedResponse,
+      ].filter((mark: any) => {
+        return mark.catchRawId === id
+      })
+
+      let species = taxon.filter((obj: any) => {
+        return obj.code === taxonCode
+      })[0].commonname
+
+      if (id) {
+        if (adiposeClipped) {
+          adiposeClippedData.push({
+            id,
+            x: idx + 1,
+            y: adiposeClipped ? 1 : 0,
+            colorScale: qcCompleted ? 'red' : undefined,
+          })
+        }
+
+        if (taxonCode) {
+          let speciesAlreadyExistsIdx = null
+          let speciesAlreadyExists = speciesData.filter(
+            (dataObj: any, idx: number) => {
+              if (dataObj.x === species) {
+                speciesAlreadyExistsIdx = idx
+                return dataObj.x === species
+              }
+            }
+          )[0]
+
+          if (speciesAlreadyExists && speciesAlreadyExistsIdx) {
+            speciesData.splice(1, speciesAlreadyExistsIdx)
+            speciesData.push({
+              id,
+              x: idx + 1,
+              y: speciesAlreadyExists.y + numFishCaught,
+              colorScale: qcNotStarted ? 'red' : undefined,
+              label: species,
+            })
+          } else {
+            speciesData.push({
+              id,
+              x: idx + 1,
+              y: numFishCaught,
+              colorScale: qcNotStarted ? 'red' : undefined,
+              label: species,
+            })
+          }
+        }
+
+        // MARK DATA PROCESSING NOT COMPLETE
+        if (marks.length) {
+          marks.forEach((mark: any) => {
+            marksData.push({
+              id,
+              x: `${mark.markTypeId} - ${mark.markColorId}`,
+              y: 1,
+              colorScale: qcNotStarted ? 'red' : undefined,
+            })
+          })
+        }
+
+        if (dead) {
+          let speciesAlreadyExistsIdx = null
+          let speciesAlreadyExists = deadData.filter(
+            (dataObj: any, idx: number) => {
+              if (dataObj.x === species) {
+                speciesAlreadyExistsIdx = idx
+                return dataObj.x === species
+              }
+            }
+          )[0]
+
+          if (speciesAlreadyExists && speciesAlreadyExistsIdx) {
+            deadData.splice(1, speciesAlreadyExistsIdx)
+            deadData.push({
+              id,
+              x: species,
+              y: speciesAlreadyExists.y + numFishCaught,
+              colorScale: qcNotStarted ? 'red' : undefined,
+            })
+          } else {
+            deadData.push({
+              id,
+              x: species,
+              y: numFishCaught,
+              colorScale: qcNotStarted ? 'red' : undefined,
+            })
+          }
+        }
+      }
+    })
+
+    setGraphData({
+      'Adipose Clipped': adiposeClippedData,
+      Species: speciesData,
+      Marks: marksData,
+      Mortalities: deadData,
+    })
+  }, [qcCatchRawSubmissions])
 
   const GraphMenuButton = ({
     buttonName,
@@ -52,7 +198,6 @@ export default function CatchCategoricalQC({
     )
   }
 
-
   return (
     <>
       <View
@@ -73,7 +218,7 @@ export default function CatchCategoricalQC({
             Edit values by selecting a point on the plot below.
           </Text>
 
-          <HStack>
+          <HStack mb={'10'}>
             <GraphMenuButton buttonName={'Adipose Clipped'} />
             <GraphMenuButton buttonName={'Species'} />
             <GraphMenuButton buttonName={'Marks'} />
@@ -85,8 +230,9 @@ export default function CatchCategoricalQC({
               return (
                 <Graph
                   key={buttonName}
-                  chartType='line'
-                  data={data}
+                  chartType='bar'
+                  timeBased={false}
+                  data={graphData[buttonName]}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'
@@ -134,3 +280,14 @@ export default function CatchCategoricalQC({
     </>
   )
 }
+
+const mapStateToProps = (state: RootState) => {
+  let taxon = state.dropdowns.values.taxon
+
+  return {
+    qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    taxon: taxon ?? [],
+  }
+}
+
+export default connect(mapStateToProps)(CatchCategoricalQC)

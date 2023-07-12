@@ -1,13 +1,25 @@
 import { useEffect, useState } from 'react'
 import { Box, Button, Center, Icon, Text, View, VStack } from 'native-base'
 import { LayoutAnimation, TouchableOpacity } from 'react-native'
+import api from '../../api/axiosConfig'
+import { connect } from 'react-redux'
+import { RootState } from '../../redux/store'
 
-export default function QCMain({
+interface QCDataI {
+  previousTrapVisits: any[]
+  previousCatchRaw: any[]
+}
+
+function QCMain({
   navigation,
-  // route,
+  route,
+  previousTrapVisits,
+  previousCatchRaw,
 }: {
   navigation: any
-  // route: any
+  route: any
+  previousTrapVisits: any[]
+  previousCatchRaw: any[]
 }) {
   const [activeButton, setActiveButton] = useState<
     'trapBtn' | 'catchBtn' | 'efficiencyBtn' | ''
@@ -19,6 +31,25 @@ export default function QCMain({
     | 'Partial Records'
     | ''
   >('')
+  const [qcData, setQCData] = useState<QCDataI>({
+    previousTrapVisits: [],
+    previousCatchRaw: [],
+  })
+
+  useEffect(() => {
+    const programId = route.params.programId
+    const programsTrapVisits = previousTrapVisits.filter((trapVisit) => {
+      return trapVisit.createdTrapVisitResponse.programId === programId
+    })
+    const programsCatchRaw = previousCatchRaw.filter((catchRaw) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+
+    setQCData({
+      previousTrapVisits: programsTrapVisits ?? [],
+      previousCatchRaw: programsCatchRaw ?? [],
+    })
+  }, [route.params.programId])
 
   return (
     <VStack alignItems={'center'} marginTop={100} flex={1}>
@@ -27,7 +58,9 @@ export default function QCMain({
         bg={activeButton === 'trapBtn' ? 'themeOrange' : 'primary'}
         onPress={() => {
           setActiveButton('trapBtn')
-          navigation.navigate('Trap QC')
+          navigation.navigate('Trap QC', {
+            previousTrapVisits: qcData.previousTrapVisits,
+          })
         }}
       >
         <Text fontSize='xl' color='white' fontWeight={'bold'}>
@@ -71,7 +104,9 @@ export default function QCMain({
               setActiveCatchOption(
                 'Measured Variables and Associated Categories'
               )
-              navigation.navigate('CatchMeasureQC')
+              navigation.navigate('CatchMeasureQC', {
+                previousCatchRaw: qcData.previousCatchRaw,
+              })
             }}
           >
             <Text
@@ -95,7 +130,9 @@ export default function QCMain({
             alignItems='center'
             onPress={() => {
               setActiveCatchOption('Categorical Observations')
-              navigation.navigate('CatchCategoricalQC')
+              navigation.navigate('CatchCategoricalQC', {
+                previousCatchRaw: qcData.previousCatchRaw,
+              })
             }}
           >
             <Text
@@ -119,7 +156,9 @@ export default function QCMain({
             alignItems='center'
             onPress={() => {
               setActiveCatchOption('Total Fish Counts')
-              navigation.navigate('CatchFishCountQC')
+              navigation.navigate('CatchFishCountQC', {
+                previousCatchRaw: qcData.previousCatchRaw,
+              })
             }}
           >
             <Text
@@ -143,7 +182,9 @@ export default function QCMain({
             alignItems='center'
             onPress={() => {
               setActiveCatchOption('Partial Records')
-              navigation.navigate('PartialRecordsQC')
+              navigation.navigate('PartialRecordsQC', {
+                previousCatchRaw: qcData.previousCatchRaw,
+              })
             }}
           >
             <Text
@@ -164,7 +205,9 @@ export default function QCMain({
         bg={activeButton === 'efficiencyBtn' ? 'themeOrange' : 'primary'}
         onPress={() => {
           setActiveButton('efficiencyBtn')
-          navigation.navigate('EfficiencyQC')
+          navigation.navigate('EfficiencyQC', {
+            previousCatchRaw: qcData.previousCatchRaw,
+          })
         }}
       >
         <Text fontSize='xl' color='white' fontWeight={'bold'}>
@@ -187,6 +230,20 @@ export default function QCMain({
     </VStack>
   )
 }
+
+const mapStateToProps = (state: RootState) => {
+  let previousTrapVisits =
+    state.trapVisitFormPostBundler.previousTrapVisitSubmissions
+  let previousCatchRaw =
+    state.trapVisitFormPostBundler.previousCatchRawSubmissions
+
+  return {
+    previousTrapVisits,
+    previousCatchRaw,
+  }
+}
+
+export default connect(mapStateToProps)(QCMain)
 
 const Accordion = ({
   headerComponent,

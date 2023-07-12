@@ -5,7 +5,7 @@ import TrapQC from "../screens/qcScreens/TrapQC"
 import CatchMeasureQC from "../screens/qcScreens/CatchMeasureQC"
 import CatchCategoricalQC from "../screens/qcScreens/CatchCategoricalQC"
 import CatchFishCountQC from "../screens/qcScreens/CatchFishCountQC"
-import PartialRecordsQC from "../screens/qcScreens/PartialRecordsQc"
+import PartialRecordsQC from "../screens/qcScreens/PartialRecordsQC"
 import EfficiencyQC from "../screens/qcScreens/EfficiencyQC"
 
 const DataQualityControl = createStackNavigator()

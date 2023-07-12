@@ -51,7 +51,10 @@ const GraphModalContent = ({
   useEffect(() => {
     let modalDataAtPointClicked: any = {}
     Object.keys(modalData).forEach((header) => {
-      modalDataAtPointClicked[header] = modalData[header][pointClicked.x - 1]
+      let dataAtId = modalData[header].filter((obj: any) => {
+        return obj.id == pointClicked.id
+      })[0]
+      modalDataAtPointClicked[header] = dataAtId
     })
     setPayload(modalDataAtPointClicked)
   }, [modalData, pointClicked])
@@ -91,7 +94,7 @@ const GraphModalContent = ({
               <DataTable.Title
                 key={idx}
                 numeric
-                style={[{ justifyContent: 'center', flexWrap: 'wrap' }]}
+                style={[{ justifyContent: 'space-evenly', flexWrap: 'wrap' }]}
               >
                 {header}
               </DataTable.Title>
@@ -99,7 +102,7 @@ const GraphModalContent = ({
           </DataTable.Header>
 
           <DataTable.Row style={[{ height: 55 }]}>
-            <HStack justifyContent={'space-between'} w='100%'>
+            <HStack justifyContent={'space-evenly'} w='100%'>
               {Object.keys(modalData).map((header: any, idx: number) => {
                 return (
                   <View
@@ -124,7 +127,7 @@ const GraphModalContent = ({
                         }
                       }}
                       onBlur={() => {}}
-                      value={payload[header] ? `${payload[header].y}`: '10'}
+                      value={payload[header] ? `${payload[header].y}` : '10'}
                     />
                   </View>
                 )

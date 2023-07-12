@@ -8,7 +8,7 @@ import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { trapVisitQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import sampleWaterTurbidityData from './sample_trap_visit_env_data'
+import api from '../../api/axiosConfig'
 
 interface GraphDataI {
   Temperature: any[]
@@ -21,10 +21,12 @@ interface GraphDataI {
 
 function TrapQC({
   navigation,
-  cachedTrapVisits,
+  route,
+  qcTrapVisitSubmissions,
 }: {
   navigation: any
-  cachedTrapVisits: any[]
+  route: any
+  qcTrapVisitSubmissions: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -49,84 +51,92 @@ function TrapQC({
   const [pointClicked, setPointClicked] = useState<any | null>(null)
 
   useEffect(() => {
-    let tempData: any[] = []
-    let turbidityData: any[] = []
-    let rpmAtStartData: any[] = []
-    let rpmAtEndData: any[] = []
-    let counterData: any[] = []
-    let debrisData: any[] = []
+    const previousTrapVisits = route.params.previousTrapVisits
 
-    Object.values(cachedTrapVisits).forEach((response: any, idx: number) => {
-      const trapVisitId = response.createdTrapCoordinatesResponse.trapVisitId
+      let tempData: any[] = []
+      let turbidityData: any[] = []
+      let rpmAtStartData: any[] = []
+      let rpmAtEndData: any[] = []
+      let counterData: any[] = []
+      let debrisData: any[] = []
 
-      let temp = response.createdTrapVisitEnvironmentalResponse.filter(
-        (item: any) => {
-          return item.measureName === 'water temperature'
+      Object.values([...qcTrapVisitSubmissions, ...previousTrapVisits]).forEach(
+        (response: any, idx: number) => {
+          const trapVisitId = response.createdTrapVisitResponse.id
+          const qcCompleted = response.createdTrapVisitResponse.qcCompleted
+          const qcNotStarted = qcCompleted ? false : true
+
+          if (trapVisitId) {
+            let temp = response.createdTrapVisitEnvironmentalResponse.filter(
+              (item: any) => {
+                return item.measureName === 'water temperature'
+              }
+            )[0]
+            tempData.push({
+              id: trapVisitId,
+              x: idx + 1,
+              y: Number(temp.measureValueNumeric),
+              colorScale: qcNotStarted ? 'red' : undefined,
+            })
+
+            let turbidity =
+              response.createdTrapVisitEnvironmentalResponse.filter(
+                (item: any) => {
+                  return item.measureName === 'water turbidity'
+                }
+              )[0]
+            turbidityData.push({
+              id: trapVisitId,
+              x: idx + 1,
+              y: Number(turbidity.measureValueNumeric),
+              colorScale: qcNotStarted ? 'red' : undefined,
+            })
+
+            let rpmAtStart = {
+              id: trapVisitId,
+              x: idx + 1,
+              y: Number(response.createdTrapVisitResponse.rpmAtStart),
+              colorScale: qcNotStarted ? 'red' : undefined,
+            }
+            rpmAtStartData.push(rpmAtStart)
+
+            let rpmAtEnd = {
+              id: trapVisitId,
+              x: idx + 1,
+              y: Number(response.createdTrapVisitResponse.rpmAtEnd),
+              colorScale: qcNotStarted ? 'red' : undefined,
+            }
+            rpmAtEndData.push(rpmAtEnd)
+
+            let counter = {
+              id: trapVisitId,
+              x: idx + 1,
+              y: response.createdTrapVisitResponse.totalRevolutions,
+              colorScale: qcNotStarted ? 'red' : undefined,
+            }
+            counterData.push(counter)
+
+            let debris = {
+              id: trapVisitId,
+              x: idx + 1,
+              y: response.createdTrapVisitResponse.debrisVolumeLiters,
+              colorScale: qcNotStarted ? 'red' : undefined,
+            }
+            debrisData.push(debris)
+          }
         }
-      )[0]
-      tempData.push({
-        trapVisitId,
-        x: idx + 1,
-        y: Number(temp.measureValueNumeric),
+      )
+
+      setGraphData({
+        Temperature: tempData,
+        Turbidity: turbidityData,
+        'RPM At Start': rpmAtStartData,
+        'RPM At End': rpmAtEndData,
+        Counter: counterData,
+        Debris: debrisData,
       })
 
-      let turbidity = response.createdTrapVisitEnvironmentalResponse.filter(
-        (item: any) => {
-          return item.measureName === 'water turbidity'
-        }
-      )[0]
-      turbidityData.push({
-        trapVisitId,
-        x: idx + 1,
-        y: Number(turbidity.measureValueNumeric),
-      })
-
-      let rpmAtStart = {
-        trapVisitId,
-        x: idx + 1,
-        y: Number(response.createdTrapVisitResponse.rpmAtStart),
-      }
-      rpmAtStartData.push(rpmAtStart)
-
-      let rpmAtEnd = {
-        trapVisitId,
-        x: idx + 1,
-        y: Number(response.createdTrapVisitResponse.rpmAtEnd),
-      }
-      rpmAtEndData.push(rpmAtEnd)
-
-      let counter = {
-        trapVisitId,
-        x: idx + 1,
-        y: response.createdTrapVisitResponse.totalRevolutions,
-      }
-      counterData.push(counter)
-
-      let debris = {
-        trapVisitId,
-        x: idx + 1,
-        y: response.createdTrapVisitResponse.debrisVolumeLiters,
-      }
-      debrisData.push(debris)
-    })
-
-    // sampleWaterTurbidityData.forEach((envItem, idx) => {
-    //   turbidityData.push({
-    //     trapVisitId: envItem.trapVisitId,
-    //     x: idx + 1,
-    //     y: Number(envItem.measureValueNumeric),
-    //   })
-    // })
-
-    setGraphData({
-      Temperature: tempData,
-      Turbidity: turbidityData,
-      'RPM At Start': rpmAtStartData,
-      'RPM At End': rpmAtEndData,
-      Counter: counterData,
-      Debris: debrisData,
-    })
-  }, [cachedTrapVisits])
+  }, [qcTrapVisitSubmissions])
 
   const GraphMenuButton = ({
     buttonName,
@@ -173,12 +183,13 @@ function TrapQC({
 
   const handlePointClicked = (datum: any) => {
     setPointClicked(datum)
+    console.log('point clicked: ', datum)
     setIsModalOpen(true)
   }
 
   const handleModalSubmit = (submission: any) => {
     if (pointClicked) {
-      const trapVisitId = submission['Temperature']['trapVisitId']
+      const trapVisitId = submission['Temperature']['id']
       dispatch(trapVisitQCSubmission({ trapVisitId, submission }))
     }
   }
@@ -286,13 +297,9 @@ function TrapQC({
 }
 
 const mapStateToProps = (state: RootState) => {
-  let cachedTrapVisits = [
-    ...state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
-    ...state.trapVisitFormPostBundler.qcTrapVisitSubmissions,
-  ]
-
   return {
-    cachedTrapVisits: cachedTrapVisits ?? [],
+    qcTrapVisitSubmissions:
+      state.trapVisitFormPostBundler.qcTrapVisitSubmissions,
   }
 }
 

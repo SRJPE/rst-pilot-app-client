@@ -7,37 +7,22 @@ import { RootState } from '../../redux/store'
 function ProgramQC({
   navigation,
   programs,
-  cachedTrapVisits,
-  cachedCatch,
 }: {
   navigation: any
   programs: any[]
-  cachedTrapVisits: any[]
-  cachedCatch: any[]
 }) {
-  const returnCachedTrapVisits = (programId: number) => {
-    const payload = cachedTrapVisits.filter((trapVisit) => {
-      return trapVisit.createdTrapVisitResponse.programId == programId
-    })
-    return payload
-  }
+  const userPrograms = [6]
+  // TODO: ^ hard coded value to be updated to user's program ids ^
+  // Use programId of 'FlowWest Test Entry' program
 
-  const returnCachedCatch = (programId: number) => {
-    const payload = cachedCatch.filter((catchSubmission) => {
-      return catchSubmission.createdCatchRawResponse.programId == programId
-    })
-    return payload
-  }
-
-  const returnButtonColor = (program: any) => {
-    const cachedTrapVisits = returnCachedTrapVisits(program.programId)
-    if (cachedTrapVisits.length) {
+  const returnButtonColor = (programId: any) => {
+    if (userPrograms.includes(programId)) {
       return 'primary'
     } else return 'gray.400'
   }
 
   const returnButtonDisabled = (programId: number) => {
-    if (returnCachedTrapVisits(programId).length) {
+    if (userPrograms.includes(programId)) {
       return false
     } else return true
   }
@@ -56,13 +41,13 @@ function ProgramQC({
           <Button
             key={program.programName}
             w='4/5'
-            bg={returnButtonColor(program)}
+            bg={returnButtonColor(program.programId)}
             disabled={returnButtonDisabled(program.programId)}
             mb={5}
             onPress={() => {
-              const cachedTrapVisits = returnCachedTrapVisits(program.programId)
-              const cachedCatch = returnCachedCatch(program.programId)
-              navigation.navigate('Select Data to QC')
+              navigation.navigate('Select Data to QC', {
+                programId: program.programId,
+              })
             }}
           >
             <Text fontSize='xl' color='white' fontWeight={'bold'}>
@@ -91,16 +76,9 @@ function ProgramQC({
 
 const mapStateToProps = (state: RootState) => {
   let programs = state.visitSetupDefaults.programs
-  let cachedTrapVisits = [
-    ...state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
-    ...state.trapVisitFormPostBundler.qcTrapVisitSubmissions,
-  ]
-  let cachedCatch = state.trapVisitFormPostBundler.previousCatchRawSubmissions
 
   return {
     programs: programs ?? [],
-    cachedTrapVisits: cachedTrapVisits ?? [],
-    cachedCatch: cachedCatch ?? [],
   }
 }
 
