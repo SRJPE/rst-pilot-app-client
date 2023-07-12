@@ -33,6 +33,7 @@ import trappingProtocolsSlice from './createNewProgramSlices/trappingProtocolsSl
 import efficiencyTrialProtocolsSlice from './createNewProgramSlices/efficiencyTrialProtocolsSlice'
 import permitInformationSlice from './createNewProgramSlices/permitInformationSlice'
 import multipleTrapsSlice from './createNewProgramSlices/multipleTrapsSlice'
+import monitoringProgramPostBundler from './postSlices/monitoringProgramPostBundler'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
@@ -61,6 +62,11 @@ const markRecaptureFormPostPersistConfig = {
   version: 1,
   storage: AsyncStorage,
 }
+const monitoringProgramPostPersistConfig = {
+  key: 'monitoringProgramPostPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
 
 export default combineReducers({
   dropdowns: persistReducer(dropdownsPersistConfig, dropdownsSlice),
@@ -85,6 +91,10 @@ export default combineReducers({
   markRecaptureFormPostBundler: persistReducer(
     markRecaptureFormPostPersistConfig,
     markRecapturePostBundler
+  ),
+  monitoringProgramPostBundler: persistReducer(
+    monitoringProgramPostPersistConfig,
+    monitoringProgramPostBundler
   ),
   connectivity: connectivitySlice,
   paperEntry: paperEntrySlice,
