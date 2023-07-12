@@ -2,8 +2,27 @@ import React from 'react'
 import { Box, Center, Heading, Text, VStack } from 'native-base'
 import AppLogo from '../../../components/Shared/AppLogo'
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '../../../redux/store'
+import { resetCreateNewProgramHomeSlice } from '../../../redux/reducers/createNewProgramSlices/createNewProgramHomeSlice'
+import { resetEfficiencyTrialProtocolsSlice } from '../../../redux/reducers/createNewProgramSlices/efficiencyTrialProtocolsSlice'
+import { resetTrappingProtocolsSlice } from '../../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
+import { resetPermitInformationSlice } from '../../../redux/reducers/createNewProgramSlices/permitInformationSlice'
+import { resetCrewMembersSlice } from '../../../redux/reducers/createNewProgramSlices/crewMembersSlice'
+import { resetTrappingSitesSlice } from '../../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 
 const CreateNewProgramComplete = ({ navigation }: { navigation: any }) => {
+  const dispatch = useDispatch<AppDispatch>()
+
+  const clearFormValues = () => {
+    dispatch(resetCreateNewProgramHomeSlice())
+    dispatch(resetTrappingSitesSlice())
+    dispatch(resetCrewMembersSlice())
+    dispatch(resetEfficiencyTrialProtocolsSlice())
+    dispatch(resetTrappingProtocolsSlice())
+    dispatch(resetPermitInformationSlice())
+  }
+
   return (
     <>
       <Box overflow='hidden' flex={1} bg='#fff'>
@@ -17,7 +36,10 @@ const CreateNewProgramComplete = ({ navigation }: { navigation: any }) => {
           </Text>
         </VStack>
       </Box>
-      <CreateNewProgramNavButtons navigation={navigation} />
+      <CreateNewProgramNavButtons
+        navigation={navigation}
+        clearFormValues={clearFormValues}
+      />
     </>
   )
 }
