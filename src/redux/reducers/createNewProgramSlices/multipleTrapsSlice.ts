@@ -30,8 +30,8 @@ export const multipleTrapsSlice = createSlice({
       let multipleTrapsStorePayload = cloneDeep(action.payload)
       delete multipleTrapsStorePayload.numberOfTrapSites
 
+      console.log('🚀 ~ multipleTrapsStorePayload:', multipleTrapsStorePayload)
       state.groupTrapSiteValues = multipleTrapsStorePayload
-      console.log('🚀 ~ state:', state)
     },
   },
 })
