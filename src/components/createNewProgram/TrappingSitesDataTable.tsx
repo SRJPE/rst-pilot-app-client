@@ -35,7 +35,6 @@ const TrappingSitesDataTable = ({
   )
 
   useEffect(() => {
-    console.log('🚀 ~ multipleTrapsStore:', multipleTrapsStore)
     setProcessedData(Object.values(trappingSitesStore))
   }, [trappingSitesStore])
 
@@ -104,7 +103,7 @@ const TrappingSitesDataTable = ({
               (keyValuePair: any, idx: number) => {
                 const [key, cellValue] = keyValuePair
                 const currentCol = headers.find(
-                  header => header.colData === key
+                  (header) => header.colData === key
                 )
 
                 if (currentCol)
