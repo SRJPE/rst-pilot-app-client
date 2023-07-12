@@ -19,7 +19,7 @@ export interface IndividualCrewMemberValuesI {
   email: string | null
   isLead: boolean
   agency: string | null
-  orchidID: string | null
+  orcidId: string | null
 }
 export const IndividualCrewMemberState: IndividualCrewMemberValuesI = {
   firstName: '',
@@ -28,7 +28,7 @@ export const IndividualCrewMemberState: IndividualCrewMemberValuesI = {
   email: '',
   isLead: false,
   agency: '',
-  orchidID: '',
+  orcidId: '',
 }
 
 export const crewMembersSlice = createSlice({
@@ -52,6 +52,7 @@ export const crewMembersSlice = createSlice({
   },
 })
 
-export const { saveIndividualCrewMember } = crewMembersSlice.actions
+export const { resetCrewMembersSlice, saveIndividualCrewMember } =
+  crewMembersSlice.actions
 
 export default crewMembersSlice.reducer
