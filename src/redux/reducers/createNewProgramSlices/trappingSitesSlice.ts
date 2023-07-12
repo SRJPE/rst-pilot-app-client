@@ -54,6 +54,7 @@ export const trappingSitesSlice = createSlice({
   },
 })
 
-export const { saveIndividualTrapSite } = trappingSitesSlice.actions
+export const { resetTrappingSitesSlice, saveIndividualTrapSite } =
+  trappingSitesSlice.actions
 
 export default trappingSitesSlice.reducer
