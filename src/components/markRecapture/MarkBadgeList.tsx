@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { removeMarkFromAppliedMarks } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
+import { removeMarkFromBatchCountExistingMarks } from '../../redux/reducers/formSlices/batchCountSlice'
 
 interface markBadgeI {
   markType: string
@@ -44,11 +45,13 @@ const MarkBadgeList = ({
     badgeListCopy.splice(index, 1)
 
     //add removal function for other version of component
-    if (setExistingMarks !== null) {
+    if (setExistingMarks) {
       setExistingMarks({
         ...existingMarks,
         value: badgeListCopy.splice(index, 1),
       })
+    } else if (field === 'batchCountExistingMarks') {
+      dispatch(removeMarkFromBatchCountExistingMarks(badgeListCopy))
     } else {
       //update store with the spliced copy
       dispatch(removeMarkFromAppliedMarks(badgeListCopy))

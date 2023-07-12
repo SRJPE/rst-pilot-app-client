@@ -159,8 +159,8 @@ const IncompleteSections = ({
         )
         .map((obj: any) => obj.personnelId)
     )
-    //if the array contains a single string, return the string
-    return filteredNames.length === 1 ? filteredNames[0] : filteredNames
+    //if the array contains a single string, return the string in an array
+    return filteredNames
   }
 
   const saveTrapVisits = () => {
