@@ -314,7 +314,7 @@ export const crewMembersSchema = yup.object().shape({
     .required('Email required')
     .email('Email format is not valid'),
   agency: yup.string().required('Agency required'),
-  orchidID: yup.string().nullable(),
+  orcidId: yup.string().nullable(),
 })
 export const hatcheryInformationSchema = yup.object().shape({
   hatchery: yup.string().required('Hatchery required'),
@@ -342,10 +342,7 @@ export const permittingInformationSchema = yup.object().shape({
     .number()
     .required('Flow threshold required')
     .typeError('Input must be a number'),
-  trapCheckFrequency: yup
-    .number()
-    .required('Trap check frequency required')
-    .typeError('Input must be a number'),
+  trapCheckFrequency: yup.string().required('Trap check frequency required'),
 })
 export const takeAndMortalitySchema = yup.object().shape({
   species: yup.string().required('Species required'),
@@ -372,5 +369,5 @@ export const groupTrapSitesSchema = yup.object().shape({
     .min(2)
     .required('Number of trap sites required'),
 
-  orchidID: yup.string().nullable(),
+  orcidId: yup.string().nullable(),
 })
