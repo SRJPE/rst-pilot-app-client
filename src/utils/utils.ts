@@ -114,6 +114,14 @@ export const QARanges = {
   debrisVolume: { max: 2000, min: null },
 }
 
+export const returnDefinitionArray = (dropdownsArray: any[]) => {
+  return dropdownsArray?.map((dropdownObj: any) => {
+    return dropdownObj.definition
+  })
+}
+export const returnNullableTableId = (value: any) =>
+  value == -1 ? null : value + 1
+
 export const markBadgeLookup = {
   type: {
     none: 'n',

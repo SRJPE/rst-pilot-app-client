@@ -12,7 +12,7 @@ import {
 import AppLogo from '../../components/Shared/AppLogo'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import { Formik } from 'formik'
-import { connect, useDispatch } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { saveNewProgramValues } from '../../redux/reducers/createNewProgramSlices/createNewProgramHomeSlice'
 import MonitoringProgramNavButtons from '../../components/monitoringProgram/MonitoringProgramNavButtons'
@@ -27,10 +27,10 @@ const programsTemp = [
   { id: 1, definition: 'Program 1' },
   { id: 2, definition: 'Program 2' },
 ]
-const fundingAgenciesTemp = [
-  { id: 1, definition: 'Funding Agency 1' },
-  { id: 2, definition: 'Funding Agency 2' },
-]
+// const fundingAgenciesTemp = [
+//   { id: 1, definition: 'Funding Agency 1' },
+//   { id: 2, definition: 'Funding Agency 2' },
+// ]
 const MonitoringProgramNew = ({
   navigation,
   createNewProgramHomeStore,
@@ -38,6 +38,9 @@ const MonitoringProgramNew = ({
   navigation: any
   createNewProgramHomeStore: any
 }) => {
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
   const dispatch = useDispatch<AppDispatch>()
 
   const [copyValuesChecked, setCopyValuesChecked] = useState(false as boolean)
@@ -85,20 +88,15 @@ const MonitoringProgramNew = ({
                   onChangeText={handleChange('monitoringProgramName')}
                   onBlur={handleBlur('monitoringProgramName')}
                 />
-                <FormControl>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Stream Name
-                    </Text>
-                  </FormControl.Label>
-                  <CustomSelect
-                    selectedValue={values.streamName}
-                    placeholder='Stream Name'
-                    onValueChange={handleChange('streamName')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={streamNamesTemp}
-                  />
-                </FormControl>
+                <FormInputComponent
+                  label={'Stream Name'}
+                  touched={touched}
+                  errors={errors}
+                  value={values.streamName ? `${values.streamName}` : ''}
+                  camelName={'streamName'}
+                  onChangeText={handleChange('streamName')}
+                  onBlur={handleBlur('streamName')}
+                />
                 <FormControl>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
@@ -110,7 +108,7 @@ const MonitoringProgramNew = ({
                     placeholder='Funding Agency'
                     onValueChange={handleChange('fundingAgency')}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={fundingAgenciesTemp}
+                    selectOptions={dropdownValues?.fundingAgency}
                   />
                 </FormControl>
                 <HStack alignItems='center' space={8}>

@@ -95,21 +95,22 @@ const AddTakeAndMortalityModalContent = ({
                   }))}
                 />
               </FormControl>
-              <FormInputComponent
-                label={'Listing Unit or Stock'}
-                touched={touched}
-                errors={errors}
-                value={
-                  values.listingUnitOrStock
-                    ? `${values.listingUnitOrStock}`
-                    : ''
-                }
-                camelName={'listingUnitOrStock'}
-                keyboardType={'numeric'}
-                width={'45%'}
-                onChangeText={handleChange('listingUnitOrStock')}
-                onBlur={handleBlur('listingUnitOrStock')}
-              />
+              <FormControl w='45%' ml='5'>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Listing Unit or Stock
+                  </Text>
+                </FormControl.Label>
+                <CustomSelect
+                  selectedValue={values.listingUnitOrStock}
+                  placeholder={'Listing Unit or Stock'}
+                  onValueChange={(value: any) =>
+                    handleChange('listingUnitOrStock')(value)
+                  }
+                  setFieldTouched={setFieldTouched}
+                  selectOptions={dropdownValues?.listingUnit}
+                />
+              </FormControl>
             </HStack>
 
             <FormControl w='45%' ml='5'>

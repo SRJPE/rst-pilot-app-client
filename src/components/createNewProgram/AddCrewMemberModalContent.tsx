@@ -9,21 +9,24 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   IndividualCrewMemberValuesI,
   IndividualCrewMemberState,
   saveIndividualCrewMember,
 } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
-import { AppDispatch } from '../../redux/store'
+import { AppDispatch, RootState } from '../../redux/store'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
 
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import { crewMembersSchema } from '../../utils/helpers/yupValidations'
+import CustomSelect from '../Shared/CustomSelect'
 
 const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
   const dispatch = useDispatch<AppDispatch>()
-
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
   const handleAddCrewMemberSubmission = (
     values: IndividualCrewMemberValuesI
   ) => {
@@ -142,25 +145,29 @@ const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
             </HStack>
 
             <HStack justifyContent='space-between'>
+              <FormControl w='45%'>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Funding Agency
+                  </Text>
+                </FormControl.Label>
+                <CustomSelect
+                  selectedValue={values.agency as string}
+                  placeholder='Funding Agency'
+                  onValueChange={handleChange('agency')}
+                  setFieldTouched={setFieldTouched}
+                  selectOptions={dropdownValues?.fundingAgency}
+                />
+              </FormControl>
               <FormInputComponent
-                label={'Agency'}
+                label={'Orcid ID (optional)'}
                 touched={touched}
                 errors={errors}
-                value={values.agency ? `${values.agency}` : ''}
-                camelName={'agency'}
+                value={values.orcidId ? `${values.orcidId}` : ''}
+                camelName={'orcidId'}
                 width={'45%'}
-                onChangeText={handleChange('agency')}
-                onBlur={handleBlur('agency')}
-              />
-              <FormInputComponent
-                label={'Orchid ID (optional)'}
-                touched={touched}
-                errors={errors}
-                value={values.orchidID ? `${values.orchidID}` : ''}
-                camelName={'orchidID'}
-                width={'45%'}
-                onChangeText={handleChange('orchidID')}
-                onBlur={handleBlur('orchidID')}
+                onChangeText={handleChange('orcidId')}
+                onBlur={handleBlur('orcidId')}
               />
             </HStack>
 
@@ -171,11 +178,11 @@ const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
                 </Text>
               </FormControl.Label>
               <Radio.Group
-                name='coneSetting'
-                accessibilityLabel='cone setting'
+                name='isLead'
+                accessibilityLabel='is lead'
                 value={`${values.isLead}`}
                 onChange={(value: any) => {
-                  setFieldTouched('coneSetting', true)
+                  setFieldTouched('isLead', true)
                   if (value === 'true') {
                     setFieldValue('isLead', true)
                   } else {

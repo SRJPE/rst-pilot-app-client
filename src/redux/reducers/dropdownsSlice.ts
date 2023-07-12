@@ -31,6 +31,9 @@ interface ValuesI {
   lightCondition: any[]
   plusCountMethodology: any[]
   twoMostRecentReleaseMarks: any[]
+  fundingAgency: any[]
+  listingUnit: any[]
+  frequency: any[]
 }
 
 interface APIResponseI {
@@ -58,6 +61,9 @@ const initialState: InitialStateI = {
     lightCondition: [],
     plusCountMethodology: [],
     twoMostRecentReleaseMarks: [],
+    fundingAgency: [],
+    listingUnit: [],
+    frequency: [],
   },
 }
 

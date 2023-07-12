@@ -13,7 +13,7 @@ const headers = [
   'Email',
   'Lead',
   'Agency',
-  'Orchid ID',
+  'Orcid ID',
   '',
 ]
 

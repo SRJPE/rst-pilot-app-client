@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { fetchPreviousTrapAndCatch, postTrapVisitFormSubmissions } from './postSlices/trapVisitFormPostBundler'
 import { postMarkRecaptureSubmissions } from './postSlices/markRecapturePostBundler'
+import { postMonitoringProgramSubmissions } from './postSlices/monitoringProgramPostBundler'
 
 interface InitialStateI {
   type: string
@@ -46,6 +47,7 @@ export const connectionChanged = createAsyncThunk(
         thunkAPI.dispatch(fetchPreviousTrapAndCatch())
         thunkAPI.dispatch(postTrapVisitFormSubmissions())
         thunkAPI.dispatch(postMarkRecaptureSubmissions())
+        thunkAPI.dispatch(postMonitoringProgramSubmissions())
       }
       return payload
     } catch (e) {
