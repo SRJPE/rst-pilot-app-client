@@ -17,7 +17,7 @@ import ChooseFileModalContent from '../../../components/createNewProgram/ChooseF
 import CustomSelect from '../../../components/Shared/CustomSelect'
 import { Formik } from 'formik'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { connect, useDispatch } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   EfficiencyTrialProtocolsInitialStateI,
   saveHatcheryInformationValues,
@@ -25,14 +25,6 @@ import {
 import FormInputComponent from '../../../components/Shared/FormInputComponent'
 import { hatcheryInformationSchema } from '../../../utils/helpers/yupValidations'
 
-const sampleHatcheryDropDowns = [
-  { label: 'Hatchery 1', value: 'h1' },
-  { label: 'Hatchery 2', value: 'h2' },
-]
-const sampleFrequencyDropDowns = [
-  { label: 'Frequency 1', value: 'f1' },
-  { label: 'Frequency 2', value: 'f2' },
-]
 const HatcheryInformation = ({
   efficiencyTrialProtocolsStore,
   navigation,
@@ -41,6 +33,10 @@ const HatcheryInformation = ({
   navigation: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
   const [chooseFileModalOpen, setChooseFileModalOpen] = useState(
     false as boolean
   )
@@ -74,22 +70,15 @@ const HatcheryInformation = ({
               <VStack py='5%' px='10%' space={5}>
                 <Heading alignSelf='center'>Hatchery Information</Heading>
                 <VStack space={4}>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Hatchery
-                      </Text>
-                    </FormControl.Label>
-                    <CustomSelect
-                      selectedValue={values.hatchery}
-                      placeholder={'Hatchery'}
-                      onValueChange={(value: any) =>
-                        handleChange('hatchery')(value)
-                      }
-                      setFieldTouched={() => setFieldTouched('hatchery')}
-                      selectOptions={sampleHatcheryDropDowns}
-                    />
-                  </FormControl>
+                  <FormInputComponent
+                    label={'Hatchery'}
+                    touched={touched}
+                    errors={errors}
+                    value={values.hatchery ? `${values.hatchery}` : ''}
+                    camelName={'hatchery'}
+                    onChangeText={handleChange('hatchery')}
+                    onBlur={handleBlur('hatchery')}
+                  />
                   <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
@@ -105,7 +94,7 @@ const HatcheryInformation = ({
                       setFieldTouched={() =>
                         setFieldTouched('frequencyOfReceivingFish')
                       }
-                      selectOptions={sampleFrequencyDropDowns}
+                      selectOptions={dropdownValues?.frequency}
                     />
                   </FormControl>
                   <FormInputComponent
