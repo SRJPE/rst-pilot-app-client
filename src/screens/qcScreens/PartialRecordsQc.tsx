@@ -7,22 +7,88 @@ import {
   Text,
   Pressable,
   Icon,
+  ScrollView,
 } from 'native-base'
+import { useEffect, useState } from 'react'
 import { DataTable } from 'react-native-paper'
+import { connect } from 'react-redux'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
+import { RootState } from '../../redux/store'
 
-export default function PartialRecordsQC({ navigation }: { navigation: any }) {
-  const AddCommentButton = ({name}: {name: string}) => {
+function PartialRecordsQC({
+  navigation,
+  route,
+  qcCatchRawSubmissions,
+}: {
+  navigation: any
+  route: any
+  qcCatchRawSubmissions: any
+}) {
+  const [tableData, setTableData] = useState<any[]>([])
+
+  useEffect(() => {
+    const previousCatchRaw = route.params.previousCatchRaw
+    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const formattedData: any = {}
+    const tableDataPayload: any[] = []
+    const omittedPartialRecordKeys = [
+      'id',
+      'programId',
+      'trapVisitId',
+      'captureRunClass',
+      'captureRunClassMethod',
+      'comments',
+      'createdAt',
+      'createdBy',
+      'programId',
+      'qcComments',
+      'qcCompleted',
+      'qcCompletedBy',
+      'qcTime',
+      'releaseId',
+      'updatedAt',
+      'qcCompleted',
+      'qcCompletedBy',
+      'qcTime',
+      'markedForRelease',
+    ]
+
+    qcData.forEach((catchResponse) => {
+      const catchRaw = catchResponse.createdCatchRawResponse
+      const catchRawKeys = Object.keys(catchRaw)
+
+      catchRawKeys.forEach((key) => {
+        if (!omittedPartialRecordKeys.includes(key)) {
+          if (Object.keys(formattedData).includes(key)) {
+            if (catchRaw[key] != null) {
+              formattedData[key] += 1
+            }
+          } else {
+            formattedData[key] = 0
+          }
+        }
+      })
+    })
+
+    Object.keys(formattedData).forEach((key) => {
+      tableDataPayload.push({
+        variableName: key,
+        percentNotRecorded: (formattedData[key] / qcData.length) * 100,
+      })
+    })
+
+    setTableData(tableDataPayload)
+  }, [qcCatchRawSubmissions])
+
+  const AddCommentButton = ({ name }: { name: string }) => {
     return (
-      <Pressable alignSelf='flex-end' onPress={() => {
-        console.log(`add comment for ${name} pressed`)
-      }}>
-        <Icon
-          as={MaterialIcons}
-          name={'add-circle'}
-          size='8'
-          color='primary'
-        />
+      <Pressable
+        alignSelf='flex-end'
+        onPress={() => {
+          console.log(`add comment for ${name} pressed`)
+        }}
+      >
+        <Icon as={MaterialIcons} name={'add-circle'} size='8' color='primary' />
       </Pressable>
     )
   }
@@ -55,21 +121,27 @@ export default function PartialRecordsQC({ navigation }: { navigation: any }) {
               <DataTable.Title numeric>Comments</DataTable.Title>
             </DataTable.Header>
 
-            <DataTable.Row>
-              <DataTable.Cell>Fork Length</DataTable.Cell>
-              <DataTable.Cell numeric>0%</DataTable.Cell>
-              <DataTable.Cell numeric>
-                <AddCommentButton name={'Fork Length'}/>
-              </DataTable.Cell>
-            </DataTable.Row>
-
-            <DataTable.Row>
-              <DataTable.Cell>Weight</DataTable.Cell>
-              <DataTable.Cell numeric>100%</DataTable.Cell>
-              <DataTable.Cell numeric>
-                <AddCommentButton name='Weight'/>
-              </DataTable.Cell>
-            </DataTable.Row>
+            <ScrollView>
+              {tableData.map((rowData) => {
+                return (
+                  <DataTable.Row key={rowData.variableName}>
+                    <DataTable.Cell>
+                      {`${rowData.variableName}`
+                        .replace(/([A-Z])/g, ' $1')
+                        .replace(/^./, function (str) {
+                          return str.toUpperCase()
+                        })}
+                    </DataTable.Cell>
+                    <DataTable.Cell
+                      numeric
+                    >{`${rowData.percentNotRecorded}%`}</DataTable.Cell>
+                    <DataTable.Cell numeric>
+                      <AddCommentButton name={rowData.variableName} />
+                    </DataTable.Cell>
+                  </DataTable.Row>
+                )
+              })}
+            </ScrollView>
           </DataTable>
 
           <View flex={1}></View>
@@ -109,3 +181,11 @@ export default function PartialRecordsQC({ navigation }: { navigation: any }) {
     </>
   )
 }
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+  }
+}
+
+export default connect(mapStateToProps)(PartialRecordsQC)

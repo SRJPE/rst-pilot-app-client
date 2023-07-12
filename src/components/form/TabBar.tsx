@@ -37,7 +37,7 @@ const TabBar = ({
   const formSlicesToValidateDict = {
     'Trap Operations': trapOperationsSlice,
     'Fish Processing': fishProcessingSlice,
-    'Trap Post-Processing': trapPostProcessingSlice
+    'Trap Post-Processing': trapPostProcessingSlice,
   }
 
   useEffect(() => {
@@ -72,11 +72,13 @@ const TabBar = ({
     })
 
     Object.keys(tabsErrorCount).forEach((tabId) => {
-      dispatch(updateErrorCount({tabId, errorCount: tabsErrorCount[tabId]}))
+      dispatch(updateErrorCount({ tabId, errorCount: tabsErrorCount[tabId] }))
     })
 
     Object.keys(tabsErrorDetails).forEach((tabId) => {
-      dispatch(updateErrorDetails({tabId, errorDetails: tabsErrorDetails[tabId]}))
+      dispatch(
+        updateErrorDetails({ tabId, errorDetails: tabsErrorDetails[tabId] })
+      )
     })
   }
 
@@ -90,13 +92,12 @@ const TabBar = ({
         <ScrollView horizontal={true}>
           <HStack alignItems={'center'} justifyContent='space-between'>
             {Object.keys(tabSlice.tabs).map((tabId) => (
-              <>
+              <Box key={`button-${tabId}`}>
                 <Button
                   size={'lg'}
                   height={'16'}
                   bg={tabId == tabSlice.activeTabId ? 'primary' : 'secondary'}
                   onPress={() => dispatch(setActiveTab(tabId))}
-                  key={`button-${tabId}`}
                   mr={5}
                 >
                   <HStack alignItems={'center'} justifyContent='space-between'>
@@ -150,7 +151,7 @@ const TabBar = ({
                 ) : (
                   <></>
                 )}
-              </>
+              </Box>
             ))}
             <Icon
               onPress={() => {
@@ -200,7 +201,7 @@ const mapStateToProps = (state: RootState) => {
     tabSlice: state.tabSlice,
     trapOperationsSlice: state.trapOperations,
     fishProcessingSlice: state.fishProcessing,
-    trapPostProcessingSlice: state.trapPostProcessing
+    trapPostProcessingSlice: state.trapPostProcessing,
   }
 }
 

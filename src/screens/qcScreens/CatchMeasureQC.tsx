@@ -1,20 +1,77 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, HStack, View, VStack, Text, ScrollView } from 'native-base'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
+import { connect, useDispatch } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/store'
+import CustomModal from '../../components/Shared/CustomModal'
+import GraphModalContent from '../../components/Shared/GraphModalContent'
+import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
-export default function CatchMeasureQC({ navigation }: { navigation: any }) {
+interface GraphDataI {
+  'Fork Length': any[]
+  Weight: any[]
+}
+
+function CatchMeasureQC({
+  navigation,
+  route,
+  qcCatchRawSubmissions,
+}: {
+  navigation: any
+  route: any
+  qcCatchRawSubmissions: any
+}) {
+  const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
     ('Fork Length' | 'Weight')[]
   >(['Fork Length'])
+  const [graphData, setGraphData] = useState<GraphDataI>({
+    'Fork Length': [],
+    Weight: [],
+  })
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [pointClicked, setPointClicked] = useState<any | null>(null)
 
-  const data = [
-    { label: 'Point 1', x: 1, y: 10, extraInfo: 'woop woop!' },
-    { label: 'Point 2', x: 2, y: 20, extraInfo: 'woop woop!' },
-    { label: 'Point 3', x: 3, y: 15, extraInfo: 'woop woop!' },
-    { label: 'Point 4', x: 4, y: 25, extraInfo: 'woop woop!' },
-    { label: 'Point 5', x: 5, y: 12, extraInfo: 'woop woop!' },
-  ]
+  useEffect(() => {
+    const previousCatchRaw = route.params.previousCatchRaw
+    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    let forkLengthData: any[] = []
+    let weightData: any[] = []
+    
+
+    qcData.forEach((catchResponse: any, idx: number) => {
+      const catchRawId: number = catchResponse.createdCatchRawResponse.id
+      const qcCompleted: any = catchResponse.createdCatchRawResponse.qcCompleted
+      const qcNotStarted: boolean = qcCompleted ? false : true
+
+      let forkLength = catchResponse.createdCatchRawResponse.forkLength
+      let weight = catchResponse.createdCatchRawResponse.weight
+
+      if (forkLength && catchRawId) {
+        forkLengthData.push({
+          id: catchRawId,
+          x: idx + 1,
+          y: Number(forkLength),
+          colorScale: qcNotStarted ? 'red' : undefined,
+        })
+      }
+
+      if (weight && catchRawId) {
+        weightData.push({
+          id: catchRawId,
+          x: idx + 1,
+          y: Number(weight),
+          colorScale: qcNotStarted ? 'red' : undefined,
+        })
+      }
+    })
+
+    setGraphData({
+      'Fork Length': forkLengthData,
+      Weight: weightData,
+    })
+  }, [qcCatchRawSubmissions])
 
   const GraphMenuButton = ({
     buttonName,
@@ -48,6 +105,24 @@ export default function CatchMeasureQC({ navigation }: { navigation: any }) {
     )
   }
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setPointClicked(null)
+  }
+
+  const handlePointClicked = (datum: any) => {
+    console.log('point clicked: ', datum)
+    setPointClicked(datum)
+    setIsModalOpen(true)
+  }
+
+  const handleModalSubmit = (submission: any) => {
+    if (pointClicked) {
+      const catchRawId = submission['Weight']['id']
+      dispatch(catchRawQCSubmission({ catchRawId, submission }))
+    }
+  }
+
   return (
     <>
       <View
@@ -69,7 +144,7 @@ export default function CatchMeasureQC({ navigation }: { navigation: any }) {
             lines show historic fork length distribution
           </Text>
 
-          <HStack>
+          <HStack mb={'10'}>
             <GraphMenuButton buttonName={'Fork Length'} />
             <GraphMenuButton buttonName={'Weight'} />
             <View flex={3}></View>
@@ -80,8 +155,9 @@ export default function CatchMeasureQC({ navigation }: { navigation: any }) {
               return (
                 <Graph
                   key={buttonName}
-                  chartType='line'
-                  data={data}
+                  chartType='bar'
+                  data={graphData[buttonName]}
+                  onPointClick={(datum) => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'
@@ -126,6 +202,31 @@ export default function CatchMeasureQC({ navigation }: { navigation: any }) {
           </HStack>
         </VStack>
       </View>
+      {pointClicked ? (
+        <CustomModal
+          isOpen={isModalOpen}
+          closeModal={() => handleCloseModal()}
+          height='1/2'
+        >
+          <GraphModalContent
+            closeModal={() => handleCloseModal()}
+            pointClicked={pointClicked}
+            onSubmit={(submission: any) => handleModalSubmit(submission)}
+            headerText={'Table of Selected Points'}
+            modalData={graphData}
+          />
+        </CustomModal>
+      ) : (
+        <></>
+      )}
     </>
   )
 }
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+  }
+}
+
+export default connect(mapStateToProps)(CatchMeasureQC)

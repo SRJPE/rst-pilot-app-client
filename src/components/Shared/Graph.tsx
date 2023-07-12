@@ -5,8 +5,15 @@ import {
   VictoryBar,
   VictoryChart,
   VictoryLine,
+  VictoryScatter,
   VictoryTheme,
+  VictoryZoomContainer,
 } from 'victory-native'
+
+interface ZoomDomainI {
+  x?: any,
+  y?: any
+}
 
 export default function Graph({
   chartType,
@@ -18,8 +25,10 @@ export default function Graph({
   selectedBarColor,
   backgroundColor,
   onPointClick,
+  timeBased,
+  zoomDomain,
 }: {
-  chartType: 'graph' | 'line'
+  chartType: 'bar' | 'line'
   title?: string
   data: any
   height: number
@@ -27,22 +36,32 @@ export default function Graph({
   barColor: string
   selectedBarColor: string
   backgroundColor?: string
-  onPointClick?: () => void
+  onPointClick?: (pointClicked: any) => void
+  timeBased?: boolean
+  zoomDomain?: ZoomDomainI
 }) {
-  const handlePointClick = () => {
-    console.log('hit!')
+  const handlePointClick = (datum: any) => {
     if (onPointClick) {
-      onPointClick()
+      onPointClick(datum)
     }
   }
 
   const chartTypeComponent = () => {
     switch (chartType) {
-      case 'graph':
+      case 'bar':
         return (
           <VictoryBar
             data={data}
-            style={{ data: { fill: barColor } }}
+            style={{
+              data: {
+                fill: (props) => {
+                  return props.datum.colorScale
+                    ? props.datum.colorScale
+                    : barColor
+                },
+              },
+            }}
+            barWidth={({ index }) => 2}
             x='x'
             y='y'
             events={[
@@ -55,21 +74,20 @@ export default function Graph({
                         target: 'data',
                         eventKey: 'all',
                         mutation: (props) => {
-                          const fill = props.style?.fill
-                          return fill === barColor
-                            ? null
-                            : { style: { fill: barColor } }
+                          // const fill = props.style?.fill
+                          // return fill === barColor
+                          //   ? null
+                          //   : { style: { fill: barColor } }
                         },
                       },
                       {
                         target: 'data',
                         mutation: (props) => {
-                          console.log(data.datum)
-                          handlePointClick()
-                          const fill = props.style?.fill
-                          return fill === selectedBarColor
-                            ? null
-                            : { style: { fill: selectedBarColor } }
+                          handlePointClick(data.datum)
+                          // const fill = props.style?.fill
+                          // return fill === selectedBarColor
+                          //   ? null
+                          //   : { style: { fill: selectedBarColor } }
                         },
                       },
                     ]
@@ -83,7 +101,20 @@ export default function Graph({
         return (
           <VictoryLine
             data={data}
-            style={{ data: { fill: barColor } }}
+            style={{
+              data: {
+                fill: (props) => {
+                  return barColor
+                  // if (Object.keys(props.datum).includes('colorScale')) {
+                  //   return props.datum.colorScale
+                  //     ? props.datum.colorScale
+                  //     : barColor
+                  // } else {
+                  //   return barColor
+                  // }
+                },
+              },
+            }}
             x='x'
             y='y'
             events={[
@@ -96,21 +127,20 @@ export default function Graph({
                         target: 'data',
                         eventKey: 'all',
                         mutation: (props) => {
-                          const fill = props.style?.fill
-                          return fill === barColor
-                            ? null
-                            : { style: { fill: barColor } }
+                          // const fill = props.style?.fill
+                          // return fill === barColor
+                          //   ? null
+                          //   : { style: { fill: barColor } }
                         },
                       },
                       {
                         target: 'data',
                         mutation: (props) => {
-                          console.log(data.datum)
-                          handlePointClick()
-                          const fill = props.style?.fill
-                          return fill === selectedBarColor
-                            ? null
-                            : { style: { fill: selectedBarColor } }
+                          // handlePointClick(data.datum)
+                          // const fill = props.style?.fill
+                          // return fill === selectedBarColor
+                          //   ? null
+                          //   : { style: { fill: selectedBarColor } }
                         },
                       },
                     ]
@@ -131,6 +161,13 @@ export default function Graph({
         </Text>
       )}
       <VictoryChart
+        scale={timeBased ? { x: 'time', y: 'linear' } : undefined}
+        containerComponent={
+          <VictoryZoomContainer
+            zoomDomain={zoomDomain ? zoomDomain : { y: [0, 50] }}
+            zoomDimension='x'
+          />
+        }
         theme={VictoryTheme.material}
         domainPadding={30}
         width={width}
@@ -138,17 +175,64 @@ export default function Graph({
         style={{ background: { fill: backgroundColor } }}
       >
         <VictoryAxis
+          fixLabelOverlap={true}
           tickFormat={(value) => {
             return `${value}`
           }}
         />
         <VictoryAxis
           dependentAxis
+          // fixLabelOverlap={true}
           tickFormat={(value) => {
             return `${value}`
           }}
         />
         {chartTypeComponent()}
+        <VictoryScatter
+          data={data}
+          style={{
+            data: {
+              fill: (props) => {
+                return props.datum.colorScale
+                  ? props.datum.colorScale
+                  : barColor
+              },
+            },
+          }}
+          x='x'
+          y='y'
+          events={[
+            {
+              target: 'data',
+              eventHandlers: {
+                onPressIn: (event, data) => {
+                  return [
+                    {
+                      target: 'data',
+                      eventKey: 'all',
+                      mutation: (props) => {
+                        // const fill = props.style?.fill
+                        // return fill === barColor
+                        //   ? null
+                        //   : { style: { fill: barColor } }
+                      },
+                    },
+                    {
+                      target: 'data',
+                      mutation: (props) => {
+                        handlePointClick(data.datum)
+                        // const fill = props.style?.fill
+                        // return fill === selectedBarColor
+                        //   ? null
+                        //   : { style: { fill: selectedBarColor } }
+                      },
+                    },
+                  ]
+                },
+              },
+            },
+          ]}
+        />
       </VictoryChart>
     </View>
   )

@@ -1,11 +1,25 @@
 import { useEffect, useState } from 'react'
 import { Box, Button, Center, Icon, Text, View, VStack } from 'native-base'
 import { LayoutAnimation, TouchableOpacity } from 'react-native'
+import api from '../../api/axiosConfig'
+import { connect } from 'react-redux'
+import { RootState } from '../../redux/store'
 
-export default function DataQualityControl({
+interface QCDataI {
+  previousTrapVisits: any[]
+  previousCatchRaw: any[]
+}
+
+function QCMain({
   navigation,
+  route,
+  previousTrapVisits,
+  previousCatchRaw,
 }: {
   navigation: any
+  route: any
+  previousTrapVisits: any[]
+  previousCatchRaw: any[]
 }) {
   const [activeButton, setActiveButton] = useState<
     'trapBtn' | 'catchBtn' | 'efficiencyBtn' | ''
@@ -17,6 +31,25 @@ export default function DataQualityControl({
     | 'Partial Records'
     | ''
   >('')
+  const [qcData, setQCData] = useState<QCDataI>({
+    previousTrapVisits: [],
+    previousCatchRaw: [],
+  })
+
+  useEffect(() => {
+    const programId = route.params.programId
+    const programsTrapVisits = previousTrapVisits.filter((trapVisit) => {
+      return trapVisit.createdTrapVisitResponse.programId === programId
+    })
+    const programsCatchRaw = previousCatchRaw.filter((catchRaw) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+
+    setQCData({
+      previousTrapVisits: programsTrapVisits ?? [],
+      previousCatchRaw: programsCatchRaw ?? [],
+    })
+  }, [route.params.programId])
 
   return (
     <VStack alignItems={'center'} marginTop={100} flex={1}>
@@ -24,8 +57,10 @@ export default function DataQualityControl({
         w='4/5'
         bg={activeButton === 'trapBtn' ? 'themeOrange' : 'primary'}
         onPress={() => {
-          setActiveButton(activeButton != 'trapBtn' ? 'trapBtn' : '')
-          navigation.navigate('Trap QC')
+          setActiveButton('trapBtn')
+          navigation.navigate('Trap QC', {
+            previousTrapVisits: qcData.previousTrapVisits,
+          })
         }}
       >
         <Text fontSize='xl' color='white' fontWeight={'bold'}>
@@ -34,7 +69,7 @@ export default function DataQualityControl({
       </Button>
       {/* ------------------------------------------------------------------------------------ */}
       <Accordion
-      activeButton={activeButton}
+        activeButton={activeButton}
         headerComponent={
           <View
             marginTop={25}
@@ -50,7 +85,7 @@ export default function DataQualityControl({
           </View>
         }
         headerOnPress={() => {
-          setActiveButton(activeButton != 'catchBtn' ? 'catchBtn' : '')
+          setActiveButton('catchBtn')
         }}
       >
         <>
@@ -67,12 +102,11 @@ export default function DataQualityControl({
             alignItems='center'
             onPress={() => {
               setActiveCatchOption(
-                activeCatchOption !=
-                  'Measured Variables and Associated Categories'
-                  ? 'Measured Variables and Associated Categories'
-                  : ''
+                'Measured Variables and Associated Categories'
               )
-              navigation.navigate('CatchMeasureQC')
+              navigation.navigate('CatchMeasureQC', {
+                previousCatchRaw: qcData.previousCatchRaw,
+              })
             }}
           >
             <Text
@@ -95,12 +129,10 @@ export default function DataQualityControl({
             justifyContent='center'
             alignItems='center'
             onPress={() => {
-              setActiveCatchOption(
-                activeCatchOption != 'Categorical Observations'
-                  ? 'Categorical Observations'
-                  : ''
-              )
-              navigation.navigate('CatchCategoricalQC')
+              setActiveCatchOption('Categorical Observations')
+              navigation.navigate('CatchCategoricalQC', {
+                previousCatchRaw: qcData.previousCatchRaw,
+              })
             }}
           >
             <Text
@@ -123,12 +155,10 @@ export default function DataQualityControl({
             justifyContent='center'
             alignItems='center'
             onPress={() => {
-              setActiveCatchOption(
-                activeCatchOption != 'Total Fish Counts'
-                  ? 'Total Fish Counts'
-                  : ''
-              )
-              navigation.navigate('CatchFishCountQC')
+              setActiveCatchOption('Total Fish Counts')
+              navigation.navigate('CatchFishCountQC', {
+                previousCatchRaw: qcData.previousCatchRaw,
+              })
             }}
           >
             <Text
@@ -151,12 +181,10 @@ export default function DataQualityControl({
             justifyContent='center'
             alignItems='center'
             onPress={() => {
-              setActiveCatchOption(
-                activeCatchOption != 'Partial Records'
-                  ? 'Partial Records'
-                  : ''
-              )
-              navigation.navigate('PartialRecordsQC')
+              setActiveCatchOption('Partial Records')
+              navigation.navigate('PartialRecordsQC', {
+                previousCatchRaw: qcData.previousCatchRaw,
+              })
             }}
           >
             <Text
@@ -176,10 +204,10 @@ export default function DataQualityControl({
         w='4/5'
         bg={activeButton === 'efficiencyBtn' ? 'themeOrange' : 'primary'}
         onPress={() => {
-          setActiveButton(
-            activeButton != 'efficiencyBtn' ? 'efficiencyBtn' : ''
-          )
-          navigation.navigate('EfficiencyQC')
+          setActiveButton('efficiencyBtn')
+          navigation.navigate('EfficiencyQC', {
+            previousCatchRaw: qcData.previousCatchRaw,
+          })
         }}
       >
         <Text fontSize='xl' color='white' fontWeight={'bold'}>
@@ -192,7 +220,7 @@ export default function DataQualityControl({
         w='90%'
         bg='primary'
         onPress={() => {
-          navigation.navigate('Home')
+          navigation.goBack()
         }}
       >
         <Text fontSize='xl' color='white' fontWeight={'bold'}>
@@ -203,11 +231,25 @@ export default function DataQualityControl({
   )
 }
 
+const mapStateToProps = (state: RootState) => {
+  let previousTrapVisits =
+    state.trapVisitFormPostBundler.previousTrapVisitSubmissions
+  let previousCatchRaw =
+    state.trapVisitFormPostBundler.previousCatchRawSubmissions
+
+  return {
+    previousTrapVisits,
+    previousCatchRaw,
+  }
+}
+
+export default connect(mapStateToProps)(QCMain)
+
 const Accordion = ({
   headerComponent,
   headerOnPress,
   children,
-  activeButton
+  activeButton,
 }: {
   headerComponent: JSX.Element
   headerOnPress: () => void
