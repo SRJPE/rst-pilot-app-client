@@ -5,11 +5,14 @@ import {
   Divider,
   Heading,
   HStack,
+  Icon,
+  IconButton,
   Pressable,
   Radio,
   ScrollView,
   Stack,
   Text,
+  View,
   VStack,
 } from 'native-base'
 import { useEffect, useState } from 'react'
@@ -35,6 +38,7 @@ import BatchCountDataTable from '../../components/form/batchCount/BatchCountData
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import BatchCountTableModal from '../../components/form/batchCount/BatchCountTableModal'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import { Entypo, FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 
 const BatchCount = ({
   tabSlice,
@@ -45,12 +49,14 @@ const BatchCount = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
+  const { height: screenHeight } = useWindowDimensions()
   const [firstButton, setFirstButton] = useState(0 as number)
   const [numberOfAdditionalButtons, setNumberOfAdditionalButtons] = useState(
     0 as number
   )
   const [showTableModal, setShowTableModal] = useState(false as boolean)
   const [showTable, setShowTable] = useState(false as boolean)
+  const [lifeStageRadioValue, setLifeStageRadioValue] = useState('' as string)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
     useState(false as boolean)
   const [modalInitialData, setModalInitialData] = useState({
@@ -58,12 +64,18 @@ const BatchCount = ({
     count: '',
   } as any)
 
-  const { tabId, species, adiposeClipped, dead, existingMark, forkLengths } =
-    batchCountStore
-
-  const { height: screenHeight } = useWindowDimensions()
-
-  const [lifeStageRadioValue, setLifeStageRadioValue] = useState('' as string)
+  const [deadIsLocked, setDeadIsLocked] = useState(false as boolean)
+  const [deadToggle, setDeadToggle] = useState(false as boolean)
+  const [markToggle, setMarkToggle] = useState(false as boolean)
+  const [conditionToggle, setConditionToggle] = useState(false as boolean)
+  const {
+    tabId,
+    species,
+    adiposeClipped,
+    fishCondition,
+    existingMarks,
+    forkLengths,
+  } = batchCountStore
 
   useEffect(() => {
     if (species === '') {
@@ -126,6 +138,33 @@ const BatchCount = ({
     return forkLengthOfLastFish
   }
 
+  const handleToggles = (toggleName: string) => {
+    switch (toggleName) {
+      case 'dead':
+        if (deadIsLocked) return
+        setDeadToggle(!deadToggle)
+        break
+      case 'mark':
+        setMarkToggle(!markToggle)
+        break
+      case 'condition':
+        setConditionToggle(!conditionToggle)
+        break
+
+      default:
+        setMarkToggle(false)
+        setConditionToggle(false)
+        if (deadIsLocked) return
+        setDeadToggle(false)
+        break
+    }
+  }
+
+  const handlePressLockDead = () => {
+    if (!deadToggle) return
+    setDeadIsLocked(!deadIsLocked)
+  }
+
   return (
     <>
       <ScrollView
@@ -155,21 +194,35 @@ const BatchCount = ({
           </HStack>
           <Divider m='1%' />
           <Box px='2%'>
-            <HStack space={6} mb='2'>
-              <Text bold>Selected Batch Characteristics:</Text>
-              <Text>
-                Species: <Text bold>{capitalize(species)}</Text>
-              </Text>
-              <Text>
-                Adiposed Clipped:{' '}
-                <Text bold>{adiposeClipped ? 'Yes' : 'No'}</Text>
-              </Text>
-              <Text>
-                Dead: <Text bold>{dead ? 'Yes' : 'No'}</Text>
-              </Text>
-              <Text>
-                Mark: <Text bold>{existingMark ? existingMark : 'N/A'}</Text>
-              </Text>
+            <HStack space={6}>
+              <VStack>
+                <HStack space={6} mb='2'>
+                  <Text fontSize='16' bold>
+                    Selected Batch Characteristics:
+                  </Text>
+                  <Text>
+                    Species: <Text bold>{capitalize(species)}</Text>
+                  </Text>
+                  <Text>
+                    Fish Condition:{' '}
+                    <Text bold>{capitalize(fishCondition)}</Text>
+                  </Text>
+                </HStack>
+                <HStack space={6} ml='100'>
+                  <Text>
+                    Adipose Clipped:{' '}
+                    <Text bold>{adiposeClipped ? 'Yes' : 'No'}</Text>
+                  </Text>
+                  <Text>
+                    Mark:{' '}
+                    <Text bold>
+                      {existingMarks.length > 0
+                        ? `${existingMarks[0].markType} - ${existingMarks[0].markColor} - ${existingMarks[0].markPosition}`
+                        : 'N/A'}
+                    </Text>
+                  </Text>
+                </HStack>
+              </VStack>
             </HStack>
             <HStack space={4}>
               <Pressable onPress={handlePressSaveAndStartNewBatchCount}>
@@ -196,7 +249,7 @@ const BatchCount = ({
           >
             <BatchCountHistogram />
           </Box>
-          <VStack space={4}>
+          <VStack space={3}>
             <HStack
               alignItems='center'
               space={10}
@@ -222,7 +275,7 @@ const BatchCount = ({
               </HStack>
             </HStack>
             {showTable ? (
-              <ScrollView height='376'>
+              <ScrollView height='369'>
                 <BatchCountDataTable
                   handleShowTableModal={handleShowTableModal}
                 />
@@ -310,7 +363,12 @@ const BatchCount = ({
                   numberOfAdditionalButtons={numberOfAdditionalButtons}
                   selectedLifeStage={lifeStageRadioValue}
                   ignoreLifeStage={species !== 'Chinook salmon'}
+                  deadToggle={deadToggle}
+                  markToggle={markToggle}
+                  conditionToggle={conditionToggle}
+                  handleToggles={handleToggles}
                 />
+                {species !== 'Chinook salmon' && <View mb='65'></View>}
               </>
             )}
             <HStack px='2%' justifyContent='space-between'>
@@ -326,9 +384,64 @@ const BatchCount = ({
                   </Button>
                 </HStack>
               </VStack>
+              <VStack alignItems='center' space={2}>
+                <HStack alignItems='center' space={2}>
+                  <IconButton
+                    // color='secondary'
+                    // bg='secondary'
+                    onPress={() => handlePressLockDead()}
+                    icon={
+                      <Icon
+                        as={FontAwesome}
+                        name={deadIsLocked ? 'lock' : 'unlock'}
+                      />
+                    }
+                    borderRadius='full'
+                    _icon={{
+                      size: 5,
+                    }}
+                    _pressed={{
+                      bg: '#FFF',
+                    }}
+                  />
+
+                  <Text fontSize='16'>Dead</Text>
+                </HStack>
+                <Switch
+                  shadow='3'
+                  offTrackColor='secondary'
+                  onTrackColor='primary'
+                  size='md'
+                  isChecked={deadToggle}
+                  // isDisabled={deadIsLocked}
+                  onToggle={() => handleToggles('dead')}
+                />
+              </VStack>
+              <VStack alignItems='center' space={4} mt='2'>
+                <Text fontSize='16'>Mark</Text>
+                <Switch
+                  shadow='3'
+                  offTrackColor='secondary'
+                  onTrackColor='primary'
+                  size='md'
+                  isChecked={markToggle}
+                  onToggle={() => handleToggles('mark')}
+                />
+              </VStack>
+              <VStack alignItems='center' space={4} mt='2'>
+                <Text fontSize='16'>Condition</Text>
+                <Switch
+                  shadow='3'
+                  offTrackColor='secondary'
+                  onTrackColor='primary'
+                  size='md'
+                  isChecked={conditionToggle}
+                  onToggle={() => handleToggles('condition')}
+                />
+              </VStack>
               <VStack space={4}>
                 <Heading size='md'>
-                  Fork length of last fish entered: {calculateLastFish()}
+                  Last Fork length Entered: {calculateLastFish()}
                 </Heading>
                 <Button
                   bg='primary'

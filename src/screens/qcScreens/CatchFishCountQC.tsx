@@ -1,15 +1,48 @@
 import { Button, HStack, View, VStack, Text, ScrollView } from 'native-base'
+import { useEffect, useState } from 'react'
+import { connect } from 'react-redux'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
+import { RootState } from '../../redux/store'
 
-export default function CatchFishCountQC({ navigation }: { navigation: any }) {
-  const data = [
-    { label: 'Point 1', x: 1, y: 10, extraInfo: 'woop woop!' },
-    { label: 'Point 2', x: 2, y: 20, extraInfo: 'woop woop!' },
-    { label: 'Point 3', x: 3, y: 15, extraInfo: 'woop woop!' },
-    { label: 'Point 4', x: 4, y: 25, extraInfo: 'woop woop!' },
-    { label: 'Point 5', x: 5, y: 12, extraInfo: 'woop woop!' },
-  ]
+function CatchFishCountQC({
+  navigation,
+  route,
+  qcCatchRawSubmissions,
+}: {
+  navigation: any
+  route: any
+  qcCatchRawSubmissions: any
+}) {
+  const [graphData, setGraphData] = useState<any[]>([])
+
+  useEffect(() => {
+    const previousCatchRaw = route.params.previousCatchRaw
+    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const totalCountByDay: any[] = []
+    const datesFormatted: any = {}
+
+    qcData.forEach((catchResponse) => {
+      const catchRaw = catchResponse.createdCatchRawResponse
+      const numFishCaught = catchRaw?.numFishCaught
+      const createdAtString = new Date(catchRaw?.createdAt).toDateString()
+
+      if (Object.keys(datesFormatted).includes(createdAtString)) {
+        datesFormatted[createdAtString] += numFishCaught
+      } else {
+        datesFormatted[createdAtString] = numFishCaught
+      }
+    })
+
+    Object.keys(datesFormatted).forEach((dateString) => {
+      totalCountByDay.push({
+        x: dateString,
+        y: datesFormatted[dateString]
+      })
+    })
+
+    setGraphData(totalCountByDay)
+  }, [qcCatchRawSubmissions])
 
   return (
     <>
@@ -34,8 +67,8 @@ export default function CatchFishCountQC({ navigation }: { navigation: any }) {
 
           <ScrollView>
             <Graph
-              chartType='line'
-              data={data}
+              chartType='bar'
+              data={graphData}
               barColor='grey'
               selectedBarColor='green'
               height={400}
@@ -80,3 +113,11 @@ export default function CatchFishCountQC({ navigation }: { navigation: any }) {
     </>
   )
 }
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+  }
+}
+
+export default connect(mapStateToProps)(CatchFishCountQC)

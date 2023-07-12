@@ -260,6 +260,10 @@ export const addAnotherMarkSchema = yup.object().shape({
   markColor: yup.string().required('Mark color required'),
   markPosition: yup.string().required('Mark position required'),
 })
+export const batchCharacteristicsSchema = yup.object().shape({
+  species: yup.string().required('Species required'),
+  fishCondition: yup.string().required('Fish Condition required'),
+})
 
 /*----------------------------------------------------------------
   CREATE NEW PROGRAM SCHEMAS

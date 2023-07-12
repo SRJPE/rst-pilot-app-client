@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
-import { AppDispatch } from './store'
-import { useDispatch } from 'react-redux'
+import { AppDispatch, RootState } from './store'
+import { connect, useDispatch } from 'react-redux'
 import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo'
 import { getTrapVisitDropdownValues } from './reducers/dropdownsSlice'
 import { getVisitSetupDefaults } from './reducers/visitSetupDefaults'
@@ -8,6 +8,7 @@ import { connectionChanged } from './reducers/connectivitySlice'
 
 type Props = {
   children: React.ReactNode
+  isConnected: boolean
 }
 
 const OnStartupProvider = (props: Props) => {
@@ -18,13 +19,21 @@ const OnStartupProvider = (props: Props) => {
     dispatch(getTrapVisitDropdownValues())
     dispatch(getVisitSetupDefaults(1))
     unsubscribe = NetInfo.addEventListener((connectionState) => {
-      dispatch(connectionChanged(connectionState as any))
+      if (props.isConnected != connectionState.isConnected) {
+        dispatch(connectionChanged(connectionState as any))
+      }
     })
-  }, [])
+  }, [props.isConnected])
 
   useEffect(() => () => unsubscribe(), [])
 
   return <>{props.children}</>
 }
 
-export default OnStartupProvider
+const mapStateToProps = (state: RootState) => {
+  return {
+    isConnected: state.connectivity.isConnected,
+  }
+}
+
+export default connect(mapStateToProps, {})(OnStartupProvider)

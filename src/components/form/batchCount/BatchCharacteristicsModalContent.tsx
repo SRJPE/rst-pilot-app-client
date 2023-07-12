@@ -25,13 +25,25 @@ import RenderErrorMessage from '../../Shared/RenderErrorMessage'
 import MarkBadgeList from '../../markRecapture/MarkBadgeList'
 import CustomModal from '../../Shared/CustomModal'
 import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
+import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
 
 const initialFormValues = {
   species: '',
   adiposeClipped: false,
-  dead: false,
+  fishCondition: '',
   existingMarks: [],
 }
+const fishConditionTempValues = [
+  { id: 1, definition: 'Dark coloration' },
+  { id: 2, definition: 'Swimming abnormally' },
+  { id: 3, definition: 'Bulging eyes' },
+  { id: 4, definition: 'Pale gills' },
+  { id: 5, definition: 'Bulging abdomen' },
+  { id: 6, definition: 'Swollen/protruding vent' },
+  { id: 7, definition: 'Bloody eye' },
+  { id: 8, definition: 'Fungus' },
+  { id: 9, definition: 'none' },
+]
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -71,7 +83,7 @@ const BatchCharacteristicsModalContent = ({
   return (
     <ScrollView>
       <Formik
-        // validationSchema={}
+        validationSchema={batchCharacteristicsSchema}
         initialValues={initialFormValues}
         onSubmit={(values) => handleFormSubmit(values)}
       >
@@ -96,10 +108,10 @@ const BatchCharacteristicsModalContent = ({
                   mx='2'
                   px='10'
                   shadow='3'
-                  // isDisabled={
-                  //   (touched && Object.keys(touched).length === 0) ||
-                  //   (errors && Object.keys(errors).length > 0)
-                  // }
+                  isDisabled={
+                    (touched && Object.keys(touched).length === 0) ||
+                    (errors && Object.keys(errors).length > 0)
+                  }
                   onPress={() => {
                     handleSubmit()
                     closeModal()
@@ -117,28 +129,58 @@ const BatchCharacteristicsModalContent = ({
                 Please return to the individual fish input if you plan on
                 marking or sampling a fish.
               </Text>
-              <FormControl w='1/2' pr='5'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Species
-                  </Text>
-                </FormControl.Label>
+              <HStack>
+                <FormControl w='1/2' pr='5'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Species
+                    </Text>
+                  </FormControl.Label>
 
-                {touched.species &&
-                  errors.species &&
-                  RenderErrorMessage(errors, 'species')}
+                  {touched.species &&
+                    errors.species &&
+                    RenderErrorMessage(errors, 'species')}
 
-                <CustomSelect
-                  selectedValue={values.species}
-                  placeholder={'Species'}
-                  onValueChange={(value: any) => handleChange('species')(value)}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={reorderedTaxon.map((taxon: any) => ({
-                    label: taxon?.commonname,
-                    value: taxon?.commonname,
-                  }))}
-                />
-              </FormControl>
+                  <CustomSelect
+                    selectedValue={values.species}
+                    placeholder={'Species'}
+                    onValueChange={(value: any) =>
+                      handleChange('species')(value)
+                    }
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={reorderedTaxon.map((taxon: any) => ({
+                      label: taxon?.commonname,
+                      value: taxon?.commonname,
+                    }))}
+                  />
+                </FormControl>
+                <FormControl w='1/2' pr='5'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Fish Condition
+                    </Text>
+                  </FormControl.Label>
+
+                  {touched.fishCondition &&
+                    errors.fishCondition &&
+                    RenderErrorMessage(errors, 'fishCondition')}
+
+                  <CustomSelect
+                    selectedValue={values.fishCondition}
+                    placeholder={'Fish Condition'}
+                    onValueChange={(value: any) =>
+                      handleChange('fishCondition')(value)
+                    }
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={fishConditionTempValues.map(
+                      (condition: any) => ({
+                        label: condition?.definition,
+                        value: condition?.definition,
+                      })
+                    )}
+                  />
+                </FormControl>
+              </HStack>
 
               <HStack space={10}>
                 <VStack space={4} w={'20%'}>
@@ -178,46 +220,9 @@ const BatchCharacteristicsModalContent = ({
                       </Radio>
                     </Radio.Group>
                   </FormControl>
-
-                  <FormControl w='full'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Dead
-                      </Text>
-                    </FormControl.Label>
-                    <Radio.Group
-                      name='dead'
-                      accessibilityLabel='dead'
-                      value={`${values.dead}`}
-                      onChange={(value: any) => {
-                        if (value === 'true') {
-                          setFieldValue('dead', true)
-                        } else {
-                          setFieldValue('dead', false)
-                        }
-                      }}
-                    >
-                      <Radio
-                        colorScheme='primary'
-                        value='true'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        Yes
-                      </Radio>
-                      <Radio
-                        colorScheme='primary'
-                        value='false'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        No
-                      </Radio>
-                    </Radio.Group>
-                  </FormControl>
                 </VStack>
 
-                <VStack space={4} w={'120%'}>
+                <VStack space={4} w={'80%'}>
                   <Text color='black' fontSize='xl'>
                     Add Existing Mark
                   </Text>
@@ -225,22 +230,27 @@ const BatchCharacteristicsModalContent = ({
                     badgeListContent={batchCountStore.existingMarks}
                     setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
-                    field='existingMarks'
+                    field='batchCountExistingMarks'
                   />
-                  <Pressable onPress={() => setAddMarkModalOpen(true)}>
-                    <HStack alignItems='center'>
-                      <Icon
-                        as={Ionicons}
-                        name={'add-circle'}
-                        size='3xl'
-                        color='primary'
-                        marginRight='1'
-                      />
-                      <Text color='primary' fontSize='lg'>
-                        Add Another Mark
-                      </Text>
-                    </HStack>
-                  </Pressable>
+                  {batchCountStore.existingMarks.length < 1 && (
+                    <Pressable
+                      isDisabled={batchCountStore.existingMarks.length > 0}
+                      onPress={() => setAddMarkModalOpen(true)}
+                    >
+                      <HStack alignItems='center'>
+                        <Icon
+                          as={Ionicons}
+                          name={'add-circle'}
+                          size='3xl'
+                          color='primary'
+                          marginRight='1'
+                        />
+                        <Text color='primary' fontSize='lg'>
+                          Add Mark
+                        </Text>
+                      </HStack>
+                    </Pressable>
+                  )}
                 </VStack>
               </HStack>
             </VStack>

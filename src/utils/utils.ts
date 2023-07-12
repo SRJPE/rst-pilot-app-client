@@ -178,3 +178,9 @@ export const markBadgeLookup = {
     'not recorded': 'nr',
   },
 }
+
+export const getSubstring = (str: string, start: string, end: string): string => {
+  let char1 = str.indexOf(start) + 1
+  let char2 = str.lastIndexOf(end)
+  return str.substring(char1, char2)
+}

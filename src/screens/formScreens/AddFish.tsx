@@ -64,6 +64,18 @@ export interface ReleaseMarkI {
   markColor: number
 }
 
+const fishConditionTempValues = [
+  { id: 1, definition: 'Dark coloration' },
+  { id: 2, definition: 'Swimming abnormally' },
+  { id: 3, definition: 'Bulging eyes' },
+  { id: 4, definition: 'Pale gills' },
+  { id: 5, definition: 'Bulging abdomen' },
+  { id: 6, definition: 'Swollen/protruding vent' },
+  { id: 7, definition: 'Bloody eye' },
+  { id: 8, definition: 'Fungus' },
+  { id: 9, definition: 'none' },
+]
+
 const AddFishContent = ({
   route,
   saveIndividualFish,
@@ -220,6 +232,7 @@ const AddFishContent = ({
         required: true,
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
+      fishCondition: createFormValueDefault({ value: null }),
     },
     whenSpeciesSteelhead: {
       species: createFormValueDefault({ value: null, required: true }),
@@ -239,6 +252,7 @@ const AddFishContent = ({
         required: true,
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
+      fishCondition: createFormValueDefault({ value: null }),
     },
     whenSpeciesOther: {
       species: createFormValueDefault({ value: null, required: true }),
@@ -259,6 +273,7 @@ const AddFishContent = ({
         required: true,
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
+      fishCondition: createFormValueDefault({ value: null }),
     },
   }
 
@@ -296,6 +311,15 @@ const AddFishContent = ({
       ? stateDefaults.whenSpeciesChinook.run
       : createFormValueDefault({
           value: route.params?.editModeData.run,
+          touched: true,
+          required: false,
+        })
+  )
+  const [fishCondition, setFishCondition] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.fishCondition
+      : createFormValueDefault({
+          value: route.params?.editModeData.fishCondition,
           touched: true,
           required: false,
         })
@@ -363,6 +387,7 @@ const AddFishContent = ({
     count,
     forkLength,
     run,
+    fishCondition,
     weight,
     lifeStage,
     adiposeClipped,
@@ -377,6 +402,7 @@ const AddFishContent = ({
       count,
       forkLength,
       run,
+      fishCondition,
       weight,
       lifeStage,
       adiposeClipped,
@@ -417,6 +443,7 @@ const AddFishContent = ({
     setForkLength(stateDefaults[identifier].forkLength)
     setRun(stateDefaults[identifier].run)
     setWeight(stateDefaults[identifier].weight)
+    setFishCondition(stateDefaults[identifier].fishCondition)
     setLifeStage(stateDefaults[identifier].lifeStage)
     setAdiposeClipped(stateDefaults[identifier].adiposeClipped)
     setExistingMarks(stateDefaults[identifier].existingMarks)
@@ -475,6 +502,7 @@ const AddFishContent = ({
       species: species.value,
       forkLength: forkLength.value,
       run: run.value,
+      fishCondition: fishCondition.value,
       weight: weight.value,
       lifeStage: lifeStage.value,
       adiposeClipped: adiposeClipped.value,
@@ -889,6 +917,24 @@ const AddFishContent = ({
                       </FormControl>
                     )}
                   </HStack>
+                  <FormControl w='1/2' paddingRight='9'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Fish Condition
+                      </Text>
+                    </FormControl.Label>
+                    <CustomSelect
+                      selectedValue={fishCondition.value as string}
+                      placeholder={'Fish Condition'}
+                      onValueChange={(value: string) =>
+                        setFishCondition({ ...fishCondition, value })
+                      }
+                      setFieldTouched={() =>
+                        setFishCondition({ ...fishCondition, touched: true })
+                      }
+                      selectOptions={fishConditionTempValues}
+                    />
+                  </FormControl>
                   <HStack space={4} w='80%'>
                     {(species.value == 'Chinook salmon' ||
                       species.value == 'Steelhead / rainbow trout') && (
@@ -1034,7 +1080,7 @@ const AddFishContent = ({
                       </FormControl>
                     )}
                     <VStack space={6}>
-                      <FormControl w='2/3'>
+                      <FormControl>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
                             Dead
@@ -1282,7 +1328,7 @@ const AddFishContent = ({
                     formValues: payload,
                   })
                   showSlideAlert(dispatch, 'Fish')
-                  resetFormState('other')
+                  resetFormState('other') //ths needs explanation from Hunter
                 }
               }
             }}
