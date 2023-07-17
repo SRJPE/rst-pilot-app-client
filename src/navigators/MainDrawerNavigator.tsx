@@ -2,7 +2,6 @@ import { createDrawerNavigator } from '@react-navigation/drawer'
 import DrawerMenu from '../components/drawerMenu'
 import Home from '../screens/Home'
 import TrapVisitForm from './roots/TrapVisitFormRoot'
-import GenerateReport from '../screens/GenerateReport'
 import MarkRecaptureForm from './roots/MarkRecaptureFormRoot'
 import Profile from '../screens/accountScreens/Profile'
 import PermitInfo from '../screens/PermitInfo'
@@ -11,6 +10,7 @@ import { connect } from 'react-redux'
 import { RootState } from '../redux/store'
 import QCForm from './roots/QCFormRoot'
 import MonitoringProgram from './roots/MonitoringProgramRoot'
+import GenerateReport from './roots/GenerateReportRoot'
 
 const Drawer = createDrawerNavigator()
 
