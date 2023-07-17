@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
+import { uid } from 'uid'
 
 export interface CrewMembersInitialStateI {
   crewMembersStore: CrewMembersStoreI
@@ -20,6 +21,7 @@ export interface IndividualCrewMemberValuesI {
   isLead: boolean
   agency: string | null
   orcidId: string | null
+  uid: string
 }
 export const IndividualCrewMemberState: IndividualCrewMemberValuesI = {
   firstName: '',
@@ -29,6 +31,7 @@ export const IndividualCrewMemberState: IndividualCrewMemberValuesI = {
   isLead: false,
   agency: '',
   orcidId: '',
+  uid: '',
 }
 
 export const crewMembersSlice = createSlice({
@@ -46,13 +49,31 @@ export const crewMembersSlice = createSlice({
       } else {
         id = 0
       }
-      crewMembersStoreCopy[id] = { ...action.payload }
+      crewMembersStoreCopy[id] = { ...action.payload, uid: uid() }
       state.crewMembersStore = crewMembersStoreCopy
+    },
+    updateIndividualCrewMember: (state, action) => {
+      let trappingSitesStoreCopy = cloneDeep(state.crewMembersStore)
+      let id: any = null
+
+      for (let key in trappingSitesStoreCopy) {
+        if (trappingSitesStoreCopy[key].uid === action.payload.uid) {
+          id = key
+          trappingSitesStoreCopy[id] = {
+            ...action.payload,
+            uid: action.payload.uid,
+          }
+          state.crewMembersStore = trappingSitesStoreCopy
+        }
+      }
     },
   },
 })
 
-export const { resetCrewMembersSlice, saveIndividualCrewMember } =
-  crewMembersSlice.actions
+export const {
+  resetCrewMembersSlice,
+  saveIndividualCrewMember,
+  updateIndividualCrewMember,
+} = crewMembersSlice.actions
 
 export default crewMembersSlice.reducer

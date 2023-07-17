@@ -19,8 +19,10 @@ const headers = [
 
 const CrewMemberDataTable = ({
   crewMembersStore,
+  handleShowTableModal,
 }: {
   crewMembersStore: CrewMembersStoreI
+  handleShowTableModal: any
 }) => {
   const [processedData, setProcessedData] = useState([] as Array<any>)
 
@@ -50,8 +52,8 @@ const CrewMemberDataTable = ({
               // handleShowTableModal(trapObject)
             }
           >
-            {Object.values(trapObject).map((callValue: any, idx: number) => (
-              <DataTable.Cell key={idx}>{callValue.toString()}</DataTable.Cell>
+            {Object.values(trapObject).map((cellValue: any, idx: number) => (
+              <DataTable.Cell key={idx}>{cellValue.toString()}</DataTable.Cell>
             ))}
             <IconButton
               marginY={3}
@@ -59,7 +61,7 @@ const CrewMemberDataTable = ({
               bg='primary'
               colorScheme='primary'
               size='sm'
-              onPress={() => console.log('TRAP OBJECT ROW DATA: ', trapObject)}
+              onPress={() => handleShowTableModal(trapObject)}
             >
               <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
             </IconButton>

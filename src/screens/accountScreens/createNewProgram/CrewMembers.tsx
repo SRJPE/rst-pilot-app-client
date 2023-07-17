@@ -22,7 +22,10 @@ import AppLogo from '../../../components/Shared/AppLogo'
 import CrewMemberDataTable from '../../../components/createNewProgram/CrewMemberDataTable'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { saveIndividualCrewMember } from '../../../redux/reducers/createNewProgramSlices/crewMembersSlice'
+import {
+  IndividualCrewMemberState,
+  saveIndividualCrewMember,
+} from '../../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 
 export const sampleTeamLead = {
   //to be replaced when a logged in user is persisted
@@ -45,6 +48,9 @@ const CrewMembers = ({
   const [addCrewMemberModalOpen, setAddCrewMemberModalOpen] = useState(
     false as boolean
   )
+  const [addTrapModalContent, setAddTrapModalContent] = useState(
+    IndividualCrewMemberState as any
+  )
   const { firstName, lastName, phoneNumber, email } = sampleTeamLead
 
   const handleSaveTeamLeadInformation = () => {
@@ -55,6 +61,14 @@ const CrewMembers = ({
       orcidId,
     }
     dispatch(saveIndividualCrewMember(values))
+  }
+  const handleShowTableModal = (selectedRowData: any) => {
+    const modalDataContainer = {} as any
+    Object.keys(selectedRowData).forEach((key: string) => {
+      modalDataContainer[key] = selectedRowData[key].toString()
+    })
+    setAddTrapModalContent(modalDataContainer)
+    setAddCrewMemberModalOpen(true)
   }
 
   return (
@@ -134,7 +148,7 @@ const CrewMembers = ({
           </VStack>
         ) : (
           <ScrollView h={300}>
-            <CrewMemberDataTable />
+            <CrewMemberDataTable handleShowTableModal={handleShowTableModal} />
           </ScrollView>
         )}
         <Divider my='1%' />
@@ -163,6 +177,7 @@ const CrewMembers = ({
         height='70%'
       >
         <AddCrewMemberModalContent
+          addTrapModalContent={addTrapModalContent}
           closeModal={() => setAddCrewMemberModalOpen(false)}
         />
       </CustomModal>
