@@ -39,15 +39,19 @@ interface TrappingSitesSubmissionI {
   coneSizeFt: number
   xCoord: number
   yCoord: number
+  releaseSiteName: string
+  releaseSiteXCoord: number
+  releaseSiteYCoord: number
   coordinateSystem?: string
   projection?: string
   datum?: string
   gageNumber: number
-  gageAgency?: number
+  gageAgency: number
   comments?: string
   createdAt: Date
   updatedAt: Date
 }
+
 interface CrewMembersSubmissionI {
   firstName: string
   lastName: string
@@ -63,10 +67,10 @@ interface EfficiencyTrialProtocolsSubmissionI {
   hatcheryName: string
   streamName: string
   agreementId?: string
-  aggrementStartDate?: Date
-  aggrementEndDate?: Date
-  renewalDate?: Date
-  frequencyOfFishCollection: number
+  aggrementStartDate: Date
+  aggrementEndDate: Date
+  renewalDate: Date
+  frequencyOfFishCollection: number | null
   quantityOfFish: number
   hatcheryFileLink?: string
 }
@@ -76,7 +80,22 @@ interface TrappingProtocolsSubmissionI {
   run: number
   numberMeasured: number
 }
-interface PermitInformationSubmissionI {}
+interface PermitInformationSubmissionI {
+  streamName: string
+  permit_file_link?: string
+  permitStartDate: Date
+  permitEndDate: Date
+  flowThreshold: number
+  temperatureThreshold: number
+  frequencySamplingInclementWeather: number
+  expectedTakeAndMortality: Array<{
+    species: any
+    listingUnit: number
+    fishLifeStage: number
+    allowed_expected_take: number
+    allowed_mortality_count: number
+  }>
+}
 
 export interface MonitoringProgramSubmissionI {
   metaData: ProgramMetaDataSubmissionI
@@ -131,10 +150,6 @@ const CreateNewProgramHome = ({
       const metaData = handleSaveProgramMetaData()
       const trappingSites = handleSaveTrappingSites()
       const crewMembers = handleSaveCrewMembers()
-      console.log(
-        '🚀 ~ POSTMonitoringProgramSubmissions ~ crewMembers:',
-        crewMembers
-      )
       const efficiencyTrialProtocols = handleSaveEfficiencyTrialProtocols()
       const trappingProtocols = handleSaveTrappingProtocols()
       const permittingInformation = handleSavePermittingInformation()
@@ -159,7 +174,6 @@ const CreateNewProgramHome = ({
   }
 
   // Program Meta Data
-
   const handleSaveProgramMetaData = useCallback(() => {
     const { fundingAgency, monitoringProgramName, streamName } =
       createNewProgramHomeStore.values
@@ -183,7 +197,6 @@ const CreateNewProgramHome = ({
   }, [createNewProgramHomeStore])
 
   // Trapping Sites
-
   const handleSaveTrappingSites = useCallback(() => {
     const fundingAgencyValues = returnDefinitionArray(
       dropdownsState.values.fundingAgency
@@ -197,7 +210,7 @@ const CreateNewProgramHome = ({
           trapLatitude,
           trapLongitude,
           USGSStationNumber,
-          releaseSiteLatitude, // need to address release site information
+          releaseSiteLatitude,
           releaseSiteLongitude,
           releaseSiteName,
         } = trapSiteObj
@@ -215,14 +228,14 @@ const CreateNewProgramHome = ({
           releaseSiteName,
           releaseSiteXCoord: Number(releaseSiteLatitude),
           releaseSiteYCoord: Number(releaseSiteLongitude),
-          // coordinateSystem: 'VARCHAR(100)', //to be completed
-          // projection: 'VARCHAR(100)', //ignore for now ?release_site_projection
-          // datum: 'VARCHAR(100)', //ignore for now ?release_site_datum
+          // coordinateSystem: 'VARCHAR(100)', //ignore for now
+          // projection: 'VARCHAR(100)', //ignore for now - release_site_projection
+          // datum: 'VARCHAR(100)', //ignore for now - release_site_datum
           gageNumber: Number(USGSStationNumber),
           gageAgency:
             fundingAgencyValues.indexOf(
               createNewProgramHomeStore.values.fundingAgency
-            ) + 1, //'INTEGER REFERENCES agency', //to be completed
+            ) + 1,
           // comments: 'VARCHAR(500)', //to be completed
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -233,7 +246,6 @@ const CreateNewProgramHome = ({
   }, [trappingSitesStore])
 
   // Crew Members / Personnel / Program Personnel
-
   const handleSaveCrewMembers = useCallback(() => {
     const fundingAgencyValues = returnDefinitionArray(
       dropdownsState.values.fundingAgency
@@ -268,7 +280,6 @@ const CreateNewProgramHome = ({
   }, [crewMembersStore])
 
   // Efficiency Trial Protocols
-
   const handleSaveEfficiencyTrialProtocols = useCallback(() => {
     const {
       hatchery,
@@ -291,8 +302,9 @@ const CreateNewProgramHome = ({
         aggrementStartDate: agreementStartDate,
         aggrementEndDate: agreementEndDate,
         renewalDate: renewalDate,
-        frequencyOfFishCollection:
-          frequencyOfReceivingFishValues.indexOf(frequencyOfReceivingFish) + 1,
+        frequencyOfFishCollection: frequencyOfReceivingFishValues
+          ? frequencyOfReceivingFishValues.indexOf(frequencyOfReceivingFish) + 1
+          : null,
         quantityOfFish: Number(expectedNumberOfFishReceivedAtEachPickup),
         // hatcheryFileLink: 'VARCHAR(200)', //to be completed
       }
@@ -300,23 +312,23 @@ const CreateNewProgramHome = ({
     return efficiencyTrialProtocolsSubmission
   }, [efficiencyTrialProtocolsStore])
 
+  //
+  const returnTaxonCode = (speciesString: string) => {
+    let code: string = ''
+    dropdownsState.values.taxon.forEach((taxonValue: any) => {
+      if (
+        taxonValue.commonname
+          .toLowerCase()
+          .includes(speciesString.toLowerCase())
+      ) {
+        code = taxonValue.code
+      }
+    })
+    return code
+  }
+
   // Trapping Protocols
-
   const handleSaveTrappingProtocols = useCallback(() => {
-    const returnTaxonCode = (speciesString: string) => {
-      let code: string = ''
-      dropdownsState.values.taxon.forEach((taxonValue: any) => {
-        if (
-          taxonValue.commonname
-            .toLowerCase()
-            .includes(speciesString.toLowerCase())
-        ) {
-          code = taxonValue.code
-        }
-      })
-      return code
-    }
-
     const lifeStageValues = returnDefinitionArray(
       dropdownsState.values.lifeStage
     )
@@ -338,9 +350,7 @@ const CreateNewProgramHome = ({
   }, [trappingProtocolsStore])
 
   // Permitting Information
-
   const handleSavePermittingInformation = useCallback(() => {
-    //WORK IN PROGRESS permitting information does not currently account for multiple entries of take and mortality
     const {
       dateExpired,
       dateIssued,
@@ -352,37 +362,40 @@ const CreateNewProgramHome = ({
     const frequencyOfReceivingFishValues = returnDefinitionArray(
       dropdownsState.values.frequency
     )
-    const permittingInformationSubmission = {
-      // permit_id: 'VARCHAR(25)', //to be completed
+    const lifeStageValues = returnDefinitionArray(
+      dropdownsState.values.lifeStage
+    )
+    const listingUnitOrStockValues = returnDefinitionArray(
+      dropdownsState.values.listingUnit
+    )
+    const runValues = returnDefinitionArray(dropdownsState.values.run)
+    const permittingInformationSubmission: PermitInformationSubmissionI = {
       streamName: createNewProgramHomeStore.values.streamName,
+      // permit_file_link: 'VARCHAR(200)', //to be completed
       permitStartDate: dateIssued,
       permitEndDate: dateExpired,
       flowThreshold: Number(flowThreshold),
       temperatureThreshold: Number(waterTemperatureThreshold),
       frequencySamplingInclementWeather:
         frequencyOfReceivingFishValues.indexOf(trapCheckFrequency) + 1,
-      // permit_file_link: 'VARCHAR(200)', //to be completed
-
-      // expectedTakeAndMortality: Object.values(
-      //   permitInformationStore.takeAndMortalityValues
-      // ).map((takeAndMortalityObj: any) => {
-      //   console.log('🚀 ~ ).map ~ takeAndMortalityObj:', takeAndMortalityObj)
-
-      //   const {
-      //     expectedTake,
-      //     indirectMortality,
-      //     lifeStage,
-      //     listingUnitOrStock,
-      //     species,
-      //   } = takeAndMortalityObj
-      //   return {
-      //     species: 'VARCHAR(10) REFERENCES taxon (code)', //to be completed
-      //     listing_unit: 'INTEGER REFERENCES listing_unit', //to be completed
-      //     fish_life_stage: 'fish_life_stage_enum', //to be completed
-      //     allowed_expected_take: Number(expectedTake), //to be completed
-      //     allowed_mortality_count: Number(indirectMortality), //to be completed
-      //   }
-      // }),
+      expectedTakeAndMortality: Object.values(
+        permitInformationStore.takeAndMortalityValues
+      ).map((takeAndMortalityObj: any) => {
+        const {
+          expectedTake,
+          indirectMortality,
+          lifeStage,
+          listingUnitOrStock,
+          species,
+        } = takeAndMortalityObj
+        return {
+          species: returnTaxonCode(species),
+          listingUnit: listingUnitOrStockValues.indexOf(listingUnitOrStock) + 1,
+          fishLifeStage: lifeStageValues.indexOf(lifeStage) + 1,
+          allowed_expected_take: Number(expectedTake),
+          allowed_mortality_count: Number(indirectMortality),
+        }
+      }),
     }
 
     return permittingInformationSubmission
