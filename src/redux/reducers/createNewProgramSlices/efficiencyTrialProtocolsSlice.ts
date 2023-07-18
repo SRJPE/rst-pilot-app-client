@@ -10,6 +10,9 @@ export interface HatcheryInformationI {
   hatchery: string
   frequencyOfReceivingFish: string
   expectedNumberOfFishReceivedAtEachPickup: number | null
+  agreementStartDate: Date
+  agreementEndDate: Date
+  renewalDate: Date
 }
 export const initialState: EfficiencyTrialProtocolsInitialStateI = {
   efficiencyMonitoringProtocolsPDF: '',
@@ -18,6 +21,9 @@ export const initialState: EfficiencyTrialProtocolsInitialStateI = {
     hatchery: '',
     frequencyOfReceivingFish: '',
     expectedNumberOfFishReceivedAtEachPickup: null,
+    agreementStartDate: new Date(),
+    agreementEndDate: new Date(),
+    renewalDate: new Date(),
   },
 }
 
