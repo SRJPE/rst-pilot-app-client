@@ -21,7 +21,10 @@ import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
 import { Formik } from 'formik'
 import FormInputComponent from '../../../components/Shared/FormInputComponent'
-import { savePermitInformationValues } from '../../../redux/reducers/createNewProgramSlices/permitInformationSlice'
+import {
+  IndividualTakeAndMortalityState,
+  savePermitInformationValues,
+} from '../../../redux/reducers/createNewProgramSlices/permitInformationSlice'
 import { permittingInformationSchema } from '../../../utils/helpers/yupValidations'
 import CustomSelect from '../../../components/Shared/CustomSelect'
 
@@ -41,6 +44,19 @@ const PermittingInformationInput = ({
   )
   const [addTakeAndMortalityModalOpen, setAddTakeAndMortalityModalOpen] =
     useState(false as boolean)
+
+  const [addTakeAndMortalityModalContent, setAddTakeAndMortalityModalContent] =
+    useState(IndividualTakeAndMortalityState as any)
+
+  const handleShowTableModal = (selectedRowData: any) => {
+    const modalDataContainer = {} as any
+    Object.keys(selectedRowData).forEach((key: string) => {
+      modalDataContainer[key] = selectedRowData[key].toString()
+    })
+    setAddTakeAndMortalityModalContent(modalDataContainer)
+    setAddTakeAndMortalityModalOpen(true)
+  }
+
   const [dateIssued, setDateIssued] = useState(
     permitInformationStore.values.dateIssued as Date
   )
@@ -192,7 +208,9 @@ const PermittingInformationInput = ({
                 </Text>
               </VStack>
               <ScrollView h={150}>
-                <TakeAndMortalityDataTable />
+                <TakeAndMortalityDataTable
+                  handleShowTableModal={handleShowTableModal}
+                />
               </ScrollView>
               <Divider my='1%' />
               <VStack py='5%' px='10%' space={5}>
@@ -245,6 +263,7 @@ const PermittingInformationInput = ({
         height='1/2'
       >
         <AddTakeAndMortalityModalContent
+          addTakeAndMortalityModalContent={addTakeAndMortalityModalContent}
           closeModal={() => setAddTakeAndMortalityModalOpen(false)}
         />
       </CustomModal>
