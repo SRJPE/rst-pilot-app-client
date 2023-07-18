@@ -131,6 +131,10 @@ const CreateNewProgramHome = ({
       const metaData = handleSaveProgramMetaData()
       const trappingSites = handleSaveTrappingSites()
       const crewMembers = handleSaveCrewMembers()
+      console.log(
+        '🚀 ~ POSTMonitoringProgramSubmissions ~ crewMembers:',
+        crewMembers
+      )
       const efficiencyTrialProtocols = handleSaveEfficiencyTrialProtocols()
       const trappingProtocols = handleSaveTrappingProtocols()
       const permittingInformation = handleSavePermittingInformation()
@@ -198,7 +202,7 @@ const CreateNewProgramHome = ({
           releaseSiteName,
         } = trapSiteObj
         return {
-          trapName: trapName,
+          trapName,
           dataRecorderId: 14, //to be completed when a logged in user is persisted
           dataRecorderAgencyId:
             fundingAgencyValues.indexOf(
@@ -208,11 +212,17 @@ const CreateNewProgramHome = ({
           coneSizeFt: Number(coneSize),
           xCoord: Number(trapLatitude),
           yCoord: Number(trapLongitude),
+          releaseSiteName,
+          releaseSiteXCoord: Number(releaseSiteLatitude),
+          releaseSiteYCoord: Number(releaseSiteLongitude),
           // coordinateSystem: 'VARCHAR(100)', //to be completed
           // projection: 'VARCHAR(100)', //ignore for now ?release_site_projection
           // datum: 'VARCHAR(100)', //ignore for now ?release_site_datum
           gageNumber: Number(USGSStationNumber),
-          // gageAgency: 'INTEGER REFERENCES agency', //to be completed
+          gageAgency:
+            fundingAgencyValues.indexOf(
+              createNewProgramHomeStore.values.fundingAgency
+            ) + 1, //'INTEGER REFERENCES agency', //to be completed
           // comments: 'VARCHAR(500)', //to be completed
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -246,7 +256,7 @@ const CreateNewProgramHome = ({
         lastName,
         email,
         phone: phoneNumber,
-        agencyId: 8, //fundingAgencyValues.indexOf(agency) + 1, //fix lookup //to be completed
+        agencyId: fundingAgencyValues.indexOf(agency) + 1,
         role: isLead ? 'lead' : 'non-lead',
         orcidId: orcidId,
         createdAt: new Date(),
@@ -264,6 +274,9 @@ const CreateNewProgramHome = ({
       hatchery,
       frequencyOfReceivingFish,
       expectedNumberOfFishReceivedAtEachPickup,
+      agreementStartDate,
+      agreementEndDate,
+      renewalDate,
     } = efficiencyTrialProtocolsStore.values
 
     const frequencyOfReceivingFishValues = returnDefinitionArray(
@@ -275,12 +288,11 @@ const CreateNewProgramHome = ({
         hatcheryName: hatchery,
         streamName: createNewProgramHomeStore.values.streamName, //to be completed
         // agreementId: 'VARCHAR(25)', //to be completed
-        // aggrementStartDate: 'DATE', //fix typo in DB //to be completed
-        // aggrementEndDate: 'DATE', //fix typo in DB //to be completed
-        // renewalDate: 'DATE', //to be completed
+        aggrementStartDate: agreementStartDate,
+        aggrementEndDate: agreementEndDate,
+        renewalDate: renewalDate,
         frequencyOfFishCollection:
-          frequencyOfReceivingFishValues.indexOf(frequencyOfReceivingFish) +
-            1 || 5,
+          frequencyOfReceivingFishValues.indexOf(frequencyOfReceivingFish) + 1,
         quantityOfFish: Number(expectedNumberOfFishReceivedAtEachPickup),
         // hatcheryFileLink: 'VARCHAR(200)', //to be completed
       }
