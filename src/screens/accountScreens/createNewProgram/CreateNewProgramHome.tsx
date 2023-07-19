@@ -20,6 +20,7 @@ import {
   returnDefinitionArray,
   returnNullableTableId,
 } from '../../../utils/utils'
+import { GroupTrapSiteValuesI } from '../../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
 
 interface ProgramMetaDataSubmissionI {
   programName: string
@@ -67,10 +68,10 @@ interface EfficiencyTrialProtocolsSubmissionI {
   hatcheryName: string
   streamName: string
   agreementId?: string
-  aggrementStartDate: Date
-  aggrementEndDate: Date
+  agreementStartDate: Date
+  agreementEndDate: Date
   renewalDate: Date
-  frequencyOfFishCollection: number | null
+  frequencyOfFishCollection?: number | null
   quantityOfFish: number
   hatcheryFileLink?: string
 }
@@ -92,8 +93,8 @@ interface PermitInformationSubmissionI {
     species: any
     listingUnit: number
     fishLifeStage: number
-    allowed_expected_take: number
-    allowed_mortality_count: number
+    allowedExpectedTake: number
+    allowedMortalityCount: number
   }>
 }
 
@@ -101,13 +102,14 @@ export interface MonitoringProgramSubmissionI {
   metaData: ProgramMetaDataSubmissionI
   trappingSites: TrappingSitesSubmissionI[]
   crewMembers: CrewMembersSubmissionI[]
-  efficiencyTrialProtocols: EfficiencyTrialProtocolsSubmissionI
+  efficiencyTrialProtocols: EfficiencyTrialProtocolsSubmissionI[]
   trappingProtocols: TrappingProtocolsSubmissionI[]
-  permittingInformation: any
+  permittingInformation: PermitInformationSubmissionI[]
 }
 const CreateNewProgramHome = ({
   createNewProgramHomeStore,
   trappingSitesStore,
+  multipleTrapsStore,
   crewMembersStore,
   efficiencyTrialProtocolsStore,
   trappingProtocolsStore,
@@ -118,6 +120,7 @@ const CreateNewProgramHome = ({
 }: {
   createNewProgramHomeStore: CreateNewProgramInitialStateI
   trappingSitesStore: TrappingSitesStoreI
+  multipleTrapsStore: GroupTrapSiteValuesI
   crewMembersStore: CrewMembersStoreI
   efficiencyTrialProtocolsStore: EfficiencyTrialProtocolsInitialStateI
   trappingProtocolsStore: TrappingProtocolsStoreI
@@ -201,7 +204,6 @@ const CreateNewProgramHome = ({
     const fundingAgencyValues = returnDefinitionArray(
       dropdownsState.values.fundingAgency
     )
-    console.log('🚀 ~ Object.values ~ trappingSitesStore:', trappingSitesStore)
     const trappingSitesSubmission: Array<TrappingSitesSubmissionI> =
       Object.values(trappingSitesStore).map((trapSiteObj: any) => {
         const {
@@ -214,6 +216,14 @@ const CreateNewProgramHome = ({
           releaseSiteLongitude,
           releaseSiteName,
         } = trapSiteObj
+        let groupSiteName: any = null
+
+        Object.values(multipleTrapsStore).forEach((trapSiteGroup: any) => {
+          if (trapSiteGroup.groupItems.includes(trapName)) {
+            groupSiteName = trapSiteGroup.trapSiteName
+          }
+        })
+
         return {
           trapName,
           dataRecorderId: 14, //to be completed when a logged in user is persisted
@@ -221,7 +231,7 @@ const CreateNewProgramHome = ({
             fundingAgencyValues.indexOf(
               createNewProgramHomeStore.values.fundingAgency
             ) + 1,
-          siteName: trapName, //to be completed
+          siteName: groupSiteName,
           coneSizeFt: Number(coneSize),
           xCoord: Number(trapLatitude),
           yCoord: Number(trapLongitude),
@@ -243,7 +253,7 @@ const CreateNewProgramHome = ({
       })
 
     return trappingSitesSubmission
-  }, [trappingSitesStore])
+  }, [trappingSitesStore, multipleTrapsStore])
 
   // Crew Members / Personnel / Program Personnel
   const handleSaveCrewMembers = useCallback(() => {
@@ -293,23 +303,27 @@ const CreateNewProgramHome = ({
     const frequencyOfReceivingFishValues = returnDefinitionArray(
       dropdownsState.values.frequency
     )
+    if (hatchery === '') {
+      return []
+    } else {
+      const efficiencyTrialProtocolsSubmission: EfficiencyTrialProtocolsSubmissionI =
+        {
+          hatcheryName: hatchery,
+          streamName: createNewProgramHomeStore.values.streamName, //to be completed
+          // agreementId: 'VARCHAR(25)', //to be completed
+          agreementStartDate: agreementStartDate,
+          agreementEndDate: agreementEndDate,
+          renewalDate: renewalDate,
+          frequencyOfFishCollection: frequencyOfReceivingFishValues
+            ? frequencyOfReceivingFishValues.indexOf(frequencyOfReceivingFish) +
+              1
+            : null,
+          quantityOfFish: Number(expectedNumberOfFishReceivedAtEachPickup),
+          // hatcheryFileLink: 'VARCHAR(200)', //to be completed
+        }
 
-    const efficiencyTrialProtocolsSubmission: EfficiencyTrialProtocolsSubmissionI =
-      {
-        hatcheryName: hatchery,
-        streamName: createNewProgramHomeStore.values.streamName, //to be completed
-        // agreementId: 'VARCHAR(25)', //to be completed
-        aggrementStartDate: agreementStartDate,
-        aggrementEndDate: agreementEndDate,
-        renewalDate: renewalDate,
-        frequencyOfFishCollection: frequencyOfReceivingFishValues
-          ? frequencyOfReceivingFishValues.indexOf(frequencyOfReceivingFish) + 1
-          : null,
-        quantityOfFish: Number(expectedNumberOfFishReceivedAtEachPickup),
-        // hatcheryFileLink: 'VARCHAR(200)', //to be completed
-      }
-
-    return efficiencyTrialProtocolsSubmission
+      return [efficiencyTrialProtocolsSubmission]
+    }
   }, [efficiencyTrialProtocolsStore])
 
   //
@@ -369,36 +383,42 @@ const CreateNewProgramHome = ({
       dropdownsState.values.listingUnit
     )
     const runValues = returnDefinitionArray(dropdownsState.values.run)
-    const permittingInformationSubmission: PermitInformationSubmissionI = {
-      streamName: createNewProgramHomeStore.values.streamName,
-      // permit_file_link: 'VARCHAR(200)', //to be completed
-      permitStartDate: dateIssued,
-      permitEndDate: dateExpired,
-      flowThreshold: Number(flowThreshold),
-      temperatureThreshold: Number(waterTemperatureThreshold),
-      frequencySamplingInclementWeather:
-        frequencyOfReceivingFishValues.indexOf(trapCheckFrequency) + 1,
-      expectedTakeAndMortality: Object.values(
-        permitInformationStore.takeAndMortalityValues
-      ).map((takeAndMortalityObj: any) => {
-        const {
-          expectedTake,
-          indirectMortality,
-          lifeStage,
-          listingUnitOrStock,
-          species,
-        } = takeAndMortalityObj
-        return {
-          species: returnTaxonCode(species),
-          listingUnit: listingUnitOrStockValues.indexOf(listingUnitOrStock) + 1,
-          fishLifeStage: lifeStageValues.indexOf(lifeStage) + 1,
-          allowed_expected_take: Number(expectedTake),
-          allowed_mortality_count: Number(indirectMortality),
-        }
-      }),
-    }
 
-    return permittingInformationSubmission
+    if (flowThreshold === null) {
+      return []
+    } else {
+      const permittingInformationSubmission: PermitInformationSubmissionI = {
+        streamName: createNewProgramHomeStore.values.streamName,
+        // permit_file_link: 'VARCHAR(200)', //to be completed
+        permitStartDate: dateIssued,
+        permitEndDate: dateExpired,
+        flowThreshold: Number(flowThreshold),
+        temperatureThreshold: Number(waterTemperatureThreshold),
+        frequencySamplingInclementWeather:
+          frequencyOfReceivingFishValues.indexOf(trapCheckFrequency) + 1,
+        expectedTakeAndMortality: Object.values(
+          permitInformationStore.takeAndMortalityValues
+        ).map((takeAndMortalityObj: any) => {
+          const {
+            expectedTake,
+            indirectMortality,
+            lifeStage,
+            listingUnitOrStock,
+            species,
+          } = takeAndMortalityObj
+          return {
+            species: returnTaxonCode(species),
+            listingUnit:
+              listingUnitOrStockValues.indexOf(listingUnitOrStock) + 1,
+            fishLifeStage: lifeStageValues.indexOf(lifeStage) + 1,
+            allowedExpectedTake: Number(expectedTake),
+            allowedMortalityCount: Number(indirectMortality),
+          }
+        }),
+      }
+
+      return [permittingInformationSubmission]
+    }
   }, [permitInformationStore])
 
   return (
@@ -473,6 +493,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     createNewProgramHomeStore: state.createNewProgramHome,
     trappingSitesStore: state.trappingSites.trappingSitesStore,
+    multipleTrapsStore: state.multipleTraps.groupTrapSiteValues,
     crewMembersStore: state.crewMembers.crewMembersStore,
     efficiencyTrialProtocolsStore: state.efficiencyTrialProtocols,
     trappingProtocolsStore: state.trappingProtocols.trappingProtocolsStore,
