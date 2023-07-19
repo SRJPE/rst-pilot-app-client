@@ -33,17 +33,6 @@ const initialFormValues = {
   fishCondition: '',
   existingMarks: [],
 }
-const fishConditionTempValues = [
-  { id: 1, definition: 'Dark coloration' },
-  { id: 2, definition: 'Swimming abnormally' },
-  { id: 3, definition: 'Bulging eyes' },
-  { id: 4, definition: 'Pale gills' },
-  { id: 5, definition: 'Bulging abdomen' },
-  { id: 6, definition: 'Swollen/protruding vent' },
-  { id: 7, definition: 'Bloody eye' },
-  { id: 8, definition: 'Fungus' },
-  { id: 9, definition: 'none' },
-]
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -172,7 +161,7 @@ const BatchCharacteristicsModalContent = ({
                       handleChange('fishCondition')(value)
                     }
                     setFieldTouched={setFieldTouched}
-                    selectOptions={fishConditionTempValues.map(
+                    selectOptions={dropdownValues.fishCondition.map(
                       (condition: any) => ({
                         label: condition?.definition,
                         value: condition?.definition,
