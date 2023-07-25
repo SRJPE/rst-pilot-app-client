@@ -18,8 +18,10 @@ const headers = [
 
 const TakeAndMortalityDataTable = ({
   takeAndMortalityValuesStore,
+  handleShowTableModal,
 }: {
   takeAndMortalityValuesStore: TakeAndMortalityValuesI
+  handleShowTableModal?: any
 }) => {
   const [processedData, setProcessedData] = useState(
     [] as Array<IndividualTrappingSiteValuesI>
@@ -62,9 +64,10 @@ const TakeAndMortalityDataTable = ({
               bg='primary'
               colorScheme='primary'
               size='sm'
-              onPress={() =>
+              onPress={() => {
                 console.log('TRAP OBJECT ROW DATA: ', trappingProtocolObject)
-              }
+                handleShowTableModal(trappingProtocolObject)
+              }}
             >
               <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
             </IconButton>
