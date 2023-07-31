@@ -35,11 +35,13 @@ function PartialRecordsQC({
   route,
   qcCatchRawSubmissions,
   releaseSites,
+  programs,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any
   releaseSites: any[]
+  programs: any[]
 }) {
   const [qcData, setQCData] = useState<any[]>([])
   const [percentNotRecordedData, setPercentNotRecorded] = useState<any[]>([])
@@ -74,6 +76,9 @@ function PartialRecordsQC({
       'qcCompletedBy',
       'qcTime',
       'markedForRelease',
+      'isRandom',
+      'plusCount',
+      'plusCountMethodology',
     ]
 
     qcData.forEach((catchResponse) => {
@@ -289,9 +294,6 @@ function PartialRecordsQC({
                   dead
                 </DataTable.Title>
                 <DataTable.Title style={{ justifyContent: 'center' }}>
-                  interpolated
-                </DataTable.Title>
-                <DataTable.Title style={{ justifyContent: 'center' }}>
                   count
                 </DataTable.Title>
                 <DataTable.Title style={{ justifyContent: 'center' }}>
@@ -307,6 +309,7 @@ function PartialRecordsQC({
                   ({ createdCatchRawResponse, releaseResponse }, idx) => {
                     // Nested Modal Form Values
                     const catchRawId = createdCatchRawResponse.id
+                    const programId = createdCatchRawResponse.programId
                     const createdAt = createdCatchRawResponse.createdAt
                       ? new Date(
                           createdCatchRawResponse.createdAt
@@ -320,6 +323,8 @@ function PartialRecordsQC({
                     const dead = `${createdCatchRawResponse.dead ?? 'NA'}`
                     const numFishCaught =
                       createdCatchRawResponse.numFishCaught ?? 'NA'
+                    const program = programs.filter((program) => programId === program.id)
+                    const stream = program ? program[0].streamName : 'NA'
                     let releaseSiteObj = releaseSites.filter((releaseSite) => {
                       return releaseSite.id === releaseResponse.releaseSiteId
                     })[0]
@@ -547,13 +552,6 @@ function PartialRecordsQC({
                           {dead}
                         </DataTable.Cell>
                         <DataTable.Cell
-                          onPress={() => console.log('cell clicked')}
-                          style={{ justifyContent: 'center' }}
-                          numeric
-                        >
-                          interpolated
-                        </DataTable.Cell>
-                        <DataTable.Cell
                           onPress={() =>
                             handleOpenNestedModal({
                               catchRawId,
@@ -607,7 +605,7 @@ function PartialRecordsQC({
                           style={{ justifyContent: 'center' }}
                           numeric
                         >
-                          stream
+                          {stream}
                         </DataTable.Cell>
                         <DataTable.Cell
                           onPress={() =>
@@ -753,6 +751,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
     releaseSites: state.visitSetupDefaults.releaseSites,
+    programs: state.visitSetupDefaults.programs
   }
 }
 
