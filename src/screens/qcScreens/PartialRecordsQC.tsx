@@ -80,7 +80,6 @@ function PartialRecordsQC({
       const catchRaw = catchResponse.createdCatchRawResponse
       const catchRawKeys = Object.keys(catchRaw)
 
-      // Logic for formattedData[key] is not working
       catchRawKeys.forEach((key) => {
         if (!omittedPartialRecordKeys.includes(key)) {
           if (
