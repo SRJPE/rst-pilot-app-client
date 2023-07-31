@@ -70,7 +70,6 @@ const GraphModalContent = ({
 
       console.log('dataAtId', dataAtId)
     })
-    console.log('bruh - ', modalDataAtPointClicked)
     setPayload(modalDataAtPointClicked)
   }, [modalData, pointClicked])
 
