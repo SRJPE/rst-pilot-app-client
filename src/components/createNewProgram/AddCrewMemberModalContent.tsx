@@ -80,7 +80,6 @@ const AddCrewMemberModalContent = ({ closeModal }: { closeModal: any }) => {
               </Button>
             }
           />
-          <Divider my='1%' thickness='3' />
           <VStack mx='5%' my='2%' space={4}>
             <FormControl>
               <FormControl.Label>

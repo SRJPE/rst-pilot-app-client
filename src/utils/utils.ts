@@ -184,3 +184,7 @@ export const getSubstring = (str: string, start: string, end: string): string =>
   let char2 = str.lastIndexOf(end)
   return str.substring(char1, char2)
 }
+
+export function GaussKDE(xi: number, x: number) {
+  return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(Math.pow(xi - x, 2) / -2)
+}

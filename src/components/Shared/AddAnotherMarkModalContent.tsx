@@ -101,7 +101,6 @@ const AddAnotherMarkModalContent = ({
               </Button>
             }
           />
-          <Divider my={2} thickness='3' />
           <View>
             <VStack space={6} paddingX='10' paddingTop='7' paddingBottom='3'>
               <FormControl>

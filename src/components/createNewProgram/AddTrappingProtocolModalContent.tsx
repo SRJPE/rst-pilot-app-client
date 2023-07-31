@@ -75,7 +75,6 @@ const AddTrappingProtocolModalContent = ({
               </Button>
             }
           />
-          <Divider my='1%' thickness='3' />
           <VStack mx='5%' my='2%' space={6}>
             <HStack justifyContent='space-around'>
               <FormControl w='45%'>

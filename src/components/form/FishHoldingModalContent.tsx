@@ -176,7 +176,6 @@ const FishHoldingModalContent = ({
         }
       />
       <>
-        <Divider my={2} thickness='3' />
         <VStack
           alignItems='center'
           paddingX='10'

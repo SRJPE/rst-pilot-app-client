@@ -100,7 +100,6 @@ const AddGeneticsModalContent = ({
               }
             />
             <>
-              <Divider my={2} thickness='3' />
               <VStack paddingX='10' paddingTop='3' paddingBottom='10'>
                 <HStack justifyContent='space-between' marginBottom='5'>
                   <Button

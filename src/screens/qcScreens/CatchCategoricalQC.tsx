@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { Button, HStack, View, VStack, Text, ScrollView } from 'native-base'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
-import { RootState } from '../../redux/store'
-import { connect } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/store'
+import { connect, useDispatch } from 'react-redux'
+import CustomModal from '../../components/Shared/CustomModal'
+import GraphModalContent from '../../components/Shared/GraphModalContent'
+import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
 interface GraphDataI {
   'Adipose Clipped': any[]
@@ -23,6 +26,7 @@ function CatchCategoricalQC({
   qcCatchRawSubmissions: any
   taxon: any
 }) {
+  const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
     ('Adipose Clipped' | 'Species' | 'Marks' | 'Mortalities')[]
   >(['Adipose Clipped'])
@@ -75,12 +79,12 @@ function CatchCategoricalQC({
       })[0].commonname
 
       if (id) {
-        if (adiposeClipped) {
+        if (adiposeClipped != null) {
           adiposeClippedData.push({
             id,
             x: idx + 1,
-            y: adiposeClipped ? 1 : 0,
-            colorScale: qcCompleted ? 'red' : undefined,
+            y: adiposeClipped ? 2 : 1,
+            colorScale: qcNotStarted ? 'red' : undefined,
           })
         }
 
@@ -126,7 +130,7 @@ function CatchCategoricalQC({
             })
           })
         }
-
+        
         if (dead) {
           let speciesAlreadyExistsIdx = null
           let speciesAlreadyExists = deadData.filter(
@@ -166,6 +170,29 @@ function CatchCategoricalQC({
     })
   }, [qcCatchRawSubmissions])
 
+  const handlePointClick = (datum: any) => {
+    console.log('point clicked: ', datum)
+    setPointClicked(datum)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setPointClicked(null)
+  }
+
+  const handleModalSubmit = (submission: any) => {
+    if (pointClicked) {
+      const ids = Object.keys(submission).map((key: string) => {
+        if (submission[key]) {
+          return submission[key]['id']
+        }
+      })
+      const catchRawId = ids.find((val) => Boolean(Number(val)))
+      dispatch(catchRawQCSubmission({ catchRawId, submission }))
+    }
+  }
+
   const GraphMenuButton = ({
     buttonName,
   }: {
@@ -196,6 +223,13 @@ function CatchCategoricalQC({
         </Text>
       </Button>
     )
+  }
+
+  const buttonNameToChatType = {
+    'Adipose Clipped': 'true-or-false',
+    Species: 'bar',
+    Marks: 'bar',
+    Mortalities: 'bar',
   }
 
   return (
@@ -230,7 +264,8 @@ function CatchCategoricalQC({
               return (
                 <Graph
                   key={buttonName}
-                  chartType='bar'
+                  chartType={buttonNameToChatType[buttonName] as any}
+                  onPointClick={(datum) => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
                   title={buttonName}
@@ -277,6 +312,36 @@ function CatchCategoricalQC({
           </HStack>
         </VStack>
       </View>
+      {pointClicked ? (
+        <CustomModal
+          isOpen={isModalOpen}
+          closeModal={() => handleCloseModal()}
+          height='1/2'
+        >
+          <GraphModalContent
+            closeModal={() => handleCloseModal()}
+            pointClicked={pointClicked}
+            onSubmit={(submission: any) => handleModalSubmit(submission)}
+            headerText={'Table of Selected Points'}
+            modalData={graphData}
+            dataFormatter={(header, dataAtId) => {
+              // 'Adipose Clipped' | 'Species' | 'Marks' | 'Mortalities'
+              if (header === 'Adipose Clipped') {
+                if (dataAtId.y === 1) return 'false'
+                if (dataAtId.y === 2) return 'true'
+              }
+              else if (header === 'Species') {
+                return dataAtId.label
+              }
+              else {
+                return dataAtId.y
+              }
+            }}
+          />
+        </CustomModal>
+      ) : (
+        <></>
+      )}
     </>
   )
 }

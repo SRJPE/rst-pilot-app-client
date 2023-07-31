@@ -11,7 +11,7 @@ import {
 } from 'victory-native'
 
 interface ZoomDomainI {
-  x?: any,
+  x?: any
   y?: any
 }
 
@@ -28,7 +28,7 @@ export default function Graph({
   timeBased,
   zoomDomain,
 }: {
-  chartType: 'bar' | 'line'
+  chartType: 'bar' | 'line' | 'true-or-false'
   title?: string
   data: any
   height: number
@@ -101,42 +101,90 @@ export default function Graph({
         return (
           <VictoryLine
             data={data}
-            style={{
-              data: {
-                fill: (props) => {
-                  return barColor
-                  // if (Object.keys(props.datum).includes('colorScale')) {
-                  //   return props.datum.colorScale
-                  //     ? props.datum.colorScale
-                  //     : barColor
-                  // } else {
-                  //   return barColor
-                  // }
-                },
-              },
-            }}
+            interpolation='natural'
             x='x'
             y='y'
+            // style={{
+            //   data: {
+            //     fill: (props) => {
+            //       return props.datum.colorScale
+            //         ? props.datum.colorScale
+            //         : barColor
+            //     },
+            //   },
+            // }}
             events={[
               {
                 target: 'data',
                 eventHandlers: {
                   onPressIn: (event, data) => {
                     return [
+                      // {
+                      //   target: 'data',
+                      //   eventKey: 'all',
+                      //   mutation: (props) => {
+                      //     // const fill = props.style?.fill
+                      //     // return fill === barColor
+                      //     //   ? null
+                      //     //   : { style: { fill: barColor } }
+                      //   },
+                      // },
                       {
                         target: 'data',
-                        eventKey: 'all',
                         mutation: (props) => {
+                          console.log('data.datum', data.datum)
+                          console.log('props', props)
+                          // handlePointClick(data.datum)
                           // const fill = props.style?.fill
-                          // return fill === barColor
+                          // return fill === selectedBarColor
                           //   ? null
-                          //   : { style: { fill: barColor } }
+                          //   : { style: { fill: selectedBarColor } }
                         },
                       },
+                    ]
+                  },
+                },
+              },
+            ]}
+          />
+        )
+      case 'true-or-false':
+        return (
+          <VictoryScatter
+            data={data}
+            x='x'
+            y='y'
+            style={{
+              data: {
+                fill: (props) => {
+                  return props.datum.colorScale
+                    ? props.datum.colorScale
+                    : barColor
+                },
+              },
+            }}
+            events={[
+              {
+                target: 'data',
+                eventHandlers: {
+                  onPressIn: (event, data) => {
+                    return [
+                      // {
+                      //   target: 'data',
+                      //   eventKey: 'all',
+                      //   mutation: (props) => {
+                      //     // const fill = props.style?.fill
+                      //     // return fill === barColor
+                      //     //   ? null
+                      //     //   : { style: { fill: barColor } }
+                      //   },
+                      // },
                       {
                         target: 'data',
                         mutation: (props) => {
-                          // handlePointClick(data.datum)
+                          console.log('data.datum', data.datum)
+                          console.log('props', props)
+                          handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor
                           //   ? null
@@ -164,7 +212,13 @@ export default function Graph({
         scale={timeBased ? { x: 'time', y: 'linear' } : undefined}
         containerComponent={
           <VictoryZoomContainer
-            zoomDomain={zoomDomain ? zoomDomain : { y: [0, 50] }}
+            zoomDomain={
+              chartType === 'true-or-false'
+                ? { y: [0, 2.5] }
+                : zoomDomain
+                ? zoomDomain
+                : { y: [0, 50] }
+            }
             zoomDimension='x'
           />
         }
@@ -184,55 +238,69 @@ export default function Graph({
           dependentAxis
           // fixLabelOverlap={true}
           tickFormat={(value) => {
-            return `${value}`
+            if (chartType === 'true-or-false') {
+              if (value === 1) {
+                return 'false'
+              } else if (value === 2) {
+                return 'true'
+              } else {
+                return ''
+              }
+            } else {
+              return `${value}`
+            }
           }}
         />
         {chartTypeComponent()}
-        <VictoryScatter
-          data={data}
-          style={{
-            data: {
-              fill: (props) => {
-                return props.datum.colorScale
-                  ? props.datum.colorScale
-                  : barColor
-              },
-            },
-          }}
-          x='x'
-          y='y'
-          events={[
-            {
-              target: 'data',
-              eventHandlers: {
-                onPressIn: (event, data) => {
-                  return [
-                    {
-                      target: 'data',
-                      eventKey: 'all',
-                      mutation: (props) => {
-                        // const fill = props.style?.fill
-                        // return fill === barColor
-                        //   ? null
-                        //   : { style: { fill: barColor } }
-                      },
-                    },
-                    {
-                      target: 'data',
-                      mutation: (props) => {
-                        handlePointClick(data.datum)
-                        // const fill = props.style?.fill
-                        // return fill === selectedBarColor
-                        //   ? null
-                        //   : { style: { fill: selectedBarColor } }
-                      },
-                    },
-                  ]
+        {chartType === 'bar' ? (
+          <VictoryScatter
+            data={data}
+            style={{
+              data: {
+                fill: (props) => {
+                  return props.datum.colorScale
+                    ? props.datum.colorScale
+                    : barColor
                 },
               },
-            },
-          ]}
-        />
+            }}
+            x='x'
+            y='y'
+            events={[
+              {
+                target: 'data',
+                eventHandlers: {
+                  onPressIn: (event, data) => {
+                    return [
+                      {
+                        target: 'data',
+                        eventKey: 'all',
+                        mutation: (props) => {
+                          // const fill = props.style?.fill
+                          // return fill === barColor
+                          //   ? null
+                          //   : { style: { fill: barColor } }
+                        },
+                      },
+                      {
+                        target: 'data',
+                        mutation: (props) => {
+                          handlePointClick(data.datum)
+                          // const fill = props.style?.fill
+                          // return fill === selectedBarColor
+                          //   ? null
+                          //   : { style: { fill: selectedBarColor } }
+                        },
+                      },
+                    ]
+                  },
+                },
+              },
+            ]}
+          />
+        ) : (
+          <></>
+        )}
       </VictoryChart>
     </View>
   )
