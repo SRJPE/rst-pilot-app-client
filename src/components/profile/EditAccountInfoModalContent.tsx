@@ -44,7 +44,6 @@ const EditAccountInfoModalContent = ({ closeModal }: { closeModal: any }) => {
         //   </Button>
         // }
       />
-      <Divider my={2} thickness='3' />
       <VStack space={5} m='5%'>
         <FormControl>
           <HStack space={4} alignItems='center'>

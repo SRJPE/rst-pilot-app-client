@@ -112,7 +112,6 @@ const BatchCharacteristicsModalContent = ({
                 </Button>
               }
             />
-            <Divider my={2} thickness='3' />
             <VStack px='5%' space={4}>
               <Text justifyContent='center' fontSize='lg'>
                 Please return to the individual fish input if you plan on

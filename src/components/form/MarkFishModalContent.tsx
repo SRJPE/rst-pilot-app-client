@@ -102,7 +102,6 @@ const MarkFishModalContent = ({
               }
             />
             <>
-              <Divider my={2} thickness='3' />
               <VStack space={5} paddingX='10' paddingTop='7' paddingBottom='3'>
                 <FormControl>
                   <HStack space={4} alignItems='center'>

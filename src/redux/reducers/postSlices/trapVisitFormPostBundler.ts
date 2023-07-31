@@ -181,7 +181,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
 export const fetchPreviousTrapAndCatch = createAsyncThunk(
   'trapVisitPostBundler/fetchPreviousTrapAndCatch',
   async (_, thunkAPI) => {
-    const programIds = [5]
+    const programIds = [1]
     // ^ hard coded value to be updated to user's program ids ^
     const previousTrapVisits: any[] = []
     const previousCatchRaw: any[] = []

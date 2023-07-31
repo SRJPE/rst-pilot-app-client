@@ -7,6 +7,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import CustomModal from '../../components/Shared/CustomModal'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { GaussKDE } from '../../utils/utils'
 
 interface GraphDataI {
   'Fork Length': any[]
@@ -36,40 +37,78 @@ function CatchMeasureQC({
   useEffect(() => {
     const previousCatchRaw = route.params.previousCatchRaw
     const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
-    let forkLengthData: any[] = []
-    let weightData: any[] = []
+
+    let N = qcData.length
+    let range: number | null = null
+    let startPoint: number | null = null
     
-
-    qcData.forEach((catchResponse: any, idx: number) => {
-      const catchRawId: number = catchResponse.createdCatchRawResponse.id
-      const qcCompleted: any = catchResponse.createdCatchRawResponse.qcCompleted
-      const qcNotStarted: boolean = qcCompleted ? false : true
-
-      let forkLength = catchResponse.createdCatchRawResponse.forkLength
-      let weight = catchResponse.createdCatchRawResponse.weight
-
-      if (forkLength && catchRawId) {
-        forkLengthData.push({
-          id: catchRawId,
-          x: idx + 1,
-          y: Number(forkLength),
-          colorScale: qcNotStarted ? 'red' : undefined,
-        })
+    // Fork Length Calculations
+    let xiDataOne: any[] = []
+    const forkLengthArray: any[] = qcData.map((catchRawResponse) => {
+      return Number(catchRawResponse.createdCatchRawResponse.forkLength)
+    })
+    startPoint = Math.min(...forkLengthArray)
+    range = Math.max(...forkLengthArray) - startPoint
+    for (let i = 0; i < range; i++) {
+      xiDataOne[i] = startPoint + i
+    }
+    const forkLengthPayload: any[] = []
+    for (let i = 0; i < xiDataOne.length; i++) {
+      let forkLength = 0
+      qcData.forEach((catchRawResponse) => {
+        forkLength =
+          forkLength +
+          GaussKDE(
+            xiDataOne[i],
+            catchRawResponse.createdCatchRawResponse.forkLength
+          )
+        forkLengthPayload.push([xiDataOne[i], (1 / N) * forkLength])
+      })
+    }
+    let forkLengthGraphData = forkLengthPayload.map((arr) => {
+      let x = arr[0]
+      let y = arr[1]
+      return {
+        x,
+        y,
       }
+    })
 
-      if (weight && catchRawId) {
-        weightData.push({
-          id: catchRawId,
-          x: idx + 1,
-          y: Number(weight),
-          colorScale: qcNotStarted ? 'red' : undefined,
-        })
+    // Weight Calculations
+    let xiDataTwo: any[] = []
+    const weightArray: any[] = qcData.map((catchRawResponse) => {
+      return Number(catchRawResponse.createdCatchRawResponse.weight)
+    })
+    startPoint = Math.min(...weightArray)
+    range = Math.max(...weightArray) - startPoint
+    for (let i = 0; i < range; i++) {
+      xiDataTwo[i] = startPoint + i
+    }
+    const weightPayload: any[] = []
+    for (let i = 0; i < xiDataTwo.length; i++) {
+      let weight = 0
+      qcData.forEach((catchRawResponse) => {
+        weight =
+          weight +
+          GaussKDE(
+            xiDataTwo[i],
+            catchRawResponse.createdCatchRawResponse.weight
+          )
+        weightPayload.push([xiDataTwo[i], (1 / N) * weight])
+      })
+    }
+    let weightGraphData = weightPayload.map((arr) => {
+      let x = arr[0]
+      let y = arr[1]
+      return {
+        x,
+        y,
       }
     })
 
     setGraphData({
-      'Fork Length': forkLengthData,
-      Weight: weightData,
+      'Fork Length': forkLengthGraphData,
+      Weight: weightGraphData,
     })
   }, [qcCatchRawSubmissions])
 
@@ -155,7 +194,8 @@ function CatchMeasureQC({
               return (
                 <Graph
                   key={buttonName}
-                  chartType='bar'
+                  zoomDomain={{ x: [0, 60], y: [0, 0.3] }}
+                  chartType='line'
                   data={graphData[buttonName]}
                   onPointClick={(datum) => handlePointClicked(datum)}
                   title={buttonName}

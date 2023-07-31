@@ -53,53 +53,60 @@ function TrapQC({
   useEffect(() => {
     const previousTrapVisits = route.params.previousTrapVisits
 
-      let tempData: any[] = []
-      let turbidityData: any[] = []
-      let rpmAtStartData: any[] = []
-      let rpmAtEndData: any[] = []
-      let counterData: any[] = []
-      let debrisData: any[] = []
+    let tempData: any[] = []
+    let turbidityData: any[] = []
+    let rpmAtStartData: any[] = []
+    let rpmAtEndData: any[] = []
+    let counterData: any[] = []
+    let debrisData: any[] = []
 
-      Object.values([...qcTrapVisitSubmissions, ...previousTrapVisits]).forEach(
-        (response: any, idx: number) => {
-          const trapVisitId = response.createdTrapVisitResponse.id
-          const qcCompleted = response.createdTrapVisitResponse.qcCompleted
-          const qcNotStarted = qcCompleted ? false : true
+    Object.values([...qcTrapVisitSubmissions, ...previousTrapVisits]).forEach(
+      (response: any, idx: number) => {
+        const trapVisitId = response.createdTrapVisitResponse.id
+        const qcCompleted = response.createdTrapVisitResponse.qcCompleted
+        const qcNotStarted = qcCompleted ? false : true
 
-          if (trapVisitId) {
-            let temp = response.createdTrapVisitEnvironmentalResponse.filter(
-              (item: any) => {
-                return item.measureName === 'water temperature'
-              }
-            )[0]
+        if (trapVisitId) {
+          let temp = response.createdTrapVisitEnvironmentalResponse.filter(
+            (item: any) => {
+              return item.measureName === 'water temperature'
+            }
+          )[0]
+          if (temp) {
             tempData.push({
               id: trapVisitId,
               x: idx + 1,
               y: Number(temp.measureValueNumeric),
               colorScale: qcNotStarted ? 'red' : undefined,
             })
+          }
 
-            let turbidity =
-              response.createdTrapVisitEnvironmentalResponse.filter(
-                (item: any) => {
-                  return item.measureName === 'water turbidity'
-                }
-              )[0]
+          let turbidity = response.createdTrapVisitEnvironmentalResponse.filter(
+            (item: any) => {
+              return item.measureName === 'water turbidity'
+            }
+          )[0]
+          if (turbidity) {
             turbidityData.push({
               id: trapVisitId,
               x: idx + 1,
               y: Number(turbidity.measureValueNumeric),
               colorScale: qcNotStarted ? 'red' : undefined,
             })
+          }
 
+          if (response.createdTrapVisitResponse.rpmAtStart) {
             let rpmAtStart = {
               id: trapVisitId,
               x: idx + 1,
               y: Number(response.createdTrapVisitResponse.rpmAtStart),
               colorScale: qcNotStarted ? 'red' : undefined,
             }
-            rpmAtStartData.push(rpmAtStart)
 
+            rpmAtStartData.push(rpmAtStart)
+          }
+
+          if (response.createdTrapVisitResponse.rpmAtEnd) {
             let rpmAtEnd = {
               id: trapVisitId,
               x: idx + 1,
@@ -107,7 +114,9 @@ function TrapQC({
               colorScale: qcNotStarted ? 'red' : undefined,
             }
             rpmAtEndData.push(rpmAtEnd)
+          }
 
+          if (response.createdTrapVisitResponse.totalRevolutions) {
             let counter = {
               id: trapVisitId,
               x: idx + 1,
@@ -115,7 +124,9 @@ function TrapQC({
               colorScale: qcNotStarted ? 'red' : undefined,
             }
             counterData.push(counter)
+          }
 
+          if (response.createdTrapVisitResponse.debrisVolumeLiters) {
             let debris = {
               id: trapVisitId,
               x: idx + 1,
@@ -125,17 +136,17 @@ function TrapQC({
             debrisData.push(debris)
           }
         }
-      )
+      }
+    )
 
-      setGraphData({
-        Temperature: tempData,
-        Turbidity: turbidityData,
-        'RPM At Start': rpmAtStartData,
-        'RPM At End': rpmAtEndData,
-        Counter: counterData,
-        Debris: debrisData,
-      })
-
+    setGraphData({
+      Temperature: tempData,
+      Turbidity: turbidityData,
+      'RPM At Start': rpmAtStartData,
+      'RPM At End': rpmAtEndData,
+      Counter: counterData,
+      Debris: debrisData,
+    })
   }, [qcTrapVisitSubmissions])
 
   const GraphMenuButton = ({
