@@ -17,9 +17,24 @@ import { Ionicons } from '@expo/vector-icons'
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
 import CustomModal from '../../../components/Shared/CustomModal'
 import AddTrappingProtocolModalContent from '../../../components/createNewProgram/AddTrappingProtocolModalContent'
+import { IndividualTrappingProtocolState } from '../../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
+
 const TrappingProtocolsTable = ({ navigation }: { navigation: any }) => {
   const [addTrappingProtocolModalOpen, setAddTrappingProtocolModalOpen] =
     useState(false as boolean)
+  const [
+    addTrappingProtocolsModalContent,
+    setAddTrappingProtocolsModalContent,
+  ] = useState(IndividualTrappingProtocolState as any)
+
+  const handleShowTableModal = (selectedRowData: any) => {
+    const modalDataContainer = {} as any
+    Object.keys(selectedRowData).forEach((key: string) => {
+      modalDataContainer[key] = selectedRowData[key].toString()
+    })
+    setAddTrappingProtocolsModalContent(modalDataContainer)
+    setAddTrappingProtocolModalOpen(true)
+  }
 
   return (
     <>
@@ -35,7 +50,9 @@ const TrappingProtocolsTable = ({ navigation }: { navigation: any }) => {
           </Text>
         </VStack>
         <ScrollView h={300}>
-          <TrappingProtocolsDataTable />
+          <TrappingProtocolsDataTable
+            handleShowTableModal={handleShowTableModal}
+          />
         </ScrollView>
         <Divider my='1%' />
         <VStack py='5%' px='10%' space={5}>
@@ -63,6 +80,7 @@ const TrappingProtocolsTable = ({ navigation }: { navigation: any }) => {
         height='1/3'
       >
         <AddTrappingProtocolModalContent
+          addTrappingProtocolsModalContent={addTrappingProtocolsModalContent}
           closeModal={() => setAddTrappingProtocolModalOpen(false)}
         />
       </CustomModal>

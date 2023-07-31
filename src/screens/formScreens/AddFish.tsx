@@ -64,18 +64,6 @@ export interface ReleaseMarkI {
   markColor: number
 }
 
-const fishConditionTempValues = [
-  { id: 1, definition: 'Dark coloration' },
-  { id: 2, definition: 'Swimming abnormally' },
-  { id: 3, definition: 'Bulging eyes' },
-  { id: 4, definition: 'Pale gills' },
-  { id: 5, definition: 'Bulging abdomen' },
-  { id: 6, definition: 'Swollen/protruding vent' },
-  { id: 7, definition: 'Bloody eye' },
-  { id: 8, definition: 'Fungus' },
-  { id: 9, definition: 'none' },
-]
-
 const AddFishContent = ({
   route,
   saveIndividualFish,
@@ -932,7 +920,7 @@ const AddFishContent = ({
                       setFieldTouched={() =>
                         setFishCondition({ ...fishCondition, touched: true })
                       }
-                      selectOptions={fishConditionTempValues}
+                      selectOptions={dropdownValues.fishCondition}
                     />
                   </FormControl>
                   <HStack space={4} w='80%'>

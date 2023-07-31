@@ -303,6 +303,11 @@ export const trappingSitesSchema = yup.object().shape({
     .required('Trap latitude required')
     .typeError('Input must be a number'),
 })
+
+export const crewMembersLeadSchema = yup.object().shape({
+  agency: yup.string().required('Agency required'),
+  orcidId: yup.string().nullable(),
+})
 export const crewMembersSchema = yup.object().shape({
   firstName: yup.string().required('First name required'),
   lastName: yup.string().required('Last name required'),
