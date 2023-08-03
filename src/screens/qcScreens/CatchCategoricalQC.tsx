@@ -7,7 +7,8 @@ import { connect, useDispatch } from 'react-redux'
 import CustomModal from '../../components/Shared/CustomModal'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-
+import moment from 'moment'
+import { every } from 'lodash'
 interface GraphDataI {
   'Adipose Clipped': any[]
   Species: any[]
@@ -48,6 +49,12 @@ function CatchCategoricalQC({
     let marksData: any[] = []
     let deadData: any[] = []
 
+    interface MarkCombosI {
+      [key: string]: any
+    }
+
+    const markCombos = {} as MarkCombosI
+
     qcData.forEach((catchResponse: any, idx: number) => {
       const {
         id,
@@ -58,25 +65,33 @@ function CatchCategoricalQC({
         createdAt,
         qcCompleted,
       } = catchResponse.createdCatchRawResponse
-      const qcNotStarted = qcCompleted ? false : true
+      const qcNotStarted = !qcCompleted
 
       const createdExistingMarksResponse =
         catchResponse.createdExistingMarksResponse ?? []
       const createdMarkAppliedResponse =
         catchResponse.createdMarkAppliedResponse ?? []
 
-      const dateTime = new Date(createdAt)
+      const date = new Date(createdAt)
+      date.setHours(0)
+      date.setMinutes(0)
+      date.setSeconds(0)
+      date.setMilliseconds(0)
+      // const dateTime = moment(createdAt).format('MMM Do YY')
+      // const date = new Date(createdAt)
+      const dateTime = date.getTime()
 
       const marks = [
         ...createdExistingMarksResponse,
-        ...createdMarkAppliedResponse,
+        // ...createdMarkAppliedResponse,
       ].filter((mark: any) => {
         return mark.catchRawId === id
       })
+      console.log('🚀 ~ qcData.forEach ~ marks:', marks)
 
       let species = taxon.filter((obj: any) => {
         return obj.code === taxonCode
-      })[0].commonname
+      })[0].commonName
 
       if (id) {
         if (adiposeClipped != null) {
@@ -122,15 +137,32 @@ function CatchCategoricalQC({
         // MARK DATA PROCESSING NOT COMPLETE
         if (marks.length) {
           marks.forEach((mark: any) => {
-            marksData.push({
-              id,
-              x: `${mark.markTypeId} - ${mark.markColorId}`,
-              y: 1,
-              colorScale: qcNotStarted ? 'red' : undefined,
-            })
+            const { markTypeId, markColorId, markPositionId } = mark
+            const markIdentifier = `${markTypeId}-${markColorId}-${markPositionId}`
+
+            // if date does not exist,
+            if (!markCombos[dateTime]) {
+              //add to markCombos obj and set property to unique combo and count to 1
+              markCombos[dateTime] = {
+                [markIdentifier]: [{ catchRawId: id, mark }],
+              } as any
+            } else if (markCombos[dateTime]) {
+              // if markIdentifier combo exists, increment
+              if (markCombos[dateTime][markIdentifier]) {
+                markCombos[dateTime][markIdentifier] = [
+                  ...markCombos[dateTime][markIdentifier],
+                  { catchRawId: id, mark },
+                ]
+              } else {
+                // else set new markIdentifier count to
+                markCombos[dateTime][markIdentifier] = [
+                  { catchRawId: id, mark },
+                ]
+              }
+            }
           })
         }
-        
+
         if (dead) {
           let speciesAlreadyExistsIdx = null
           let speciesAlreadyExists = deadData.filter(
@@ -162,6 +194,68 @@ function CatchCategoricalQC({
       }
     })
 
+    const symbolOptions = [
+      'cross',
+      'diamond',
+      'plus',
+      'minus',
+      'square',
+      // 'star',
+      'triangleDown',
+      'triangleUp',
+    ]
+    const test = {
+      markIdentifier: 'unusedMark',
+    }
+
+    console.log('markCombos', markCombos)
+
+    let symbolCounter = 0
+    const addJitter = (value: any, jitterAmount = 0.1) => {
+      return value + Math.random() * jitterAmount - jitterAmount / 2
+    }
+    Object.entries(markCombos).forEach(([dateTime, countObj], index) => {
+      //iterate over the countObj values.
+      //create an Obj of found lengths
+      // for each countObject value's length
+      //check to see if it is already present in the found lengths array
+      // if found (needs to be a star)
+
+      // end obj
+      /*
+      {
+        1: [12-5-4, 2-8-null]
+        2: []
+        3: []
+        4: [down-here]
+      }
+
+      */
+
+      Object.entries(countObj as MarkCombosI).forEach(
+        ([markIdentifier, itemsArray]) => {
+          let symbol = symbolOptions[symbolCounter]
+
+          // if other properties in the same countObj have same length,
+          // then symbol should be star
+
+          marksData.push({
+            id: `${markIdentifier}_${dateTime}`,
+            x: dateTime,
+            y: itemsArray.length,
+            colorScale: every(itemsArray, ['qcCompleted', true])
+              ? 'black'
+              : 'red',
+            symbol: every(itemsArray, ['qcCompleted', true])
+              ? 'circle'
+              : symbol,
+            itemsArray: itemsArray,
+          })
+          symbolCounter++
+        }
+      )
+    })
+
     setGraphData({
       'Adipose Clipped': adiposeClippedData,
       Species: speciesData,
@@ -171,7 +265,6 @@ function CatchCategoricalQC({
   }, [qcCatchRawSubmissions])
 
   const handlePointClick = (datum: any) => {
-    console.log('point clicked: ', datum)
     setPointClicked(datum)
     setIsModalOpen(true)
   }
@@ -225,10 +318,10 @@ function CatchCategoricalQC({
     )
   }
 
-  const buttonNameToChatType = {
+  const buttonNameToChartType = {
     'Adipose Clipped': 'true-or-false',
     Species: 'bar',
-    Marks: 'bar',
+    Marks: 'scatter',
     Mortalities: 'bar',
   }
 
@@ -264,7 +357,7 @@ function CatchCategoricalQC({
               return (
                 <Graph
                   key={buttonName}
-                  chartType={buttonNameToChatType[buttonName] as any}
+                  chartType={buttonNameToChartType[buttonName] as any}
                   onPointClick={(datum) => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
@@ -329,11 +422,9 @@ function CatchCategoricalQC({
               if (header === 'Adipose Clipped') {
                 if (dataAtId.y === 1) return 'false'
                 if (dataAtId.y === 2) return 'true'
-              }
-              else if (header === 'Species') {
+              } else if (header === 'Species') {
                 return dataAtId.label
-              }
-              else {
+              } else {
                 return dataAtId.y
               }
             }}

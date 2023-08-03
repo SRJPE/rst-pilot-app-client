@@ -1,9 +1,11 @@
+import moment from 'moment'
 import { View, Text } from 'native-base'
 import React from 'react'
 import {
   VictoryAxis,
   VictoryBar,
   VictoryChart,
+  VictoryLegend,
   VictoryLine,
   VictoryScatter,
   VictoryTheme,
@@ -28,7 +30,7 @@ export default function Graph({
   timeBased,
   zoomDomain,
 }: {
-  chartType: 'bar' | 'line' | 'true-or-false'
+  chartType: 'bar' | 'line' | 'true-or-false' | 'scatter'
   title?: string
   data: any
   height: number
@@ -44,6 +46,10 @@ export default function Graph({
     if (onPointClick) {
       onPointClick(datum)
     }
+  }
+
+  const addJitter = (value: any, jitterAmount = 0.1) => {
+    return value + Math.random() * jitterAmount - jitterAmount / 2
   }
 
   const chartTypeComponent = () => {
@@ -198,6 +204,57 @@ export default function Graph({
             ]}
           />
         )
+      case 'scatter':
+        return (
+          <VictoryScatter
+            data={data}
+            x={({ x }) => x} // Add jitter to Y-axis value
+            y={({ y }) => addJitter(y, 0.2)} // Add jitter to Y-axis value
+            size={7}
+            style={{
+              data: {
+                fill: (props) => {
+                  return props.datum.colorScale
+                    ? props.datum.colorScale
+                    : barColor
+                },
+              },
+            }}
+            events={[
+              {
+                target: 'data',
+                eventHandlers: {
+                  onPressIn: (event, data) => {
+                    return [
+                      // {
+                      //   target: 'data',
+                      //   eventKey: 'all',
+                      //   mutation: (props) => {
+                      //     // const fill = props.style?.fill
+                      //     // return fill === barColor
+                      //     //   ? null
+                      //     //   : { style: { fill: barColor } }
+                      //   },
+                      // },
+                      {
+                        target: 'data',
+                        mutation: (props) => {
+                          console.log('data.datum', data.datum)
+                          console.log('props', props)
+                          handlePointClick(data.datum)
+                          // const fill = props.style?.fill
+                          // return fill === selectedBarColor
+                          //   ? null
+                          //   : { style: { fill: selectedBarColor } }
+                        },
+                      },
+                    ]
+                  },
+                },
+              },
+            ]}
+          />
+        )
     }
   }
 
@@ -217,7 +274,7 @@ export default function Graph({
                 ? { y: [0, 2.5] }
                 : zoomDomain
                 ? zoomDomain
-                : { y: [0, 50] }
+                : { y: [0, 8] }
             }
             zoomDimension='x'
           />
@@ -231,11 +288,21 @@ export default function Graph({
         <VictoryAxis
           fixLabelOverlap={true}
           tickFormat={(value) => {
-            return `${value}`
+            if (chartType === 'scatter') {
+              //  moment(createdAt).format('MMM Do YY')
+              console.log('value: ', value)
+              console.log('value: ', typeof value)
+              let date = new Date(Number(value))
+              console.log('date: ', date)
+              return `${moment(date).format('MMM Do YY')}`
+            } else {
+              return `${value}`
+            }
           }}
         />
         <VictoryAxis
           dependentAxis
+          // label='Number of fish with mark'
           // fixLabelOverlap={true}
           tickFormat={(value) => {
             if (chartType === 'true-or-false') {
@@ -301,7 +368,27 @@ export default function Graph({
         ) : (
           <></>
         )}
+        {chartType === 'scatter' ? (
+          <VictoryLegend
+            x={125}
+            y={50}
+            title='Legend'
+            centerTitle
+            orientation='horizontal'
+            gutter={20}
+            style={{ border: { stroke: 'black' }, title: { fontSize: 20 } }}
+            data={[
+              { name: 'One', symbol: { type: 'star' } },
+              { name: 'Two', symbol: { fill: 'orange' } },
+              { name: 'Three', symbol: { fill: 'gold' } },
+            ]}
+          />
+        ) : (
+          <></>
+        )}
       </VictoryChart>
     </View>
   )
 }
+
+// name: user friendly mark combo
