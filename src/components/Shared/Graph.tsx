@@ -1,3 +1,4 @@
+import moment from 'moment'
 import { View, Text } from 'native-base'
 import React from 'react'
 import {
@@ -28,7 +29,7 @@ export default function Graph({
   timeBased,
   zoomDomain,
 }: {
-  chartType: 'bar' | 'line' | 'true-or-false'
+  chartType: 'bar' | 'line' | 'true-or-false' | 'scatterplot'
   title?: string
   data: any
   height: number
@@ -132,8 +133,6 @@ export default function Graph({
                       {
                         target: 'data',
                         mutation: (props) => {
-                          console.log('data.datum', data.datum)
-                          console.log('props', props)
                           // handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor
@@ -182,8 +181,54 @@ export default function Graph({
                       {
                         target: 'data',
                         mutation: (props) => {
-                          console.log('data.datum', data.datum)
-                          console.log('props', props)
+                          handlePointClick(data.datum)
+                          // const fill = props.style?.fill
+                          // return fill === selectedBarColor
+                          //   ? null
+                          //   : { style: { fill: selectedBarColor } }
+                        },
+                      },
+                    ]
+                  },
+                },
+              },
+            ]}
+          />
+        )
+      case 'scatterplot':
+        return (
+          <VictoryScatter
+            data={data}
+            x='x'
+            y='y'
+            style={{
+              data: {
+                fill: (props) => {
+                  return props.datum.colorScale
+                    ? props.datum.colorScale
+                    : barColor
+                },
+              },
+            }}
+            events={[
+              {
+                target: 'data',
+                eventHandlers: {
+                  onPressIn: (event, data) => {
+                    return [
+                      // {
+                      //   target: 'data',
+                      //   eventKey: 'all',
+                      //   mutation: (props) => {
+                      //     // const fill = props.style?.fill
+                      //     // return fill === barColor
+                      //     //   ? null
+                      //     //   : { style: { fill: barColor } }
+                      //   },
+                      // },
+                      {
+                        target: 'data',
+                        mutation: (props) => {
                           handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor
@@ -213,11 +258,7 @@ export default function Graph({
         containerComponent={
           <VictoryZoomContainer
             zoomDomain={
-              chartType === 'true-or-false'
-                ? { y: [0, 2.5] }
-                : zoomDomain
-                ? zoomDomain
-                : { y: [0, 50] }
+              chartType === 'true-or-false' ? { y: [0, 2.5] } : undefined
             }
             zoomDimension='x'
           />
@@ -231,7 +272,13 @@ export default function Graph({
         <VictoryAxis
           fixLabelOverlap={true}
           tickFormat={(value) => {
-            return `${value}`
+            if (chartType === 'scatterplot') {
+              let date = new Date(Number(value))
+              return `${moment(date).format("MMM Do YY")}`
+            } else {
+
+              return `${value}`
+            }
           }}
         />
         <VictoryAxis

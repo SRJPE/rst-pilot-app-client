@@ -67,8 +67,6 @@ const GraphModalContent = ({
       } else {
         modalDataAtPointClicked[header] = { y: 'NA' }
       }
-
-      console.log('dataAtId', dataAtId)
     })
     setPayload(modalDataAtPointClicked)
   }, [modalData, pointClicked])

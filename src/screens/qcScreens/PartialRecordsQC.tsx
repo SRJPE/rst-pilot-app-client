@@ -108,7 +108,6 @@ function PartialRecordsQC({
     })
 
     Object.keys(formattedData).forEach((key) => {
-      console.log('key, ', key, 'formattedData[key], ', formattedData[key])
       percentNotRecordedPayload.push({
         variableName: key,
         percentNotRecorded: Math.round(
@@ -117,9 +116,6 @@ function PartialRecordsQC({
       })
     })
 
-    console.log('percentNotRecordedPayload', percentNotRecordedPayload)
-
-    console.log('qcData: ', qcData)
     setQCData(qcData)
     setPercentNotRecorded(percentNotRecordedPayload)
   }, [qcCatchRawSubmissions])
@@ -323,13 +319,16 @@ function PartialRecordsQC({
                     const dead = `${createdCatchRawResponse.dead ?? 'NA'}`
                     const numFishCaught =
                       createdCatchRawResponse.numFishCaught ?? 'NA'
-                    const program = programs.filter((program) => programId === program.id)
+                    const program = programs.filter(
+                      (program) => programId === program.id
+                    )
                     const stream = program ? program[0].streamName : 'NA'
-                    let releaseSiteObj = releaseSites.filter((releaseSite) => {
-                      return releaseSite.id === releaseResponse.releaseSiteId
-                    })[0]
-                    const releaseSite = releaseSiteObj
-                      ? releaseSiteObj.releaseSiteName
+                    let releaseSiteArr = releaseSites.filter((releaseSite) => {
+                      if (releaseResponse)
+                        return releaseSite.id === releaseResponse.releaseSiteId
+                    })
+                    const releaseSite = releaseSiteArr.length
+                      ? releaseSiteArr[0].releaseSiteName
                       : 'NA'
 
                     return (
@@ -627,7 +626,7 @@ function PartialRecordsQC({
                               ),
                               modalInput: (
                                 <VStack alignItems={'flex-start'}>
-                                  <Text>Edit fish count value</Text>
+                                  <Text>Edit Release Site</Text>
                                   <Input
                                     height='50px'
                                     width='350px'
@@ -751,7 +750,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
     releaseSites: state.visitSetupDefaults.releaseSites,
-    programs: state.visitSetupDefaults.programs
+    programs: state.visitSetupDefaults.programs,
   }
 }
 
