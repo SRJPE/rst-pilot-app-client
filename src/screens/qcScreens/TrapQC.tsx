@@ -62,16 +62,25 @@ function TrapQC({
 
     Object.values([...qcTrapVisitSubmissions, ...previousTrapVisits]).forEach(
       (response: any, idx: number) => {
-        const trapVisitId = response.createdTrapVisitResponse.id
-        const qcCompleted = response.createdTrapVisitResponse.qcCompleted
+        const {
+          createdTrapCoordinatesResponse,
+          createdTrapVisitCrewResponse,
+          createdTrapVisitEnvironmentalResponse,
+          createdTrapVisitResponse,
+        } = response
+
+        const trapVisitId = createdTrapVisitResponse.id
+        const qcCompleted = createdTrapVisitResponse.qcCompleted
         const qcNotStarted = qcCompleted ? false : true
 
         if (trapVisitId) {
-          let temp = response.createdTrapVisitEnvironmentalResponse.filter(
-            (item: any) => {
-              return item.measureName === 'water temperature'
-            }
-          )[0]
+          let temp =
+            createdTrapVisitEnvironmentalResponse ? createdTrapVisitEnvironmentalResponse.filter(
+              (item: any) => {
+                return item.measureName === 'water temperature'
+              }
+            )[0] : null
+
           if (temp) {
             tempData.push({
               id: trapVisitId,
@@ -81,11 +90,13 @@ function TrapQC({
             })
           }
 
-          let turbidity = response.createdTrapVisitEnvironmentalResponse.filter(
+          let turbidity = createdTrapVisitEnvironmentalResponse ? createdTrapVisitEnvironmentalResponse.filter(
             (item: any) => {
               return item.measureName === 'water turbidity'
             }
-          )[0]
+          )[0] : null
+
+
           if (turbidity) {
             turbidityData.push({
               id: trapVisitId,
@@ -95,7 +106,7 @@ function TrapQC({
             })
           }
 
-          if (response.createdTrapVisitResponse.rpmAtStart) {
+          if (createdTrapVisitResponse.rpmAtStart) {
             let rpmAtStart = {
               id: trapVisitId,
               x: idx + 1,
@@ -106,31 +117,31 @@ function TrapQC({
             rpmAtStartData.push(rpmAtStart)
           }
 
-          if (response.createdTrapVisitResponse.rpmAtEnd) {
+          if (createdTrapVisitResponse.rpmAtEnd) {
             let rpmAtEnd = {
               id: trapVisitId,
               x: idx + 1,
-              y: Number(response.createdTrapVisitResponse.rpmAtEnd),
+              y: Number(createdTrapVisitResponse.rpmAtEnd),
               colorScale: qcNotStarted ? 'red' : undefined,
             }
             rpmAtEndData.push(rpmAtEnd)
           }
 
-          if (response.createdTrapVisitResponse.totalRevolutions) {
+          if (createdTrapVisitResponse.totalRevolutions) {
             let counter = {
               id: trapVisitId,
               x: idx + 1,
-              y: response.createdTrapVisitResponse.totalRevolutions,
+              y: createdTrapVisitResponse.totalRevolutions,
               colorScale: qcNotStarted ? 'red' : undefined,
             }
             counterData.push(counter)
           }
 
-          if (response.createdTrapVisitResponse.debrisVolumeLiters) {
+          if (createdTrapVisitResponse.debrisVolumeLiters) {
             let debris = {
               id: trapVisitId,
               x: idx + 1,
-              y: response.createdTrapVisitResponse.debrisVolumeLiters,
+              y: createdTrapVisitResponse.debrisVolumeLiters,
               colorScale: qcNotStarted ? 'red' : undefined,
             }
             debrisData.push(debris)
@@ -194,7 +205,6 @@ function TrapQC({
 
   const handlePointClicked = (datum: any) => {
     setPointClicked(datum)
-    console.log('point clicked: ', datum)
     setIsModalOpen(true)
   }
 

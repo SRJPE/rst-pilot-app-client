@@ -1,6 +1,7 @@
 import React, { useCallback, memo } from 'react'
 import { CheckIcon, Select } from 'native-base'
 import { capitalize } from 'lodash'
+import { StyleProp, ViewStyle } from 'react-native'
 
 interface CustomSelectI {
   selectedValue: string
@@ -8,6 +9,7 @@ interface CustomSelectI {
   setFieldTouched: any
   onValueChange: any
   selectOptions: any[]
+  style?: StyleProp<ViewStyle>
 }
 
 const CustomSelect: React.FC<CustomSelectI> = (props) => {
@@ -21,6 +23,7 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
       fontSize='16'
       selectedValue={props.selectedValue}
       minWidth='100'
+      style={props.style}
       accessibilityLabel={props.placeholder}
       placeholder={props.placeholder}
       _selectedItem={{

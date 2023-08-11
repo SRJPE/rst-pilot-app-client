@@ -1,5 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Button, HStack, View, VStack, Text, ScrollView } from 'native-base'
+import {
+  Button,
+  HStack,
+  View,
+  VStack,
+  Text,
+  ScrollView,
+  Heading,
+  Icon,
+  Input,
+  Radio,
+} from 'native-base'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -7,6 +18,12 @@ import { connect, useDispatch } from 'react-redux'
 import CustomModal from '../../components/Shared/CustomModal'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { DataTable } from 'react-native-paper'
+import { MaterialIcons } from '@expo/vector-icons'
+import CustomSelect from '../../components/Shared/CustomSelect'
+import { reorderTaxon } from '../../utils/utils'
+import { get } from 'lodash'
+import moment from 'moment'
 
 interface GraphDataI {
   'Adipose Clipped': any[]
@@ -15,16 +32,27 @@ interface GraphDataI {
   Mortalities: any[]
 }
 
+interface NestedModalDataI {
+  fieldClicked: string
+  data: any
+}
+
 function CatchCategoricalQC({
   navigation,
   route,
   qcCatchRawSubmissions,
-  taxon,
+  taxonState,
+  runState,
+  lifeStageState,
+  markTypeState,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any
-  taxon: any
+  taxonState: any
+  runState: any
+  lifeStageState: any
+  markTypeState: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -37,7 +65,10 @@ function CatchCategoricalQC({
     Mortalities: [],
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [pointClicked, setPointClicked] = useState<any | null>(null)
+  const [modalData, setModalData] = useState<any[] | null>(null)
+  const [nestedModalData, setNestedModalData] =
+    useState<NestedModalDataI | null>(null)
+  const [nestedModalValue, setNestedModalValue] = useState<string | boolean>('')
 
   useEffect(() => {
     const previousCatchRaw = route.params.previousCatchRaw
@@ -47,6 +78,12 @@ function CatchCategoricalQC({
     let speciesData: any[] = []
     let marksData: any[] = []
     let deadData: any[] = []
+
+    let fishCountByDateAndSpecies: any = {
+      // [date]: {
+      //    species: {count: 00, ids: [...]}
+      // }
+    }
 
     qcData.forEach((catchResponse: any, idx: number) => {
       const {
@@ -58,14 +95,14 @@ function CatchCategoricalQC({
         createdAt,
         qcCompleted,
       } = catchResponse.createdCatchRawResponse
-      const qcNotStarted = qcCompleted ? false : true
+      const qcNotStarted = !qcCompleted
 
       const createdExistingMarksResponse =
         catchResponse.createdExistingMarksResponse ?? []
       const createdMarkAppliedResponse =
         catchResponse.createdMarkAppliedResponse ?? []
 
-      const dateTime = new Date(createdAt)
+      const normalizedDate = normalizeDate(new Date(createdAt))
 
       const marks = [
         ...createdExistingMarksResponse,
@@ -74,48 +111,52 @@ function CatchCategoricalQC({
         return mark.catchRawId === id
       })
 
-      let species = taxon.filter((obj: any) => {
+      const species = taxonState.filter((obj: any) => {
         return obj.code === taxonCode
       })[0].commonname
 
       if (id) {
         if (adiposeClipped != null) {
           adiposeClippedData.push({
-            id,
+            ids: [id],
+            dataId: 'Adipose Clipped',
             x: idx + 1,
             y: adiposeClipped ? 2 : 1,
             colorScale: qcNotStarted ? 'red' : undefined,
+            // catchResponse,
           })
         }
 
-        if (taxonCode) {
-          let speciesAlreadyExistsIdx = null
-          let speciesAlreadyExists = speciesData.filter(
-            (dataObj: any, idx: number) => {
-              if (dataObj.x === species) {
-                speciesAlreadyExistsIdx = idx
-                return dataObj.x === species
+        if (species) {
+          if (
+            Object.keys(fishCountByDateAndSpecies).includes(
+              String(normalizedDate)
+            )
+          ) {
+            const fishAtDate = fishCountByDateAndSpecies[normalizedDate]
+
+            // add to already existing species count and ids
+            if (Object.keys(fishAtDate).includes(species)) {
+              let speciesAtDate = {
+                ...fishCountByDateAndSpecies[normalizedDate][species],
+              }
+              speciesAtDate.count += numFishCaught
+              speciesAtDate.ids.push(id)
+
+              fishCountByDateAndSpecies[normalizedDate][species] = speciesAtDate
+            }
+            // add new species with new count
+            else {
+              fishCountByDateAndSpecies[normalizedDate] = {
+                ...fishAtDate,
+                [species]: { count: numFishCaught, ids: [id] },
               }
             }
-          )[0]
-
-          if (speciesAlreadyExists && speciesAlreadyExistsIdx) {
-            speciesData.splice(1, speciesAlreadyExistsIdx)
-            speciesData.push({
-              id,
-              x: idx + 1,
-              y: speciesAlreadyExists.y + numFishCaught,
-              colorScale: qcNotStarted ? 'red' : undefined,
-              label: species,
-            })
           } else {
-            speciesData.push({
-              id,
-              x: idx + 1,
-              y: numFishCaught,
-              colorScale: qcNotStarted ? 'red' : undefined,
-              label: species,
-            })
+            // add date with new species and count
+            fishCountByDateAndSpecies[normalizedDate] = {
+              [species]: { count: numFishCaught, ids: [id] },
+            }
           }
         }
 
@@ -123,14 +164,16 @@ function CatchCategoricalQC({
         if (marks.length) {
           marks.forEach((mark: any) => {
             marksData.push({
-              id,
+              ids: [id],
+              dataId: 'Marks',
               x: `${mark.markTypeId} - ${mark.markColorId}`,
               y: 1,
               colorScale: qcNotStarted ? 'red' : undefined,
+              // catchResponse,
             })
           })
         }
-        
+
         if (dead) {
           let speciesAlreadyExistsIdx = null
           let speciesAlreadyExists = deadData.filter(
@@ -145,21 +188,42 @@ function CatchCategoricalQC({
           if (speciesAlreadyExists && speciesAlreadyExistsIdx) {
             deadData.splice(1, speciesAlreadyExistsIdx)
             deadData.push({
-              id,
+              ids: [id],
+              dataId: 'Mortalities',
               x: species,
               y: speciesAlreadyExists.y + numFishCaught,
               colorScale: qcNotStarted ? 'red' : undefined,
+              // catchResponse,
             })
           } else {
             deadData.push({
-              id,
+              ids: [id],
+              dataId: 'Mortalities',
               x: species,
               y: numFishCaught,
               colorScale: qcNotStarted ? 'red' : undefined,
+              // catchResponse,
             })
           }
         }
       }
+    })
+
+    Object.keys(fishCountByDateAndSpecies).forEach((date) => {
+      const speciesCountFromDate = fishCountByDateAndSpecies[date]
+
+      Object.keys(speciesCountFromDate).forEach((species) => {
+        let count = speciesCountFromDate[species].count
+        let ids = speciesCountFromDate[species].ids
+
+        speciesData.push({
+          ids,
+          dataId: 'Species',
+          x: date,
+          y: count,
+          // label: species
+        })
+      })
     })
 
     setGraphData({
@@ -170,19 +234,43 @@ function CatchCategoricalQC({
     })
   }, [qcCatchRawSubmissions])
 
+  const normalizeDate = (date: Date) => {
+    date.setHours(0)
+    date.setMinutes(0)
+    date.setSeconds(0)
+    date.setMilliseconds(0)
+
+    return date.getTime()
+  }
+
   const handlePointClick = (datum: any) => {
-    console.log('point clicked: ', datum)
-    setPointClicked(datum)
+    const previousCatchRaw = route.params.previousCatchRaw
+    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const { ids, dataId } = datum
+
+    const selectedData = qcData.filter((response) => {
+      return ids.includes(response.createdCatchRawResponse.id)
+    })
+
+    setModalData(selectedData)
     setIsModalOpen(true)
+  }
+
+  const handleModalCellPressed = (fieldClicked: string, data: any) => {
+    setNestedModalData({ fieldClicked, data })
   }
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
-    setPointClicked(null)
+    setModalData(null)
+  }
+
+  const handleCloseNestedModal = () => {
+    setNestedModalData(null)
   }
 
   const handleModalSubmit = (submission: any) => {
-    if (pointClicked) {
+    if (modalData) {
       const ids = Object.keys(submission).map((key: string) => {
         if (submission[key]) {
           return submission[key]['id']
@@ -191,6 +279,10 @@ function CatchCategoricalQC({
       const catchRawId = ids.find((val) => Boolean(Number(val)))
       dispatch(catchRawQCSubmission({ catchRawId, submission }))
     }
+  }
+
+  const handleSaveNestedModal = () => {
+    console.log('handle nested modal save')
   }
 
   const GraphMenuButton = ({
@@ -225,11 +317,161 @@ function CatchCategoricalQC({
     )
   }
 
-  const buttonNameToChatType = {
+  const CustomNestedModalInput = ({
+    fieldClicked,
+    data,
+  }: {
+    fieldClicked: string
+    data: any
+  }) => {
+    const reorderedTaxon = reorderTaxon(taxonState)
+
+    switch (fieldClicked) {
+      case 'taxonCode':
+        return (
+          <VStack>
+            <Text>Edit Species</Text>
+            <CustomSelect
+              selectedValue={nestedModalValue as string}
+              placeholder={'Species'}
+              onValueChange={(value: string) => setNestedModalValue(value)}
+              setFieldTouched={() => console.log('species field touched')}
+              selectOptions={reorderedTaxon.map((taxon: any) => ({
+                label: taxon?.commonname,
+                value: taxon?.commonname,
+              }))}
+            />
+          </VStack>
+        )
+      case 'captureRunClass':
+        return (
+          <VStack>
+            <Text>Edit Run</Text>
+            <CustomSelect
+              selectedValue={nestedModalValue as string}
+              placeholder={'Run'}
+              onValueChange={(value: string) => setNestedModalValue(value)}
+              setFieldTouched={() => console.log('run field touched')}
+              selectOptions={runState.map((run: any) => ({
+                label: run?.definition,
+                value: run?.definition,
+              }))}
+            />
+          </VStack>
+        )
+      case 'lifeStage':
+        return (
+          <VStack>
+            <Text>Edit Lifestage</Text>
+            <CustomSelect
+              selectedValue={nestedModalValue as string}
+              placeholder={'Lifestage'}
+              onValueChange={(value: string) => setNestedModalValue(value)}
+              setFieldTouched={() => console.log('lifestage field touched')}
+              selectOptions={lifeStageState.map((lifeStage: any) => ({
+                label: lifeStage?.definition,
+                value: lifeStage?.definition,
+              }))}
+            />
+          </VStack>
+        )
+      case 'forkLength':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Fork Length</Text>
+            <Input
+              height='50px'
+              width='350px'
+              fontSize='16'
+              placeholder='fork length...'
+              keyboardType='numeric'
+              onChangeText={(value) => {
+                let payload = { ...data }
+                payload.createdCatchRawResponse.forkLength = value
+                console.log('handle fork length edit submit')
+              }}
+              // onBlur={handleBlur('comments')}
+              value={''}
+            />
+          </VStack>
+        )
+      case 'markType':
+        return (
+          <VStack>
+            <Text>Edit Mark Type</Text>
+            <CustomSelect
+              selectedValue={nestedModalValue as string}
+              placeholder={'Mark Type'}
+              onValueChange={(value: string) => setNestedModalValue(value)}
+              setFieldTouched={() => console.log('marktype field touched')}
+              selectOptions={markTypeState.map((markType: any) => ({
+                label: markType?.definition,
+                value: markType?.definition,
+              }))}
+            />
+          </VStack>
+        )
+      case 'dead':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Mortality</Text>
+            <Radio.Group
+              name='isLead'
+              accessibilityLabel='is lead'
+              value={undefined}
+              onChange={(value: any) => {
+                if (value === 'true') {
+                  setNestedModalValue(true)
+                } else {
+                  setNestedModalValue(false)
+                }
+              }}
+            >
+              <Radio
+                colorScheme='primary'
+                value='false'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                Dead
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='true'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                Alive
+              </Radio>
+            </Radio.Group>
+          </VStack>
+        )
+    }
+  }
+
+  const buttonNameToChartType = {
     'Adipose Clipped': 'true-or-false',
-    Species: 'bar',
+    Species: 'scatterplot',
     Marks: 'bar',
     Mortalities: 'bar',
+  }
+
+  const identifierToName = {
+    taxonCode: 'Species',
+    captureRunClass: 'Run',
+    lifeStage: 'Lifestage',
+    forkLength: 'Fork Length',
+    markType: 'Mark Type',
+    dead: 'Mortality',
+  }
+
+  const identifierToDataValueFromRecord = {
+    taxonCode: 'createdCatchRawResponse.taxonCode',
+    captureRunClass: 'createdCatchRawResponse.captureRunClass',
+    lifeStage: 'createdCatchRawResponse.captureRunClass',
+    forkLength: 'createdCatchRawResponse.forkLength',
+    markType: 'createdCatchRawResponse.markType',
+    dead: 'createdCatchRawResponse.dead',
   }
 
   return (
@@ -264,7 +506,7 @@ function CatchCategoricalQC({
               return (
                 <Graph
                   key={buttonName}
-                  chartType={buttonNameToChatType[buttonName] as any}
+                  chartType={buttonNameToChartType[buttonName] as any}
                   onPointClick={(datum) => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
@@ -312,32 +554,297 @@ function CatchCategoricalQC({
           </HStack>
         </VStack>
       </View>
-      {pointClicked ? (
+      {modalData ? (
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
           height='1/2'
         >
-          <GraphModalContent
-            closeModal={() => handleCloseModal()}
-            pointClicked={pointClicked}
-            onSubmit={(submission: any) => handleModalSubmit(submission)}
-            headerText={'Table of Selected Points'}
-            modalData={graphData}
-            dataFormatter={(header, dataAtId) => {
-              // 'Adipose Clipped' | 'Species' | 'Marks' | 'Mortalities'
-              if (header === 'Adipose Clipped') {
-                if (dataAtId.y === 1) return 'false'
-                if (dataAtId.y === 2) return 'true'
+          <>
+            <CustomModalHeader
+              headerText={
+                'Click on a cell to flag data as low confidence or edit value'
               }
-              else if (header === 'Species') {
-                return dataAtId.label
+              headerStyle={{ fontSize: 23, fontWeight: '300' }}
+              showHeaderButton={false}
+              closeModal={() => setModalData(null)}
+            />
+
+            <VStack alignItems={'center'}>
+              <Heading fontSize={23} mb={5}>
+                Table of Selected Points
+              </Heading>
+              <ScrollView horizontal size={'full'}>
+                <DataTable>
+                  <DataTable.Header>
+                    <DataTable.Title>Variable</DataTable.Title>
+                    {modalData.map((data, idx) => (
+                      <DataTable.Title key={idx}>{`Fish ${
+                        idx + 1
+                      }`}</DataTable.Title>
+                    ))}
+                  </DataTable.Header>
+
+                  <ScrollView size={'full'}>
+                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                        <Text>Species</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        const taxonCode = data.createdCatchRawResponse.taxonCode
+                        let species = taxonState.filter((obj: any) => {
+                          return obj.code === taxonCode
+                        })
+
+                        return (
+                          <DataTable.Cell
+                            style={{ minWidth: 100, width: '100%' }}
+                            key={`species-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('taxonCode', data)
+                            }
+                          >
+                            <Text>
+                              {species.length ? species[0].commonname : 'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                        <Text>Run</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let run = data.createdCatchRawResponse.captureRunClass
+
+                        return (
+                          <DataTable.Cell
+                            style={{ minWidth: 100, width: '100%' }}
+                            key={`run-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('captureRunClass', data)
+                            }
+                          >
+                            <Text>{run ?? 'NA'}</Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                        <Text>Lifestage</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let lifeStageId = data.createdCatchRawResponse.lifeStage
+                        let lifeStage = lifeStageState.filter((obj: any) => {
+                          return obj.id === lifeStageId
+                        })
+
+                        return (
+                          <DataTable.Cell
+                            style={{ minWidth: 100, width: '100%' }}
+                            key={`lifestage-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('lifeStage', data)
+                            }
+                          >
+                            <Text>
+                              {lifeStage.length
+                                ? lifeStage[0].definition
+                                : 'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                        <Text>Fork Length</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let forkLength = data.createdCatchRawResponse.forkLength
+
+                        return (
+                          <DataTable.Cell
+                            style={{ minWidth: 100, width: '100%' }}
+                            key={`forklength-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('forkLength', data)
+                            }
+                          >
+                            <Text>{forkLength ?? 'NA'}</Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                        <Text>Mark Type</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let markTypeCode = data.createdCatchRawResponse.markType
+                        let markType = markTypeState.filter((obj: any) => {
+                          return obj.id === markTypeCode
+                        })
+
+                        return (
+                          <DataTable.Cell
+                            style={{ minWidth: 100, width: '100%' }}
+                            key={`marktype-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('markType', data)
+                            }
+                          >
+                            <Text>
+                              {markType.length ? markType[0].definition : 'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                        <Text>Mort</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let mort = data.createdCatchRawResponse.dead
+
+                        return (
+                          <DataTable.Cell
+                            style={{ minWidth: 100, width: '100%' }}
+                            key={`mortality-${idx}`}
+                            onPress={() => handleModalCellPressed('dead', data)}
+                          >
+                            <Text>{mort != null ? `${mort}` : 'NA'}</Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                        <Text>Crew</Text>
+                      </DataTable.Cell>
+
+                      {modalData.map((data, idx) => {
+                        return (
+                          <DataTable.Cell
+                            style={{ minWidth: 100, width: '100%' }}
+                            key={`crew-${idx}`}
+                          >
+                            <Text>crew members</Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+                  </ScrollView>
+                </DataTable>
+              </ScrollView>
+            </VStack>
+          </>
+        </CustomModal>
+      ) : (
+        <></>
+      )}
+      {nestedModalData ? (
+        <CustomModal
+          isOpen={isModalOpen}
+          closeModal={() => handleCloseModal()}
+          height='1/2'
+        >
+          <>
+            <CustomModalHeader
+              headerText={
+                identifierToName[
+                  nestedModalData.fieldClicked as keyof typeof identifierToName
+                ]
               }
-              else {
-                return dataAtId.y
+              headerFontSize={23}
+              showHeaderButton={true}
+              closeModal={() => handleCloseNestedModal()}
+              headerButton={
+                <Button
+                  bg='primary'
+                  mx='2'
+                  px='10'
+                  shadow='3'
+                  onPress={() => {
+                    console.log('handle nested modal submit')
+                    handleSaveNestedModal()
+                    handleCloseNestedModal()
+                  }}
+                >
+                  <Text fontSize='xl' color='white'>
+                    Save
+                  </Text>
+                </Button>
               }
-            }}
-          />
+            />
+            <VStack
+              paddingX={20}
+              justifyContent='center'
+              justifyItems={'center'}
+            >
+              <Text color='black' fontSize='2xl' mb={5} fontWeight={'light'}>
+                You have the {nestedModalData.fieldClicked} marked as{' '}
+                <Text fontWeight={'bold'}>
+                  {get(
+                    nestedModalData.data,
+                    identifierToDataValueFromRecord[
+                      nestedModalData.fieldClicked as keyof typeof identifierToDataValueFromRecord
+                    ]
+                  )}
+                </Text>{' '}
+              </Text>
+              <Text color='black' fontSize='2xl' fontWeight={'light'}>
+                Click button below to flag data as low confidence or edit value
+                if you know true value.
+              </Text>
+              <HStack
+                justifyContent={'space-between'}
+                style={{ marginRight: 100 }}
+                w='full'
+              >
+                <Button
+                  style={{ backgroundColor: '#D1E8F0' }}
+                  paddingX={10}
+                  width={'3xs'}
+                >
+                  <HStack
+                    alignItems={'center'}
+                    justifyContent={'space-between'}
+                    w='20'
+                  >
+                    <Text color={'#007C7C'}>Flag</Text>
+                    <Icon
+                      as={MaterialIcons}
+                      name={'flag'}
+                      size='10'
+                      color='#FF4242'
+                    />
+                  </HStack>
+                </Button>
+                <Input
+                  height='50px'
+                  width='350px'
+                  fontSize='16'
+                  placeholder='Write a comment'
+                  keyboardType='default'
+                  // onChangeText={handleChange('comments')}
+                  // onBlur={handleBlur('comments')}
+                  value={'Flag Comment (optional)'}
+                />
+              </HStack>
+
+              <View mt='50px'>{CustomNestedModalInput(nestedModalData)}</View>
+            </VStack>
+          </>
         </CustomModal>
       ) : (
         <></>
@@ -348,10 +855,16 @@ function CatchCategoricalQC({
 
 const mapStateToProps = (state: RootState) => {
   let taxon = state.dropdowns.values.taxon
+  let run = state.dropdowns.values.run
+  let lifeStage = state.dropdowns.values.lifeStage
+  let markType = state.dropdowns.values.markType
 
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
-    taxon: taxon ?? [],
+    taxonState: taxon ?? [],
+    runState: run ?? [],
+    lifeStageState: lifeStage ?? [],
+    markTypeState: markType ?? [],
   }
 }
 
