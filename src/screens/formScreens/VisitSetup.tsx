@@ -275,7 +275,7 @@ const VisitSetup = ({
         )
       }
     }
-    dispatch(markStepCompleted([true, 'visitSetup']))
+    dispatch(markStepCompleted({ propName: 'visitSetup' }))
     console.log('🚀 ~ handleSubmit ~ Visit', payload)
   }
 
