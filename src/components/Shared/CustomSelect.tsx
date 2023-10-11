@@ -21,7 +21,7 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
     <Select
       height='50px'
       fontSize='16'
-      selectedValue={props.selectedValue}
+      selectedValue={props.selectedValue ?? ''}
       minWidth='100'
       style={props.style}
       accessibilityLabel={props.placeholder}
