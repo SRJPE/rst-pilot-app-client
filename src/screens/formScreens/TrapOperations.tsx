@@ -137,10 +137,10 @@ const TrapOperations = ({
         fontSize={16}
         onPress={() => {
           if (setFieldValue) {
-            if (text === '°F') {
-              setFieldValue('waterTemperatureUnit', '°C')
-            } else {
+            if (text === '°C') {
               setFieldValue('waterTemperatureUnit', '°F')
+            } else {
+              setFieldValue('waterTemperatureUnit', '°C')
             }
           }
         }}
@@ -322,8 +322,8 @@ const TrapOperations = ({
                   {values.trapStatus.length > 0 &&
                     values.trapStatus !== trapNotInServiceIdentifier && (
                       <>
-                        <HStack>
-                          <FormControl w='30%'>
+                        <FormControl w='30%'>
+                          <HStack space={4} alignItems='center'>
                             <FormControl.Label>
                               <Text color='black' fontSize='xl'>
                                 Cone Setting
@@ -342,56 +342,27 @@ const TrapOperations = ({
                                 }
                               }}
                             >
-                              <Radio
-                                colorScheme='primary'
-                                value='full'
-                                my={1}
-                                _icon={{ color: 'primary' }}
-                              >
-                                Full
-                              </Radio>
-                              <Radio
-                                colorScheme='primary'
-                                value='half'
-                                my={1}
-                                _icon={{ color: 'primary' }}
-                              >
-                                Half
-                              </Radio>
+                              <HStack space={4}>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='full'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  Full
+                                </Radio>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='half'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  Half
+                                </Radio>
+                              </HStack>
                             </Radio.Group>
-                          </FormControl>
-                          <FormControl w='47%'>
-                            <HStack space={4} alignItems='center'>
-                              <FormControl.Label>
-                                <Text color='black' fontSize='xl'>
-                                  Total Revolutions
-                                </Text>
-                              </FormControl.Label>
-                              {Number(values.totalRevolutions) >
-                                QARanges.totalRevolutions.max && (
-                                <RenderWarningMessage />
-                              )}
-                              {tabSlice.incompleteSectionTouched
-                                ? errors.totalRevolutions &&
-                                  RenderErrorMessage(errors, 'totalRevolutions')
-                                : touched.totalRevolutions &&
-                                  errors.totalRevolutions &&
-                                  RenderErrorMessage(
-                                    errors,
-                                    'totalRevolutions'
-                                  )}
-                            </HStack>
-                            <OptimizedInput
-                              height='50px'
-                              fontSize='16'
-                              placeholder='Numeric Value'
-                              keyboardType='numeric'
-                              onChangeText={handleChange('totalRevolutions')}
-                              onBlur={handleBlur('totalRevolutions')}
-                              value={values.totalRevolutions}
-                            />
-                          </FormControl>
-                        </HStack>
+                          </HStack>
+                        </FormControl>
                         <FormControl>
                           <HStack space={4} alignItems='center'>
                             <FormControl.Label>
