@@ -18,10 +18,10 @@ export interface ReleaseTrialValuesI {
 
 const initialState: InitialStateI = {
   completed: false,
-  totalFishHolding: null,
+  totalFishHolding: 0,
   values: {
-    wildCount: null,
-    deadWildCount: null,
+    wildCount: 0,
+    deadWildCount: 0,
     willSupplement: false,
     hatcheryCount: null,
     runIDHatchery: '',
