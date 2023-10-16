@@ -62,6 +62,7 @@ const TrapPostProcessing = ({
   navigationSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const [locationClicked, setLocationClicked] = useState(false as boolean)
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
     ;(async () => {
@@ -75,6 +76,7 @@ const TrapPostProcessing = ({
         setFieldValue('trapLongitude', currentLocation.coords.longitude)
         setFieldTouched('trapLatitude', true)
         setFieldTouched('trapLongitude', true)
+        setLocationClicked(false)
       } catch (error) {
         console.error(error)
       }
@@ -178,41 +180,71 @@ const TrapPostProcessing = ({
             >
               <VStack space={10}>
                 <Heading>Trap Post-Processing</Heading>
-                <FormControl w='1/2'>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Debris Volume
-                      </Text>
-                    </FormControl.Label>
-                    {Number(values.debrisVolume) >
-                      QARanges.debrisVolume.max && <RenderWarningMessage />}
-                    {tabSlice.incompleteSectionTouched
-                      ? errors.reasonNotFunc &&
-                        RenderErrorMessage(errors, 'debrisVolume')
-                      : touched.reasonNotFunc &&
-                        errors.reasonNotFunc &&
-                        RenderErrorMessage(errors, 'debrisVolume')}
-                  </HStack>
-                  <Input
-                    height='50px'
-                    fontSize='16'
-                    placeholder='Numeric Value'
-                    keyboardType='numeric'
-                    onChangeText={handleChange('debrisVolume')}
-                    onBlur={handleBlur('debrisVolume')}
-                    value={values.debrisVolume}
-                  />
-                  <Text
-                    color='#A1A1A1'
-                    position='absolute'
-                    top={50}
-                    right={4}
-                    fontSize={16}
-                  >
-                    {'gal'}
-                  </Text>
-                </FormControl>
+                <HStack space={8}>
+                  <FormControl w='40%'>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Debris Volume
+                        </Text>
+                      </FormControl.Label>
+                      {Number(values.debrisVolume) >
+                        QARanges.debrisVolume.max && <RenderWarningMessage />}
+                      {tabSlice.incompleteSectionTouched
+                        ? errors.reasonNotFunc &&
+                          RenderErrorMessage(errors, 'debrisVolume')
+                        : touched.reasonNotFunc &&
+                          errors.reasonNotFunc &&
+                          RenderErrorMessage(errors, 'debrisVolume')}
+                    </HStack>
+                    <Input
+                      height='50px'
+                      fontSize='16'
+                      placeholder='Numeric Value'
+                      keyboardType='numeric'
+                      onChangeText={handleChange('debrisVolume')}
+                      onBlur={handleBlur('debrisVolume')}
+                      value={values.debrisVolume}
+                    />
+                    <Text
+                      color='#A1A1A1'
+                      position='absolute'
+                      top={50}
+                      right={4}
+                      fontSize={16}
+                    >
+                      {'gal'}
+                    </Text>
+                  </FormControl>
+                  <FormControl w='40%'>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Total Revolutions
+                        </Text>
+                      </FormControl.Label>
+                      {Number(values.totalRevolutions) >
+                        QARanges.totalRevolutions.max && (
+                        <RenderWarningMessage />
+                      )}
+                      {tabSlice.incompleteSectionTouched
+                        ? errors.totalRevolutions &&
+                          RenderErrorMessage(errors, 'totalRevolutions')
+                        : touched.totalRevolutions &&
+                          errors.totalRevolutions &&
+                          RenderErrorMessage(errors, 'totalRevolutions')}
+                    </HStack>
+                    <Input
+                      height='50px'
+                      fontSize='16'
+                      placeholder='Numeric Value'
+                      keyboardType='numeric'
+                      onChangeText={handleChange('totalRevolutions')}
+                      onBlur={handleBlur('totalRevolutions')}
+                      value={values.totalRevolutions}
+                    />
+                  </FormControl>
+                </HStack>
 
                 <FormControl>
                   <HStack space={4} alignItems='center'>
@@ -304,7 +336,16 @@ const TrapPostProcessing = ({
                       // h='12%'
                       bg='primary'
                       px='10'
+                      isLoading={locationClicked}
+                      spinnerPlacement='end'
+                      isLoadingText='Drop Pin at Current Location'
+                      _loading={{
+                        _text: {
+                          fontSize: 'xl',
+                        },
+                      }}
                       onPress={() => {
+                        setLocationClicked(true)
                         getCurrentLocation(setFieldTouched, setFieldValue)
                       }}
                     >
@@ -312,7 +353,6 @@ const TrapPostProcessing = ({
                         Drop Pin at Current Location
                       </Text>
                     </Button>
-
                     <VStack space={3} alignSelf='center'>
                       <Text fontSize='xl' color='black'>
                         {values.trapLatitude
@@ -321,8 +361,8 @@ const TrapPostProcessing = ({
                       </Text>
                       <Text fontSize='xl' color='black'>
                         {values.trapLongitude
-                          ? `Lat:  ${values.trapLongitude}`
-                          : 'Lat:'}
+                          ? `Long:  ${values.trapLongitude}`
+                          : 'Long:'}
                       </Text>
                     </VStack>
                   </HStack>
