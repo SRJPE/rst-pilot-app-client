@@ -33,16 +33,6 @@ export const trapOperationsSchema = yup.object().shape({
     .required('Water Turbidity Required')
     .typeError('Input must be a number'),
   waterTurbidityUnit: yup.string(),
-
-  totalRevolutions: yup
-    .number()
-    // .transform(value => (isNaN(value) ? undefined : value))
-    // .transform((value, originalValue) => {
-    //   return originalValue === '' ? undefined : value
-    // })
-    .nullable()
-    .required('Total Revolutions Required')
-    .typeError('Input must be a number'),
   rpm1: yup
     .number()
     .required('Measurement 1 required')
@@ -64,6 +54,7 @@ export const trapPostProcessingSchema = yup.object().shape({
     .number()
     .required('Debris volume required')
     .typeError('Input must be a number'),
+  totalRevolutions: yup.number().nullable().typeError('Input must be a number'),
   rpm1: yup
     .number()
     .required('Measurement 1 required')
@@ -157,7 +148,7 @@ export const addIndividualFishSchemaOtherSpecies = yup.object().shape({
 
 export const addMarksOrTagsSchema = yup.object().shape({
   markType: yup.string().required('Mark Type is required'),
-  markCode: yup.number().typeError('Input must be a number'),
+  markCode: yup.string().required('Mark Code is required'),
   // position: yup.string()
   crewMember: yup.string().required('Crew Member is required'),
   // comments: yup.string(),
