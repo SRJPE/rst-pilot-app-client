@@ -129,9 +129,7 @@ const TabBar = ({
                   <Badge
                     colorScheme='danger'
                     rounded='full'
-                    mb={'50px'}
-                    ml={-9}
-                    mr={3}
+                    mr={2}
                     zIndex={1}
                     variant='solid'
                     alignSelf='flex-end'
