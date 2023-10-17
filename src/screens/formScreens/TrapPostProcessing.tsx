@@ -120,10 +120,24 @@ const TrapPostProcessing = ({
     )
     dispatch(markTrapPostProcessingCompleted({ tabId, value: true }))
     let stepCompletedCheck = true
-    Object.keys(tabSlice.tabs).forEach((tabId) => {
-      if (!reduxState[tabId]) stepCompletedCheck = false
+    const allTabIds: string[] = Object.keys(tabSlice.tabs)
+    allTabIds.forEach((allTabId) => {
+      if (!Object.keys(reduxState).includes(allTabId)) {
+        if (Object.keys(reduxState).length < allTabIds.length) {
+          stepCompletedCheck = false
+        }
+        if (Object.keys(errors).length) {
+          stepCompletedCheck = false
+        }
+      } else {
+        if (!reduxState[allTabId].completed) {
+          stepCompletedCheck = false
+        }
+      }
     })
-    if (stepCompletedCheck) dispatch(markStepCompleted([true]))
+
+    if (stepCompletedCheck)
+      dispatch(markStepCompleted({ propName: 'trapPostProcessing' }))
     console.log('🚀 ~ onSubmit ~ TrapPostProcessing', values)
   }
 

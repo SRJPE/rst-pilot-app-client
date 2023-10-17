@@ -81,11 +81,24 @@ const FishProcessing = ({
       dispatch(saveFishProcessing({ tabId, values, errors }))
       dispatch(markFishProcessingCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
-      Object.keys(tabSlice.tabs).forEach((tabId) => {
-        if (!reduxState[tabId]) stepCompletedCheck = false
+      const allTabIds: string[] = Object.keys(tabSlice.tabs)
+      allTabIds.forEach((allTabId) => {
+        if (!Object.keys(reduxState).includes(allTabId)) {
+          if (Object.keys(reduxState).length < allTabIds.length) {
+            stepCompletedCheck = false
+          }
+          if (Object.keys(errors).length) {
+            stepCompletedCheck = false
+          }
+        } else {
+          if (!reduxState[allTabId].completed) {
+            stepCompletedCheck = false
+          }
+        }
       })
+
       if (stepCompletedCheck)
-        dispatch(markStepCompleted([true, 'fishProcessing']))
+        dispatch(markStepCompleted({ propName: 'fishProcessing' }))
       console.log('🚀 ~ handleSubmit~ FishProcessing', values)
     }
   }

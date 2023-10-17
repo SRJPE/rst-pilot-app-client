@@ -119,10 +119,27 @@ const TrapOperations = ({
       )
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
-      Object.keys(tabSlice.tabs).forEach((tabId) => {
-        if (!reduxState[tabId]) stepCompletedCheck = false
+      const allTabIds: string[] = Object.keys(tabSlice.tabs)
+      allTabIds.forEach((allTabId) => {
+        if (!Object.keys(reduxState).includes(allTabId)) {
+          if (Object.keys(reduxState).length < allTabIds.length) {
+            stepCompletedCheck = false
+          }
+          if (Object.keys(errors).length) {
+            stepCompletedCheck = false
+          }
+        } else {
+          if (
+            !reduxState[allTabId].completed ||
+            Object.keys(reduxState[allTabId].errors).length
+          ) {
+            stepCompletedCheck = false
+          }
+        }
       })
-      if (stepCompletedCheck) dispatch(markStepCompleted([true]))
+
+      if (stepCompletedCheck)
+        dispatch(markStepCompleted({ propName: 'trapOperations' }))
       console.log('🚀 ~ handleSubmit ~ Status', values)
     }
   }
@@ -198,6 +215,7 @@ const TrapOperations = ({
       }) => {
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
+            console.log('tab switch')
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }

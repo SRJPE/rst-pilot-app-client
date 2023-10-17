@@ -92,10 +92,9 @@ const FishInput = ({
       )
       dispatch(markFishInputCompleted({ tabId: activeTabId, bool: true }))
       let stepCompletedCheck = true
-      Object.keys(tabSlice.tabs).forEach((tabId) => {
-        if (!fishInputSlice[tabId]) stepCompletedCheck = false
-      })
-      if (stepCompletedCheck) dispatch(markStepCompleted([true, 'fishInput']))
+
+      if (stepCompletedCheck)
+        dispatch(markStepCompleted({ propName: 'fishInput' }))
       console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
     }
   }
