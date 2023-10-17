@@ -124,16 +124,13 @@ const TrapPostProcessing = ({
     allTabIds.forEach((allTabId) => {
       if (!Object.keys(reduxState).includes(allTabId)) {
         if (Object.keys(reduxState).length < allTabIds.length) {
-          console.log('hit 1')
           stepCompletedCheck = false
         }
         if (Object.keys(errors).length) {
-          console.log('hit 2')
           stepCompletedCheck = false
         }
       } else {
         if (!reduxState[allTabId].completed) {
-          console.log('hit 3')
           stepCompletedCheck = false
         }
       }
