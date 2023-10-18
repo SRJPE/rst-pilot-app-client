@@ -176,9 +176,6 @@ const PlusCountModalContent = ({
                       Count
                     </Text>
                   </FormControl.Label>
-                  {Number(values.count) > QARanges.plusCount.max && (
-                    <RenderWarningMessage />
-                  )}
                   {touched.count &&
                     errors.count &&
                     RenderErrorMessage(errors, 'count')}

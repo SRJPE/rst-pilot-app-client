@@ -143,7 +143,10 @@ export const saveFishSlice = createSlice({
           forkLength: forkLength,
           run: 'not recorded', //updated
           weight: null,
-          lifeStage: species === 'Chinook salmon' ? lifeStage : 'not recorded', //updated
+          lifeStage:
+            species === 'Chinook salmon'
+              ? lifeStage.toLowerCase()
+              : 'not recorded', //updated
           adiposeClipped: adiposeClipped,
           existingMarks: existingMark ? existingMarks : [],
           dead: dead,

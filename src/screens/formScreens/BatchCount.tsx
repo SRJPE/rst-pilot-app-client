@@ -216,8 +216,13 @@ const BatchCount = ({
                   <Text>
                     Mark:{' '}
                     <Text bold>
-                      {existingMarks.length > 0
-                        ? `${existingMarks[0].markType} - ${existingMarks[0].markColor} - ${existingMarks[0].markPosition}`
+                      {existingMarks && existingMarks.length > 0
+                        ? `${existingMarks[0].markType} - ${
+                            existingMarks[0].markColor
+                          } - ${
+                            existingMarks[0].markPosition ||
+                            existingMarks[0].bodyPart
+                          }`
                         : 'N/A'}
                     </Text>
                   </Text>
@@ -377,9 +382,13 @@ const BatchCount = ({
                   Total Count: {calculateTotalCount()}
                 </Heading>
                 <HStack space={5}>
-                  <Button bg='primary' onPress={handlePressSaveBatchCount}>
+                  <Button
+                    bg='primary'
+                    onPress={() => handlePressRemoveFish()}
+                    isDisabled={calculateTotalCount() === 0}
+                  >
                     <Text fontSize='lg' bold color='white'>
-                      Save Batch Count
+                      Remove Last Fish
                     </Text>
                   </Button>
                 </HStack>
@@ -417,39 +426,40 @@ const BatchCount = ({
                   onToggle={() => handleToggles('dead')}
                 />
               </VStack>
-              <VStack alignItems='center' space={4} mt='2'>
-                <Text fontSize='16'>Mark</Text>
-                <Switch
-                  shadow='3'
-                  offTrackColor='secondary'
-                  onTrackColor='primary'
-                  size='md'
-                  isChecked={markToggle}
-                  onToggle={() => handleToggles('mark')}
-                />
-              </VStack>
-              <VStack alignItems='center' space={4} mt='2'>
-                <Text fontSize='16'>Condition</Text>
-                <Switch
-                  shadow='3'
-                  offTrackColor='secondary'
-                  onTrackColor='primary'
-                  size='md'
-                  isChecked={conditionToggle}
-                  onToggle={() => handleToggles('condition')}
-                />
-              </VStack>
+              {existingMarks && existingMarks.length > 0 && (
+                <VStack alignItems='center' space={4} mt='2'>
+                  <Text fontSize='16'>Mark</Text>
+                  <Switch
+                    shadow='3'
+                    offTrackColor='secondary'
+                    onTrackColor='primary'
+                    size='md'
+                    isChecked={markToggle}
+                    onToggle={() => handleToggles('mark')}
+                  />
+                </VStack>
+              )}
+              {fishCondition !== 'none' && (
+                <VStack alignItems='center' space={4} mt='2'>
+                  <Text fontSize='16'>Condition</Text>
+                  <Switch
+                    shadow='3'
+                    offTrackColor='secondary'
+                    onTrackColor='primary'
+                    size='md'
+                    isChecked={conditionToggle}
+                    onToggle={() => handleToggles('condition')}
+                  />
+                </VStack>
+              )}
               <VStack space={4}>
                 <Heading size='md'>
                   Last Fork length Entered: {calculateLastFish()}
                 </Heading>
-                <Button
-                  bg='primary'
-                  onPress={() => handlePressRemoveFish()}
-                  isDisabled={calculateTotalCount() === 0}
-                >
+
+                <Button bg='primary' onPress={handlePressSaveBatchCount}>
                   <Text fontSize='lg' bold color='white'>
-                    Remove Last Fish
+                    Save Batch Count
                   </Text>
                 </Button>
               </VStack>

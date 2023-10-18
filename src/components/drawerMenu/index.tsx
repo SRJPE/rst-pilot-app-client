@@ -111,12 +111,12 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             icon='home'
             title='Home'
           />
-          <MenuButton
+          {/* <MenuButton
             active={currentRoute === 'Sign In'}
             onPress={() => handlePressMainNavButton('Sign In')}
             icon='home'
             title='Sign In'
-          />
+          /> */}
           <MenuButton
             active={currentRoute === 'Profile'}
             onPress={() => {
@@ -138,6 +138,12 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             onPress={() => handlePressMainNavButton('Generate Report')}
             icon='bar-chart'
             title='Generate Report'
+          />
+          <MenuButton
+            active={currentRoute === 'Quality Control'}
+            onPress={() => handlePressMainNavButton('Quality Control')}
+            icon='bar-chart'
+            title='QC Data'
           />
           <MenuButton
             active={false}

@@ -250,8 +250,8 @@ const IncompleteSections = ({
             `${trapPostProcessingState[id].values.endingTrapStatus}`.toLowerCase()
           )
         ),
-        totalRevolutions: trapOperationsState[id].values.totalRevolutions
-          ? parseInt(trapOperationsState[id].values.totalRevolutions)
+        totalRevolutions: trapPostProcessingState[id].values.totalRevolutions
+          ? parseInt(trapPostProcessingState[id].values.totalRevolutions)
           : null,
         rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
         rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
