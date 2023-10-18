@@ -61,10 +61,11 @@ const ReleaseTrial = ({
       validationSchema={releaseTrialSchema}
       initialValues={releaseTrialStore.values}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
-      initialTouched={{ willSupplement: true }}
-      initialErrors={
-        releaseTrialStore.completed ? undefined : { wildCount: '' }
-      }
+      initialTouched={{
+        willSupplement: true,
+        wildCount: true,
+        deadWildCount: true,
+      }}
       onSubmit={(values) => {
         handleSubmit(values)
       }}
@@ -101,7 +102,7 @@ const ReleaseTrial = ({
                   <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
-                        Confirm number of fish used in release trial
+                        Confirm number of wild fish used in release trial
                       </Text>
                     </FormControl.Label>
                     <HStack space={4}>
@@ -135,7 +136,7 @@ const ReleaseTrial = ({
                       keyboardType='numeric'
                       onChangeText={handleChange('deadWildCount')}
                       onBlur={handleBlur('deadWildCount')}
-                      value={values.deadWildCount}
+                      value={`${values.deadWildCount}`}
                     />
                     {touched.deadWildCount &&
                       errors.deadWildCount &&

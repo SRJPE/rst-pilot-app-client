@@ -89,6 +89,22 @@ const ReleaseDataEntry = ({
         releaseSite.trapLocationsId
       ) !== -1
   )
+  const removeDuplicates = (obj: any[]) => {
+    const uniqueObj: any[] = []
+    const seenSet = new Set()
+    for (const item of obj) {
+      const releaseSiteName = item.releaseSiteName
+      if (!seenSet.has(releaseSiteName)) {
+        seenSet.add(releaseSiteName)
+        uniqueObj.push(item)
+      }
+    }
+    return uniqueObj
+  }
+
+  const tempReleaseSites = removeDuplicates(
+    visitSetupDefaultsState.releaseSites
+  )
 
   const onReleaseTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
@@ -199,7 +215,10 @@ const ReleaseDataEntry = ({
   return (
     <Formik
       validationSchema={releaseTrialDataEntrySchema}
-      initialValues={releaseTrialDataEntryState.values}
+      initialValues={{
+        ...releaseTrialDataEntryState.values,
+        releaseLocation: filteredReleaseSites[0],
+      }}
       onSubmit={(values) => {
         handleSubmit(values)
       }}
@@ -257,16 +276,14 @@ const ReleaseDataEntry = ({
                   </Text>
                 </FormControl.Label>
                 <CustomSelect
-                  selectedValue={values.releaseLocation}
+                  selectedValue={values.releaseLocation.releaseSiteName}
                   placeholder='Location'
                   onValueChange={handleChange('releaseLocation')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={filteredReleaseSites?.map(
-                    (releaseSite: any) => ({
-                      label: releaseSite?.releaseSiteName,
-                      value: releaseSite?.releaseSiteName,
-                    })
-                  )}
+                  selectOptions={tempReleaseSites?.map((releaseSite: any) => ({
+                    label: releaseSite?.releaseSiteName,
+                    value: releaseSite?.releaseSiteName,
+                  }))}
                 />
                 {touched.releaseLocation &&
                   errors.releaseLocation &&

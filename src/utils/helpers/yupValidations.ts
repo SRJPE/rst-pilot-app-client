@@ -207,7 +207,8 @@ export const releaseTrialSchema = yup.object().shape({
     is: true,
     then: yup
       .number()
-      .required('Hatchery run weight is required')
+
+      .nullable()
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
