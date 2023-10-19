@@ -75,7 +75,7 @@ const BatchCountButtonGrid = ({
         })
       ) : (
         <Text bold fontSize='lg'>
-          PLease select a fork length size range.
+          Please select a fork length size range.
         </Text>
       )}
     </Box>
