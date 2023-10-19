@@ -533,6 +533,7 @@ const VisitSetup = ({
                         setFieldValue={setFieldValue}
                         setFieldTouched={setFieldTouched}
                         visitSetupState={visitSetupState}
+                        stream={values.stream}
                         tabId={tabSlice?.activeTabId}
                       />
                     </FormControl>
