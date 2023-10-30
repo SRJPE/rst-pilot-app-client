@@ -109,16 +109,6 @@ const TabBar = ({
                     >
                       {tabSlice.tabs[tabId].name}
                     </Text>
-                    <Icon
-                      onPress={() => dispatch(deleteTab(tabId))}
-                      as={Ionicons}
-                      name='ios-close-circle'
-                      color='#FFF'
-                      size={6}
-                      margin='0'
-                      padding='0'
-                      marginLeft={3}
-                    />
                   </HStack>
                 </Button>
                 {tabSlice.incompleteSectionTouched &&
