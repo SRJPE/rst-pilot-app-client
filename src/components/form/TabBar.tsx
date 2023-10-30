@@ -151,22 +151,6 @@ const TabBar = ({
                 )}
               </Box>
             ))}
-            <Icon
-              onPress={() => {
-                const tabId = uid()
-                dispatch(createTab({ tabId, tabName: 'New Tab' }))
-                dispatch(setActiveTab(tabId))
-                headerProps.navigation.navigate('Trap Visit Form', {
-                  screen: 'Visit Setup',
-                })
-              }}
-              as={Ionicons}
-              name='ios-add-circle'
-              color='primary'
-              size={9}
-              margin='0'
-              padding='0'
-            />
           </HStack>
         </ScrollView>
       </Box>
