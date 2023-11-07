@@ -1,12 +1,8 @@
-import { Ionicons } from '@expo/vector-icons'
 import { NativeStackHeaderProps } from '@react-navigation/native-stack'
-import { Badge, Box, Icon, ScrollView, HStack, Button, Text } from 'native-base'
+import { Badge, Box, ScrollView, HStack, Button, Text, VStack } from 'native-base'
 import { useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
-import { uid } from 'uid'
 import {
-  createTab,
-  deleteTab,
   setActiveTab,
   TabStateI,
   updateErrorCount,
@@ -89,60 +85,75 @@ const TabBar = ({
     // show tab bar
     return (
       <Box px={'2%'} pt={'2%'}>
-        <ScrollView horizontal={true}>
-          <HStack alignItems={'center'} justifyContent='space-between'>
-            {Object.keys(tabSlice.tabs).map((tabId) => (
-              <Box key={`button-${tabId}`}>
-                <Button
-                  size={'lg'}
-                  height={'16'}
-                  bg={tabId == tabSlice.activeTabId ? 'primary' : 'secondary'}
-                  onPress={() => dispatch(setActiveTab(tabId))}
-                  mr={5}
-                >
-                  <HStack alignItems={'center'} justifyContent='space-between'>
-                    <Text
-                      fontSize='lg'
-                      color={
-                        tabId == tabSlice.activeTabId ? 'white' : 'primary'
-                      }
-                    >
-                      {tabSlice.tabs[tabId].name}
-                    </Text>
-                  </HStack>
-                </Button>
-                {tabSlice.incompleteSectionTouched &&
-                tabSlice.tabs[tabId].errorDetails[headerProps.route.name] &&
-                Object.keys(
-                  tabSlice.tabs[tabId].errorDetails[headerProps.route.name]
-                ).length ? (
-                  <Badge
-                    colorScheme='danger'
-                    rounded='full'
-                    mr={2}
-                    zIndex={1}
-                    variant='solid'
-                    alignSelf='flex-end'
-                    _text={{
-                      fontSize: 16,
-                    }}
-                    key={`badge-${tabId}`}
+        <VStack>
+          <ScrollView horizontal={true} width={'full'}>
+            <HStack
+              alignItems={'center'}
+              justifyContent='space-between'
+              w={'full'}
+            >
+              {Object.keys(tabSlice.tabs).map((tabId) => (
+                <Box key={`button-${tabId}`}>
+                  <Button
+                    size={'lg'}
+                    height={'16'}
+                    bg={tabId == tabSlice.activeTabId ? 'primary' : 'secondary'}
+                    onPress={() => dispatch(setActiveTab(tabId))}
+                    mr={5}
                   >
-                    {
-                      Object.keys(
-                        tabSlice.tabs[tabId].errorDetails[
-                          headerProps.route.name
-                        ]
-                      ).length
-                    }
-                  </Badge>
-                ) : (
-                  <></>
-                )}
-              </Box>
-            ))}
-          </HStack>
-        </ScrollView>
+                    <HStack
+                      alignItems={'center'}
+                      justifyContent='space-between'
+                    >
+                      <Text
+                        fontSize='lg'
+                        color={
+                          tabId == tabSlice.activeTabId ? 'white' : 'primary'
+                        }
+                      >
+                        {tabSlice.tabs[tabId].name}
+                      </Text>
+                    </HStack>
+                  </Button>
+                  {tabSlice.incompleteSectionTouched &&
+                  tabSlice.tabs[tabId].errorDetails[headerProps.route.name] &&
+                  Object.keys(
+                    tabSlice.tabs[tabId].errorDetails[headerProps.route.name]
+                  ).length ? (
+                    <Badge
+                      colorScheme='danger'
+                      rounded='full'
+                      mr={2}
+                      zIndex={1}
+                      variant='solid'
+                      alignSelf='flex-end'
+                      _text={{
+                        fontSize: 16,
+                      }}
+                      key={`badge-${tabId}`}
+                    >
+                      {
+                        Object.keys(
+                          tabSlice.tabs[tabId].errorDetails[
+                            headerProps.route.name
+                          ]
+                        ).length
+                      }
+                    </Badge>
+                  ) : (
+                    <></>
+                  )}
+                </Box>
+              ))}
+            </HStack>
+          </ScrollView>
+          {Object.keys(tabSlice.tabs).length > 1 && (
+            <Text fontSize={'lg'} color={'black'} fontWeight={'light'} mt={'2'}>
+              Please enter information for remaining tabs, if applicable, before
+              proceeding to the next level
+            </Text>
+          )}
+        </VStack>
       </Box>
     )
   } else if (

@@ -427,7 +427,7 @@ const AddFishContent = ({
     } else if (resetType === 'other') {
       identifier = 'whenSpeciesOther'
     }
-    // setSpecies(stateDefaults[identifier].species)
+        // setSpecies(stateDefaults[identifier].species)
     setForkLength(stateDefaults[identifier].forkLength)
     setRun(stateDefaults[identifier].run)
     setWeight(stateDefaults[identifier].weight)
@@ -1306,8 +1306,6 @@ const AddFishContent = ({
                   navigation.goBack()
                 }
               } else {
-                // bypasses formik to fix async issues.
-                // This should be fine since the button is only enabled when the form is valid
                 const activeTabId = tabSlice.activeTabId
                 if (activeTabId) {
                   saveIndividualFish({
@@ -1315,7 +1313,21 @@ const AddFishContent = ({
                     formValues: payload,
                   })
                   showSlideAlert(dispatch, 'Fish')
-                  resetFormState('other') //ths needs explanation from Hunter
+                  if (
+                    species.value &&
+                    typeof species.value === 'string' &&
+                    species.value.includes('Chinook')
+                  ) {
+                    resetFormState('chinook')
+                  } else if (
+                    species.value &&
+                    typeof species.value === 'string' &&
+                    species.value.includes('Steelhead')
+                  ) {
+                    resetFormState('steelhead')
+                  } else {
+                    resetFormState('other')
+                  }
                 }
               }
             }}
