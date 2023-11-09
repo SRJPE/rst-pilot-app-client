@@ -105,11 +105,11 @@ const FishInput = ({
         flex={1}
         scrollEnabled={screenHeight < 1180}
         bg='#fff'
-        py='4%'
+        py='0%'
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <Heading mb={showError ? '3' : '8'} px='5%'>
+        <Heading mb={showError ? '0' : '5'} px='5%'>
           Which species were captured?
         </Heading>
         <VStack space={6}>
