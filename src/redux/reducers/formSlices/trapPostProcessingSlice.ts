@@ -13,6 +13,7 @@ interface TrapPostProcessingStateI {
 export interface trapPostProcessingValuesI {
   debrisVolume: number | null
   totalRevolutions: number | null
+  waterTurbidity?: number | null
   rpm1: number | null
   rpm2: number | null
   rpm3: number | null
@@ -28,6 +29,7 @@ const initialState: InitialStateI = {
     values: {
       debrisVolume: null,
       totalRevolutions: null,
+      waterTurbidity: null,
       rpm1: null,
       rpm2: null,
       rpm3: null,
