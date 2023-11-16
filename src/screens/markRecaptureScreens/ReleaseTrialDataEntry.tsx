@@ -276,7 +276,7 @@ const ReleaseDataEntry = ({
                   </Text>
                 </FormControl.Label>
                 <CustomSelect
-                  selectedValue={values.releaseLocation.releaseSiteName}
+                  selectedValue={values.releaseLocation?.releaseSiteName}
                   placeholder='Location'
                   onValueChange={handleChange('releaseLocation')}
                   setFieldTouched={setFieldTouched}
