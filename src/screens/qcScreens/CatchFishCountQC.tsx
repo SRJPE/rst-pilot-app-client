@@ -40,24 +40,34 @@ function CatchFishCountQC({
     qcData.forEach((catchResponse) => {
       const catchRaw = catchResponse.createdCatchRawResponse
       const numFishCaught = catchRaw?.numFishCaught
-      const createdAtString = new Date(catchRaw?.createdAt).toDateString()
+      const createdAt = new Date(catchRaw.createdAt)
+      const normalizedDate = normalizeDate(createdAt)
 
-      if (Object.keys(datesFormatted).includes(createdAtString)) {
-        datesFormatted[createdAtString] += numFishCaught
+      if (Object.keys(datesFormatted).includes(String(normalizedDate))) {
+        datesFormatted[normalizedDate] += numFishCaught
       } else {
-        datesFormatted[createdAtString] = numFishCaught
+        datesFormatted[normalizedDate] = numFishCaught
       }
     })
 
     Object.keys(datesFormatted).forEach((dateString) => {
       totalCountByDay.push({
-        x: dateString,
+        x: Number(dateString),
         y: datesFormatted[dateString],
       })
     })
 
     setGraphData(totalCountByDay)
   }, [qcCatchRawSubmissions])
+
+  const normalizeDate = (date: Date) => {
+    date.setHours(0)
+    date.setMinutes(0)
+    date.setSeconds(0)
+    date.setMilliseconds(0)
+
+    return date.getTime()
+  }
 
   const handlePointClick = (datum: any) => {
     console.log('point clicked: ', datum)

@@ -272,11 +272,10 @@ export default function Graph({
         <VictoryAxis
           fixLabelOverlap={true}
           tickFormat={(value) => {
-            if (chartType === 'scatterplot') {
-              let date = new Date(Number(value))
-              return `${moment(date).format("MMM Do YY")}`
+            let date = new Date(Number(value))
+            if (String(date) !== 'Invalid Date' && chartType !== 'line') {
+              return `${moment(date).format('MMM Do YY')}`
             } else {
-
               return `${value}`
             }
           }}
