@@ -276,9 +276,14 @@ const IncompleteSections = ({
           },
           {
             measureName: 'water turbidity',
-            measureValueNumeric: trapOperationsState[id].values.waterTurbidity,
+            measureValueNumeric:
+              trapOperationsState[id].values.waterTurbidity ||
+              trapPostProcessingState[id].values.waterTurbidity ||
+              null,
             measureValueText:
-              trapOperationsState[id].values.waterTurbidity.toString(),
+              trapOperationsState[id].values?.waterTurbidity?.toString() ||
+              trapPostProcessingState[id].values?.waterTurbidity?.toString() ||
+              '',
             measureUnit: 25,
           },
         ],

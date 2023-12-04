@@ -99,7 +99,11 @@ export const QARanges = {
   flowMeasure: {
     'Mill Creek': { max: 2000, min: null },
     'Deer Creek': { max: 2000, min: null },
-    'Feather River': { max: 5000, min: 800 },
+    'Feather River': {
+      standard: { max: 3500, min: 50 },
+      eyeRiffle: { max: 16000, min: 50 },
+      herringerRiffle: { max: 20000, min: 50 },
+    },
     'Yuba River': { max: 3500, min: 50 },
   } as any,
   waterTemperature: { maxF: 100, maxC: 30, min: null },
@@ -179,7 +183,11 @@ export const markBadgeLookup = {
   },
 }
 
-export const getSubstring = (str: string, start: string, end: string): string => {
+export const getSubstring = (
+  str: string,
+  start: string,
+  end: string
+): string => {
   let char1 = str.indexOf(start) + 1
   let char2 = str.lastIndexOf(end)
   return str.substring(char1, char2)

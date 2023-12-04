@@ -1,5 +1,5 @@
 import { Formik, yupToFormErrors } from 'formik'
-import { connect, useDispatch } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
   Text,
@@ -62,6 +62,11 @@ const TrapPostProcessing = ({
   navigationSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const recordTurbidityInPostProcessing = useSelector(
+    (state: any) =>
+      state.trapOperations[tabSlice.activeTabId].values
+        .recordTurbidityInPostProcessing
+  )
   const [locationClicked, setLocationClicked] = useState(false as boolean)
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
@@ -195,7 +200,7 @@ const TrapPostProcessing = ({
               <VStack space={10}>
                 <Heading>Trap Post-Processing</Heading>
                 <HStack space={8}>
-                  <FormControl w='40%'>
+                  <FormControl w='30%'>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
@@ -230,7 +235,7 @@ const TrapPostProcessing = ({
                       {'gal'}
                     </Text>
                   </FormControl>
-                  <FormControl w='40%'>
+                  <FormControl w='30%'>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
@@ -258,6 +263,43 @@ const TrapPostProcessing = ({
                       value={values.totalRevolutions}
                     />
                   </FormControl>
+                  {recordTurbidityInPostProcessing && (
+                    <FormControl w='30%'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Water Turbidity
+                        </Text>
+                      </FormControl.Label>
+                      <Input
+                        height='50px'
+                        fontSize='16'
+                        placeholder='Numeric Value'
+                        keyboardType='numeric'
+                        onChangeText={handleChange('waterTurbidity')}
+                        onBlur={handleBlur('waterTurbidity')}
+                        value={values.waterTurbidity}
+                      />
+
+                      <Text
+                        color='#A1A1A1'
+                        position='absolute'
+                        top={50}
+                        right={4}
+                        fontSize={16}
+                      >
+                        {'ntu'}
+                      </Text>
+
+                      {Number(values.waterTurbidity) >
+                        QARanges.waterTurbidity.max && <RenderWarningMessage />}
+                      {tabSlice.incompleteSectionTouched
+                        ? errors.totalRevolutions &&
+                          RenderErrorMessage(errors, 'waterTurbidity')
+                        : touched.totalRevolutions &&
+                          errors.totalRevolutions &&
+                          RenderErrorMessage(errors, 'waterTurbidity')}
+                    </FormControl>
+                  )}
                 </HStack>
 
                 <FormControl>

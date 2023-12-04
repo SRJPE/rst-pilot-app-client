@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Formik, yupToFormErrors } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -17,6 +17,7 @@ import {
   Radio,
   ScrollView,
   KeyboardAvoidingView,
+  Switch,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
@@ -71,6 +72,7 @@ const TrapOperations = ({
   const { whyTrapNotFunctioning } = dropdownValues
   const trapNotInServiceLabel = '- restart trapping'
   const trapNotInServiceIdentifier = 'trap not in service - restart trapping'
+  const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
 
   const calculateTempWarning = (
     waterTemperatureValue: number,
@@ -110,6 +112,9 @@ const TrapOperations = ({
         dispatch(updateTrapVisitStartTime(newDate))
       }
       const errors = checkForErrors(values)
+      if (values.recordTurbidityInPostProcessing) {
+        values.waterTurbidity = null
+      }
       dispatch(
         saveTrapOperations({
           tabId,
@@ -514,7 +519,48 @@ const TrapOperations = ({
                           </Text>
                         </FormControl>
 
-                        <Heading>Environmental Conditions</Heading>
+                        <HStack
+                          space={5}
+                          width='100%'
+                          justifyContent='space-between'
+                        >
+                          <Heading>Environmental Conditions</Heading>
+                          <FormControl w='30%'>
+                            <HStack space={2} alignItems='center'>
+                              <FormControl.Label>
+                                <Text fontSize='14'>
+                                  Record Turbidity in Post Processing
+                                </Text>
+                              </FormControl.Label>
+                              <Switch
+                                name='recordTurbidityInPostProcessing'
+                                shadow='3'
+                                offTrackColor='secondary'
+                                onTrackColor='primary'
+                                size='md'
+                                isChecked={turbidityToggle}
+                                value={values.recordTurbidityInPostProcessing}
+                                onToggle={() => {
+                                  setFieldValue('waterTurbidity', null)
+                                  if (!turbidityToggle) {
+                                    setFieldValue(
+                                      'recordTurbidityInPostProcessing',
+                                      true
+                                    )
+                                  } else {
+                                    setFieldValue(
+                                      'recordTurbidityInPostProcessing',
+                                      false
+                                    )
+                                  }
+
+                                  setTurbidityToggle(!turbidityToggle)
+                                }}
+                              />
+                            </HStack>
+                          </FormControl>
+                        </HStack>
+
                         <HStack space={5} width='125%'>
                           <FormControl w='1/4'>
                             <FormControl.Label>
@@ -589,6 +635,7 @@ const TrapOperations = ({
                             </FormControl.Label>
 
                             <OptimizedInput
+                              isDisabled={turbidityToggle}
                               height='50px'
                               fontSize='16'
                               placeholder='Numeric Value'

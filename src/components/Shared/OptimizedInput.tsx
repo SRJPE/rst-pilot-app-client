@@ -7,6 +7,7 @@ import {
 } from 'react-native'
 
 interface OptimizedInputI {
+  isDisabled?: boolean
   height?: string
   fontSize?: string
   placeholder?: string
@@ -34,6 +35,7 @@ const OptimizedInput: React.FC<OptimizedInputI> = (props) => {
 
   return (
     <Input
+      isDisabled={props.isDisabled}
       height={props.height}
       fontSize={props.fontSize}
       placeholder={props.placeholder}
