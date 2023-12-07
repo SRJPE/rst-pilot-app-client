@@ -114,7 +114,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
         trapVisitSubmissions.map(async (trapSubmission: any) => {
           const uid = trapSubmission.uid
           const trapSubmissionCopy = cloneDeep(trapSubmission)
-          delete trapSubmissionCopy['uid']
+
           // submit trap visit
           const apiResponse: APIResponseI = await api.post(
             'trap-visit/',
