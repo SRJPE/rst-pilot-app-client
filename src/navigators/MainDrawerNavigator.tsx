@@ -21,26 +21,39 @@ const DrawerNavigator = ({
 }) => {
   return (
     <Drawer.Navigator
-      // initialRouteName='Sign In'
-      initialRouteName='Home'
+      initialRouteName='Sign In'
+      // initialRouteName='Home'
       screenOptions={{ drawerType: 'front' }}
       drawerContent={(props) => <DrawerMenu {...props} />}
     >
-      {/* {storedCredentialsStore === null ? ( */}
-      <Drawer.Screen
-        name='Sign In'
-        component={SignIn}
-        options={{
-          headerShown: false,
-          // swipeEnabled: false,
-        }}
-      />
-      {/* ) : ( */}
+      {/* 
+      
+      UN-COMMENT THIS CODE TO REACTIVATE NAV AUTH REQUIREMENT 
+
+      {storedCredentialsStore === null ? (
+        <Drawer.Screen
+          name='Sign In'
+          component={SignIn}
+          options={{
+            headerShown: false,
+            swipeEnabled: true,
+          }}
+        />
+      ) : ( */}
       <>
+        {/*   "Sign In" screen should be removed from this block when the above code is commented out */}
+        <Drawer.Screen
+          name='Sign In'
+          component={SignIn}
+          options={{
+            headerShown: false,
+            swipeEnabled: true,
+          }}
+        />
         <Drawer.Screen
           name='Home'
           component={Home}
-          options={{ headerShown: false }}
+          options={{ headerShown: false, swipeEnabled: true }}
         />
         <Drawer.Screen name='Profile' component={Profile} />
         <Drawer.Screen name='Permit Info' component={PermitInfo} />
