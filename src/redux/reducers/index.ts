@@ -52,6 +52,9 @@ const trapVisitPostPersistConfig = {
   version: 1,
   storage: AsyncStorage,
 }
+// SHOULD POSSIBLY USE SECURE STORE INSTEAD OF ASYNC STORAGE
+//import SecureStore from 'expo-secure-store'
+
 const userCredentialsPersistConfig = {
   key: 'userCredentialsPersistConfig',
   version: 1,
