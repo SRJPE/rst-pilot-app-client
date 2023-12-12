@@ -94,30 +94,36 @@ const IncompleteSections = ({
   }, [])
 
   const handleSubmit = () => {
-    saveTrapVisits()
-    saveCatchRawSubmission()
-    resetAllFormSlices()
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Visit Setup' }],
-    })
-
-    // navigation.dispatch(
-    //   CommonActions.reset({
-    //     index: 0,
-    //     routes: [{ name: 'Visit Setup' }],
-    //   })
-    // )
-
-    // navigation.navigate.popToTop()
-
-    // navigation.dispatch(StackActions.popToTop())
-
-    if (
-      connectivityState.isConnected &&
-      connectivityState.isInternetReachable
-    ) {
-      dispatch(postTrapVisitFormSubmissions())
+    try {
+      saveTrapVisits()
+      saveCatchRawSubmission()
+      resetAllFormSlices()
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Visit Setup' }],
+      })
+  
+      // navigation.dispatch(
+      //   CommonActions.reset({
+      //     index: 0,
+      //     routes: [{ name: 'Visit Setup' }],
+      //   })
+      // )
+  
+      // navigation.navigate.popToTop()
+  
+      // navigation.dispatch(StackActions.popToTop())
+  
+      if (
+        connectivityState.isConnected &&
+        connectivityState.isInternetReachable
+      ) {
+        dispatch(postTrapVisitFormSubmissions())
+      } else {
+        console.log('Connection issue during submission')
+      }
+    } catch (error) {
+      console.log('error: ', error)
     }
   }
 
