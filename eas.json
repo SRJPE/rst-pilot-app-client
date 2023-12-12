@@ -16,7 +16,6 @@
     "production": {},
     "devclient": {
       "extends": "base",
-      "releaseChannel": "default",
       "channel": "default",
       "distribution": "internal",
       "developmentClient": true,
