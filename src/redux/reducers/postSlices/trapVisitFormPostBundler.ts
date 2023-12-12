@@ -20,7 +20,7 @@ interface InitialStateI {
 }
 
 interface TrapVisitSubmissionI {
-  uid: string
+  trapVisitUid: string
   crew?: number[]
   id?: number
   programId?: number
@@ -456,13 +456,13 @@ export const trapVisitPostBundler = createSlice({
 
     [postTrapVisitFormSubmissions.rejected.type]: (state, action) => {
       let errorDetail: string = action.payload.error.data.detail
-      let { failedTrapVisitSubmissions, failedCatchRawSubmissions } =
+            let { failedTrapVisitSubmissions, failedCatchRawSubmissions } =
         action.payload
       if (errorDetail.includes('already exists')) {
         // if duplicate trap visit
         if (
           errorDetail.includes(
-            'Key (program_id, trap_location_id, trap_visit_time_start)'
+            'Key (program_id, trap_location_id, trap_visit_uuid)'
           )
         ) {
           let index = getIndexOfDuplicateTrapVisit({
