@@ -26,9 +26,8 @@ const DrawerNavigator = ({
       screenOptions={{ drawerType: 'front' }}
       drawerContent={(props) => <DrawerMenu {...props} />}
     >
-      {/* 
-      
-      UN-COMMENT THIS CODE TO REACTIVATE NAV AUTH REQUIREMENT 
+      {/*       
+      UN-COMMENT THIS CODE TO REACTIVATE NAV AUTH REQUIREMENT  */}
 
       {storedCredentialsStore === null ? (
         <Drawer.Screen
@@ -39,34 +38,25 @@ const DrawerNavigator = ({
             swipeEnabled: true,
           }}
         />
-      ) : ( */}
-      <>
-        {/*   "Sign In" screen should be removed from this block when the above code is commented out */}
-        <Drawer.Screen
-          name='Sign In'
-          component={SignIn}
-          options={{
-            headerShown: false,
-            swipeEnabled: true,
-          }}
-        />
-        <Drawer.Screen
-          name='Home'
-          component={Home}
-          options={{ headerShown: false, swipeEnabled: true }}
-        />
-        <Drawer.Screen name='Profile' component={Profile} />
-        <Drawer.Screen name='Permit Info' component={PermitInfo} />
-        <Drawer.Screen name='Generate Report' component={GenerateReport} />
-        <Drawer.Screen name='Quality Control' component={QCForm} />
-        <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
-        <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
-        <Drawer.Screen
-          name='Monitoring Program'
-          component={MonitoringProgram}
-        />
-      </>
-      {/* )} */}
+      ) : (
+        <>
+          <Drawer.Screen
+            name='Home'
+            component={Home}
+            options={{ headerShown: false, swipeEnabled: true }}
+          />
+          <Drawer.Screen name='Profile' component={Profile} />
+          <Drawer.Screen name='Permit Info' component={PermitInfo} />
+          <Drawer.Screen name='Generate Report' component={GenerateReport} />
+          <Drawer.Screen name='Quality Control' component={QCForm} />
+          <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
+          <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
+          <Drawer.Screen
+            name='Monitoring Program'
+            component={MonitoringProgram}
+          />
+        </>
+      )}
     </Drawer.Navigator>
   )
 }

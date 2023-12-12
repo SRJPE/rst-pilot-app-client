@@ -5,13 +5,13 @@ export default ({ config }) => {
     ...config,
     name: 'rst-pilot-app',
     slug: 'rst-pilot-app',
-    owner: "flowwest",
+    owner: 'flowwest',
     runtimeVersion: {
       policy: 'sdkVersion',
     },
     ios: {
       bundleIdentifier: 'com.flowwest.rstapp',
-      supportsTablet: true
+      supportsTablet: true,
     },
     extra: {
       REACT_APP_BASE_URL: process.env.REACT_APP_BASE_URL,
@@ -22,5 +22,6 @@ export default ({ config }) => {
     updates: {
       url: 'https://u.expo.dev/a6f6224b-3c38-4476-ad72-6cbea4d1bdc6',
     },
+    scheme: 'com.onmicrosoft.rstb2c.rsttabletapp',
   }
 }
