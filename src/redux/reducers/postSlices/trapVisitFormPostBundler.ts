@@ -20,7 +20,7 @@ interface InitialStateI {
 }
 
 interface TrapVisitSubmissionI {
-  uid: string
+  trapVisitUid: string
   crew?: number[]
   id?: number
   programId?: number
@@ -188,7 +188,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
     try {
       const state = thunkAPI.getState() as RootState
       await Promise.all(
-        programIds.map(async (programId) => {
+        programIds.map(async programId => {
           const trapVisitResponse = await api.get(
             `trap-visit/program/${programId}`
           )
@@ -200,7 +200,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCTrapVisitIds: number[] =
             state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
-              (trapVisit) => {
+              trapVisit => {
                 return trapVisit.createdTrapVisitResponse.id
               }
             )
@@ -215,7 +215,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCCatchRawIds: number[] =
             state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
-              (catchRaw) => {
+              catchRaw => {
                 return catchRaw.createdCatchRawResponse.id
               }
             )
@@ -408,12 +408,12 @@ export const trapVisitPostBundler = createSlice({
         let catchRawToQC: any = state.previousCatchRawSubmissions[catchRawIdx]
 
         if (submissionKeys.includes('Fork Length')) {
-          catchRawToQC.createdCatchRawResponse.forkLength = submission['Fork Length'].y
+          catchRawToQC.createdCatchRawResponse.forkLength =
+            submission['Fork Length'].y
         }
 
         if (submissionKeys.includes('Weight')) {
-          catchRawToQC.createdCatchRawResponse.weight =
-            submission['Weight'].y
+          catchRawToQC.createdCatchRawResponse.weight = submission['Weight'].y
         }
 
         catchRawToQC.createdCatchRawResponse.qcCompleted = true
@@ -462,8 +462,9 @@ export const trapVisitPostBundler = createSlice({
         // if duplicate trap visit
         if (
           errorDetail.includes(
-            'Key (program_id, trap_location_id, trap_visit_time_start)'
-          )
+            'Key (program_id, trap_location_id, trap_visit_uuid)'
+          ) ||
+          errorDetail.includes('Key (trap_visit_uid)')
         ) {
           let index = getIndexOfDuplicateTrapVisit({
             errorDetail,
