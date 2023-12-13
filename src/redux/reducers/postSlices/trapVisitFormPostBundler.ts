@@ -461,10 +461,10 @@ export const trapVisitPostBundler = createSlice({
       if (errorDetail.includes('already exists')) {
         // if duplicate trap visit
         if (
-          [
-            'Key (program_id, trap_location_id, trap_visit_time_start)',
-            'Key (trap_visit_uid)',
-          ].includes(errorDetail)
+          errorDetail.includes(
+            'Key (program_id, trap_location_id, trap_visit_uuid)'
+          ) ||
+          errorDetail.includes('Key (trap_visit_uid)')
         ) {
           let index = getIndexOfDuplicateTrapVisit({
             errorDetail,
