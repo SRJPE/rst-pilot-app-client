@@ -462,10 +462,10 @@ export const trapVisitPostBundler = createSlice({
         // if duplicate trap visit
         if (
           errorDetail.includes(
-            'Key (program_id, trap_location_id, trap_visit_uuid)'
+            'Key (trap_visit_uid)='
           )
         ) {
-          let index = getIndexOfDuplicateTrapVisit({
+                    let index = getIndexOfDuplicateTrapVisit({
             errorDetail,
             failedTrapVisitSubmissions,
           })
