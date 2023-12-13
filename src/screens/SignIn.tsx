@@ -110,28 +110,19 @@ const SignIn = ({ navigation }: { navigation: any }) => {
 
   // Endpoint
   const discovery = useAutoDiscovery(
-    `https://login.microsoftonline.com/${REACT_APP_TENANT_ID}/v2.0`
-    // 'https://rsttabletapp.b2clogin.com/5d42c8af-da07-4e6f-a290-f57c473612cf/v2.0/'
-    // 'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_signin'
+    'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/B2C_1_signin/v2.0/'
   )
 
   console.log('🚀 ~ SignIn ~ discovery:', discovery)
-  // const discovery = {
-  //   authorizationEndpoint:
-  //     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/authorize?p=b2c_1_signin',
-  //   tokenEndpoint:
-  //     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_signin',
-  // }
-  // const redirectUri = REACT_APP_REDIRECT_URI
 
-  const redirectUri = makeRedirectUri({
-    // scheme: 'com.onmicrosoft.rstb2c.rsttabletapp',
-    scheme: undefined,
-    path: 'oauth/redirect',
-  })
+  // const redirectUri = makeRedirectUri({
+  //   scheme: 'com.onmicrosoft.rstb2c.rsttabletapp',
+  //   // scheme: undefined,
+  //   path: 'oauth/redirect',
+  // })
+
+  const redirectUri = 'com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect'
   console.log('🚀 ~ SignIn ~ redirectUri:', redirectUri)
-
-  // const redirectUri = 'com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect'
 
   // ('com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect')
 
@@ -238,7 +229,7 @@ const SignIn = ({ navigation }: { navigation: any }) => {
               //   setAuthorizeResult(authorizeResult)
               // }
               () => {
-                promptAsync().then((codeResponse) => {
+                promptAsync().then(codeResponse => {
                   if (
                     request &&
                     codeResponse?.type === 'success' &&
@@ -254,7 +245,7 @@ const SignIn = ({ navigation }: { navigation: any }) => {
                         redirectUri,
                       },
                       discovery
-                    ).then((res) => {
+                    ).then(res => {
                       console.log('🚀 ~ res.accessToken:', res.accessToken)
                       setToken(res.accessToken)
                       dispatch(saveUserCredentials(res.accessToken))
