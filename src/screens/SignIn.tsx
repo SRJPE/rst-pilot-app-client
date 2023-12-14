@@ -132,10 +132,17 @@ const SignIn = ({ navigation }: { navigation: any }) => {
   const [token, setToken] = React.useState<string | null>(null)
 
   // Request
-  const [request, , promptAsync] = useAuthRequest(
+  const [request, response, promptAsync] = useAuthRequest(
     {
       clientId,
-      scopes: ['openid', 'profile', 'email', 'offline_access'],
+      scopes: [
+        'openid',
+        'profile',
+        'email',
+        'offline_access',
+        'https://rsttabletapp.onmicrosoft.com/jpe-server-api/api.read',
+        'https://rsttabletapp.onmicrosoft.com/jpe-server-api/api.write',
+      ],
       redirectUri,
     },
     discovery
