@@ -272,388 +272,399 @@ function PartialRecordsQC({
 
             <Divider my={2} thickness='3' />
 
-            <DataTable>
-              <DataTable.Header>
-                <DataTable.Title style={{ justifyContent: 'center' }}>
-                  date
-                </DataTable.Title>
-                <DataTable.Title style={{ justifyContent: 'center' }}>
-                  run
-                </DataTable.Title>
-                <DataTable.Title style={{ justifyContent: 'center' }}>
-                  fork length
-                </DataTable.Title>
-                <DataTable.Title style={{ justifyContent: 'center' }}>
-                  lifestage
-                </DataTable.Title>
-                <DataTable.Title style={{ justifyContent: 'center' }}>
-                  dead
-                </DataTable.Title>
-                <DataTable.Title style={{ justifyContent: 'center' }}>
-                  count
-                </DataTable.Title>
-                <DataTable.Title style={{ justifyContent: 'center' }}>
-                  stream
-                </DataTable.Title>
-                <DataTable.Title style={{ justifyContent: 'center' }}>
-                  site
-                </DataTable.Title>
-              </DataTable.Header>
+            <ScrollView horizontal={true} width={'100%'}>
+              <DataTable style={{minWidth: '100%'}}>
+                <DataTable.Header>
+                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                    date
+                  </DataTable.Title>
+                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                    run
+                  </DataTable.Title>
+                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                    fork length
+                  </DataTable.Title>
+                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                    lifestage
+                  </DataTable.Title>
+                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                    dead
+                  </DataTable.Title>
+                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                    count
+                  </DataTable.Title>
+                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                    stream
+                  </DataTable.Title>
+                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                    site
+                  </DataTable.Title>
+                </DataTable.Header>
 
-              <ScrollView>
-                {rowsNotRecordedData.map(
-                  ({ createdCatchRawResponse, releaseResponse }, idx) => {
-                    // Nested Modal Form Values
-                    const catchRawId = createdCatchRawResponse.id
-                    const programId = createdCatchRawResponse.programId
-                    const createdAt = createdCatchRawResponse.createdAt
-                      ? new Date(
-                          createdCatchRawResponse.createdAt
-                        ).toLocaleDateString()
-                      : 'NA'
-                    const captureRunClass =
-                      createdCatchRawResponse.captureRunClass ?? 'NA'
-                    const forkLength =
-                      createdCatchRawResponse.forkLength ?? 'NA'
-                    const lifestage = createdCatchRawResponse.lifestage ?? 'NA'
-                    const dead = `${createdCatchRawResponse.dead ?? 'NA'}`
-                    const numFishCaught =
-                      createdCatchRawResponse.numFishCaught ?? 'NA'
-                    const program = programs.filter(
-                      (program) => programId === program.id
-                    )
-                    const stream = program ? program[0].streamName : 'NA'
-                    let releaseSiteArr = releaseSites.filter((releaseSite) => {
-                      if (releaseResponse)
-                        return releaseSite.id === releaseResponse.releaseSiteId
-                    })
-                    const releaseSite = releaseSiteArr.length
-                      ? releaseSiteArr[0].releaseSiteName
-                      : 'NA'
+                <ScrollView>
+                  {rowsNotRecordedData.map(
+                    ({ createdCatchRawResponse, releaseResponse }, idx) => {
+                      // Nested Modal Form Values
+                      const catchRawId = createdCatchRawResponse.id
+                      const programId = createdCatchRawResponse.programId
+                      const createdAt = createdCatchRawResponse.createdAt
+                        ? new Date(
+                            createdCatchRawResponse.createdAt
+                          ).toLocaleDateString()
+                        : 'NA'
+                      const captureRunClass =
+                        createdCatchRawResponse.captureRunClass ?? 'NA'
+                      const forkLength =
+                        createdCatchRawResponse.forkLength ?? 'NA'
+                      const lifestage =
+                        createdCatchRawResponse.lifestage ?? 'NA'
+                      const dead = `${createdCatchRawResponse.dead ?? 'NA'}`
+                      const numFishCaught =
+                        createdCatchRawResponse.numFishCaught ?? 'NA'
+                      const program = programs.filter(
+                        (program) => programId === program.id
+                      )
+                      const stream = program ? program[0].streamName : 'NA'
+                      let releaseSiteArr = releaseSites.filter(
+                        (releaseSite) => {
+                          if (releaseResponse)
+                            return (
+                              releaseSite.id === releaseResponse.releaseSiteId
+                            )
+                        }
+                      )
+                      const releaseSite = releaseSiteArr.length
+                        ? releaseSiteArr[0].releaseSiteName
+                        : 'NA'
 
-                    return (
-                      <DataTable.Row
-                        key={`${createdCatchRawResponse.id}-${idx}`}
-                        style={[{ height: 55, justifyContent: 'center' }]}
-                      >
-                        <DataTable.Cell
-                          onPress={() =>
-                            handleOpenNestedModal({
-                              catchRawId,
-                              fieldName: 'createdAt',
-                              fieldValue: createdAt,
-                              modalHeader: 'Date Editor',
-                              modalText: (
-                                <Text
-                                  color='black'
-                                  fontSize='2xl'
-                                  mb={5}
-                                  fontWeight={'light'}
-                                >
-                                  You have this date marked as{' '}
-                                  <Text fontWeight={'bold'}>{createdAt}</Text>{' '}
-                                </Text>
-                              ),
-                              modalInput: (
-                                <VStack alignItems={'flex-start'}>
-                                  <Text>Edit Date</Text>
-                                  <DateTimePicker
-                                    value={new Date(createdAt)}
-                                    mode='date'
-                                    onChange={(event, selectedDate) =>
-                                      setNestedModalValue(selectedDate)
-                                    }
-                                    accentColor='#007C7C'
-                                  />
-                                </VStack>
-                              ),
-                            })
-                          }
-                          style={{ justifyContent: 'center' }}
-                          numeric
+                      return (
+                        <DataTable.Row
+                          key={`${createdCatchRawResponse.id}-${idx}`}
+                          style={[{ height: 55, justifyContent: 'center' }]}
                         >
-                          {createdAt}
-                        </DataTable.Cell>
-                        <DataTable.Cell
-                          onPress={() =>
-                            handleOpenNestedModal({
-                              catchRawId,
-                              fieldName: 'captureRunClass',
-                              fieldValue: captureRunClass,
-                              modalHeader: 'Run Editor',
-                              modalText: (
-                                <Text
-                                  color='black'
-                                  fontSize='2xl'
-                                  mb={5}
-                                  fontWeight={'light'}
-                                >
-                                  You have the run marked as{' '}
-                                  <Text fontWeight={'bold'}>
-                                    {captureRunClass}
-                                  </Text>{' '}
-                                </Text>
-                              ),
-                              modalInput: (
-                                <VStack alignItems={'flex-start'}>
-                                  <Text>Edit run</Text>
-                                  <Input
-                                    height='50px'
-                                    width='350px'
-                                    fontSize='16'
-                                    placeholder='Write a comment'
-                                    keyboardType='default'
-                                    onChangeText={(value) =>
-                                      setNestedModalValue(value)
-                                    }
-                                    // onBlur={handleBlur('comments')}
-                                    value={captureRunClass}
-                                  />
-                                </VStack>
-                              ),
-                            })
-                          }
-                          style={{ justifyContent: 'center' }}
-                          numeric
-                        >
-                          {captureRunClass}
-                        </DataTable.Cell>
-                        <DataTable.Cell
-                          onPress={() =>
-                            handleOpenNestedModal({
-                              catchRawId,
-                              fieldName: 'forkLength',
-                              fieldValue: forkLength,
-                              modalHeader: 'Fork Length Editor',
-                              modalText: (
-                                <Text
-                                  color='black'
-                                  fontSize='2xl'
-                                  mb={5}
-                                  fontWeight={'light'}
-                                >
-                                  You have the fork length marked as{' '}
-                                  <Text fontWeight={'bold'}>{forkLength}</Text>{' '}
-                                </Text>
-                              ),
-                              modalInput: (
-                                <VStack alignItems={'flex-start'}>
-                                  <Text>Edit fork length</Text>
-                                  <Input
-                                    height='50px'
-                                    width='350px'
-                                    fontSize='16'
-                                    placeholder='Write a comment'
-                                    keyboardType='numeric'
-                                    onChangeText={(value) =>
-                                      setNestedModalValue(value)
-                                    }
-                                    // onBlur={handleBlur('comments')}
-                                    value={forkLength}
-                                  />
-                                </VStack>
-                              ),
-                            })
-                          }
-                          style={{ justifyContent: 'center' }}
-                          numeric
-                        >
-                          {forkLength}
-                        </DataTable.Cell>
-                        <DataTable.Cell
-                          onPress={() =>
-                            handleOpenNestedModal({
-                              catchRawId,
-                              fieldName: 'lifestage',
-                              fieldValue: lifestage,
-                              modalHeader: 'Life Stage Editor',
-                              modalText: (
-                                <Text
-                                  color='black'
-                                  fontSize='2xl'
-                                  mb={5}
-                                  fontWeight={'light'}
-                                >
-                                  You have the lifestage marked as{' '}
-                                  <Text fontWeight={'bold'}>{lifestage}</Text>{' '}
-                                </Text>
-                              ),
-                              modalInput: (
-                                <VStack alignItems={'flex-start'}>
-                                  <Text>Edit lifestage</Text>
-                                  <Input
-                                    height='50px'
-                                    width='350px'
-                                    fontSize='16'
-                                    placeholder='Write a comment'
-                                    keyboardType='default'
-                                    // onChangeText={(value) =>
-                                    //   setNestedModalValue(value)
-                                    // }
-                                    // onBlur={handleBlur('comments')}
-                                    value={'OUT OF SERVICE'}
-                                  />
-                                </VStack>
-                              ),
-                            })
-                          }
-                          style={{ justifyContent: 'center' }}
-                          numeric
-                        >
-                          {lifestage}
-                        </DataTable.Cell>
-                        <DataTable.Cell
-                          onPress={() =>
-                            handleOpenNestedModal({
-                              catchRawId,
-                              fieldName: 'dead',
-                              fieldValue: dead,
-                              modalHeader: 'Dead Editor',
-                              modalText: (
-                                <Text
-                                  color='black'
-                                  fontSize='2xl'
-                                  mb={5}
-                                  fontWeight={'light'}
-                                >
-                                  You have this record marked as{' '}
-                                  <Text fontWeight={'bold'}>
-                                    {typeof dead == 'boolean'
-                                      ? dead
-                                        ? 'dead'
-                                        : 'not dead'
-                                      : 'NA'}
-                                  </Text>{' '}
-                                </Text>
-                              ),
-                              modalInput: (
-                                <VStack alignItems={'flex-start'}>
-                                  <Text>Edit dead value</Text>
-                                  <Input
-                                    height='50px'
-                                    width='350px'
-                                    fontSize='16'
-                                    placeholder='Write a comment'
-                                    keyboardType='default'
-                                    onChangeText={(value) =>
-                                      setNestedModalValue(value)
-                                    }
-                                    // onBlur={handleBlur('comments')}
-                                    value={dead}
-                                  />
-                                </VStack>
-                              ),
-                            })
-                          }
-                          style={{ justifyContent: 'center' }}
-                          numeric
-                        >
-                          {dead}
-                        </DataTable.Cell>
-                        <DataTable.Cell
-                          onPress={() =>
-                            handleOpenNestedModal({
-                              catchRawId,
-                              fieldName: 'numFishCaught',
-                              fieldValue: numFishCaught,
-                              modalHeader: 'Fish Count Editor',
-                              modalText: (
-                                <Text
-                                  color='black'
-                                  fontSize='2xl'
-                                  mb={5}
-                                  fontWeight={'light'}
-                                >
-                                  You collected{' '}
-                                  <Text fontWeight={'bold'}>
-                                    {numFishCaught}
-                                  </Text>{' '}
-                                  fish and{' '}
-                                  <Text fontWeight={'bold'}>
-                                    30000 plus count
-                                  </Text>{' '}
-                                  fish.
-                                </Text>
-                              ),
-                              modalInput: (
-                                <VStack alignItems={'flex-start'}>
-                                  <Text>Edit fish count value</Text>
-                                  <Input
-                                    height='50px'
-                                    width='350px'
-                                    fontSize='16'
-                                    placeholder='Write a comment'
-                                    keyboardType='default'
-                                    onChangeText={(value) =>
-                                      setNestedModalValue(value)
-                                    }
-                                    // onBlur={handleBlur('comments')}
-                                    value={numFishCaught}
-                                  />
-                                </VStack>
-                              ),
-                            })
-                          }
-                          style={{ justifyContent: 'center' }}
-                          numeric
-                        >
-                          {numFishCaught}
-                        </DataTable.Cell>
-                        <DataTable.Cell
-                          onPress={() => console.log('cell clicked')}
-                          style={{ justifyContent: 'center' }}
-                          numeric
-                        >
-                          {stream}
-                        </DataTable.Cell>
-                        <DataTable.Cell
-                          onPress={() =>
-                            handleOpenNestedModal({
-                              catchRawId,
-                              fieldName: 'releaseSite',
-                              fieldValue: releaseSite,
-                              modalHeader: 'Release Site Editor',
-                              modalText: (
-                                <Text
-                                  color='black'
-                                  fontSize='2xl'
-                                  mb={5}
-                                  fontWeight={'light'}
-                                >
-                                  You have marked this site as{' '}
-                                  <Text fontWeight={'bold'}>{releaseSite}</Text>{' '}
-                                </Text>
-                              ),
-                              modalInput: (
-                                <VStack alignItems={'flex-start'}>
-                                  <Text>Edit Release Site</Text>
-                                  <Input
-                                    height='50px'
-                                    width='350px'
-                                    fontSize='16'
-                                    placeholder='Write a comment'
-                                    keyboardType='default'
-                                    onChangeText={(value) =>
-                                      setNestedModalValue(value)
-                                    }
-                                    // onBlur={handleBlur('comments')}
-                                    value={'OUT OF SERVICE'}
-                                  />
-                                </VStack>
-                              ),
-                            })
-                          }
-                          style={{ justifyContent: 'center' }}
-                          numeric
-                        >
-                          {releaseSite}
-                        </DataTable.Cell>
-                      </DataTable.Row>
-                    )
-                  }
-                )}
-              </ScrollView>
-            </DataTable>
+                          <DataTable.Cell
+                            onPress={() =>
+                              handleOpenNestedModal({
+                                catchRawId,
+                                fieldName: 'createdAt',
+                                fieldValue: createdAt,
+                                modalHeader: 'Date Editor',
+                                modalText: (
+                                  <Text
+                                    color='black'
+                                    fontSize='2xl'
+                                    mb={5}
+                                    fontWeight={'light'}
+                                  >
+                                    You have this date marked as{' '}
+                                    <Text fontWeight={'bold'}>{createdAt}</Text>{' '}
+                                  </Text>
+                                ),
+                                modalInput: (
+                                  <VStack alignItems={'flex-start'}>
+                                    <Text>Edit Date</Text>
+                                    <DateTimePicker
+                                      value={new Date(createdAt)}
+                                      mode='date'
+                                      onChange={(event, selectedDate) =>
+                                        setNestedModalValue(selectedDate)
+                                      }
+                                      accentColor='#007C7C'
+                                    />
+                                  </VStack>
+                                ),
+                              })
+                            }
+                            style={{ justifyContent: 'center' }}
+                            numeric
+                          >
+                            {createdAt}
+                          </DataTable.Cell>
+                          <DataTable.Cell
+                            onPress={() =>
+                              handleOpenNestedModal({
+                                catchRawId,
+                                fieldName: 'captureRunClass',
+                                fieldValue: captureRunClass,
+                                modalHeader: 'Run Editor',
+                                modalText: (
+                                  <Text
+                                    color='black'
+                                    fontSize='2xl'
+                                    mb={5}
+                                    fontWeight={'light'}
+                                  >
+                                    You have the run marked as{' '}
+                                    <Text fontWeight={'bold'}>
+                                      {captureRunClass}
+                                    </Text>{' '}
+                                  </Text>
+                                ),
+                                modalInput: (
+                                  <VStack alignItems={'flex-start'}>
+                                    <Text>Edit run</Text>
+                                    <Input
+                                      height='50px'
+                                      width='350px'
+                                      fontSize='16'
+                                      placeholder='Write a comment'
+                                      keyboardType='default'
+                                      onChangeText={(value) =>
+                                        setNestedModalValue(value)
+                                      }
+                                      // onBlur={handleBlur('comments')}
+                                      value={captureRunClass}
+                                    />
+                                  </VStack>
+                                ),
+                              })
+                            }
+                            style={{ justifyContent: 'center' }}
+                            numeric
+                          >
+                            {captureRunClass}
+                          </DataTable.Cell>
+                          <DataTable.Cell
+                            onPress={() =>
+                              handleOpenNestedModal({
+                                catchRawId,
+                                fieldName: 'forkLength',
+                                fieldValue: forkLength,
+                                modalHeader: 'Fork Length Editor',
+                                modalText: (
+                                  <Text
+                                    color='black'
+                                    fontSize='2xl'
+                                    mb={5}
+                                    fontWeight={'light'}
+                                  >
+                                    You have the fork length marked as{' '}
+                                    <Text fontWeight={'bold'}>
+                                      {forkLength}
+                                    </Text>{' '}
+                                  </Text>
+                                ),
+                                modalInput: (
+                                  <VStack alignItems={'flex-start'}>
+                                    <Text>Edit fork length</Text>
+                                    <Input
+                                      height='50px'
+                                      width='350px'
+                                      fontSize='16'
+                                      placeholder='Write a comment'
+                                      keyboardType='numeric'
+                                      onChangeText={(value) =>
+                                        setNestedModalValue(value)
+                                      }
+                                      // onBlur={handleBlur('comments')}
+                                      value={forkLength}
+                                    />
+                                  </VStack>
+                                ),
+                              })
+                            }
+                            style={{ justifyContent: 'center' }}
+                            numeric
+                          >
+                            {forkLength}
+                          </DataTable.Cell>
+                          <DataTable.Cell
+                            onPress={() =>
+                              handleOpenNestedModal({
+                                catchRawId,
+                                fieldName: 'lifestage',
+                                fieldValue: lifestage,
+                                modalHeader: 'Life Stage Editor',
+                                modalText: (
+                                  <Text
+                                    color='black'
+                                    fontSize='2xl'
+                                    mb={5}
+                                    fontWeight={'light'}
+                                  >
+                                    You have the lifestage marked as{' '}
+                                    <Text fontWeight={'bold'}>{lifestage}</Text>{' '}
+                                  </Text>
+                                ),
+                                modalInput: (
+                                  <VStack alignItems={'flex-start'}>
+                                    <Text>Edit lifestage</Text>
+                                    <Input
+                                      height='50px'
+                                      width='350px'
+                                      fontSize='16'
+                                      placeholder='Write a comment'
+                                      keyboardType='default'
+                                      // onChangeText={(value) =>
+                                      //   setNestedModalValue(value)
+                                      // }
+                                      // onBlur={handleBlur('comments')}
+                                      value={'OUT OF SERVICE'}
+                                    />
+                                  </VStack>
+                                ),
+                              })
+                            }
+                            style={{ justifyContent: 'center' }}
+                            numeric
+                          >
+                            {lifestage}
+                          </DataTable.Cell>
+                          <DataTable.Cell
+                            onPress={() =>
+                              handleOpenNestedModal({
+                                catchRawId,
+                                fieldName: 'dead',
+                                fieldValue: dead,
+                                modalHeader: 'Dead Editor',
+                                modalText: (
+                                  <Text
+                                    color='black'
+                                    fontSize='2xl'
+                                    mb={5}
+                                    fontWeight={'light'}
+                                  >
+                                    You have this record marked as{' '}
+                                    <Text fontWeight={'bold'}>
+                                      {typeof dead == 'boolean'
+                                        ? dead
+                                          ? 'dead'
+                                          : 'not dead'
+                                        : 'NA'}
+                                    </Text>{' '}
+                                  </Text>
+                                ),
+                                modalInput: (
+                                  <VStack alignItems={'flex-start'}>
+                                    <Text>Edit dead value</Text>
+                                    <Input
+                                      height='50px'
+                                      width='350px'
+                                      fontSize='16'
+                                      placeholder='Write a comment'
+                                      keyboardType='default'
+                                      onChangeText={(value) =>
+                                        setNestedModalValue(value)
+                                      }
+                                      // onBlur={handleBlur('comments')}
+                                      value={dead}
+                                    />
+                                  </VStack>
+                                ),
+                              })
+                            }
+                            style={{ justifyContent: 'center' }}
+                            numeric
+                          >
+                            {dead}
+                          </DataTable.Cell>
+                          <DataTable.Cell
+                            onPress={() =>
+                              handleOpenNestedModal({
+                                catchRawId,
+                                fieldName: 'numFishCaught',
+                                fieldValue: numFishCaught,
+                                modalHeader: 'Fish Count Editor',
+                                modalText: (
+                                  <Text
+                                    color='black'
+                                    fontSize='2xl'
+                                    mb={5}
+                                    fontWeight={'light'}
+                                  >
+                                    You collected{' '}
+                                    <Text fontWeight={'bold'}>
+                                      {numFishCaught}
+                                    </Text>{' '}
+                                    fish and{' '}
+                                    <Text fontWeight={'bold'}>
+                                      30000 plus count
+                                    </Text>{' '}
+                                    fish.
+                                  </Text>
+                                ),
+                                modalInput: (
+                                  <VStack alignItems={'flex-start'}>
+                                    <Text>Edit fish count value</Text>
+                                    <Input
+                                      height='50px'
+                                      width='350px'
+                                      fontSize='16'
+                                      placeholder='Write a comment'
+                                      keyboardType='default'
+                                      onChangeText={(value) =>
+                                        setNestedModalValue(value)
+                                      }
+                                      // onBlur={handleBlur('comments')}
+                                      value={numFishCaught}
+                                    />
+                                  </VStack>
+                                ),
+                              })
+                            }
+                            style={{ justifyContent: 'center' }}
+                            numeric
+                          >
+                            {numFishCaught}
+                          </DataTable.Cell>
+                          <DataTable.Cell
+                            onPress={() => console.log('cell clicked')}
+                            style={{ justifyContent: 'center' }}
+                            numeric
+                          >
+                            {stream}
+                          </DataTable.Cell>
+                          <DataTable.Cell
+                            onPress={() =>
+                              handleOpenNestedModal({
+                                catchRawId,
+                                fieldName: 'releaseSite',
+                                fieldValue: releaseSite,
+                                modalHeader: 'Release Site Editor',
+                                modalText: (
+                                  <Text
+                                    color='black'
+                                    fontSize='2xl'
+                                    mb={5}
+                                    fontWeight={'light'}
+                                  >
+                                    You have marked this site as{' '}
+                                    <Text fontWeight={'bold'}>
+                                      {releaseSite}
+                                    </Text>{' '}
+                                  </Text>
+                                ),
+                                modalInput: (
+                                  <VStack alignItems={'flex-start'}>
+                                    <Text>Edit Release Site</Text>
+                                    <Input
+                                      height='50px'
+                                      width='350px'
+                                      fontSize='16'
+                                      placeholder='Write a comment'
+                                      keyboardType='default'
+                                      onChangeText={(value) =>
+                                        setNestedModalValue(value)
+                                      }
+                                      // onBlur={handleBlur('comments')}
+                                      value={'OUT OF SERVICE'}
+                                    />
+                                  </VStack>
+                                ),
+                              })
+                            }
+                            style={{ justifyContent: 'center' }}
+                            numeric
+                          >
+                            {releaseSite}
+                          </DataTable.Cell>
+                        </DataTable.Row>
+                      )
+                    }
+                  )}
+                </ScrollView>
+              </DataTable>
+            </ScrollView>
           </VStack>
         </CustomModal>
       ) : (
