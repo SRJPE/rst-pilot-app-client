@@ -19,17 +19,19 @@ const DrawerNavigator = ({
 }: {
   storedCredentialsStore: any
 }) => {
+  console.log('🚀  ~ storedCredentialsStore:', storedCredentialsStore)
   return (
     <Drawer.Navigator
       initialRouteName='Sign In'
       // initialRouteName='Home'
       screenOptions={{ drawerType: 'front' }}
-      drawerContent={(props) => <DrawerMenu {...props} />}
+      drawerContent={props => <DrawerMenu {...props} />}
     >
       {/*       
       UN-COMMENT THIS CODE TO REACTIVATE NAV AUTH REQUIREMENT  */}
 
-      {storedCredentialsStore === null ? (
+      {/* {storedCredentialsStore === null ? ( */}
+      {storedCredentialsStore ? (
         <Drawer.Screen
           name='Sign In'
           component={SignIn}

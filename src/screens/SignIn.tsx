@@ -26,8 +26,8 @@ import {
   useAutoDiscovery,
 } from 'expo-auth-session'
 import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
-import { useDispatch } from 'react-redux'
-import { AppDispatch } from '../redux/store'
+import { connect, useDispatch } from 'react-redux'
+import { AppDispatch, RootState } from '../redux/store'
 import {
   // @ts-ignore
   REACT_APP_REDIRECT_URI,
@@ -40,7 +40,15 @@ import AppLogo from '../components/Shared/AppLogo'
 
 WebBrowser.maybeCompleteAuthSession()
 
-const SignIn = ({ navigation }: { navigation: any }) => {
+const SignIn = ({
+  userCredentialsStore,
+  navigation,
+}: {
+  userCredentialsStore: any
+  navigation: any
+}) => {
+  console.log('🚀 ~ userCredentialsStore:', userCredentialsStore)
+
   const dispatch = useDispatch<AppDispatch>()
   const [email, setEmail] = useState('' as string)
   const [password, setPassword] = useState('' as string)
@@ -113,8 +121,6 @@ const SignIn = ({ navigation }: { navigation: any }) => {
     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/B2C_1_signin/v2.0/'
   )
 
-  console.log('🚀 ~ SignIn ~ discovery:', discovery)
-
   // const redirectUri = makeRedirectUri({
   //   scheme: 'com.onmicrosoft.rstb2c.rsttabletapp',
   //   // scheme: undefined,
@@ -122,14 +128,16 @@ const SignIn = ({ navigation }: { navigation: any }) => {
   // })
 
   const redirectUri = 'com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect'
-  console.log('🚀 ~ SignIn ~ redirectUri:', redirectUri)
 
   // ('com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect')
 
   const clientId = REACT_APP_CLIENT_ID
 
   // We store the JWT in here
-  const [token, setToken] = React.useState<string | null>(null)
+  const [token, setToken] = React.useState<{
+    accessToken: string | undefined
+    refreshToken: string | undefined
+  } | null>(null)
 
   // Request
   const [request, response, promptAsync] = useAuthRequest(
@@ -160,63 +168,6 @@ const SignIn = ({ navigation }: { navigation: any }) => {
           <Heading color='#FFF' fontWeight={300} fontSize='7xl' mb={16}>
             Data Tackle{' '}
           </Heading>
-          <Input
-            focusOutlineColor='#fff'
-            variant='filled'
-            fontSize='2xl'
-            h='60px'
-            w='450px'
-            placeholder='Email'
-            onChangeText={handleChangeEmail}
-            value={email}
-            _focus={{
-              bg: '#fff',
-            }}
-            InputLeftElement={
-              <Icon
-                as={<MaterialIcons name='mail' />}
-                size={7}
-                ml='2'
-                color='muted.400'
-              />
-            }
-          />
-          <Input
-            focusOutlineColor='#fff'
-            variant='filled'
-            fontSize='2xl'
-            h='60px'
-            w='450px'
-            placeholder='Password'
-            onChangeText={handleChangePassword}
-            value={password}
-            _focus={{
-              bg: '#fff',
-            }}
-            type={show ? 'text' : 'password'}
-            InputLeftElement={
-              <Icon
-                as={<MaterialIcons name='lock' />}
-                size={7}
-                ml='2'
-                color='muted.400'
-              />
-            }
-            InputRightElement={
-              <Pressable onPress={() => setShow(!show)}>
-                <Icon
-                  as={
-                    <MaterialIcons
-                      name={show ? 'visibility' : 'visibility-off'}
-                    />
-                  }
-                  size={7}
-                  mr='2'
-                  color='muted.400'
-                />
-              </Pressable>
-            }
-          />
           {/* {authRequest && discovery ? ( */}
           <Button
             borderRadius={10}
@@ -253,9 +204,14 @@ const SignIn = ({ navigation }: { navigation: any }) => {
                       },
                       discovery
                     ).then(res => {
-                      console.log('🚀 ~ res.accessToken:', res.accessToken)
-                      setToken(res.accessToken)
-                      dispatch(saveUserCredentials(res.accessToken))
+                      const tokenResponse = {
+                        accessToken: res.accessToken,
+                        refreshToken: res.refreshToken,
+                      }
+
+                      console.log('🚀 ~ promptAsync ~ res:', res)
+                      setToken(tokenResponse)
+                      dispatch(saveUserCredentials(tokenResponse))
                     })
                   }
                 })
@@ -263,15 +219,9 @@ const SignIn = ({ navigation }: { navigation: any }) => {
             }
           >
             <Text fontSize='xl' fontWeight='bold' color='white'>
-              Sign In
+              Sign in with Microsoft
             </Text>
           </Button>
-          <Text color='#fff' fontSize='lg'>
-            Token: {token}
-          </Text>
-          {/* ) : (
-            <></>
-          )} */}
           <HStack justifyContent='space-between' w='400px'>
             <Pressable>
               <Text color='#fff' fontSize='lg'>
@@ -289,4 +239,11 @@ const SignIn = ({ navigation }: { navigation: any }) => {
     </KeyboardAvoidingView>
   )
 }
-export default SignIn
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    userCredentialsStore: state.userCredentials.storedCredentials,
+  }
+}
+
+export default connect(mapStateToProps)(SignIn)

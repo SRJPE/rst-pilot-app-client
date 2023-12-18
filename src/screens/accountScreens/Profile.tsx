@@ -19,6 +19,7 @@ import EditAccountInfoModalContent from '../../components/profile/EditAccountInf
 import { AppDispatch } from '../../redux/store'
 import { useDispatch } from 'react-redux'
 import { clearUserCredentials } from '../../redux/reducers/userCredentialsSlice'
+import * as AuthSession from 'expo-auth-session'
 
 const Profile = ({ navigation }: { navigation: any }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -115,7 +116,10 @@ const Profile = ({ navigation }: { navigation: any }) => {
           <Pressable
             mt='20'
             alignSelf='center'
-            onPress={() => dispatch(clearUserCredentials())}
+            onPress={() => {
+              AuthSession.dismiss()
+              dispatch(clearUserCredentials())
+            }}
           >
             <Text fontSize='2xl' fontWeight='bold' color='#FF0000'>
               Sign out
