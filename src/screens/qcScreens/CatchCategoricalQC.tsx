@@ -70,6 +70,13 @@ function CatchCategoricalQC({
     useState<NestedModalDataI | null>(null)
   const [nestedModalValue, setNestedModalValue] = useState<string | boolean>('')
 
+  const axisLabelDictionary = {
+    'Adipose Clipped': { xLabel: 'Sampling Time', yLabel: undefined },
+    Species: { xLabel: 'Date', yLabel: 'Count' },
+    Marks: { xLabel: 'Date', yLabel: 'Count' },
+    Mortalities: { xLabel: 'Date', yLabel: 'Count' },
+  }
+
   useEffect(() => {
     const previousCatchRaw = route.params.previousCatchRaw
     const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
@@ -505,6 +512,8 @@ function CatchCategoricalQC({
             {activeButtons.map((buttonName) => {
               return (
                 <Graph
+                  xLabel={axisLabelDictionary[buttonName]['xLabel']}
+                  yLabel={axisLabelDictionary[buttonName]['yLabel']}
                   key={buttonName}
                   chartType={buttonNameToChartType[buttonName] as any}
                   onPointClick={(datum) => handlePointClick(datum)}

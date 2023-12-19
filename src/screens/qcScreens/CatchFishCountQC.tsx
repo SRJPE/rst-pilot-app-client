@@ -116,6 +116,8 @@ function CatchFishCountQC({
 
           <ScrollView>
             <Graph
+              xLabel={'Date'}
+              yLabel={'Total Daily Catch'}
               chartType='bar'
               data={graphData}
               barColor='grey'
