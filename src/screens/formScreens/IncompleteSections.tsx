@@ -211,7 +211,7 @@ const IncompleteSections = ({
       const selectedCrewIds =
         findCrewIdsFromSelectedCrewNames(selectedCrewNames)
       const trapVisitSubmission = {
-        uid: id,
+        trapVisitUid: id,
         crew: selectedCrewIds,
         programId: visitSetupState[id].values.programId,
         visitTypeId: null,
