@@ -193,7 +193,7 @@ const SignIn = ({
               //   setAuthorizeResult(authorizeResult)
               // }
               () => {
-                promptAsync().then((codeResponse) => {
+                promptAsync().then(codeResponse => {
                   if (
                     request &&
                     codeResponse?.type === 'success' &&
@@ -209,7 +209,7 @@ const SignIn = ({
                         redirectUri,
                       },
                       discovery
-                    ).then(async (res) => {
+                    ).then(async res => {
                       const tokenResponse = {
                         accessToken: res.accessToken as string,
                         refreshToken: res.refreshToken as string,
@@ -233,7 +233,7 @@ const SignIn = ({
             }
           >
             <Text fontSize='xl' fontWeight='bold' color='white'>
-              Sign in with Microsoft
+              Sign In
             </Text>
           </Button>
           <HStack justifyContent='space-between' w='400px'>

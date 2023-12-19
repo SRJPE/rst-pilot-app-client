@@ -63,42 +63,42 @@ export interface Options {
   requireAuthentication?: boolean
 }
 
-function createSecureStorage(options = {} as Options) {
-  const replaceCharacter = options.replaceCharacter || '_'
-  const replacer = options.replacer || defaultReplacer
+// function createSecureStorage(options = {} as Options) {
+//   const replaceCharacter = options.replaceCharacter || '_'
+//   const replacer = options.replacer || defaultReplacer
 
-  console.log('SecureStore', SecureStore)
+//   console.log('SecureStore', SecureStore)
 
-  return {
-    getItem: (key: string) => SecureStore.getItemAsync(key, options),
-    setItem: (key: string, value: any) =>
-      SecureStore.setItemAsync(key, value, options),
-    removeItem: (key: string) => SecureStore.deleteItemAsync(key, options),
-  }
-  return {
-    getItem: (key: string) =>
-      SecureStore.getItemAsync(replacer(key, replaceCharacter)),
-    setItem: (key: string, value: any) =>
-      SecureStore.setItemAsync(replacer(key, replaceCharacter), value),
-    removeItem: (key: string) =>
-      SecureStore.deleteItemAsync(replacer(key, replaceCharacter)),
-  }
-}
-function defaultReplacer(key: string, replaceCharacter: string) {
-  return key.replace(/[^a-z0-9.\-_]/gi, replaceCharacter)
-}
-
-const userCredentialsPersistConfig = {
-  key: 'userCredentialsPersistConfig',
-  version: 1,
-  storage: createSecureStorage(),
-}
+//   return {
+//     getItem: (key: string) => SecureStore.getItemAsync(key, options),
+//     setItem: (key: string, value: any) =>
+//       SecureStore.setItemAsync(key, value, options),
+//     removeItem: (key: string) => SecureStore.deleteItemAsync(key, options),
+//   }
+//   return {
+//     getItem: (key: string) =>
+//       SecureStore.getItemAsync(replacer(key, replaceCharacter)),
+//     setItem: (key: string, value: any) =>
+//       SecureStore.setItemAsync(replacer(key, replaceCharacter), value),
+//     removeItem: (key: string) =>
+//       SecureStore.deleteItemAsync(replacer(key, replaceCharacter)),
+//   }
+// }
+// function defaultReplacer(key: string, replaceCharacter: string) {
+//   return key.replace(/[^a-z0-9.\-_]/gi, replaceCharacter)
+// }
 
 // const userCredentialsPersistConfig = {
 //   key: 'userCredentialsPersistConfig',
 //   version: 1,
-//   storage: AsyncStorage,
+//   storage: createSecureStorage(),
 // }
+
+const userCredentialsPersistConfig = {
+  key: 'userCredentialsPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
 
 const markRecaptureFormPostPersistConfig = {
   key: 'markRecaptureFormPostPersistConfig',
