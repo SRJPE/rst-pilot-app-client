@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as AuthSession from 'expo-auth-session'
-import * as SecureStore from 'expo-secure-store'
 
 interface InitialStateI {
   storedCredentials: any
@@ -14,7 +13,7 @@ export const userCredentialsSlice = createSlice({
   name: 'userCredentials',
   initialState: initialState,
   reducers: {
-    clearUserCredentials: state => {
+    clearUserCredentials: (state) => {
       state.storedCredentials = null
     },
     saveUserCredentials: (state, action) => {

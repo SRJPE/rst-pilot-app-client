@@ -25,6 +25,8 @@ import {
   useAuthRequest,
   useAutoDiscovery,
 } from 'expo-auth-session'
+import * as SecureStore from 'expo-secure-store'
+
 import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../redux/store'
@@ -156,6 +158,10 @@ const SignIn = ({
     discovery
   )
 
+  async function saveSecureStore(key: string, value: string) {
+    await SecureStore.setItemAsync(key, value)
+  }
+
   return (
     <KeyboardAvoidingView flex='1' behavior='padding'>
       <ImageBackground
@@ -187,7 +193,7 @@ const SignIn = ({
               //   setAuthorizeResult(authorizeResult)
               // }
               () => {
-                promptAsync().then(codeResponse => {
+                promptAsync().then((codeResponse) => {
                   if (
                     request &&
                     codeResponse?.type === 'success' &&
@@ -203,15 +209,23 @@ const SignIn = ({
                         redirectUri,
                       },
                       discovery
-                    ).then(res => {
+                    ).then(async (res) => {
                       const tokenResponse = {
-                        accessToken: res.accessToken,
-                        refreshToken: res.refreshToken,
+                        accessToken: res.accessToken as string,
+                        refreshToken: res.refreshToken as string,
                       }
 
                       console.log('🚀 ~ promptAsync ~ res:', res)
                       setToken(tokenResponse)
-                      dispatch(saveUserCredentials(tokenResponse))
+                      // dispatch(saveUserCredentials(tokenResponse))
+                      await saveSecureStore(
+                        'userAccessToken',
+                        tokenResponse.accessToken
+                      )
+                      await saveSecureStore(
+                        'userRefreshToken',
+                        tokenResponse.refreshToken
+                      )
                     })
                   }
                 })

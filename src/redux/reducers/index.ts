@@ -64,8 +64,8 @@ export interface Options {
 }
 
 function createSecureStorage(options = {} as Options) {
-  // const replaceCharacter = options.replaceCharacter || '_'
-  // const replacer = options.replacer || defaultReplacer
+  const replaceCharacter = options.replaceCharacter || '_'
+  const replacer = options.replacer || defaultReplacer
 
   console.log('SecureStore', SecureStore)
 
@@ -75,29 +75,30 @@ function createSecureStorage(options = {} as Options) {
       SecureStore.setItemAsync(key, value, options),
     removeItem: (key: string) => SecureStore.deleteItemAsync(key, options),
   }
-  // return {
-  //   getItem: (key: string) =>
-  //     SecureStore.getItemAsync(replacer(key, replaceCharacter)),
-  //   setItem: (key: string, value: any) =>
-  //     SecureStore.setItemAsync(replacer(key, replaceCharacter), value),
-  //   removeItem: (key: string) =>
-  //     SecureStore.deleteItemAsync(replacer(key, replaceCharacter)),
-  // }
+  return {
+    getItem: (key: string) =>
+      SecureStore.getItemAsync(replacer(key, replaceCharacter)),
+    setItem: (key: string, value: any) =>
+      SecureStore.setItemAsync(replacer(key, replaceCharacter), value),
+    removeItem: (key: string) =>
+      SecureStore.deleteItemAsync(replacer(key, replaceCharacter)),
+  }
 }
-// function defaultReplacer(key: string, replaceCharacter: string) {
-//   return key.replace(/[^a-z0-9.\-_]/gi, replaceCharacter)
-// }
+function defaultReplacer(key: string, replaceCharacter: string) {
+  return key.replace(/[^a-z0-9.\-_]/gi, replaceCharacter)
+}
+
+const userCredentialsPersistConfig = {
+  key: 'userCredentialsPersistConfig',
+  version: 1,
+  storage: createSecureStorage(),
+}
 
 // const userCredentialsPersistConfig = {
 //   key: 'userCredentialsPersistConfig',
 //   version: 1,
-//   storage: createSecureStorage(),
+//   storage: AsyncStorage,
 // }
-const userCredentialsPersistConfig = {
-  key: 'userCredentialsPersistConfig',
-  version: 1,
-  storage: AsyncStorage,
-}
 
 const markRecaptureFormPostPersistConfig = {
   key: 'markRecaptureFormPostPersistConfig',

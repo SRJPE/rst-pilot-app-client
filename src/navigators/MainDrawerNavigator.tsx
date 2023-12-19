@@ -11,6 +11,8 @@ import { connect } from 'react-redux'
 import { RootState } from '../redux/store'
 import QCForm from './roots/QCFormRoot'
 import MonitoringProgram from './roots/MonitoringProgramRoot'
+import * as SecureStore from 'expo-secure-store'
+import { useEffect, useState } from 'react'
 
 const Drawer = createDrawerNavigator()
 
@@ -20,18 +22,44 @@ const DrawerNavigator = ({
   storedCredentialsStore: any
 }) => {
   console.log('🚀  ~ storedCredentialsStore:', storedCredentialsStore)
+  const [currentUserAccessToken, setCurrentUserAccessToken] = useState(
+    null as string | null
+  )
+
+  async function getValueFor(key: string) {
+    let result = await SecureStore.getItemAsync(key)
+    if (result) {
+      return result
+    } else {
+      console.log('No values stored under that key.')
+      return null
+    }
+  }
+
+  useEffect(() => {
+    ;(async () => {
+      await SecureStore.deleteItemAsync('userAccessToken')
+      // const user = await getValueFor('userAccessToken')
+      // console.log('🚀 ~ ; ~TEST user:', user)
+      // setCurrentUserAccessToken(user)
+    })()
+  }, [])
+
+  useEffect(() => {
+    console.log('🚀 ~ currentUserAccessToken:', currentUserAccessToken)
+  }, [currentUserAccessToken])
   return (
     <Drawer.Navigator
       initialRouteName='Sign In'
       // initialRouteName='Home'
       screenOptions={{ drawerType: 'front' }}
-      drawerContent={props => <DrawerMenu {...props} />}
+      drawerContent={(props) => <DrawerMenu {...props} />}
     >
       {/*       
       UN-COMMENT THIS CODE TO REACTIVATE NAV AUTH REQUIREMENT  */}
 
       {/* {storedCredentialsStore === null ? ( */}
-      {storedCredentialsStore ? (
+      {currentUserAccessToken === null ? (
         <Drawer.Screen
           name='Sign In'
           component={SignIn}
