@@ -68,21 +68,10 @@ const Profile = ({ navigation }: { navigation: any }) => {
           // bg='secondary'
           roundedBottom='xl'
         >
-          {/* <Pressable my='5%'>
-            <HStack justifyContent='space-between' alignItems='center'>
-              <VStack space={4}>
-                <Heading>Jordan Hong</Heading>
-                <Text fontSize='2xl'>jhoang@flowwest.com</Text>
-              </VStack>
-              <Pressable onPress={() => setEditAccountInfoModalOpen(true)}>
-                <Text color='primary' fontSize='2xl' fontWeight='600'>
-                  Edit
-                </Text>
-              </Pressable>
-            </HStack>
-          </Pressable> */}
-          {/* <Divider bg='#414141' /> */}
-          <Pressable my='7'>
+          <Pressable
+            my='7'
+            onPress={() => setMonitoringProgramInfoModalOpen(true)}
+          >
             <HStack justifyContent='space-between' alignItems='center'>
               <VStack>
                 <Text fontSize='2xl' bold>
@@ -90,13 +79,12 @@ const Profile = ({ navigation }: { navigation: any }) => {
                 </Text>
                 <Text fontSize='xl'> {'<Monitoring Program Team Name>'}</Text>
               </VStack>
-              <IconButton
-                onPress={() => setMonitoringProgramInfoModalOpen(true)}
-                icon={<Icon as={Entypo} name='chevron-right' />}
-                borderRadius='full'
-                _icon={{
-                  size: 8,
-                }}
+              <Icon
+                as={Entypo}
+                name='chevron-right'
+                color='black'
+                size={8}
+                marginX={3}
               />
             </HStack>
           </Pressable>
@@ -106,13 +94,12 @@ const Profile = ({ navigation }: { navigation: any }) => {
               <Text fontSize='2xl' bold>
                 View Permit
               </Text>
-
-              <IconButton
-                icon={<Icon as={Entypo} name='chevron-right' />}
-                borderRadius='full'
-                _icon={{
-                  size: 8,
-                }}
+              <Icon
+                as={Entypo}
+                name='chevron-right'
+                color='black'
+                size={8}
+                marginX={3}
               />
             </HStack>
           </Pressable>
@@ -122,13 +109,12 @@ const Profile = ({ navigation }: { navigation: any }) => {
               <Text fontSize='2xl' bold>
                 Change Password
               </Text>
-
-              <IconButton
-                icon={<Icon as={Entypo} name='chevron-right' />}
-                borderRadius='full'
-                _icon={{
-                  size: 8,
-                }}
+              <Icon
+                as={Entypo}
+                name='chevron-right'
+                color='black'
+                size={8}
+                marginX={3}
               />
             </HStack>
           </Pressable>
