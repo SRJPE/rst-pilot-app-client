@@ -6,6 +6,8 @@ interface ModalPropsI {
   closeModal: any
   children: JSX.Element
   height?: string
+  style?: Record<string, string | number>
+  size?: 'full' | 'xl' | 'lg' | 'md' | 'sm' | 'xs'
 }
 
 const CustomModal = (props: ModalPropsI) => {
@@ -15,9 +17,9 @@ const CustomModal = (props: ModalPropsI) => {
       onClose={props.closeModal}
       avoidKeyboard
       closeOnOverlayClick={false}
-      size={'full'}
+      size={props.size || 'full'}
       h={props.height ? props.height : 'full'}
-      style={{ marginBottom: 0, marginTop: 'auto' }}
+      style={props.style ? props.style : { marginBottom: 0, marginTop: 'auto' }}
     >
       <Modal.Content height={'full'}>
         <Modal.Body p='0'>{props.children}</Modal.Body>

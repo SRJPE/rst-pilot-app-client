@@ -145,7 +145,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
                 color='white'
                 style={{ marginRight: 5 }}
               />
-              <Text color='white'>Profile Settings</Text>
+              <Text color='white'>Settings</Text>
             </Pressable>
           </VStack>
           <Avatar

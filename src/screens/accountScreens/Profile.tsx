@@ -1,5 +1,6 @@
 import { Entypo } from '@expo/vector-icons'
 import {
+  Avatar,
   Box,
   Button,
   Center,
@@ -23,28 +24,41 @@ import { clearUserCredentials } from '../../redux/reducers/userCredentialsSlice'
 
 const Profile = ({ navigation }: { navigation: any }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] = useState(
-    false as boolean
-  )
+  const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false)
+  const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] =
+    useState<boolean>(false as boolean)
   const [monitoringProgramInfoModalOpen, setMonitoringProgramInfoModalOpen] =
-    useState(false as boolean)
+    useState<boolean>(false as boolean)
   return (
     <>
       <Box overflow='hidden'>
-        <Center
-          bg='primary'
-          _text={{
-            alignSelf: 'center',
-            color: '#FFF',
-            fontWeight: '700',
-            fontSize: 'xl',
-          }}
-          bottom='0'
-          px='6'
-          py='1.5'
-        >
-          User Profile
-        </Center>
+        <VStack alignItems='center' marginTop='16' marginBottom='8'>
+          <Avatar
+            source={{
+              uri: 'https://images.unsplash.com/photo-1510771463146-e89e6e86560e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80',
+            }}
+            size={150}
+            borderRadius={100}
+            backgroundColor='hsl(0,0%,70%)'
+            borderColor='secondary'
+            borderWidth={3}
+          />
+          <Text fontSize={'3xl'}>John Doe</Text>
+          <Text fontSize={'lg'} mb={5}>
+            jdoe4422@flowwest.com
+          </Text>
+          <Button
+            alignSelf='center'
+            bg='transparent'
+            borderWidth={1}
+            borderColor='primary'
+            onPress={() => setEditAccountInfoModalOpen(true)}
+          >
+            <Text fontWeight='bold' color='primary'>
+              EDIT PROFILE
+            </Text>
+          </Button>
+        </VStack>
         <VStack
           py='2%'
           px='4%'
@@ -54,7 +68,7 @@ const Profile = ({ navigation }: { navigation: any }) => {
           // bg='secondary'
           roundedBottom='xl'
         >
-          <Pressable my='5%'>
+          {/* <Pressable my='5%'>
             <HStack justifyContent='space-between' alignItems='center'>
               <VStack space={4}>
                 <Heading>Jordan Hong</Heading>
@@ -66,66 +80,66 @@ const Profile = ({ navigation }: { navigation: any }) => {
                 </Text>
               </Pressable>
             </HStack>
-          </Pressable>
-          <Divider bg='#414141' />
-          <Pressable my='5%'>
+          </Pressable> */}
+          {/* <Divider bg='#414141' /> */}
+          <Pressable my='7'>
             <HStack justifyContent='space-between' alignItems='center'>
-              <VStack space={4}>
-                <Heading>Monitoring Program</Heading>
-                <Text fontSize='2xl'>Monitoring Program Team Name</Text>
+              <VStack>
+                <Text fontSize='2xl' bold>
+                  Monitoring Program
+                </Text>
+                <Text fontSize='xl'> {'<Monitoring Program Team Name>'}</Text>
               </VStack>
               <IconButton
                 onPress={() => setMonitoringProgramInfoModalOpen(true)}
                 icon={<Icon as={Entypo} name='chevron-right' />}
                 borderRadius='full'
                 _icon={{
-                  size: 10,
+                  size: 8,
                 }}
               />
             </HStack>
           </Pressable>
           <Divider bg='#414141' />
-          <Pressable my='5%'>
+          <Pressable my='7'>
             <HStack justifyContent='space-between' alignItems='center'>
-              <VStack space={4}>
-                <Heading>View Permit</Heading>
-              </VStack>
+              <Text fontSize='2xl' bold>
+                View Permit
+              </Text>
+
               <IconButton
                 icon={<Icon as={Entypo} name='chevron-right' />}
                 borderRadius='full'
                 _icon={{
-                  size: 10,
+                  size: 8,
                 }}
               />
             </HStack>
           </Pressable>
           <Divider bg='#414141' />
-          <Pressable my='5%'>
+          <Pressable my='7'>
             <HStack justifyContent='space-between' alignItems='center'>
-              <VStack space={4}>
-                <Heading>Change Password</Heading>
-              </VStack>
+              <Text fontSize='2xl' bold>
+                Change Password
+              </Text>
+
               <IconButton
                 icon={<Icon as={Entypo} name='chevron-right' />}
                 borderRadius='full'
                 _icon={{
-                  size: 10,
+                  size: 8,
                 }}
               />
             </HStack>
           </Pressable>
           <Divider bg='#414141' />
 
-          <Pressable
-            mt='20'
-            alignSelf='center'
-            onPress={() => dispatch(clearUserCredentials())}
-          >
-            <Text fontSize='2xl' fontWeight='bold' color='#FF0000'>
+          <Pressable my='7' onPress={() => setLogoutModalOpen(true)}>
+            <Text fontSize='2xl' fontWeight='bold' color='error'>
               Sign out
             </Text>
           </Pressable>
-          <Button
+          {/* <Button
             mt='20'
             alignSelf='center'
             bg='primary'
@@ -135,14 +149,13 @@ const Profile = ({ navigation }: { navigation: any }) => {
             <Text fontSize='xl' fontWeight='bold' color='white'>
               CREATE NEW PROGRAM
             </Text>
-          </Button>
+          </Button> */}
         </VStack>
       </Box>
       {/* --------- Modals --------- */}
       <CustomModal
         isOpen={editAccountInfoModalOpen}
         closeModal={() => setEditAccountInfoModalOpen(false)}
-        // height='1/1'
       >
         <EditAccountInfoModalContent
           closeModal={() => setEditAccountInfoModalOpen(false)}
@@ -156,6 +169,48 @@ const Profile = ({ navigation }: { navigation: any }) => {
         <MonitoringProgramInfoModalContent
           closeModal={() => setMonitoringProgramInfoModalOpen(false)}
         />
+      </CustomModal>
+
+      <CustomModal
+        isOpen={logoutModalOpen}
+        closeModal={() => setLogoutModalOpen(false)}
+        height='175'
+        size='md'
+        style={{
+          marginTop: 'auto',
+          marginBottom: 'auto',
+        }}
+      >
+        <Box display='flex' height='175' paddingX={10} paddingY={5}>
+          <Text textAlign='center' fontSize='lg' bold marginBottom={1}>
+            Are you sure you want to log out?
+          </Text>
+          <Text textAlign='center' marginBottom={5}>
+            When logged out you will not have access to saved content when
+            offline.
+          </Text>
+          <HStack justifyContent='center'>
+            <Button
+              marginRight={2}
+              borderWidth={1}
+              flexGrow={1}
+              backgroundColor='transparent'
+              borderColor='error'
+              color='error'
+              onPress={() => setLogoutModalOpen(false)}
+            >
+              <Text color='error'>Cancel</Text>
+            </Button>
+            <Button
+              background='primary'
+              onPress={() => setLogoutModalOpen(false)}
+              flexGrow={1}
+              marginLeft={3}
+            >
+              Confirm
+            </Button>
+          </HStack>
+        </Box>
       </CustomModal>
     </>
   )
