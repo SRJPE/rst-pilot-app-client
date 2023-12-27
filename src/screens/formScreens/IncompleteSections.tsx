@@ -25,6 +25,7 @@ import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/tr
 import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
+import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
 import { cloneDeep, flatten, uniq } from 'lodash'
 import { uid } from 'uid'
 import {
@@ -102,18 +103,18 @@ const IncompleteSections = ({
         index: 0,
         routes: [{ name: 'Visit Setup' }],
       })
-  
+
       // navigation.dispatch(
       //   CommonActions.reset({
       //     index: 0,
       //     routes: [{ name: 'Visit Setup' }],
       //   })
       // )
-  
+
       // navigation.navigate.popToTop()
-  
+
       // navigation.dispatch(StackActions.popToTop())
-  
+
       if (
         connectivityState.isConnected &&
         connectivityState.isInternetReachable
@@ -137,6 +138,7 @@ const IncompleteSections = ({
     dispatch(resetTrapOperationsSlice())
     dispatch(resetVisitSetupSlice())
     dispatch(resetPaperEntrySlice())
+    dispatch(resetTabsSlice())
   }
 
   const returnDefinitionArray = (dropdownsArray: any[]) => {
