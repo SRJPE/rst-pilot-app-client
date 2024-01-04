@@ -1,27 +1,28 @@
 import { createDrawerNavigator } from '@react-navigation/drawer'
-import DrawerMenu from '../components/drawerMenu'
-import Home from '../screens/Home'
-import TrapVisitForm from './roots/TrapVisitFormRoot'
-import GenerateReport from '../screens/GenerateReport'
-import MarkRecaptureForm from './roots/MarkRecaptureFormRoot'
-import Profile from '../screens/accountScreens/Profile'
-import PermitInfo from '../screens/PermitInfo'
-import SignIn from '../screens/SignIn'
-import { connect } from 'react-redux'
-import { RootState } from '../redux/store'
-import QCForm from './roots/QCFormRoot'
-import MonitoringProgram from './roots/MonitoringProgramRoot'
 import * as SecureStore from 'expo-secure-store'
 import { useEffect, useState } from 'react'
+import { connect } from 'react-redux'
+import DrawerMenu from '../components/drawerMenu'
+import { RootState } from '../redux/store'
+import GenerateReport from '../screens/GenerateReport'
+import Home from '../screens/Home'
+import PermitInfo from '../screens/PermitInfo'
+import SignIn from '../screens/SignIn'
+import Profile from '../screens/accountScreens/Profile'
+import MarkRecaptureForm from './roots/MarkRecaptureFormRoot'
+import MonitoringProgram from './roots/MonitoringProgramRoot'
+import QCForm from './roots/QCFormRoot'
+import TrapVisitForm from './roots/TrapVisitFormRoot'
 
 const Drawer = createDrawerNavigator()
 
 const DrawerNavigator = ({
-  storedCredentialsStore,
+  userCredentialsStore,
 }: {
-  storedCredentialsStore: any
+  userCredentialsStore: any
 }) => {
-  console.log('🚀  ~ storedCredentialsStore:', storedCredentialsStore)
+  console.log('🚀 ~ storedCredentialsStore:', userCredentialsStore)
+
   const [currentUserAccessToken, setCurrentUserAccessToken] = useState(
     null as string | null
   )
@@ -36,30 +37,26 @@ const DrawerNavigator = ({
     }
   }
 
-  useEffect(() => {
-    ;(async () => {
-      await SecureStore.deleteItemAsync('userAccessToken')
-      // const user = await getValueFor('userAccessToken')
-      // console.log('🚀 ~ ; ~TEST user:', user)
-      // setCurrentUserAccessToken(user)
-    })()
-  }, [])
+  // useEffect(() => {
+  //   ;(async () => {
+  //     // await SecureStore.deleteItemAsync('userAccessToken')
+  //     const user = await getValueFor('userAccessToken')
 
-  useEffect(() => {
-    console.log('🚀 ~ currentUserAccessToken:', currentUserAccessToken)
-  }, [currentUserAccessToken])
+  //     setCurrentUserAccessToken(user)
+  //   })()
+  // }, [])
+
   return (
     <Drawer.Navigator
       initialRouteName='Sign In'
       // initialRouteName='Home'
       screenOptions={{ drawerType: 'front' }}
-      drawerContent={(props) => <DrawerMenu {...props} />}
+      drawerContent={props => <DrawerMenu {...props} />}
     >
       {/*       
       UN-COMMENT THIS CODE TO REACTIVATE NAV AUTH REQUIREMENT  */}
 
-      {/* {storedCredentialsStore === null ? ( */}
-      {currentUserAccessToken === null ? (
+      {userCredentialsStore.azureUid === null ? (
         <Drawer.Screen
           name='Sign In'
           component={SignIn}
@@ -93,7 +90,7 @@ const DrawerNavigator = ({
 
 const mapStateToProps = (state: RootState) => {
   return {
-    storedCredentialsStore: state.userCredentials.storedCredentials,
+    userCredentialsStore: state.userCredentials,
   }
 }
 export default connect(mapStateToProps)(DrawerNavigator)

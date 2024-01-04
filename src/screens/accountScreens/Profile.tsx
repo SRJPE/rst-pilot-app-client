@@ -13,19 +13,43 @@ import {
   View,
   VStack,
 } from 'native-base'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CustomModal from '../../components/Shared/CustomModal'
 import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
-import { AppDispatch } from '../../redux/store'
-import { useDispatch } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/store'
+import { connect, useDispatch } from 'react-redux'
 import { clearUserCredentials } from '../../redux/reducers/userCredentialsSlice'
 import * as AuthSession from 'expo-auth-session'
+import * as SecureStore from 'expo-secure-store'
+import api from '../../api/axiosConfig'
 
-const Profile = ({ navigation }: { navigation: any }) => {
+const Profile = ({
+  userCredentialsStore,
+  navigation,
+}: {
+  userCredentialsStore: any
+  navigation: any
+}) => {
   const dispatch = useDispatch<AppDispatch>()
   const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] = useState(
     false as boolean
   )
+  // const [user, setUser] = useState<any>({})
+
+  // useEffect(() => {
+  //   ;(async () => {
+  //     const idToken = await SecureStore.getItemAsync('userIdToken')
+  //     const accessToken = await SecureStore.getItemAsync('userAccessToken')
+  //     if (idToken) {
+  //       const userRes = await api.get('user/current', {
+  //         headers: { idToken },
+  //       })
+  //       console.log('🚀 ~ ; ~ userRes:', userRes)
+
+  //       setUser(userRes.data)
+  //     }
+  //   })()
+  // }, [])
   return (
     <>
       <Box overflow='hidden'>
@@ -55,8 +79,12 @@ const Profile = ({ navigation }: { navigation: any }) => {
           <Pressable my='5%'>
             <HStack justifyContent='space-between' alignItems='center'>
               <VStack space={4}>
-                <Heading>Jordan Hong</Heading>
-                <Text fontSize='2xl'>jhoang@flowwest.com</Text>
+                <Heading>
+                  {userCredentialsStore?.displayName || 'No Name'}
+                </Heading>
+                <Text fontSize='2xl'>
+                  {userCredentialsStore?.emailAddress || 'No email'}
+                </Text>
               </VStack>
               <Pressable onPress={() => setEditAccountInfoModalOpen(true)}>
                 <Text color='primary' fontSize='2xl' fontWeight='600'>
@@ -117,7 +145,7 @@ const Profile = ({ navigation }: { navigation: any }) => {
             mt='20'
             alignSelf='center'
             onPress={() => {
-              AuthSession.dismiss()
+              // AuthSession.dismiss()
               dispatch(clearUserCredentials())
             }}
           >
@@ -151,4 +179,10 @@ const Profile = ({ navigation }: { navigation: any }) => {
     </>
   )
 }
-export default Profile
+const mapStateToProps = (state: RootState) => {
+  return {
+    userCredentialsStore: state.userCredentials,
+  }
+}
+
+export default connect(mapStateToProps)(Profile)

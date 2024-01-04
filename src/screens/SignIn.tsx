@@ -22,11 +22,12 @@ import {
   makeRedirectUri,
   Prompt,
   ResponseType,
+  TokenResponse,
   useAuthRequest,
   useAutoDiscovery,
 } from 'expo-auth-session'
 import * as SecureStore from 'expo-secure-store'
-
+import api from '../api/axiosConfig'
 import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../redux/store'
@@ -136,10 +137,11 @@ const SignIn = ({
   const clientId = REACT_APP_CLIENT_ID
 
   // We store the JWT in here
-  const [token, setToken] = React.useState<{
-    accessToken: string | undefined
-    refreshToken: string | undefined
-  } | null>(null)
+  // const [token, setToken] = React.useState<{
+  //   accessToken: string | undefined
+  //   refreshToken: string | undefined
+  //   idToken: string | undefined
+  // } | null>(null)
 
   // Request
   const [request, response, promptAsync] = useAuthRequest(
@@ -210,21 +212,29 @@ const SignIn = ({
                       },
                       discovery
                     ).then(async res => {
-                      const tokenResponse = {
-                        accessToken: res.accessToken as string,
-                        refreshToken: res.refreshToken as string,
-                      }
+                      const { accessToken, refreshToken, idToken } = res
 
-                      console.log('🚀 ~ promptAsync ~ res:', res)
-                      setToken(tokenResponse)
-                      // dispatch(saveUserCredentials(tokenResponse))
-                      await saveSecureStore(
+                      const userRes = await api.get('user/current', {
+                        headers: { idToken: idToken as string },
+                      })
+
+                      await SecureStore.setItemAsync(
                         'userAccessToken',
-                        tokenResponse.accessToken
+                        accessToken
                       )
-                      await saveSecureStore(
+                      await SecureStore.setItemAsync(
                         'userRefreshToken',
-                        tokenResponse.refreshToken
+                        refreshToken as string
+                      )
+                      await SecureStore.setItemAsync(
+                        'userIdToken',
+                        idToken as string
+                      )
+                      dispatch(
+                        saveUserCredentials({
+                          ...userCredentialsStore,
+                          ...userRes.data,
+                        })
                       )
                     })
                   }
@@ -256,7 +266,7 @@ const SignIn = ({
 
 const mapStateToProps = (state: RootState) => {
   return {
-    userCredentialsStore: state.userCredentials.storedCredentials,
+    userCredentialsStore: state.userCredentials,
   }
 }
 
