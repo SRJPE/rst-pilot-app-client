@@ -55,13 +55,16 @@ const FishHolding = ({
       selectedFishStoreState &&
       Object.keys(selectedFishStoreState).length === 0
     ) {
-      console.log('selectedFishStore is truthy')
       createSelectedFishStore()
     } else {
       setSelectedFishStore(selectedFishStoreState as SelectedFishStoreI)
     }
     setSelectedLifeStagesAndRuns()
-  }, [activeTabId])
+  }, [activeTabId, selectedFishStoreState])
+
+  useEffect(() => {
+    handleResetAll()
+  }, [...Object.keys(fishInput).map(tabId => fishInput[tabId].fishStore)])
 
   useEffect(() => {
     if (previouslyActiveTabId && navigationSlice.activeStep === 16) {
