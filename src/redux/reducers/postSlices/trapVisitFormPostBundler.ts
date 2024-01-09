@@ -112,7 +112,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       // for each trap visit
       await Promise.all(
         trapVisitSubmissions.map(async (trapSubmission: any) => {
-          const uid = trapSubmission.uid
+          const uid = trapSubmission.trapVisitUid
           const trapSubmissionCopy = cloneDeep(trapSubmission)
 
           // submit trap visit
