@@ -123,6 +123,7 @@ const SignIn = ({
   const discovery = useAutoDiscovery(
     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/B2C_1_signin/v2.0/'
   )
+  console.log('🚀 ~ discovery:', discovery)
 
   // const redirectUri = makeRedirectUri({
   //   scheme: 'com.onmicrosoft.rstb2c.rsttabletapp',
@@ -159,6 +160,7 @@ const SignIn = ({
     },
     discovery
   )
+  console.log('🚀 ~ request:', request)
 
   async function saveSecureStore(key: string, value: string) {
     await SecureStore.setItemAsync(key, value)
@@ -201,6 +203,11 @@ const SignIn = ({
                     codeResponse?.type === 'success' &&
                     discovery
                   ) {
+                    console.log('🚀 ~ request:', request)
+                    console.log(
+                      '🚀 ~ promptAsync ~ codeResponse:',
+                      codeResponse
+                    )
                     exchangeCodeAsync(
                       {
                         clientId,
@@ -213,7 +220,6 @@ const SignIn = ({
                       discovery
                     ).then(async res => {
                       const { accessToken, refreshToken, idToken } = res
-
                       const userRes = await api.get('user/current', {
                         headers: { idToken: idToken as string },
                       })
@@ -230,6 +236,7 @@ const SignIn = ({
                         'userIdToken',
                         idToken as string
                       )
+
                       dispatch(
                         saveUserCredentials({
                           ...userCredentialsStore,

@@ -21,7 +21,17 @@ const DrawerNavigator = ({
 }: {
   userCredentialsStore: any
 }) => {
-  console.log('🚀 ~ storedCredentialsStore:', userCredentialsStore)
+  // console.log(
+  //   '🚀 ~ userCredentialsStore from the nnavigator:',
+  //   userCredentialsStore
+  // )
+
+  useEffect(() => {
+    console.log(
+      '🚀 ~ userCredentialsStore from the navigator:',
+      userCredentialsStore
+    )
+  }, [userCredentialsStore])
 
   const [currentUserAccessToken, setCurrentUserAccessToken] = useState(
     null as string | null
@@ -56,7 +66,7 @@ const DrawerNavigator = ({
       {/*       
       UN-COMMENT THIS CODE TO REACTIVATE NAV AUTH REQUIREMENT  */}
 
-      {userCredentialsStore.azureUid === null ? (
+      {!userCredentialsStore.azureUid ? (
         <Drawer.Screen
           name='Sign In'
           component={SignIn}

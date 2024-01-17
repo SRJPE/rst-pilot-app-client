@@ -18,22 +18,64 @@ import CustomModal from '../../components/Shared/CustomModal'
 import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
 import { AppDispatch, RootState } from '../../redux/store'
 import { connect, useDispatch } from 'react-redux'
-import { clearUserCredentials } from '../../redux/reducers/userCredentialsSlice'
-import * as AuthSession from 'expo-auth-session'
+import {
+  clearUserCredentials,
+  changePassword,
+} from '../../redux/reducers/userCredentialsSlice'
+import {
+  dismiss,
+  exchangeCodeAsync,
+  revokeAsync,
+  useAuthRequest,
+  useAutoDiscovery,
+} from 'expo-auth-session'
 import * as SecureStore from 'expo-secure-store'
 import api from '../../api/axiosConfig'
+import {
+  // @ts-ignore
+  REACT_APP_REDIRECT_URI,
+  // @ts-ignore
+  REACT_APP_CLIENT_ID,
+  // @ts-ignore
+  REACT_APP_TENANT_ID,
+} from '@env'
 
 const Profile = ({
   userCredentialsStore,
   navigation,
+  clearAllUserCredentials,
 }: {
   userCredentialsStore: any
+  clearAllUserCredentials: any
   navigation: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] = useState(
     false as boolean
   )
+  const redirectUri = 'com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect'
+  const clientId = REACT_APP_CLIENT_ID
+
+  const discovery = useAutoDiscovery(
+    'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_password_reset'
+  )
+
+  const [request, response, promptAsync] = useAuthRequest(
+    {
+      clientId,
+      scopes: [
+        'openid',
+        'profile',
+        'email',
+        'offline_access',
+        'https://rsttabletapp.onmicrosoft.com/jpe-server-api/api.read',
+        'https://rsttabletapp.onmicrosoft.com/jpe-server-api/api.write',
+      ],
+      redirectUri,
+    },
+    discovery
+  )
+
   // const [user, setUser] = useState<any>({})
 
   // useEffect(() => {
@@ -144,8 +186,48 @@ const Profile = ({
           <Pressable
             mt='20'
             alignSelf='center'
-            onPress={() => {
-              // AuthSession.dismiss()
+            onPress={async () => {
+              const accessToken = await SecureStore.getItemAsync(
+                'userAccessToken'
+              )
+              console.log('🚀 ~ onPress={ ~ accessToken:', accessToken)
+
+              const refreshToken = await SecureStore.getItemAsync(
+                'userRefreshToken'
+              )
+              console.log('🚀 ~ onPress={ ~ refreshToken:', refreshToken)
+              //////////////
+              //Attempt #1 Use the dismiss method from Expo-Auth-Session
+              //////////////
+              // dismiss()
+
+              //////////////
+              //Attempt #2 Use the revokeAsync method from Expo-Auth-Session
+              //note: Using the useAutoDiscovery hook does not return the required revocationEndpoint
+              //////////////
+              // if (accessToken) {
+              //   const revokeRes = await revokeAsync(
+              //     { token: accessToken },
+              //     { revocationEndpoint: discovery?.endSessionEndpoint }
+              //   )
+              // }
+              // if (refreshToken) {
+              //   const revokeRes = await revokeAsync(
+              //     { token: refreshToken },
+              //     { revocationEndpoint: discovery?.endSessionEndpoint }
+              //   )
+              // }
+
+              //////////////
+              //Attempt #3 Make a direct call to the end_session_endpoint
+              //note: After looking into it some more I think the browser window needs to be opened 0so the href can be visited to trigger the logout event
+              //////////////
+              // const logoutRes = await fetch(
+              //   'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/b2c_1_signin/oauth2/v2.0/logout?post_logout_redirect_uri=https%3A%2F%2Fjwt.ms%2',
+              //   { headers: { authorization: `${accessToken}` } }
+              // )
+              // console.log('🚀 ~ logoutRes:', logoutRes)
+              // console.log('tokens revoked')
               dispatch(clearUserCredentials())
             }}
           >
@@ -153,6 +235,27 @@ const Profile = ({
               Sign out
             </Text>
           </Pressable>
+          <Button
+            mt='5'
+            alignSelf='center'
+            bg='amber.500'
+            onPress={async () =>
+              //   async () => {
+              //   const authorizeResult = await authRequest.promptAsync(discovery)
+              //   setAuthorizeResult(authorizeResult)
+              // }
+              dispatch(
+                changePassword({
+                  currentPassword: 'Fishfood123',
+                  newPassword: 'Willie123!',
+                })
+              )
+            }
+          >
+            <Text fontSize='xl' fontWeight='bold' color='white'>
+              RESET PASSWORD{' '}
+            </Text>
+          </Button>
           <Button
             mt='20'
             alignSelf='center'
@@ -185,4 +288,10 @@ const mapStateToProps = (state: RootState) => {
   }
 }
 
-export default connect(mapStateToProps)(Profile)
+const mapDispatchToProps = dispatch => {
+  return {
+    clearAllUserCredentials: () => dispatch(clearUserCredentials()),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Profile)
