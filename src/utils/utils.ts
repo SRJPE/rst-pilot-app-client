@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   //returns an alphabetically sorted copy of the original array
   const alphabeticalArray = [...arrayToSort].sort((a, b) => {
@@ -195,4 +197,18 @@ export const getSubstring = (
 
 export function GaussKDE(xi: number, x: number) {
   return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(Math.pow(xi - x, 2) / -2)
+}
+
+export const useDebounce = <T>(value: T, delay = 500) => {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => clearTimeout(timeout)
+  }, [value, delay])
+
+  return debouncedValue
 }
