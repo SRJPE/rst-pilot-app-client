@@ -21,6 +21,7 @@ import { connect, useDispatch } from 'react-redux'
 import {
   clearUserCredentials,
   changePassword,
+  saveUserCredentials,
 } from '../../redux/reducers/userCredentialsSlice'
 import {
   dismiss,
@@ -30,6 +31,8 @@ import {
   useAutoDiscovery,
 } from 'expo-auth-session'
 import * as SecureStore from 'expo-secure-store'
+import * as WebBrowser from 'expo-web-browser'
+
 import api from '../../api/axiosConfig'
 import {
   // @ts-ignore
@@ -39,6 +42,7 @@ import {
   // @ts-ignore
   REACT_APP_TENANT_ID,
 } from '@env'
+import { openAuthSessionAsync } from 'expo-web-browser'
 
 const Profile = ({
   userCredentialsStore,
@@ -60,6 +64,8 @@ const Profile = ({
     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_password_reset'
   )
 
+  //////////////////////////////////////////////
+
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId,
@@ -75,6 +81,53 @@ const Profile = ({
     },
     discovery
   )
+
+  //////////////////////////////////////////////
+  //Web Browser Change Password
+  const [result, setResult] = useState(null)
+
+  const handleChangePasswordButtonAsync = async () => {
+    // let result = await WebBrowser.openBrowserAsync(
+    //   `https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_password_reset&client_id=cfae2097-cff5-45ab-a238-96873bf15888&nonce=defaultNonce&redirect_uri=com.onmicrosoft.rstb2c.rsttabletapp%3A%2F%2Foauth%2Fredirect&scope=openid&response_type=code&prompt=login`
+    // )
+    // setResult(result);
+    promptAsync().then(codeResponse => {
+      if (request && codeResponse?.type === 'success' && discovery) {
+        console.log('🚀 ~ request:', request)
+        console.log('🚀 ~ promptAsync ~ codeResponse:', codeResponse)
+        exchangeCodeAsync(
+          {
+            clientId,
+            code: codeResponse.params.code,
+            extraParams: request.codeVerifier
+              ? { code_verifier: request.codeVerifier }
+              : undefined,
+            redirectUri,
+          },
+          discovery
+        ).then(async res => {
+          const { accessToken, refreshToken, idToken } = res
+          const userRes = await api.get('user/current', {
+            headers: { idToken: idToken as string },
+          })
+
+          await SecureStore.setItemAsync('userAccessToken', accessToken)
+          await SecureStore.setItemAsync(
+            'userRefreshToken',
+            refreshToken as string
+          )
+          await SecureStore.setItemAsync('userIdToken', idToken as string)
+
+          dispatch(
+            saveUserCredentials({
+              ...userCredentialsStore,
+              ...userRes.data,
+            })
+          )
+        })
+      }
+    })
+  }
 
   // const [user, setUser] = useState<any>({})
 
@@ -196,6 +249,7 @@ const Profile = ({
                 'userRefreshToken'
               )
               console.log('🚀 ~ onPress={ ~ refreshToken:', refreshToken)
+
               //////////////
               //Attempt #1 Use the dismiss method from Expo-Auth-Session
               //////////////
@@ -244,12 +298,13 @@ const Profile = ({
               //   const authorizeResult = await authRequest.promptAsync(discovery)
               //   setAuthorizeResult(authorizeResult)
               // }
-              dispatch(
-                changePassword({
-                  currentPassword: 'Fishfood123',
-                  newPassword: 'Willie123!',
-                })
-              )
+              // dispatch(
+              //   changePassword({
+              //     currentPassword: 'Fishfood123!',
+              //     newPassword: 'Willie123!',
+              //   })
+              // )
+              await handleChangePasswordButtonAsync()
             }
           >
             <Text fontSize='xl' fontWeight='bold' color='white'>
