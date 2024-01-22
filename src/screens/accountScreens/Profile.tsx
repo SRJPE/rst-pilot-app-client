@@ -1,5 +1,6 @@
 import { Entypo } from '@expo/vector-icons'
 import {
+  Avatar,
   Box,
   Button,
   Center,
@@ -43,6 +44,7 @@ import {
   REACT_APP_TENANT_ID,
 } from '@env'
 import { openAuthSessionAsync } from 'expo-web-browser'
+import MonitoringProgramInfoModalContent from '../../components/profile/MonitoringProgramModalContent'
 
 const Profile = ({
   userCredentialsStore,
@@ -54,9 +56,12 @@ const Profile = ({
   navigation: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] = useState(
-    false as boolean
-  )
+    const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false)
+  const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] =
+    useState<boolean>(false)
+  const [monitoringProgramInfoModalOpen, setMonitoringProgramInfoModalOpen] =
+    useState<boolean>(false)
+
   const redirectUri = 'com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect'
   const clientId = REACT_APP_CLIENT_ID
 
@@ -145,23 +150,37 @@ const Profile = ({
   //     }
   //   })()
   // }, [])
+
   return (
     <>
       <Box overflow='hidden'>
-        <Center
-          bg='primary'
-          _text={{
-            alignSelf: 'center',
-            color: '#FFF',
-            fontWeight: '700',
-            fontSize: 'xl',
-          }}
-          bottom='0'
-          px='6'
-          py='1.5'
-        >
-          User Profile
-        </Center>
+        <VStack alignItems='center' marginTop='16' marginBottom='8'>
+          <Avatar
+            source={{
+              uri: 'https://images.unsplash.com/photo-1510771463146-e89e6e86560e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80',
+            }}
+            size={150}
+            borderRadius={100}
+            backgroundColor='hsl(0,0%,70%)'
+            borderColor='secondary'
+            borderWidth={3}
+          />
+          <Text fontSize={'3xl'}>John Doe</Text>
+          <Text fontSize={'lg'} mb={5}>
+            jdoe4422@flowwest.com
+          </Text>
+          <Button
+            alignSelf='center'
+            bg='transparent'
+            borderWidth={1}
+            borderColor='primary'
+            onPress={() => setEditAccountInfoModalOpen(true)}
+          >
+            <Text fontWeight='bold' color='primary'>
+              EDIT PROFILE
+            </Text>
+          </Button>
+        </VStack>
         <VStack
           py='2%'
           px='4%'
@@ -171,66 +190,53 @@ const Profile = ({
           // bg='secondary'
           roundedBottom='xl'
         >
-          <Pressable my='5%'>
+          <Pressable
+            my='7'
+            onPress={() => setMonitoringProgramInfoModalOpen(true)}
+          >
             <HStack justifyContent='space-between' alignItems='center'>
-              <VStack space={4}>
-                <Heading>
-                  {userCredentialsStore?.displayName || 'No Name'}
-                </Heading>
-                <Text fontSize='2xl'>
-                  {userCredentialsStore?.emailAddress || 'No email'}
+              <VStack>
+                <Text fontSize='2xl' bold>
+                  Monitoring Program
                 </Text>
+                <Text fontSize='xl'> {'<Monitoring Program Team Name>'}</Text>
               </VStack>
-              <Pressable onPress={() => setEditAccountInfoModalOpen(true)}>
-                <Text color='primary' fontSize='2xl' fontWeight='600'>
-                  Edit
-                </Text>
-              </Pressable>
-            </HStack>
-          </Pressable>
-          <Divider bg='#414141' />
-          <Pressable my='5%'>
-            <HStack justifyContent='space-between' alignItems='center'>
-              <VStack space={4}>
-                <Heading>Monitoring Program</Heading>
-                <Text fontSize='2xl'>Monitoring Program Team Name</Text>
-              </VStack>
-              <IconButton
-                icon={<Icon as={Entypo} name='chevron-right' />}
-                borderRadius='full'
-                _icon={{
-                  size: 10,
-                }}
+              <Icon
+                as={Entypo}
+                name='chevron-right'
+                color='black'
+                size={8}
+                marginX={3}
               />
             </HStack>
           </Pressable>
           <Divider bg='#414141' />
-          <Pressable my='5%'>
+          <Pressable my='7'>
             <HStack justifyContent='space-between' alignItems='center'>
-              <VStack space={4}>
-                <Heading>View Permit</Heading>
-              </VStack>
-              <IconButton
-                icon={<Icon as={Entypo} name='chevron-right' />}
-                borderRadius='full'
-                _icon={{
-                  size: 10,
-                }}
+              <Text fontSize='2xl' bold>
+                View Permit
+              </Text>
+              <Icon
+                as={Entypo}
+                name='chevron-right'
+                color='black'
+                size={8}
+                marginX={3}
               />
             </HStack>
           </Pressable>
           <Divider bg='#414141' />
-          <Pressable my='5%'>
+          <Pressable my='7'>
             <HStack justifyContent='space-between' alignItems='center'>
-              <VStack space={4}>
-                <Heading>Change Password</Heading>
-              </VStack>
-              <IconButton
-                icon={<Icon as={Entypo} name='chevron-right' />}
-                borderRadius='full'
-                _icon={{
-                  size: 10,
-                }}
+              <Text fontSize='2xl' bold>
+                Change Password
+              </Text>
+              <Icon
+                as={Entypo}
+                name='chevron-right'
+                color='black'
+                size={8}
+                marginX={3}
               />
             </HStack>
           </Pressable>
@@ -243,46 +249,14 @@ const Profile = ({
               const accessToken = await SecureStore.getItemAsync(
                 'userAccessToken'
               )
-              console.log('🚀 ~ onPress={ ~ accessToken:', accessToken)
-
               const refreshToken = await SecureStore.getItemAsync(
                 'userRefreshToken'
               )
               console.log('🚀 ~ onPress={ ~ refreshToken:', refreshToken)
 
-              //////////////
-              //Attempt #1 Use the dismiss method from Expo-Auth-Session
-              //////////////
-              // dismiss()
-
-              //////////////
-              //Attempt #2 Use the revokeAsync method from Expo-Auth-Session
-              //note: Using the useAutoDiscovery hook does not return the required revocationEndpoint
-              //////////////
-              // if (accessToken) {
-              //   const revokeRes = await revokeAsync(
-              //     { token: accessToken },
-              //     { revocationEndpoint: discovery?.endSessionEndpoint }
-              //   )
-              // }
-              // if (refreshToken) {
-              //   const revokeRes = await revokeAsync(
-              //     { token: refreshToken },
-              //     { revocationEndpoint: discovery?.endSessionEndpoint }
-              //   )
-              // }
-
-              //////////////
-              //Attempt #3 Make a direct call to the end_session_endpoint
-              //note: After looking into it some more I think the browser window needs to be opened 0so the href can be visited to trigger the logout event
-              //////////////
-              // const logoutRes = await fetch(
-              //   'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/b2c_1_signin/oauth2/v2.0/logout?post_logout_redirect_uri=https%3A%2F%2Fjwt.ms%2',
-              //   { headers: { authorization: `${accessToken}` } }
-              // )
-              // console.log('🚀 ~ logoutRes:', logoutRes)
-              // console.log('tokens revoked')
-              dispatch(clearUserCredentials())
+              ///////
+              setLogoutModalOpen(true)
+              // dispatch(clearUserCredentials())
             }}
           >
             <Text fontSize='2xl' fontWeight='bold' color='#FF0000'>
@@ -294,16 +268,6 @@ const Profile = ({
             alignSelf='center'
             bg='amber.500'
             onPress={async () =>
-              //   async () => {
-              //   const authorizeResult = await authRequest.promptAsync(discovery)
-              //   setAuthorizeResult(authorizeResult)
-              // }
-              // dispatch(
-              //   changePassword({
-              //     currentPassword: 'Fishfood123!',
-              //     newPassword: 'Willie123!',
-              //   })
-              // )
               await handleChangePasswordButtonAsync()
             }
           >
@@ -325,14 +289,66 @@ const Profile = ({
         </VStack>
       </Box>
       {/* --------- Modals --------- */}
+      {editAccountInfoModalOpen && (
+        <CustomModal
+          isOpen={editAccountInfoModalOpen}
+          closeModal={() => setEditAccountInfoModalOpen(false)}
+        >
+          <EditAccountInfoModalContent
+            closeModal={() => setEditAccountInfoModalOpen(false)}
+          />
+        </CustomModal>
+      )}
       <CustomModal
-        isOpen={editAccountInfoModalOpen}
-        closeModal={() => setEditAccountInfoModalOpen(false)}
+        isOpen={monitoringProgramInfoModalOpen}
+        closeModal={() => setMonitoringProgramInfoModalOpen(false)}
         // height='1/1'
       >
-        <EditAccountInfoModalContent
-          closeModal={() => setEditAccountInfoModalOpen(false)}
+        <MonitoringProgramInfoModalContent
+          closeModal={() => setMonitoringProgramInfoModalOpen(false)}
         />
+      </CustomModal>
+
+      <CustomModal
+        isOpen={logoutModalOpen}
+        closeModal={() => setLogoutModalOpen(false)}
+        height='175'
+        size='md'
+        style={{
+          marginTop: 'auto',
+          marginBottom: 'auto',
+        }}
+      >
+        <Box display='flex' height='175' paddingX={10} paddingY={5}>
+          <Text textAlign='center' fontSize='lg' bold marginBottom={1}>
+            Are you sure you want to log out?
+          </Text>
+          <Text textAlign='center' marginBottom={5}>
+            When logged out you will not have access to saved content when
+            offline.
+          </Text>
+          <HStack justifyContent='center'>
+            <Button
+              marginRight={2}
+              borderWidth={1}
+              flexGrow={1}
+              backgroundColor='transparent'
+              borderColor='error'
+              color='error'
+              onPress={() => setLogoutModalOpen(false)}
+            >
+              <Text color='error'>Cancel</Text>
+            </Button>
+            <Button
+              background='primary'
+              onPress={() => setLogoutModalOpen(false)}
+              flexGrow={1}
+              marginLeft={3}
+            >
+              Confirm
+            </Button>
+          </HStack>
+        </Box>
       </CustomModal>
     </>
   )
