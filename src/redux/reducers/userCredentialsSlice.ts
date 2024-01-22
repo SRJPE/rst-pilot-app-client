@@ -1,9 +1,7 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import * as AuthSession from 'expo-auth-session'
+import { createSlice } from '@reduxjs/toolkit'
 import * as SecureStore from 'expo-secure-store'
-import api from '../../api/axiosConfig'
 import { cloneDeep } from 'lodash'
-import { RootState } from '../store'
+import api from '../../api/axiosConfig'
 
 interface InitialStateI {
   displayName: string | null
@@ -40,6 +38,18 @@ export const userCredentialsSlice = createSlice({
       // state.storedCredentials = action.payload
       return (state = { ...action.payload })
     },
+    editProfile: (state, action) => {
+      api
+        .patch(`user/${state.azureUid}/edit`, { ...action.payload })
+        .catch(err => {
+          throw err
+        })
+      return (state = {
+        azureUid: state.azureUid,
+        displayName: `${action.payload.firstName} ${action.payload.lastName}`,
+        ...action.payload,
+      })
+    },
     changePassword: (state, action) => {
       api
         .post(`user/${state.azureUid}/change-password`, action.payload)
@@ -52,7 +62,11 @@ export const userCredentialsSlice = createSlice({
   },
 })
 
-export const { saveUserCredentials, clearUserCredentials, changePassword } =
-  userCredentialsSlice.actions
+export const {
+  saveUserCredentials,
+  clearUserCredentials,
+  changePassword,
+  editProfile,
+} = userCredentialsSlice.actions
 
 export default userCredentialsSlice.reducer

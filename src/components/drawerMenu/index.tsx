@@ -20,7 +20,7 @@ import {
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MenuButton from './MenuButton'
 import { useSelector } from 'react-redux'
-import { AppDispatch } from '../../redux/store'
+import { AppDispatch, RootState } from '../../redux/store'
 import { useDispatch } from 'react-redux'
 import {
   numOfFormSteps,
@@ -28,6 +28,7 @@ import {
 } from '../../redux/reducers/formSlices/navigationSlice'
 import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
 import AppLogo from '../Shared/AppLogo'
+import { connect } from 'react-redux'
 
 const DUMMY_USER = {
   firstName: 'John',
@@ -35,17 +36,23 @@ const DUMMY_USER = {
   email: 'test@flowwest.com',
 }
 
-const DrawerMenu = (props: DrawerContentComponentProps) => {
+interface ExtendedDrawerProps extends DrawerContentComponentProps {
+  userCredentialsStore: any
+}
+
+const DrawerMenu = ({
+  userCredentialsStore,
+  ...props
+}: ExtendedDrawerProps) => {
   const dispatch = useDispatch<AppDispatch>()
   //=========== DUMMY USER ===========//
-  const { firstName, lastName, email } = DUMMY_USER
   //=================================//
 
   const navigationState = useSelector((state: any) => state.navigation)
   const reduxState = useSelector((state: any) => state)
   const { steps, activeStep } = navigationState
   const { state, navigation } = props
-  const currentRoute = state.routeNames[state.index]
+  const currentRoute = state?.routeNames[state.index]
   //unsliced Array for dev
   // const stepsArray = Object.values(steps) as Array<any>
   const stepsArray = Object.values(steps).slice(0, numOfFormSteps) as Array<any>
@@ -61,13 +68,13 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
 
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {
-      navigation.navigate(buttonTitle)
+      navigation?.navigate(buttonTitle)
     },
     [navigation]
   )
 
   const handlePressFormButton = useCallback((buttonTitle: string) => {
-    navigation.navigate('Trap Visit Form', { screen: buttonTitle })
+    navigation?.navigate('Trap Visit Form', { screen: buttonTitle })
     //for each object in the steps Array
     //if the Object contain the name property that matched button title
     //assign the index top stepPayload
@@ -120,13 +127,18 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             color: 'white',
           }}
         />
-        <HStack p={7} alignItems='center' justifyContent='space-between'>
+        <HStack
+          p={7}
+          space={3}
+          alignItems='center'
+          justifyContent='space-between'
+        >
           <VStack>
-            <Text fontSize='2xl' color='white' bold mt={3}>
-              {`${firstName} ${lastName}`}
+            <Text fontSize='xl' color='white' bold mt={3}>
+              {userCredentialsStore.displayName}
             </Text>
-            <Text fontSize='lg' color='white'>
-              {email}
+            <Text fontSize='md' color='white'>
+              {userCredentialsStore.emailAddress}
             </Text>
             <Pressable
               variant='outline'
@@ -148,7 +160,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
               <Text color='white'>Settings</Text>
             </Pressable>
           </VStack>
-          <Avatar
+          {/* <Avatar
             source={{
               uri: 'https://images.unsplash.com/photo-1510771463146-e89e6e86560e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80',
             }}
@@ -157,7 +169,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             backgroundColor='hsl(0,0%,70%)'
             borderColor='secondary'
             borderWidth={3}
-          />
+          /> */}
         </HStack>
       </VStack>
       <Box safeArea flex={1} px={7}>
@@ -168,12 +180,6 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
               onPress={() => handlePressMainNavButton('Home')}
               icon='home'
               title='Home'
-            />
-            <MenuButton
-              active={currentRoute === 'Sign In'}
-              onPress={() => handlePressMainNavButton('Sign In')}
-              icon='home'
-              title='Sign In'
             />
 
             <MenuButton
@@ -262,4 +268,10 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
   )
 }
 
-export default DrawerMenu
+const mapStateToProps = (state: RootState) => {
+  return {
+    userCredentialsStore: state.userCredentials,
+  }
+}
+
+export default connect(mapStateToProps)(DrawerMenu)

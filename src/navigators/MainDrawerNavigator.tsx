@@ -21,22 +21,6 @@ const DrawerNavigator = ({
 }: {
   userCredentialsStore: any
 }) => {
-  // console.log(
-  //   '🚀 ~ userCredentialsStore from the nnavigator:',
-  //   userCredentialsStore
-  // )
-
-  useEffect(() => {
-    console.log(
-      '🚀 ~ userCredentialsStore from the navigator:',
-      userCredentialsStore
-    )
-  }, [userCredentialsStore])
-
-  const [currentUserAccessToken, setCurrentUserAccessToken] = useState(
-    null as string | null
-  )
-
   async function getValueFor(key: string) {
     let result = await SecureStore.getItemAsync(key)
     if (result) {
@@ -46,15 +30,6 @@ const DrawerNavigator = ({
       return null
     }
   }
-
-  // useEffect(() => {
-  //   ;(async () => {
-  //     // await SecureStore.deleteItemAsync('userAccessToken')
-  //     const user = await getValueFor('userAccessToken')
-
-  //     setCurrentUserAccessToken(user)
-  //   })()
-  // }, [])
 
   return (
     <Drawer.Navigator
@@ -72,7 +47,7 @@ const DrawerNavigator = ({
           component={SignIn}
           options={{
             headerShown: false,
-            swipeEnabled: true,
+            swipeEnabled: false,
           }}
         />
       ) : (
