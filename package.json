@@ -25,7 +25,6 @@
     "expo": "^47.0.0",
     "expo-auth-session": "~3.8.0",
     "expo-clipboard": "~4.0.1",
-    "expo-community-flipper": "46.0.2",
     "expo-constants": "~14.0.2",
     "expo-dev-client": "~2.0.1",
     "expo-location": "~15.0.1",
@@ -46,7 +45,6 @@
     "react-native": "0.70.8",
     "react-native-dotenv": "^3.4.8",
     "react-native-dropdown-picker": "^5.4.2",
-    "react-native-flipper": "^0.176.0",
     "react-native-gesture-handler": "~2.8.0",
     "react-native-pager-view": "6.0.1",
     "react-native-paper": "^4.12.5",
@@ -73,8 +71,7 @@
     "@types/react-native-table-component": "^1.2.4",
     "@types/react-redux": "^7.1.24",
     "dotenv": "^16.0.3",
-    "react-devtools-core": "^4.27.1",
-    "react-native-flipper-performance-plugin": "^0.3.1"
+    "react-devtools-core": "^4.27.1"
   },
   "private": true
 }
