@@ -139,14 +139,16 @@ const Profile = ({ navigation }: { navigation: any }) => {
         </VStack>
       </Box>
       {/* --------- Modals --------- */}
-      <CustomModal
-        isOpen={editAccountInfoModalOpen}
-        closeModal={() => setEditAccountInfoModalOpen(false)}
-      >
-        <EditAccountInfoModalContent
+      {editAccountInfoModalOpen && (
+        <CustomModal
+          isOpen={editAccountInfoModalOpen}
           closeModal={() => setEditAccountInfoModalOpen(false)}
-        />
-      </CustomModal>
+        >
+          <EditAccountInfoModalContent
+            closeModal={() => setEditAccountInfoModalOpen(false)}
+          />
+        </CustomModal>
+      )}
       <CustomModal
         isOpen={monitoringProgramInfoModalOpen}
         closeModal={() => setMonitoringProgramInfoModalOpen(false)}
