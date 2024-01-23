@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 2.2.0"
+    "version": ">= 2.2.0",
+    "promptToConfigurePushNotifications": false
   },
   "build": {
     "base": {
@@ -8,7 +9,13 @@
     },
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "env": {
+        "REACT_APP_BASE_URL": "https://jpe-app-server.azurewebsites.net"
+      }
     },
     "preview": {
       "distribution": "internal"
