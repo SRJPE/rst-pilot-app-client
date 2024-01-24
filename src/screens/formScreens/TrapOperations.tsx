@@ -125,7 +125,7 @@ const TrapOperations = ({
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
       const allTabIds: string[] = Object.keys(tabSlice.tabs)
-      allTabIds.forEach((allTabId) => {
+      allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
             stepCompletedCheck = false
@@ -395,7 +395,7 @@ const TrapOperations = ({
                             </FormControl.Label>
                             <Popover
                               placement='bottom left'
-                              trigger={(triggerProps) => {
+                              trigger={triggerProps => {
                                 return (
                                   <IconButton
                                     {...triggerProps}
@@ -470,6 +470,8 @@ const TrapOperations = ({
                                   value={values.rpm1}
                                   setFieldValue={setFieldValue}
                                   fieldName='rpm1'
+                                  fieldTouched={touched.rpm1}
+                                  setFieldTouched={setFieldTouched}
                                 />
                                 {Number(values.rpm1) > QARanges.RPM.max ? (
                                   <RenderWarningMessage />
@@ -490,6 +492,8 @@ const TrapOperations = ({
                                   value={values.rpm2}
                                   setFieldValue={setFieldValue}
                                   fieldName='rpm2'
+                                  fieldTouched={touched.rpm2}
+                                  setFieldTouched={setFieldTouched}
                                 />
                                 {Number(values.rpm2) > QARanges.RPM.max ? (
                                   <RenderWarningMessage />
@@ -510,6 +514,8 @@ const TrapOperations = ({
                                   value={values.rpm3}
                                   setFieldValue={setFieldValue}
                                   fieldName='rpm3'
+                                  fieldTouched={touched.rpm3}
+                                  setFieldTouched={setFieldTouched}
                                 />
                                 {Number(values.rpm3) > QARanges.RPM.max ? (
                                   <RenderWarningMessage />
@@ -584,6 +590,8 @@ const TrapOperations = ({
                               value={values.flowMeasure}
                               setFieldValue={setFieldValue}
                               fieldName='flowMeasure'
+                              fieldTouched={touched.flowMeasure}
+                              setFieldTouched={setFieldTouched}
                             />
                             {inputUnit(values.flowMeasureUnit)}
                             {touched.flowMeasure &&
@@ -621,6 +629,8 @@ const TrapOperations = ({
                               value={values.waterTemperature}
                               setFieldValue={setFieldValue}
                               fieldName='waterTemperature'
+                              fieldTouched={touched.waterTemperature}
+                              setFieldTouched={setFieldTouched}
                             />
                             {inputUnit(
                               values.waterTemperatureUnit,
@@ -655,6 +665,8 @@ const TrapOperations = ({
                               value={values.waterTurbidity}
                               setFieldValue={setFieldValue}
                               fieldName='waterTurbidity'
+                              fieldTouched={touched.waterTurbidity}
+                              setFieldTouched={setFieldTouched}
                             />
                             {inputUnit(values.waterTurbidityUnit)}
                             {Number(values.waterTurbidity) >
