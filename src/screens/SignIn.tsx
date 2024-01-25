@@ -166,6 +166,16 @@ const SignIn = ({
     await SecureStore.setItemAsync(key, value)
   }
 
+  //Web Browser Change Password
+  const [result, setResult] = useState<WebBrowser.WebBrowserResult | null>(null)
+
+  const handleChangePasswordButtonAsync = async () => {
+    let result = await WebBrowser.openBrowserAsync(
+      `https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_password_reset&client_id=cfae2097-cff5-45ab-a238-96873bf15888&nonce=defaultNonce&redirect_uri=com.onmicrosoft.rstb2c.rsttabletapp%3A%2F%2Foauth%2Fredirect&scope=openid&response_type=code&prompt=login`
+    )
+    setResult(result)
+  }
+
   return (
     <KeyboardAvoidingView flex='1' behavior='padding'>
       <ImageBackground
@@ -254,7 +264,9 @@ const SignIn = ({
             </Text>
           </Button>
           <HStack justifyContent='space-between' w='400px'>
-            <Pressable>
+            <Pressable
+              onPress={async () => await handleChangePasswordButtonAsync()}
+            >
               <Text color='#fff' fontSize='lg'>
                 Forgot Password
               </Text>
