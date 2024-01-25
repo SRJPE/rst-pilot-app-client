@@ -368,6 +368,8 @@ const VisitSetup = ({
       onSubmit={(values) => {
         onSubmit(values, tabSlice?.activeTabId)
       }}
+      validateOnChange={false}
+      validateOnBlur={true}
     >
       {({
         handleChange,

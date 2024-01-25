@@ -125,7 +125,7 @@ const TrapOperations = ({
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
       const allTabIds: string[] = Object.keys(tabSlice.tabs)
-      allTabIds.forEach((allTabId) => {
+      allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
             stepCompletedCheck = false
@@ -205,7 +205,8 @@ const TrapOperations = ({
           onSubmit(values, activeTabId)
         }
       }}
-      validateOnChange={true}
+      validateOnChange={false}
+      validateOnBlur={true}
     >
       {({
         handleChange,
@@ -220,7 +221,6 @@ const TrapOperations = ({
       }) => {
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
-            console.log('tab switch')
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }
@@ -395,7 +395,7 @@ const TrapOperations = ({
                             </FormControl.Label>
                             <Popover
                               placement='bottom left'
-                              trigger={(triggerProps) => {
+                              trigger={triggerProps => {
                                 return (
                                   <IconButton
                                     {...triggerProps}
@@ -468,6 +468,10 @@ const TrapOperations = ({
                                   onChangeText={handleChange('rpm1')}
                                   onBlur={handleBlur('rpm1')}
                                   value={values.rpm1}
+                                  setFieldValue={setFieldValue}
+                                  fieldName='rpm1'
+                                  fieldTouched={touched.rpm1}
+                                  setFieldTouched={setFieldTouched}
                                 />
                                 {Number(values.rpm1) > QARanges.RPM.max ? (
                                   <RenderWarningMessage />
@@ -486,6 +490,10 @@ const TrapOperations = ({
                                   onChangeText={handleChange('rpm2')}
                                   onBlur={handleBlur('rpm2')}
                                   value={values.rpm2}
+                                  setFieldValue={setFieldValue}
+                                  fieldName='rpm2'
+                                  fieldTouched={touched.rpm2}
+                                  setFieldTouched={setFieldTouched}
                                 />
                                 {Number(values.rpm2) > QARanges.RPM.max ? (
                                   <RenderWarningMessage />
@@ -504,6 +512,10 @@ const TrapOperations = ({
                                   onChangeText={handleChange('rpm3')}
                                   onBlur={handleBlur('rpm3')}
                                   value={values.rpm3}
+                                  setFieldValue={setFieldValue}
+                                  fieldName='rpm3'
+                                  fieldTouched={touched.rpm3}
+                                  setFieldTouched={setFieldTouched}
                                 />
                                 {Number(values.rpm3) > QARanges.RPM.max ? (
                                   <RenderWarningMessage />
@@ -576,6 +588,10 @@ const TrapOperations = ({
                               onChangeText={handleChange('flowMeasure')}
                               onBlur={handleBlur('flowMeasure')}
                               value={values.flowMeasure}
+                              setFieldValue={setFieldValue}
+                              fieldName='flowMeasure'
+                              fieldTouched={touched.flowMeasure}
+                              setFieldTouched={setFieldTouched}
                             />
                             {inputUnit(values.flowMeasureUnit)}
                             {touched.flowMeasure &&
@@ -611,6 +627,10 @@ const TrapOperations = ({
                               onChangeText={handleChange('waterTemperature')}
                               onBlur={handleBlur('waterTemperature')}
                               value={values.waterTemperature}
+                              setFieldValue={setFieldValue}
+                              fieldName='waterTemperature'
+                              fieldTouched={touched.waterTemperature}
+                              setFieldTouched={setFieldTouched}
                             />
                             {inputUnit(
                               values.waterTemperatureUnit,
@@ -643,6 +663,10 @@ const TrapOperations = ({
                               onChangeText={handleChange('waterTurbidity')}
                               onBlur={handleBlur('waterTurbidity')}
                               value={values.waterTurbidity}
+                              setFieldValue={setFieldValue}
+                              fieldName='waterTurbidity'
+                              fieldTouched={touched.waterTurbidity}
+                              setFieldTouched={setFieldTouched}
                             />
                             {inputUnit(values.waterTurbidityUnit)}
                             {Number(values.waterTurbidity) >

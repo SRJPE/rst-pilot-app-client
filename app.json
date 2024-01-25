@@ -6,9 +6,8 @@
     "orientation": "portrait",
     "icon": "./assets/three_fish_app_icon.png",
     "userInterfaceStyle": "light",
+    "jsEngine": "jsc",
     "plugins": [
-      ["expo-community-flipper"],
-      ["react-native-flipper-performance-plugin"],
       [
         "expo-location",
         {
