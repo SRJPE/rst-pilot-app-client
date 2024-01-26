@@ -7,7 +7,7 @@ import {
 } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { debounce } from 'lodash'
@@ -200,6 +200,10 @@ const NavButtons = ({
   }
 
   const handleRightButton = () => {
+    console.log(
+      'handleRightButton',
+      navigationState.steps[activeStep + 1]?.name
+    )
     //if function truthy, submit form to check for errors and save to redux
     if (handleSubmit) {
       handleSubmit()
@@ -306,14 +310,20 @@ const NavButtons = ({
     // }
     return buttonText
   }
-  const debouncedHandleRightButton = debounce(handleRightButton, 500, {
-    leading: true,
-    trailing: false,
-  })
-  const debouncedHandleLeftButton = debounce(handleLeftButton, 500, {
-    leading: true,
-    trailing: false,
-  })
+  const debouncedHandleRightButton = useCallback(
+    debounce(handleRightButton, 500, {
+      leading: true,
+      trailing: false,
+    }),
+    []
+  )
+  const debouncedHandleLeftButton = useCallback(
+    debounce(handleLeftButton, 500, {
+      leading: true,
+      trailing: false,
+    }),
+    []
+  )
   return (
     <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>
       <HStack justifyContent='space-evenly'>
