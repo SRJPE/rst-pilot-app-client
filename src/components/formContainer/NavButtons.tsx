@@ -200,10 +200,6 @@ const NavButtons = ({
   }
 
   const handleRightButton = () => {
-    console.log(
-      'handleRightButton',
-      navigationState.steps[activeStep + 1]?.name
-    )
     //if function truthy, submit form to check for errors and save to redux
     if (handleSubmit) {
       handleSubmit()
