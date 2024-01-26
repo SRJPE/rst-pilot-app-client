@@ -311,14 +311,14 @@ const NavButtons = ({
       leading: true,
       trailing: false,
     }),
-    []
+    [handleSubmit]
   )
   const debouncedHandleLeftButton = useCallback(
     debounce(handleLeftButton, 500, {
       leading: true,
       trailing: false,
     }),
-    []
+    [handleSubmit]
   )
   return (
     <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>
