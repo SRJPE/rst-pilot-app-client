@@ -288,7 +288,7 @@ const IncompleteSections = ({
             measureValueNumeric:
               trapOperationsState[id].values.waterTemperature,
             measureValueText:
-              trapOperationsState[id].values.waterTemperature.toString(),
+              trapOperationsState[id].values.waterTemperature?.toString(),
             measureUnit:
               trapOperationsState[id].values.waterTemperatureUnit === '°F'
                 ? 1
