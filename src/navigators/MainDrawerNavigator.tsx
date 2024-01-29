@@ -1,6 +1,5 @@
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import * as SecureStore from 'expo-secure-store'
-import { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import DrawerMenu from '../components/drawerMenu'
 import { RootState } from '../redux/store'

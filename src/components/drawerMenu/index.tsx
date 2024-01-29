@@ -1,40 +1,28 @@
-import { useCallback, useEffect } from 'react'
+import { MaterialIcons } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import {
-  HStack,
-  VStack,
-  Button,
-  Icon,
-  Avatar,
-  Heading,
-  IconButton,
-  Text,
+  DrawerContentComponentProps,
+  DrawerContentScrollView,
+} from '@react-navigation/drawer'
+import {
   Box,
   Divider,
+  HStack,
+  IconButton,
   Pressable,
+  Text,
+  VStack,
 } from 'native-base'
-import { MaterialIcons } from '@expo/vector-icons'
-import {
-  DrawerContentScrollView,
-  DrawerContentComponentProps,
-} from '@react-navigation/drawer'
-import Ionicons from '@expo/vector-icons/Ionicons'
-import MenuButton from './MenuButton'
-import { useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
-import { useDispatch } from 'react-redux'
+import { useCallback } from 'react'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   numOfFormSteps,
   updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
 import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
+import { AppDispatch, RootState } from '../../redux/store'
 import AppLogo from '../Shared/AppLogo'
-import { connect } from 'react-redux'
-
-const DUMMY_USER = {
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'test@flowwest.com',
-}
+import MenuButton from './MenuButton'
 
 interface ExtendedDrawerProps extends DrawerContentComponentProps {
   userCredentialsStore: any
@@ -45,9 +33,6 @@ const DrawerMenu = ({
   ...props
 }: ExtendedDrawerProps) => {
   const dispatch = useDispatch<AppDispatch>()
-  //=========== DUMMY USER ===========//
-  //=================================//
-
   const navigationState = useSelector((state: any) => state.navigation)
   const reduxState = useSelector((state: any) => state)
   const { steps, activeStep } = navigationState
@@ -160,16 +145,6 @@ const DrawerMenu = ({
               <Text color='white'>Settings</Text>
             </Pressable>
           </VStack>
-          {/* <Avatar
-            source={{
-              uri: 'https://images.unsplash.com/photo-1510771463146-e89e6e86560e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80',
-            }}
-            size={75}
-            borderRadius={100}
-            backgroundColor='hsl(0,0%,70%)'
-            borderColor='secondary'
-            borderWidth={3}
-          /> */}
         </HStack>
       </VStack>
       <Box safeArea flex={1} px={7}>

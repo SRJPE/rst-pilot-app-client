@@ -1,5 +1,10 @@
 import { Entypo } from '@expo/vector-icons'
-import { useAuthRequest, useAutoDiscovery } from 'expo-auth-session'
+import {
+  AuthSessionResult,
+  exchangeCodeAsync,
+  useAuthRequest,
+  useAutoDiscovery,
+} from 'expo-auth-session'
 import * as SecureStore from 'expo-secure-store'
 import * as WebBrowser from 'expo-web-browser'
 import {
@@ -16,8 +21,12 @@ import { useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
 import CustomModal from '../../components/Shared/CustomModal'
-import { clearUserCredentials } from '../../redux/reducers/userCredentialsSlice'
+import {
+  clearUserCredentials,
+  saveUserCredentials,
+} from '../../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState } from '../../redux/store'
+import api from '../../api/axiosConfig'
 
 import {
   // @ts-ignore
@@ -32,8 +41,6 @@ const Profile = ({
   userCredentialsStore: any
   navigation: any
 }) => {
-  console.log('🚀 ~ userCredentialsStore 4:', userCredentialsStore)
-
   const dispatch = useDispatch<AppDispatch>()
   const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false)
   const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] =
@@ -44,13 +51,13 @@ const Profile = ({
   const redirectUri = 'com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect'
   const clientId = REACT_APP_CLIENT_ID
 
-  const discovery = useAutoDiscovery(
-    'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_password_reset'
+  const passwordResetDiscovery = useAutoDiscovery(
+    'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/B2C_1_password_reset/v2.0/'
   )
 
   //////////////////////////////////////////////
 
-  const [request, response, promptAsync] = useAuthRequest(
+  const [pwResetRequest, pwResetResponse, pwResetPromptAsync] = useAuthRequest(
     {
       clientId,
       scopes: [
@@ -63,70 +70,59 @@ const Profile = ({
       ],
       redirectUri,
     },
-    discovery
+    passwordResetDiscovery
   )
 
   //////////////////////////////////////////////
   //Web Browser Change Password
-  const [result, setResult] = useState<WebBrowser.WebBrowserResult | null>(null)
-
   const handleChangePasswordButtonAsync = async () => {
-    let result = await WebBrowser.openBrowserAsync(
-      `https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1_password_reset&client_id=cfae2097-cff5-45ab-a238-96873bf15888&nonce=defaultNonce&redirect_uri=com.onmicrosoft.rstb2c.rsttabletapp%3A%2F%2Foauth%2Fredirect&scope=openid&response_type=code&prompt=login`
-    )
-    setResult(result)
-    // promptAsync().then(codeResponse => {
-    //   if (request && codeResponse?.type === 'success' && discovery) {
-    //     console.log('🚀 ~ request:', request)
-    //     console.log('🚀 ~ promptAsync ~ codeResponse:', codeResponse)
-    //     exchangeCodeAsync(
-    //       {
-    //         clientId,
-    //         code: codeResponse.params.code,
-    //         extraParams: request.codeVerifier
-    //           ? { code_verifier: request.codeVerifier }
-    //           : undefined,
-    //         redirectUri,
-    //       },
-    //       discovery
-    //     ).then(async res => {
-    //       const { accessToken, refreshToken, idToken } = res
-    //       const userRes = await api.get('user/current', {
-    //         headers: { idToken: idToken as string },
-    //       })
+    pwResetPromptAsync().then((codeResponse: AuthSessionResult) => {
+      if (
+        pwResetRequest &&
+        codeResponse?.type === 'success' &&
+        passwordResetDiscovery
+      ) {
+        exchangeCodeAsync(
+          {
+            clientId,
+            code: codeResponse.params.code,
+            extraParams: pwResetRequest.codeVerifier
+              ? { code_verifier: pwResetRequest.codeVerifier }
+              : undefined,
+            redirectUri,
+          },
+          passwordResetDiscovery
+        )
+        //note: leaving this here for the team to decide if new tokens are needed on a password change from the profile screen
 
-    //       await SecureStore.setItemAsync('userAccessToken', accessToken)
-    //       await SecureStore.setItemAsync(
-    //         'userRefreshToken',
-    //         refreshToken as string
-    //       )
-    //       await SecureStore.setItemAsync('userIdToken', idToken as string)
+        // .then(async res => {
+        //   const { accessToken, refreshToken, idToken } = res
+        //   const userRes = await api.get('user/current', {
+        //     headers: { idToken: idToken as string },
+        //   })
 
-    //       dispatch(
-    //         saveUserCredentials({
-    //           ...userCredentialsStore,
-    //           ...userRes.data,
-    //         })
-    //       )
-    //     })
-    //   }
-    // })
+        //   await SecureStore.setItemAsync('userAccessToken', accessToken)
+        //   await SecureStore.setItemAsync(
+        //     'userRefreshToken',
+        //     refreshToken as string
+        //   )
+        //   await SecureStore.setItemAsync('userIdToken', idToken as string)
+
+        //   dispatch(
+        //     saveUserCredentials({
+        //       ...userCredentialsStore,
+        //       ...userRes.data,
+        //     })
+        //   )
+        // })
+      }
+    })
   }
 
   return (
     <>
       <Box overflow='hidden'>
         <VStack alignItems='center' marginTop='16' marginBottom='8'>
-          {/* <Avatar
-            source={{
-              uri: 'https://images.unsplash.com/photo-1510771463146-e89e6e86560e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80',
-            }}
-            size={150}
-            borderRadius={100}
-            backgroundColor='hsl(0,0%,70%)'
-            borderColor='secondary'
-            borderWidth={3}
-          /> */}
           <Text fontSize={'3xl'}>{userCredentialsStore.displayName}</Text>
           <Text fontSize={'xl'}>{userCredentialsStore.jobTitle}</Text>
           <Text fontSize={'lg'} mb={5}>
@@ -214,7 +210,6 @@ const Profile = ({
 
               ///////
               setLogoutModalOpen(true)
-              // dispatch(clearUserCredentials())
             }}
           >
             <Text fontSize='2xl' fontWeight='bold' color='#FF0000'>

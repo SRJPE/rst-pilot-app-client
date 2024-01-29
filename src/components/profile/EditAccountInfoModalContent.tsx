@@ -1,4 +1,3 @@
-import * as ImagePicker from 'expo-image-picker'
 import { Formik } from 'formik'
 import {
   Button,
@@ -9,7 +8,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import React, { useState } from 'react'
+import React from 'react'
 import { useDispatch } from 'react-redux'
 import * as Yup from 'yup'
 import { editProfile } from '../../redux/reducers/userCredentialsSlice'
@@ -31,32 +30,7 @@ const EditAccountInfoModalContent = ({
   closeModal: () => void
   user: any
 }) => {
-  // const [imageSrc, setImageSrc] = useState('')
   const dispatch = useDispatch<AppDispatch>()
-
-  // const pickImage = async (
-  //   setFieldValue: (
-  //     field: string,
-  //     value: any,
-  //     shouldValidate?: boolean | undefined
-  //   ) => void
-  // ) => {
-  //   // No permissions request is necessary for launching the image library
-  //   let result = await ImagePicker.launchImageLibraryAsync({
-  //     mediaTypes: ImagePicker.MediaTypeOptions.All,
-  //     allowsEditing: true,
-  //     aspect: [1, 1],
-  //     quality: 1,
-  //   })
-
-  //   console.log(result)
-
-  //   if (!result.cancelled) {
-  //     console.error('🚀 ~ pickImage ~ result:', result)
-  //     setFieldValue('image', result.assets[0].uri)
-  //     setImageSrc(result.assets[0].uri)
-  //   }
-  // }
 
   return (
     <>
@@ -74,7 +48,6 @@ const EditAccountInfoModalContent = ({
           jobTitle: user.jobTitle || '',
           department: user.department || '',
           emailAddress: user.emailAddress || '',
-          // image: '',
         }}
         onSubmit={(values, { setSubmitting }) => {
           dispatch(editProfile(values))
@@ -92,45 +65,6 @@ const EditAccountInfoModalContent = ({
         }) => {
           return (
             <VStack space={5} m='5%'>
-              {/* <HStack space={10}>
-                <Avatar
-                  source={imageSrc ? { uri: imageSrc } : imagePlaceholder}
-                  // source={{
-                  //   uri: imageSrc,
-                  //   // uri: 'https://images.unsplash.com/photo-1510771463146-e89e6e86560e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=627&q=80',
-                  // }}
-                  size={150}
-                  borderRadius={100}
-                  backgroundColor='hsl(0,0%,70%)'
-                  borderColor='secondary'
-                  borderWidth={3}
-                />
-                <VStack>
-                  <Text fontSize='xl'>Profile Picture</Text>
-                  <Text fontSize='lg' color='gray.500'>
-                    Maximum Size is 2mb
-                  </Text>
-                  <Text fontSize='lg' color='gray.500'>
-                    Supported images: .jpg, .jpeg, .svg
-                  </Text>
-                  <Button
-                    variant='outline'
-                    mt={5}
-                    borderColor='primary'
-                    onPress={() => pickImage(setFieldValue)}
-                    leftIcon={
-                      <Icon
-                        as={Ionicons}
-                        name='images'
-                        size='sm'
-                        color='primary'
-                      />
-                    }
-                  >
-                    <Text color='primary'>Upload Image</Text>
-                  </Button>
-                </VStack>
-              </HStack> */}
               <FormControl>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
