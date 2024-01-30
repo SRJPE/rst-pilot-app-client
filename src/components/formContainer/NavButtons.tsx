@@ -7,9 +7,10 @@ import {
 } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { useNavigation, useRoute } from '@react-navigation/native'
+import { debounce } from 'lodash'
 
 const NavButtons = ({
   navigation,
@@ -255,8 +256,7 @@ const NavButtons = ({
     // }
     if (activePage === 'Incomplete Sections') {
       //if form is complete, then do not disable button
-      // return isFormComplete ? false : true
-      return isFormComplete ? false : false
+      return isFormComplete ? false : true
     } else if (
       activePage === 'High Flows' ||
       activePage === 'Non Functional Trap' ||
@@ -306,7 +306,20 @@ const NavButtons = ({
     // }
     return buttonText
   }
-
+  const debouncedHandleRightButton = useCallback(
+    debounce(handleRightButton, 500, {
+      leading: true,
+      trailing: false,
+    }),
+    [handleSubmit]
+  )
+  const debouncedHandleLeftButton = useCallback(
+    debounce(handleLeftButton, 500, {
+      leading: true,
+      trailing: false,
+    }),
+    [handleSubmit]
+  )
   return (
     <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>
       <HStack justifyContent='space-evenly'>
@@ -323,26 +336,12 @@ const NavButtons = ({
               <></>
             )
           }
-          onPress={handleLeftButton}
+          onPress={debouncedHandleLeftButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='primary'>
             {activePage === 'Visit Setup' ? 'Return Home' : 'Back'}
           </Text>
         </Button>
-
-        {/* <Button
-          height='20'
-          bg='primary'
-          alignSelf='flex-start'
-          width='5%'
-          shadow='5'
-          onPress={() => console.log('🚀 ~ reduxState', reduxState)}
-        >
-          <Text fontWeight='bold' color='white'>
-            redux state
-          </Text>
-        </Button> */}
-
         <Button
           alignSelf='flex-start'
           bg='primary'
@@ -350,7 +349,7 @@ const NavButtons = ({
           height='20'
           shadow='5'
           isDisabled={disableRightButton()}
-          onPress={handleRightButton}
+          onPress={debouncedHandleRightButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
             {renderRightButtonText(activePage)}

@@ -17,7 +17,10 @@ import NavButtons from '../../components/formContainer/NavButtons'
 import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
 import { Keyboard } from 'react-native'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
-import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  checkIfFormIsComplete,
+  markStepCompleted,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
@@ -143,8 +146,10 @@ const TrapPostProcessing = ({
       }
     })
 
-    if (stepCompletedCheck)
+    if (stepCompletedCheck) {
       dispatch(markStepCompleted({ propName: 'trapPostProcessing' }))
+      dispatch(checkIfFormIsComplete())
+    }
     console.log('🚀 ~ onSubmit ~ TrapPostProcessing', values)
   }
 
@@ -210,10 +215,10 @@ const TrapPostProcessing = ({
                       {Number(values.debrisVolume) >
                         QARanges.debrisVolume.max && <RenderWarningMessage />}
                       {tabSlice.incompleteSectionTouched
-                        ? errors.reasonNotFunc &&
+                        ? errors.debrisVolume &&
                           RenderErrorMessage(errors, 'debrisVolume')
-                        : touched.reasonNotFunc &&
-                          errors.reasonNotFunc &&
+                        : touched.debrisVolume &&
+                          errors.debrisVolume &&
                           RenderErrorMessage(errors, 'debrisVolume')}
                     </HStack>
                     <Input

@@ -27,7 +27,7 @@ import AppLogo from '../Shared/AppLogo'
 const DrawerMenu = (props: DrawerContentComponentProps) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
-  const reduxState = useSelector((state: any) => state)
+  // const reduxState = useSelector((state: any) => state)
   const { steps, activeStep } = navigationState
   const { state, navigation } = props
   const currentRoute = state.routeNames[state.index]
@@ -147,9 +147,9 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
           />
           <MenuButton
             active={false}
-            onPress={() => console.log('🚀 ~ reduxState:', reduxState)}
-            icon='bug'
-            title='Developer Log'
+            onPress={() => handlePressMainNavButton('Inspector')}
+            icon='search'
+            title='Inspector'
           />
           <MenuButton
             active={currentRoute === 'Mark Recapture'}

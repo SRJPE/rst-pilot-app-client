@@ -32,6 +32,7 @@ import {
   setIncompleteSectionTouched,
   TabStateI,
 } from '../../redux/reducers/formSlices/tabSlice'
+import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -91,7 +92,6 @@ const IncompleteSections = ({
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
-    dispatch(checkIfFormIsComplete())
   }, [])
 
   const handleSubmit = () => {
@@ -124,7 +124,7 @@ const IncompleteSections = ({
         console.log('Connection issue during submission')
       }
     } catch (error) {
-      console.log('error: ', error)
+      console.log('submit error: ', error)
     }
   }
 
@@ -145,6 +145,15 @@ const IncompleteSections = ({
     return dropdownsArray.map((dropdownObj: any) => {
       return dropdownObj.definition
     })
+  }
+
+  const findTrapLocationIds = () => {
+    let container = [] as any
+    for (let tabId in visitSetupState) {
+      if (tabId === 'placeholderId') continue
+      container.push(visitSetupState[tabId].values.trapLocationId)
+    }
+    return container
   }
 
   const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
@@ -271,7 +280,7 @@ const IncompleteSections = ({
             measureName: 'flow measure',
             measureValueNumeric: trapOperationsState[id].values.flowMeasure,
             measureValueText:
-              trapOperationsState[id].values.flowMeasure.toString(),
+              trapOperationsState[id].values.flowMeasure?.toString(),
             measureUnit: 5,
           },
           {
@@ -279,7 +288,7 @@ const IncompleteSections = ({
             measureValueNumeric:
               trapOperationsState[id].values.waterTemperature,
             measureValueText:
-              trapOperationsState[id].values.waterTemperature.toString(),
+              trapOperationsState[id].values.waterTemperature?.toString(),
             measureUnit:
               trapOperationsState[id].values.waterTemperatureUnit === '°F'
                 ? 1
@@ -317,6 +326,14 @@ const IncompleteSections = ({
       }
 
       dispatch(saveTrapVisitSubmission(trapVisitSubmission))
+
+      dispatch(
+        saveTrapVisitInformation({
+          crew: visitSetupState[tabIds[0]].values.crew,
+          programId: visitSetupState[tabIds[0]].values.programId,
+          trapLocationIds: findTrapLocationIds(),
+        })
+      )
     })
   }
 
@@ -510,7 +527,7 @@ const IncompleteSections = ({
           })}
         </VStack>
       </View>
-      <NavButtons navigation={navigation} handleSubmit={() => handleSubmit()} />
+      <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
     </>
   )
 }

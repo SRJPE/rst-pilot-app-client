@@ -443,6 +443,9 @@ export const trapVisitPostBundler = createSlice({
         state.qcCatchRawSubmissions.push(qcCatchRaw)
       }
     },
+    reset: () => {
+      return initialState
+    }
   },
   extraReducers: {
     [postTrapVisitFormSubmissions.pending.type]: (state, action) => {
@@ -493,6 +496,7 @@ export const {
   saveCatchRawSubmissions,
   trapVisitQCSubmission,
   catchRawQCSubmission,
+  reset
 } = trapVisitPostBundler.actions
 
 export default trapVisitPostBundler.reducer
