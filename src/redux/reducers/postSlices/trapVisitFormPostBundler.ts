@@ -172,6 +172,9 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
         failedTrapVisitSubmissions: trapVisitSubmissions,
         failedCatchRawSubmissions: catchRawSubmissions,
       })
+    } finally {
+      if (payload.trapVisitResponse)
+        fetchWithPostParams(thunkAPI.dispatch, payload)
     }
 
     return payload
@@ -188,7 +191,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
     try {
       const state = thunkAPI.getState() as RootState
       await Promise.all(
-        programIds.map(async programId => {
+        programIds.map(async (programId) => {
           const trapVisitResponse = await api.get(
             `trap-visit/program/${programId}`
           )
@@ -200,7 +203,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCTrapVisitIds: number[] =
             state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
-              trapVisit => {
+              (trapVisit) => {
                 return trapVisit.createdTrapVisitResponse.id
               }
             )
@@ -215,7 +218,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCCatchRawIds: number[] =
             state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
-              catchRaw => {
+              (catchRaw) => {
                 return catchRaw.createdCatchRawResponse.id
               }
             )
@@ -245,6 +248,45 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
     }
   }
 )
+
+const fetchWithPostParams = async (dispatch: any, postResults: any) => {
+  // if fetch results DOES NOT contain post results, put post in fetch, clear post
+  // if fetch results DOES contain post results, clear post
+
+  const { trapVisitResponse, catchRawResponse } = postResults
+
+  if (trapVisitResponse.length) {
+    const fetchResults = await dispatch(fetchPreviousTrapAndCatch())
+
+    if (fetchResults.meta.requestStatus === 'fulfilled') {
+      const fetchPayload = fetchResults.payload
+      const { previousTrapVisits, previousCatchRaw } = fetchPayload
+
+      const fetchedTrapIds = previousTrapVisits.map(
+        (trap: any) => trap.createdTrapVisitResponse.id
+      )
+      const postedTrapIds = trapVisitResponse.map(
+        (trap: any) => trap.createdTrapVisitResponse.id
+      )
+
+      // check if every trap_id posted is already in fetched
+      const doesFetchContainPost = (arr: any, target: any) =>
+        target.every((v: any) => arr.includes(v))
+
+      // if fetch results DOES NOT contain post results
+      if (!doesFetchContainPost(fetchedTrapIds, postedTrapIds)) {
+        const missedFetchIds = postedTrapIds.filter((id: number) => {
+          return !fetchedTrapIds.includes(id)
+        })
+        dispatch(addMissingFetchedTrapVisitSubs({ missedFetchIds }))
+      }
+      // if fetch results DOES contain post results
+      else {
+        dispatch(clearPendingTrapVisitSubs())
+      }
+    }
+  }
+}
 
 const getIndexOfDuplicateTrapVisit = ({
   errorDetail,
@@ -445,6 +487,19 @@ export const trapVisitPostBundler = createSlice({
     },
     reset: () => {
       return initialState
+    },
+    clearPendingTrapVisitSubs: (state) => {
+      state.trapVisitSubmissions = []
+    },
+    addMissingFetchedTrapVisitSubs: (state, action) => {
+      const { missedFetchIds } = action.payload
+      const missedTrapVisits = state.trapVisitSubmissions.filter(
+        (trapVisit: any) => {
+          return missedFetchIds.includes(trapVisit.createdTrapVisitResponse.id)
+        }
+      )
+      state.previousTrapVisitSubmissions.push(...missedTrapVisits)
+      state.trapVisitSubmissions = []
     }
   },
   extraReducers: {
@@ -496,7 +551,9 @@ export const {
   saveCatchRawSubmissions,
   trapVisitQCSubmission,
   catchRawQCSubmission,
-  reset
+  reset,
+  clearPendingTrapVisitSubs,
+  addMissingFetchedTrapVisitSubs,
 } = trapVisitPostBundler.actions
 
 export default trapVisitPostBundler.reducer
