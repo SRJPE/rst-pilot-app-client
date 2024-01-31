@@ -167,6 +167,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
         })
       )
     } catch (error: any) {
+      console.log('error', error.response)
       return thunkAPI.rejectWithValue({
         error: error.response,
         failedTrapVisitSubmissions: trapVisitSubmissions,
@@ -445,7 +446,7 @@ export const trapVisitPostBundler = createSlice({
     },
     reset: () => {
       return initialState
-    }
+    },
   },
   extraReducers: {
     [postTrapVisitFormSubmissions.pending.type]: (state, action) => {
@@ -496,7 +497,7 @@ export const {
   saveCatchRawSubmissions,
   trapVisitQCSubmission,
   catchRawQCSubmission,
-  reset
+  reset,
 } = trapVisitPostBundler.actions
 
 export default trapVisitPostBundler.reducer

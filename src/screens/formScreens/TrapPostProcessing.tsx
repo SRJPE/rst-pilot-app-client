@@ -131,7 +131,7 @@ const TrapPostProcessing = ({
     dispatch(markTrapPostProcessingCompleted({ tabId, value: true }))
     let stepCompletedCheck = true
     const allTabIds: string[] = Object.keys(tabSlice.tabs)
-    allTabIds.forEach((allTabId) => {
+    allTabIds.forEach(allTabId => {
       if (!Object.keys(reduxState).includes(allTabId)) {
         if (Object.keys(reduxState).length < allTabIds.length) {
           stepCompletedCheck = false
@@ -164,7 +164,7 @@ const TrapPostProcessing = ({
           ? reduxState[activeTabId].errors
           : null
       }
-      onSubmit={(values) => {
+      onSubmit={values => {
         if (activeTabId != 'placeholderId') {
           onSubmit(values, activeTabId)
         } else {
@@ -452,7 +452,7 @@ const TrapPostProcessing = ({
                       my={1}
                       _icon={{ color: 'primary' }}
                     >
-                      Restart Trap
+                      Continue Trapping
                     </Radio>
                     <Radio
                       colorScheme='primary'
