@@ -34,6 +34,11 @@ function CatchMeasureQC({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
 
+  const axisLabelDictionary = {
+    'Fork Length': { xLabel: 'Fork Length (mm)', yLabel: 'Density' },
+    Weight: { xLabel: 'Weight (g)', yLabel: 'Density' },
+  }
+
   useEffect(() => {
     const previousCatchRaw = route.params.previousCatchRaw
     const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
@@ -193,6 +198,8 @@ function CatchMeasureQC({
             {activeButtons.map((buttonName) => {
               return (
                 <Graph
+                  xLabel={axisLabelDictionary[buttonName]['xLabel']}
+                  yLabel={axisLabelDictionary[buttonName]['yLabel']}
                   key={buttonName}
                   zoomDomain={{ x: [0, 60], y: [0, 0.3] }}
                   chartType='line'

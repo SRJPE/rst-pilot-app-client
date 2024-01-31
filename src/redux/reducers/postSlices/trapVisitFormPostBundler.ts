@@ -112,7 +112,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       // for each trap visit
       await Promise.all(
         trapVisitSubmissions.map(async (trapSubmission: any) => {
-          const uid = trapSubmission.uid
+          const uid = trapSubmission.trapVisitUid
           const trapSubmissionCopy = cloneDeep(trapSubmission)
 
           // submit trap visit
@@ -443,6 +443,9 @@ export const trapVisitPostBundler = createSlice({
         state.qcCatchRawSubmissions.push(qcCatchRaw)
       }
     },
+    reset: () => {
+      return initialState
+    }
   },
   extraReducers: {
     [postTrapVisitFormSubmissions.pending.type]: (state, action) => {
@@ -493,6 +496,7 @@ export const {
   saveCatchRawSubmissions,
   trapVisitQCSubmission,
   catchRawQCSubmission,
+  reset
 } = trapVisitPostBundler.actions
 
 export default trapVisitPostBundler.reducer

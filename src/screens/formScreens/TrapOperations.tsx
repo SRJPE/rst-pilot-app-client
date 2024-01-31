@@ -205,7 +205,6 @@ const TrapOperations = ({
           onSubmit(values, activeTabId)
         }
       }}
-      validateOnChange={true}
     >
       {({
         handleChange,
@@ -220,7 +219,6 @@ const TrapOperations = ({
       }) => {
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
-            console.log('tab switch')
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }

@@ -25,12 +25,14 @@ import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/tr
 import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
+import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
 import { cloneDeep, flatten, uniq } from 'lodash'
 import { uid } from 'uid'
 import {
   setIncompleteSectionTouched,
   TabStateI,
 } from '../../redux/reducers/formSlices/tabSlice'
+import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -90,34 +92,39 @@ const IncompleteSections = ({
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
-    dispatch(checkIfFormIsComplete())
   }, [])
 
   const handleSubmit = () => {
-    saveTrapVisits()
-    saveCatchRawSubmission()
-    resetAllFormSlices()
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Visit Setup' }],
-    })
+    try {
+      saveTrapVisits()
+      saveCatchRawSubmission()
+      resetAllFormSlices()
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Visit Setup' }],
+      })
 
-    // navigation.dispatch(
-    //   CommonActions.reset({
-    //     index: 0,
-    //     routes: [{ name: 'Visit Setup' }],
-    //   })
-    // )
+      // navigation.dispatch(
+      //   CommonActions.reset({
+      //     index: 0,
+      //     routes: [{ name: 'Visit Setup' }],
+      //   })
+      // )
 
-    // navigation.navigate.popToTop()
+      // navigation.navigate.popToTop()
 
-    // navigation.dispatch(StackActions.popToTop())
+      // navigation.dispatch(StackActions.popToTop())
 
-    if (
-      connectivityState.isConnected &&
-      connectivityState.isInternetReachable
-    ) {
-      dispatch(postTrapVisitFormSubmissions())
+      if (
+        connectivityState.isConnected &&
+        connectivityState.isInternetReachable
+      ) {
+        dispatch(postTrapVisitFormSubmissions())
+      } else {
+        console.log('Connection issue during submission')
+      }
+    } catch (error) {
+      console.log('submit error: ', error)
     }
   }
 
@@ -131,12 +138,22 @@ const IncompleteSections = ({
     dispatch(resetTrapOperationsSlice())
     dispatch(resetVisitSetupSlice())
     dispatch(resetPaperEntrySlice())
+    dispatch(resetTabsSlice())
   }
 
   const returnDefinitionArray = (dropdownsArray: any[]) => {
     return dropdownsArray.map((dropdownObj: any) => {
       return dropdownObj.definition
     })
+  }
+
+  const findTrapLocationIds = () => {
+    let container = [] as any
+    for (let tabId in visitSetupState) {
+      if (tabId === 'placeholderId') continue
+      container.push(visitSetupState[tabId].values.trapLocationId)
+    }
+    return container
   }
 
   const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
@@ -263,7 +280,7 @@ const IncompleteSections = ({
             measureName: 'flow measure',
             measureValueNumeric: trapOperationsState[id].values.flowMeasure,
             measureValueText:
-              trapOperationsState[id].values.flowMeasure.toString(),
+              trapOperationsState[id].values.flowMeasure?.toString(),
             measureUnit: 5,
           },
           {
@@ -271,7 +288,7 @@ const IncompleteSections = ({
             measureValueNumeric:
               trapOperationsState[id].values.waterTemperature,
             measureValueText:
-              trapOperationsState[id].values.waterTemperature.toString(),
+              trapOperationsState[id].values.waterTemperature?.toString(),
             measureUnit:
               trapOperationsState[id].values.waterTemperatureUnit === '°F'
                 ? 1
@@ -309,6 +326,14 @@ const IncompleteSections = ({
       }
 
       dispatch(saveTrapVisitSubmission(trapVisitSubmission))
+
+      dispatch(
+        saveTrapVisitInformation({
+          crew: visitSetupState[tabIds[0]].values.crew,
+          programId: visitSetupState[tabIds[0]].values.programId,
+          trapLocationIds: findTrapLocationIds(),
+        })
+      )
     })
   }
 
@@ -502,7 +527,7 @@ const IncompleteSections = ({
           })}
         </VStack>
       </View>
-      <NavButtons navigation={navigation} handleSubmit={() => handleSubmit()} />
+      <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
     </>
   )
 }

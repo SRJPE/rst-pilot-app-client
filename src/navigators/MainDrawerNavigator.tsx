@@ -12,6 +12,7 @@ import MarkRecaptureForm from './roots/MarkRecaptureFormRoot'
 import MonitoringProgram from './roots/MonitoringProgramRoot'
 import QCForm from './roots/QCFormRoot'
 import TrapVisitForm from './roots/TrapVisitFormRoot'
+import InspectorWindow from '../screens/InspectorWindow'
 
 const Drawer = createDrawerNavigator()
 
@@ -51,23 +52,27 @@ const DrawerNavigator = ({
         />
       ) : (
         <>
-          <Drawer.Screen
+     <Drawer.Screen
             name='Home'
             component={Home}
             options={{ headerShown: false, swipeEnabled: true }}
           />
-          <Drawer.Screen name='Profile' component={Profile} />
-          <Drawer.Screen name='Permit Info' component={PermitInfo} />
-          <Drawer.Screen name='Generate Report' component={GenerateReport} />
-          <Drawer.Screen name='Quality Control' component={QCForm} />
-          <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
-          <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
-          <Drawer.Screen
-            name='Monitoring Program'
-            component={MonitoringProgram}
-          />
-        </>
+        <Drawer.Screen name='Profile' component={Profile} />
+        <Drawer.Screen name='Permit Info' component={PermitInfo} />
+        <Drawer.Screen name='Generate Report' component={GenerateReport} />
+        <Drawer.Screen name='Quality Control' component={QCForm} />
+        <Drawer.Screen name='Inspector' component={InspectorWindow} />
+        <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
+        <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
+        <Drawer.Screen
+          name='Monitoring Program'
+          component={MonitoringProgram}
+        />
+      </>
+        
       )}
+     
+  
     </Drawer.Navigator>
   )
 }

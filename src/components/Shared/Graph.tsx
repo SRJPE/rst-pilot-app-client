@@ -5,6 +5,7 @@ import {
   VictoryAxis,
   VictoryBar,
   VictoryChart,
+  VictoryLabel,
   VictoryLine,
   VictoryScatter,
   VictoryTheme,
@@ -20,6 +21,8 @@ export default function Graph({
   chartType,
   title,
   data,
+  xLabel,
+  yLabel,
   height,
   width,
   barColor,
@@ -32,6 +35,8 @@ export default function Graph({
   chartType: 'bar' | 'line' | 'true-or-false' | 'scatterplot'
   title?: string
   data: any
+  xLabel?: string
+  yLabel?: string
   height: number
   width: number
   barColor: string
@@ -55,7 +60,7 @@ export default function Graph({
             data={data}
             style={{
               data: {
-                fill: (props) => {
+                fill: (props: any) => {
                   return props.datum.colorScale
                     ? props.datum.colorScale
                     : barColor
@@ -69,12 +74,12 @@ export default function Graph({
               {
                 target: 'data',
                 eventHandlers: {
-                  onPressIn: (event, data) => {
+                  onPressIn: (event: any, data: any) => {
                     return [
                       {
                         target: 'data',
                         eventKey: 'all',
-                        mutation: (props) => {
+                        mutation: (props: any) => {
                           // const fill = props.style?.fill
                           // return fill === barColor
                           //   ? null
@@ -83,7 +88,7 @@ export default function Graph({
                       },
                       {
                         target: 'data',
-                        mutation: (props) => {
+                        mutation: (props: any) => {
                           handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor
@@ -107,7 +112,7 @@ export default function Graph({
             y='y'
             // style={{
             //   data: {
-            //     fill: (props) => {
+            //     fill: (props: any) => {
             //       return props.datum.colorScale
             //         ? props.datum.colorScale
             //         : barColor
@@ -118,12 +123,12 @@ export default function Graph({
               {
                 target: 'data',
                 eventHandlers: {
-                  onPressIn: (event, data) => {
+                  onPressIn: (event: any, data: any) => {
                     return [
                       // {
                       //   target: 'data',
                       //   eventKey: 'all',
-                      //   mutation: (props) => {
+                      //   mutation: (props: any) => {
                       //     // const fill = props.style?.fill
                       //     // return fill === barColor
                       //     //   ? null
@@ -132,7 +137,7 @@ export default function Graph({
                       // },
                       {
                         target: 'data',
-                        mutation: (props) => {
+                        mutation: (props: any) => {
                           // handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor
@@ -155,7 +160,7 @@ export default function Graph({
             y='y'
             style={{
               data: {
-                fill: (props) => {
+                fill: (props: any) => {
                   return props.datum.colorScale
                     ? props.datum.colorScale
                     : barColor
@@ -166,12 +171,12 @@ export default function Graph({
               {
                 target: 'data',
                 eventHandlers: {
-                  onPressIn: (event, data) => {
+                  onPressIn: (event: any, data: any) => {
                     return [
                       // {
                       //   target: 'data',
                       //   eventKey: 'all',
-                      //   mutation: (props) => {
+                      //   mutation: (props: any) => {
                       //     // const fill = props.style?.fill
                       //     // return fill === barColor
                       //     //   ? null
@@ -180,7 +185,7 @@ export default function Graph({
                       // },
                       {
                         target: 'data',
-                        mutation: (props) => {
+                        mutation: (props: any) => {
                           handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor
@@ -203,7 +208,7 @@ export default function Graph({
             y='y'
             style={{
               data: {
-                fill: (props) => {
+                fill: (props: any) => {
                   return props.datum.colorScale
                     ? props.datum.colorScale
                     : barColor
@@ -214,12 +219,12 @@ export default function Graph({
               {
                 target: 'data',
                 eventHandlers: {
-                  onPressIn: (event, data) => {
+                  onPressIn: (event: any, data: any) => {
                     return [
                       // {
                       //   target: 'data',
                       //   eventKey: 'all',
-                      //   mutation: (props) => {
+                      //   mutation: (props: any) => {
                       //     // const fill = props.style?.fill
                       //     // return fill === barColor
                       //     //   ? null
@@ -228,7 +233,7 @@ export default function Graph({
                       // },
                       {
                         target: 'data',
-                        mutation: (props) => {
+                        mutation: (props: any) => {
                           handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor
@@ -270,6 +275,10 @@ export default function Graph({
         style={{ background: { fill: backgroundColor } }}
       >
         <VictoryAxis
+          label={xLabel}
+          axisLabelComponent={
+            <VictoryLabel dy={25} style={{ fontWeight: 500, letterSpacing: 1.5, fontFamily: 'Helvetica Neue' }} />
+          }
           fixLabelOverlap={true}
           tickFormat={(value) => {
             let date = new Date(Number(value))
@@ -281,6 +290,10 @@ export default function Graph({
           }}
         />
         <VictoryAxis
+          label={yLabel}
+          axisLabelComponent={
+            <VictoryLabel dy={-30} style={{ fontWeight: 500, letterSpacing: 1.5, fontFamily: 'Helvetica Neue' }} />
+          }
           dependentAxis
           // fixLabelOverlap={true}
           tickFormat={(value) => {
@@ -303,7 +316,7 @@ export default function Graph({
             data={data}
             style={{
               data: {
-                fill: (props) => {
+                fill: (props: any) => {
                   return props.datum.colorScale
                     ? props.datum.colorScale
                     : barColor
@@ -316,12 +329,12 @@ export default function Graph({
               {
                 target: 'data',
                 eventHandlers: {
-                  onPressIn: (event, data) => {
+                  onPressIn: (event: any, data: any) => {
                     return [
                       {
                         target: 'data',
                         eventKey: 'all',
-                        mutation: (props) => {
+                        mutation: (props: any) => {
                           // const fill = props.style?.fill
                           // return fill === barColor
                           //   ? null
@@ -330,7 +343,7 @@ export default function Graph({
                       },
                       {
                         target: 'data',
-                        mutation: (props) => {
+                        mutation: (props: any) => {
                           handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor

@@ -167,10 +167,10 @@ const FishProcessing = ({
                     selectOptions={fishProcessedDropdowns}
                   />
                   {tabSlice.incompleteSectionTouched
-                    ? errors.reasonNotFunc &&
+                    ? errors.fishProcessed &&
                       RenderErrorMessage(errors, 'fishProcessed')
                     : touched.reasonNotFunc &&
-                      errors.reasonNotFunc &&
+                      errors.fishProcessed &&
                       RenderErrorMessage(errors, 'fishProcessed')}
                 </FormControl>
                 {(values.fishProcessedResult ===
@@ -191,10 +191,10 @@ const FishProcessing = ({
                       selectOptions={whyFishNotProcessedDropdowns}
                     />
                     {tabSlice.incompleteSectionTouched
-                      ? errors.reasonNotFunc &&
+                      ? errors.reasonForNotProcessing &&
                         RenderErrorMessage(errors, 'reasonForNotProcessing')
                       : touched.reasonNotFunc &&
-                        errors.reasonNotFunc &&
+                        errors.reasonForNotProcessing &&
                         RenderErrorMessage(errors, 'reasonForNotProcessing')}
                   </FormControl>
                 )}
