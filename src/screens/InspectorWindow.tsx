@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Button, Divider, Icon, ScrollView, Text, View } from 'native-base'
-import { AppDispatch, RootState } from '../redux/store'
-import { reset } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { AppDispatch, RootState, persistor } from '../redux/store'
 import { connect, useDispatch } from 'react-redux'
 import { startCase } from 'lodash'
 import * as Clipboard from 'expo-clipboard'
@@ -83,10 +82,6 @@ const Debug = (props: DebugPropsI) => {
     visitSetupDefaults: '',
   })
 
-  useEffect(() => {
-    console.log('trapVisitFormPostBundler: ', props.trapVisitFormPostBundler)
-  }, [props.trapVisitFormPostBundler.fetchStatus])
-
   const rowComponent = ({ name, marginBottom }: RowComponentI) => {
 
     const messageBuilder = () => {
@@ -156,7 +151,7 @@ const Debug = (props: DebugPropsI) => {
               onPress={() => messageBuilder()}
             >
               <Text fontSize={'2xl'} color='white'>
-                {logState[name] ? 'Clear' : 'Log'}
+                {logState[name] ? 'Close' : 'Log'}
               </Text>
             </Button>
           </View>
@@ -166,7 +161,7 @@ const Debug = (props: DebugPropsI) => {
             bgColor='#FF5B5B'
             shadow={'7'}
             onPress={() => {
-              dispatch(reset())
+              persistor.purge()
               setLogState({
                 ...logState,
                 ['trapVisitFormPostBundler']: '',
