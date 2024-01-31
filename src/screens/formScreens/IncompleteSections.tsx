@@ -124,7 +124,7 @@ const IncompleteSections = ({
         console.log('Connection issue during submission')
       }
     } catch (error) {
-      console.log('error: ', error)
+      console.log('submit error: ', error)
     }
   }
 
@@ -199,7 +199,7 @@ const IncompleteSections = ({
       dropdownsState.values.trapStatusAtEnd
     )
     const calculateRpmAvg = (rpms: (string | null)[]) => {
-      const validRpms = rpms.filter((n) => n)
+      const validRpms = rpms.filter(n => n)
       if (!validRpms.length) {
         return null
       }
@@ -212,7 +212,7 @@ const IncompleteSections = ({
     }
 
     const tabIds = Object.keys(tabState.tabs)
-    tabIds.forEach((id) => {
+    tabIds.forEach(id => {
       const {
         rpm1: startRpm1,
         rpm2: startRpm2,
@@ -280,7 +280,7 @@ const IncompleteSections = ({
             measureName: 'flow measure',
             measureValueNumeric: trapOperationsState[id].values.flowMeasure,
             measureValueText:
-              trapOperationsState[id].values.flowMeasure.toString(),
+              trapOperationsState[id].values.flowMeasure?.toString(),
             measureUnit: 5,
           },
           {
@@ -288,7 +288,7 @@ const IncompleteSections = ({
             measureValueNumeric:
               trapOperationsState[id].values.waterTemperature,
             measureValueText:
-              trapOperationsState[id].values.waterTemperature.toString(),
+              trapOperationsState[id].values.waterTemperature?.toString(),
             measureUnit:
               trapOperationsState[id].values.waterTemperatureUnit === '°F'
                 ? 1
@@ -367,14 +367,14 @@ const IncompleteSections = ({
 
     const catchRawSubmissions: any[] = []
 
-    Object.keys(fishInputState).forEach((tabId) => {
+    Object.keys(fishInputState).forEach(tabId => {
       if (tabId != 'placeholderId') {
         const fishStoreKeys = Object.keys(fishInputState[tabId].fishStore)
         const programId = Object.keys(visitSetupState).includes(tabId)
           ? visitSetupState[tabId].values.programId
           : 1
 
-        fishStoreKeys.forEach((key) => {
+        fishStoreKeys.forEach(key => {
           const fishValue = fishInputState[tabId].fishStore[key]
 
           const filterAndPrepareData = (data: Array<any>) => {
@@ -527,7 +527,7 @@ const IncompleteSections = ({
           })}
         </VStack>
       </View>
-      <NavButtons navigation={navigation} handleSubmit={() => handleSubmit()} />
+      <NavButtons navigation={navigation} handleSubmit={handleSubmit} />
     </>
   )
 }
