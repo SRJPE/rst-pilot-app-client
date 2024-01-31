@@ -151,7 +151,7 @@ const Debug = (props: DebugPropsI) => {
               onPress={() => messageBuilder()}
             >
               <Text fontSize={'2xl'} color='white'>
-                {logState[name] ? 'Clear' : 'Log'}
+                {logState[name] ? 'Close' : 'Log'}
               </Text>
             </Button>
           </View>
