@@ -23,6 +23,7 @@ const mapStateToProps = (state: RootState) => {
     navigationSlice: state.navigation,
     visitSetupState: state.visitSetup,
     tabState: state.tabSlice,
+    fishProcessingState: state.fishProcessing,
   }
 }
 
@@ -34,6 +35,7 @@ const FishHolding = ({
   navigationSlice,
   visitSetupState,
   tabState,
+  fishProcessingState,
 }: {
   fishInput: any
   selectedFishStoreState: SelectedFishStoreI
@@ -42,6 +44,7 @@ const FishHolding = ({
   navigationSlice: any
   visitSetupState: any
   tabState: any
+  fishProcessingState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation: any = useNavigation()
@@ -82,10 +85,16 @@ const FishHolding = ({
     let count = 0 as number
     for (let individualFishStore in fishInput) {
       if (individualFishStore === 'placeholderId') continue
-      for (let fish in fishInput[individualFishStore].fishStore) {
-        combinedFishStore[count] =
-          fishInput[individualFishStore].fishStore[fish]
-        count++
+
+      if (
+        fishProcessingState?.[individualFishStore]?.values
+          ?.willBeHoldingFishForMarkRecapture
+      ) {
+        for (let fish in fishInput[individualFishStore].fishStore) {
+          combinedFishStore[count] =
+            fishInput[individualFishStore].fishStore[fish]
+          count++
+        }
       }
     }
 

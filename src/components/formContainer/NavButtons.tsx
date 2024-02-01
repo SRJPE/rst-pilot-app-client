@@ -1,15 +1,11 @@
 import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import {
-  togglePreviousPageWasIncompleteSections,
-  updateActiveStep,
-} from '../../redux/reducers/formSlices/navigationSlice'
+import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { useEffect, useState, useCallback } from 'react'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import { useNavigation, useRoute } from '@react-navigation/native'
 import { debounce } from 'lodash'
 
 const NavButtons = ({
@@ -42,14 +38,9 @@ const NavButtons = ({
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
   const [isPaperEntryStore, setIsPaperEntryStore] = useState(false)
-  const [
-    willBeHoldingFishForMarkRecapture,
-    setWillBeHoldingFishForMarkRecapture,
-  ] = useState(false)
 
   useEffect(() => {
-    setIsPaperEntryStore(checkIsPaperEntryStore)
-    setWillBeHoldingFishForMarkRecapture(checkWillBeHoldingFishForMarkRecapture)
+    setIsPaperEntryStore(checkIsPaperEntryStore())
   }, [tabSlice.activeTabId])
 
   const checkIsPaperEntryStore = () => {
@@ -66,13 +57,12 @@ const NavButtons = ({
 
   const checkWillBeHoldingFishForMarkRecapture = () => {
     if (tabSlice.activeTabId) {
-      if (fishProcessingSlice[tabSlice.activeTabId]) {
-        return fishProcessingSlice[tabSlice.activeTabId].values
-          .willBeHoldingFishForMarkRecapture
-      } else {
-        return fishProcessingSlice['placeholderId'].values
-          .willBeHoldingFishForMarkRecapture
-      }
+      const tabsContainHoldingTrue = Object.keys(tabSlice.tabs).some(
+        tabId =>
+          fishProcessingSlice?.[tabId]?.values
+            ?.willBeHoldingFishForMarkRecapture
+      )
+      return tabsContainHoldingTrue
     }
     return false
   }
@@ -136,7 +126,7 @@ const NavButtons = ({
         }
         break
       case 'Trap Post-Processing':
-        if (willBeHoldingFishForMarkRecapture) {
+        if (checkWillBeHoldingFishForMarkRecapture()) {
           navigateHelper('Fish Holding')
         }
         break
@@ -190,7 +180,7 @@ const NavButtons = ({
         navigateHelper('Trap Post-Processing')
         break
       case 'Incomplete Sections':
-        if (willBeHoldingFishForMarkRecapture) {
+        if (checkWillBeHoldingFishForMarkRecapture()) {
           navigateHelper('Fish Holding')
         }
         break
