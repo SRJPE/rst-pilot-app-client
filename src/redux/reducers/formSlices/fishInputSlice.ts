@@ -200,7 +200,7 @@ export const saveFishSlice = createSlice({
       }
     },
     savePlusCount: (state, action) => {
-      const { tabId, species, count, run, lifeStage, plusCountMethod } =
+      const { tabId, species, count, run, lifeStage, plusCountMethod, dead } =
         action.payload
 
       const plusCountEntry = {
@@ -214,7 +214,7 @@ export const saveFishSlice = createSlice({
         lifeStage,
         adiposeClipped: null,
         existingMarks: [],
-        dead: null,
+        dead,
         willBeUsedInRecapture: null,
         plusCountMethod,
         plusCount: true,

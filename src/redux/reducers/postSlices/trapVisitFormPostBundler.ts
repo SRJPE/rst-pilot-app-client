@@ -168,6 +168,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
         })
       )
     } catch (error: any) {
+      console.log('error', error.response)
       return thunkAPI.rejectWithValue({
         error: error.response,
         failedTrapVisitSubmissions: trapVisitSubmissions,
@@ -192,7 +193,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
     try {
       const state = thunkAPI.getState() as RootState
       await Promise.all(
-        programIds.map(async (programId) => {
+        programIds.map(async programId => {
           const trapVisitResponse = await api.get(
             `trap-visit/program/${programId}`
           )
@@ -204,7 +205,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCTrapVisitIds: number[] =
             state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
-              (trapVisit) => {
+              trapVisit => {
                 return trapVisit.createdTrapVisitResponse.id
               }
             )
@@ -219,7 +220,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCCatchRawIds: number[] =
             state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
-              (catchRaw) => {
+              catchRaw => {
                 return catchRaw.createdCatchRawResponse.id
               }
             )
@@ -543,7 +544,7 @@ export const trapVisitPostBundler = createSlice({
       )
     }
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder.addCase(PURGE, () => {
       return initialState
     })
