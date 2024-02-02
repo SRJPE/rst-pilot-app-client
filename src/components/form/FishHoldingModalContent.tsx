@@ -184,7 +184,7 @@ const FishHoldingModalContent = ({
           space={5}
         >
           <Heading color='black' fontSize='2xl'>
-            Which fish are you holding for mark recapture Trials?
+            Which fish are you holding for mark recapture trials?
           </Heading>
           <HStack m='2%' space={10}>
             <Button

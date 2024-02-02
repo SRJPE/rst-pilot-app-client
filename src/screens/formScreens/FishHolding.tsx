@@ -254,7 +254,7 @@ const FishHolding = ({
       <View flex={1} bg='#fff' p='5%' borderColor='themeGrey' borderWidth='15'>
         <VStack space={8}>
           <Heading fontSize='28'>
-            Which fish are you holding for mark recapture Trials?
+            Which fish are you holding for mark recapture trials?
           </Heading>
           <HStack>
             <Button
