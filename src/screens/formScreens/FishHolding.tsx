@@ -134,7 +134,12 @@ const FishHolding = ({
   }
 
   const calculateTotalFish = () => {
-    setTotalFish(Object.keys(selectedFishStore).length)
+    let sum = 0
+
+    for (let fish in selectedFishStore) {
+      sum += parseInt(selectedFishStore[fish].numFishCaught, 10)
+    }
+    setTotalFish(sum)
   }
 
   const removeBadgeFromList = (list: Array<any>, badgeToRemove: string) => {
