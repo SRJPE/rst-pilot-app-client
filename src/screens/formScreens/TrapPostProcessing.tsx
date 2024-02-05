@@ -67,8 +67,8 @@ const TrapPostProcessing = ({
   const dispatch = useDispatch<AppDispatch>()
   const recordTurbidityInPostProcessing = useSelector(
     (state: any) =>
-      state.trapOperations[tabSlice.activeTabId].values
-        .recordTurbidityInPostProcessing
+      state.trapOperations?.[tabSlice.activeTabId]?.values
+        ?.recordTurbidityInPostProcessing
   )
   const [locationClicked, setLocationClicked] = useState(false as boolean)
 

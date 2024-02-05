@@ -2,7 +2,10 @@ import { useNavigation } from '@react-navigation/native'
 import { HStack, VStack, Text, Button, Heading, View } from 'native-base'
 import { useCallback, useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
-import { FishStoreI } from '../../redux/reducers/formSlices/fishInputSlice'
+import {
+  FishStoreI,
+  updateFishEntry,
+} from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveTotalFishHolding } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import FishHoldingCard from '../../components/form/FishHoldingCard'
@@ -23,6 +26,7 @@ const mapStateToProps = (state: RootState) => {
     navigationSlice: state.navigation,
     visitSetupState: state.visitSetup,
     tabState: state.tabSlice,
+    fishProcessingState: state.fishProcessing,
   }
 }
 
@@ -34,6 +38,7 @@ const FishHolding = ({
   navigationSlice,
   visitSetupState,
   tabState,
+  fishProcessingState,
 }: {
   fishInput: any
   selectedFishStoreState: SelectedFishStoreI
@@ -42,6 +47,7 @@ const FishHolding = ({
   navigationSlice: any
   visitSetupState: any
   tabState: any
+  fishProcessingState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation: any = useNavigation()
@@ -55,13 +61,16 @@ const FishHolding = ({
       selectedFishStoreState &&
       Object.keys(selectedFishStoreState).length === 0
     ) {
-      console.log('selectedFishStore is truthy')
       createSelectedFishStore()
     } else {
       setSelectedFishStore(selectedFishStoreState as SelectedFishStoreI)
     }
     setSelectedLifeStagesAndRuns()
-  }, [activeTabId])
+  }, [activeTabId, selectedFishStoreState])
+
+  useEffect(() => {
+    handleResetAll()
+  }, [...Object.keys(fishInput).map(tabId => fishInput[tabId].fishStore)])
 
   useEffect(() => {
     if (previouslyActiveTabId && navigationSlice.activeStep === 16) {
@@ -79,10 +88,20 @@ const FishHolding = ({
     let count = 0 as number
     for (let individualFishStore in fishInput) {
       if (individualFishStore === 'placeholderId') continue
-      for (let fish in fishInput[individualFishStore].fishStore) {
-        combinedFishStore[count] =
-          fishInput[individualFishStore].fishStore[fish]
-        count++
+
+      if (
+        fishProcessingState?.[individualFishStore]?.values
+          ?.willBeHoldingFishForMarkRecapture
+      ) {
+        for (let fish in fishInput[individualFishStore].fishStore) {
+          const fishObj = {
+            ...fishInput[individualFishStore].fishStore[fish],
+            tabId: individualFishStore,
+            fishObjId: fish,
+          }
+          combinedFishStore[count] = fishObj
+          count++
+        }
       }
     }
 
@@ -122,7 +141,12 @@ const FishHolding = ({
   }
 
   const calculateTotalFish = () => {
-    setTotalFish(Object.keys(selectedFishStore).length)
+    let sum = 0
+
+    for (let fish in selectedFishStore) {
+      sum += parseInt(selectedFishStore[fish].numFishCaught, 10)
+    }
+    setTotalFish(sum)
   }
 
   const removeBadgeFromList = (list: Array<any>, badgeToRemove: string) => {
@@ -204,6 +228,21 @@ const FishHolding = ({
         })
       )
       // saves to fish holding
+      for (let fish in selectedFishStore) {
+        selectedFishStore[fish] = {
+          ...selectedFishStore[fish],
+          willBeUsedInRecapture: true,
+        }
+
+        dispatch(
+          updateFishEntry({
+            tabId: selectedFishStore[fish].tabId,
+            id: selectedFishStore[fish].fishObjId,
+            ...selectedFishStore[fish],
+            willBeUsedInRecapture: true,
+          })
+        )
+      }
       dispatch(
         saveFishHolding({
           totalFishHolding: totalFish,
@@ -237,7 +276,7 @@ const FishHolding = ({
       <View flex={1} bg='#fff' p='5%' borderColor='themeGrey' borderWidth='15'>
         <VStack space={8}>
           <Heading fontSize='28'>
-            Which fish are you holding for mark recapture Trials?
+            Which fish are you holding for mark recapture trials?
           </Heading>
           <HStack>
             <Button
