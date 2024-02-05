@@ -2,7 +2,10 @@ import { useNavigation } from '@react-navigation/native'
 import { HStack, VStack, Text, Button, Heading, View } from 'native-base'
 import { useCallback, useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
-import { FishStoreI } from '../../redux/reducers/formSlices/fishInputSlice'
+import {
+  FishStoreI,
+  updateFishEntry,
+} from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveTotalFishHolding } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import FishHoldingCard from '../../components/form/FishHoldingCard'
@@ -91,8 +94,12 @@ const FishHolding = ({
           ?.willBeHoldingFishForMarkRecapture
       ) {
         for (let fish in fishInput[individualFishStore].fishStore) {
-          combinedFishStore[count] =
-            fishInput[individualFishStore].fishStore[fish]
+          const fishObj = {
+            ...fishInput[individualFishStore].fishStore[fish],
+            tabId: individualFishStore,
+            fishObjId: fish,
+          }
+          combinedFishStore[count] = fishObj
           count++
         }
       }
@@ -221,6 +228,21 @@ const FishHolding = ({
         })
       )
       // saves to fish holding
+      for (let fish in selectedFishStore) {
+        selectedFishStore[fish] = {
+          ...selectedFishStore[fish],
+          willBeUsedInRecapture: true,
+        }
+
+        dispatch(
+          updateFishEntry({
+            tabId: selectedFishStore[fish].tabId,
+            id: selectedFishStore[fish].fishObjId,
+            ...selectedFishStore[fish],
+            willBeUsedInRecapture: true,
+          })
+        )
+      }
       dispatch(
         saveFishHolding({
           totalFishHolding: totalFish,

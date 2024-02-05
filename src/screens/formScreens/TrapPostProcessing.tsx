@@ -67,8 +67,8 @@ const TrapPostProcessing = ({
   const dispatch = useDispatch<AppDispatch>()
   const recordTurbidityInPostProcessing = useSelector(
     (state: any) =>
-      state.trapOperations[tabSlice.activeTabId].values
-        .recordTurbidityInPostProcessing
+      state.trapOperations?.[tabSlice.activeTabId]?.values
+        ?.recordTurbidityInPostProcessing
   )
   const [locationClicked, setLocationClicked] = useState(false as boolean)
 
@@ -131,7 +131,7 @@ const TrapPostProcessing = ({
     dispatch(markTrapPostProcessingCompleted({ tabId, value: true }))
     let stepCompletedCheck = true
     const allTabIds: string[] = Object.keys(tabSlice.tabs)
-    allTabIds.forEach((allTabId) => {
+    allTabIds.forEach(allTabId => {
       if (!Object.keys(reduxState).includes(allTabId)) {
         if (Object.keys(reduxState).length < allTabIds.length) {
           stepCompletedCheck = false
@@ -164,7 +164,7 @@ const TrapPostProcessing = ({
           ? reduxState[activeTabId].errors
           : null
       }
-      onSubmit={(values) => {
+      onSubmit={values => {
         if (activeTabId != 'placeholderId') {
           onSubmit(values, activeTabId)
         } else {
