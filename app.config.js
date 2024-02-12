@@ -5,6 +5,7 @@ export default ({ config }) => {
     ...config,
     name: 'rst-pilot-app',
     slug: 'rst-pilot-app',
+    owner: "flowwest",
     runtimeVersion: {
       policy: 'sdkVersion',
     },

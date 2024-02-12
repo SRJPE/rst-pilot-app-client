@@ -17,7 +17,10 @@ import NavButtons from '../../components/formContainer/NavButtons'
 import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
 import { Keyboard } from 'react-native'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
-import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  checkIfFormIsComplete,
+  markStepCompleted,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
@@ -64,8 +67,8 @@ const TrapPostProcessing = ({
   const dispatch = useDispatch<AppDispatch>()
   const recordTurbidityInPostProcessing = useSelector(
     (state: any) =>
-      state.trapOperations[tabSlice.activeTabId].values
-        .recordTurbidityInPostProcessing
+      state.trapOperations?.[tabSlice.activeTabId]?.values
+        ?.recordTurbidityInPostProcessing
   )
   const [locationClicked, setLocationClicked] = useState(false as boolean)
 
@@ -128,7 +131,7 @@ const TrapPostProcessing = ({
     dispatch(markTrapPostProcessingCompleted({ tabId, value: true }))
     let stepCompletedCheck = true
     const allTabIds: string[] = Object.keys(tabSlice.tabs)
-    allTabIds.forEach((allTabId) => {
+    allTabIds.forEach(allTabId => {
       if (!Object.keys(reduxState).includes(allTabId)) {
         if (Object.keys(reduxState).length < allTabIds.length) {
           stepCompletedCheck = false
@@ -143,8 +146,10 @@ const TrapPostProcessing = ({
       }
     })
 
-    if (stepCompletedCheck)
+    if (stepCompletedCheck) {
       dispatch(markStepCompleted({ propName: 'trapPostProcessing' }))
+      dispatch(checkIfFormIsComplete())
+    }
     console.log('🚀 ~ onSubmit ~ TrapPostProcessing', values)
   }
 
@@ -159,7 +164,7 @@ const TrapPostProcessing = ({
           ? reduxState[activeTabId].errors
           : null
       }
-      onSubmit={(values) => {
+      onSubmit={values => {
         if (activeTabId != 'placeholderId') {
           onSubmit(values, activeTabId)
         } else {
@@ -210,10 +215,10 @@ const TrapPostProcessing = ({
                       {Number(values.debrisVolume) >
                         QARanges.debrisVolume.max && <RenderWarningMessage />}
                       {tabSlice.incompleteSectionTouched
-                        ? errors.reasonNotFunc &&
+                        ? errors.debrisVolume &&
                           RenderErrorMessage(errors, 'debrisVolume')
-                        : touched.reasonNotFunc &&
-                          errors.reasonNotFunc &&
+                        : touched.debrisVolume &&
+                          errors.debrisVolume &&
                           RenderErrorMessage(errors, 'debrisVolume')}
                     </HStack>
                     <Input
@@ -447,7 +452,7 @@ const TrapPostProcessing = ({
                       my={1}
                       _icon={{ color: 'primary' }}
                     >
-                      Restart Trap
+                      Continue Trapping
                     </Radio>
                     <Radio
                       colorScheme='primary'

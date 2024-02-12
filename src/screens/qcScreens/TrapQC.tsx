@@ -50,6 +50,15 @@ function TrapQC({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
 
+  const axisLabelDictionary = {
+    Temperature: { xLabel: 'Date', yLabel: 'Temperature (C)' },
+    Turbidity: { xLabel: 'Date', yLabel: 'Turbidity (ntu)' },
+    'RPM At Start': { xLabel: 'Date', yLabel: 'RPM' },
+    'RPM At End': { xLabel: 'Date', yLabel: 'RPM' },
+    Counter: { xLabel: 'Date', yLabel: 'Total Revolutions' },
+    Debris: { xLabel: 'Date', yLabel: 'Debris (L)' },
+  }
+
   useEffect(() => {
     const previousTrapVisits = route.params.previousTrapVisits
 
@@ -72,35 +81,35 @@ function TrapQC({
         const trapVisitId = createdTrapVisitResponse.id
         const qcCompleted = createdTrapVisitResponse.qcCompleted
         const qcNotStarted = qcCompleted ? false : true
+        const createdAt = new Date(createdTrapVisitResponse.createdAt)
+        const normalizedDate = normalizeDate(createdAt)
 
         if (trapVisitId) {
-          let temp =
-            createdTrapVisitEnvironmentalResponse ? createdTrapVisitEnvironmentalResponse.filter(
-              (item: any) => {
+          let temp = createdTrapVisitEnvironmentalResponse
+            ? createdTrapVisitEnvironmentalResponse.filter((item: any) => {
                 return item.measureName === 'water temperature'
-              }
-            )[0] : null
+              })[0]
+            : null
 
           if (temp) {
             tempData.push({
               id: trapVisitId,
-              x: idx + 1,
+              x: normalizedDate,
               y: Number(temp.measureValueNumeric),
               colorScale: qcNotStarted ? 'red' : undefined,
             })
           }
 
-          let turbidity = createdTrapVisitEnvironmentalResponse ? createdTrapVisitEnvironmentalResponse.filter(
-            (item: any) => {
-              return item.measureName === 'water turbidity'
-            }
-          )[0] : null
-
+          let turbidity = createdTrapVisitEnvironmentalResponse
+            ? createdTrapVisitEnvironmentalResponse.filter((item: any) => {
+                return item.measureName === 'water turbidity'
+              })[0]
+            : null
 
           if (turbidity) {
             turbidityData.push({
               id: trapVisitId,
-              x: idx + 1,
+              x: normalizedDate,
               y: Number(turbidity.measureValueNumeric),
               colorScale: qcNotStarted ? 'red' : undefined,
             })
@@ -109,7 +118,7 @@ function TrapQC({
           if (createdTrapVisitResponse.rpmAtStart) {
             let rpmAtStart = {
               id: trapVisitId,
-              x: idx + 1,
+              x: normalizedDate,
               y: Number(response.createdTrapVisitResponse.rpmAtStart),
               colorScale: qcNotStarted ? 'red' : undefined,
             }
@@ -120,7 +129,7 @@ function TrapQC({
           if (createdTrapVisitResponse.rpmAtEnd) {
             let rpmAtEnd = {
               id: trapVisitId,
-              x: idx + 1,
+              x: normalizedDate,
               y: Number(createdTrapVisitResponse.rpmAtEnd),
               colorScale: qcNotStarted ? 'red' : undefined,
             }
@@ -130,7 +139,7 @@ function TrapQC({
           if (createdTrapVisitResponse.totalRevolutions) {
             let counter = {
               id: trapVisitId,
-              x: idx + 1,
+              x: normalizedDate,
               y: createdTrapVisitResponse.totalRevolutions,
               colorScale: qcNotStarted ? 'red' : undefined,
             }
@@ -140,7 +149,7 @@ function TrapQC({
           if (createdTrapVisitResponse.debrisVolumeLiters) {
             let debris = {
               id: trapVisitId,
-              x: idx + 1,
+              x: normalizedDate,
               y: createdTrapVisitResponse.debrisVolumeLiters,
               colorScale: qcNotStarted ? 'red' : undefined,
             }
@@ -159,6 +168,15 @@ function TrapQC({
       Debris: debrisData,
     })
   }, [qcTrapVisitSubmissions])
+
+  const normalizeDate = (date: Date) => {
+    date.setHours(0)
+    date.setMinutes(0)
+    date.setSeconds(0)
+    date.setMilliseconds(0)
+
+    return date.getTime()
+  }
 
   const GraphMenuButton = ({
     buttonName,
@@ -248,6 +266,8 @@ function TrapQC({
             {activeButtons.map((buttonName) => {
               return (
                 <Graph
+                  xLabel={axisLabelDictionary[buttonName]['xLabel']}
+                  yLabel={axisLabelDictionary[buttonName]['yLabel']}
                   key={buttonName}
                   chartType='bar'
                   data={graphData[buttonName]}

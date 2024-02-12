@@ -78,7 +78,7 @@ export default function Home({ navigation }: { navigation: any }) {
       bg='#FFFFFF'
       // opacity={staggerOpen ? 0.25 : 1.0}
     >
-      <View ml='10' mt='10' alignSelf='flex-start'>
+      <View ml='10' mt='10' mb='-5' alignSelf='flex-start'>
         <IconButton
           onPress={() => navigation.openDrawer()}
           _icon={{

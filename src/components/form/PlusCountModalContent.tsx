@@ -8,6 +8,7 @@ import {
   Button,
   Heading,
   HStack,
+  Radio,
 } from 'native-base'
 import React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
@@ -28,6 +29,7 @@ const initialFormValues = {
   run: '',
   count: '',
   plusCountMethod: '',
+  dead: false,
 }
 
 const PlusCountModalContent = ({
@@ -47,7 +49,12 @@ const PlusCountModalContent = ({
   const handleFormSubmit = (values: any) => {
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
-      dispatch(savePlusCount({ tabId: activeTabId, ...values }))
+      dispatch(
+        savePlusCount({
+          tabId: activeTabId,
+          ...values,
+        })
+      )
       console.log('🚀 ~ Plus Count Values: ', values)
       showSlideAlert(dispatch, 'Plus count')
     }
@@ -58,7 +65,7 @@ const PlusCountModalContent = ({
       <Formik
         validationSchema={addPlusCountsSchema}
         initialValues={{ ...initialFormValues, plusCountMethod: 'none' }}
-        onSubmit={(values) => handleFormSubmit(values)}
+        onSubmit={values => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -68,6 +75,7 @@ const PlusCountModalContent = ({
           touched,
           errors,
           values,
+          setFieldValue,
         }) => (
           <>
             <CustomModalHeader
@@ -169,27 +177,73 @@ const PlusCountModalContent = ({
                   />
                 </FormControl>
               </HStack>
-              <FormControl>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Count
-                    </Text>
-                  </FormControl.Label>
-                  {touched.count &&
-                    errors.count &&
-                    RenderErrorMessage(errors, 'count')}
-                </HStack>
-                <Input
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Enter count'
-                  keyboardType='numeric'
-                  onChangeText={handleChange('count')}
-                  onBlur={handleBlur('count')}
-                  value={values.count}
-                />
-              </FormControl>
+              <HStack space={6}>
+                <FormControl w='48.5%'>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Count
+                      </Text>
+                    </FormControl.Label>
+                    {touched.count &&
+                      errors.count &&
+                      RenderErrorMessage(errors, 'count')}
+                  </HStack>
+                  <Input
+                    height='50px'
+                    fontSize='16'
+                    placeholder='Enter count'
+                    keyboardType='numeric'
+                    onChangeText={handleChange('count')}
+                    onBlur={handleBlur('count')}
+                    value={values.count}
+                  />
+                </FormControl>
+                <FormControl w='48.5%' paddingLeft='5'>
+                  <HStack space={4} alignItems='center'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Dead
+                      </Text>
+                    </FormControl.Label>
+                    {touched.dead &&
+                      errors.dead &&
+                      RenderErrorMessage(errors, 'dead')}
+                  </HStack>
+                  <Radio.Group
+                    name='dead'
+                    accessibilityLabel='dead'
+                    value={`${values.dead}`}
+                    onChange={(value: any) => {
+                      setFieldTouched('dead', true)
+                      if (value === 'true') {
+                        setFieldValue('dead', true)
+                      } else {
+                        setFieldValue('dead', false)
+                      }
+                    }}
+                  >
+                    <HStack space={4}>
+                      <Radio
+                        colorScheme='primary'
+                        value='true'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        Yes
+                      </Radio>
+                      <Radio
+                        colorScheme='primary'
+                        value='false'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        No
+                      </Radio>
+                    </HStack>
+                  </Radio.Group>
+                </FormControl>
+              </HStack>
 
               <FormControl>
                 <HStack space={4} alignItems='center'>
