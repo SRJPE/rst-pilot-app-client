@@ -97,14 +97,25 @@ export const calculateLifeStage = (forkLength: number) => {
 
 export const QARanges = {
   flowMeasure: {
-    'Mill Creek': { max: 2000, min: null },
-    'Deer Creek': { max: 2000, min: null },
+    'Mill Creek': {
+      'Mill Creek RST': { max: 2000, min: null },
+    },
+    'Deer Creek': {
+      'Deer Creek RST': { max: 2000, min: null },
+    },
     'Feather River': {
       standard: { max: 3500, min: 50 },
-      eyeRiffle: { max: 16000, min: 50 },
-      herringerRiffle: { max: 20000, min: 50 },
+      'Herringer Riffle': { max: 25000, min: 50 },
+      'Gateway Riffle': { max: 8000, min: 50 },
+      // 'Sunset Pumps': { max: 25000, min: 50 },
+      'Steep Riffle': { max: 6000, min: 50 },
+      // 'Shawns Beach': { max: 25000, min: 50 },
+      // 'Live Oak': { max: 25000, min: 50 },
+      'Eye Riffle': { max: 8000, min: 50 },
     },
-    'Yuba River': { max: 3500, min: 50 },
+    'Yuba River': {
+      hallwood: { max: 15000, min: 50 },
+    },
   } as any,
   waterTemperature: { maxF: 100, maxC: 30, min: null },
   waterTurbidity: { max: 1000, min: null },
