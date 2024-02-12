@@ -42,6 +42,9 @@ const mapStateToProps = (state: RootState) => {
     selectedStream:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.stream,
+    selectedTrapSite:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.trapSite,
     activeTabId: state.tabSlice.activeTabId,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
@@ -52,6 +55,7 @@ const TrapOperations = ({
   navigation,
   reduxState,
   selectedStream,
+  selectedTrapSite,
   activeTabId,
   previouslyActiveTabId,
   navigationSlice,
@@ -60,11 +64,20 @@ const TrapOperations = ({
   navigation: any
   reduxState: any
   selectedStream: string
+  selectedTrapSite: string
   activeTabId: string | null
   previouslyActiveTabId: string | null
   navigationSlice: any
   tabSlice: TabStateI
 }) => {
+  console.log('🚀 ~ selectedTrapSite:', selectedTrapSite)
+  console.log('🚀 ~ selectedStream:', selectedStream)
+  console.log('🚀 ~ QARanges:', QARanges)
+
+  // console.log(
+  //   '🚀 ~ selectedStream RANGES:',
+  //   QARanges.flowMeasure[selectedStream]
+  // )
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -90,6 +103,39 @@ const TrapOperations = ({
           <RenderWarningMessage />
         )
       )
+    }
+  }
+
+  const calculateFLowMeasureWarning = (flowMeasureEntered: number) => {
+    if (selectedTrapSite) {
+      console.log(
+        '🚀 ~ calculateFLowMeasureWarning ~ selectedTrapSite:',
+        selectedTrapSite
+      )
+      console.log(
+        '🚀 ~ calculateFLowMeasureWarning ~  QARanges.flowMeasure[selectedStream][selectedTrapSite].max:',
+        QARanges.flowMeasure[selectedStream][selectedTrapSite]?.max
+      )
+
+      if (
+        flowMeasureEntered >
+          // QARanges.flowMeasure[selectedStream][selectedTrapSite].max
+          QARanges.flowMeasure[selectedStream][selectedTrapSite] &&
+        QARanges.flowMeasure[selectedStream][selectedTrapSite]?.max
+      ) {
+        console.log('GREATER')
+        return <RenderWarningMessage />
+      }
+      console.log('lower')
+      return []
+    } else {
+      if (
+        flowMeasureEntered > QARanges.flowMeasure[selectedStream] &&
+        QARanges.flowMeasure[selectedStream]?.max
+      ) {
+        return <RenderWarningMessage />
+      }
+      return []
     }
   }
 
@@ -342,331 +388,333 @@ const TrapOperations = ({
                           RenderErrorMessage(errors, 'reasonNotFunc')}
                     </FormControl>
                   )}
-                  {values.trapStatus.length > 0 &&
-                    values.trapStatus !== trapNotInServiceIdentifier && (
-                      <>
-                        <FormControl w='30%'>
-                          <HStack space={4} alignItems='center'>
-                            <FormControl.Label>
-                              <Text color='black' fontSize='xl'>
-                                Cone Setting
-                              </Text>
-                            </FormControl.Label>
-                            <Radio.Group
-                              name='coneSetting'
-                              accessibilityLabel='cone setting'
-                              value={`${values.coneSetting}`}
-                              onChange={(value: any) => {
-                                setFieldTouched('coneSetting', true)
-                                if (value === 'full') {
-                                  setFieldValue('coneSetting', 'full')
-                                } else {
-                                  setFieldValue('coneSetting', 'half')
-                                }
-                              }}
-                            >
-                              <HStack space={4}>
-                                <Radio
-                                  colorScheme='primary'
-                                  value='full'
-                                  my={1}
-                                  _icon={{ color: 'primary' }}
-                                >
-                                  Full
-                                </Radio>
-                                <Radio
-                                  colorScheme='primary'
-                                  value='half'
-                                  my={1}
-                                  _icon={{ color: 'primary' }}
-                                >
-                                  Half
-                                </Radio>
-                              </HStack>
-                            </Radio.Group>
-                          </HStack>
-                        </FormControl>
-                        <FormControl>
-                          <HStack space={4} alignItems='center'>
-                            <FormControl.Label>
-                              <Text color='black' fontSize='xl'>
-                                RPM Before Cleaning
-                              </Text>
-                            </FormControl.Label>
-                            <Popover
-                              placement='bottom left'
-                              trigger={(triggerProps) => {
-                                return (
-                                  <IconButton
-                                    {...triggerProps}
-                                    icon={
-                                      <Icon
-                                        as={MaterialIcons}
-                                        name='info-outline'
-                                        size='lg'
-                                      />
-                                    }
-                                  ></IconButton>
-                                )
-                              }}
-                            >
-                              <Popover.Content
-                                accessibilityLabel='RPM Info'
-                                w='600'
-                                mr='10'
+                  {values.trapStatus.length > 0 && (
+                    // &&
+                    //   values.trapStatus !== trapNotInServiceIdentifier
+                    <>
+                      <FormControl w='30%'>
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Cone Setting
+                            </Text>
+                          </FormControl.Label>
+                          <Radio.Group
+                            name='coneSetting'
+                            accessibilityLabel='cone setting'
+                            value={`${values.coneSetting}`}
+                            onChange={(value: any) => {
+                              setFieldTouched('coneSetting', true)
+                              if (value === 'full') {
+                                setFieldValue('coneSetting', 'full')
+                              } else {
+                                setFieldValue('coneSetting', 'half')
+                              }
+                            }}
+                          >
+                            <HStack space={4}>
+                              <Radio
+                                colorScheme='primary'
+                                value='full'
+                                my={1}
+                                _icon={{ color: 'primary' }}
                               >
-                                <Popover.Arrow />
-                                <Popover.Header>
-                                  Take one or more measure of cone rotations. We
-                                  will save the average in our database.
-                                </Popover.Header>
-                              </Popover.Content>
-                            </Popover>
-                            {tabSlice.incompleteSectionTouched
-                              ? (errors.rpm1 || errors.rpm2 || errors.rpm3) && (
-                                  <HStack space={1}>
-                                    <Icon
-                                      marginTop={'.5'}
-                                      as={Ionicons}
-                                      name='alert-circle-outline'
-                                      color='error'
-                                    />
-                                    <Text
-                                      style={{ fontSize: 14, color: '#b71c1c' }}
-                                    >
-                                      At least one measurement is required
-                                    </Text>
-                                  </HStack>
-                                )
-                              : (touched.rpm1 ||
-                                  touched.rpm2 ||
-                                  touched.rpm3) &&
-                                (errors.rpm1 || errors.rpm2 || errors.rpm3) && (
-                                  <HStack space={1}>
-                                    <Icon
-                                      marginTop={'.5'}
-                                      as={Ionicons}
-                                      name='alert-circle-outline'
-                                      color='error'
-                                    />
-                                    <Text
-                                      style={{ fontSize: 14, color: '#b71c1c' }}
-                                    >
-                                      At least one measurement is required
-                                    </Text>
-                                  </HStack>
-                                )}
-                          </HStack>
-                          <HStack space={8} justifyContent='space-between'>
-                            <FormControl w='30%'>
-                              <VStack>
-                                <OptimizedInput
-                                  height='50px'
-                                  fontSize='16'
-                                  placeholder='Numeric Value'
-                                  keyboardType='numeric'
-                                  onChangeText={handleChange('rpm1')}
-                                  onBlur={handleBlur('rpm1')}
-                                  value={values.rpm1}
-                                />
-                                {Number(values.rpm1) > QARanges.RPM.max ? (
-                                  <RenderWarningMessage />
-                                ) : (
-                                  <></>
-                                )}
-                              </VStack>
-                            </FormControl>
-                            <FormControl w='30%'>
-                              <VStack>
-                                <OptimizedInput
-                                  height='50px'
-                                  fontSize='16'
-                                  placeholder='Numeric Value (optional)'
-                                  keyboardType='numeric'
-                                  onChangeText={handleChange('rpm2')}
-                                  onBlur={handleBlur('rpm2')}
-                                  value={values.rpm2}
-                                />
-                                {Number(values.rpm2) > QARanges.RPM.max ? (
-                                  <RenderWarningMessage />
-                                ) : (
-                                  <></>
-                                )}
-                              </VStack>
-                            </FormControl>
-                            <FormControl w='30%'>
-                              <VStack>
-                                <OptimizedInput
-                                  height='50px'
-                                  fontSize='16'
-                                  placeholder='Numeric Value (optional)'
-                                  keyboardType='numeric'
-                                  onChangeText={handleChange('rpm3')}
-                                  onBlur={handleBlur('rpm3')}
-                                  value={values.rpm3}
-                                />
-                                {Number(values.rpm3) > QARanges.RPM.max ? (
-                                  <RenderWarningMessage />
-                                ) : (
-                                  <></>
-                                )}
-                              </VStack>
-                            </FormControl>
-                          </HStack>
-                          <Text color='grey' mt='5' fontSize='17'>
-                            Please take 3 separate measures of cone rotations
-                            per minute before cleaning the trap.
-                          </Text>
-                        </FormControl>
-
-                        <HStack
-                          space={5}
-                          width='100%'
-                          justifyContent='space-between'
-                        >
-                          <Heading>Environmental Conditions</Heading>
-                          <FormControl w='30%'>
-                            <HStack space={2} alignItems='center'>
-                              <FormControl.Label>
-                                <Text fontSize='14'>
-                                  Record Turbidity in Post Processing
-                                </Text>
-                              </FormControl.Label>
-                              <Switch
-                                name='recordTurbidityInPostProcessing'
-                                shadow='3'
-                                offTrackColor='secondary'
-                                onTrackColor='primary'
-                                size='md'
-                                isChecked={turbidityToggle}
-                                value={values.recordTurbidityInPostProcessing}
-                                onToggle={() => {
-                                  setFieldValue('waterTurbidity', null)
-                                  if (!turbidityToggle) {
-                                    setFieldValue(
-                                      'recordTurbidityInPostProcessing',
-                                      true
-                                    )
-                                  } else {
-                                    setFieldValue(
-                                      'recordTurbidityInPostProcessing',
-                                      false
-                                    )
-                                  }
-
-                                  setTurbidityToggle(!turbidityToggle)
-                                }}
-                              />
+                                Full
+                              </Radio>
+                              <Radio
+                                colorScheme='primary'
+                                value='half'
+                                my={1}
+                                _icon={{ color: 'primary' }}
+                              >
+                                Half
+                              </Radio>
                             </HStack>
+                          </Radio.Group>
+                        </HStack>
+                      </FormControl>
+                      <FormControl>
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              RPM Before Cleaning
+                            </Text>
+                          </FormControl.Label>
+                          <Popover
+                            placement='bottom left'
+                            trigger={(triggerProps) => {
+                              return (
+                                <IconButton
+                                  {...triggerProps}
+                                  icon={
+                                    <Icon
+                                      as={MaterialIcons}
+                                      name='info-outline'
+                                      size='lg'
+                                    />
+                                  }
+                                ></IconButton>
+                              )
+                            }}
+                          >
+                            <Popover.Content
+                              accessibilityLabel='RPM Info'
+                              w='600'
+                              mr='10'
+                            >
+                              <Popover.Arrow />
+                              <Popover.Header>
+                                Take one or more measure of cone rotations. We
+                                will save the average in our database.
+                              </Popover.Header>
+                            </Popover.Content>
+                          </Popover>
+                          {tabSlice.incompleteSectionTouched
+                            ? (errors.rpm1 || errors.rpm2 || errors.rpm3) && (
+                                <HStack space={1}>
+                                  <Icon
+                                    marginTop={'.5'}
+                                    as={Ionicons}
+                                    name='alert-circle-outline'
+                                    color='error'
+                                  />
+                                  <Text
+                                    style={{ fontSize: 14, color: '#b71c1c' }}
+                                  >
+                                    At least one measurement is required
+                                  </Text>
+                                </HStack>
+                              )
+                            : (touched.rpm1 || touched.rpm2 || touched.rpm3) &&
+                              (errors.rpm1 || errors.rpm2 || errors.rpm3) && (
+                                <HStack space={1}>
+                                  <Icon
+                                    marginTop={'.5'}
+                                    as={Ionicons}
+                                    name='alert-circle-outline'
+                                    color='error'
+                                  />
+                                  <Text
+                                    style={{ fontSize: 14, color: '#b71c1c' }}
+                                  >
+                                    At least one measurement is required
+                                  </Text>
+                                </HStack>
+                              )}
+                        </HStack>
+                        <HStack space={8} justifyContent='space-between'>
+                          <FormControl w='30%'>
+                            <VStack>
+                              <OptimizedInput
+                                height='50px'
+                                fontSize='16'
+                                placeholder='Numeric Value'
+                                keyboardType='numeric'
+                                onChangeText={handleChange('rpm1')}
+                                onBlur={handleBlur('rpm1')}
+                                value={values.rpm1}
+                              />
+                              {Number(values.rpm1) > QARanges.RPM.max ? (
+                                <RenderWarningMessage />
+                              ) : (
+                                <></>
+                              )}
+                            </VStack>
+                          </FormControl>
+                          <FormControl w='30%'>
+                            <VStack>
+                              <OptimizedInput
+                                height='50px'
+                                fontSize='16'
+                                placeholder='Numeric Value (optional)'
+                                keyboardType='numeric'
+                                onChangeText={handleChange('rpm2')}
+                                onBlur={handleBlur('rpm2')}
+                                value={values.rpm2}
+                              />
+                              {Number(values.rpm2) > QARanges.RPM.max ? (
+                                <RenderWarningMessage />
+                              ) : (
+                                <></>
+                              )}
+                            </VStack>
+                          </FormControl>
+                          <FormControl w='30%'>
+                            <VStack>
+                              <OptimizedInput
+                                height='50px'
+                                fontSize='16'
+                                placeholder='Numeric Value (optional)'
+                                keyboardType='numeric'
+                                onChangeText={handleChange('rpm3')}
+                                onBlur={handleBlur('rpm3')}
+                                value={values.rpm3}
+                              />
+                              {Number(values.rpm3) > QARanges.RPM.max ? (
+                                <RenderWarningMessage />
+                              ) : (
+                                <></>
+                              )}
+                            </VStack>
                           </FormControl>
                         </HStack>
+                        <Text color='grey' mt='5' fontSize='17'>
+                          Please take 3 separate measures of cone rotations per
+                          minute before cleaning the trap.
+                        </Text>
+                      </FormControl>
 
-                        <HStack space={5} width='125%'>
-                          <FormControl w='1/4'>
+                      <HStack
+                        space={5}
+                        width='100%'
+                        justifyContent='space-between'
+                      >
+                        <Heading>Environmental Conditions</Heading>
+                        <FormControl w='30%'>
+                          <HStack space={2} alignItems='center'>
                             <FormControl.Label>
-                              <Text color='black' fontSize='xl'>
-                                Flow Measure
+                              <Text fontSize='14'>
+                                Record Turbidity in Post Processing
                               </Text>
                             </FormControl.Label>
-                            <OptimizedInput
-                              height='50px'
-                              fontSize='16'
-                              placeholder='Populated from CDEC'
-                              keyboardType='numeric'
-                              onChangeText={handleChange('flowMeasure')}
-                              onBlur={handleBlur('flowMeasure')}
-                              value={values.flowMeasure}
-                            />
-                            {inputUnit(values.flowMeasureUnit)}
-                            {touched.flowMeasure &&
-                              Number(values.flowMeasure) >
-                                QARanges.flowMeasure[selectedStream] &&
-                              QARanges.flowMeasure[selectedStream]?.max && (
-                                <RenderWarningMessage />
-                              )}
-                            {touched.flowMeasure &&
-                              Number(values.flowMeasure) <
-                                QARanges.flowMeasure[selectedStream] &&
-                              QARanges.flowMeasure[selectedStream]?.min && (
-                                <RenderWarningMessage />
-                              )}
-                            {tabSlice.incompleteSectionTouched
-                              ? errors.totalRevolutions &&
-                                RenderErrorMessage(errors, 'flowMeasure')
-                              : touched.totalRevolutions &&
-                                errors.totalRevolutions &&
-                                RenderErrorMessage(errors, 'flowMeasure')}
-                          </FormControl>
-                          <FormControl w='1/4'>
-                            <FormControl.Label>
-                              <Text color='black' fontSize='xl'>
-                                Water Temperature
-                              </Text>
-                            </FormControl.Label>
-                            <OptimizedInput
-                              height='50px'
-                              fontSize='16'
-                              placeholder='Numeric Value'
-                              keyboardType='numeric'
-                              onChangeText={handleChange('waterTemperature')}
-                              onBlur={handleBlur('waterTemperature')}
-                              value={values.waterTemperature}
-                            />
-                            {inputUnit(
-                              values.waterTemperatureUnit,
-                              setFieldValue
-                            )}
-                            {calculateTempWarning(
-                              Number(values.waterTemperature),
-                              values.waterTemperatureUnit
-                            )}
-                            {tabSlice.incompleteSectionTouched
-                              ? errors.totalRevolutions &&
-                                RenderErrorMessage(errors, 'waterTemperature')
-                              : touched.totalRevolutions &&
-                                errors.totalRevolutions &&
-                                RenderErrorMessage(errors, 'waterTemperature')}
-                          </FormControl>
-                          <FormControl w='1/4'>
-                            <FormControl.Label>
-                              <Text color='black' fontSize='xl'>
-                                Water Turbidity
-                              </Text>
-                            </FormControl.Label>
+                            <Switch
+                              name='recordTurbidityInPostProcessing'
+                              shadow='3'
+                              offTrackColor='secondary'
+                              onTrackColor='primary'
+                              size='md'
+                              isChecked={turbidityToggle}
+                              value={values.recordTurbidityInPostProcessing}
+                              onToggle={() => {
+                                setFieldValue('waterTurbidity', null)
+                                if (!turbidityToggle) {
+                                  setFieldValue(
+                                    'recordTurbidityInPostProcessing',
+                                    true
+                                  )
+                                } else {
+                                  setFieldValue(
+                                    'recordTurbidityInPostProcessing',
+                                    false
+                                  )
+                                }
 
-                            <OptimizedInput
-                              isDisabled={turbidityToggle}
-                              height='50px'
-                              fontSize='16'
-                              placeholder='Numeric Value'
-                              keyboardType='numeric'
-                              onChangeText={handleChange('waterTurbidity')}
-                              onBlur={handleBlur('waterTurbidity')}
-                              value={values.waterTurbidity}
+                                setTurbidityToggle(!turbidityToggle)
+                              }}
                             />
-                            {inputUnit(values.waterTurbidityUnit)}
-                            {Number(values.waterTurbidity) >
-                              QARanges.waterTurbidity.max && (
+                          </HStack>
+                        </FormControl>
+                      </HStack>
+
+                      <HStack space={5} width='125%'>
+                        <FormControl w='1/4'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Flow Measure
+                            </Text>
+                          </FormControl.Label>
+                          <OptimizedInput
+                            height='50px'
+                            fontSize='16'
+                            placeholder='Populated from CDEC'
+                            keyboardType='numeric'
+                            onChangeText={handleChange('flowMeasure')}
+                            onBlur={handleBlur('flowMeasure')}
+                            value={values.flowMeasure}
+                          />
+                          {inputUnit(values.flowMeasureUnit)}
+                          {touched.flowMeasure &&
+                            // Number(values.flowMeasure) >
+                            //   QARanges.flowMeasure[selectedStream] &&
+                            // QARanges.flowMeasure[selectedStream]?.max && (
+                            //   <RenderWarningMessage />
+                            // )
+                            calculateFLowMeasureWarning(
+                              Number(values.flowMeasure)
+                            )}
+                          {touched.flowMeasure &&
+                            Number(values.flowMeasure) <
+                              QARanges.flowMeasure[selectedStream] &&
+                            QARanges.flowMeasure[selectedStream]?.min && (
                               <RenderWarningMessage />
                             )}
-                            {tabSlice.incompleteSectionTouched
-                              ? errors.totalRevolutions &&
-                                RenderErrorMessage(errors, 'waterTurbidity')
-                              : touched.totalRevolutions &&
-                                errors.totalRevolutions &&
-                                RenderErrorMessage(errors, 'waterTurbidity')}
-                          </FormControl>
-                        </HStack>
-                        <Text
-                          color='black'
-                          fontSize='xl'
-                          alignSelf='center'
-                          pb='15%'
-                        >
-                          - Remove debris and begin fish processing -
-                        </Text>
-                      </>
-                    )}
+                          {tabSlice.incompleteSectionTouched
+                            ? errors.totalRevolutions &&
+                              RenderErrorMessage(errors, 'flowMeasure')
+                            : touched.totalRevolutions &&
+                              errors.totalRevolutions &&
+                              RenderErrorMessage(errors, 'flowMeasure')}
+                        </FormControl>
+                        <FormControl w='1/4'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Water Temperature
+                            </Text>
+                          </FormControl.Label>
+                          <OptimizedInput
+                            height='50px'
+                            fontSize='16'
+                            placeholder='Numeric Value'
+                            keyboardType='numeric'
+                            onChangeText={handleChange('waterTemperature')}
+                            onBlur={handleBlur('waterTemperature')}
+                            value={values.waterTemperature}
+                          />
+                          {inputUnit(
+                            values.waterTemperatureUnit,
+                            setFieldValue
+                          )}
+                          {calculateTempWarning(
+                            Number(values.waterTemperature),
+                            values.waterTemperatureUnit
+                          )}
+                          {tabSlice.incompleteSectionTouched
+                            ? errors.totalRevolutions &&
+                              RenderErrorMessage(errors, 'waterTemperature')
+                            : touched.totalRevolutions &&
+                              errors.totalRevolutions &&
+                              RenderErrorMessage(errors, 'waterTemperature')}
+                        </FormControl>
+                        <FormControl w='1/4'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Water Turbidity
+                            </Text>
+                          </FormControl.Label>
+
+                          <OptimizedInput
+                            isDisabled={turbidityToggle}
+                            height='50px'
+                            fontSize='16'
+                            placeholder='Numeric Value'
+                            keyboardType='numeric'
+                            onChangeText={handleChange('waterTurbidity')}
+                            onBlur={handleBlur('waterTurbidity')}
+                            value={values.waterTurbidity}
+                          />
+                          {inputUnit(values.waterTurbidityUnit)}
+                          {Number(values.waterTurbidity) >
+                            QARanges.waterTurbidity.max && (
+                            <RenderWarningMessage />
+                          )}
+                          {tabSlice.incompleteSectionTouched
+                            ? errors.totalRevolutions &&
+                              RenderErrorMessage(errors, 'waterTurbidity')
+                            : touched.totalRevolutions &&
+                              errors.totalRevolutions &&
+                              RenderErrorMessage(errors, 'waterTurbidity')}
+                        </FormControl>
+                      </HStack>
+                      <Text
+                        color='black'
+                        fontSize='xl'
+                        alignSelf='center'
+                        pb='15%'
+                      >
+                        - Remove debris and begin fish processing -
+                      </Text>
+                    </>
+                  )}
                 </VStack>
               </Pressable>
             </ScrollView>
@@ -685,4 +733,5 @@ const TrapOperations = ({
     </Formik>
   )
 }
+
 export default connect(mapStateToProps)(TrapOperations)
