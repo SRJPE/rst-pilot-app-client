@@ -98,6 +98,7 @@ export const calculateLifeStage = (forkLength: number) => {
 }
 
 export const QARanges = {
+  //test
   flowMeasure: {
     'Mill Creek': {
       'Mill Creek RST': { max: 2000, min: null },
@@ -107,16 +108,48 @@ export const QARanges = {
     },
     'Feather River': {
       standard: { max: 3500, min: 50 },
-      'Herringer Riffle': { max: 25000, min: 50 },
-      'Gateway Riffle': { max: 8000, min: 50 },
-      // 'Sunset Pumps': { max: 25000, min: 50 },
-      'Steep Riffle': { max: 6000, min: 50 },
-      // 'Shawns Beach': { max: 25000, min: 50 },
-      // 'Live Oak': { max: 25000, min: 50 },
-      'Eye Riffle': { max: 8000, min: 50 },
+      'Eye Riffle': {
+        'Eye riffle north': { max: 8000, min: 50 },
+        'Eye riffle Side Channel': { max: 8000, min: 50 },
+      },
+      'Live Oak': { max: 25000, min: 50 },
+      'Herringer Riffle': {
+        'Herringer east': { max: 25000, min: 50 },
+        'Herringer west': { max: 25000, min: 50 },
+        'Herringer Upper west': { max: 25000, min: 50 },
+      },
+      'Sunset Pumps': {
+        'Sunset East Bank': { max: 25000, min: 50 },
+        'Sunset West Bank': { max: 25000, min: 50 },
+      },
+      'Shawns Beach': {
+        'Shawns East': { max: 25000, min: 50 },
+        'Shawns West': { max: 25000, min: 50 },
+      },
+      'Gateway Riffle': {
+        'Gateway main1': { max: 8000, min: 50 },
+        'Gateway Rootball': { max: 8000, min: 50 },
+        "Gateway Main 400' Up River": { max: 8000, min: 50 },
+        'Gateway Rootball River Left': { max: 8000, min: 50 },
+      },
+      'Steep Riffle': {
+        'Steep Side Channel': { max: 6000, min: 50 },
+        "Steep Riffle 10' ext": { max: 6000, min: 50 },
+        'Steep Riffle RST': { max: 6000, min: 50 },
+      },
     },
     'Yuba River': {
-      hallwood: { max: 15000, min: 50 },
+      Hallwood: {
+        'Hallwood 1': { max: 15000, min: 50 },
+        'Hallwood 2': { max: 15000, min: 50 },
+        'Hallwood 3': { max: 15000, min: 50 },
+      },
+    },
+    'Flowwest Test': {
+      'Flowwest Test': {
+        'FlowWest Test 1': { max: 2000, min: 50 },
+        'FlowWest Test 2': { max: 2000, min: 50 },
+      },
     },
   } as any,
   waterTemperature: { maxF: 100, maxC: 30, min: null },
