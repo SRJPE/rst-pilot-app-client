@@ -20,6 +20,7 @@ const NavButtons = ({
   visitSetupSlice,
   fishProcessingSlice,
   reduxState,
+  shouldProceedToLoadingScreen = false,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -32,11 +33,13 @@ const NavButtons = ({
   visitSetupSlice: any
   fishProcessingSlice: any
   reduxState: RootState
+  shouldProceedToLoadingScreen?: boolean
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
+  const previousPage = navigationState.steps[activeStep - 1]?.name
   const [isPaperEntryStore, setIsPaperEntryStore] = useState(false)
 
   useEffect(() => {
@@ -58,7 +61,7 @@ const NavButtons = ({
   const checkWillBeHoldingFishForMarkRecapture = () => {
     if (tabSlice.activeTabId) {
       const tabsContainHoldingTrue = Object.keys(tabSlice.tabs).some(
-        tabId =>
+        (tabId) =>
           fishProcessingSlice?.[tabId]?.values
             ?.willBeHoldingFishForMarkRecapture
       )
@@ -76,6 +79,7 @@ const NavButtons = ({
       }
     }
 
+    // REFACTOR
     navigation.navigate('Trap Visit Form', { screen: destination })
     dispatch({
       type: updateActiveStep,
@@ -88,6 +92,8 @@ const NavButtons = ({
       case 'Visit Setup':
         if (isPaperEntry) {
           navigateHelper('Paper Entry')
+        } else {
+          navigateHelper('Trap Operations')
         }
         break
       case 'Trap Operations':
@@ -103,14 +109,19 @@ const NavButtons = ({
           } else if (values?.waterTemperatureUnit === '°C') {
             if (values?.waterTemperature > 30) {
               navigateHelper('High Temperatures')
+            } else {
+              navigateHelper('Fish Processing')
             }
           } else if (values?.waterTemperatureUnit === '°F') {
             if (values?.waterTemperature > 86) {
               navigateHelper('High Temperatures')
+            } else {
+              navigateHelper('Fish Processing')
             }
+          } else {
+            navigateHelper('Fish Processing')
           }
         }
-
         break
       case 'Fish Processing':
         if (!isPaperEntryStore) {
@@ -122,12 +133,18 @@ const NavButtons = ({
             values?.fishProcessedResult === 'no catch data, fish released'
           ) {
             navigateHelper('Trap Post-Processing')
+          } else {
+            navigateHelper('Fish Input')
           }
+        } else {
+          navigateHelper('Trap Post-Processing')
         }
         break
       case 'Trap Post-Processing':
         if (checkWillBeHoldingFishForMarkRecapture()) {
           navigateHelper('Fish Holding')
+        } else {
+          navigateHelper('Incomplete Sections')
         }
         break
       case 'Fish Holding':
@@ -149,6 +166,10 @@ const NavButtons = ({
         navigation.navigate('Home')
         break
       default:
+        navigation.navigate('Trap Visit Form', {
+          screen: navigationState.steps[activeStep + 1]?.name,
+        })
+        dispatch(updateActiveStep(navigationState.activeStep + 1))
         break
     }
   }
@@ -190,28 +211,16 @@ const NavButtons = ({
   }
 
   const handleRightButton = () => {
-    //if function truthy, submit form to check for errors and save to redux
+    console.log('hit handleRightButton')
     if (handleSubmit) {
       handleSubmit()
       showSlideAlert(dispatch)
     }
-    // if (navigationState.previousPageWasIncompleteSections) {
-    //   navigation.navigate('Trap Visit Form', {
-    //     screen: 'Incomplete Sections',
-    //   })
-    //   dispatch(updateActiveStep(6))
-    //   dispatch(togglePreviousPageWasIncompleteSections())
-    //   navigateFlowRightButton(values)
-    // }
-    //navigate Right
-    // else {
-    navigation.navigate('Trap Visit Form', {
-      screen: navigationState.steps[activeStep + 1]?.name,
-    })
-    dispatch(updateActiveStep(navigationState.activeStep + 1))
-    //navigate various flows (This seems to not be causing performance issues even though it is kind of redundant to place it here)
-    navigateFlowRightButton(values)
-    // }
+
+    if (!shouldProceedToLoadingScreen) {
+      // If proceeding to loading screen, do not navigate to next screen, instead navigate from loading screen
+      navigateFlowRightButton(values)
+    }
   }
 
   const handleLeftButton = () => {
