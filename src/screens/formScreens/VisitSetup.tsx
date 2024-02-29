@@ -23,6 +23,7 @@ import { trapVisitSchema } from '../../utils/helpers/yupValidations'
 import {
   markStepCompleted,
   NavigationStateI,
+  updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
 import {
   createTab,
@@ -31,6 +32,7 @@ import {
   TabStateI,
 } from '../../redux/reducers/formSlices/tabSlice'
 import { uniqBy } from 'lodash'
+import { DeviceEventEmitter } from 'react-native'
 
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import CustomSelect from '../../components/Shared/CustomSelect'
@@ -93,12 +95,12 @@ const VisitSetup = ({
   }, [tabSlice?.activeTabId])
 
   const onSubmit = (values: any, tabId: string | null) => {
-    // values.crew = ['temp1']
     const programId = selectedProgramId
     const payload = {
       ...values,
       programId,
     }
+    console.log('submitting visit setup form')
     // if no current tabs, create all new tabs
     if (!tabId) {
       // if trapName, iterate through all trap names and create tabs
@@ -263,6 +265,7 @@ const VisitSetup = ({
         )
       }
     }
+    console.log('finished submitting visit setup form')
     dispatch(markStepCompleted({ propName: 'visitSetup' }))
     console.log('🚀 ~ handleSubmit ~ Visit', payload)
   }
@@ -366,7 +369,21 @@ const VisitSetup = ({
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
       onSubmit={(values) => {
-        onSubmit(values, tabSlice?.activeTabId)
+        const callback = () => {
+          console.log('hit callback')
+          console.log('navigationSlice.activeStep', navigationSlice.activeStep)
+          dispatch(updateActiveStep(navigationSlice.activeStep + 1))
+          navigation.navigate('Trap Operations')
+        }
+
+        navigation.navigate('Loading...')
+
+        setTimeout(() => {
+          DeviceEventEmitter.emit('event.load', {
+            process: () => onSubmit(values, tabSlice?.activeTabId),
+            callback,
+          })
+        }, 2000)
       }}
     >
       {({
@@ -546,6 +563,7 @@ const VisitSetup = ({
               }
               touched={touched}
               isPaperEntry={isPaperEntry}
+              shouldProceedToLoadingScreen={true}
             />
           </>
         )
