@@ -79,7 +79,6 @@ const NavButtons = ({
       }
     }
 
-    // REFACTOR
     navigation.navigate('Trap Visit Form', { screen: destination })
     dispatch({
       type: updateActiveStep,
@@ -188,6 +187,9 @@ const NavButtons = ({
       case 'Non Functional Trap':
         navigateHelper('Trap Operations')
         break
+      case 'Fish Processing':
+        navigateHelper('Trap Operations')
+        break
       case 'No Fish Caught':
         navigateHelper('Fish Processing')
         break
@@ -211,7 +213,6 @@ const NavButtons = ({
   }
 
   const handleRightButton = () => {
-    console.log('hit handleRightButton')
     if (handleSubmit) {
       handleSubmit()
       showSlideAlert(dispatch)

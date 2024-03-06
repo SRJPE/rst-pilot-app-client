@@ -21,11 +21,11 @@ import {
   markFishInputModalOpen,
   saveFishInput,
 } from '../../redux/reducers/formSlices/fishInputSlice'
-import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import { markStepCompleted, updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import FishInputDataTable from '../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../components/form/PlusCountModalContent'
 import { Ionicons } from '@expo/vector-icons'
-import { useWindowDimensions } from 'react-native'
+import { DeviceEventEmitter, useWindowDimensions } from 'react-native'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 const mapStateToProps = (state: RootState) => {
@@ -43,6 +43,7 @@ const mapStateToProps = (state: RootState) => {
     speciesCaptured,
     tabSlice: state.tabSlice,
     fishInputSlice: state.fishInput,
+    navigationSlice: state.navigation,
   }
 }
 
@@ -52,12 +53,14 @@ const FishInput = ({
   speciesCaptured,
   tabSlice,
   fishInputSlice,
+  navigationSlice,
 }: {
   navigation: any
   activeTabId: string
   speciesCaptured: string[]
   tabSlice: TabStateI
   fishInputSlice: any
+  navigationSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addPlusCountModalOpen, setAddPlusCountModalOpen] = useState(
@@ -79,23 +82,37 @@ const FishInput = ({
   }, [checkboxGroupValue])
 
   const handleSubmit = () => {
-    // if (checkboxGroupValue.length < 1) {
-    //   setShowError(true)
+    dispatch(
+      saveFishInput({
+        tabId: activeTabId,
+        speciesCaptured: checkboxGroupValue,
+      })
+    )
+    dispatch(markFishInputCompleted({ tabId: activeTabId, bool: true }))
+    let stepCompletedCheck = true
 
-    // }
+    if (stepCompletedCheck)
+      dispatch(markStepCompleted({ propName: 'fishInput' }))
+    console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
+  }
+
+  const submissionLoader = () => {
     if (activeTabId && activeTabId != 'placeholderId') {
-      dispatch(
-        saveFishInput({
-          tabId: activeTabId,
-          speciesCaptured: checkboxGroupValue,
+      const callback = () => {
+        navigation.navigate('Trap Visit Form', {
+          screen: navigationSlice.steps[navigationSlice.activeStep + 1]?.name,
         })
-      )
-      dispatch(markFishInputCompleted({ tabId: activeTabId, bool: true }))
-      let stepCompletedCheck = true
+        dispatch(updateActiveStep(navigationSlice.activeStep + 1))
+      }
 
-      if (stepCompletedCheck)
-        dispatch(markStepCompleted({ propName: 'fishInput' }))
-      console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
+      navigation.push('Loading...')
+
+      setTimeout(() => {
+        DeviceEventEmitter.emit('event.load', {
+          process: () => handleSubmit(),
+          callback,
+        })
+      }, 1000)
     }
   }
 
@@ -245,7 +262,8 @@ const FishInput = ({
       </ScrollView>
       <NavButtons
         navigation={navigation}
-        handleSubmit={handleSubmit}
+        handleSubmit={submissionLoader}
+        shouldProceedToLoadingScreen={true}
         values={checkboxGroupValue}
       />
     </>

@@ -38,6 +38,7 @@ import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import { uid } from 'uid'
 import TrapNameDropDown from '../../components/form/TrapNameDropDown'
+import { navigateHelper } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -265,7 +266,6 @@ const VisitSetup = ({
         )
       }
     }
-    console.log('finished submitting visit setup form')
     dispatch(markStepCompleted({ propName: 'visitSetup' }))
     console.log('🚀 ~ handleSubmit ~ Visit', payload)
   }
@@ -370,13 +370,26 @@ const VisitSetup = ({
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
       onSubmit={(values) => {
         const callback = () => {
-          console.log('hit callback')
-          console.log('navigationSlice.activeStep', navigationSlice.activeStep)
-          dispatch(updateActiveStep(navigationSlice.activeStep + 1))
-          navigation.navigate('Trap Operations')
+          if (isPaperEntry) {
+            navigateHelper(
+              'Paper Entry',
+              navigationSlice,
+              navigation,
+              dispatch,
+              updateActiveStep
+            )
+          } else {
+            navigateHelper(
+              'Trap Operations',
+              navigationSlice,
+              navigation,
+              dispatch,
+              updateActiveStep
+            )
+          }
         }
 
-        navigation.navigate('Loading...')
+        navigation.push('Loading...')
 
         setTimeout(() => {
           DeviceEventEmitter.emit('event.load', {

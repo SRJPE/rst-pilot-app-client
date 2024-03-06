@@ -212,3 +212,25 @@ export const useDebounce = <T>(value: T, delay = 500) => {
 
   return debouncedValue
 }
+
+export const navigateHelper = (
+  destination: string,
+  navigationState: any,
+  navigation: any,
+  dispatch: any,
+  updateActiveStep: any
+) => {
+  const formSteps = Object.values(navigationState?.steps) as any
+  let payload = null
+  for (let i = 0; i < formSteps.length; i++) {
+    if (formSteps[i].name === destination) {
+      payload = i + 1
+    }
+  }
+
+  navigation.navigate('Trap Visit Form', { screen: destination })
+  dispatch({
+    type: updateActiveStep,
+    payload: payload,
+  })
+}

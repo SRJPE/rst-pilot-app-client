@@ -84,7 +84,6 @@ const IncompleteSections = ({
   addGeneticSamplesState: any
   appliedMarksState: any
 }) => {
-  // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
     0,
@@ -97,7 +96,6 @@ const IncompleteSections = ({
 
   const emitSubmission = () => {
     const callback = () => {
-      console.log('hit callback')
       navigation.reset({
         index: 0,
         routes: [{ name: 'Visit Setup' }],
