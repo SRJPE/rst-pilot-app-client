@@ -21,7 +21,7 @@ import {
 import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
@@ -112,7 +112,7 @@ const FishProcessing = ({
       initialTouched={{ fishProcessedResult: true }}
       initialErrors={
         activeTabId && reduxState[activeTabId]
-          ? reduxState[activeTabId].errors
+          ? { ...reduxState[activeTabId].errors, fishProcessedResult: '' }
           : null
       }
       onSubmit={(values) => {
@@ -122,7 +122,6 @@ const FishProcessing = ({
           if (tabSlice.activeTabId) onSubmit(values, tabSlice.activeTabId)
         }
       }}
-      validateOnChange={true}
     >
       {({
         handleChange,
@@ -140,7 +139,18 @@ const FishProcessing = ({
             resetForm()
           }
         }, [previouslyActiveTabId])
-
+        const navButtons = useMemo(
+          () => (
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={handleSubmit}
+              errors={errors}
+              touched={touched}
+              values={values}
+            />
+          ),
+          [navigation, handleSubmit, errors, touched, values]
+        )
         return (
           <>
             <View
@@ -271,13 +281,7 @@ const FishProcessing = ({
                 )}
               </VStack>
             </View>
-            <NavButtons
-              navigation={navigation}
-              handleSubmit={handleSubmit}
-              errors={errors}
-              touched={touched}
-              values={values}
-            />
+            {navButtons}
           </>
         )
       }}

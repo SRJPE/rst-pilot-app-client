@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -386,7 +386,29 @@ const VisitSetup = ({
             onSubmit(values, tabSlice.previouslyActiveTabId)
           }
         }, [tabSlice.previouslyActiveTabId])
-
+        const navButtons = useMemo(
+          () => (
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={handleSubmit}
+              errors={
+                values.crew.length
+                  ? errors
+                  : { ...errors, crew: Boolean(values.crew.length) }
+              }
+              touched={touched}
+              isPaperEntry={isPaperEntry}
+            />
+          ),
+          [
+            navigation,
+            handleSubmit,
+            errors,
+            touched,
+            isPaperEntry,
+            values.crew.length,
+          ]
+        )
         return (
           <>
             <View
@@ -536,17 +558,7 @@ const VisitSetup = ({
                 )}
               </VStack>
             </View>
-            <NavButtons
-              navigation={navigation}
-              handleSubmit={handleSubmit}
-              errors={
-                values.crew.length
-                  ? errors
-                  : { ...errors, crew: Boolean(values.crew.length) }
-              }
-              touched={touched}
-              isPaperEntry={isPaperEntry}
-            />
+            {navButtons}
           </>
         )
       }}
