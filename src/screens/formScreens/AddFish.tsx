@@ -427,7 +427,7 @@ const AddFishContent = ({
     } else if (resetType === 'other') {
       identifier = 'whenSpeciesOther'
     }
-        // setSpecies(stateDefaults[identifier].species)
+    // setSpecies(stateDefaults[identifier].species)
     setForkLength(stateDefaults[identifier].forkLength)
     setRun(stateDefaults[identifier].run)
     setWeight(stateDefaults[identifier].weight)
@@ -558,6 +558,7 @@ const AddFishContent = ({
                           icon={
                             <Icon
                               as={MaterialIcons}
+                              color='black'
                               name='info-outline'
                               size='xl'
                             />
@@ -796,6 +797,7 @@ const AddFishContent = ({
                                   icon={
                                     <Icon
                                       as={MaterialIcons}
+                                      color='black'
                                       name='info-outline'
                                       size='xl'
                                     />
@@ -1024,6 +1026,7 @@ const AddFishContent = ({
                                   icon={
                                     <Icon
                                       as={MaterialIcons}
+                                      color='black'
                                       name='info-outline'
                                       size='xl'
                                     />
