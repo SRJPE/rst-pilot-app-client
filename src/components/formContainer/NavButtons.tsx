@@ -302,6 +302,7 @@ const NavButtons = ({
     touched,
     errors,
     values,
+    isFormComplete,
   ])
 
   return (
