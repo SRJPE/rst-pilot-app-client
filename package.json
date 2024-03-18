@@ -6,7 +6,9 @@
     "reset-cache": "expo start --clear",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build-production": "REACT_APP_BASE_URL=\"https://jpe-app-server-production.azurewebsites.net\" eas update --branch milldeer",
+    "build-testing": "REACT_APP_BASE_URL=\"https://jpe-app-server.azurewebsites.net\" eas update --branch testing"
   },
   "dependencies": {
     "@expo/metro-config": "~0.10.0",

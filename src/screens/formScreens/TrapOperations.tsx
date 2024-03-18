@@ -23,15 +23,18 @@ import {
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
-import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  markStepCompleted,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
   markTrapOperationsCompleted,
   saveTrapOperations,
 } from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
-import { Keyboard } from 'react-native'
-import { QARanges } from '../../utils/utils'
+import { DeviceEventEmitter, Keyboard } from 'react-native'
+import { QARanges, navigateHelper } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import OptimizedInput from '../../components/Shared/OptimizedInput'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
@@ -248,8 +251,89 @@ const TrapOperations = ({
       }
       // only create initial error when form is not completed
       onSubmit={(values: any) => {
-        if (activeTabId) {
-          onSubmit(values, activeTabId)
+        if (activeTabId && activeTabId != 'placeholderId') {
+          const callback = () => {
+            if (values?.trapStatus === 'trap not functioning') {
+              navigateHelper(
+                'Non Functional Trap',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            } else if (
+              values?.trapStatus === 'trap not in service - restart trapping'
+            ) {
+              navigateHelper(
+                'Started Trapping',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            } else if (values?.flowMeasure > 1000) {
+              navigateHelper(
+                'High Flows',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            } else if (values?.waterTemperatureUnit === '°C') {
+              if (values?.waterTemperature > 30) {
+                navigateHelper(
+                  'High Temperatures',
+                  navigationSlice,
+                  navigation,
+                  dispatch,
+                  updateActiveStep
+                )
+              } else {
+                navigateHelper(
+                  'Fish Processing',
+                  navigationSlice,
+                  navigation,
+                  dispatch,
+                  updateActiveStep
+                )
+              }
+            } else if (values?.waterTemperatureUnit === '°F') {
+              if (values?.waterTemperature > 86) {
+                navigateHelper(
+                  'High Temperatures',
+                  navigationSlice,
+                  navigation,
+                  dispatch,
+                  updateActiveStep
+                )
+              } else {
+                navigateHelper(
+                  'Fish Processing',
+                  navigationSlice,
+                  navigation,
+                  dispatch,
+                  updateActiveStep
+                )
+              }
+            } else {
+              navigateHelper(
+                'Fish Processing',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            }
+          }
+
+          navigation.push('Loading...')
+
+          setTimeout(() => {
+            DeviceEventEmitter.emit('event.load', {
+              process: () => onSubmit(values, activeTabId),
+              callback,
+            })
+          }, 2000)
         }
       }}
     >
@@ -279,6 +363,7 @@ const TrapOperations = ({
               errors={errors}
               touched={touched}
               values={values}
+              shouldProceedToLoadingScreen={true}
             />
           ),
           [navigation, handleSubmit, errors, touched, values]

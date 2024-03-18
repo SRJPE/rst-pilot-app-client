@@ -15,11 +15,12 @@ import {
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
-import { Keyboard } from 'react-native'
+import { DeviceEventEmitter, Keyboard } from 'react-native'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import {
   checkIfFormIsComplete,
   markStepCompleted,
+  updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
 import {
   markTrapPostProcessingCompleted,
@@ -28,22 +29,26 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import { QARanges } from '../../utils/utils'
+import { QARanges, navigateHelper } from '../../utils/utils'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 const mapStateToProps = (state: RootState) => {
-  let activeTabId = 'placeholderId'
-  if (
-    state.tabSlice.activeTabId &&
-    state.trapPostProcessing[state.tabSlice.activeTabId]
-  ) {
-    activeTabId = state.tabSlice.activeTabId
+  let activeTabId = state.tabSlice.activeTabId
+  let willBeHoldingFishForMarkRecapture = false
+
+  if (activeTabId) {
+    const tabsContainHoldingTrue = Object.keys(state.tabSlice).some(
+      (tabId) =>
+        state.fishProcessing?.[tabId]?.values?.willBeHoldingFishForMarkRecapture
+    )
+    willBeHoldingFishForMarkRecapture = tabsContainHoldingTrue
   }
 
   return {
     reduxState: state.trapPostProcessing,
     tabSlice: state.tabSlice,
     activeTabId,
+    willBeHoldingFishForMarkRecapture,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
   }
@@ -54,6 +59,7 @@ const TrapPostProcessing = ({
   reduxState,
   tabSlice,
   activeTabId,
+  willBeHoldingFishForMarkRecapture,
   previouslyActiveTabId,
   navigationSlice,
 }: {
@@ -61,6 +67,7 @@ const TrapPostProcessing = ({
   reduxState: any
   tabSlice: any
   activeTabId: string
+  willBeHoldingFishForMarkRecapture: boolean
   previouslyActiveTabId: string | null
   navigationSlice: any
 }) => {
@@ -158,20 +165,51 @@ const TrapPostProcessing = ({
       validationSchema={trapPostProcessingSchema}
       enableReinitialize={true}
       initialValues={
-        recordTurbidityInPostProcessing
-          ? { ...reduxState[activeTabId].values, isWaterTurbidityPresent: true }
-          : reduxState[activeTabId].values
+        reduxState[activeTabId]
+          ? recordTurbidityInPostProcessing
+            ? {
+                ...reduxState[activeTabId].values,
+                isWaterTurbidityPresent: true,
+              }
+            : reduxState[activeTabId].values
+          : reduxState['placeholderId'].values
       }
+      initialTouched={{ debrisVolume: true }}
       initialErrors={
         activeTabId && reduxState[activeTabId]
           ? reduxState[activeTabId].errors
           : null
       }
       onSubmit={(values) => {
-        if (activeTabId != 'placeholderId') {
-          onSubmit(values, activeTabId)
-        } else {
-          if (tabSlice.activeTabId) onSubmit(values, tabSlice.activeTabId)
+        if (activeTabId && activeTabId != 'placeholderId') {
+          const callback = () => {
+            if (willBeHoldingFishForMarkRecapture) {
+              navigateHelper(
+                'Fish Holding',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            } else {
+              navigateHelper(
+                'Incomplete Sections',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            }
+          }
+
+          navigation.push('Loading...')
+
+          setTimeout(() => {
+            DeviceEventEmitter.emit('event.load', {
+              process: () => onSubmit(values, activeTabId),
+              callback,
+            })
+          }, 2000)
         }
       }}
     >
@@ -199,6 +237,7 @@ const TrapPostProcessing = ({
               handleSubmit={handleSubmit}
               errors={errors}
               touched={touched}
+              shouldProceedToLoadingScreen={true}
             />
           ),
           [navigation, handleSubmit, errors, touched]
