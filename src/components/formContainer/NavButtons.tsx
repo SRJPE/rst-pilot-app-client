@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { debounce } from 'lodash'
 
@@ -58,7 +58,7 @@ const NavButtons = ({
   const checkWillBeHoldingFishForMarkRecapture = () => {
     if (tabSlice.activeTabId) {
       const tabsContainHoldingTrue = Object.keys(tabSlice.tabs).some(
-        tabId =>
+        (tabId) =>
           fishProcessingSlice?.[tabId]?.values
             ?.willBeHoldingFishForMarkRecapture
       )
@@ -296,20 +296,14 @@ const NavButtons = ({
     // }
     return buttonText
   }
-  const debouncedHandleRightButton = useCallback(
-    debounce(handleRightButton, 500, {
-      leading: true,
-      trailing: false,
-    }),
-    [handleSubmit]
-  )
-  const debouncedHandleLeftButton = useCallback(
-    debounce(handleLeftButton, 500, {
-      leading: true,
-      trailing: false,
-    }),
-    [handleSubmit]
-  )
+
+  const rightDisabledBool = useMemo(disableRightButton, [
+    activePage,
+    touched,
+    errors,
+    values,
+  ])
+
   return (
     <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>
       <HStack justifyContent='space-evenly'>
@@ -326,7 +320,7 @@ const NavButtons = ({
               <></>
             )
           }
-          onPress={debouncedHandleLeftButton}
+          onPress={handleLeftButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='primary'>
             {activePage === 'Visit Setup' ? 'Return Home' : 'Back'}
@@ -338,8 +332,8 @@ const NavButtons = ({
           width='45%'
           height='20'
           shadow='5'
-          isDisabled={disableRightButton()}
-          onPress={debouncedHandleRightButton}
+          isDisabled={rightDisabledBool}
+          onPress={handleRightButton}
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
             {renderRightButtonText(activePage)}
