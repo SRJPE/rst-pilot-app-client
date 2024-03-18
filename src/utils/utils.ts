@@ -98,7 +98,6 @@ export const calculateLifeStage = (forkLength: number) => {
 }
 
 export const QARanges = {
-  //test
   flowMeasure: {
     'Mill Creek': {
       'Mill Creek RST': { max: 2000, min: null },
@@ -107,7 +106,6 @@ export const QARanges = {
       'Deer Creek RST': { max: 2000, min: null },
     },
     'Feather River': {
-      standard: { max: 3500, min: 50 },
       'Eye Riffle': {
         'Eye riffle north': { max: 8000, min: 50 },
         'Eye riffle Side Channel': { max: 8000, min: 50 },
