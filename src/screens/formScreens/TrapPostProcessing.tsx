@@ -29,7 +29,7 @@ import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import { QARanges } from '../../utils/utils'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
@@ -131,7 +131,7 @@ const TrapPostProcessing = ({
     dispatch(markTrapPostProcessingCompleted({ tabId, value: true }))
     let stepCompletedCheck = true
     const allTabIds: string[] = Object.keys(tabSlice.tabs)
-    allTabIds.forEach(allTabId => {
+    allTabIds.forEach((allTabId) => {
       if (!Object.keys(reduxState).includes(allTabId)) {
         if (Object.keys(reduxState).length < allTabIds.length) {
           stepCompletedCheck = false
@@ -157,21 +157,23 @@ const TrapPostProcessing = ({
     <Formik
       validationSchema={trapPostProcessingSchema}
       enableReinitialize={true}
-      initialValues={reduxState[activeTabId].values}
-      initialTouched={{ debrisVolume: true }}
+      initialValues={
+        recordTurbidityInPostProcessing
+          ? { ...reduxState[activeTabId].values, isWaterTurbidityPresent: true }
+          : reduxState[activeTabId].values
+      }
       initialErrors={
         activeTabId && reduxState[activeTabId]
           ? reduxState[activeTabId].errors
           : null
       }
-      onSubmit={values => {
+      onSubmit={(values) => {
         if (activeTabId != 'placeholderId') {
           onSubmit(values, activeTabId)
         } else {
           if (tabSlice.activeTabId) onSubmit(values, tabSlice.activeTabId)
         }
       }}
-      validateOnChange={true}
     >
       {({
         handleChange,
@@ -190,7 +192,17 @@ const TrapPostProcessing = ({
             resetForm()
           }
         }, [previouslyActiveTabId])
-
+        const navButtons = useMemo(
+          () => (
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={handleSubmit}
+              errors={errors}
+              touched={touched}
+            />
+          ),
+          [navigation, handleSubmit, errors, touched]
+        )
         return (
           <>
             <Pressable
@@ -206,21 +218,11 @@ const TrapPostProcessing = ({
                 <Heading>Trap Post-Processing</Heading>
                 <HStack space={8}>
                   <FormControl w='30%'>
-                    <HStack space={4} alignItems='center'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Debris Volume
-                        </Text>
-                      </FormControl.Label>
-                      {Number(values.debrisVolume) >
-                        QARanges.debrisVolume.max && <RenderWarningMessage />}
-                      {tabSlice.incompleteSectionTouched
-                        ? errors.debrisVolume &&
-                          RenderErrorMessage(errors, 'debrisVolume')
-                        : touched.debrisVolume &&
-                          errors.debrisVolume &&
-                          RenderErrorMessage(errors, 'debrisVolume')}
-                    </HStack>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Debris Volume
+                      </Text>
+                    </FormControl.Label>
                     <Input
                       height='50px'
                       fontSize='16'
@@ -239,25 +241,21 @@ const TrapPostProcessing = ({
                     >
                       {'gal'}
                     </Text>
+                    {Number(values.debrisVolume) >
+                      QARanges.debrisVolume.max && <RenderWarningMessage />}
+                    {tabSlice.incompleteSectionTouched
+                      ? errors.debrisVolume &&
+                        RenderErrorMessage(errors, 'debrisVolume')
+                      : touched.debrisVolume &&
+                        errors.debrisVolume &&
+                        RenderErrorMessage(errors, 'debrisVolume')}
                   </FormControl>
                   <FormControl w='30%'>
-                    <HStack space={4} alignItems='center'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Total Revolutions
-                        </Text>
-                      </FormControl.Label>
-                      {Number(values.totalRevolutions) >
-                        QARanges.totalRevolutions.max && (
-                        <RenderWarningMessage />
-                      )}
-                      {tabSlice.incompleteSectionTouched
-                        ? errors.totalRevolutions &&
-                          RenderErrorMessage(errors, 'totalRevolutions')
-                        : touched.totalRevolutions &&
-                          errors.totalRevolutions &&
-                          RenderErrorMessage(errors, 'totalRevolutions')}
-                    </HStack>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Total Revolutions
+                      </Text>
+                    </FormControl.Label>
                     <Input
                       height='50px'
                       fontSize='16'
@@ -267,6 +265,14 @@ const TrapPostProcessing = ({
                       onBlur={handleBlur('totalRevolutions')}
                       value={values.totalRevolutions}
                     />
+                    {Number(values.totalRevolutions) >
+                      QARanges.totalRevolutions.max && <RenderWarningMessage />}
+                    {tabSlice.incompleteSectionTouched
+                      ? errors.totalRevolutions &&
+                        RenderErrorMessage(errors, 'totalRevolutions')
+                      : touched.totalRevolutions &&
+                        errors.totalRevolutions &&
+                        RenderErrorMessage(errors, 'totalRevolutions')}
                   </FormControl>
                   {recordTurbidityInPostProcessing && (
                     <FormControl w='30%'>
@@ -298,10 +304,10 @@ const TrapPostProcessing = ({
                       {Number(values.waterTurbidity) >
                         QARanges.waterTurbidity.max && <RenderWarningMessage />}
                       {tabSlice.incompleteSectionTouched
-                        ? errors.totalRevolutions &&
+                        ? errors.waterTurbidity &&
                           RenderErrorMessage(errors, 'waterTurbidity')
-                        : touched.totalRevolutions &&
-                          errors.totalRevolutions &&
+                        : touched.waterTurbidity &&
+                          errors.waterTurbidity &&
                           RenderErrorMessage(errors, 'waterTurbidity')}
                     </FormControl>
                   )}
@@ -314,7 +320,9 @@ const TrapPostProcessing = ({
                         RPM After Cleaning
                       </Text>
                     </FormControl.Label>
-                    {(errors.rpm1 || errors.rpm2 || errors.rpm3) && (
+                    {((touched.rpm1 && errors.rpm1) ||
+                      (touched.rpm2 && errors.rpm2) ||
+                      (touched.rpm3 && errors.rpm3)) && (
                       <HStack space={1}>
                         <Icon
                           marginTop={'.5'}
@@ -466,12 +474,7 @@ const TrapPostProcessing = ({
                 </FormControl>
               </VStack>
             </Pressable>
-            <NavButtons
-              navigation={navigation}
-              handleSubmit={handleSubmit}
-              errors={errors}
-              touched={touched}
-            />
+            {navButtons}
           </>
         )
       }}
