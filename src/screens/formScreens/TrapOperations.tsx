@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Formik, yupToFormErrors } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -18,6 +18,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Switch,
+  Box,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
@@ -33,8 +34,8 @@ import { Keyboard } from 'react-native'
 import { QARanges } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import OptimizedInput from '../../components/Shared/OptimizedInput'
-import { updateTrapVisitStartTime } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -45,17 +46,22 @@ const mapStateToProps = (state: RootState) => {
     selectedTrapSite:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.trapSite,
+    selectedTrapName:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.trapName,
     activeTabId: state.tabSlice.activeTabId,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
     tabSlice: state.tabSlice,
   }
 }
+
 const TrapOperations = ({
   navigation,
   reduxState,
   selectedStream,
   selectedTrapSite,
+  selectedTrapName,
   activeTabId,
   previouslyActiveTabId,
   navigationSlice,
@@ -65,19 +71,13 @@ const TrapOperations = ({
   reduxState: any
   selectedStream: string
   selectedTrapSite: string
+  selectedTrapName?: string
+
   activeTabId: string | null
   previouslyActiveTabId: string | null
   navigationSlice: any
   tabSlice: TabStateI
 }) => {
-  console.log('🚀 ~ selectedTrapSite:', selectedTrapSite)
-  console.log('🚀 ~ selectedStream:', selectedStream)
-  console.log('🚀 ~ QARanges:', QARanges)
-
-  // console.log(
-  //   '🚀 ~ selectedStream RANGES:',
-  //   QARanges.flowMeasure[selectedStream]
-  // )
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -86,57 +86,48 @@ const TrapOperations = ({
   const trapNotInServiceLabel = '- restart trapping'
   const trapNotInServiceIdentifier = 'trap not in service - restart trapping'
   const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
+  const [startTime, setStartTime] = useState(new Date() as any)
 
-  const calculateTempWarning = (
+  const useFlowMeasureCalculationBool = (flowMeasureEntered: number) => {
+    return useMemo(() => {
+      if (!flowMeasureEntered) {
+        return false
+      }
+      let warningResult = false
+      const range = selectedTrapName
+        ? QARanges.flowMeasure[selectedStream][selectedTrapSite][
+            selectedTrapName
+          ]
+        : QARanges.flowMeasure[selectedStream][selectedTrapSite]
+
+      if (flowMeasureEntered > range.max || flowMeasureEntered < range.min) {
+        warningResult = true
+      }
+
+      return warningResult
+    }, [flowMeasureEntered, selectedTrapName, selectedStream, selectedTrapSite])
+  }
+
+  const useWaterTempCalculationBool = (
     waterTemperatureValue: number,
     unit: string
   ) => {
-    if (unit === '°F') {
-      return (
-        waterTemperatureValue > QARanges.waterTemperature.maxF && (
-          <RenderWarningMessage />
-        )
-      )
-    } else {
-      return (
-        waterTemperatureValue > QARanges.waterTemperature.maxC && (
-          <RenderWarningMessage />
-        )
-      )
-    }
-  }
-
-  const calculateFLowMeasureWarning = (flowMeasureEntered: number) => {
-    if (selectedTrapSite) {
-      console.log(
-        '🚀 ~ calculateFLowMeasureWarning ~ selectedTrapSite:',
-        selectedTrapSite
-      )
-      console.log(
-        '🚀 ~ calculateFLowMeasureWarning ~  QARanges.flowMeasure[selectedStream][selectedTrapSite].max:',
-        QARanges.flowMeasure[selectedStream][selectedTrapSite]?.max
-      )
-
-      if (
-        flowMeasureEntered >
-          // QARanges.flowMeasure[selectedStream][selectedTrapSite].max
-          QARanges.flowMeasure[selectedStream][selectedTrapSite] &&
-        QARanges.flowMeasure[selectedStream][selectedTrapSite]?.max
-      ) {
-        console.log('GREATER')
-        return <RenderWarningMessage />
+    return useMemo(() => {
+      if (!waterTemperatureValue) {
+        return false
       }
-      console.log('lower')
-      return []
-    } else {
-      if (
-        flowMeasureEntered > QARanges.flowMeasure[selectedStream] &&
-        QARanges.flowMeasure[selectedStream]?.max
-      ) {
-        return <RenderWarningMessage />
+      let warningResult = false
+      const maxTemp =
+        unit === '°F'
+          ? QARanges.waterTemperature.maxF
+          : QARanges.waterTemperature.maxC
+
+      if (waterTemperatureValue > maxTemp) {
+        warningResult = true
       }
-      return []
-    }
+
+      return warningResult
+    }, [waterTemperatureValue, unit])
   }
 
   const checkForErrors = (values: any) => {
@@ -153,10 +144,6 @@ const TrapOperations = ({
 
   const onSubmit = (values: any, tabId: string | null) => {
     if (tabId) {
-      const newDate = new Date()
-      if (values.trapStatus === trapNotInServiceIdentifier) {
-        dispatch(updateTrapVisitStartTime(newDate))
-      }
       const errors = checkForErrors(values)
       if (values.recordTurbidityInPostProcessing) {
         values.waterTurbidity = null
@@ -164,7 +151,11 @@ const TrapOperations = ({
       dispatch(
         saveTrapOperations({
           tabId,
-          values: { ...values, trapVisitStopTime: new Date() },
+          values: {
+            ...values,
+            trapVisitStopTime: new Date(), //refactor needed
+            trapVisitStartTime: startTime,
+          },
           errors,
         })
       )
@@ -222,9 +213,21 @@ const TrapOperations = ({
     return (
       <IconButton
         {...triggerProps}
-        icon={<Icon as={MaterialIcons} name='info-outline' size='lg' />}
+        icon={
+          <Icon
+            as={MaterialIcons}
+            color='black'
+            name='info-outline'
+            size='lg'
+          />
+        }
       ></IconButton>
     )
+  }
+
+  const onStartTimeChange = (event: any, selectedDate: any) => {
+    const currentDate = selectedDate
+    setStartTime(currentDate)
   }
 
   return (
@@ -238,14 +241,12 @@ const TrapOperations = ({
             : reduxState['placeholderId'].values
           : reduxState['placeholderId'].values
       }
-      initialTouched={{ trapStatus: true }}
       initialErrors={
         activeTabId && reduxState[activeTabId]
           ? reduxState[activeTabId].errors
           : null
       }
       // only create initial error when form is not completed
-      // initialErrors={reduxState.completed ? undefined : { trapStatus: '' }}
       onSubmit={(values: any) => {
         if (activeTabId) {
           onSubmit(values, activeTabId)
@@ -263,13 +264,31 @@ const TrapOperations = ({
         values,
         resetForm,
       }) => {
+        const warningResultFlow = useFlowMeasureCalculationBool(
+          Number(values.flowMeasure)
+        )
+        const warningResultTemp = useWaterTempCalculationBool(
+          Number(values.waterTemperature),
+          values.waterTemperatureUnit
+        )
+        const navButtons = useMemo(
+          () => (
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={handleSubmit}
+              errors={errors}
+              touched={touched}
+              values={values}
+            />
+          ),
+          [navigation, handleSubmit, errors, touched, values]
+        )
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }
         }, [previouslyActiveTabId])
-
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
@@ -285,6 +304,21 @@ const TrapOperations = ({
               <Pressable onPress={Keyboard.dismiss}>
                 <VStack space={4}>
                   <Heading>Trap Operations</Heading>
+                  <FormControl>
+                    <VStack space={2}>
+                      <Text color='black' fontSize='xl'>
+                        Trap Visit Start Date and Time:
+                      </Text>
+                      <Box alignSelf='flex-start' ml='-2'>
+                        <DateTimePicker
+                          value={startTime}
+                          mode='datetime'
+                          onChange={onStartTimeChange}
+                          accentColor='#007C7C'
+                        />
+                      </Box>
+                    </VStack>
+                  </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems='center'>
                       <FormControl.Label>
@@ -387,8 +421,6 @@ const TrapOperations = ({
                     </FormControl>
                   )}
                   {values.trapStatus.length > 0 && (
-                    // &&
-                    //   values.trapStatus !== trapNotInServiceIdentifier
                     <>
                       <FormControl w='30%'>
                         <HStack space={4} alignItems='center'>
@@ -447,6 +479,7 @@ const TrapOperations = ({
                                   icon={
                                     <Icon
                                       as={MaterialIcons}
+                                      color='black'
                                       name='info-outline'
                                       size='lg'
                                     />
@@ -585,18 +618,15 @@ const TrapOperations = ({
                               value={values.recordTurbidityInPostProcessing}
                               onToggle={() => {
                                 setFieldValue('waterTurbidity', null)
-                                if (!turbidityToggle) {
-                                  setFieldValue(
-                                    'recordTurbidityInPostProcessing',
-                                    true
-                                  )
-                                } else {
-                                  setFieldValue(
-                                    'recordTurbidityInPostProcessing',
-                                    false
-                                  )
-                                }
-
+                                !turbidityToggle
+                                  ? setFieldValue(
+                                      'recordTurbidityInPostProcessing',
+                                      true
+                                    )
+                                  : setFieldValue(
+                                      'recordTurbidityInPostProcessing',
+                                      false
+                                    )
                                 setTurbidityToggle(!turbidityToggle)
                               }}
                             />
@@ -621,26 +651,14 @@ const TrapOperations = ({
                             value={values.flowMeasure}
                           />
                           {inputUnit(values.flowMeasureUnit)}
-                          {touched.flowMeasure &&
-                            // Number(values.flowMeasure) >
-                            //   QARanges.flowMeasure[selectedStream] &&
-                            // QARanges.flowMeasure[selectedStream]?.max && (
-                            //   <RenderWarningMessage />
-                            // )
-                            calculateFLowMeasureWarning(
-                              Number(values.flowMeasure)
-                            )}
-                          {touched.flowMeasure &&
-                            Number(values.flowMeasure) <
-                              QARanges.flowMeasure[selectedStream] &&
-                            QARanges.flowMeasure[selectedStream]?.min && (
-                              <RenderWarningMessage />
-                            )}
+
+                          {warningResultFlow && <RenderWarningMessage />}
+
                           {tabSlice.incompleteSectionTouched
-                            ? errors.totalRevolutions &&
+                            ? errors.flowMeasure &&
                               RenderErrorMessage(errors, 'flowMeasure')
-                            : touched.totalRevolutions &&
-                              errors.totalRevolutions &&
+                            : touched.flowMeasure &&
+                              errors.flowMeasure &&
                               RenderErrorMessage(errors, 'flowMeasure')}
                         </FormControl>
                         <FormControl w='1/4'>
@@ -658,19 +676,19 @@ const TrapOperations = ({
                             onBlur={handleBlur('waterTemperature')}
                             value={values.waterTemperature}
                           />
+
                           {inputUnit(
                             values.waterTemperatureUnit,
                             setFieldValue
                           )}
-                          {calculateTempWarning(
-                            Number(values.waterTemperature),
-                            values.waterTemperatureUnit
-                          )}
+
+                          {warningResultTemp && <RenderWarningMessage />}
+
                           {tabSlice.incompleteSectionTouched
-                            ? errors.totalRevolutions &&
+                            ? errors.waterTemperature &&
                               RenderErrorMessage(errors, 'waterTemperature')
-                            : touched.totalRevolutions &&
-                              errors.totalRevolutions &&
+                            : touched.waterTemperature &&
+                              errors.waterTemperature &&
                               RenderErrorMessage(errors, 'waterTemperature')}
                         </FormControl>
                         <FormControl w='1/4'>
@@ -681,7 +699,7 @@ const TrapOperations = ({
                           </FormControl.Label>
 
                           <OptimizedInput
-                            isDisabled={turbidityToggle}
+                            isReadOnly={turbidityToggle}
                             height='50px'
                             fontSize='16'
                             placeholder='Numeric Value'
@@ -716,15 +734,7 @@ const TrapOperations = ({
                 </VStack>
               </Pressable>
             </ScrollView>
-            <NavButtons
-              navigation={navigation}
-              handleSubmit={handleSubmit}
-              errors={
-                values.trapStatus !== trapNotInServiceIdentifier ? errors : null
-              }
-              touched={touched}
-              values={values}
-            />
+            {navButtons}
           </KeyboardAvoidingView>
         )
       }}
