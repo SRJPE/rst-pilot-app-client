@@ -10,6 +10,7 @@ import {
   Text,
   View,
   VStack,
+  ScrollView,
 } from 'native-base'
 import MarkRecaptureNavButtons from '../../components/markRecapture/MarkRecaptureNavButtons'
 import { Formik } from 'formik'
@@ -66,7 +67,7 @@ const ReleaseTrial = ({
         wildCount: true,
         deadWildCount: true,
       }}
-      onSubmit={(values) => {
+      onSubmit={values => {
         handleSubmit(values)
       }}
     >
@@ -81,7 +82,7 @@ const ReleaseTrial = ({
         values,
       }) => (
         <>
-          <View flex={1} bg='themeGrey'>
+          <ScrollView flex={1} bg='themeGrey'>
             <VStack space={8} p='10'>
               <Box bg='#FFF'>
                 <Center
@@ -269,7 +270,7 @@ const ReleaseTrial = ({
                 </Box>
               )}
             </VStack>
-          </View>
+          </ScrollView>
           <MarkRecaptureNavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}
