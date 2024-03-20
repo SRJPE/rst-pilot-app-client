@@ -572,11 +572,18 @@ export const trapVisitPostBundler = createSlice({
           action.payload
         if (errorDetail.includes('already exists')) {
           // if duplicate trap visit
-          let index = getIndexOfDuplicateTrapVisit({
-            errorDetail,
-            failedTrapVisitSubmissions,
-          })
-          state.trapVisitSubmissions.splice(index, 1)
+          if (
+            errorDetail.includes(
+              'Key (program_id, trap_location_id, trap_visit_time_start)'
+            ) ||
+            errorDetail.includes('Key (trap_visit_uid)')
+          ) {
+            let index = getIndexOfDuplicateTrapVisit({
+              errorDetail,
+              failedTrapVisitSubmissions,
+            })
+            state.trapVisitSubmissions.splice(index, 1)
+          }
         }
         state.submissionStatus = 'submission-failed'
       }
