@@ -6,6 +6,7 @@ import {
   VictoryBar,
   VictoryChart,
   VictoryLegend,
+  VictoryLabel,
   VictoryLine,
   VictoryScatter,
   VictoryTheme,
@@ -21,6 +22,8 @@ export default function Graph({
   chartType,
   title,
   data,
+  xLabel,
+  yLabel,
   height,
   width,
   barColor,
@@ -30,9 +33,11 @@ export default function Graph({
   timeBased,
   zoomDomain,
 }: {
-  chartType: 'bar' | 'line' | 'true-or-false' | 'scatter'
+  chartType: 'bar' | 'line' | 'true-or-false' | 'scatterplot'
   title?: string
   data: any
+  xLabel?: string
+  yLabel?: string
   height: number
   width: number
   barColor: string
@@ -60,7 +65,7 @@ export default function Graph({
             data={data}
             style={{
               data: {
-                fill: (props) => {
+                fill: (props: any) => {
                   return props.datum.colorScale
                     ? props.datum.colorScale
                     : barColor
@@ -74,12 +79,12 @@ export default function Graph({
               {
                 target: 'data',
                 eventHandlers: {
-                  onPressIn: (event, data) => {
+                  onPressIn: (event: any, data: any) => {
                     return [
                       {
                         target: 'data',
                         eventKey: 'all',
-                        mutation: (props) => {
+                        mutation: (props: any) => {
                           // const fill = props.style?.fill
                           // return fill === barColor
                           //   ? null
@@ -88,7 +93,7 @@ export default function Graph({
                       },
                       {
                         target: 'data',
-                        mutation: (props) => {
+                        mutation: (props: any) => {
                           handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor
@@ -112,7 +117,7 @@ export default function Graph({
             y='y'
             // style={{
             //   data: {
-            //     fill: (props) => {
+            //     fill: (props: any) => {
             //       return props.datum.colorScale
             //         ? props.datum.colorScale
             //         : barColor
@@ -123,12 +128,12 @@ export default function Graph({
               {
                 target: 'data',
                 eventHandlers: {
-                  onPressIn: (event, data) => {
+                  onPressIn: (event: any, data: any) => {
                     return [
                       // {
                       //   target: 'data',
                       //   eventKey: 'all',
-                      //   mutation: (props) => {
+                      //   mutation: (props: any) => {
                       //     // const fill = props.style?.fill
                       //     // return fill === barColor
                       //     //   ? null
@@ -137,9 +142,7 @@ export default function Graph({
                       // },
                       {
                         target: 'data',
-                        mutation: (props) => {
-                          console.log('data.datum', data.datum)
-                          console.log('props', props)
+                        mutation: (props: any) => {
                           // handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor
@@ -162,7 +165,7 @@ export default function Graph({
             y='y'
             style={{
               data: {
-                fill: (props) => {
+                fill: (props: any) => {
                   return props.datum.colorScale
                     ? props.datum.colorScale
                     : barColor
@@ -173,12 +176,12 @@ export default function Graph({
               {
                 target: 'data',
                 eventHandlers: {
-                  onPressIn: (event, data) => {
+                  onPressIn: (event: any, data: any) => {
                     return [
                       // {
                       //   target: 'data',
                       //   eventKey: 'all',
-                      //   mutation: (props) => {
+                      //   mutation: (props: any) => {
                       //     // const fill = props.style?.fill
                       //     // return fill === barColor
                       //     //   ? null
@@ -187,9 +190,55 @@ export default function Graph({
                       // },
                       {
                         target: 'data',
-                        mutation: (props) => {
-                          console.log('data.datum', data.datum)
-                          console.log('props', props)
+                        mutation: (props: any) => {
+                          handlePointClick(data.datum)
+                          // const fill = props.style?.fill
+                          // return fill === selectedBarColor
+                          //   ? null
+                          //   : { style: { fill: selectedBarColor } }
+                        },
+                      },
+                    ]
+                  },
+                },
+              },
+            ]}
+          />
+        )
+      case 'scatterplot':
+        return (
+          <VictoryScatter
+            data={data}
+            x='x'
+            y='y'
+            style={{
+              data: {
+                fill: (props: any) => {
+                  return props.datum.colorScale
+                    ? props.datum.colorScale
+                    : barColor
+                },
+              },
+            }}
+            events={[
+              {
+                target: 'data',
+                eventHandlers: {
+                  onPressIn: (event: any, data: any) => {
+                    return [
+                      // {
+                      //   target: 'data',
+                      //   eventKey: 'all',
+                      //   mutation: (props: any) => {
+                      //     // const fill = props.style?.fill
+                      //     // return fill === barColor
+                      //     //   ? null
+                      //     //   : { style: { fill: barColor } }
+                      //   },
+                      // },
+                      {
+                        target: 'data',
+                        mutation: (props: any) => {
                           handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor
@@ -270,11 +319,7 @@ export default function Graph({
         containerComponent={
           <VictoryZoomContainer
             zoomDomain={
-              chartType === 'true-or-false'
-                ? { y: [0, 2.5] }
-                : zoomDomain
-                ? zoomDomain
-                : { y: [0, 8] }
+              chartType === 'true-or-false' ? { y: [0, 2.5] } : undefined
             }
             zoomDimension='x'
           />
@@ -286,14 +331,14 @@ export default function Graph({
         style={{ background: { fill: backgroundColor } }}
       >
         <VictoryAxis
+          label={xLabel}
+          axisLabelComponent={
+            <VictoryLabel dy={25} style={{ fontWeight: 500, letterSpacing: 1.5, fontFamily: 'Helvetica Neue' }} />
+          }
           fixLabelOverlap={true}
           tickFormat={(value) => {
-            if (chartType === 'scatter') {
-              //  moment(createdAt).format('MMM Do YY')
-              console.log('value: ', value)
-              console.log('value: ', typeof value)
-              let date = new Date(Number(value))
-              console.log('date: ', date)
+            let date = new Date(Number(value))
+            if (String(date) !== 'Invalid Date' && chartType !== 'line') {
               return `${moment(date).format('MMM Do YY')}`
             } else {
               return `${value}`
@@ -301,6 +346,10 @@ export default function Graph({
           }}
         />
         <VictoryAxis
+          label={yLabel}
+          axisLabelComponent={
+            <VictoryLabel dy={-30} style={{ fontWeight: 500, letterSpacing: 1.5, fontFamily: 'Helvetica Neue' }} />
+          }
           dependentAxis
           // label='Number of fish with mark'
           // fixLabelOverlap={true}
@@ -324,7 +373,7 @@ export default function Graph({
             data={data}
             style={{
               data: {
-                fill: (props) => {
+                fill: (props: any) => {
                   return props.datum.colorScale
                     ? props.datum.colorScale
                     : barColor
@@ -337,12 +386,12 @@ export default function Graph({
               {
                 target: 'data',
                 eventHandlers: {
-                  onPressIn: (event, data) => {
+                  onPressIn: (event: any, data: any) => {
                     return [
                       {
                         target: 'data',
                         eventKey: 'all',
-                        mutation: (props) => {
+                        mutation: (props: any) => {
                           // const fill = props.style?.fill
                           // return fill === barColor
                           //   ? null
@@ -351,7 +400,7 @@ export default function Graph({
                       },
                       {
                         target: 'data',
-                        mutation: (props) => {
+                        mutation: (props: any) => {
                           handlePointClick(data.datum)
                           // const fill = props.style?.fill
                           // return fill === selectedBarColor

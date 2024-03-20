@@ -9,6 +9,7 @@ import { connectionChanged } from './reducers/connectivitySlice'
 type Props = {
   children: React.ReactNode
   isConnected: boolean
+  isInternetReachable: boolean
 }
 
 const OnStartupProvider = (props: Props) => {
@@ -18,8 +19,11 @@ const OnStartupProvider = (props: Props) => {
   useEffect(() => {
     dispatch(getTrapVisitDropdownValues())
     dispatch(getVisitSetupDefaults(1))
-    unsubscribe = NetInfo.addEventListener((connectionState) => {
-      if (props.isConnected != connectionState.isConnected) {
+    unsubscribe = NetInfo.addEventListener(connectionState => {
+      if (
+        props.isConnected != connectionState.isConnected ||
+        props.isInternetReachable != connectionState.isInternetReachable
+      ) {
         dispatch(connectionChanged(connectionState as any))
       }
     })
