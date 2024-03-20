@@ -47,7 +47,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     reduxState: state.trapPostProcessing,
     tabSlice: state.tabSlice,
-    activeTabId,
+    activeTabId: state.tabSlice.activeTabId,
     willBeHoldingFishForMarkRecapture,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
@@ -66,7 +66,7 @@ const TrapPostProcessing = ({
   navigation: any
   reduxState: any
   tabSlice: any
-  activeTabId: string
+  activeTabId: any
   willBeHoldingFishForMarkRecapture: boolean
   previouslyActiveTabId: string | null
   navigationSlice: any
@@ -77,6 +77,7 @@ const TrapPostProcessing = ({
       state.trapOperations?.[tabSlice.activeTabId]?.values
         ?.recordTurbidityInPostProcessing
   )
+
   const [locationClicked, setLocationClicked] = useState(false as boolean)
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
@@ -160,20 +161,33 @@ const TrapPostProcessing = ({
     console.log('🚀 ~ onSubmit ~ TrapPostProcessing', values)
   }
 
+  const initialValues = useMemo(() => {
+    let initialValues
+
+    if (reduxState[activeTabId]) {
+      initialValues = { ...reduxState[activeTabId].values }
+
+      if (recordTurbidityInPostProcessing) {
+        initialValues = {
+          ...initialValues,
+          isWaterTurbidityPresent: true,
+        }
+      }
+    } else {
+      initialValues = {
+        ...reduxState['placeholderId'].values,
+        isWaterTurbidityPresent: recordTurbidityInPostProcessing,
+      }
+    }
+
+    return initialValues
+  }, [reduxState, activeTabId])
+
   return (
     <Formik
       validationSchema={trapPostProcessingSchema}
       enableReinitialize={true}
-      initialValues={
-        reduxState[activeTabId]
-          ? recordTurbidityInPostProcessing
-            ? {
-                ...reduxState[activeTabId].values,
-                isWaterTurbidityPresent: true,
-              }
-            : reduxState[activeTabId].values
-          : reduxState['placeholderId'].values
-      }
+      initialValues={initialValues}
       initialTouched={{ debrisVolume: true }}
       initialErrors={
         activeTabId && reduxState[activeTabId]

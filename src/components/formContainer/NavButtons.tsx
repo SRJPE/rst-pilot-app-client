@@ -4,9 +4,9 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import { debounce } from 'lodash'
+import { debounce, isEqual } from 'lodash'
 
 const NavButtons = ({
   navigation,
@@ -56,6 +56,15 @@ const NavButtons = ({
       }
     }
     return false
+  }
+  function useDeepCompareMemoize(value: any) {
+    const ref = useRef()
+
+    if (!isEqual(value, ref.current)) {
+      ref.current = value
+    }
+
+    return ref.current
   }
 
   const checkWillBeHoldingFishForMarkRecapture = () => {
@@ -148,6 +157,10 @@ const NavButtons = ({
         break
       case 'Fish Holding':
         navigateHelper('Incomplete Sections')
+        break
+      case 'Incomplete Sections':
+        console.log('🚀 INCOMPLETE SECTIONS CASE HIT')
+        navigateHelper('Start Mark Recapture')
         break
       case 'High Flows':
         navigateHelper('End Trapping')
@@ -249,33 +262,6 @@ const NavButtons = ({
     navigateFlowLeftButton()
   }
 
-  const disableRightButton = () => {
-    //if paper entry then never disable the right button
-    // if (isPaperEntryStore) {
-    //   return false
-    // }
-    if (activePage === 'Incomplete Sections') {
-      //if form is complete, then do not disable button
-      return isFormComplete ? false : true
-    } else if (
-      activePage === 'High Flows' ||
-      activePage === 'Non Functional Trap' ||
-      activePage === 'No Fish Caught'
-    ) {
-      return true
-    } else if (activePage === 'Fish Input') {
-      return values?.length < 1 ? true : false
-    } else {
-      //if current screen uses formik && if form has first NOT been touched
-      // OR
-      //if current screen uses formik && there are errors
-      return (
-        (touched && Object.keys(touched).length === 0) ||
-        (errors && Object.keys(errors).length > 0)
-      )
-    }
-  }
-
   const renderRightButtonText = (activePage: string) => {
     let buttonText
     switch (activePage) {
@@ -307,12 +293,40 @@ const NavButtons = ({
     return buttonText
   }
 
-  const rightDisabledBool = useMemo(disableRightButton, [
-    activePage,
-    touched,
-    errors,
-    values,
-    isFormComplete,
+  const rightDisabledBool = useMemo(() => {
+    if (activePage === 'Incomplete Sections') {
+      // if form is complete, then do not disable button
+      return !isFormComplete
+    } else if (
+      activePage === 'High Flows' ||
+      activePage === 'Non Functional Trap' ||
+      activePage === 'No Fish Caught'
+    ) {
+      return true
+    } else if (activePage === 'Fish Input') {
+      return !(values?.length >= 1)
+    } else {
+      // if current screen uses formik && if form has first NOT been touched
+      // OR
+      // if current screen uses formik && there are errors
+      // console.log('🚀 ~ disableRightButton ~ touched:', touched)
+      // console.log('🚀 ~ disableRightButton ~ errors:', errors)
+      // console.log(
+      //   '🚀 ~ disableRightButton ~ BOOL:',
+      //   (touched && Object.keys(touched).length === 0) ||
+      //     (errors && Object.keys(errors).length > 0)
+      // )
+      return (
+        (touched && Object.keys(touched).length === 0) ||
+        (errors && Object.keys(errors).length > 0)
+      )
+    }
+  }, [
+    // activePage,1
+    useDeepCompareMemoize(touched),
+    useDeepCompareMemoize(errors),
+    // values,
+    // isFormComplete,
   ])
 
   return (

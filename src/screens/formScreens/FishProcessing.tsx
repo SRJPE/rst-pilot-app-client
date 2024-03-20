@@ -56,7 +56,7 @@ const FishProcessing = ({
   navigation: any
   reduxState: any
   tabSlice: any
-  activeTabId: string
+  activeTabId: any
   isPaperEntryStore: boolean
   previouslyActiveTabId: string | null
   navigationSlice: any
@@ -121,8 +121,8 @@ const FishProcessing = ({
       initialTouched={{ fishProcessedResult: true }}
       initialErrors={
         activeTabId && reduxState[activeTabId]
-          ? { ...reduxState[activeTabId].errors, fishProcessedResult: '' }
-          : null
+          ? reduxState[activeTabId].errors
+          : { fishProcessedResult: '' }
       }
       onSubmit={(values) => {
         if (activeTabId && activeTabId != 'placeholderId') {
