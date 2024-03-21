@@ -46,7 +46,11 @@ export const connectionChanged = createAsyncThunk(
     const payload = connectionState
     console.log('connection changed...', connectionState)
     try {
-      if (connectionState.isConnected && connectionState.isInternetReachable) {
+      if (
+        connectionState.isConnected &&
+        connectionState.isInternetReachable &&
+        connectionState.type !== 'wifi'
+      ) {
         thunkAPI.dispatch(fetchPreviousTrapAndCatch())
         thunkAPI.dispatch(postTrapVisitFormSubmissions())
         thunkAPI.dispatch(postMarkRecaptureSubmissions())
