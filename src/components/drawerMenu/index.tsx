@@ -151,12 +151,6 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             icon='search'
             title='Inspector'
           />
-          {/* <MenuButton
-            active={false}
-            onPress={() => console.log('🚀 ~ reduxState:', reduxState)}
-            icon='bug'
-            title='Developer Log'
-          /> */}
           <MenuButton
             active={currentRoute === 'Mark Recapture'}
             onPress={() => handlePressMainNavButton('Mark Recapture')}
