@@ -93,7 +93,7 @@ const TrapOperations = ({
 
   const useFlowMeasureCalculationBool = (flowMeasureEntered: number) => {
     return useMemo(() => {
-      if (!flowMeasureEntered) {
+      if (!flowMeasureEntered || !QARanges) {
         return false
       }
       let warningResult = false
