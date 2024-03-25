@@ -287,9 +287,6 @@ const NavButtons = ({
         buttonText = 'Next'
         break
     }
-    // if (navigationState.previousPageWasIncompleteSections) {
-    //   buttonText = 'Return to Incomplete Sections'
-    // }
     return buttonText
   }
 
@@ -306,28 +303,12 @@ const NavButtons = ({
     } else if (activePage === 'Fish Input') {
       return !(values?.length >= 1)
     } else {
-      // if current screen uses formik && if form has first NOT been touched
-      // OR
-      // if current screen uses formik && there are errors
-      // console.log('🚀 ~ disableRightButton ~ touched:', touched)
-      // console.log('🚀 ~ disableRightButton ~ errors:', errors)
-      // console.log(
-      //   '🚀 ~ disableRightButton ~ BOOL:',
-      //   (touched && Object.keys(touched).length === 0) ||
-      //     (errors && Object.keys(errors).length > 0)
-      // )
       return (
         (touched && Object.keys(touched).length === 0) ||
         (errors && Object.keys(errors).length > 0)
       )
     }
-  }, [
-    // activePage,1
-    useDeepCompareMemoize(touched),
-    useDeepCompareMemoize(errors),
-    // values,
-    // isFormComplete,
-  ])
+  }, [useDeepCompareMemoize(touched), useDeepCompareMemoize(errors)])
 
   return (
     <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>
