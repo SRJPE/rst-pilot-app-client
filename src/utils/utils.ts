@@ -99,14 +99,56 @@ export const calculateLifeStage = (forkLength: number) => {
 
 export const QARanges = {
   flowMeasure: {
-    'Mill Creek': { max: 2000, min: null },
-    'Deer Creek': { max: 2000, min: null },
-    'Feather River': {
-      standard: { max: 3500, min: 50 },
-      eyeRiffle: { max: 16000, min: 50 },
-      herringerRiffle: { max: 20000, min: 50 },
+    'Mill Creek': {
+      'Mill Creek RST': { max: 2000, min: null },
     },
-    'Yuba River': { max: 3500, min: 50 },
+    'Deer Creek': {
+      'Deer Creek RST': { max: 2000, min: null },
+    },
+    'Feather River': {
+      'Eye Riffle': {
+        'Eye riffle north': { max: 8000, min: 50 },
+        'Eye riffle Side Channel': { max: 8000, min: 50 },
+      },
+      'Live Oak': { max: 25000, min: 50 },
+      'Herringer Riffle': {
+        'Herringer east': { max: 25000, min: 50 },
+        'Herringer west': { max: 25000, min: 50 },
+        'Herringer Upper west': { max: 25000, min: 50 },
+      },
+      'Sunset Pumps': {
+        'Sunset East Bank': { max: 25000, min: 50 },
+        'Sunset West Bank': { max: 25000, min: 50 },
+      },
+      'Shawns Beach': {
+        'Shawns East': { max: 25000, min: 50 },
+        'Shawns West': { max: 25000, min: 50 },
+      },
+      'Gateway Riffle': {
+        'Gateway main1': { max: 8000, min: 50 },
+        'Gateway Rootball': { max: 8000, min: 50 },
+        "Gateway Main 400' Up River": { max: 8000, min: 50 },
+        'Gateway Rootball River Left': { max: 8000, min: 50 },
+      },
+      'Steep Riffle': {
+        'Steep Side Channel': { max: 6000, min: 50 },
+        "Steep Riffle 10' ext": { max: 6000, min: 50 },
+        'Steep Riffle RST': { max: 6000, min: 50 },
+      },
+    },
+    'Yuba River': {
+      Hallwood: {
+        'Hallwood 1': { max: 15000, min: 50 },
+        'Hallwood 2': { max: 15000, min: 50 },
+        'Hallwood 3': { max: 15000, min: 50 },
+      },
+    },
+    'Flowwest Test': {
+      'Flowwest Test': {
+        'FlowWest Test 1': { max: 2000, min: 50 },
+        'FlowWest Test 2': { max: 2000, min: 50 },
+      },
+    },
   } as any,
   waterTemperature: { maxF: 100, maxC: 30, min: null },
   waterTurbidity: { max: 1000, min: null },
