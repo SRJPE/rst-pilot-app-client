@@ -219,7 +219,7 @@ const ReleaseDataEntry = ({
         ...releaseTrialDataEntryState.values,
         releaseLocation: filteredReleaseSites[0],
       }}
-      onSubmit={(values) => {
+      onSubmit={values => {
         handleSubmit(values)
       }}
     >
@@ -276,7 +276,10 @@ const ReleaseDataEntry = ({
                   </Text>
                 </FormControl.Label>
                 <CustomSelect
-                  selectedValue={values.releaseLocation?.releaseSiteName}
+                  selectedValue={
+                    values.releaseLocation?.releaseSiteName ||
+                    values.releaseLocation
+                  }
                   placeholder='Location'
                   onValueChange={handleChange('releaseLocation')}
                   setFieldTouched={setFieldTouched}
