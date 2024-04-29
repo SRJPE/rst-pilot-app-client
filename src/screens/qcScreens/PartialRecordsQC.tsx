@@ -34,12 +34,14 @@ function PartialRecordsQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions,
   releaseSites,
   programs,
 }: {
   navigation: any
   route: any
-  qcCatchRawSubmissions: any
+  qcCatchRawSubmissions: any[]
+  previousCatchRawSubmissions: any[]
   releaseSites: any[]
   programs: any[]
 }) {
@@ -52,8 +54,13 @@ function PartialRecordsQC({
   const [nestedModalValue, setNestedModalValue] = useState<any>('')
 
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter(
+      (catchRaw: any) => {
+        return catchRaw.createdCatchRawResponse.programId === programId
+      }
+    )
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
     const formattedData: any = {}
     const percentNotRecordedPayload: any[] = []
     const omittedPartialRecordKeys = [
@@ -273,7 +280,7 @@ function PartialRecordsQC({
             <Divider my={2} thickness='3' />
 
             <ScrollView horizontal={true} width={'100%'}>
-              <DataTable style={{minWidth: '100%'}}>
+              <DataTable style={{ minWidth: '100%' }}>
                 <DataTable.Header>
                   <DataTable.Title style={{ justifyContent: 'center' }}>
                     date
@@ -760,6 +767,8 @@ function PartialRecordsQC({
 const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions:
+      state.trapVisitFormPostBundler.previousCatchRawSubmissions,
     releaseSites: state.visitSetupDefaults.releaseSites,
     programs: state.visitSetupDefaults.programs,
   }

@@ -21,10 +21,12 @@ function CatchFishCountQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any
+  previousCatchRawSubmissions: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [graphData, setGraphData] = useState<any[]>([])
@@ -32,8 +34,11 @@ function CatchFishCountQC({
   const [pointClicked, setPointClicked] = useState<any | null>(null)
 
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw: any) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
     const totalCountByDay: any[] = []
     const datesFormatted: any = {}
 
@@ -251,6 +256,8 @@ function CatchFishCountQC({
 const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions:
+      state.trapVisitFormPostBundler.previousCatchRawSubmissions,
   }
 }
 

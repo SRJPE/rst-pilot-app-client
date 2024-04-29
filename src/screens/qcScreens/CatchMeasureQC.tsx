@@ -18,10 +18,12 @@ function CatchMeasureQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions
 }: {
   navigation: any
   route: any
-  qcCatchRawSubmissions: any
+  qcCatchRawSubmissions: any[]
+  previousCatchRawSubmissions: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -40,8 +42,11 @@ function CatchMeasureQC({
   }
 
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
     let N = qcData.length
     let range: number | null = null
@@ -273,6 +278,7 @@ function CatchMeasureQC({
 const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions: state.trapVisitFormPostBundler.previousCatchRawSubmissions,
   }
 }
 

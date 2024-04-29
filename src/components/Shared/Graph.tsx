@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { View, Text } from 'native-base'
+import { View, Text, VStack } from 'native-base'
 import React from 'react'
 import {
   VictoryAxis,
@@ -28,10 +28,11 @@ export default function Graph({
   width,
   barColor,
   selectedBarColor,
-  backgroundColor,
+  backgroundColor = 'white',
   onPointClick,
   timeBased,
   zoomDomain,
+  legendData,
 }: {
   chartType: 'bar' | 'line' | 'true-or-false' | 'scatterplot'
   title?: string
@@ -46,6 +47,7 @@ export default function Graph({
   onPointClick?: (pointClicked: any) => void
   timeBased?: boolean
   zoomDomain?: ZoomDomainI
+  legendData?: any[]
 }) {
   const handlePointClick = (datum: any) => {
     if (onPointClick) {
@@ -211,6 +213,7 @@ export default function Graph({
             data={data}
             x='x'
             y='y'
+            size={10}
             style={{
               data: {
                 fill: (props: any) => {
@@ -253,7 +256,7 @@ export default function Graph({
             ]}
           />
         )
-      case 'scatter':
+      case 'scatterplot':
         return (
           <VictoryScatter
             data={data}
@@ -308,7 +311,7 @@ export default function Graph({
   }
 
   return (
-    <View>
+    <VStack>
       {title && (
         <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>
           {title}
@@ -333,7 +336,14 @@ export default function Graph({
         <VictoryAxis
           label={xLabel}
           axisLabelComponent={
-            <VictoryLabel dy={25} style={{ fontWeight: 500, letterSpacing: 1.5, fontFamily: 'Helvetica Neue' }} />
+            <VictoryLabel
+              dy={25}
+              style={{
+                fontWeight: 500,
+                letterSpacing: 1.5,
+                fontFamily: 'Helvetica Neue',
+              }}
+            />
           }
           fixLabelOverlap={true}
           tickFormat={(value) => {
@@ -348,7 +358,14 @@ export default function Graph({
         <VictoryAxis
           label={yLabel}
           axisLabelComponent={
-            <VictoryLabel dy={-30} style={{ fontWeight: 500, letterSpacing: 1.5, fontFamily: 'Helvetica Neue' }} />
+            <VictoryLabel
+              dy={-30}
+              style={{
+                fontWeight: 500,
+                letterSpacing: 1.5,
+                fontFamily: 'Helvetica Neue',
+              }}
+            />
           }
           dependentAxis
           // label='Number of fish with mark'
@@ -417,26 +434,37 @@ export default function Graph({
         ) : (
           <></>
         )}
-        {chartType === 'scatter' ? (
+      </VictoryChart>
+      {chartType === 'scatterplot' && legendData ? (
+        <View width={10} height={225}>
           <VictoryLegend
-            x={125}
-            y={50}
+            x={55}
+            y={20}
+            // width={300}
+            standalone={true}
+            itemsPerRow={5}
             title='Legend'
             centerTitle
-            orientation='horizontal'
             gutter={20}
-            style={{ border: { stroke: 'black' }, title: { fontSize: 20 } }}
-            data={[
-              { name: 'One', symbol: { type: 'star' } },
-              { name: 'Two', symbol: { fill: 'orange' } },
-              { name: 'Three', symbol: { fill: 'gold' } },
-            ]}
+            style={{
+              border: { stroke: 'black' },
+              title: { fontSize: 20 },
+            }}
+            data={
+              legendData
+                ? legendData
+                : [
+                    { name: 'One', symbol: { type: 'star' } },
+                    { name: 'Two', symbol: { fill: 'orange' } },
+                    { name: 'Three', symbol: { fill: 'gold' } },
+                  ]
+            }
           />
-        ) : (
-          <></>
-        )}
-      </VictoryChart>
-    </View>
+        </View>
+      ) : (
+        <></>
+      )}
+    </VStack>
   )
 }
 

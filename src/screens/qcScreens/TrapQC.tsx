@@ -23,10 +23,12 @@ function TrapQC({
   navigation,
   route,
   qcTrapVisitSubmissions,
+  previousTrapVisits,
 }: {
   navigation: any
   route: any
   qcTrapVisitSubmissions: any[]
+  previousTrapVisits: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -60,7 +62,12 @@ function TrapQC({
   }
 
   useEffect(() => {
-    const previousTrapVisits = route.params.previousTrapVisits
+    const programId = route.params.programId
+    const programTrapVisits = previousTrapVisits.filter((trapVisit) => {
+      return trapVisit.createdTrapVisitResponse.programId === programId
+    })
+    console.log('programTrapVisits', programTrapVisits)
+    console.log('qcTrapVisitSubmissions', qcTrapVisitSubmissions)
 
     let tempData: any[] = []
     let turbidityData: any[] = []
@@ -69,7 +76,7 @@ function TrapQC({
     let counterData: any[] = []
     let debrisData: any[] = []
 
-    Object.values([...qcTrapVisitSubmissions, ...previousTrapVisits]).forEach(
+    Object.values([...qcTrapVisitSubmissions, ...programTrapVisits]).forEach(
       (response: any, idx: number) => {
         const {
           createdTrapCoordinatesResponse,
@@ -341,6 +348,8 @@ const mapStateToProps = (state: RootState) => {
   return {
     qcTrapVisitSubmissions:
       state.trapVisitFormPostBundler.qcTrapVisitSubmissions,
+    previousTrapVisits:
+      state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
   }
 }
 

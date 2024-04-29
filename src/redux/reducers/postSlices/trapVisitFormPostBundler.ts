@@ -193,7 +193,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
     try {
       const state = thunkAPI.getState() as RootState
       await Promise.all(
-        programIds.map(async programId => {
+        programIds.map(async (programId) => {
           const trapVisitResponse = await api.get(
             `trap-visit/program/${programId}`
           )
@@ -205,7 +205,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCTrapVisitIds: number[] =
             state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
-              trapVisit => {
+              (trapVisit) => {
                 return trapVisit.createdTrapVisitResponse.id
               }
             )
@@ -220,7 +220,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCCatchRawIds: number[] =
             state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
-              catchRaw => {
+              (catchRaw) => {
                 return catchRaw.createdCatchRawResponse.id
               }
             )
@@ -300,7 +300,7 @@ const fetchWithPostParams = async (dispatch: any, postResults: any) => {
           return !fetchedCatchRawIds.includes(id)
         })
         dispatch(addMissingFetchedCatchRawSubs({ missedFetchIds }))
-      } 
+      }
       // if fetch results DOES contain post results
       else {
         dispatch(clearPendingCatchRawSubs())
@@ -379,38 +379,51 @@ export const trapVisitPostBundler = createSlice({
         let trapVisitToQC: any =
           state.previousTrapVisitSubmissions[trapVisitIdx]
 
-        //env data
-        trapVisitToQC.createdTrapVisitEnvironmentalResponse.forEach(
-          (envMeasure: any) => {
-            if (envMeasure.measureName === 'water temperature') {
-              envMeasure.measureValueNumeric = submission['Temperature'].y
-              envMeasure.measureValueText = submission['Temperature'].y
-            }
+        if (trapVisitToQC?.createdTrapVisitEnvironmentalResponse) {
+          //env data
+          trapVisitToQC.createdTrapVisitEnvironmentalResponse.forEach(
+            (envMeasure: any) => {
+              if (envMeasure.measureName === 'water temperature') {
+                envMeasure.measureValueNumeric = submission['Temperature'].y
+                envMeasure.measureValueText = submission['Temperature'].y
+              }
 
-            if (envMeasure.measureName === 'water turbidity') {
-              envMeasure.measureValueNumeric = submission['Turbidity'].y
-              envMeasure.measureValueText = submission['Turbidity'].y
+              if (envMeasure.measureName === 'water turbidity') {
+                envMeasure.measureValueNumeric = submission['Turbidity'].y
+                envMeasure.measureValueText = submission['Turbidity'].y
+              }
             }
-          }
-        )
+          )
+        }
 
-        //trap visit record data
-        trapVisitToQC.createdTrapVisitResponse.totalRevolutions =
-          submission['Counter'].y
-        trapVisitToQC.createdTrapVisitResponse.debrisVolumeLiters =
-          submission['Debris'].y
-        trapVisitToQC.createdTrapVisitResponse.rpmAtStart =
-          submission['RPM At Start'].y
-        trapVisitToQC.createdTrapVisitResponse.rpmAtEnd =
-          submission['RPM At End'].y
-        trapVisitToQC.createdTrapVisitResponse.qcCompleted = true
-        trapVisitToQC.createdTrapVisitResponse.qcCompletedAt = new Date()
+        if (trapVisitToQC?.createdTrapVisitResponse) {
+          //trap visit record data
+          trapVisitToQC.createdTrapVisitResponse.totalRevolutions =
+            submission['Counter'].y
+          trapVisitToQC.createdTrapVisitResponse.debrisVolumeLiters =
+            submission['Debris'].y
+          trapVisitToQC.createdTrapVisitResponse.rpmAtStart =
+            submission['RPM At Start'].y
+          trapVisitToQC.createdTrapVisitResponse.rpmAtEnd =
+            submission['RPM At End'].y
+          trapVisitToQC.createdTrapVisitResponse.qcCompleted = true
+          trapVisitToQC.createdTrapVisitResponse.qcCompletedAt = new Date()
+        }
 
         state.previousTrapVisitSubmissions = [
           ...state.previousTrapVisitSubmissions.slice(0, trapVisitIdx),
           ...state.previousTrapVisitSubmissions.slice(trapVisitIdx + 1),
         ]
         state.qcTrapVisitSubmissions.push(trapVisitToQC)
+        console.log(
+          'previousTrapVisitSubmissions in bundler',
+          state.previousTrapVisitSubmissions.length
+        )
+
+        console.log(
+          'qcTrapVisitSubmissions in bundler: ',
+          state.qcTrapVisitSubmissions.length
+        )
       }
       // if trap visit has started QC
       else {
@@ -542,9 +555,9 @@ export const trapVisitPostBundler = createSlice({
           return !missedFetchIds.includes(catchRaw.uid)
         }
       )
-    }
+    },
   },
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     builder.addCase(PURGE, () => {
       return initialState
     })
@@ -596,7 +609,6 @@ export const trapVisitPostBundler = createSlice({
         state.previousTrapVisitSubmissions = previousTrapVisits
         state.previousCatchRawSubmissions = previousCatchRaw
         state.fetchStatus = 'fetch-successful'
-        console.log('successful QC fetch: ', action.payload)
       }
     )
 

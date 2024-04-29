@@ -23,7 +23,7 @@ import { every } from 'lodash'
 import { DataTable } from 'react-native-paper'
 import { MaterialIcons } from '@expo/vector-icons'
 import CustomSelect from '../../components/Shared/CustomSelect'
-import { reorderTaxon } from '../../utils/utils'
+import { getRandomColor, reorderTaxon } from '../../utils/utils'
 import { get } from 'lodash'
 
 interface GraphDataI {
@@ -42,18 +42,24 @@ function CatchCategoricalQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions,
   taxonState,
   runState,
   lifeStageState,
   markTypeState,
+  markColorState,
+  markPositionState,
 }: {
   navigation: any
   route: any
-  qcCatchRawSubmissions: any
+  qcCatchRawSubmissions: any[]
+  previousCatchRawSubmissions: any[]
   taxonState: any
   runState: any
   lifeStageState: any
   markTypeState: any
+  markColorState: any
+  markPositionState: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -70,6 +76,7 @@ function CatchCategoricalQC({
   const [nestedModalData, setNestedModalData] =
     useState<NestedModalDataI | null>(null)
   const [nestedModalValue, setNestedModalValue] = useState<string | boolean>('')
+  const [markIdToSymbolArr, setMarkIdToSymbolArr] = useState([])
 
   const axisLabelDictionary = {
     'Adipose Clipped': { xLabel: 'Sampling Time', yLabel: undefined },
@@ -79,8 +86,11 @@ function CatchCategoricalQC({
   }
 
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
     let adiposeClippedData: any[] = []
     let speciesData: any[] = []
@@ -182,40 +192,44 @@ function CatchCategoricalQC({
           }
         }
 
-        // MARK DATA PROCESSING NOT COMPLETE
         if (marks.length) {
           marks.forEach((mark: any) => {
             const { markTypeId, markColorId, markPositionId } = mark
-            const markIdentifier = `${markTypeId}-${markColorId}-${markPositionId}`
+            const markType =
+              markTypeState.filter((obj: any) => {
+                console.log(obj, 'this!')
+                return obj.id == markTypeId
+              })[0]?.definition ?? 'NA'
+            const markColor =
+              markColorState.filter((obj: any) => {
+                return obj.id == markColorId
+              })[0]?.definition ?? 'NA'
+            const markPosition =
+              markPositionState.filter((obj: any) => {
+                return obj.id == markPositionId
+              })[0]?.definition ?? 'NA'
+            const markIdentifier = `${markType}-${markColor}-${markPosition}`
 
             // if date does not exist,
             if (!markCombos[dateTime]) {
               //add to markCombos obj and set property to unique combo and count to 1
               markCombos[dateTime] = {
-                [markIdentifier]: [{ catchRawId: id, mark }],
+                [markIdentifier]: [{ catchRawId: id, ...mark }],
               } as any
             } else if (markCombos[dateTime]) {
               // if markIdentifier combo exists, increment
               if (markCombos[dateTime][markIdentifier]) {
                 markCombos[dateTime][markIdentifier] = [
                   ...markCombos[dateTime][markIdentifier],
-                  { catchRawId: id, mark },
+                  { catchRawId: id, ...mark },
                 ]
               } else {
                 // else set new markIdentifier count to
                 markCombos[dateTime][markIdentifier] = [
-                  { catchRawId: id, mark },
+                  { catchRawId: id, ...mark },
                 ]
               }
             }
-            marksData.push({
-              ids: [id],
-              dataId: 'Marks',
-              x: `${mark.markTypeId} - ${mark.markColorId}`,
-              y: 1,
-              colorScale: qcNotStarted ? 'red' : undefined,
-              // catchResponse,
-            })
           })
         }
 
@@ -254,19 +268,7 @@ function CatchCategoricalQC({
       }
     })
 
-    const symbolOptions = [
-      'cross',
-      'diamond',
-      'plus',
-      'minus',
-      'square',
-      // 'star',
-      'triangleDown',
-      'triangleUp',
-    ]
-
-    console.log('markCombos', markCombos)
-
+    let markIdToColorBuilder: any = []
     let symbolCounter = 0
 
     const addJitter = (value: any, jitterAmount = 0.1) => {
@@ -274,26 +276,16 @@ function CatchCategoricalQC({
     }
 
     Object.entries(markCombos).forEach(([dateTime, countObj], index) => {
-      //iterate over the countObj values.
-      //create an Obj of found lengths
-      // for each countObject value's length
-      //check to see if it is already present in the found lengths array
-      // if found (needs to be a star)
-
-      // end obj
-      /*
-      {
-        1: [12-5-4, 2-8-null]
-        2: []
-        3: []
-        4: [down-here]
-      }
-
-      */
-
       Object.entries(countObj as MarkCombosI).forEach(
         ([markIdentifier, itemsArray]) => {
-          let symbol = symbolOptions[symbolCounter]
+          let randomColor = getRandomColor()
+          let symbol = every(itemsArray, ['qcCompleted', true])
+            ? 'circle'
+            : 'plus'
+          markIdToColorBuilder.push({
+            name: markIdentifier,
+            symbol: { type: symbol, fill: randomColor },
+          })
 
           // if other properties in the same countObj have same length,
           // then symbol should be star
@@ -302,31 +294,31 @@ function CatchCategoricalQC({
             id: `${markIdentifier}_${dateTime}`,
             x: dateTime,
             y: itemsArray.length,
-            colorScale: every(itemsArray, ['qcCompleted', true])
-              ? 'black'
-              : 'red',
+            colorScale: randomColor,
             symbol: every(itemsArray, ['qcCompleted', true])
               ? 'circle'
-              : symbol,
+              : 'plus',
             itemsArray: itemsArray,
           })
           symbolCounter++
         }
       )
-      Object.keys(fishCountByDateAndSpecies).forEach((date) => {
-        const speciesCountFromDate = fishCountByDateAndSpecies[date]
+    })
+    setMarkIdToSymbolArr(markIdToColorBuilder)
 
-        Object.keys(speciesCountFromDate).forEach((species) => {
-          let count = speciesCountFromDate[species].count
-          let ids = speciesCountFromDate[species].ids
+    Object.keys(fishCountByDateAndSpecies).forEach((date) => {
+      const speciesCountFromDate = fishCountByDateAndSpecies[date]
 
-          speciesData.push({
-            ids,
-            dataId: 'Species',
-            x: date,
-            y: count,
-            // label: species
-          })
+      Object.keys(speciesCountFromDate).forEach((species) => {
+        let count = speciesCountFromDate[species].count
+        let ids = speciesCountFromDate[species].ids
+
+        speciesData.push({
+          ids,
+          dataId: 'Species',
+          x: date,
+          y: count,
+          // label: species
         })
       })
     })
@@ -339,7 +331,6 @@ function CatchCategoricalQC({
     })
 
     console.log('graphData: ', graphData)
-    
   }, [qcCatchRawSubmissions])
 
   const normalizeDate = (date: Date) => {
@@ -354,14 +345,11 @@ function CatchCategoricalQC({
   const handlePointClick = (datum: any) => {
     const previousCatchRaw = route.params.previousCatchRaw
     const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
-    const { ids, dataId } = datum
-    console.log('datum: ', datum)
+    const idsAtPoint = datum.itemsArray.map((item: any) => item.catchRawId)
 
-    console.log('ids: ', ids)
     const selectedData = qcData.filter((response) => {
-      console.log('response', response)
       const id = response.createdCatchRawResponse?.id
-      return ids.includes(id)
+      return idsAtPoint.includes(id)
     })
 
     setModalData(selectedData)
@@ -629,6 +617,9 @@ function CatchCategoricalQC({
                   selectedBarColor='green'
                   height={400}
                   width={600}
+                  legendData={
+                    buttonName === 'Marks' ? markIdToSymbolArr : undefined
+                  }
                 />
               )
             })}
@@ -986,13 +977,19 @@ const mapStateToProps = (state: RootState) => {
   let run = state.dropdowns.values.run
   let lifeStage = state.dropdowns.values.lifeStage
   let markType = state.dropdowns.values.markType
+  let markColor = state.dropdowns.values.markColor
+  let markPosition = state.dropdowns.values.bodyPart
 
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions:
+      state.trapVisitFormPostBundler.previousCatchRawSubmissions,
     taxonState: taxon ?? [],
     runState: run ?? [],
     lifeStageState: lifeStage ?? [],
     markTypeState: markType ?? [],
+    markColorState: markColor ?? [],
+    markPositionState: markPosition ?? [],
   }
 }
 

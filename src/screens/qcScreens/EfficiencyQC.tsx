@@ -9,16 +9,21 @@ function EfficiencyQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions,
 }: {
   navigation: any
   route: any
-  qcCatchRawSubmissions: any
+  qcCatchRawSubmissions: any[]
+  previousCatchRawSubmissions: any[]
 }) {
   const [graphData, setGraphData] = useState<any[]>([])
 
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw: any) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
     const graphDataPayload: any[] = []
 
     qcData.forEach((catchRawResponse: any, idx: number) => {
@@ -45,7 +50,7 @@ function EfficiencyQC({
       graphDataPayload.push({
         id: catchRawId,
         x: idx + 1,
-        y: numberReleased !== 0 ? (numberRecaptured / numberReleased) : 0,
+        y: numberReleased !== 0 ? numberRecaptured / numberReleased : 0,
       })
     })
 
@@ -126,6 +131,8 @@ function EfficiencyQC({
 const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions:
+      state.trapVisitFormPostBundler.previousCatchRawSubmissions,
   }
 }
 
