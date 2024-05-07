@@ -83,7 +83,7 @@ function TrapQC({
           createdTrapVisitCrewResponse,
           createdTrapVisitEnvironmentalResponse,
           createdTrapVisitResponse,
-        } = response
+        } = response || {}
 
         const trapVisitId = createdTrapVisitResponse.id
         const qcCompleted = createdTrapVisitResponse.qcCompleted

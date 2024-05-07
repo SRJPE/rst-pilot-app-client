@@ -343,9 +343,19 @@ function CatchCategoricalQC({
   }
 
   const handlePointClick = (datum: any) => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
-    const idsAtPoint = datum.itemsArray.map((item: any) => item.catchRawId)
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+    let idsAtPoint: any[] = []
+    const objKeys = Object.keys(datum)
+    if (objKeys.includes('ids')) {
+      idsAtPoint = datum.ids
+    } else if (objKeys.includes('itemsArray')) {
+      idsAtPoint = datum.itemsArray.map((item: any) => item.catchRawId)
+    }
+    console.log('4')
 
     const selectedData = qcData.filter((response) => {
       const id = response.createdCatchRawResponse?.id
