@@ -88,11 +88,11 @@ function PartialRecordsQC({
       'plusCountMethodology',
     ]
 
-    qcData.forEach((catchResponse) => {
+    qcData.forEach(catchResponse => {
       const catchRaw = catchResponse.createdCatchRawResponse
       const catchRawKeys = Object.keys(catchRaw)
 
-      catchRawKeys.forEach((key) => {
+      catchRawKeys.forEach(key => {
         if (!omittedPartialRecordKeys.includes(key)) {
           if (
             Object.keys(formattedData).includes(key) &&
@@ -114,7 +114,7 @@ function PartialRecordsQC({
       })
     })
 
-    Object.keys(formattedData).forEach((key) => {
+    Object.keys(formattedData).forEach(key => {
       percentNotRecordedPayload.push({
         variableName: key,
         percentNotRecorded: Math.round(
@@ -192,7 +192,7 @@ function PartialRecordsQC({
             </DataTable.Header>
 
             <ScrollView>
-              {percentNotRecordedData.map((rowData) => {
+              {percentNotRecordedData.map(rowData => {
                 return (
                   <DataTable.Row
                     key={rowData.variableName}
@@ -329,17 +329,15 @@ function PartialRecordsQC({
                       const numFishCaught =
                         createdCatchRawResponse.numFishCaught ?? 'NA'
                       const program = programs.filter(
-                        (program) => programId === program.id
+                        program => programId === program.id
                       )
                       const stream = program ? program[0].streamName : 'NA'
-                      let releaseSiteArr = releaseSites.filter(
-                        (releaseSite) => {
-                          if (releaseResponse)
-                            return (
-                              releaseSite.id === releaseResponse.releaseSiteId
-                            )
-                        }
-                      )
+                      let releaseSiteArr = releaseSites.filter(releaseSite => {
+                        if (releaseResponse)
+                          return (
+                            releaseSite.id === releaseResponse.releaseSiteId
+                          )
+                      })
                       const releaseSite = releaseSiteArr.length
                         ? releaseSiteArr[0].releaseSiteName
                         : 'NA'
@@ -416,7 +414,7 @@ function PartialRecordsQC({
                                       fontSize='16'
                                       placeholder='Write a comment'
                                       keyboardType='default'
-                                      onChangeText={(value) =>
+                                      onChangeText={value =>
                                         setNestedModalValue(value)
                                       }
                                       // onBlur={handleBlur('comments')}
@@ -460,7 +458,7 @@ function PartialRecordsQC({
                                       fontSize='16'
                                       placeholder='Write a comment'
                                       keyboardType='numeric'
-                                      onChangeText={(value) =>
+                                      onChangeText={value =>
                                         setNestedModalValue(value)
                                       }
                                       // onBlur={handleBlur('comments')}
@@ -550,7 +548,7 @@ function PartialRecordsQC({
                                       fontSize='16'
                                       placeholder='Write a comment'
                                       keyboardType='default'
-                                      onChangeText={(value) =>
+                                      onChangeText={value =>
                                         setNestedModalValue(value)
                                       }
                                       // onBlur={handleBlur('comments')}
@@ -599,7 +597,7 @@ function PartialRecordsQC({
                                       fontSize='16'
                                       placeholder='Write a comment'
                                       keyboardType='default'
-                                      onChangeText={(value) =>
+                                      onChangeText={value =>
                                         setNestedModalValue(value)
                                       }
                                       // onBlur={handleBlur('comments')}
@@ -650,7 +648,7 @@ function PartialRecordsQC({
                                       fontSize='16'
                                       placeholder='Write a comment'
                                       keyboardType='default'
-                                      onChangeText={(value) =>
+                                      onChangeText={value =>
                                         setNestedModalValue(value)
                                       }
                                       // onBlur={handleBlur('comments')}
@@ -715,7 +713,7 @@ function PartialRecordsQC({
               {nestedModalField.modalText}
               <Text color='black' fontSize='2xl' fontWeight={'light'}>
                 Click button below to flag data as low confidence or edit value
-                if you know true value.
+                if you know the correct value.
               </Text>
               <HStack
                 justifyContent={'space-between'}

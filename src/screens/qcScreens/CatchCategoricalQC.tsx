@@ -87,7 +87,7 @@ function CatchCategoricalQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
@@ -306,10 +306,10 @@ function CatchCategoricalQC({
     })
     setMarkIdToSymbolArr(markIdToColorBuilder)
 
-    Object.keys(fishCountByDateAndSpecies).forEach((date) => {
+    Object.keys(fishCountByDateAndSpecies).forEach(date => {
       const speciesCountFromDate = fishCountByDateAndSpecies[date]
 
-      Object.keys(speciesCountFromDate).forEach((species) => {
+      Object.keys(speciesCountFromDate).forEach(species => {
         let count = speciesCountFromDate[species].count
         let ids = speciesCountFromDate[species].ids
 
@@ -344,7 +344,7 @@ function CatchCategoricalQC({
 
   const handlePointClick = (datum: any) => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
@@ -357,7 +357,7 @@ function CatchCategoricalQC({
     }
     console.log('4')
 
-    const selectedData = qcData.filter((response) => {
+    const selectedData = qcData.filter(response => {
       const id = response.createdCatchRawResponse?.id
       return idsAtPoint.includes(id)
     })
@@ -386,7 +386,7 @@ function CatchCategoricalQC({
           return submission[key]['id']
         }
       })
-      const catchRawId = ids.find((val) => Boolean(Number(val)))
+      const catchRawId = ids.find(val => Boolean(Number(val)))
       dispatch(catchRawQCSubmission({ catchRawId, submission }))
     }
   }
@@ -495,7 +495,7 @@ function CatchCategoricalQC({
               fontSize='16'
               placeholder='fork length...'
               keyboardType='numeric'
-              onChangeText={(value) => {
+              onChangeText={value => {
                 let payload = { ...data }
                 payload.createdCatchRawResponse.forkLength = value
                 console.log('handle fork length edit submit')
@@ -612,14 +612,14 @@ function CatchCategoricalQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map((buttonName) => {
+            {activeButtons.map(buttonName => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
                   yLabel={axisLabelDictionary[buttonName]['yLabel']}
                   key={buttonName}
                   chartType={buttonNameToChartType[buttonName] as any}
-                  onPointClick={(datum) => handlePointClick(datum)}
+                  onPointClick={datum => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
                   title={buttonName}
@@ -933,7 +933,7 @@ function CatchCategoricalQC({
               </Text>
               <Text color='black' fontSize='2xl' fontWeight={'light'}>
                 Click button below to flag data as low confidence or edit value
-                if you know true value.
+                if you know the correct value.
               </Text>
               <HStack
                 justifyContent={'space-between'}

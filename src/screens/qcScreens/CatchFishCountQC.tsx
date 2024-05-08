@@ -35,14 +35,16 @@ function CatchFishCountQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw: any) => {
-      return catchRaw.createdCatchRawResponse.programId === programId
-    })
+    const programCatchRaw = previousCatchRawSubmissions.filter(
+      (catchRaw: any) => {
+        return catchRaw.createdCatchRawResponse.programId === programId
+      }
+    )
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
     const totalCountByDay: any[] = []
     const datesFormatted: any = {}
 
-    qcData.forEach((catchResponse) => {
+    qcData.forEach(catchResponse => {
       const catchRaw = catchResponse.createdCatchRawResponse
       const numFishCaught = catchRaw?.numFishCaught
       const createdAt = new Date(catchRaw.createdAt)
@@ -55,7 +57,7 @@ function CatchFishCountQC({
       }
     })
 
-    Object.keys(datesFormatted).forEach((dateString) => {
+    Object.keys(datesFormatted).forEach(dateString => {
       totalCountByDay.push({
         x: Number(dateString),
         y: datesFormatted[dateString],
@@ -126,7 +128,7 @@ function CatchFishCountQC({
               chartType='bar'
               data={graphData}
               barColor='grey'
-              onPointClick={(datum) => handlePointClick(datum)}
+              onPointClick={datum => handlePointClick(datum)}
               selectedBarColor='green'
               height={400}
               width={600}
@@ -192,7 +194,7 @@ function CatchFishCountQC({
               </Text>
               <Text color='black' fontSize='2xl' fontWeight={'light'}>
                 Click button below to flag data as low confidence or edit value
-                if you know true value.
+                if you know the correct value.
               </Text>
               <HStack
                 justifyContent={'space-between'}
