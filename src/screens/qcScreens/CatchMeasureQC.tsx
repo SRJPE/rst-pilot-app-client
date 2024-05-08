@@ -18,10 +18,12 @@ function CatchMeasureQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions
 }: {
   navigation: any
   route: any
-  qcCatchRawSubmissions: any
+  qcCatchRawSubmissions: any[]
+  previousCatchRawSubmissions: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -34,9 +36,17 @@ function CatchMeasureQC({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
 
+  const axisLabelDictionary = {
+    'Fork Length': { xLabel: 'Fork Length (mm)', yLabel: 'Density' },
+    Weight: { xLabel: 'Weight (g)', yLabel: 'Density' },
+  }
+
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
     let N = qcData.length
     let range: number | null = null
@@ -193,6 +203,8 @@ function CatchMeasureQC({
             {activeButtons.map((buttonName) => {
               return (
                 <Graph
+                  xLabel={axisLabelDictionary[buttonName]['xLabel']}
+                  yLabel={axisLabelDictionary[buttonName]['yLabel']}
                   key={buttonName}
                   zoomDomain={{ x: [0, 60], y: [0, 0.3] }}
                   chartType='line'
@@ -266,6 +278,7 @@ function CatchMeasureQC({
 const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions: state.trapVisitFormPostBundler.previousCatchRawSubmissions,
   }
 }
 

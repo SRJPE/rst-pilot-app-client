@@ -21,10 +21,12 @@ function CatchFishCountQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any
+  previousCatchRawSubmissions: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [graphData, setGraphData] = useState<any[]>([])
@@ -32,32 +34,45 @@ function CatchFishCountQC({
   const [pointClicked, setPointClicked] = useState<any | null>(null)
 
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw: any) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
     const totalCountByDay: any[] = []
     const datesFormatted: any = {}
 
     qcData.forEach((catchResponse) => {
       const catchRaw = catchResponse.createdCatchRawResponse
       const numFishCaught = catchRaw?.numFishCaught
-      const createdAtString = new Date(catchRaw?.createdAt).toDateString()
+      const createdAt = new Date(catchRaw.createdAt)
+      const normalizedDate = normalizeDate(createdAt)
 
-      if (Object.keys(datesFormatted).includes(createdAtString)) {
-        datesFormatted[createdAtString] += numFishCaught
+      if (Object.keys(datesFormatted).includes(String(normalizedDate))) {
+        datesFormatted[normalizedDate] += numFishCaught
       } else {
-        datesFormatted[createdAtString] = numFishCaught
+        datesFormatted[normalizedDate] = numFishCaught
       }
     })
 
     Object.keys(datesFormatted).forEach((dateString) => {
       totalCountByDay.push({
-        x: dateString,
+        x: Number(dateString),
         y: datesFormatted[dateString],
       })
     })
 
     setGraphData(totalCountByDay)
   }, [qcCatchRawSubmissions])
+
+  const normalizeDate = (date: Date) => {
+    date.setHours(0)
+    date.setMinutes(0)
+    date.setSeconds(0)
+    date.setMilliseconds(0)
+
+    return date.getTime()
+  }
 
   const handlePointClick = (datum: any) => {
     console.log('point clicked: ', datum)
@@ -106,6 +121,8 @@ function CatchFishCountQC({
 
           <ScrollView>
             <Graph
+              xLabel={'Date'}
+              yLabel={'Total Daily Catch'}
               chartType='bar'
               data={graphData}
               barColor='grey'
@@ -239,6 +256,8 @@ function CatchFishCountQC({
 const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions:
+      state.trapVisitFormPostBundler.previousCatchRawSubmissions,
   }
 }
 

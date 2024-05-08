@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   //returns an alphabetically sorted copy of the original array
   const alphabeticalArray = [...arrayToSort].sort((a, b) => {
@@ -99,7 +101,11 @@ export const QARanges = {
   flowMeasure: {
     'Mill Creek': { max: 2000, min: null },
     'Deer Creek': { max: 2000, min: null },
-    'Feather River': { max: 5000, min: 800 },
+    'Feather River': {
+      standard: { max: 3500, min: 50 },
+      eyeRiffle: { max: 16000, min: 50 },
+      herringerRiffle: { max: 20000, min: 50 },
+    },
     'Yuba River': { max: 3500, min: 50 },
   } as any,
   waterTemperature: { maxF: 100, maxC: 30, min: null },
@@ -179,7 +185,11 @@ export const markBadgeLookup = {
   },
 }
 
-export const getSubstring = (str: string, start: string, end: string): string => {
+export const getSubstring = (
+  str: string,
+  start: string,
+  end: string
+): string => {
   let char1 = str.indexOf(start) + 1
   let char2 = str.lastIndexOf(end)
   return str.substring(char1, char2)
@@ -187,4 +197,57 @@ export const getSubstring = (str: string, start: string, end: string): string =>
 
 export function GaussKDE(xi: number, x: number) {
   return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(Math.pow(xi - x, 2) / -2)
+}
+
+export const useDebounce = <T>(value: T, delay = 500) => {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => clearTimeout(timeout)
+  }, [value, delay])
+
+  return debouncedValue
+}
+
+export const navigateHelper = (
+  destination: string,
+  navigationState: any,
+  navigation: any,
+  dispatch: any,
+  updateActiveStep: any
+) => {
+  const formSteps = Object.values(navigationState?.steps) as any
+  let payload = null
+  for (let i = 0; i < formSteps.length; i++) {
+    if (formSteps[i].name === destination) {
+      payload = i + 1
+    }
+  }
+
+  navigation.navigate('Trap Visit Form', { screen: destination })
+  dispatch({
+    type: updateActiveStep,
+    payload: payload,
+  })
+}
+
+export const getRandomColor = () => {
+  // Generate random values for red, green, and blue channels
+  var red = Math.floor(Math.random() * 256)
+  var green = Math.floor(Math.random() * 256)
+  var blue = Math.floor(Math.random() * 256)
+
+  // Convert decimal values to hexadecimal
+  var redHex = red.toString(16).padStart(2, '0')
+  var greenHex = green.toString(16).padStart(2, '0')
+  var blueHex = blue.toString(16).padStart(2, '0')
+
+  // Concatenate hexadecimal values to form the color code
+  var color = '#' + redHex + greenHex + blueHex
+
+  return color
 }

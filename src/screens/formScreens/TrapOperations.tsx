@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Formik, yupToFormErrors } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -17,19 +17,23 @@ import {
   Radio,
   ScrollView,
   KeyboardAvoidingView,
+  Switch,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
-import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  markStepCompleted,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
   markTrapOperationsCompleted,
   saveTrapOperations,
 } from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
-import { Keyboard } from 'react-native'
-import { QARanges } from '../../utils/utils'
+import { DeviceEventEmitter, Keyboard } from 'react-native'
+import { QARanges, navigateHelper } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import OptimizedInput from '../../components/Shared/OptimizedInput'
 import { updateTrapVisitStartTime } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
@@ -71,6 +75,7 @@ const TrapOperations = ({
   const { whyTrapNotFunctioning } = dropdownValues
   const trapNotInServiceLabel = '- restart trapping'
   const trapNotInServiceIdentifier = 'trap not in service - restart trapping'
+  const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
 
   const calculateTempWarning = (
     waterTemperatureValue: number,
@@ -110,6 +115,9 @@ const TrapOperations = ({
         dispatch(updateTrapVisitStartTime(newDate))
       }
       const errors = checkForErrors(values)
+      if (values.recordTurbidityInPostProcessing) {
+        values.waterTurbidity = null
+      }
       dispatch(
         saveTrapOperations({
           tabId,
@@ -119,10 +127,27 @@ const TrapOperations = ({
       )
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
-      Object.keys(tabSlice.tabs).forEach((tabId) => {
-        if (!reduxState[tabId]) stepCompletedCheck = false
+      const allTabIds: string[] = Object.keys(tabSlice.tabs)
+      allTabIds.forEach((allTabId) => {
+        if (!Object.keys(reduxState).includes(allTabId)) {
+          if (Object.keys(reduxState).length < allTabIds.length) {
+            stepCompletedCheck = false
+          }
+          if (Object.keys(errors).length) {
+            stepCompletedCheck = false
+          }
+        } else {
+          if (
+            !reduxState[allTabId].completed ||
+            Object.keys(reduxState[allTabId].errors).length
+          ) {
+            stepCompletedCheck = false
+          }
+        }
       })
-      if (stepCompletedCheck) dispatch(markStepCompleted([true]))
+
+      if (stepCompletedCheck)
+        dispatch(markStepCompleted({ propName: 'trapOperations' }))
       console.log('🚀 ~ handleSubmit ~ Status', values)
     }
   }
@@ -137,10 +162,10 @@ const TrapOperations = ({
         fontSize={16}
         onPress={() => {
           if (setFieldValue) {
-            if (text === '°F') {
-              setFieldValue('waterTemperatureUnit', '°C')
-            } else {
+            if (text === '°C') {
               setFieldValue('waterTemperatureUnit', '°F')
+            } else {
+              setFieldValue('waterTemperatureUnit', '°C')
             }
           }
         }}
@@ -179,11 +204,91 @@ const TrapOperations = ({
       // only create initial error when form is not completed
       // initialErrors={reduxState.completed ? undefined : { trapStatus: '' }}
       onSubmit={(values: any) => {
-        if (activeTabId) {
-          onSubmit(values, activeTabId)
+        if (activeTabId && activeTabId != 'placeholderId') {
+          const callback = () => {
+            if (values?.trapStatus === 'trap not functioning') {
+              navigateHelper(
+                'Non Functional Trap',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            } else if (
+              values?.trapStatus === 'trap not in service - restart trapping'
+            ) {
+              navigateHelper(
+                'Started Trapping',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            } else if (values?.flowMeasure > 1000) {
+              navigateHelper(
+                'High Flows',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            } else if (values?.waterTemperatureUnit === '°C') {
+              if (values?.waterTemperature > 30) {
+                navigateHelper(
+                  'High Temperatures',
+                  navigationSlice,
+                  navigation,
+                  dispatch,
+                  updateActiveStep
+                )
+              } else {
+                navigateHelper(
+                  'Fish Processing',
+                  navigationSlice,
+                  navigation,
+                  dispatch,
+                  updateActiveStep
+                )
+              }
+            } else if (values?.waterTemperatureUnit === '°F') {
+              if (values?.waterTemperature > 86) {
+                navigateHelper(
+                  'High Temperatures',
+                  navigationSlice,
+                  navigation,
+                  dispatch,
+                  updateActiveStep
+                )
+              } else {
+                navigateHelper(
+                  'Fish Processing',
+                  navigationSlice,
+                  navigation,
+                  dispatch,
+                  updateActiveStep
+                )
+              }
+            } else {
+              navigateHelper(
+                'Fish Processing',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            }
+          }
+
+          navigation.push('Loading...')
+
+          setTimeout(() => {
+            DeviceEventEmitter.emit('event.load', {
+              process: () => onSubmit(values, activeTabId),
+              callback,
+            })
+          }, 2000)
         }
       }}
-      validateOnChange={true}
     >
       {({
         handleChange,
@@ -322,8 +427,8 @@ const TrapOperations = ({
                   {values.trapStatus.length > 0 &&
                     values.trapStatus !== trapNotInServiceIdentifier && (
                       <>
-                        <HStack>
-                          <FormControl w='30%'>
+                        <FormControl w='30%'>
+                          <HStack space={4} alignItems='center'>
                             <FormControl.Label>
                               <Text color='black' fontSize='xl'>
                                 Cone Setting
@@ -342,56 +447,27 @@ const TrapOperations = ({
                                 }
                               }}
                             >
-                              <Radio
-                                colorScheme='primary'
-                                value='full'
-                                my={1}
-                                _icon={{ color: 'primary' }}
-                              >
-                                Full
-                              </Radio>
-                              <Radio
-                                colorScheme='primary'
-                                value='half'
-                                my={1}
-                                _icon={{ color: 'primary' }}
-                              >
-                                Half
-                              </Radio>
+                              <HStack space={4}>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='full'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  Full
+                                </Radio>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='half'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  Half
+                                </Radio>
+                              </HStack>
                             </Radio.Group>
-                          </FormControl>
-                          <FormControl w='47%'>
-                            <HStack space={4} alignItems='center'>
-                              <FormControl.Label>
-                                <Text color='black' fontSize='xl'>
-                                  Total Revolutions
-                                </Text>
-                              </FormControl.Label>
-                              {Number(values.totalRevolutions) >
-                                QARanges.totalRevolutions.max && (
-                                <RenderWarningMessage />
-                              )}
-                              {tabSlice.incompleteSectionTouched
-                                ? errors.totalRevolutions &&
-                                  RenderErrorMessage(errors, 'totalRevolutions')
-                                : touched.totalRevolutions &&
-                                  errors.totalRevolutions &&
-                                  RenderErrorMessage(
-                                    errors,
-                                    'totalRevolutions'
-                                  )}
-                            </HStack>
-                            <OptimizedInput
-                              height='50px'
-                              fontSize='16'
-                              placeholder='Numeric Value'
-                              keyboardType='numeric'
-                              onChangeText={handleChange('totalRevolutions')}
-                              onBlur={handleBlur('totalRevolutions')}
-                              value={values.totalRevolutions}
-                            />
-                          </FormControl>
-                        </HStack>
+                          </HStack>
+                        </FormControl>
                         <FormControl>
                           <HStack space={4} alignItems='center'>
                             <FormControl.Label>
@@ -525,7 +601,48 @@ const TrapOperations = ({
                           </Text>
                         </FormControl>
 
-                        <Heading>Environmental Conditions</Heading>
+                        <HStack
+                          space={5}
+                          width='100%'
+                          justifyContent='space-between'
+                        >
+                          <Heading>Environmental Conditions</Heading>
+                          <FormControl w='30%'>
+                            <HStack space={2} alignItems='center'>
+                              <FormControl.Label>
+                                <Text fontSize='14'>
+                                  Record Turbidity in Post Processing
+                                </Text>
+                              </FormControl.Label>
+                              <Switch
+                                name='recordTurbidityInPostProcessing'
+                                shadow='3'
+                                offTrackColor='secondary'
+                                onTrackColor='primary'
+                                size='md'
+                                isChecked={turbidityToggle}
+                                value={values.recordTurbidityInPostProcessing}
+                                onToggle={() => {
+                                  setFieldValue('waterTurbidity', null)
+                                  if (!turbidityToggle) {
+                                    setFieldValue(
+                                      'recordTurbidityInPostProcessing',
+                                      true
+                                    )
+                                  } else {
+                                    setFieldValue(
+                                      'recordTurbidityInPostProcessing',
+                                      false
+                                    )
+                                  }
+
+                                  setTurbidityToggle(!turbidityToggle)
+                                }}
+                              />
+                            </HStack>
+                          </FormControl>
+                        </HStack>
+
                         <HStack space={5} width='125%'>
                           <FormControl w='1/4'>
                             <FormControl.Label>
@@ -600,6 +717,7 @@ const TrapOperations = ({
                             </FormControl.Label>
 
                             <OptimizedInput
+                              isDisabled={turbidityToggle}
                               height='50px'
                               fontSize='16'
                               placeholder='Numeric Value'
@@ -637,6 +755,7 @@ const TrapOperations = ({
             <NavButtons
               navigation={navigation}
               handleSubmit={handleSubmit}
+              shouldProceedToLoadingScreen={true}
               errors={
                 values.trapStatus !== trapNotInServiceIdentifier ? errors : null
               }

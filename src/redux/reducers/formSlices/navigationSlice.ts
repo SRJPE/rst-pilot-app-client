@@ -53,20 +53,13 @@ export const navigationSlice = createSlice({
       state.activeStep = action.payload
     },
     markStepCompleted: (state, action) => {
-      //currently working: "state.activeStep - 1" could be refactored in the future
-
-      //super hacky fixes for the demo:
-
-      //another fix to get visitSetup working properly
-      if (action.payload[1] === 'visitSetup') {
-        state.steps['1'].completed = action.payload[0]
-      } else if (action.payload[1] === 'fishInput') {
-        state.steps[state.activeStep].completed = action.payload[0]
-      } else if (action.payload[1] === 'fishProcessing') {
-        state.steps[state.activeStep - 1].completed = action.payload[0]
-      } else {
-        state.steps[state.activeStep - 1].completed = action.payload[0]
-      }
+      let steps = {...state.steps}
+      Object.keys(steps).forEach((key) => {
+        if (steps[key].propName === action.payload.propName) {
+          steps[key] = { ...steps[key], completed: true }
+        }
+      })
+      state.steps = steps
     },
     checkIfFormIsComplete: (state) => {
       //iterate over the first 6 step and check if all steps are completed

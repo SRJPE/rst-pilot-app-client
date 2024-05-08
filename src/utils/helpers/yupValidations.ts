@@ -30,19 +30,9 @@ export const trapOperationsSchema = yup.object().shape({
   waterTurbidity: yup
     .number()
     .nullable()
-    .required('Water Turbidity Required')
+    // .required('Water Turbidity Required')
     .typeError('Input must be a number'),
   waterTurbidityUnit: yup.string(),
-
-  totalRevolutions: yup
-    .number()
-    // .transform(value => (isNaN(value) ? undefined : value))
-    // .transform((value, originalValue) => {
-    //   return originalValue === '' ? undefined : value
-    // })
-    .nullable()
-    .required('Total Revolutions Required')
-    .typeError('Input must be a number'),
   rpm1: yup
     .number()
     .required('Measurement 1 required')
@@ -63,6 +53,12 @@ export const trapPostProcessingSchema = yup.object().shape({
   debrisVolume: yup
     .number()
     .required('Debris volume required')
+    .typeError('Input must be a number'),
+  totalRevolutions: yup.number().nullable().typeError('Input must be a number'),
+  waterTurbidity: yup
+    .number()
+    .nullable()
+    // .required('Water Turbidity Required')
     .typeError('Input must be a number'),
   rpm1: yup
     .number()
@@ -157,7 +153,7 @@ export const addIndividualFishSchemaOtherSpecies = yup.object().shape({
 
 export const addMarksOrTagsSchema = yup.object().shape({
   markType: yup.string().required('Mark Type is required'),
-  markCode: yup.number().typeError('Input must be a number'),
+  markCode: yup.string().required('Mark Code is required'),
   // position: yup.string()
   crewMember: yup.string().required('Crew Member is required'),
   // comments: yup.string(),
@@ -180,6 +176,7 @@ export const addPlusCountsSchema = yup.object().shape({
     .required('Count is required')
     .typeError('Input must be a number'),
   plusCountMethod: yup.string().required('Plus count method required'),
+  dead: yup.boolean().required('Fish mortality required'),
 })
 
 /*----------------------------------------------------------------
@@ -204,7 +201,7 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),
@@ -216,11 +213,12 @@ export const releaseTrialSchema = yup.object().shape({
     is: true,
     then: yup
       .number()
-      .required('Hatchery run weight is required')
+
+      .nullable()
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),
@@ -232,7 +230,7 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),

@@ -133,9 +133,6 @@ const MarkFishModalContent = ({
                         Code
                       </Text>
                     </FormControl.Label>
-                    {Number(values.markCode) > QARanges.markNumber.max && (
-                      <RenderWarningMessage />
-                    )}
                     {touched.markCode &&
                       errors.markCode &&
                       RenderErrorMessage(errors, 'markCode')}

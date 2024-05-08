@@ -9,24 +9,21 @@ function EfficiencyQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions,
 }: {
   navigation: any
   route: any
-  qcCatchRawSubmissions: any
+  qcCatchRawSubmissions: any[]
+  previousCatchRawSubmissions: any[]
 }) {
   const [graphData, setGraphData] = useState<any[]>([])
 
-  const data = [
-    { label: 'Point 1', x: 1, y: 10, extraInfo: 'woop woop!' },
-    { label: 'Point 2', x: 2, y: 20, extraInfo: 'woop woop!' },
-    { label: 'Point 3', x: 3, y: 15, extraInfo: 'woop woop!' },
-    { label: 'Point 4', x: 4, y: 25, extraInfo: 'woop woop!' },
-    { label: 'Point 5', x: 5, y: 12, extraInfo: 'woop woop!' },
-  ]
-
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw: any) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
     const graphDataPayload: any[] = []
 
     qcData.forEach((catchRawResponse: any, idx: number) => {
@@ -50,23 +47,10 @@ function EfficiencyQC({
         numberRecaptured = numFishCaught
       }
 
-      console.log('numberRecaptured: ', numberRecaptured)
-      console.log('numberReleased: ', numberReleased)
-      // RIGHT
-      console.log(
-        'numberRecaptured over numberReleased: ',
-        numberRecaptured / numberReleased
-      )
-      // WRONG 
-      console.log(
-        'numberReleased over numberRecaptured: ',
-        numberReleased / numberRecaptured
-      )
-
       graphDataPayload.push({
         id: catchRawId,
         x: idx + 1,
-        y: numberReleased / numberRecaptured,
+        y: numberReleased !== 0 ? numberRecaptured / numberReleased : 0,
       })
     })
 
@@ -147,6 +131,8 @@ function EfficiencyQC({
 const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions:
+      state.trapVisitFormPostBundler.previousCatchRawSubmissions,
   }
 }
 

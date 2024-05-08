@@ -49,7 +49,11 @@ function QCMain({
       previousTrapVisits: programsTrapVisits ?? [],
       previousCatchRaw: programsCatchRaw ?? [],
     })
-  }, [route.params.programId])
+
+    console.log('QCData', qcData)
+    console.log('programsTrapVisits', programsTrapVisits)
+    console.log('previoustrapvisits', previousTrapVisits)
+  }, [route.params.programId, previousTrapVisits, previousCatchRaw])
 
   return (
     <VStack alignItems={'center'} marginTop={100} flex={1}>
@@ -59,7 +63,7 @@ function QCMain({
         onPress={() => {
           setActiveButton('trapBtn')
           navigation.navigate('Trap QC', {
-            previousTrapVisits: qcData.previousTrapVisits,
+            programId: route.params.programId,
           })
         }}
       >
@@ -105,7 +109,7 @@ function QCMain({
                 'Measured Variables and Associated Categories'
               )
               navigation.navigate('CatchMeasureQC', {
-                previousCatchRaw: qcData.previousCatchRaw,
+                programId: route.params.programId,
               })
             }}
           >
@@ -131,7 +135,7 @@ function QCMain({
             onPress={() => {
               setActiveCatchOption('Categorical Observations')
               navigation.navigate('CatchCategoricalQC', {
-                previousCatchRaw: qcData.previousCatchRaw,
+                programId: route.params.programId,
               })
             }}
           >
@@ -157,7 +161,7 @@ function QCMain({
             onPress={() => {
               setActiveCatchOption('Total Fish Counts')
               navigation.navigate('CatchFishCountQC', {
-                previousCatchRaw: qcData.previousCatchRaw,
+                programId: route.params.programId,
               })
             }}
           >
@@ -183,7 +187,7 @@ function QCMain({
             onPress={() => {
               setActiveCatchOption('Partial Records')
               navigation.navigate('PartialRecordsQC', {
-                previousCatchRaw: qcData.previousCatchRaw,
+                programId: route.params.programId,
               })
             }}
           >
@@ -206,7 +210,7 @@ function QCMain({
         onPress={() => {
           setActiveButton('efficiencyBtn')
           navigation.navigate('EfficiencyQC', {
-            previousCatchRaw: qcData.previousCatchRaw,
+            programId: route.params.programId,
           })
         }}
       >
