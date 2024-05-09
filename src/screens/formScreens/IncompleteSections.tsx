@@ -218,7 +218,7 @@ const IncompleteSections = ({
       dropdownsState.values.trapStatusAtEnd
     )
     const calculateRpmAvg = (rpms: (string | null)[]) => {
-      const validRpms = rpms.filter((n) => n)
+      const validRpms = rpms.filter(n => n)
       if (!validRpms.length) {
         return null
       }
@@ -231,7 +231,7 @@ const IncompleteSections = ({
     }
 
     const tabIds = Object.keys(tabState.tabs)
-    tabIds.forEach((id) => {
+    tabIds.forEach(id => {
       const {
         rpm1: startRpm1,
         rpm2: startRpm2,
@@ -386,14 +386,14 @@ const IncompleteSections = ({
 
     const catchRawSubmissions: any[] = []
 
-    Object.keys(fishInputState).forEach((tabId) => {
+    Object.keys(fishInputState).forEach(tabId => {
       if (tabId != 'placeholderId') {
         const fishStoreKeys = Object.keys(fishInputState[tabId].fishStore)
         const programId = Object.keys(visitSetupState).includes(tabId)
           ? visitSetupState[tabId].values.programId
           : 1
 
-        fishStoreKeys.forEach((key) => {
+        fishStoreKeys.forEach(key => {
           const fishValue = fishInputState[tabId].fishStore[key]
 
           const filterAndPrepareData = (data: Array<any>) => {
@@ -446,6 +446,36 @@ const IncompleteSections = ({
             return releaseId
           }
 
+          console.log('fishValue', fishValue)
+
+          const determineValueNotRecordedOrNull = (
+            fishValue: any,
+            fieldName: string
+          ) => {
+            const fieldValue = fishValue[fieldName]
+            const fieldValues = returnDefinitionArray(
+              dropdownsState.values[fieldName]
+            )
+            if (
+              fishValue.species === 'Chinook salmon' ||
+              (fishValue.species === 'Steelhead / rainbow trout' &&
+                fieldName === 'lifeStage')
+            ) {
+              const value = fieldValue || 'not recorded'
+              return returnNullableTableId(fieldValues.indexOf(value))
+            } else {
+              const value = fieldValue || null
+              return returnNullableTableId(fieldValues.indexOf(value))
+            }
+          }
+
+          const test1 = determineValueNotRecordedOrNull(fishValue, 'lifeStage')
+          console.log('lifeStage', test1)
+          const test2 = determineValueNotRecordedOrNull(fishValue, 'run')
+          console.log('run', test2)
+
+          const getRunClassMethod = (fishValue: any) => {}
+
           catchRawSubmissions.push({
             uid: tabId,
             programId,
@@ -455,12 +485,12 @@ const IncompleteSections = ({
               runValues.indexOf(fishValue.run)
             ),
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
-            captureRunClassMethod: fishValue.run ? 5 : null,
+            captureRunClassMethod: fishValue.run ? 6 : null,
             // defaults to "none" (id: 1) if not selected
             markType: 1, // Check w/ Erin
             markedForRelease: fishValue.willBeUsedInRecapture,
-            adiposeClipped: fishValue.adiposeClipped,
-            dead: fishValue.dead,
+            adiposeClipped: fishValue.adiposeClipped ? true : false,
+            dead: fishValue.dead ? true : false,
             lifeStage: returnNullableTableId(
               lifeStageValues.indexOf(fishValue.lifeStage)
             ),
@@ -473,7 +503,7 @@ const IncompleteSections = ({
                 ? parseInt(fishValue?.weight as any)
                 : null,
             numFishCaught: fishValue?.numFishCaught,
-            plusCount: fishValue?.plusCount,
+            plusCount: fishValue?.plusCount ? true : false,
             plusCountMethodology: fishValue?.plusCountMethod
               ? returnNullableTableId(
                   plusCountMethodValues.indexOf(fishValue?.plusCountMethod)
