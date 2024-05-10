@@ -35,7 +35,7 @@ const BatchCountButtonGrid = ({
     dispatch(
       addForkLengthToBatchStore({
         forkLength: num,
-        lifeStage: ignoreLifeStage ? 'not recorded' : selectedLifeStage,
+        lifeStage: ignoreLifeStage ? null : selectedLifeStage,
         dead: deadToggle,
         existingMark: markToggle,
         fishCondition: conditionToggle,

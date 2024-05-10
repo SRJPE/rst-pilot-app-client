@@ -522,10 +522,10 @@ export const trapVisitPostBundler = createSlice({
     reset: () => {
       return initialState
     },
-    clearPendingTrapVisitSubs: (state) => {
+    clearPendingTrapVisitSubs: state => {
       state.trapVisitSubmissions = []
     },
-    clearPendingCatchRawSubs: (state) => {
+    clearPendingCatchRawSubs: state => {
       state.catchRawSubmissions = []
     },
     addMissingFetchedTrapVisitSubs: (state, action) => {
@@ -587,7 +587,7 @@ export const trapVisitPostBundler = createSlice({
           // if duplicate trap visit
           if (
             errorDetail.includes(
-              'Key (program_id, trap_location_id, trap_visit_uuid)'
+              'Key (program_id, trap_location_id, trap_visit_time_start)'
             ) ||
             errorDetail.includes('Key (trap_visit_uid)')
           ) {

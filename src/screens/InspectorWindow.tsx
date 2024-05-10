@@ -83,7 +83,6 @@ const Debug = (props: DebugPropsI) => {
   })
 
   const rowComponent = ({ name, marginBottom }: RowComponentI) => {
-
     const messageBuilder = () => {
       if (name === 'trapVisitFormPostBundler') {
         logState[name]
@@ -93,7 +92,7 @@ const Debug = (props: DebugPropsI) => {
             })
           : setLogState({
               ...logState,
-              ['trapVisitFormPostBundler']: `fetch status: ${props[name]['fetchStatus']}. submission status: ${props[name]['submissionStatus']}. previous trap visit submissions length: ${props[name]['previousTrapVisitSubmissions'].length}. previous catch raw submissions: ${props[name]['previousCatchRawSubmissions'].length}. pending trap visit submissions: ${props[name]['trapVisitSubmissions'].length}. pending QC trap visit submissions: ${props[name]['qcTrapVisitSubmissions'].length}. pending QC catch raw submissions: ${props[name]['qcCatchRawSubmissions'].length}`,
+              ['trapVisitFormPostBundler']: `fetch status: ${props[name]['fetchStatus']}. submission status: ${props[name]['submissionStatus']}. previous trap visit submissions length: ${props[name]['previousTrapVisitSubmissions'].length}. previous catch raw submissions: ${props[name]['previousCatchRawSubmissions'].length}. pending trap visit submissions: ${props[name]['trapVisitSubmissions'].length}. pending catch raw submissions: ${props[name]['catchRawSubmissions'].length}. pending QC trap visit submissions: ${props[name]['qcTrapVisitSubmissions'].length}. pending QC catch raw submissions: ${props[name]['qcCatchRawSubmissions'].length}`,
             })
       } else {
         logState[name]
@@ -129,7 +128,11 @@ const Debug = (props: DebugPropsI) => {
             maxH={'500px'}
           >
             <ScrollView>
-              <Text color={'white'} fontSize='xl' onPress={() => Clipboard.setStringAsync(logState[name])}>
+              <Text
+                color={'white'}
+                fontSize='xl'
+                onPress={() => Clipboard.setStringAsync(logState[name])}
+              >
                 {logState[name]}
               </Text>
             </ScrollView>
@@ -195,7 +198,7 @@ const Debug = (props: DebugPropsI) => {
         alignSelf='stretch'
         backgroundColor='#292929'
       >
-        {Object.keys(logState).map((key) =>
+        {Object.keys(logState).map(key =>
           rowComponent({ name: key as any, marginBottom: '10' })
         )}
       </ScrollView>

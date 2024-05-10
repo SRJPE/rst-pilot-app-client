@@ -25,6 +25,7 @@ export interface TrapOperationsValuesI {
   rpm2: number | null
   rpm3: number | null
   trapVisitStopTime: Date | null
+  trapVisitStartTime: Date | null
 }
 
 const initialState: InitialStateI = {
@@ -45,6 +46,7 @@ const initialState: InitialStateI = {
       rpm2: null,
       rpm3: null,
       trapVisitStopTime: null,
+      trapVisitStartTime: null,
     },
     errors: {},
   },
@@ -61,6 +63,10 @@ export const trapOperationsSlice = createSlice({
         completed: true,
         values: {
           ...values,
+          trapVisitStartTime: state[tabId]
+            ? state[tabId].values.trapVisitStartTime
+            : action.payload.values.trapVisitStartTime,
+
           trapVisitStopTime: state[tabId]
             ? state[tabId].values.trapVisitStopTime
             : action.payload.values.trapVisitStopTime,

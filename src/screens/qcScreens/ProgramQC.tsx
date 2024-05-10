@@ -29,20 +29,26 @@ function ProgramQC({
 
   return (
     <VStack alignItems={'center'} marginTop={100} flex={1}>
-      <Button w='3/5' bg={'secondary'} mb={10}>
+      {/* PLACEHOLDER WHILE QC IS IN DEV */}
+      <Text fontSize='3xl' color='primary' fontWeight={'bold'} margin={10}>
+        QC currently in development
+      </Text>
+      <Button w='3/5' bg={'secondary'} mb={10} isDisabled>
         <Text fontSize='xl' color='primary' fontWeight={'bold'}>
           Programs
         </Text>
       </Button>
       {/* ---------------------------------------------------------------------------------------- */}
 
-      {programs.map((program) => {
+      {programs.map(program => {
         return (
           <Button
             key={program.programName}
             w='4/5'
             bg={returnButtonColor(program.programId)}
+            // hardcode TRUE for now
             disabled={returnButtonDisabled(program.programId)}
+            isDisabled
             mb={5}
             onPress={() => {
               navigation.navigate('Select Data to QC', {
