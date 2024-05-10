@@ -97,11 +97,16 @@ const TrapOperations = ({
         return false
       }
       let warningResult = false
-      const range = selectedTrapName
-        ? QARanges.flowMeasure[selectedStream][selectedTrapSite][
-            selectedTrapName
+      let activeTabName = selectedTrapName
+
+      if (activeTabId) {
+        activeTabName = tabSlice.tabs[activeTabId].name
+      }
+      const range = activeTabName
+        ? QARanges.flowMeasure[selectedStream.trim()][selectedTrapSite.trim()][
+            activeTabName.trim()
           ]
-        : QARanges.flowMeasure[selectedStream][selectedTrapSite]
+        : QARanges.flowMeasure[selectedStream.trim()][selectedTrapSite.trim()]
 
       if (flowMeasureEntered > range.max || flowMeasureEntered < range.min) {
         warningResult = true
@@ -165,7 +170,7 @@ const TrapOperations = ({
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
       const allTabIds: string[] = Object.keys(tabSlice.tabs)
-      allTabIds.forEach((allTabId) => {
+      allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
             stepCompletedCheck = false
@@ -557,7 +562,7 @@ const TrapOperations = ({
                           </FormControl.Label>
                           <Popover
                             placement='bottom left'
-                            trigger={(triggerProps) => {
+                            trigger={triggerProps => {
                               return (
                                 <IconButton
                                   {...triggerProps}

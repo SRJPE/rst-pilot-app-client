@@ -143,10 +143,10 @@ export const QARanges = {
         'Hallwood 3': { max: 15000, min: 50 },
       },
     },
-    'Flowwest Test': {
-      'Flowwest Test': {
-        'FlowWest Test 1': { max: 2000, min: 50 },
-        'FlowWest Test 2': { max: 2000, min: 50 },
+    'FlowWest Test': {
+      'FlowWest Test': {
+        'FlowWest test 1': { max: 2000, min: 50 },
+        'FlowWest test 2': { max: 2000, min: 50 },
       },
     },
   } as any,

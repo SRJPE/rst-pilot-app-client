@@ -96,7 +96,7 @@ export default function Home({ navigation }: { navigation: any }) {
       <Text fontWeight={300} fontSize={23}>
         Select the action you would like to perform.
       </Text>
-      <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
+      {/* <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
         <Text fontWeight={300} fontSize={20} marginBottom={5}>
           Recent Items
         </Text>
@@ -105,7 +105,7 @@ export default function Home({ navigation }: { navigation: any }) {
           {recentItemsCard({ title: 'Report', date: '7/22/22' })}
           {recentItemsCard({ title: 'Quality Control', date: '7/24/22' })}
         </View>
-      </View>
+      </View> */}
 
       <BottomNavigation
         navigation={navigation}

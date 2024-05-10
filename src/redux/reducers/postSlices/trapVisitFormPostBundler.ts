@@ -596,7 +596,6 @@ export const trapVisitPostBundler = createSlice({
         state.previousTrapVisitSubmissions = previousTrapVisits
         state.previousCatchRawSubmissions = previousCatchRaw
         state.fetchStatus = 'fetch-successful'
-        console.log('successful QC fetch: ', action.payload)
       }
     )
 
