@@ -105,7 +105,7 @@ const AddCrewMemberModalContent = ({
               }
             />
             <VStack mx='5%' my='2%' space={4}>
-              <FormControl>
+              {/* <FormControl>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
                     Search for existing User
@@ -118,7 +118,7 @@ const AddCrewMemberModalContent = ({
                   value={''}
                 />
               </FormControl>
-              <Divider thickness='3' my='2%' />
+              <Divider thickness='3' my='2%' /> */}
 
               <HStack justifyContent='space-between'>
                 <FormInputComponent
