@@ -165,6 +165,10 @@ const CreateNewProgramHome = ({
         trappingProtocols: trappingProtocols,
         permittingInformation: permittingInformation,
       }
+      console.log(
+        '🚀 ~ POSTMonitoringProgramSubmissions ~ monitoringProgramSubmission:',
+        monitoringProgramSubmission
+      )
 
       dispatch(saveMonitoringProgramSubmission(monitoringProgramSubmission))
       if (connectivityState.isConnected) {
