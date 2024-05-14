@@ -74,7 +74,7 @@ const MonitoringProgramNew = ({
           <>
             <Box overflow='hidden' flex={1} bg='#fff'>
               <VStack py='5%' px='10%' space={5}>
-                <Heading alignSelf='center'>Set Up a new Program</Heading>
+                <Heading alignSelf='center'>Set Up a New Program</Heading>
                 <FormInputComponent
                   label={'Monitoring Program Name'}
                   touched={touched}
