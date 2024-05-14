@@ -117,7 +117,7 @@ const PermittingInformationInput = ({
                 Permitting Information
               </Box>
               <Text fontSize='2xl' color='grey' ml='5%' mt='5%'>
-                Enter Based on your 4d Permit
+                Enter Based on Your 4d Permit
               </Text>
               <Divider mb='2' />
               <VStack px='5%' py='2' space={3}>
