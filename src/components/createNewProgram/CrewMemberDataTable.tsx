@@ -5,6 +5,7 @@ import { Icon, IconButton, Text } from 'native-base'
 import { Entypo } from '@expo/vector-icons'
 import { RootState } from '../../redux/store'
 import { CrewMembersStoreI } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
+import { startCase } from 'lodash'
 
 interface Header {
   colData: string
@@ -15,7 +16,7 @@ interface Header {
 const headers: Header[] = [
   { colData: 'firstName', label: 'First Name', numeric: false, flex: 1 },
   { colData: 'lastName', label: 'Last Name', numeric: false, flex: 1 },
-  { colData: 'phoneNumber', label: 'Phone', numeric: true, flex: 1 },
+  { colData: 'phoneNumber', label: 'Phone', numeric: false, flex: 1 },
   { colData: 'email', label: 'Email', numeric: false, flex: 2 },
   { colData: 'isLead', label: 'Lead', numeric: false, flex: 1 },
   { colData: 'agency', label: 'Agency', numeric: false, flex: 1 },
@@ -35,7 +36,7 @@ const CrewMemberDataTable = ({
   }, [crewMembersStore])
   return (
     <DataTable style={{}}>
-      <DataTable.Header style={[{}]}>
+      <DataTable.Header>
         {headers.map(({ label, numeric, flex }, idx: number) => (
           <DataTable.Title
             key={idx}
@@ -50,8 +51,8 @@ const CrewMemberDataTable = ({
         ))}
         <DataTable.Title
           style={{
-            paddingHorizontal: 10,
-            flex: 0,
+            paddingHorizontal: 0,
+            flex: 0.4,
           }}
         >
           {''}
