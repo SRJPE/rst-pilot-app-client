@@ -37,6 +37,7 @@ export const sampleTeamLead = {
   lastName: 'Doe',
   phoneNumber: '1234567890',
   email: 'test@flowwest.com',
+  isLead: true,
 }
 
 const CrewMembers = ({
@@ -62,8 +63,8 @@ const CrewMembers = ({
     let payload = {
       ...sampleTeamLead,
       ...values,
-      isLead: true,
     }
+    console.log('🚀 ~ handleSaveTeamLeadInformation ~ payload:', payload)
     dispatch(saveIndividualCrewMember(payload))
   }
   const handleShowTableModal = (selectedRowData: any) => {
