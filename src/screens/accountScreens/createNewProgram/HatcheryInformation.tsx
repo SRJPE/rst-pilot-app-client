@@ -62,12 +62,30 @@ const HatcheryInformation = ({
   }
 
   const handleEfficiencyTrialProtocolsSubmission = (values: any) => {
-    console.log(
-      '🚀 ~ handleEfficiencyTrialProtocolsSubmission ~ values:',
-      values
-    )
+    delete values.agreementStartDate
+    delete values.agreementEndDate
+    delete values.renewalDate
+    console.log('🚀 ~ handleEfficiencyTrialProtocolsSubmission ~ values :', {
+      ...values,
+      expectedNumberOfFishReceivedAtEachPickup: Number(
+        values.expectedNumberOfFishReceivedAtEachPickup
+      ),
+      agreementStartDate,
+      agreementEndDate,
+      renewalDate,
+    })
+    dispatch(
+      saveHatcheryInformationValues({
+        ...values,
+        expectedNumberOfFishReceivedAtEachPickup: Number(
+          values.expectedNumberOfFishReceivedAtEachPickup
+        ),
 
-    dispatch(saveHatcheryInformationValues(values))
+        agreementStartDate,
+        agreementEndDate,
+        renewalDate,
+      })
+    )
   }
   return (
     <>
@@ -111,7 +129,7 @@ const HatcheryInformation = ({
                   </VStack>
                   <VStack space={2}>
                     <Text color='black' fontSize='xl'>
-                      Agreement Start Date
+                      Agreement End Date
                     </Text>
                     <Box alignSelf='flex-start' minWidth='220' ml='-95'>
                       <DateTimePicker
