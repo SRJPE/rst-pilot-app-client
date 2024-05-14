@@ -22,6 +22,7 @@ import { trappingSitesSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
 import { useEffect, useState } from 'react'
+import RenderErrorMessage from '../Shared/RenderErrorMessage'
 
 const AddTrapModalContent = ({
   closeModal,
@@ -80,10 +81,11 @@ const AddTrapModalContent = ({
                   mx='2'
                   px='10'
                   shadow='3'
-                  // isDisabled={
-                  //   (Object.values(touched).length > 0 &&
-                  //   Object.values(errors).length > 0)
-                  // }
+                  isDisabled={
+                    Object.values(touched).length === 0 ||
+                    (Object.values(touched).length > 0 &&
+                      Object.values(errors).length > 0)
+                  }
                   onPress={() => {
                     handleSubmit()
                     closeModal()
@@ -130,14 +132,14 @@ const AddTrapModalContent = ({
                   onChangeText={handleChange('trapLongitude')}
                   onBlur={handleBlur('trapLongitude')}
                 />
-                <Pressable alignSelf='flex-end'>
+                {/* <Pressable alignSelf='flex-end'>
                   <Icon
                     as={MaterialIcons}
                     name={'add-location-alt'}
                     size='16'
                     color='primary'
                   />
-                </Pressable>
+                </Pressable> */}
               </HStack>
 
               <HStack space={10}>
@@ -196,6 +198,7 @@ const AddTrapModalContent = ({
                   width={'40%'}
                   onChangeText={handleChange('releaseSiteLatitude')}
                   onBlur={handleBlur('releaseSiteLatitude')}
+                  stackDirection={'column'}
                 />
                 <FormInputComponent
                   label={'Release Site Longitude'}
@@ -211,15 +214,17 @@ const AddTrapModalContent = ({
                   width={'40%'}
                   onChangeText={handleChange('releaseSiteLongitude')}
                   onBlur={handleBlur('releaseSiteLongitude')}
+                  stackDirection={'column'}
                 />
-                <Pressable alignSelf='flex-end'>
+
+                {/* <Pressable alignSelf='flex-end'>
                   <Icon
                     as={MaterialIcons}
                     name={'add-location-alt'}
                     size='16'
                     color='primary'
                   />
-                </Pressable>
+                </Pressable> */}
               </HStack>
             </VStack>
           </>
