@@ -194,7 +194,7 @@ const CrewMembers = ({
             <CustomModal
               isOpen={addCrewMemberModalOpen}
               closeModal={() => setAddCrewMemberModalOpen(false)}
-              height='70%'
+              height='50%'
             >
               <AddCrewMemberModalContent
                 addTrapModalContent={addTrapModalContent}
