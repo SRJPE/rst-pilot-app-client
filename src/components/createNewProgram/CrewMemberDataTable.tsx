@@ -59,7 +59,6 @@ const CrewMemberDataTable = ({
         </DataTable.Title>
       </DataTable.Header>
       {processedData.map((crewObject: any, idx: number) => {
-        console.log('🚀 ~ {processedData.map ~ crewObject:', crewObject)
         return (
           <DataTable.Row style={[{ height: 55 }]} key={idx}>
             {Object.entries(crewObject).map(
