@@ -121,7 +121,7 @@ const Profile = ({ navigation }: { navigation: any }) => {
               Sign out
             </Text>
           </Pressable>
-          <Button
+          {/* <Button
             mt='20'
             alignSelf='center'
             bg='primary'
@@ -131,7 +131,7 @@ const Profile = ({ navigation }: { navigation: any }) => {
             <Text fontSize='xl' fontWeight='bold' color='white'>
               MONITORING PROGRAM
             </Text>
-          </Button>
+          </Button> */}
         </VStack>
       </Box>
       {/* --------- Modals --------- */}
