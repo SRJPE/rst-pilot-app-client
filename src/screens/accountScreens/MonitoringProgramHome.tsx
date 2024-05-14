@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { Box, Button, Center, Heading, Text, VStack } from 'native-base'
+import { Box, Button, Center, Heading, Icon, Text, VStack } from 'native-base'
 import AppLogo from '../../components/Shared/AppLogo'
+import { Ionicons } from '@expo/vector-icons'
 
 const MonitoringProgramHome = ({ navigation }: { navigation: any }) => {
   return (
@@ -17,7 +18,7 @@ const MonitoringProgramHome = ({ navigation }: { navigation: any }) => {
           borderRadius={10}
           bg='primary'
           h='60px'
-          w='450px'
+          w='400px'
           shadow='5'
           onPress={() => {
             navigation.navigate('Monitoring Program', {
@@ -33,7 +34,7 @@ const MonitoringProgramHome = ({ navigation }: { navigation: any }) => {
           borderRadius={10}
           bg='primary'
           h='60px'
-          w='450px'
+          w='400px'
           shadow='5'
           onPress={() => {
             navigation.navigate('Monitoring Program', {
@@ -43,6 +44,21 @@ const MonitoringProgramHome = ({ navigation }: { navigation: any }) => {
         >
           <Text fontSize='xl' fontWeight='bold' color='white'>
             Join an existing program
+          </Text>
+        </Button>
+        <Button
+          borderRadius={10}
+          bg='primary'
+          h='60px'
+          w='400px'
+          shadow='5'
+          leftIcon={<Icon as={Ionicons} name='home' size='lg' color='white' />}
+          onPress={() => {
+            navigation.navigate('Home')
+          }}
+        >
+          <Text fontSize='xl' fontWeight='bold' color='white'>
+            Return Home
           </Text>
         </Button>
       </VStack>
