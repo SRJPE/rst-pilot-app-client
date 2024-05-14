@@ -317,7 +317,8 @@ export const crewMembersSchema = yup.object().shape({
   lastName: yup.string().required('Last name required'),
   phoneNumber: yup
     .string()
-    .required('Phone number required')
+    .nullable()
+    // .required('Phone number required')
     .matches(
       /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/,
       'Phone number is not valid'
