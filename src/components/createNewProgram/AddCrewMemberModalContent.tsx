@@ -40,11 +40,24 @@ const AddCrewMemberModalContent = ({
   const handleAddCrewMemberSubmission = (
     values: IndividualCrewMemberValuesI
   ) => {
-    console.log('🚀 ~ handleAddTrapSubmission ~ values:', values)
+    console.log('🚀 ~ handleAddTrapSubmission ~ values:', {
+      ...values,
+      isLead: !!values.isLead,
+    })
     if (values?.uid) {
-      dispatch(updateIndividualCrewMember(values))
+      dispatch(
+        updateIndividualCrewMember({
+          ...values,
+          isLead: !!values.isLead,
+        })
+      )
     } else {
-      dispatch(saveIndividualCrewMember(values))
+      dispatch(
+        saveIndividualCrewMember({
+          ...values,
+          isLead: !!values.isLead,
+        })
+      )
     }
   }
 
