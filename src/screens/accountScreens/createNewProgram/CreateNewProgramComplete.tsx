@@ -1,9 +1,9 @@
 import React from 'react'
-import { Box, Center, Heading, Text, VStack } from 'native-base'
+import { Box, Center, HStack, Heading, Text, VStack } from 'native-base'
 import AppLogo from '../../../components/Shared/AppLogo'
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
-import { useDispatch } from 'react-redux'
-import { AppDispatch } from '../../../redux/store'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../../../redux/store'
 import { resetCreateNewProgramHomeSlice } from '../../../redux/reducers/createNewProgramSlices/createNewProgramHomeSlice'
 import { resetEfficiencyTrialProtocolsSlice } from '../../../redux/reducers/createNewProgramSlices/efficiencyTrialProtocolsSlice'
 import { resetTrappingProtocolsSlice } from '../../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
@@ -13,7 +13,10 @@ import { resetTrappingSitesSlice } from '../../../redux/reducers/createNewProgra
 
 const CreateNewProgramComplete = ({ navigation }: { navigation: any }) => {
   const dispatch = useDispatch<AppDispatch>()
-
+  const createdProgramName = useSelector(
+    (state: RootState) =>
+      state.createNewProgramHome.values.monitoringProgramName
+  )
   const clearFormValues = () => {
     dispatch(resetCreateNewProgramHomeSlice())
     dispatch(resetTrappingSitesSlice())
@@ -31,9 +34,21 @@ const CreateNewProgramComplete = ({ navigation }: { navigation: any }) => {
         </Center>
         <VStack py='5%' px='15%' space={10}>
           <Heading alignSelf='center'>Program Created!</Heading>
-          <Text fontSize='2xl' color='grey'>
-            {`Welcome to ${'{Program Name}'}! You are now all set to \nstart trapping.`}
+
+          <VStack space={2} alignItems='center'>
+            <Text fontSize='2xl' color='grey'>
+              {`Welcome to ${createdProgramName}!`}
+            </Text>
+            <Text fontSize='2xl' color='grey'>
+              {`You are now all set to start trapping.`}
+            </Text>
+          </VStack>
+          {/* <Text fontSize='2xl' color='grey'>
+            {`Welcome to ${createdProgramName}!`}
           </Text>
+          <Text fontSize='2xl' color='grey'>
+            {`You are now all set to start trapping.`}
+          </Text> */}
         </VStack>
       </Box>
       <CreateNewProgramNavButtons
