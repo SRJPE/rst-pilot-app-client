@@ -104,7 +104,7 @@ const CrewMembers = ({
                 <Heading alignSelf='center'>Add Trapping Crew</Heading>
                 <Text fontSize='lg' color='grey'>
                   {
-                    'Please add some additional information about yourself and add your crew \nmembers. Accounts will be created for all crew'
+                    'Please add some additional information about yourself and add your crew \nmembers. Accounts will be created for all crew members.'
                   }
                 </Text>
               </VStack>

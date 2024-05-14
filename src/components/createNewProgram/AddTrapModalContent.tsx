@@ -156,7 +156,7 @@ const AddTrapModalContent = ({
                 />
 
                 <FormInputComponent
-                  label={'USGS station number'}
+                  label={'USGS Station Number'}
                   touched={touched}
                   errors={errors}
                   value={

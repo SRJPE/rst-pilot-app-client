@@ -121,7 +121,7 @@ const PermittingInformationInput = ({
               </Text>
               <Divider mb='2' />
               <VStack px='5%' py='2' space={3}>
-                <HStack space={260}>
+                <HStack space={250}>
                   <VStack space={2}>
                     <Text color='black' fontSize='xl'>
                       Date Issued
@@ -150,9 +150,9 @@ const PermittingInformationInput = ({
                   </VStack>
                 </HStack>
                 <Text fontSize='2xl' color='grey'>
-                  Trap will be stopped when:
+                  Trap will be stopped when
                 </Text>
-                <HStack space={10} justifyContent='space-between'>
+                <HStack space={20}>
                   <FormInputComponent
                     label={'Water temperature'}
                     touched={touched}

@@ -168,7 +168,7 @@ const HatcheryInformation = ({
                     <FormControl width={'45%'}>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
-                          Frequency of receiving fish{' '}
+                          Frequency of Receiving Fish{' '}
                         </Text>
                       </FormControl.Label>
                       <CustomSelect
@@ -184,8 +184,8 @@ const HatcheryInformation = ({
                       />
                     </FormControl>
                     <FormInputComponent
-                      width={'45%'}
-                      label={'Expected number of fish received at each pickup'}
+                      width={'49%'}
+                      label={'Expected Number of Fish'}
                       touched={touched}
                       errors={errors}
                       value={
