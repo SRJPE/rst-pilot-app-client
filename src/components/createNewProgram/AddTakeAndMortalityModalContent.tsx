@@ -29,10 +29,14 @@ const AddTakeAndMortalityModalContent = ({
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
-  const [modalDataTemp, setModalDataTemp] = useState({} as any)
+  const [modalDataTemp, setModalDataTemp] = useState(
+    IndividualTakeAndMortalityState as IndividualTakeAndMortalityStateI
+  )
 
   useEffect(() => {
-    setModalDataTemp(addTakeAndMortalityModalContent)
+    if (addTakeAndMortalityModalContent?.uid) {
+      setModalDataTemp(addTakeAndMortalityModalContent)
+    }
   }, [addTakeAndMortalityModalContent])
 
   const handleAddTakeAndMortalitySubmission = (
@@ -48,7 +52,8 @@ const AddTakeAndMortalityModalContent = ({
   return (
     <Formik
       validationSchema={takeAndMortalitySchema}
-      initialValues={IndividualTakeAndMortalityState}
+      enableReinitialize
+      initialValues={modalDataTemp}
       onSubmit={(values, { resetForm }) => {
         handleAddTakeAndMortalitySubmission(values)
         resetForm()
@@ -64,9 +69,6 @@ const AddTakeAndMortalityModalContent = ({
         errors,
         values,
       }) => {
-        useEffect(() => {
-          setValues(modalDataTemp)
-        }, [modalDataTemp])
         return (
           <>
             <CustomModalHeader
@@ -80,7 +82,7 @@ const AddTakeAndMortalityModalContent = ({
                   px='10'
                   shadow='3'
                   isDisabled={
-                    Object.values(touched).length === 0 ||
+                    (Object.values(touched).length === 0 && !values.uid) ||
                     (Object.values(touched).length > 0 &&
                       Object.values(errors).length > 0)
                   }

@@ -83,12 +83,17 @@ const PermittingInformationInput = ({
     )
   }
 
+  const handleTakeAndMortClose = () => {
+    setAddTakeAndMortalityModalOpen(false)
+    setAddTakeAndMortalityModalContent(IndividualTakeAndMortalityState)
+  }
+
   return (
     <>
       <Formik
         validationSchema={permittingInformationSchema}
         initialValues={permitInformationStore.values}
-        onSubmit={(values) => {
+        onSubmit={values => {
           handleAddPermittingInformationSubmission(values)
         }}
       >
@@ -259,25 +264,29 @@ const PermittingInformationInput = ({
       </Formik>
 
       {/* --------- Modals --------- */}
-      <CustomModal
-        isOpen={addTakeAndMortalityModalOpen}
-        closeModal={() => setAddTakeAndMortalityModalOpen(false)}
-        height='1/2'
-      >
-        <AddTakeAndMortalityModalContent
-          addTakeAndMortalityModalContent={addTakeAndMortalityModalContent}
-          closeModal={() => setAddTakeAndMortalityModalOpen(false)}
-        />
-      </CustomModal>
-      <CustomModal
-        isOpen={chooseFileModalOpen}
-        closeModal={() => setChooseFileModalOpen(false)}
-        height='1/3'
-      >
-        <ChooseFileModalContent
+      {addTakeAndMortalityModalOpen && (
+        <CustomModal
+          isOpen={addTakeAndMortalityModalOpen}
+          closeModal={handleTakeAndMortClose}
+          height='1/2'
+        >
+          <AddTakeAndMortalityModalContent
+            addTakeAndMortalityModalContent={addTakeAndMortalityModalContent}
+            closeModal={handleTakeAndMortClose}
+          />
+        </CustomModal>
+      )}
+      {chooseFileModalOpen && (
+        <CustomModal
+          isOpen={chooseFileModalOpen}
           closeModal={() => setChooseFileModalOpen(false)}
-        />
-      </CustomModal>
+          height='1/3'
+        >
+          <ChooseFileModalContent
+            closeModal={() => setChooseFileModalOpen(false)}
+          />
+        </CustomModal>
+      )}
     </>
   )
 }
