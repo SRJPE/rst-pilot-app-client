@@ -35,15 +35,13 @@ const AddCrewMemberModalContent = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
-  const [modalDataTemp, setModalDataTemp] = useState({} as any)
+  const [modalDataTemp, setModalDataTemp] = useState(
+    IndividualCrewMemberState as IndividualCrewMemberValuesI
+  )
 
   const handleAddCrewMemberSubmission = (
     values: IndividualCrewMemberValuesI
   ) => {
-    console.log('🚀 ~ handleAddTrapSubmission ~ values:', {
-      ...values,
-      isLead: !!values.isLead,
-    })
     if (values?.uid) {
       dispatch(
         updateIndividualCrewMember({
@@ -62,13 +60,16 @@ const AddCrewMemberModalContent = ({
   }
 
   useEffect(() => {
-    setModalDataTemp(addTrapModalContent)
+    if (addTrapModalContent.uid) {
+      setModalDataTemp(addTrapModalContent)
+    }
   }, [addTrapModalContent])
 
   return (
     <Formik
       validationSchema={crewMembersSchema}
-      initialValues={IndividualCrewMemberState}
+      enableReinitialize
+      initialValues={modalDataTemp}
       onSubmit={(values, { resetForm }) => {
         handleAddCrewMemberSubmission(values)
         resetForm()
@@ -86,9 +87,6 @@ const AddCrewMemberModalContent = ({
         errors,
         values,
       }) => {
-        useEffect(() => {
-          setValues(modalDataTemp)
-        }, [modalDataTemp])
         return (
           <>
             <CustomModalHeader
@@ -102,7 +100,7 @@ const AddCrewMemberModalContent = ({
                   px='10'
                   shadow='3'
                   isDisabled={
-                    Object.values(touched).length === 0 ||
+                    (Object.values(touched).length === 0 && !values.uid) ||
                     (Object.values(touched).length > 0 &&
                       Object.values(errors).length > 0)
                   }

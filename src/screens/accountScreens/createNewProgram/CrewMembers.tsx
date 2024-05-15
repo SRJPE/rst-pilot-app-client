@@ -70,10 +70,15 @@ const CrewMembers = ({
   const handleShowTableModal = (selectedRowData: any) => {
     const modalDataContainer = {} as any
     Object.keys(selectedRowData).forEach((key: string) => {
-      modalDataContainer[key] = selectedRowData[key].toString()
+      modalDataContainer[key] = selectedRowData?.[key]?.toString()
     })
     setAddTrapModalContent(modalDataContainer)
     setAddCrewMemberModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setAddCrewMemberModalOpen(false)
+    setAddTrapModalContent(IndividualCrewMemberState)
   }
 
   return (
@@ -81,7 +86,7 @@ const CrewMembers = ({
       <Formik
         validationSchema={crewMembersLeadSchema}
         initialValues={{ agency: '', orcidId: '' }}
-        onSubmit={(values) => {
+        onSubmit={values => {
           handleSaveTeamLeadInformation(values)
         }}
       >
@@ -192,16 +197,18 @@ const CrewMembers = ({
             </View>
             <CreateNewProgramNavButtons navigation={navigation} />
             {/* --------- Modals --------- */}
-            <CustomModal
-              isOpen={addCrewMemberModalOpen}
-              closeModal={() => setAddCrewMemberModalOpen(false)}
-              height='50%'
-            >
-              <AddCrewMemberModalContent
-                addTrapModalContent={addTrapModalContent}
-                closeModal={() => setAddCrewMemberModalOpen(false)}
-              />
-            </CustomModal>
+            {addCrewMemberModalOpen && (
+              <CustomModal
+                isOpen={addCrewMemberModalOpen}
+                closeModal={handleCloseModal}
+                height='50%'
+              >
+                <AddCrewMemberModalContent
+                  addTrapModalContent={addTrapModalContent}
+                  closeModal={handleCloseModal}
+                />
+              </CustomModal>
+            )}
           </>
         )}
       </Formik>
