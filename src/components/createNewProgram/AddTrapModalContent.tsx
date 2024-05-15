@@ -31,19 +31,10 @@ const AddTrapModalContent = ({
   closeModal: any
   addTrapModalContent?: any
 }) => {
-  console.log('🚀 ~ addTrapModalContent:', addTrapModalContent)
-  console.log('individualTrappingSiteState', individualTrappingSiteState)
   const dispatch = useDispatch<AppDispatch>()
-  const [modalDataTemp, setModalDataTemp] = useState({
-    trapName: '',
-    trapLatitude: '',
-    trapLongitude: '',
-    coneSize: '',
-    USGSStationNumber: '',
-    releaseSiteName: '',
-    releaseSiteLatitude: '',
-    releaseSiteLongitude: '',
-  } as any)
+  const [modalDataTemp, setModalDataTemp] = useState(
+    individualTrappingSiteState as IndividualTrappingSiteValuesI
+  )
 
   const handleAddTrapSubmission = (values: IndividualTrappingSiteValuesI) => {
     if (values?.uid) {

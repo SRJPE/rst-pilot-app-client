@@ -36,6 +36,11 @@ const TrappingProtocolsTable = ({ navigation }: { navigation: any }) => {
     setAddTrappingProtocolModalOpen(true)
   }
 
+  const handleCloseModal = () => {
+    setAddTrappingProtocolModalOpen(false)
+    setAddTrappingProtocolsModalContent(IndividualTrappingProtocolState)
+  }
+
   return (
     <>
       <View flex={1} bg='#fff'>
@@ -56,7 +61,14 @@ const TrappingProtocolsTable = ({ navigation }: { navigation: any }) => {
         </ScrollView>
         <Divider my='1%' />
         <VStack py='5%' px='10%' space={5}>
-          <Pressable onPress={() => setAddTrappingProtocolModalOpen(true)}>
+          <Pressable
+            onPress={() => {
+              setAddTrappingProtocolsModalContent(
+                IndividualTrappingProtocolState
+              )
+              setAddTrappingProtocolModalOpen(true)
+            }}
+          >
             <HStack alignItems='center'>
               <Icon
                 as={Ionicons}
@@ -74,16 +86,18 @@ const TrappingProtocolsTable = ({ navigation }: { navigation: any }) => {
       </View>
       <CreateNewProgramNavButtons navigation={navigation} />
       {/* --------- Modals --------- */}
-      <CustomModal
-        isOpen={addTrappingProtocolModalOpen}
-        closeModal={() => setAddTrappingProtocolModalOpen(false)}
-        height='1/3'
-      >
-        <AddTrappingProtocolModalContent
-          addTrappingProtocolsModalContent={addTrappingProtocolsModalContent}
-          closeModal={() => setAddTrappingProtocolModalOpen(false)}
-        />
-      </CustomModal>
+      {addTrappingProtocolModalOpen && (
+        <CustomModal
+          isOpen={addTrappingProtocolModalOpen}
+          closeModal={handleCloseModal}
+          height='1/3'
+        >
+          <AddTrappingProtocolModalContent
+            addTrappingProtocolsModalContent={addTrappingProtocolsModalContent}
+            closeModal={handleCloseModal}
+          />
+        </CustomModal>
+      )}
     </>
   )
 }

@@ -23,19 +23,19 @@ const AddTrappingProtocolModalContent = ({
   closeModal: any
   addTrappingProtocolsModalContent: any
 }) => {
-  // console.log(
-  //   '🚀 ~ addTrappingProtocolsModalContent:',
-  //   addTrappingProtocolsModalContent
-  // )
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
-  const [modalDataTemp, setModalDataTemp] = useState({} as any)
+  const [modalDataTemp, setModalDataTemp] = useState(
+    IndividualTrappingProtocolState as IndividualTrappingProtocolValuesI
+  )
 
   useEffect(() => {
-    setModalDataTemp(addTrappingProtocolsModalContent)
+    if (addTrappingProtocolsModalContent.uid) {
+      setModalDataTemp(addTrappingProtocolsModalContent)
+    }
   }, [addTrappingProtocolsModalContent])
 
   const handleAddTrappingProtocolSubmission = (
@@ -49,16 +49,18 @@ const AddTrappingProtocolModalContent = ({
   }
   const handleDelete = () => {
     dispatch(deleteIndividualTrappingProtocol(addTrappingProtocolsModalContent))
-    setModalDataTemp({})
+    setModalDataTemp(IndividualTrappingProtocolState)
   }
 
   return (
     <Formik
       validationSchema={trappingProtocolsSchema}
-      initialValues={IndividualTrappingProtocolState}
-      onSubmit={(values, { resetForm }) => {
+      initialValues={modalDataTemp}
+      enableReinitialize
+      onSubmit={(values, { resetForm, setSubmitting }) => {
         handleAddTrappingProtocolSubmission(values)
         resetForm()
+        setSubmitting(false)
         // setModalDataTemp({})
       }}
     >
@@ -72,9 +74,6 @@ const AddTrappingProtocolModalContent = ({
         errors,
         values,
       }) => {
-        useEffect(() => {
-          setValues(modalDataTemp)
-        }, [modalDataTemp])
         return (
           <>
             <CustomModalHeader
@@ -83,7 +82,7 @@ const AddTrappingProtocolModalContent = ({
               closeModal={closeModal}
               headerButton={
                 <HStack space={8}>
-                  {addTrappingProtocolsModalContent?.uid && (
+                  {values?.uid && (
                     <Button
                       bg='error'
                       mx='2'
@@ -110,7 +109,7 @@ const AddTrappingProtocolModalContent = ({
                     px='10'
                     shadow='3'
                     isDisabled={
-                      Object.values(touched).length === 0 ||
+                      (Object.values(touched).length === 0 && !values.uid) ||
                       (Object.values(touched).length > 0 &&
                         Object.values(errors).length > 0)
                     }
