@@ -139,7 +139,7 @@ const CreateNewProgramHome = ({
 
   useEffect(() => {
     const checkForm = createNewProgramHomeStore.steps.every(
-      (step) => step.completed === true
+      step => step.completed === true
     )
     if (checkForm) {
       setFormIsCompleteAndValid(true)
@@ -235,7 +235,7 @@ const CreateNewProgramHome = ({
             fundingAgencyValues.indexOf(
               createNewProgramHomeStore.values.fundingAgency
             ) + 1,
-          siteName: groupSiteName,
+          siteName: groupSiteName || trapName,
           coneSizeFt: Number(coneSize),
           xCoord: Number(trapLatitude),
           yCoord: Number(trapLongitude),
@@ -432,7 +432,7 @@ const CreateNewProgramHome = ({
           <VStack space={4}>
             <HStack space={5}>
               <Heading mb='4'>Create New Program</Heading>
-              {/* <Button
+              <Button
                 bg='primary'
                 w='40'
                 h='10'
@@ -441,7 +441,7 @@ const CreateNewProgramHome = ({
                 }}
               >
                 TEST SAVE
-              </Button> */}
+              </Button>
             </HStack>
             <VStack
               space={2}

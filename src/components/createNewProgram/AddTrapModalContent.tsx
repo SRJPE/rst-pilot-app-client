@@ -116,7 +116,7 @@ const AddTrapModalContent = ({
                     }}
                   >
                     <Text fontSize='xl' color='white'>
-                      {modalDataTemp?.uid ? 'Save' : 'Add Protocol'}
+                      {modalDataTemp?.uid ? 'Save' : 'Add Trap'}
                     </Text>
                   </Button>
                 </HStack>

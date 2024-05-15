@@ -12,13 +12,15 @@ interface CustomSelectI {
   style?: StyleProp<ViewStyle>
 }
 
-const CustomSelect: React.FC<CustomSelectI> = (props) => {
+const CustomSelect: React.FC<CustomSelectI> = props => {
   const handleOnChange = useCallback(
     (itemValue: any) => {
       props.onValueChange(itemValue)
     },
     [props.selectedValue]
   )
+
+  const ignoreFormat = ['Species', 'Trap Site']
 
   return (
     <Select
@@ -44,7 +46,7 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
               <Select.Item
                 key={item.id ?? idx}
                 label={
-                  props.placeholder === 'Species'
+                  ignoreFormat.includes(props.placeholder)
                     ? item.label
                     : item.label.replace(/\w+/g, capitalize)
                 }
