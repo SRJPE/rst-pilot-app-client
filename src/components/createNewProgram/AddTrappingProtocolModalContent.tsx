@@ -52,6 +52,8 @@ const AddTrappingProtocolModalContent = ({
     setModalDataTemp(IndividualTrappingProtocolState)
   }
 
+  const checkIfValid = (values: any) => {}
+
   return (
     <Formik
       validationSchema={trappingProtocolsSchema}
@@ -72,6 +74,7 @@ const AddTrappingProtocolModalContent = ({
         touched,
         errors,
         values,
+        isValid,
       }) => {
         return (
           <>
@@ -103,9 +106,11 @@ const AddTrappingProtocolModalContent = ({
                     px='10'
                     shadow='3'
                     isDisabled={
-                      (Object.values(touched).length === 0 && !values.uid) ||
-                      (Object.values(touched).length > 0 &&
-                        Object.values(errors).length > 0)
+                      // disabled b/c has not been touched and is not an edit
+                      (Object.values(touched).length === 0 &&
+                        !values.species) ||
+                      // disabled b/c formik says it is invalid
+                      !isValid
                     }
                     onPress={() => {
                       handleSubmit()
