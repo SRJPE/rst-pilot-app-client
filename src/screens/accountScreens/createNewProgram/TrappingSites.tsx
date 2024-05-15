@@ -99,7 +99,7 @@ const TrappingSites = ({
           >
             <VStack m='3%'>
               <Text fontSize='2xl' mb='4'>
-                You Added multiple traps to one stream. Do these traps belong to
+                You added multiple traps to one stream. Do these traps belong to
                 a single site?
               </Text>
               <Text fontSize='md' mb='4'>
@@ -107,11 +107,11 @@ const TrappingSites = ({
                 either:
               </Text>
               <Text fontSize='md'>
-                (a) being run simultaneously and can be summed together to
-                represent daily catch; or
+                (a) Being run simultaneously and can be summed together to
+                represent daily catch.{' '}
               </Text>
               <Text fontSize='md'>
-                (b) there are multiple trap locations that are rotated through
+                (b) There are multiple trap locations that are rotated through
                 time but all trap locations represent the same site location.{' '}
               </Text>
               <CreateNewProgramNavButtons
@@ -121,15 +121,15 @@ const TrappingSites = ({
             </VStack>
           </Box>
         )}
-        {trapSitesArray.length <= 1 && (
-          <CreateNewProgramNavButtons navigation={navigation} />
-        )}
       </View>
+      {trapSitesArray.length <= 1 && (
+        <CreateNewProgramNavButtons navigation={navigation} />
+      )}
       {/* --------- Modals --------- */}
       <CustomModal
         isOpen={addTrapModalOpen}
         closeModal={() => setAddTrapModalOpen(false)}
-        height='70%'
+        height='65%'
       >
         <AddTrapModalContent
           addTrapModalContent={addTrapModalContent}
