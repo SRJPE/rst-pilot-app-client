@@ -215,7 +215,7 @@ const PermittingInformationInput = ({
                 />
               </ScrollView>
               <Divider my='1%' />
-              <VStack py='5%' px='10%' space={5}>
+              <VStack mt='2%' px='6%' space={5}>
                 <Pressable
                   onPress={() => setAddTakeAndMortalityModalOpen(true)}
                 >
