@@ -17,9 +17,9 @@ const headers: Header[] = [
   { colData: 'firstName', label: 'First Name', numeric: false, flex: 1 },
   { colData: 'lastName', label: 'Last Name', numeric: false, flex: 1 },
   { colData: 'phoneNumber', label: 'Phone', numeric: false, flex: 1 },
-  { colData: 'email', label: 'Email', numeric: false, flex: 2 },
-  { colData: 'isLead', label: 'Lead', numeric: false, flex: 1 },
-  { colData: 'agency', label: 'Agency', numeric: false, flex: 1 },
+  { colData: 'email', label: 'Email', numeric: false, flex: 1.5 },
+  { colData: 'isLead', label: 'Lead', numeric: false, flex: 0.5 },
+  { colData: 'agency', label: 'Agency', numeric: false, flex: 0.5 },
 ]
 
 const CrewMemberDataTable = ({
@@ -52,7 +52,7 @@ const CrewMemberDataTable = ({
         <DataTable.Title
           style={{
             paddingHorizontal: 0,
-            flex: 0.4,
+            flex: 0.3,
           }}
         >
           {''}
