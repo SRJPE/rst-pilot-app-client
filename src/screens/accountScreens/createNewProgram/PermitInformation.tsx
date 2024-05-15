@@ -4,9 +4,9 @@ import AppLogo from '../../../components/Shared/AppLogo'
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
 
 const PermitInformation = ({ navigation }: { navigation: any }) => {
-  const [checkboxGroupValue, setCheckboxGroupValue] = useState(
-    [] as Array<string>
-  )
+  const [checkboxGroupValue, setCheckboxGroupValue] = useState([
+    '4d',
+  ] as Array<string>)
 
   return (
     <>
@@ -19,6 +19,10 @@ const PermitInformation = ({ navigation }: { navigation: any }) => {
           <Text fontSize='2xl' color='grey'>
             Select the permits that you hold for your RST program:
           </Text>
+          <Text fontSize='xl' fontWeight='bold' color='error'>
+            *** Still In Development ***
+          </Text>
+
           <Checkbox.Group //https://github.com/GeekyAnts/NativeBase/issues/5073
             colorScheme='green'
             px='5%'
@@ -45,7 +49,7 @@ const PermitInformation = ({ navigation }: { navigation: any }) => {
               my='1'
               _checked={{ bg: 'primary', borderColor: 'primary' }}
             >
-              Other
+              Other (Contact FlowWst for more information.)
             </Checkbox>
           </Checkbox.Group>
         </VStack>
