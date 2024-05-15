@@ -207,7 +207,7 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),
@@ -224,7 +224,7 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),
@@ -236,7 +236,7 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),
@@ -293,18 +293,18 @@ export const trappingSitesSchema = yup.object().shape({
   USGSStationNumber: yup
     .number()
     // .nullable()
-    .required('Trap latitude required')
+    .required('USGS Station Number required')
     .typeError('Input must be a number'),
   releaseSiteName: yup.string().required('Release site name required'),
   releaseSiteLatitude: yup
     .number()
     // .nullable()
-    .required('Trap latitude required')
+    .required('Release site latitude required')
     .typeError('Input must be a number'),
   releaseSiteLongitude: yup
     .number()
     // .nullable()
-    .required('Trap latitude required')
+    .required('Release site longitude required')
     .typeError('Input must be a number'),
 })
 
