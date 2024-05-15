@@ -34,6 +34,14 @@ const CrewMemberDataTable = ({
   useEffect(() => {
     setProcessedData(Object.values(crewMembersStore))
   }, [crewMembersStore])
+  const formatPhoneNumber = (phoneNumber: string) => {
+    const cleaned = ('' + phoneNumber).replace(/\D/g, '')
+    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/)
+    if (match) {
+      return match[1] + '-' + match[2] + '-' + match[3]
+    }
+    return null
+  }
   return (
     <DataTable style={{}}>
       <DataTable.Header>
@@ -67,6 +75,8 @@ const CrewMemberDataTable = ({
                 const currentCol = headers.find(
                   (header) => header.colData === key
                 )
+                console.log('🚀 ~ {processedData.map ~ key:', key)
+                console.log('🚀 ~ {processedData.map ~ cellValue:', cellValue)
 
                 if (currentCol)
                   return (
@@ -78,7 +88,9 @@ const CrewMemberDataTable = ({
                         flex: currentCol.flex,
                       }}
                     >
-                      {typeof cellValue === 'boolean'
+                      {key === 'phoneNumber'
+                        ? formatPhoneNumber(cellValue)
+                        : typeof cellValue === 'boolean'
                         ? cellValue.toString().charAt(0).toUpperCase() +
                           cellValue.toString().slice(1)
                         : cellValue}
