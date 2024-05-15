@@ -93,9 +93,13 @@ export default function Home({ navigation }: { navigation: any }) {
       <Heading fontWeight={300} fontSize={50}>
         Welcome!
       </Heading>
-      <Text fontWeight={300} fontSize={23}>
-        Select the action you would like to perform.
-      </Text>
+      {staggerOpen ? (
+        <View py='18'></View>
+      ) : (
+        <Text fontWeight={300} fontSize={23}>
+          Select the action you would like to perform.
+        </Text>
+      )}
       {/* <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
         <Text fontWeight={300} fontSize={20} marginBottom={5}>
           Recent Items
