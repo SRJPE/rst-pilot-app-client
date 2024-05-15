@@ -51,6 +51,10 @@ const TrappingSites = ({
     setAddTrapModalOpen(true)
   }
 
+  const closeModal = () => {
+    setAddTrapModalOpen(false)
+  }
+
   return (
     <>
       <View bg='#fff' flex={1} px={6}>
@@ -126,16 +130,18 @@ const TrappingSites = ({
         <CreateNewProgramNavButtons navigation={navigation} />
       )}
       {/* --------- Modals --------- */}
-      <CustomModal
-        isOpen={addTrapModalOpen}
-        closeModal={() => setAddTrapModalOpen(false)}
-        height='65%'
-      >
-        <AddTrapModalContent
-          addTrapModalContent={addTrapModalContent}
-          closeModal={() => setAddTrapModalOpen(false)}
-        />
-      </CustomModal>
+      {addTrapModalOpen && (
+        <CustomModal
+          isOpen={addTrapModalOpen}
+          closeModal={closeModal}
+          height='65%'
+        >
+          <AddTrapModalContent
+            addTrapModalContent={addTrapModalContent}
+            closeModal={closeModal}
+          />
+        </CustomModal>
+      )}
     </>
   )
 }

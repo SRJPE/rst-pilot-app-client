@@ -32,11 +32,20 @@ const AddTrapModalContent = ({
   addTrapModalContent?: any
 }) => {
   console.log('🚀 ~ addTrapModalContent:', addTrapModalContent)
+  console.log('individualTrappingSiteState', individualTrappingSiteState)
   const dispatch = useDispatch<AppDispatch>()
-  const [modalDataTemp, setModalDataTemp] = useState({} as any)
+  const [modalDataTemp, setModalDataTemp] = useState({
+    trapName: '',
+    trapLatitude: '',
+    trapLongitude: '',
+    coneSize: '',
+    USGSStationNumber: '',
+    releaseSiteName: '',
+    releaseSiteLatitude: '',
+    releaseSiteLongitude: '',
+  } as any)
 
   const handleAddTrapSubmission = (values: IndividualTrappingSiteValuesI) => {
-    console.log('🚀 ~ handleAddTrapSubmission ~ values:', values?.uid)
     if (values?.uid) {
       dispatch(updateIndividualTrapSite(values))
     } else {
@@ -45,30 +54,30 @@ const AddTrapModalContent = ({
   }
 
   useEffect(() => {
-    setModalDataTemp(addTrapModalContent)
+    if (addTrapModalContent?.uid) {
+      setModalDataTemp(addTrapModalContent)
+    }
   }, [addTrapModalContent])
 
   return (
     <Formik
       validationSchema={trappingSitesSchema}
-      initialValues={individualTrappingSiteState}
-      onSubmit={(values, { resetForm }) => {
+      enableReinitialize
+      initialValues={modalDataTemp}
+      onSubmit={(values, { resetForm, setSubmitting }) => {
         handleAddTrapSubmission(values)
         resetForm()
+        setSubmitting(false)
       }}
     >
       {({
         handleChange,
         handleBlur,
         handleSubmit,
-        setValues,
         touched,
         errors,
         values,
       }) => {
-        useEffect(() => {
-          setValues(modalDataTemp)
-        }, [modalDataTemp])
         return (
           <>
             <CustomModalHeader
@@ -82,7 +91,7 @@ const AddTrapModalContent = ({
                   px='10'
                   shadow='3'
                   isDisabled={
-                    Object.values(touched).length === 0 ||
+                    (Object.values(touched).length === 0 && !values.uid) ||
                     (Object.values(touched).length > 0 &&
                       Object.values(errors).length > 0)
                   }
