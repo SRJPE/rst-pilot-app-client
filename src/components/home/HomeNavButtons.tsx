@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   Button,
   HStack,
@@ -13,7 +13,7 @@ import {
   Icon,
   Badge,
 } from 'native-base'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, useWindowDimensions } from 'react-native'
 import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
@@ -62,6 +62,27 @@ export default function BottomNavigation({
   staggerOpen?: boolean
 }) {
   const { isOpen, onToggle, onClose } = useDisclose()
+  const [topStaggerTranslateXValue, setTopStaggerTranslateXValue] = useState(
+    // -94.5 as number
+    -133.5 as number
+  )
+  const [bottomStaggerTranslateXValue, setBottomStaggerTranslateXValue] =
+    useState(
+      // -173 as number
+      -133.5 as number
+    )
+
+  // const { height: screenHeight } = useWindowDimensions()
+
+  // useEffect(() => {
+  //   if (screenHeight > 1193) {
+  //     console.log('🚀 ~ useEffect ~ greater:')
+  //     setTopStaggerTranslateXValue(-133.5)
+  //     setBottomStaggerTranslateXValue(-133.5)
+  //   } else {
+  //     console.log('🚀 ~ useEffect ~ lower:')
+  //   }
+  // }, [screenHeight])
 
   const handlePressQCData = useCallback(() => {
     navigation.navigate('Quality Control')
@@ -140,7 +161,9 @@ export default function BottomNavigation({
               <HStack
                 space={2}
                 justifyContent='flex-end'
-                style={[{ transform: [{ translateX: -94.5 }] }]}
+                style={[
+                  { transform: [{ translateX: topStaggerTranslateXValue }] },
+                ]}
               >
                 <Badge
                   alignSelf='center'
@@ -174,7 +197,9 @@ export default function BottomNavigation({
               <HStack
                 space={2}
                 alignItems='center'
-                style={[{ transform: [{ translateX: -173 }] }]}
+                style={[
+                  { transform: [{ translateX: bottomStaggerTranslateXValue }] },
+                ]}
               >
                 <Badge
                   alignSelf='center'
