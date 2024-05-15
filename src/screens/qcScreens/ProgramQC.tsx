@@ -47,7 +47,7 @@ function ProgramQC({
             w='4/5'
             bg={returnButtonColor(program.programId)}
             // hardcode TRUE for now
-            disabled={returnButtonDisabled(program.programId)}
+            disabled={true || returnButtonDisabled(program.programId)}
             isDisabled
             mb={5}
             onPress={() => {
