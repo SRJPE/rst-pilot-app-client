@@ -70,10 +70,6 @@ export const trappingProtocolsSlice = createSlice({
         if (trappingProtocolsStoreCopy[key].uid === action.payload.uid) {
           id = key
           delete trappingProtocolsStoreCopy[id]
-          // trappingSitesStoreCopy[id] = {
-          //   ...action.payload,
-          //   uid: action.payload.uid,
-          // }
           state.trappingProtocolsStore = trappingProtocolsStoreCopy
         }
       }

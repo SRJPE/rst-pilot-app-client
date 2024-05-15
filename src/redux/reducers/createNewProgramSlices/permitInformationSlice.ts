@@ -91,6 +91,20 @@ export const permitInformationSlice = createSlice({
         }
       }
     },
+    deleteIndividualTakeAndMortality: (state, action) => {
+      let takeAndMortalityValuesStoreCopy = cloneDeep(
+        state.takeAndMortalityValues
+      )
+      let id: any = null
+
+      for (let key in takeAndMortalityValuesStoreCopy) {
+        if (takeAndMortalityValuesStoreCopy[key].uid === action.payload.uid) {
+          id = key
+          delete takeAndMortalityValuesStoreCopy[id]
+          state.takeAndMortalityValues = takeAndMortalityValuesStoreCopy
+        }
+      }
+    },
   },
 })
 
@@ -99,6 +113,7 @@ export const {
   savePermitInformationValues,
   saveIndividualTakeAndMortality,
   updateIndividualTakeAndMortality,
+  deleteIndividualTakeAndMortality,
 } = permitInformationSlice.actions
 
 export default permitInformationSlice.reducer
