@@ -15,6 +15,7 @@ import {
   IndividualCrewMemberState,
   saveIndividualCrewMember,
   updateIndividualCrewMember,
+  deleteIndividualCrewMember,
 } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
@@ -65,14 +66,20 @@ const AddCrewMemberModalContent = ({
     }
   }, [addTrapModalContent])
 
+  const handleDelete = () => {
+    dispatch(deleteIndividualCrewMember(addTrapModalContent))
+    setModalDataTemp(IndividualCrewMemberState)
+  }
+
   return (
     <Formik
       validationSchema={crewMembersSchema}
       enableReinitialize
       initialValues={modalDataTemp}
-      onSubmit={(values, { resetForm }) => {
+      onSubmit={(values, { resetForm, setSubmitting }) => {
         handleAddCrewMemberSubmission(values)
         resetForm()
+        setSubmitting(false)
       }}
     >
       {({
@@ -82,7 +89,6 @@ const AddCrewMemberModalContent = ({
         setFieldValue,
         setFieldTouched,
         setValues,
-
         touched,
         errors,
         values,
@@ -94,25 +100,43 @@ const AddCrewMemberModalContent = ({
               showHeaderButton={true}
               closeModal={closeModal}
               headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    (Object.values(touched).length === 0 && !values.uid) ||
-                    (Object.values(touched).length > 0 &&
-                      Object.values(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Save
-                  </Text>
-                </Button>
+                <HStack space={8}>
+                  {values?.uid && (
+                    <Button
+                      bg='error'
+                      mx='2'
+                      px='10'
+                      shadow='3'
+                      onPress={() => {
+                        handleDelete()
+                        closeModal()
+                      }}
+                    >
+                      <Text fontSize='xl' color='white'>
+                        Delete{' '}
+                      </Text>
+                    </Button>
+                  )}
+                  <Button
+                    bg='primary'
+                    mx='2'
+                    px='10'
+                    shadow='3'
+                    isDisabled={
+                      (Object.values(touched).length === 0 && !values.uid) ||
+                      (Object.values(touched).length > 0 &&
+                        Object.values(errors).length > 0)
+                    }
+                    onPress={() => {
+                      handleSubmit()
+                      closeModal()
+                    }}
+                  >
+                    <Text fontSize='xl' color='white'>
+                      {modalDataTemp?.uid ? 'Save' : 'Add Protocol'}
+                    </Text>
+                  </Button>
+                </HStack>
               }
             />
             <VStack mx='5%' my='2%' space={4}>

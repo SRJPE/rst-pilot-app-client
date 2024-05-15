@@ -12,6 +12,7 @@ import {
 
 import { useDispatch } from 'react-redux'
 import {
+  deleteIndividualTrapSite,
   individualTrappingSiteState,
   IndividualTrappingSiteValuesI,
   saveIndividualTrapSite,
@@ -50,6 +51,11 @@ const AddTrapModalContent = ({
     }
   }, [addTrapModalContent])
 
+  const handleDelete = () => {
+    dispatch(deleteIndividualTrapSite(addTrapModalContent))
+    setModalDataTemp(individualTrappingSiteState)
+  }
+
   return (
     <Formik
       validationSchema={trappingSitesSchema}
@@ -76,25 +82,43 @@ const AddTrapModalContent = ({
               showHeaderButton={true}
               closeModal={closeModal}
               headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    (Object.values(touched).length === 0 && !values.uid) ||
-                    (Object.values(touched).length > 0 &&
-                      Object.values(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Add Trap
-                  </Text>
-                </Button>
+                <HStack space={8}>
+                  {values?.uid && (
+                    <Button
+                      bg='error'
+                      mx='2'
+                      px='10'
+                      shadow='3'
+                      onPress={() => {
+                        handleDelete()
+                        closeModal()
+                      }}
+                    >
+                      <Text fontSize='xl' color='white'>
+                        Delete{' '}
+                      </Text>
+                    </Button>
+                  )}
+                  <Button
+                    bg='primary'
+                    mx='2'
+                    px='10'
+                    shadow='3'
+                    isDisabled={
+                      (Object.values(touched).length === 0 && !values.uid) ||
+                      (Object.values(touched).length > 0 &&
+                        Object.values(errors).length > 0)
+                    }
+                    onPress={() => {
+                      handleSubmit()
+                      closeModal()
+                    }}
+                  >
+                    <Text fontSize='xl' color='white'>
+                      {modalDataTemp?.uid ? 'Save' : 'Add Protocol'}
+                    </Text>
+                  </Button>
+                </HStack>
               }
             />
             <VStack mx='5%' my='2%' space={6}>

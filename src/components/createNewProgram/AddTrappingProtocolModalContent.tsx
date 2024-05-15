@@ -61,7 +61,6 @@ const AddTrappingProtocolModalContent = ({
         handleAddTrappingProtocolSubmission(values)
         resetForm()
         setSubmitting(false)
-        // setModalDataTemp({})
       }}
     >
       {({
@@ -88,11 +87,6 @@ const AddTrappingProtocolModalContent = ({
                       mx='2'
                       px='10'
                       shadow='3'
-                      // isDisabled={
-                      //   Object.values(touched).length === 0 ||
-                      //   (Object.values(touched).length > 0 &&
-                      //     Object.values(errors).length > 0)
-                      // }
                       onPress={() => {
                         handleDelete()
                         closeModal()
