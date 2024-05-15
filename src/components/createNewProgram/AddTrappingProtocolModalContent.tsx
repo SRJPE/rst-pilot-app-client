@@ -8,6 +8,7 @@ import FormInputComponent from '../../components/Shared/FormInputComponent'
 import {
   IndividualTrappingProtocolState,
   IndividualTrappingProtocolValuesI,
+  deleteIndividualTrappingProtocol,
   saveIndividualTrappingProtocol,
   updateIndividualTrappingProtocol,
 } from '../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
@@ -22,6 +23,10 @@ const AddTrappingProtocolModalContent = ({
   closeModal: any
   addTrappingProtocolsModalContent: any
 }) => {
+  // console.log(
+  //   '🚀 ~ addTrappingProtocolsModalContent:',
+  //   addTrappingProtocolsModalContent
+  // )
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -42,6 +47,10 @@ const AddTrappingProtocolModalContent = ({
       dispatch(saveIndividualTrappingProtocol(values))
     }
   }
+  const handleDelete = () => {
+    dispatch(deleteIndividualTrappingProtocol(addTrappingProtocolsModalContent))
+    setModalDataTemp({})
+  }
 
   return (
     <Formik
@@ -50,6 +59,7 @@ const AddTrappingProtocolModalContent = ({
       onSubmit={(values, { resetForm }) => {
         handleAddTrappingProtocolSubmission(values)
         resetForm()
+        // setModalDataTemp({})
       }}
     >
       {({
@@ -72,25 +82,48 @@ const AddTrappingProtocolModalContent = ({
               showHeaderButton={true}
               closeModal={closeModal}
               headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    Object.values(touched).length === 0 ||
-                    (Object.values(touched).length > 0 &&
-                      Object.values(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Add Protocol
-                  </Text>
-                </Button>
+                <HStack space={8}>
+                  {addTrappingProtocolsModalContent?.uid && (
+                    <Button
+                      bg='error'
+                      mx='2'
+                      px='10'
+                      shadow='3'
+                      // isDisabled={
+                      //   Object.values(touched).length === 0 ||
+                      //   (Object.values(touched).length > 0 &&
+                      //     Object.values(errors).length > 0)
+                      // }
+                      onPress={() => {
+                        handleDelete()
+                        closeModal()
+                      }}
+                    >
+                      <Text fontSize='xl' color='white'>
+                        Delete{' '}
+                      </Text>
+                    </Button>
+                  )}
+                  <Button
+                    bg='primary'
+                    mx='2'
+                    px='10'
+                    shadow='3'
+                    isDisabled={
+                      Object.values(touched).length === 0 ||
+                      (Object.values(touched).length > 0 &&
+                        Object.values(errors).length > 0)
+                    }
+                    onPress={() => {
+                      handleSubmit()
+                      closeModal()
+                    }}
+                  >
+                    <Text fontSize='xl' color='white'>
+                      {modalDataTemp?.uid ? 'Save' : 'Add Protocol'}
+                    </Text>
+                  </Button>
+                </HStack>
               }
             />
             <VStack mx='5%' my='2%' space={6}>
