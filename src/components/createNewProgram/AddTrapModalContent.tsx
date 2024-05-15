@@ -5,6 +5,7 @@ import {
   Divider,
   HStack,
   Icon,
+  KeyboardAvoidingView,
   Pressable,
   Text,
   VStack,
@@ -76,9 +77,9 @@ const AddTrapModalContent = ({
         values,
       }) => {
         return (
-          <>
+          <KeyboardAvoidingView flex='1' behavior='padding'>
             <CustomModalHeader
-              headerText={'Add Traps'}
+              headerText={'Add Trap'}
               showHeaderButton={true}
               closeModal={closeModal}
               headerButton={
@@ -250,7 +251,7 @@ const AddTrapModalContent = ({
                 </Pressable> */}
               </HStack>
             </VStack>
-          </>
+          </KeyboardAvoidingView>
         )
       }}
     </Formik>

@@ -93,7 +93,7 @@ const PermittingInformationInput = ({
       <Formik
         validationSchema={permittingInformationSchema}
         initialValues={permitInformationStore.values}
-        onSubmit={values => {
+        onSubmit={(values) => {
           handleAddPermittingInformationSubmission(values)
         }}
       >
@@ -268,7 +268,7 @@ const PermittingInformationInput = ({
         <CustomModal
           isOpen={addTakeAndMortalityModalOpen}
           closeModal={handleTakeAndMortClose}
-          height='1/2'
+          height='55%'
         >
           <AddTakeAndMortalityModalContent
             addTakeAndMortalityModalContent={addTakeAndMortalityModalContent}

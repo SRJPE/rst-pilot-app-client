@@ -1,5 +1,13 @@
 import { Formik } from 'formik'
-import { Button, Divider, FormControl, HStack, Text, VStack } from 'native-base'
+import {
+  Button,
+  Divider,
+  FormControl,
+  HStack,
+  KeyboardAvoidingView,
+  Text,
+  VStack,
+} from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { trappingProtocolsSchema } from '../../utils/helpers/yupValidations'
@@ -77,7 +85,7 @@ const AddTrappingProtocolModalContent = ({
         isValid,
       }) => {
         return (
-          <>
+          <KeyboardAvoidingView flex='1' behavior='padding'>
             <CustomModalHeader
               headerText={'Species Measured'}
               showHeaderButton={true}
@@ -194,7 +202,7 @@ const AddTrappingProtocolModalContent = ({
                 />
               </HStack>
             </VStack>
-          </>
+          </KeyboardAvoidingView>
         )
       }}
     </Formik>

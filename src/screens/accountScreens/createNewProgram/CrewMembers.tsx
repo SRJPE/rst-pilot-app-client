@@ -86,7 +86,7 @@ const CrewMembers = ({
       <Formik
         validationSchema={crewMembersLeadSchema}
         initialValues={{ agency: '', orcidId: '' }}
-        onSubmit={values => {
+        onSubmit={(values) => {
           handleSaveTeamLeadInformation(values)
         }}
       >
@@ -201,7 +201,7 @@ const CrewMembers = ({
               <CustomModal
                 isOpen={addCrewMemberModalOpen}
                 closeModal={handleCloseModal}
-                height='50%'
+                height='55%'
               >
                 <AddCrewMemberModalContent
                   addTrapModalContent={addTrapModalContent}

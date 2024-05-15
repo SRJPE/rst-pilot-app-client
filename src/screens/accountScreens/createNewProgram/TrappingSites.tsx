@@ -134,7 +134,7 @@ const TrappingSites = ({
         <CustomModal
           isOpen={addTrapModalOpen}
           closeModal={closeModal}
-          height='65%'
+          height='75%'
         >
           <AddTrapModalContent
             addTrapModalContent={addTrapModalContent}

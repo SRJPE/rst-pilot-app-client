@@ -1,5 +1,13 @@
 import { Formik } from 'formik'
-import { Button, Divider, FormControl, HStack, Text, VStack } from 'native-base'
+import {
+  Button,
+  Divider,
+  FormControl,
+  HStack,
+  KeyboardAvoidingView,
+  Text,
+  VStack,
+} from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { takeAndMortalitySchema } from '../../utils/helpers/yupValidations'
@@ -76,7 +84,7 @@ const AddTakeAndMortalityModalContent = ({
         values,
       }) => {
         return (
-          <>
+          <KeyboardAvoidingView flex='1' behavior='padding'>
             <CustomModalHeader
               headerText={'Add Take and Mortality'}
               showHeaderButton={true}
@@ -115,7 +123,7 @@ const AddTakeAndMortalityModalContent = ({
                     }}
                   >
                     <Text fontSize='xl' color='white'>
-                      {modalDataTemp?.uid ? 'Save' : 'Add Protocol'}
+                      {modalDataTemp?.uid ? 'Save' : 'Add Take and Mortality'}
                     </Text>
                   </Button>
                 </HStack>
@@ -206,7 +214,7 @@ const AddTakeAndMortalityModalContent = ({
                 />
               </HStack>
             </VStack>
-          </>
+          </KeyboardAvoidingView>
         )
       }}
     </Formik>

@@ -5,6 +5,7 @@ import {
   FormControl,
   HStack,
   Input,
+  KeyboardAvoidingView,
   Radio,
   Text,
   VStack,
@@ -94,7 +95,7 @@ const AddCrewMemberModalContent = ({
         values,
       }) => {
         return (
-          <>
+          <KeyboardAvoidingView flex='1' behavior='padding'>
             <CustomModalHeader
               headerText={'Add Crew Member'}
               showHeaderButton={true}
@@ -133,7 +134,7 @@ const AddCrewMemberModalContent = ({
                     }}
                   >
                     <Text fontSize='xl' color='white'>
-                      {modalDataTemp?.uid ? 'Save' : 'Add Protocol'}
+                      {modalDataTemp?.uid ? 'Save' : 'Add Crew Member'}
                     </Text>
                   </Button>
                 </HStack>
@@ -185,7 +186,7 @@ const AddCrewMemberModalContent = ({
                   errors={errors}
                   value={values.phoneNumber ? `${values.phoneNumber}` : ''}
                   camelName={'phoneNumber'}
-                  // keyboardType={'phone'} //TODO add phone styling
+                  keyboardType={'numeric'}
                   width={'45%'}
                   onChangeText={handleChange('phoneNumber')}
                   onBlur={handleBlur('phoneNumber')}
@@ -267,7 +268,7 @@ const AddCrewMemberModalContent = ({
                 </Radio.Group>
               </FormControl>
             </VStack>
-          </>
+          </KeyboardAvoidingView>
         )
       }}
     </Formik>

@@ -90,7 +90,7 @@ const TrappingProtocolsTable = ({ navigation }: { navigation: any }) => {
         <CustomModal
           isOpen={addTrappingProtocolModalOpen}
           closeModal={handleCloseModal}
-          height='1/3'
+          height='45%'
         >
           <AddTrappingProtocolModalContent
             addTrappingProtocolsModalContent={addTrappingProtocolsModalContent}
