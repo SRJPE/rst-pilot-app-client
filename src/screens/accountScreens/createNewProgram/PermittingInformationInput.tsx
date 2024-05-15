@@ -152,9 +152,10 @@ const PermittingInformationInput = ({
                 <Text fontSize='2xl' color='grey'>
                   Trap will be stopped when
                 </Text>
-                <HStack space={20}>
+                <HStack justifyContent='space-between' w='90%'>
                   <FormInputComponent
                     label={'Water temperature'}
+                    stackDirection={'column'}
                     touched={touched}
                     errors={errors}
                     value={
@@ -170,6 +171,7 @@ const PermittingInformationInput = ({
                   />
                   <FormInputComponent
                     label={'Flow Threshold'}
+                    stackDirection={'column'}
                     touched={touched}
                     errors={errors}
                     value={
