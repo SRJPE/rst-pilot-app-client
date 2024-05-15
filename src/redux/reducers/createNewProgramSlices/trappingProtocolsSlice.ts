@@ -48,17 +48,33 @@ export const trappingProtocolsSlice = createSlice({
       state.trappingProtocolsStore = trappingProtocolsStoreCopy
     },
     updateIndividualTrappingProtocol: (state, action) => {
-      let trappingSitesStoreCopy = cloneDeep(state.trappingProtocolsStore)
+      let trappingProtocolsStoreCopy = cloneDeep(state.trappingProtocolsStore)
       let id: any = null
 
-      for (let key in trappingSitesStoreCopy) {
-        if (trappingSitesStoreCopy[key].uid === action.payload.uid) {
+      for (let key in trappingProtocolsStoreCopy) {
+        if (trappingProtocolsStoreCopy[key].uid === action.payload.uid) {
           id = key
-          trappingSitesStoreCopy[id] = {
+          trappingProtocolsStoreCopy[id] = {
             ...action.payload,
             uid: action.payload.uid,
           }
-          state.trappingProtocolsStore = trappingSitesStoreCopy
+          state.trappingProtocolsStore = trappingProtocolsStoreCopy
+        }
+      }
+    },
+    deleteIndividualTrappingProtocol: (state, action) => {
+      let trappingProtocolsStoreCopy = cloneDeep(state.trappingProtocolsStore)
+      let id: any = null
+
+      for (let key in trappingProtocolsStoreCopy) {
+        if (trappingProtocolsStoreCopy[key].uid === action.payload.uid) {
+          id = key
+          delete trappingProtocolsStoreCopy[id]
+          // trappingSitesStoreCopy[id] = {
+          //   ...action.payload,
+          //   uid: action.payload.uid,
+          // }
+          state.trappingProtocolsStore = trappingProtocolsStoreCopy
         }
       }
     },
@@ -69,6 +85,7 @@ export const {
   resetTrappingProtocolsSlice,
   saveIndividualTrappingProtocol,
   updateIndividualTrappingProtocol,
+  deleteIndividualTrappingProtocol,
 } = trappingProtocolsSlice.actions
 
 export default trappingProtocolsSlice.reducer
