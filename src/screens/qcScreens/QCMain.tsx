@@ -51,9 +51,7 @@ function QCMain({
     })
 
     console.log('QCData', qcData)
-    console.log('programsTrapVisits', programsTrapVisits)
-    console.log('previoustrapvisits', previousTrapVisits)
-  }, [route.params.programId, previousTrapVisits, previousCatchRaw])
+  }, [route.params.programId])
 
   return (
     <VStack alignItems={'center'} marginTop={100} flex={1}>
