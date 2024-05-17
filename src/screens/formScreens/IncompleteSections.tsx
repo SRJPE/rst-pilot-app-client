@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import {
+import navigationSlice, {
   checkIfFormIsComplete,
   numOfFormSteps,
   resetNavigationSlice,
+  updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
 import NavButtons from '../../components/formContainer/NavButtons'
 import IncompleteSectionButton from '../../components/form/IncompleteSectionButton'
@@ -34,6 +35,7 @@ import {
 } from '../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { DeviceEventEmitter } from 'react-native'
+import { navigateHelper } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -89,34 +91,46 @@ const IncompleteSections = ({
     0,
     numOfFormSteps - 1
   ) as Array<any>
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const hasSubmittedRef = useRef(false)
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
   }, [])
 
   const emitSubmission = () => {
+    if (isSubmitting) return // If already submitting, return early
+
+    setIsSubmitting(true) // Set submitting state to true
     const callback = () => {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Visit Setup' }],
-      })
+      navigateHelper(
+        'Start Mark Recapture',
+        navigationState,
+        navigation,
+        dispatch,
+        updateActiveStep
+      )
+      setIsSubmitting(false) // Reset submitting state after navigation
     }
 
-    navigation.navigate('Loading...')
+    navigation.push('Loading...')
 
     setTimeout(() => {
       DeviceEventEmitter.emit('event.load', {
         process: () => handleSubmit(),
         callback,
       })
-    }, 2000)
+    }, 1000)
   }
 
   const handleSubmit = () => {
+    if (hasSubmittedRef.current) return // If already submitted, return early
     try {
       saveTrapVisits()
       saveCatchRawSubmission()
       resetAllFormSlices()
+
+      hasSubmittedRef.current = true // Set submitted state to true
 
       if (
         connectivityState.isConnected &&
@@ -128,6 +142,8 @@ const IncompleteSections = ({
       }
     } catch (error) {
       console.log('submit error: ', error)
+    } finally {
+      setIsSubmitting(false) // Reset submitting state after handling submission
     }
   }
 
@@ -202,7 +218,7 @@ const IncompleteSections = ({
       dropdownsState.values.trapStatusAtEnd
     )
     const calculateRpmAvg = (rpms: (string | null)[]) => {
-      const validRpms = rpms.filter((n) => n)
+      const validRpms = rpms.filter(n => n)
       if (!validRpms.length) {
         return null
       }
@@ -215,7 +231,7 @@ const IncompleteSections = ({
     }
 
     const tabIds = Object.keys(tabState.tabs)
-    tabIds.forEach((id) => {
+    tabIds.forEach(id => {
       const {
         rpm1: startRpm1,
         rpm2: startRpm2,
@@ -370,14 +386,14 @@ const IncompleteSections = ({
 
     const catchRawSubmissions: any[] = []
 
-    Object.keys(fishInputState).forEach((tabId) => {
+    Object.keys(fishInputState).forEach(tabId => {
       if (tabId != 'placeholderId') {
         const fishStoreKeys = Object.keys(fishInputState[tabId].fishStore)
         const programId = Object.keys(visitSetupState).includes(tabId)
           ? visitSetupState[tabId].values.programId
           : 1
 
-        fishStoreKeys.forEach((key) => {
+        fishStoreKeys.forEach(key => {
           const fishValue = fishInputState[tabId].fishStore[key]
 
           const filterAndPrepareData = (data: Array<any>) => {
@@ -430,6 +446,14 @@ const IncompleteSections = ({
             return releaseId
           }
 
+          const getRunClassMethod = (fishValue: any) => {
+            if (fishValue.species === 'Chinook salmon') {
+              return fishValue.run === 'not recorded' ? 5 : 6
+            } else {
+              return null
+            }
+          }
+
           catchRawSubmissions.push({
             uid: tabId,
             programId,
@@ -439,12 +463,12 @@ const IncompleteSections = ({
               runValues.indexOf(fishValue.run)
             ),
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
-            captureRunClassMethod: fishValue.run ? 5 : null,
+            captureRunClassMethod: getRunClassMethod(fishValue),
             // defaults to "none" (id: 1) if not selected
             markType: 1, // Check w/ Erin
             markedForRelease: fishValue.willBeUsedInRecapture,
-            adiposeClipped: fishValue.adiposeClipped,
-            dead: fishValue.dead,
+            adiposeClipped: fishValue.adiposeClipped ? true : false,
+            dead: fishValue.dead ? true : false,
             lifeStage: returnNullableTableId(
               lifeStageValues.indexOf(fishValue.lifeStage)
             ),
@@ -457,7 +481,7 @@ const IncompleteSections = ({
                 ? parseInt(fishValue?.weight as any)
                 : null,
             numFishCaught: fishValue?.numFishCaught,
-            plusCount: fishValue?.plusCount,
+            plusCount: fishValue?.plusCount ? true : false,
             plusCountMethodology: fishValue?.plusCountMethod
               ? returnNullableTableId(
                   plusCountMethodValues.indexOf(fishValue?.plusCountMethod)

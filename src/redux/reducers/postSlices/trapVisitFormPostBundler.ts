@@ -553,10 +553,10 @@ export const trapVisitPostBundler = createSlice({
     reset: () => {
       return initialState
     },
-    clearPendingTrapVisitSubs: (state) => {
+    clearPendingTrapVisitSubs: state => {
       state.trapVisitSubmissions = []
     },
-    clearPendingCatchRawSubs: (state) => {
+    clearPendingCatchRawSubs: state => {
       state.catchRawSubmissions = []
     },
     addMissingFetchedTrapVisitSubs: (state, action) => {
@@ -614,10 +614,6 @@ export const trapVisitPostBundler = createSlice({
         state.catchRawSubmissions = [...failedCatchRawSubmissions]
         state.trapVisitSubmissions = [...failedTrapVisitSubmissions]
 
-        // fetchWithPostParams(builder.dispatch, {
-        //   trapVisitResponse,
-        //   catchRawResponse,
-        // })
         console.log('successful post processing: ', action.payload)
       }
     )
@@ -629,7 +625,6 @@ export const trapVisitPostBundler = createSlice({
         state.previousTrapVisitSubmissions = previousTrapVisits
         state.previousCatchRawSubmissions = previousCatchRaw
         state.fetchStatus = 'fetch-successful'
-        console.log('successful QC fetch: ', action.payload)
       }
     )
 

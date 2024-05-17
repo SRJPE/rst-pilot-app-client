@@ -21,7 +21,10 @@ import {
   markFishInputModalOpen,
   saveFishInput,
 } from '../../redux/reducers/formSlices/fishInputSlice'
-import { markStepCompleted, updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  markStepCompleted,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import FishInputDataTable from '../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../components/form/PlusCountModalContent'
 import { Ionicons } from '@expo/vector-icons'
