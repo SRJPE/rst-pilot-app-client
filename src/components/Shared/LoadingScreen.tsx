@@ -4,6 +4,7 @@ import { VStack, Image, Icon } from 'native-base'
 import { View, Text } from 'react-native'
 import { Animated, Easing } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
+import { memo } from 'react'
 
 interface LoadingScreenProps {
   navigation: any
@@ -18,8 +19,7 @@ const LoadingScreen = ({ navigation }: LoadingScreenProps) => {
       'event.load',
       async (props: { process: any; callback: () => void }) => {
         const { process, callback } = props
-
-        await loader(process, callback)
+          await loader(process, callback)
       }
     )
 
@@ -62,9 +62,12 @@ const LoadingScreen = ({ navigation }: LoadingScreenProps) => {
       <VStack height={'full'} justifyContent={'center'} alignItems={'center'}>
         {!isError ? (
           <Animated.Image
-            source={require('../../../assets/fish_splash_screen_icon.png')}
+            source={require('../../../assets/data-tackle-spinner.png')}
             style={{
-              transform: [{ rotate: spin }],
+              transform: [{ rotate: spin}, {translateY: -50}],
+              width: 400,
+              height: 400,
+              
             }}
             alt='loading icon logo'
           />
@@ -80,7 +83,7 @@ const LoadingScreen = ({ navigation }: LoadingScreenProps) => {
               size='250'
               color='primary'
             />
-            <Text style={{fontSize: 25}}>Error occurred.</Text>
+            <Text style={{ fontSize: 25 }}>Error occurred.</Text>
           </VStack>
         )}
       </VStack>
@@ -88,4 +91,4 @@ const LoadingScreen = ({ navigation }: LoadingScreenProps) => {
   )
 }
 
-export default LoadingScreen
+export default memo(LoadingScreen)
