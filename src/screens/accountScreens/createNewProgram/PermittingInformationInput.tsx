@@ -83,6 +83,11 @@ const PermittingInformationInput = ({
     )
   }
 
+  const handleTakeAndMortClose = () => {
+    setAddTakeAndMortalityModalOpen(false)
+    setAddTakeAndMortalityModalContent(IndividualTakeAndMortalityState)
+  }
+
   return (
     <>
       <Formik
@@ -117,11 +122,11 @@ const PermittingInformationInput = ({
                 Permitting Information
               </Box>
               <Text fontSize='2xl' color='grey' ml='5%' mt='5%'>
-                Enter Based on your 4d Permit
+                Enter Based on Your 4d Permit
               </Text>
               <Divider mb='2' />
               <VStack px='5%' py='2' space={3}>
-                <HStack space={260}>
+                <HStack space={250}>
                   <VStack space={2}>
                     <Text color='black' fontSize='xl'>
                       Date Issued
@@ -150,11 +155,12 @@ const PermittingInformationInput = ({
                   </VStack>
                 </HStack>
                 <Text fontSize='2xl' color='grey'>
-                  Trap will be stopped when:
+                  Trap will be stopped when
                 </Text>
-                <HStack space={10} justifyContent='space-between'>
+                <HStack justifyContent='space-between' w='90%'>
                   <FormInputComponent
                     label={'Water temperature'}
+                    stackDirection={'column'}
                     touched={touched}
                     errors={errors}
                     value={
@@ -170,6 +176,7 @@ const PermittingInformationInput = ({
                   />
                   <FormInputComponent
                     label={'Flow Threshold'}
+                    stackDirection={'column'}
                     touched={touched}
                     errors={errors}
                     value={
@@ -213,7 +220,7 @@ const PermittingInformationInput = ({
                 />
               </ScrollView>
               <Divider my='1%' />
-              <VStack py='5%' px='10%' space={5}>
+              <VStack mt='2%' px='6%' space={5}>
                 <Pressable
                   onPress={() => setAddTakeAndMortalityModalOpen(true)}
                 >
@@ -257,25 +264,29 @@ const PermittingInformationInput = ({
       </Formik>
 
       {/* --------- Modals --------- */}
-      <CustomModal
-        isOpen={addTakeAndMortalityModalOpen}
-        closeModal={() => setAddTakeAndMortalityModalOpen(false)}
-        height='1/2'
-      >
-        <AddTakeAndMortalityModalContent
-          addTakeAndMortalityModalContent={addTakeAndMortalityModalContent}
-          closeModal={() => setAddTakeAndMortalityModalOpen(false)}
-        />
-      </CustomModal>
-      <CustomModal
-        isOpen={chooseFileModalOpen}
-        closeModal={() => setChooseFileModalOpen(false)}
-        height='1/3'
-      >
-        <ChooseFileModalContent
+      {addTakeAndMortalityModalOpen && (
+        <CustomModal
+          isOpen={addTakeAndMortalityModalOpen}
+          closeModal={handleTakeAndMortClose}
+          height='55%'
+        >
+          <AddTakeAndMortalityModalContent
+            addTakeAndMortalityModalContent={addTakeAndMortalityModalContent}
+            closeModal={handleTakeAndMortClose}
+          />
+        </CustomModal>
+      )}
+      {chooseFileModalOpen && (
+        <CustomModal
+          isOpen={chooseFileModalOpen}
           closeModal={() => setChooseFileModalOpen(false)}
-        />
-      </CustomModal>
+          height='1/3'
+        >
+          <ChooseFileModalContent
+            closeModal={() => setChooseFileModalOpen(false)}
+          />
+        </CustomModal>
+      )}
     </>
   )
 }

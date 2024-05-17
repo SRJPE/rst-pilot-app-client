@@ -1,5 +1,13 @@
 import { Formik } from 'formik'
-import { Button, Divider, FormControl, HStack, Text, VStack } from 'native-base'
+import {
+  Button,
+  Divider,
+  FormControl,
+  HStack,
+  KeyboardAvoidingView,
+  Text,
+  VStack,
+} from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { trappingProtocolsSchema } from '../../utils/helpers/yupValidations'
@@ -8,6 +16,7 @@ import FormInputComponent from '../../components/Shared/FormInputComponent'
 import {
   IndividualTrappingProtocolState,
   IndividualTrappingProtocolValuesI,
+  deleteIndividualTrappingProtocol,
   saveIndividualTrappingProtocol,
   updateIndividualTrappingProtocol,
 } from '../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
@@ -27,10 +36,14 @@ const AddTrappingProtocolModalContent = ({
     (state: RootState) => state.dropdowns.values
   )
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
-  const [modalDataTemp, setModalDataTemp] = useState({} as any)
+  const [modalDataTemp, setModalDataTemp] = useState(
+    IndividualTrappingProtocolState as IndividualTrappingProtocolValuesI
+  )
 
   useEffect(() => {
-    setModalDataTemp(addTrappingProtocolsModalContent)
+    if (addTrappingProtocolsModalContent.uid) {
+      setModalDataTemp(addTrappingProtocolsModalContent)
+    }
   }, [addTrappingProtocolsModalContent])
 
   const handleAddTrappingProtocolSubmission = (
@@ -42,14 +55,22 @@ const AddTrappingProtocolModalContent = ({
       dispatch(saveIndividualTrappingProtocol(values))
     }
   }
+  const handleDelete = () => {
+    dispatch(deleteIndividualTrappingProtocol(addTrappingProtocolsModalContent))
+    setModalDataTemp(IndividualTrappingProtocolState)
+  }
+
+  const checkIfValid = (values: any) => {}
 
   return (
     <Formik
       validationSchema={trappingProtocolsSchema}
-      initialValues={IndividualTrappingProtocolState}
-      onSubmit={(values, { resetForm }) => {
+      initialValues={modalDataTemp}
+      enableReinitialize
+      onSubmit={(values, { resetForm, setSubmitting }) => {
         handleAddTrappingProtocolSubmission(values)
         resetForm()
+        setSubmitting(false)
       }}
     >
       {({
@@ -61,36 +82,54 @@ const AddTrappingProtocolModalContent = ({
         touched,
         errors,
         values,
+        isValid,
       }) => {
-        useEffect(() => {
-          setValues(modalDataTemp)
-        }, [modalDataTemp])
         return (
-          <>
+          <KeyboardAvoidingView flex='1' behavior='padding'>
             <CustomModalHeader
               headerText={'Species Measured'}
               showHeaderButton={true}
               closeModal={closeModal}
               headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    Object.values(touched).length === 0 ||
-                    (Object.values(touched).length > 0 &&
-                      Object.values(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Add Protocol
-                  </Text>
-                </Button>
+                <HStack space={8}>
+                  {values?.uid && (
+                    <Button
+                      bg='error'
+                      mx='2'
+                      px='10'
+                      shadow='3'
+                      onPress={() => {
+                        handleDelete()
+                        closeModal()
+                      }}
+                    >
+                      <Text fontSize='xl' color='white'>
+                        Delete{' '}
+                      </Text>
+                    </Button>
+                  )}
+                  <Button
+                    bg='primary'
+                    mx='2'
+                    px='10'
+                    shadow='3'
+                    isDisabled={
+                      // disabled b/c has not been touched and is not an edit
+                      (Object.values(touched).length === 0 &&
+                        !values.species) ||
+                      // disabled b/c formik says it is invalid
+                      !isValid
+                    }
+                    onPress={() => {
+                      handleSubmit()
+                      closeModal()
+                    }}
+                  >
+                    <Text fontSize='xl' color='white'>
+                      {modalDataTemp?.uid ? 'Save' : 'Add Protocol'}
+                    </Text>
+                  </Button>
+                </HStack>
               }
             />
             <VStack mx='5%' my='2%' space={6}>
@@ -163,7 +202,7 @@ const AddTrappingProtocolModalContent = ({
                 />
               </HStack>
             </VStack>
-          </>
+          </KeyboardAvoidingView>
         )
       }}
     </Formik>

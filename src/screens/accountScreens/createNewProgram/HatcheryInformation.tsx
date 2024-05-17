@@ -62,12 +62,30 @@ const HatcheryInformation = ({
   }
 
   const handleEfficiencyTrialProtocolsSubmission = (values: any) => {
-    console.log(
-      '🚀 ~ handleEfficiencyTrialProtocolsSubmission ~ values:',
-      values
-    )
+    delete values.agreementStartDate
+    delete values.agreementEndDate
+    delete values.renewalDate
+    console.log('🚀 ~ handleEfficiencyTrialProtocolsSubmission ~ values :', {
+      ...values,
+      expectedNumberOfFishReceivedAtEachPickup: Number(
+        values.expectedNumberOfFishReceivedAtEachPickup
+      ),
+      agreementStartDate,
+      agreementEndDate,
+      renewalDate,
+    })
+    dispatch(
+      saveHatcheryInformationValues({
+        ...values,
+        expectedNumberOfFishReceivedAtEachPickup: Number(
+          values.expectedNumberOfFishReceivedAtEachPickup
+        ),
 
-    dispatch(saveHatcheryInformationValues(values))
+        agreementStartDate,
+        agreementEndDate,
+        renewalDate,
+      })
+    )
   }
   return (
     <>
@@ -111,7 +129,7 @@ const HatcheryInformation = ({
                   </VStack>
                   <VStack space={2}>
                     <Text color='black' fontSize='xl'>
-                      Agreement Start Date
+                      Agreement End Date
                     </Text>
                     <Box alignSelf='flex-start' minWidth='220' ml='-95'>
                       <DateTimePicker
@@ -150,7 +168,7 @@ const HatcheryInformation = ({
                     <FormControl width={'45%'}>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
-                          Frequency of receiving fish{' '}
+                          Frequency of Receiving Fish{' '}
                         </Text>
                       </FormControl.Label>
                       <CustomSelect
@@ -166,8 +184,8 @@ const HatcheryInformation = ({
                       />
                     </FormControl>
                     <FormInputComponent
-                      width={'45%'}
-                      label={'Expected number of fish received at each pickup'}
+                      width={'49%'}
+                      label={'Expected Number of Fish'}
                       touched={touched}
                       errors={errors}
                       value={

@@ -6,7 +6,23 @@ import { Entypo } from '@expo/vector-icons'
 import { RootState } from '../../redux/store'
 import { IndividualTrappingSiteValuesI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 
-const headers = ['Species', 'Run', 'Life Stage', 'Number Measured', '']
+interface Header {
+  colData: string
+  label: string
+  numeric: boolean
+  flex: number
+}
+const headers: Header[] = [
+  { colData: 'species', label: 'Species', numeric: false, flex: 1 },
+  { colData: 'run', label: 'Run', numeric: false, flex: 1 },
+  { colData: 'lifeStage', label: 'Life Stage', numeric: false, flex: 1 },
+  {
+    colData: 'numberMeasured',
+    label: 'Number Measured',
+    numeric: false,
+    flex: 1,
+  },
+]
 
 const TrappingProtocolsDataTable = ({
   trappingProtocolsStore,
@@ -24,24 +40,53 @@ const TrappingProtocolsDataTable = ({
   }, [trappingProtocolsStore])
   return (
     <DataTable>
-      <DataTable.Header style={[{}]}>
-        {headers.map((header: string, idx: number) => (
+      <DataTable.Header>
+        {headers.map(({ label, numeric, flex }, idx: number) => (
           <DataTable.Title
             key={idx}
-            numeric
-            style={[{ justifyContent: 'center', flexWrap: 'wrap' }]}
+            numeric={numeric}
+            style={{
+              paddingHorizontal: 10,
+              flex: flex,
+            }}
           >
-            {header}
+            {label}
           </DataTable.Title>
         ))}
+        <DataTable.Title
+          style={{
+            paddingHorizontal: 10,
+            flex: 0,
+          }}
+        >
+          {''}
+        </DataTable.Title>
       </DataTable.Header>
       {processedData.map((trappingProtocolObject: any, idx: number) => {
         return (
           <DataTable.Row style={[{ height: 55 }]} key={idx}>
-            {Object.values(trappingProtocolObject).map(
-              (callValue: any, idx: number) => (
-                <DataTable.Cell key={idx}>{callValue}</DataTable.Cell>
-              )
+            {Object.entries(trappingProtocolObject).map(
+              (keyValuePair: any, idx: number) => {
+                const [key, cellValue] = keyValuePair
+                const currentCol = headers.find(
+                  (header) => header.colData === key
+                )
+
+                if (currentCol)
+                  return (
+                    <DataTable.Cell
+                      numeric={currentCol.numeric}
+                      key={idx}
+                      style={{
+                        paddingHorizontal: 10,
+                        flex: currentCol.flex,
+                      }}
+                    >
+                      {cellValue.toString().charAt(0).toUpperCase() +
+                        cellValue.toString().slice(1)}
+                    </DataTable.Cell>
+                  )
+              }
             )}
             <IconButton
               marginY={3}

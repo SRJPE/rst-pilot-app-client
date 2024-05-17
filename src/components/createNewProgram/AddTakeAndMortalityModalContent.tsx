@@ -1,5 +1,13 @@
 import { Formik } from 'formik'
-import { Button, Divider, FormControl, HStack, Text, VStack } from 'native-base'
+import {
+  Button,
+  Divider,
+  FormControl,
+  HStack,
+  KeyboardAvoidingView,
+  Text,
+  VStack,
+} from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { takeAndMortalitySchema } from '../../utils/helpers/yupValidations'
@@ -10,6 +18,7 @@ import { reorderTaxon } from '../../utils/utils'
 import {
   IndividualTakeAndMortalityState,
   IndividualTakeAndMortalityStateI,
+  deleteIndividualTakeAndMortality,
   saveIndividualTakeAndMortality,
   updateIndividualTakeAndMortality,
 } from '../../redux/reducers/createNewProgramSlices/permitInformationSlice'
@@ -29,10 +38,14 @@ const AddTakeAndMortalityModalContent = ({
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
-  const [modalDataTemp, setModalDataTemp] = useState({} as any)
+  const [modalDataTemp, setModalDataTemp] = useState(
+    IndividualTakeAndMortalityState as IndividualTakeAndMortalityStateI
+  )
 
   useEffect(() => {
-    setModalDataTemp(addTakeAndMortalityModalContent)
+    if (addTakeAndMortalityModalContent?.uid) {
+      setModalDataTemp(addTakeAndMortalityModalContent)
+    }
   }, [addTakeAndMortalityModalContent])
 
   const handleAddTakeAndMortalitySubmission = (
@@ -44,14 +57,20 @@ const AddTakeAndMortalityModalContent = ({
       dispatch(saveIndividualTakeAndMortality(values))
     }
   }
+  const handleDelete = () => {
+    dispatch(deleteIndividualTakeAndMortality(addTakeAndMortalityModalContent))
+    setModalDataTemp(IndividualTakeAndMortalityState)
+  }
 
   return (
     <Formik
       validationSchema={takeAndMortalitySchema}
-      initialValues={IndividualTakeAndMortalityState}
-      onSubmit={(values, { resetForm }) => {
+      enableReinitialize
+      initialValues={modalDataTemp}
+      onSubmit={(values, { resetForm, setSubmitting }) => {
         handleAddTakeAndMortalitySubmission(values)
         resetForm()
+        setSubmitting(false)
       }}
     >
       {({
@@ -64,35 +83,50 @@ const AddTakeAndMortalityModalContent = ({
         errors,
         values,
       }) => {
-        useEffect(() => {
-          setValues(modalDataTemp)
-        }, [modalDataTemp])
         return (
-          <>
+          <KeyboardAvoidingView flex='1' behavior='padding'>
             <CustomModalHeader
               headerText={'Add Take and Mortality'}
               showHeaderButton={true}
               closeModal={closeModal}
               headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    Object.values(touched).length === 0 ||
-                    (Object.values(touched).length > 0 &&
-                      Object.values(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Save
-                  </Text>
-                </Button>
+                <HStack space={8}>
+                  {values?.uid && (
+                    <Button
+                      bg='error'
+                      mx='2'
+                      px='10'
+                      shadow='3'
+                      onPress={() => {
+                        handleDelete()
+                        closeModal()
+                      }}
+                    >
+                      <Text fontSize='xl' color='white'>
+                        Delete{' '}
+                      </Text>
+                    </Button>
+                  )}
+                  <Button
+                    bg='primary'
+                    mx='2'
+                    px='10'
+                    shadow='3'
+                    isDisabled={
+                      (Object.values(touched).length === 0 && !values.uid) ||
+                      (Object.values(touched).length > 0 &&
+                        Object.values(errors).length > 0)
+                    }
+                    onPress={() => {
+                      handleSubmit()
+                      closeModal()
+                    }}
+                  >
+                    <Text fontSize='xl' color='white'>
+                      {modalDataTemp?.uid ? 'Save' : 'Add Take and Mortality'}
+                    </Text>
+                  </Button>
+                </HStack>
               }
             />
             <VStack mx='5%' my='2%' space={6}>
@@ -180,7 +214,7 @@ const AddTakeAndMortalityModalContent = ({
                 />
               </HStack>
             </VStack>
-          </>
+          </KeyboardAvoidingView>
         )
       }}
     </Formik>

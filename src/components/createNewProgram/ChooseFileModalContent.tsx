@@ -6,7 +6,12 @@ const ChooseFileModalContent = ({ closeModal }: { closeModal: any }) => {
   return (
     <>
       <HStack mx='4%' my='3' alignItems='center' justifyContent='space-between'>
-        <Text fontSize='xl'>Choose File</Text>
+        <Text fontSize='2xl' fontWeight='bold'>
+          Choose File
+        </Text>
+        <Text fontSize='2xl' fontWeight='bold' color='error'>
+          *** Still In Development ***
+        </Text>
         <Pressable onPress={closeModal}>
           <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
         </Pressable>

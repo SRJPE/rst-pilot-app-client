@@ -67,6 +67,18 @@ export const crewMembersSlice = createSlice({
         }
       }
     },
+    deleteIndividualCrewMember: (state, action) => {
+      let trappingSitesStoreCopy = cloneDeep(state.crewMembersStore)
+      let id: any = null
+
+      for (let key in trappingSitesStoreCopy) {
+        if (trappingSitesStoreCopy[key].uid === action.payload.uid) {
+          id = key
+          delete trappingSitesStoreCopy[id]
+          state.crewMembersStore = trappingSitesStoreCopy
+        }
+      }
+    },
   },
 })
 
@@ -74,6 +86,7 @@ export const {
   resetCrewMembersSlice,
   saveIndividualCrewMember,
   updateIndividualCrewMember,
+  deleteIndividualCrewMember,
 } = crewMembersSlice.actions
 
 export default crewMembersSlice.reducer

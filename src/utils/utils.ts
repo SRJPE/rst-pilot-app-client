@@ -100,10 +100,10 @@ export const calculateLifeStage = (forkLength: number) => {
 export const QARanges = {
   flowMeasure: {
     'Mill Creek': {
-      'Mill Creek RST': { max: 2000, min: null },
+      'Mill Creek RST': { 'Mill Creek RST': { max: 2000, min: null } },
     },
     'Deer Creek': {
-      'Deer Creek RST': { max: 2000, min: null },
+      'Deer Creek RST': { 'Deer Creek RST': { max: 2000, min: null } },
     },
     'Feather River': {
       'Eye Riffle': {

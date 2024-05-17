@@ -5,6 +5,7 @@ import {
   FormControl,
   HStack,
   Input,
+  KeyboardAvoidingView,
   Radio,
   Text,
   VStack,
@@ -15,6 +16,7 @@ import {
   IndividualCrewMemberState,
   saveIndividualCrewMember,
   updateIndividualCrewMember,
+  deleteIndividualCrewMember,
 } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
@@ -35,30 +37,50 @@ const AddCrewMemberModalContent = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
-  const [modalDataTemp, setModalDataTemp] = useState({} as any)
+  const [modalDataTemp, setModalDataTemp] = useState(
+    IndividualCrewMemberState as IndividualCrewMemberValuesI
+  )
 
   const handleAddCrewMemberSubmission = (
     values: IndividualCrewMemberValuesI
   ) => {
-    console.log('🚀 ~ handleAddTrapSubmission ~ values:', values)
     if (values?.uid) {
-      dispatch(updateIndividualCrewMember(values))
+      dispatch(
+        updateIndividualCrewMember({
+          ...values,
+          isLead: !!values.isLead,
+        })
+      )
     } else {
-      dispatch(saveIndividualCrewMember(values))
+      dispatch(
+        saveIndividualCrewMember({
+          ...values,
+          isLead: !!values.isLead,
+        })
+      )
     }
   }
 
   useEffect(() => {
-    setModalDataTemp(addTrapModalContent)
+    if (addTrapModalContent.uid) {
+      setModalDataTemp(addTrapModalContent)
+    }
   }, [addTrapModalContent])
+
+  const handleDelete = () => {
+    dispatch(deleteIndividualCrewMember(addTrapModalContent))
+    setModalDataTemp(IndividualCrewMemberState)
+  }
 
   return (
     <Formik
       validationSchema={crewMembersSchema}
-      initialValues={IndividualCrewMemberState}
-      onSubmit={(values, { resetForm }) => {
+      enableReinitialize
+      initialValues={modalDataTemp}
+      onSubmit={(values, { resetForm, setSubmitting }) => {
         handleAddCrewMemberSubmission(values)
         resetForm()
+        setSubmitting(false)
       }}
     >
       {({
@@ -68,44 +90,58 @@ const AddCrewMemberModalContent = ({
         setFieldValue,
         setFieldTouched,
         setValues,
-
         touched,
         errors,
         values,
       }) => {
-        useEffect(() => {
-          setValues(modalDataTemp)
-        }, [modalDataTemp])
         return (
-          <>
+          <KeyboardAvoidingView flex='1' behavior='padding'>
             <CustomModalHeader
               headerText={'Add Crew Member'}
               showHeaderButton={true}
               closeModal={closeModal}
               headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    Object.values(touched).length === 0 ||
-                    (Object.values(touched).length > 0 &&
-                      Object.values(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Save
-                  </Text>
-                </Button>
+                <HStack space={8}>
+                  {values?.uid && (
+                    <Button
+                      bg='error'
+                      mx='2'
+                      px='10'
+                      shadow='3'
+                      onPress={() => {
+                        handleDelete()
+                        closeModal()
+                      }}
+                    >
+                      <Text fontSize='xl' color='white'>
+                        Delete{' '}
+                      </Text>
+                    </Button>
+                  )}
+                  <Button
+                    bg='primary'
+                    mx='2'
+                    px='10'
+                    shadow='3'
+                    isDisabled={
+                      (Object.values(touched).length === 0 && !values.uid) ||
+                      (Object.values(touched).length > 0 &&
+                        Object.values(errors).length > 0)
+                    }
+                    onPress={() => {
+                      handleSubmit()
+                      closeModal()
+                    }}
+                  >
+                    <Text fontSize='xl' color='white'>
+                      {modalDataTemp?.uid ? 'Save' : 'Add Crew Member'}
+                    </Text>
+                  </Button>
+                </HStack>
               }
             />
             <VStack mx='5%' my='2%' space={4}>
-              <FormControl>
+              {/* <FormControl>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
                     Search for existing User
@@ -118,7 +154,7 @@ const AddCrewMemberModalContent = ({
                   value={''}
                 />
               </FormControl>
-              <Divider thickness='3' my='2%' />
+              <Divider thickness='3' my='2%' /> */}
 
               <HStack justifyContent='space-between'>
                 <FormInputComponent
@@ -150,7 +186,7 @@ const AddCrewMemberModalContent = ({
                   errors={errors}
                   value={values.phoneNumber ? `${values.phoneNumber}` : ''}
                   camelName={'phoneNumber'}
-                  // keyboardType={'phone'} //TODO add phone styling
+                  keyboardType={'numeric'}
                   width={'45%'}
                   onChangeText={handleChange('phoneNumber')}
                   onBlur={handleBlur('phoneNumber')}
@@ -232,7 +268,7 @@ const AddCrewMemberModalContent = ({
                 </Radio.Group>
               </FormControl>
             </VStack>
-          </>
+          </KeyboardAvoidingView>
         )
       }}
     </Formik>

@@ -1,20 +1,25 @@
 import { useEffect, useState } from 'react'
 import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
-import { Icon, IconButton } from 'native-base'
+import { Icon, IconButton, Text } from 'native-base'
 import { Entypo } from '@expo/vector-icons'
 import { RootState } from '../../redux/store'
 import { CrewMembersStoreI } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
+import { startCase } from 'lodash'
 
-const headers = [
-  'First Name',
-  'Last Name',
-  'Phone',
-  'Email',
-  'Lead',
-  'Agency',
-  'Orcid ID',
-  '',
+interface Header {
+  colData: string
+  label: string
+  numeric: boolean
+  flex: number
+}
+const headers: Header[] = [
+  { colData: 'firstName', label: 'First Name', numeric: false, flex: 1 },
+  { colData: 'lastName', label: 'Last Name', numeric: false, flex: 1 },
+  { colData: 'phoneNumber', label: 'Phone', numeric: false, flex: 1 },
+  { colData: 'email', label: 'Email', numeric: false, flex: 1.5 },
+  { colData: 'isLead', label: 'Lead', numeric: false, flex: 0.5 },
+  { colData: 'agency', label: 'Agency', numeric: false, flex: 0.5 },
 ]
 
 const CrewMemberDataTable = ({
@@ -29,39 +34,77 @@ const CrewMemberDataTable = ({
   useEffect(() => {
     setProcessedData(Object.values(crewMembersStore))
   }, [crewMembersStore])
+  const formatPhoneNumber = (phoneNumber: string) => {
+    const cleaned = ('' + phoneNumber).replace(/\D/g, '')
+    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/)
+    if (match) {
+      return match[1] + '-' + match[2] + '-' + match[3]
+    }
+    return null
+  }
   return (
-    <DataTable>
-      <DataTable.Header style={[{ paddingLeft: 0 }]}>
-        {headers.map((header: string, idx: number) => (
+    <DataTable style={{}}>
+      <DataTable.Header>
+        {headers.map(({ label, numeric, flex }, idx: number) => (
           <DataTable.Title
             key={idx}
-            numeric
-            style={[{ justifyContent: 'center', flexWrap: 'wrap' }]}
+            numeric={numeric}
+            style={{
+              paddingHorizontal: 10,
+              flex: flex,
+            }}
           >
-            {header}
+            {label}
           </DataTable.Title>
         ))}
+        <DataTable.Title
+          style={{
+            paddingHorizontal: 0,
+            flex: 0.3,
+          }}
+        >
+          {''}
+        </DataTable.Title>
       </DataTable.Header>
-      {processedData.map((trapObject: any, idx: number) => {
+      {processedData.map((crewObject: any, idx: number) => {
         return (
-          <DataTable.Row
-            style={[{ height: 55 }]}
-            key={idx}
-            onPress={
-              () => {}
-              // handleShowTableModal(trapObject)
-            }
-          >
-            {Object.values(trapObject).map((cellValue: any, idx: number) => (
-              <DataTable.Cell key={idx}>{cellValue.toString()}</DataTable.Cell>
-            ))}
+          <DataTable.Row style={[{ height: 55 }]} key={idx}>
+            {Object.entries(crewObject).map(
+              (keyValuePair: any, idx: number) => {
+                const [key, cellValue] = keyValuePair
+                const currentCol = headers.find(
+                  (header) => header.colData === key
+                )
+                console.log('🚀 ~ {processedData.map ~ key:', key)
+                console.log('🚀 ~ {processedData.map ~ cellValue:', cellValue)
+
+                if (currentCol)
+                  return (
+                    <DataTable.Cell
+                      numeric={currentCol.numeric}
+                      key={idx}
+                      style={{
+                        paddingHorizontal: 10,
+                        flex: currentCol.flex,
+                      }}
+                    >
+                      {key === 'phoneNumber'
+                        ? formatPhoneNumber(cellValue)
+                        : typeof cellValue === 'boolean'
+                        ? cellValue.toString().charAt(0).toUpperCase() +
+                          cellValue.toString().slice(1)
+                        : cellValue}
+                    </DataTable.Cell>
+                  )
+              }
+            )}
             <IconButton
               marginY={3}
               variant='solid'
               bg='primary'
               colorScheme='primary'
               size='sm'
-              onPress={() => handleShowTableModal(trapObject)}
+              onPress={() => handleShowTableModal(crewObject)}
             >
               <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
             </IconButton>

@@ -31,9 +31,12 @@ const EfficiencyTrialProtocols = ({ navigation }: { navigation: any }) => {
           <Text fontSize='lg' color='grey'>
             Upload PDF of Efficiency Monitoring Protocols
           </Text>
+          <Text fontSize='xl' fontWeight='bold' color='error'>
+            *** Still In Development ***
+          </Text>
           <Pressable
             alignSelf='center'
-            onPress={() => setChooseFileModalOpen(true)}
+            // onPress={() => setChooseFileModalOpen(true)}
           >
             <Center
               h='150'
@@ -42,7 +45,7 @@ const EfficiencyTrialProtocols = ({ navigation }: { navigation: any }) => {
               borderColor='grey'
               borderStyle='dotted'
             >
-              <Icon as={Feather} name='plus' size='5xl' color='grey' />
+              {/* <Icon as={Feather} name='plus' size='5xl' color='grey' /> */}
             </Center>
           </Pressable>
         </VStack>

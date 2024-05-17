@@ -113,7 +113,7 @@ const CreateNewProgramNavButtons = ({
         navigation.navigate('Home')
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Create New Program Home' }],
+          routes: [{ name: 'Monitoring Program New' }],
         })
 
         break
@@ -130,17 +130,13 @@ const CreateNewProgramNavButtons = ({
         })
         break
       case 'Create New Program Complete':
-        navigation.navigate('Monitoring Program', {
-          screen: 'Monitoring Program New',
-        })
-
         clearFormValues && clearFormValues()
         navigation.navigate('Monitoring Program', {
           screen: 'Monitoring Program New',
         })
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Create New Program Home' }],
+          routes: [{ name: 'Monitoring Program New' }],
         })
         break
       case 'Trapping Sites':
@@ -160,9 +156,11 @@ const CreateNewProgramNavButtons = ({
   }
 
   const handleRightButtonText = () => {
-    let rightButtonText = 'Next'
+    let rightButtonText = 'Submit'
     switch (activePage) {
       case 'Trapping Sites':
+        // rightButtonText = 'Save and Exit'
+        rightButtonText = 'Save and Return'
         if (isMultipleTrapsVariant) {
           rightButtonText = 'Group Traps'
         }
@@ -172,16 +170,32 @@ const CreateNewProgramNavButtons = ({
 
         break
       case 'Crew Members':
-        rightButtonText = 'Save Crew Members and Exit'
+        // rightButtonText = 'Save Crew Members and Exit'
+        rightButtonText = 'Save and Return'
+
+        break
+      case 'Efficiency Trial Protocols':
+        rightButtonText = 'Next'
         break
       case 'Hatchery Information':
         rightButtonText = 'Save and Exit'
         break
+      case 'Trapping Protocols':
+        rightButtonText = 'Next'
+        break
       case 'Trapping Protocols Table':
-        rightButtonText = 'Save Trapping Protocols and Exit'
+        // rightButtonText = 'Save Trapping Protocols and Exit'
+        rightButtonText = 'Save and Return'
+
+        break
+      case 'Permit Information':
+        rightButtonText = 'Next'
+
         break
       case 'Permitting Information Input':
-        rightButtonText = 'Save Permitting Information and Exit'
+        // rightButtonText = 'Save Permitting Information and Exit'
+        rightButtonText = 'Save and Return'
+
         break
       case 'Create New Program Complete':
         rightButtonText = 'Go Home'

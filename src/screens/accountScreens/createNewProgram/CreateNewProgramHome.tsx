@@ -139,7 +139,7 @@ const CreateNewProgramHome = ({
 
   useEffect(() => {
     const checkForm = createNewProgramHomeStore.steps.every(
-      (step) => step.completed === true
+      step => step.completed === true
     )
     if (checkForm) {
       setFormIsCompleteAndValid(true)
@@ -165,6 +165,10 @@ const CreateNewProgramHome = ({
         trappingProtocols: trappingProtocols,
         permittingInformation: permittingInformation,
       }
+      console.log(
+        '🚀 ~ POSTMonitoringProgramSubmissions ~ monitoringProgramSubmission:',
+        monitoringProgramSubmission
+      )
 
       dispatch(saveMonitoringProgramSubmission(monitoringProgramSubmission))
       if (connectivityState.isConnected) {
@@ -231,7 +235,7 @@ const CreateNewProgramHome = ({
             fundingAgencyValues.indexOf(
               createNewProgramHomeStore.values.fundingAgency
             ) + 1,
-          siteName: groupSiteName,
+          siteName: groupSiteName || trapName,
           coneSizeFt: Number(coneSize),
           xCoord: Number(trapLatitude),
           yCoord: Number(trapLongitude),

@@ -70,6 +70,18 @@ export const trappingSitesSlice = createSlice({
         }
       }
     },
+    deleteIndividualTrapSite: (state, action) => {
+      let trappingSitesStoreCopy = cloneDeep(state.trappingSitesStore)
+      let id: any = null
+
+      for (let key in trappingSitesStoreCopy) {
+        if (trappingSitesStoreCopy[key].uid === action.payload.uid) {
+          id = key
+          delete trappingSitesStoreCopy[id]
+          state.trappingSitesStore = trappingSitesStoreCopy
+        }
+      }
+    },
   },
 })
 
@@ -77,6 +89,7 @@ export const {
   resetTrappingSitesSlice,
   saveIndividualTrapSite,
   updateIndividualTrapSite,
+  deleteIndividualTrapSite,
 } = trappingSitesSlice.actions
 
 export default trappingSitesSlice.reducer

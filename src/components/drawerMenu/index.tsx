@@ -27,7 +27,7 @@ import AppLogo from '../Shared/AppLogo'
 const DrawerMenu = (props: DrawerContentComponentProps) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
-  // const reduxState = useSelector((state: any) => state)
+  const reduxState = useSelector((state: any) => state)
   const { steps, activeStep } = navigationState
   const { state, navigation } = props
   const currentRoute = state.routeNames[state.index]
@@ -111,12 +111,12 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             icon='home'
             title='Home'
           />
-          {/* <MenuButton
-            active={currentRoute === 'Sign In'}
-            onPress={() => handlePressMainNavButton('Sign In')}
-            icon='home'
-            title='Sign In'
-          /> */}
+          <MenuButton
+            active={false}
+            onPress={() => console.log('REDUX STATE:', reduxState)}
+            icon='bug'
+            title='DEV LOG'
+          />
           <MenuButton
             active={currentRoute === 'Profile'}
             onPress={() => {
@@ -124,6 +124,14 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             }}
             icon='person'
             title='Profile'
+          />
+          <MenuButton
+            active={currentRoute === 'Monitoring Program'}
+            onPress={() => {
+              handlePressMainNavButton('Monitoring Program')
+            }}
+            icon='add-circle'
+            title='Monitoring Program'
           />
           <MenuButton
             active={currentRoute === 'Permit Info'}
@@ -152,34 +160,6 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             title='Inspector'
           />
           <MenuButton
-            active={currentRoute === 'Mark Recapture'}
-            onPress={() => handlePressMainNavButton('Mark Recapture')}
-            icon='clipboard'
-            title='Mark Recapture'
-          />
-          {markRecaptureStepsArray && currentRoute === 'Mark Recapture' && (
-            <>
-              <Divider mt='2' />
-              {markRecaptureStepsArray.map((step: any, index: any) => {
-                return (
-                  <VStack ml='4' key={index}>
-                    <MenuButton
-                      active={currentRoute === step.name}
-                      completed={step.completed}
-                      icon='ellipse'
-                      listItem={true}
-                      title={step.name}
-                      // isDisabled={
-                      //   reduxState[step.propName]?.completed ? false : true
-                      // }
-                      onPress={() => handlePressMarkRecaptureButton(step.name)}
-                    />
-                  </VStack>
-                )
-              })}
-            </>
-          )}
-          <MenuButton
             active={currentRoute === 'Trap Visit Form'}
             onPress={() => handlePressMainNavButton('Trap Visit Form')}
             icon='clipboard'
@@ -202,6 +182,35 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
                       icon='ellipse'
                       listItem={true}
                       title={step.name}
+                    />
+                  </VStack>
+                )
+              })}
+            </>
+          )}
+          <MenuButton
+            active={currentRoute === 'Mark Recapture'}
+            onPress={() => handlePressMainNavButton('Mark Recapture')}
+            icon='clipboard'
+            title='Mark Recapture'
+            completed={true}
+          />
+          {markRecaptureStepsArray && currentRoute === 'Mark Recapture' && (
+            <>
+              <Divider mt='2' />
+              {markRecaptureStepsArray.map((step: any, index: any) => {
+                return (
+                  <VStack ml='4' key={index}>
+                    <MenuButton
+                      active={currentRoute === step.name}
+                      completed={step.completed}
+                      icon='ellipse'
+                      listItem={true}
+                      title={step.name}
+                      // isDisabled={
+                      //   reduxState[step.propName]?.completed ? false : true
+                      // }
+                      onPress={() => handlePressMarkRecaptureButton(step.name)}
                     />
                   </VStack>
                 )

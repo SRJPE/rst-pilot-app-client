@@ -19,18 +19,6 @@ import MonitoringProgramNavButtons from '../../components/monitoringProgram/Moni
 import { setUpNewProgramSchema } from '../../utils/helpers/yupValidations'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
 
-const streamNamesTemp = [
-  { id: 1, definition: 'Stream Name 1' },
-  { id: 2, definition: 'Stream Name 2' },
-]
-const programsTemp = [
-  { id: 1, definition: 'Program 1' },
-  { id: 2, definition: 'Program 2' },
-]
-// const fundingAgenciesTemp = [
-//   { id: 1, definition: 'Funding Agency 1' },
-//   { id: 2, definition: 'Funding Agency 2' },
-// ]
 const MonitoringProgramNew = ({
   navigation,
   createNewProgramHomeStore,
@@ -74,7 +62,7 @@ const MonitoringProgramNew = ({
           <>
             <Box overflow='hidden' flex={1} bg='#fff'>
               <VStack py='5%' px='10%' space={5}>
-                <Heading alignSelf='center'>Set Up a new Program</Heading>
+                <Heading alignSelf='center'>Set Up a New Program</Heading>
                 <FormInputComponent
                   label={'Monitoring Program Name'}
                   touched={touched}
@@ -113,7 +101,7 @@ const MonitoringProgramNew = ({
                 </FormControl>
                 <HStack alignItems='center' space={8}>
                   <Text fontSize='2xl' color='grey'>
-                    Would you like to copy values from an existing Program?
+                    Would you like to copy values from an existing program?
                   </Text>
                   <Checkbox
                     value={`${copyValuesChecked}`}
@@ -136,7 +124,10 @@ const MonitoringProgramNew = ({
                       placeholder='Choose Program'
                       onValueChange={handleChange('program')}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={programsTemp}
+                      selectOptions={[
+                        { id: 1, definition: 'Program 1' },
+                        { id: 2, definition: 'Program 2' },
+                      ]}
                     />
                   </FormControl>
                 )}

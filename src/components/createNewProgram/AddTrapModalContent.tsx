@@ -5,6 +5,7 @@ import {
   Divider,
   HStack,
   Icon,
+  KeyboardAvoidingView,
   Pressable,
   Text,
   VStack,
@@ -12,6 +13,7 @@ import {
 
 import { useDispatch } from 'react-redux'
 import {
+  deleteIndividualTrapSite,
   individualTrappingSiteState,
   IndividualTrappingSiteValuesI,
   saveIndividualTrapSite,
@@ -22,6 +24,7 @@ import { trappingSitesSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
 import { useEffect, useState } from 'react'
+import RenderErrorMessage from '../Shared/RenderErrorMessage'
 
 const AddTrapModalContent = ({
   closeModal,
@@ -30,12 +33,12 @@ const AddTrapModalContent = ({
   closeModal: any
   addTrapModalContent?: any
 }) => {
-  console.log('🚀 ~ addTrapModalContent:', addTrapModalContent)
   const dispatch = useDispatch<AppDispatch>()
-  const [modalDataTemp, setModalDataTemp] = useState({} as any)
+  const [modalDataTemp, setModalDataTemp] = useState(
+    individualTrappingSiteState as IndividualTrappingSiteValuesI
+  )
 
   const handleAddTrapSubmission = (values: IndividualTrappingSiteValuesI) => {
-    console.log('🚀 ~ handleAddTrapSubmission ~ values:', values?.uid)
     if (values?.uid) {
       dispatch(updateIndividualTrapSite(values))
     } else {
@@ -44,58 +47,81 @@ const AddTrapModalContent = ({
   }
 
   useEffect(() => {
-    setModalDataTemp(addTrapModalContent)
+    if (addTrapModalContent?.uid) {
+      setModalDataTemp(addTrapModalContent)
+    }
   }, [addTrapModalContent])
+
+  const handleDelete = () => {
+    dispatch(deleteIndividualTrapSite(addTrapModalContent))
+    setModalDataTemp(individualTrappingSiteState)
+  }
 
   return (
     <Formik
       validationSchema={trappingSitesSchema}
-      initialValues={individualTrappingSiteState}
-      onSubmit={(values, { resetForm }) => {
+      enableReinitialize
+      initialValues={modalDataTemp}
+      onSubmit={(values, { resetForm, setSubmitting }) => {
         handleAddTrapSubmission(values)
         resetForm()
+        setSubmitting(false)
       }}
     >
       {({
         handleChange,
         handleBlur,
         handleSubmit,
-        setValues,
         touched,
         errors,
         values,
       }) => {
-        useEffect(() => {
-          setValues(modalDataTemp)
-        }, [modalDataTemp])
         return (
-          <>
+          <KeyboardAvoidingView flex='1' behavior='padding'>
             <CustomModalHeader
-              headerText={'Add Traps'}
+              headerText={'Add Trap'}
               showHeaderButton={true}
               closeModal={closeModal}
               headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  // isDisabled={
-                  //   (Object.values(touched).length > 0 &&
-                  //   Object.values(errors).length > 0)
-                  // }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Add Trap
-                  </Text>
-                </Button>
+                <HStack space={8}>
+                  {values?.uid && (
+                    <Button
+                      bg='error'
+                      mx='2'
+                      px='10'
+                      shadow='3'
+                      onPress={() => {
+                        handleDelete()
+                        closeModal()
+                      }}
+                    >
+                      <Text fontSize='xl' color='white'>
+                        Delete{' '}
+                      </Text>
+                    </Button>
+                  )}
+                  <Button
+                    bg='primary'
+                    mx='2'
+                    px='10'
+                    shadow='3'
+                    isDisabled={
+                      (Object.values(touched).length === 0 && !values.uid) ||
+                      (Object.values(touched).length > 0 &&
+                        Object.values(errors).length > 0)
+                    }
+                    onPress={() => {
+                      handleSubmit()
+                      closeModal()
+                    }}
+                  >
+                    <Text fontSize='xl' color='white'>
+                      {modalDataTemp?.uid ? 'Save' : 'Add Trap'}
+                    </Text>
+                  </Button>
+                </HStack>
               }
             />
-            <Divider my='1%' thickness='3' />
             <VStack mx='5%' my='2%' space={6}>
               <FormInputComponent
                 label={'Trap Name'}
@@ -130,14 +156,14 @@ const AddTrapModalContent = ({
                   onChangeText={handleChange('trapLongitude')}
                   onBlur={handleBlur('trapLongitude')}
                 />
-                <Pressable alignSelf='flex-end'>
+                {/* <Pressable alignSelf='flex-end'>
                   <Icon
                     as={MaterialIcons}
                     name={'add-location-alt'}
                     size='16'
                     color='primary'
                   />
-                </Pressable>
+                </Pressable> */}
               </HStack>
 
               <HStack space={10}>
@@ -154,7 +180,7 @@ const AddTrapModalContent = ({
                 />
 
                 <FormInputComponent
-                  label={'USGS station number'}
+                  label={'USGS Station Number'}
                   touched={touched}
                   errors={errors}
                   value={
@@ -196,6 +222,7 @@ const AddTrapModalContent = ({
                   width={'40%'}
                   onChangeText={handleChange('releaseSiteLatitude')}
                   onBlur={handleBlur('releaseSiteLatitude')}
+                  stackDirection={'column'}
                 />
                 <FormInputComponent
                   label={'Release Site Longitude'}
@@ -211,18 +238,20 @@ const AddTrapModalContent = ({
                   width={'40%'}
                   onChangeText={handleChange('releaseSiteLongitude')}
                   onBlur={handleBlur('releaseSiteLongitude')}
+                  stackDirection={'column'}
                 />
-                <Pressable alignSelf='flex-end'>
+
+                {/* <Pressable alignSelf='flex-end'>
                   <Icon
                     as={MaterialIcons}
                     name={'add-location-alt'}
                     size='16'
                     color='primary'
                   />
-                </Pressable>
+                </Pressable> */}
               </HStack>
             </VStack>
-          </>
+          </KeyboardAvoidingView>
         )
       }}
     </Formik>

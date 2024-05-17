@@ -37,6 +37,7 @@ export const sampleTeamLead = {
   lastName: 'Doe',
   phoneNumber: '1234567890',
   email: 'test@flowwest.com',
+  isLead: true,
 }
 
 const CrewMembers = ({
@@ -62,17 +63,22 @@ const CrewMembers = ({
     let payload = {
       ...sampleTeamLead,
       ...values,
-      isLead: true,
     }
+    console.log('🚀 ~ handleSaveTeamLeadInformation ~ payload:', payload)
     dispatch(saveIndividualCrewMember(payload))
   }
   const handleShowTableModal = (selectedRowData: any) => {
     const modalDataContainer = {} as any
     Object.keys(selectedRowData).forEach((key: string) => {
-      modalDataContainer[key] = selectedRowData[key].toString()
+      modalDataContainer[key] = selectedRowData?.[key]?.toString()
     })
     setAddTrapModalContent(modalDataContainer)
     setAddCrewMemberModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setAddCrewMemberModalOpen(false)
+    setAddTrapModalContent(IndividualCrewMemberState)
   }
 
   return (
@@ -103,7 +109,7 @@ const CrewMembers = ({
                 <Heading alignSelf='center'>Add Trapping Crew</Heading>
                 <Text fontSize='lg' color='grey'>
                   {
-                    'Please add some additional information about yourself and add your crew \nmembers. Accounts will be created for all crew'
+                    'Please add some additional information about yourself and add your crew \nmembers. Accounts will be created for all crew members.'
                   }
                 </Text>
               </VStack>
@@ -191,16 +197,18 @@ const CrewMembers = ({
             </View>
             <CreateNewProgramNavButtons navigation={navigation} />
             {/* --------- Modals --------- */}
-            <CustomModal
-              isOpen={addCrewMemberModalOpen}
-              closeModal={() => setAddCrewMemberModalOpen(false)}
-              height='70%'
-            >
-              <AddCrewMemberModalContent
-                addTrapModalContent={addTrapModalContent}
-                closeModal={() => setAddCrewMemberModalOpen(false)}
-              />
-            </CustomModal>
+            {addCrewMemberModalOpen && (
+              <CustomModal
+                isOpen={addCrewMemberModalOpen}
+                closeModal={handleCloseModal}
+                height='55%'
+              >
+                <AddCrewMemberModalContent
+                  addTrapModalContent={addTrapModalContent}
+                  closeModal={handleCloseModal}
+                />
+              </CustomModal>
+            )}
           </>
         )}
       </Formik>
