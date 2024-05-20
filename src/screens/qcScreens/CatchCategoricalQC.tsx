@@ -105,7 +105,7 @@ function CatchCategoricalQC({
   const identifierToDataValueFromRecord = {
     taxonCode: 'createdCatchRawResponse.taxonCode',
     captureRunClass: 'createdCatchRawResponse.captureRunClass',
-    lifeStage: 'createdCatchRawResponse.captureRunClass',
+    lifeStage: 'createdCatchRawResponse.lifeStage',
     forkLength: 'createdCatchRawResponse.forkLength',
     markType: 'createdCatchRawResponse.markTypeId',
     markColor: 'createdExistingMarksResponse[0].markColorId',
@@ -414,6 +414,11 @@ function CatchCategoricalQC({
           return obj.id === rawData
         })[0]?.definition
         break
+      case 'lifeStage':
+        parsedData = lifeStageState.filter((obj: any) => {
+          return obj.id === rawData
+        })[0]?.definition
+        break
       case 'markType':
         parsedData = markTypeState.filter((obj: any) => {
           return obj.id === rawData
@@ -588,6 +593,38 @@ function CatchCategoricalQC({
               selectOptions={markTypeState.map((markType: any) => ({
                 label: markType?.definition,
                 value: markType?.definition,
+              }))}
+            />
+          </VStack>
+        )
+      case 'markColor':
+        return (
+          <VStack>
+            <Text>Edit Mark Color</Text>
+            <CustomSelect
+              selectedValue={nestedModalValue as string}
+              placeholder={'Mark Type'}
+              onValueChange={(value: string) => setNestedModalValue(value)}
+              setFieldTouched={() => console.log('markcolor field touched')}
+              selectOptions={markColorState.map((markColor: any) => ({
+                label: markColor?.definition,
+                value: markColor?.definition,
+              }))}
+            />
+          </VStack>
+        )
+      case 'markPos':
+        return (
+          <VStack>
+            <Text>Edit Mark Position</Text>
+            <CustomSelect
+              selectedValue={nestedModalValue as string}
+              placeholder={'Mark Type'}
+              onValueChange={(value: string) => setNestedModalValue(value)}
+              setFieldTouched={() => console.log('markposition field touched')}
+              selectOptions={markPositionState.map((markPosition: any) => ({
+                label: markPosition?.definition,
+                value: markPosition?.definition,
               }))}
             />
           </VStack>
