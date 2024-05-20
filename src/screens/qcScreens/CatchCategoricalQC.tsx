@@ -23,7 +23,7 @@ import { every } from 'lodash'
 import { DataTable } from 'react-native-paper'
 import { MaterialIcons } from '@expo/vector-icons'
 import CustomSelect from '../../components/Shared/CustomSelect'
-import { getRandomColor, reorderTaxon } from '../../utils/utils'
+import { capitalizeFirstLetterOfEachWord, getRandomColor, reorderTaxon, truncateAndTrimString } from '../../utils/utils'
 import { get } from 'lodash'
 
 interface GraphDataI {
@@ -395,7 +395,7 @@ function CatchCategoricalQC({
   }
 
   const handleModalCellPressed = (fieldClicked: string, data: any) => {
-    const rawData = get(
+    let rawData = get(
       data,
       identifierToDataValueFromRecord[
         fieldClicked as keyof typeof identifierToDataValueFromRecord
@@ -442,6 +442,12 @@ function CatchCategoricalQC({
     if (rawData === undefined) {
       setNestedModalData({ [fieldClicked]: 'none' })
     } else {
+      if (typeof rawData === 'boolean') {
+        rawData = rawData ? 'Yes' : 'No'
+      }
+      if (rawData === null) {
+        rawData = 'NA'
+      }
       setNestedModalData({ [fieldClicked]: parsedData ? parsedData : rawData })
     }
   }
@@ -805,7 +811,9 @@ function CatchCategoricalQC({
                             }
                           >
                             <Text>
-                              {species.length ? species[0]?.commonname : 'NA'}
+                              {species.length
+                                ? `${truncateAndTrimString(capitalizeFirstLetterOfEachWord(species[0]?.commonname), 10)}...`
+                                : 'NA'}
                             </Text>
                           </DataTable.Cell>
                         )
@@ -832,7 +840,9 @@ function CatchCategoricalQC({
                               handleModalCellPressed('captureRunClass', data)
                             }
                           >
-                            <Text>{runDefinition ?? 'NA'}</Text>
+                            <Text>
+                              {capitalizeFirstLetterOfEachWord(runDefinition) ?? 'NA'}
+                            </Text>
                           </DataTable.Cell>
                         )
                       })}
@@ -858,7 +868,9 @@ function CatchCategoricalQC({
                               handleModalCellPressed('lifeStage', data)
                             }
                           >
-                            <Text>{lifeStage ?? 'NA'}</Text>
+                            <Text>
+                              {capitalizeFirstLetterOfEachWord(lifeStage) ?? 'NA'}
+                            </Text>
                           </DataTable.Cell>
                         )
                       })}
@@ -882,7 +894,9 @@ function CatchCategoricalQC({
                               handleModalCellPressed('forkLength', data)
                             }
                           >
-                            <Text>{forkLength ?? 'NA'}</Text>
+                            <Text>
+                              {capitalizeFirstLetterOfEachWord(forkLength) ?? 'NA'}
+                            </Text>
                           </DataTable.Cell>
                         )
                       })}
@@ -910,7 +924,9 @@ function CatchCategoricalQC({
                             }
                           >
                             <Text>
-                              {markType.length ? markType[0]?.definition : 'NA'}
+                              {markType.length
+                                ? capitalizeFirstLetterOfEachWord(markType[0]?.definition)
+                                : 'NA'}
                             </Text>
                           </DataTable.Cell>
                         )
@@ -941,7 +957,9 @@ function CatchCategoricalQC({
                             >
                               <Text>
                                 {markColor.length
-                                  ? markColor[0]?.definition
+                                  ? capitalizeFirstLetterOfEachWord(
+                                      markColor[0]?.definition
+                                    )
                                   : 'NA'}
                               </Text>
                             </DataTable.Cell>
@@ -995,7 +1013,9 @@ function CatchCategoricalQC({
                             >
                               <Text>
                                 {markPosition.length
-                                  ? markPosition[0]?.definition
+                                  ? capitalizeFirstLetterOfEachWord(
+                                      markPosition[0]?.definition
+                                    )
                                   : 'NA'}
                               </Text>
                             </DataTable.Cell>
@@ -1052,7 +1072,7 @@ function CatchCategoricalQC({
                             style={{ minWidth: 100, width: '100%' }}
                             key={`crew-${idx}`}
                           >
-                            <Text>crew members</Text>
+                            <Text>placeholder</Text>
                           </DataTable.Cell>
                         )
                       })}

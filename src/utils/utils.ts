@@ -293,3 +293,15 @@ export const getRandomColor = () => {
 
   return color
 }
+
+export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
+  if (!sentence) return sentence // Check if the sentence is not empty
+  return sentence
+    .split(' ') // Split the sentence into words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+    .join(' ') // Join the words back into a sentence
+}
+
+export const truncateAndTrimString = (str: string, length: number) => {
+  return str.length > length ? str.substring(0, length).trim() : str
+}
