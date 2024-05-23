@@ -19,7 +19,7 @@ const LoadingScreen = ({ navigation }: LoadingScreenProps) => {
       'event.load',
       async (props: { process: any; callback: () => void }) => {
         const { process, callback } = props
-          await loader(process, callback)
+        await loader(process, callback)
       }
     )
 
@@ -64,10 +64,10 @@ const LoadingScreen = ({ navigation }: LoadingScreenProps) => {
           <Animated.Image
             source={require('../../../assets/data-tackle-spinner.png')}
             style={{
-              transform: [{ rotate: spin}, {translateY: -50}],
+              transform: [{ rotate: spin }],
               width: 400,
               height: 400,
-              
+              transformOrigin: 'center center',
             }}
             alt='loading icon logo'
           />
