@@ -66,8 +66,6 @@ function TrapQC({
     const programTrapVisits = previousTrapVisits.filter((trapVisit) => {
       return trapVisit.createdTrapVisitResponse.programId === programId
     })
-    console.log('programTrapVisits', programTrapVisits)
-    console.log('qcTrapVisitSubmissions', qcTrapVisitSubmissions)
 
     let tempData: any[] = []
     let turbidityData: any[] = []

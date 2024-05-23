@@ -852,7 +852,7 @@ function CatchCategoricalQC({
                       style={[{ justifyContent: 'center', width: '100%' }]}
                     >
                       <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
-                        <Text>Lifestage</Text>
+                        <Text>Life Stage</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
                         let lifeStageId = data.createdCatchRawResponse.lifeStage
