@@ -102,12 +102,27 @@ const TrapOperations = ({
       if (activeTabId) {
         activeTabName = tabSlice.tabs[activeTabId].name
       }
-      const range = activeTabName
-        ? QARanges.flowMeasure[selectedStream.trim()][selectedTrapSite.trim()][
-            activeTabName.trim()
-          ]
-        : QARanges.flowMeasure[selectedStream.trim()][selectedTrapSite.trim()]
+      let range
 
+      if (
+        !QARanges.flowMeasure?.[selectedStream.trim()]?.[
+          selectedTrapSite.trim()
+        ]
+      ) {
+        range = { max: 15000, min: 50 }
+      } else {
+        range = activeTabName
+          ? QARanges.flowMeasure?.[selectedStream.trim()]?.[
+              selectedTrapSite.trim()
+            ][activeTabName.trim()]
+          : QARanges.flowMeasure?.[selectedStream.trim()]?.[
+              selectedTrapSite.trim()
+            ]
+      }
+
+      if (!range) {
+        range = { max: 15000, min: 50 }
+      }
       if (flowMeasureEntered > range.max || flowMeasureEntered < range.min) {
         warningResult = true
       }
