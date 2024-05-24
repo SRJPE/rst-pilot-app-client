@@ -272,6 +272,13 @@ const TrapOperations = ({
       // only create initial error when form is not completed
       onSubmit={(values: any) => {
         if (activeTabId && activeTabId != 'placeholderId') {
+          const activeTabName = tabSlice.tabs[activeTabId].name
+
+          const flowRange =
+            QARanges.flowMeasure?.[selectedStream.trim()]?.[
+              selectedTrapSite.trim()
+            ][activeTabName.trim()]
+
           const callback = () => {
             if (values?.trapStatus === 'trap not functioning') {
               navigateHelper(
@@ -291,7 +298,7 @@ const TrapOperations = ({
                 dispatch,
                 updateActiveStep
               )
-            } else if (values?.flowMeasure > 1000) {
+            } else if (values?.flowMeasure > flowRange?.max) {
               navigateHelper(
                 'High Flows',
                 navigationSlice,
