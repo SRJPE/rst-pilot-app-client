@@ -142,6 +142,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
         .then(async (response: any) => {
           console.log('trap promise response: ', response)
           let trapId = response.data.createdTrapVisitResponse.id
+          console.log('trapId', trapId)
           const {
             createdTrapVisitResponse,
             createdTrapVisitCrewResponse,
@@ -159,13 +160,29 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           const catchPromises = linkedCatchRawSubmissions.map(
             ({ uid, ...rest }: any) =>
               api.post('catch-raw/', {
-                trapVisitId: trapId,
                 ...rest,
+                trapVisitId: trapId,
               })
           )
 
+          try {
+            const bulkCatchRawSubmissions = linkedCatchRawSubmissions.map(
+              ({ uid, ...rest }: any) => {
+                return {
+                  ...rest,
+                  trapVisitId: trapId,
+                }
+              }
+            )
+            const bulkCatchPostResponse = await api.post(
+              'catch-raw/',
+              bulkCatchRawSubmissions
+            )
+            console.log('bulkCatchPostResponse', bulkCatchPostResponse.data)
+          } catch (error) {}
+
           const catchResults = await Promise.allSettled(catchPromises).catch(
-            (error) => {
+            error => {
               console.log('catch submission error: ', error)
               const { response } = error
               const errorDetail = response.data.detail
@@ -179,6 +196,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
             }
           )
 
+          console.log('catchResults', catchResults)
           for (const result of catchResults as any) {
             if (result.status === 'fulfilled') {
               const {
@@ -236,7 +254,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
     try {
       const state = thunkAPI.getState() as RootState
       await Promise.all(
-        programIds.map(async (programId) => {
+        programIds.map(async programId => {
           const trapVisitResponse = await api.get(
             `trap-visit/program/${programId}`
           )
@@ -248,7 +266,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCTrapVisitIds: number[] =
             state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
-              (trapVisit) => {
+              trapVisit => {
                 return trapVisit.createdTrapVisitResponse.id
               }
             )
@@ -263,7 +281,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCCatchRawIds: number[] =
             state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
-              (catchRaw) => {
+              catchRaw => {
                 return catchRaw.createdCatchRawResponse.id
               }
             )
@@ -588,7 +606,7 @@ export const trapVisitPostBundler = createSlice({
       )
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder.addCase(PURGE, () => {
       return initialState
     })
