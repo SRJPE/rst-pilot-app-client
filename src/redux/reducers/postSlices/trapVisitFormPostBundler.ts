@@ -159,8 +159,8 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           const catchPromises = linkedCatchRawSubmissions.map(
             ({ uid, ...rest }: any) =>
               api.post('catch-raw/', {
-                trapVisitId: trapId,
                 ...rest,
+                trapVisitId: trapId,
               })
           )
 
