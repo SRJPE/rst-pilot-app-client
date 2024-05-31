@@ -237,8 +237,23 @@ export const getSubstring = (
   return str.substring(char1, char2)
 }
 
-export function GaussKDE(xi: number, x: number) {
-  return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(Math.pow(xi - x, 2) / -2)
+export function gaussianKernel(x: number) {
+    return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+}
+
+export function kernelDensityEstimation(data: number[], bandwidth: number, grid: number[]): number[] {
+  const density: number[] = [];
+
+  for (let i = 0; i < grid.length; i++) {
+    let sum = 0;
+    for (let j = 0; j < data.length; j++) {
+      const u = (grid[i] - data[j]) / bandwidth;
+      sum += gaussianKernel(u);
+    }
+    density[i] = sum / (data.length * bandwidth);
+  }
+
+  return density;
 }
 
 export const useDebounce = <T>(value: T, delay = 500) => {
@@ -304,4 +319,13 @@ export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
 
 export const truncateAndTrimString = (str: string, length: number) => {
   return str.length > length ? str.substring(0, length).trim() : str
+}
+
+export const normalizeDate = (date: Date) => {
+  date.setHours(0)
+  date.setMinutes(0)
+  date.setSeconds(0)
+  date.setMilliseconds(0)
+
+  return date.getTime()
 }

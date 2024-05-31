@@ -8,7 +8,7 @@ import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { trapVisitQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import api from '../../api/axiosConfig'
+import { normalizeDate } from '../../utils/utils'
 
 interface GraphDataI {
   Temperature: any[]
@@ -174,15 +174,6 @@ function TrapQC({
     })
   }, [qcTrapVisitSubmissions])
 
-  const normalizeDate = (date: Date) => {
-    date.setHours(0)
-    date.setMinutes(0)
-    date.setSeconds(0)
-    date.setMilliseconds(0)
-
-    return date.getTime()
-  }
-
   const GraphMenuButton = ({
     buttonName,
   }: {
@@ -276,6 +267,7 @@ function TrapQC({
                   key={buttonName}
                   chartType='bar'
                   data={graphData[buttonName]}
+                  showDates={true}
                   onPointClick={(datum) => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'

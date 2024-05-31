@@ -22,6 +22,8 @@ export default function Graph({
   chartType,
   title,
   data,
+  subData,
+  showDates = false,
   xLabel,
   yLabel,
   height,
@@ -34,9 +36,11 @@ export default function Graph({
   zoomDomain,
   legendData,
 }: {
-  chartType: 'bar' | 'line' | 'true-or-false' | 'scatterplot'
+  chartType: 'bar' | 'line' | 'true-or-false' | 'scatterplot' | 'linewithplot'
   title?: string
   data: any
+  subData?: any
+  showDates?: boolean
   xLabel?: string
   yLabel?: string
   height: number
@@ -265,7 +269,7 @@ export default function Graph({
             size={7}
             style={{
               data: {
-                fill: (props) => {
+                fill: (props: any) => {
                   return props.datum.colorScale
                     ? props.datum.colorScale
                     : barColor
@@ -276,7 +280,7 @@ export default function Graph({
               {
                 target: 'data',
                 eventHandlers: {
-                  onPressIn: (event, data) => {
+                  onPressIn: (event: any, data: any) => {
                     return [
                       // {
                       //   target: 'data',
@@ -307,6 +311,55 @@ export default function Graph({
             ]}
           />
         )
+      case 'linewithplot':
+        return (
+          <VictoryLine
+            data={data}
+            interpolation='natural'
+            x='x'
+            y='y'
+            // style={{
+            //   data: {
+            //     fill: (props: any) => {
+            //       return props.datum.colorScale
+            //         ? props.datum.colorScale
+            //         : barColor
+            //     },
+            //   },
+            // }}
+            events={[
+              {
+                target: 'data',
+                eventHandlers: {
+                  onPressIn: (event: any, data: any) => {
+                    return [
+                      // {
+                      //   target: 'data',
+                      //   eventKey: 'all',
+                      //   mutation: (props: any) => {
+                      //     // const fill = props.style?.fill
+                      //     // return fill === barColor
+                      //     //   ? null
+                      //     //   : { style: { fill: barColor } }
+                      //   },
+                      // },
+                      {
+                        target: 'data',
+                        mutation: (props: any) => {
+                          // handlePointClick(data.datum)
+                          // const fill = props.style?.fill
+                          // return fill === selectedBarColor
+                          //   ? null
+                          //   : { style: { fill: selectedBarColor } }
+                        },
+                      },
+                    ]
+                  },
+                },
+              },
+            ]}
+          />
+        )
     }
   }
 
@@ -322,7 +375,11 @@ export default function Graph({
         containerComponent={
           <VictoryZoomContainer
             zoomDomain={
-              chartType === 'true-or-false' ? { y: [0, 2.5] } : undefined
+              chartType === 'true-or-false'
+                ? { y: [0, 2.5] }
+                : zoomDomain
+                ? zoomDomain
+                : undefined
             }
             zoomDimension='x'
           />
@@ -348,7 +405,7 @@ export default function Graph({
           fixLabelOverlap={true}
           tickFormat={(value) => {
             let date = new Date(Number(value))
-            if (String(date) !== 'Invalid Date' && chartType !== 'line') {
+            if (String(date) !== 'Invalid Date' && showDates) {
               return `${moment(date).format('MMM Do YY')}`
             } else {
               return `${value}`
@@ -388,6 +445,55 @@ export default function Graph({
         {chartType === 'bar' ? (
           <VictoryScatter
             data={data}
+            style={{
+              data: {
+                fill: (props: any) => {
+                  return props.datum.colorScale
+                    ? props.datum.colorScale
+                    : barColor
+                },
+              },
+            }}
+            x='x'
+            y='y'
+            events={[
+              {
+                target: 'data',
+                eventHandlers: {
+                  onPressIn: (event: any, data: any) => {
+                    return [
+                      {
+                        target: 'data',
+                        eventKey: 'all',
+                        mutation: (props: any) => {
+                          // const fill = props.style?.fill
+                          // return fill === barColor
+                          //   ? null
+                          //   : { style: { fill: barColor } }
+                        },
+                      },
+                      {
+                        target: 'data',
+                        mutation: (props: any) => {
+                          handlePointClick(data.datum)
+                          // const fill = props.style?.fill
+                          // return fill === selectedBarColor
+                          //   ? null
+                          //   : { style: { fill: selectedBarColor } }
+                        },
+                      },
+                    ]
+                  },
+                },
+              },
+            ]}
+          />
+        ) : (
+          <></>
+        )}
+        {(chartType === 'linewithplot' && subData) ? (
+          <VictoryScatter
+            data={subData}
             style={{
               data: {
                 fill: (props: any) => {

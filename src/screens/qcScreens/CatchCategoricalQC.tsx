@@ -16,14 +16,12 @@ import Graph from '../../components/Shared/Graph'
 import { AppDispatch, RootState } from '../../redux/store'
 import { connect, useDispatch } from 'react-redux'
 import CustomModal from '../../components/Shared/CustomModal'
-import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import moment from 'moment'
 import { every } from 'lodash'
 import { DataTable } from 'react-native-paper'
 import { MaterialIcons } from '@expo/vector-icons'
 import CustomSelect from '../../components/Shared/CustomSelect'
-import { capitalizeFirstLetterOfEachWord, getRandomColor, reorderTaxon, truncateAndTrimString } from '../../utils/utils'
+import { capitalizeFirstLetterOfEachWord, getRandomColor, normalizeDate, reorderTaxon, truncateAndTrimString } from '../../utils/utils'
 import { get } from 'lodash'
 
 interface GraphDataI {
@@ -100,6 +98,7 @@ function CatchCategoricalQC({
     markColor: 'Mark Color',
     markPos: 'Mark Position',
     dead: 'Mortality',
+    adiposeClipped: 'Adipose Clipped',
   }
 
   const identifierToDataValueFromRecord = {
@@ -111,6 +110,7 @@ function CatchCategoricalQC({
     markColor: 'createdExistingMarksResponse[0].markColorId',
     markPos: 'createdExistingMarksResponse[0].markPositionId',
     dead: 'createdCatchRawResponse.dead',
+    adiposeClipped: 'createdCatchRawResponse.adiposeClipped',
   }
 
   useEffect(() => {
@@ -171,7 +171,7 @@ function CatchCategoricalQC({
 
       const species = taxonState.filter((obj: any) => {
         return obj.code === taxonCode
-      })[0]?.commonName
+      })[0]?.commonname
 
       if (id) {
         if (adiposeClipped != null) {
@@ -355,15 +355,6 @@ function CatchCategoricalQC({
       Mortalities: deadData,
     })
   }, [qcCatchRawSubmissions])
-
-  const normalizeDate = (date: Date) => {
-    date.setHours(0)
-    date.setMinutes(0)
-    date.setSeconds(0)
-    date.setMilliseconds(0)
-
-    return date.getTime()
-  }
 
   const handlePointClick = (datum: any) => {
     const programId = route.params.programId
@@ -670,6 +661,41 @@ function CatchCategoricalQC({
             </Radio.Group>
           </VStack>
         )
+      case 'adiposeClipped':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Adipose Clipped</Text>
+            <Radio.Group
+              name='isLead'
+              accessibilityLabel='is lead'
+              value={undefined}
+              onChange={(value: any) => {
+                if (value === 'true') {
+                  setNestedModalValue(true)
+                } else {
+                  setNestedModalValue(false)
+                }
+              }}
+            >
+              <Radio
+                colorScheme='primary'
+                value='false'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                Yes
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='true'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                No
+              </Radio>
+            </Radio.Group>
+          </VStack>
+        )
     }
   }
 
@@ -708,6 +734,7 @@ function CatchCategoricalQC({
                   yLabel={axisLabelDictionary[buttonName]['yLabel']}
                   key={buttonName}
                   chartType={buttonNameToChartType[buttonName] as any}
+                  showDates={ ['Species', 'Marks'].includes(buttonName)}
                   onPointClick={(datum) => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
@@ -1033,6 +1060,29 @@ function CatchCategoricalQC({
                             </DataTable.Cell>
                           )
                         }
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                        <Text>Adipose Clip</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let adiposeClipped: boolean = data.createdCatchRawResponse.adiposeClipped
+
+                        return (
+                          <DataTable.Cell
+                            style={{ minWidth: 100, width: '100%' }}
+                            key={`adipose-${idx}`}
+                            onPress={() => handleModalCellPressed('adiposeClipped', data)}
+                          >
+                            <Text>
+                              {adiposeClipped != null ? (adiposeClipped ? 'Yes' : 'No') : 'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
                       })}
                     </DataTable.Row>
 

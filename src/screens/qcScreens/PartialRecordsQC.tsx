@@ -118,7 +118,8 @@ function PartialRecordsQC({
       percentNotRecordedPayload.push({
         variableName: key,
         percentNotRecorded: Math.round(
-          (formattedData[key] / qcData.length) * 100
+          ((qcData.length - formattedData[key]) / qcData.length) * 100
+          // ((total - num exist) / total) * 100 = percent not recorded
         ),
       })
     })

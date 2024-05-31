@@ -16,6 +16,7 @@ import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { AppDispatch, RootState } from '../../redux/store'
+import { normalizeDate } from '../../utils/utils'
 
 function CatchFishCountQC({
   navigation,
@@ -66,15 +67,6 @@ function CatchFishCountQC({
 
     setGraphData(totalCountByDay)
   }, [qcCatchRawSubmissions])
-
-  const normalizeDate = (date: Date) => {
-    date.setHours(0)
-    date.setMinutes(0)
-    date.setSeconds(0)
-    date.setMilliseconds(0)
-
-    return date.getTime()
-  }
 
   const handlePointClick = (datum: any) => {
     console.log('point clicked: ', datum)
@@ -127,6 +119,7 @@ function CatchFishCountQC({
               yLabel={'Total Daily Catch'}
               chartType='bar'
               data={graphData}
+              showDates={true}
               barColor='grey'
               onPointClick={datum => handlePointClick(datum)}
               selectedBarColor='green'
