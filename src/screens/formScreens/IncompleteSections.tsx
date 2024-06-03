@@ -491,8 +491,6 @@ const IncompleteSections = ({
             releaseId: findReleaseIdFromExistingMarks(),
             comments: null,
             createdBy: null,
-            createdAt: currentDateTime,
-            updatedAt: currentDateTime,
             qcCompleted: null,
             qcCompletedBy: null,
             qcTime: null,
