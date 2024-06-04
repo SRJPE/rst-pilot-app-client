@@ -41,7 +41,7 @@ interface NestedModalDataI {
   [fieldClicked: string]: string
 }
 
-interface NestedModalValueI {
+interface NestedModalInputValueI {
   fieldClicked: string
   value: string | number | boolean
 }
@@ -84,7 +84,7 @@ function CatchCategoricalQC({
   const [nestedModalData, setNestedModalData] =
     useState<NestedModalDataI | null>(null)
   const [nestedModalInputValue, setNestedModalInputValue] =
-    useState<NestedModalValueI>({
+    useState<NestedModalInputValueI>({
       fieldClicked: '',
       value: '',
     })
