@@ -16,14 +16,19 @@ import Graph from '../../components/Shared/Graph'
 import { AppDispatch, RootState } from '../../redux/store'
 import { connect, useDispatch } from 'react-redux'
 import CustomModal from '../../components/Shared/CustomModal'
-import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { every } from 'lodash'
 import { DataTable } from 'react-native-paper'
 import { MaterialIcons } from '@expo/vector-icons'
 import CustomSelect from '../../components/Shared/CustomSelect'
-import { reorderTaxon } from '../../utils/utils'
+import {
+  capitalizeFirstLetterOfEachWord,
+  getRandomColor,
+  normalizeDate,
+  reorderTaxon,
+  truncateAndTrimString,
+} from '../../utils/utils'
 import { get } from 'lodash'
-import moment from 'moment'
 
 interface GraphDataI {
   'Adipose Clipped': any[]
@@ -33,26 +38,36 @@ interface GraphDataI {
 }
 
 interface NestedModalDataI {
+  [fieldClicked: string]: string
+}
+
+interface NestedModalInputValueI {
   fieldClicked: string
-  data: any
+  value: string | number | boolean
 }
 
 function CatchCategoricalQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions,
   taxonState,
   runState,
   lifeStageState,
   markTypeState,
+  markColorState,
+  markPositionState,
 }: {
   navigation: any
   route: any
-  qcCatchRawSubmissions: any
+  qcCatchRawSubmissions: any[]
+  previousCatchRawSubmissions: any[]
   taxonState: any
   runState: any
   lifeStageState: any
   markTypeState: any
+  markColorState: any
+  markPositionState: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -68,7 +83,12 @@ function CatchCategoricalQC({
   const [modalData, setModalData] = useState<any[] | null>(null)
   const [nestedModalData, setNestedModalData] =
     useState<NestedModalDataI | null>(null)
-  const [nestedModalValue, setNestedModalValue] = useState<string | boolean>('')
+  const [nestedModalInputValue, setNestedModalInputValue] =
+    useState<NestedModalInputValueI>({
+      fieldClicked: '',
+      value: '',
+    })
+  const [markIdToSymbolArr, setMarkIdToSymbolArr] = useState([])
 
   const axisLabelDictionary = {
     'Adipose Clipped': { xLabel: 'Sampling Time', yLabel: undefined },
@@ -77,14 +97,54 @@ function CatchCategoricalQC({
     Mortalities: { xLabel: 'Date', yLabel: 'Count' },
   }
 
+  const buttonNameToChartType = {
+    'Adipose Clipped': 'true-or-false',
+    Species: 'scatterplot',
+    Marks: 'scatterplot',
+    Mortalities: 'bar',
+  }
+
+  const identifierToName = {
+    taxonCode: 'Species',
+    captureRunClass: 'Run',
+    lifeStage: 'Lifestage',
+    forkLength: 'Fork Length',
+    markType: 'Mark Type',
+    markColor: 'Mark Color',
+    markPos: 'Mark Position',
+    dead: 'Mortality',
+    adiposeClipped: 'Adipose Clipped',
+  }
+
+  const identifierToDataValueFromRecord = {
+    taxonCode: 'createdCatchRawResponse.taxonCode',
+    captureRunClass: 'createdCatchRawResponse.captureRunClass',
+    lifeStage: 'createdCatchRawResponse.lifeStage',
+    forkLength: 'createdCatchRawResponse.forkLength',
+    markType: 'createdCatchRawResponse.markTypeId',
+    markColor: 'createdExistingMarksResponse[0].markColorId',
+    markPos: 'createdExistingMarksResponse[0].markPositionId',
+    dead: 'createdCatchRawResponse.dead',
+    adiposeClipped: 'createdCatchRawResponse.adiposeClipped',
+  }
+
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
     let adiposeClippedData: any[] = []
     let speciesData: any[] = []
     let marksData: any[] = []
     let deadData: any[] = []
+
+    interface MarkCombosI {
+      [key: string]: any
+    }
+
+    const markCombos = {} as MarkCombosI
 
     let fishCountByDateAndSpecies: any = {
       // [date]: {
@@ -106,21 +166,27 @@ function CatchCategoricalQC({
 
       const createdExistingMarksResponse =
         catchResponse.createdExistingMarksResponse ?? []
-      const createdMarkAppliedResponse =
-        catchResponse.createdMarkAppliedResponse ?? []
 
+      const date = new Date(createdAt)
+      date.setHours(0)
+      date.setMinutes(0)
+      date.setSeconds(0)
+      date.setMilliseconds(0)
+      // const dateTime = moment(createdAt).format('MMM Do YY')
+      // const date = new Date(createdAt)
+      const dateTime = date.getTime()
       const normalizedDate = normalizeDate(new Date(createdAt))
 
       const marks = [
         ...createdExistingMarksResponse,
-        ...createdMarkAppliedResponse,
+        // ...createdMarkAppliedResponse,
       ].filter((mark: any) => {
         return mark.catchRawId === id
       })
 
       const species = taxonState.filter((obj: any) => {
         return obj.code === taxonCode
-      })[0].commonname
+      })[0]?.commonname
 
       if (id) {
         if (adiposeClipped != null) {
@@ -167,17 +233,43 @@ function CatchCategoricalQC({
           }
         }
 
-        // MARK DATA PROCESSING NOT COMPLETE
         if (marks.length) {
           marks.forEach((mark: any) => {
-            marksData.push({
-              ids: [id],
-              dataId: 'Marks',
-              x: `${mark.markTypeId} - ${mark.markColorId}`,
-              y: 1,
-              colorScale: qcNotStarted ? 'red' : undefined,
-              // catchResponse,
-            })
+            const { markTypeId, markColorId, markPositionId } = mark
+            const markType =
+              markTypeState.filter((obj: any) => {
+                return obj.id == markTypeId
+              })[0]?.definition ?? 'NA'
+            const markColor =
+              markColorState.filter((obj: any) => {
+                return obj.id == markColorId
+              })[0]?.definition ?? 'NA'
+            const markPosition =
+              markPositionState.filter((obj: any) => {
+                return obj.id == markPositionId
+              })[0]?.definition ?? 'NA'
+            const markIdentifier = `${markType}-${markColor}-${markPosition}`
+
+            // if date does not exist,
+            if (!markCombos[dateTime]) {
+              //add to markCombos obj and set property to unique combo and count to 1
+              markCombos[dateTime] = {
+                [markIdentifier]: [{ catchRawId: id, ...mark }],
+              } as any
+            } else if (markCombos[dateTime]) {
+              // if markIdentifier combo exists, increment
+              if (markCombos[dateTime][markIdentifier]) {
+                markCombos[dateTime][markIdentifier] = [
+                  ...markCombos[dateTime][markIdentifier],
+                  { catchRawId: id, ...mark },
+                ]
+              } else {
+                // else set new markIdentifier count to
+                markCombos[dateTime][markIdentifier] = [
+                  { catchRawId: id, ...mark },
+                ]
+              }
+            }
           })
         }
 
@@ -216,12 +308,50 @@ function CatchCategoricalQC({
       }
     })
 
+    let markIdToColorBuilder: any = []
+    let symbolCounter = 0
+
+    const addJitter = (value: any, jitterAmount = 0.1) => {
+      return value + Math.random() * jitterAmount - jitterAmount / 2
+    }
+
+    Object.entries(markCombos).forEach(([dateTime, countObj], index) => {
+      Object.entries(countObj as MarkCombosI).forEach(
+        ([markIdentifier, itemsArray]) => {
+          let randomColor = getRandomColor()
+          let symbol = every(itemsArray, ['qcCompleted', true])
+            ? 'circle'
+            : 'plus'
+          markIdToColorBuilder.push({
+            name: markIdentifier,
+            symbol: { type: symbol, fill: randomColor },
+          })
+
+          // if other properties in the same countObj have same length,
+          // then symbol should be star
+
+          marksData.push({
+            id: `${markIdentifier}_${dateTime}`,
+            x: dateTime,
+            y: itemsArray.length,
+            colorScale: randomColor,
+            symbol: every(itemsArray, ['qcCompleted', true])
+              ? 'circle'
+              : 'plus',
+            itemsArray: itemsArray,
+          })
+          symbolCounter++
+        }
+      )
+    })
+    setMarkIdToSymbolArr(markIdToColorBuilder)
+
     Object.keys(fishCountByDateAndSpecies).forEach((date) => {
       const speciesCountFromDate = fishCountByDateAndSpecies[date]
 
       Object.keys(speciesCountFromDate).forEach((species) => {
-        let count = speciesCountFromDate[species].count
-        let ids = speciesCountFromDate[species].ids
+        let count = speciesCountFromDate[species]?.count
+        let ids = speciesCountFromDate[species]?.ids
 
         speciesData.push({
           ids,
@@ -241,22 +371,29 @@ function CatchCategoricalQC({
     })
   }, [qcCatchRawSubmissions])
 
-  const normalizeDate = (date: Date) => {
-    date.setHours(0)
-    date.setMinutes(0)
-    date.setSeconds(0)
-    date.setMilliseconds(0)
-
-    return date.getTime()
-  }
-
   const handlePointClick = (datum: any) => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
-    const { ids, dataId } = datum
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
+    })
+
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+    let idsAtPoint: any[] = []
+    if (Object.keys(datum).includes('itemsArray')) {
+      idsAtPoint = datum.itemsArray.map((item: any) => {
+        if (Object.keys(item).includes('catchRawId')) {
+          if (item.catchRawId) {
+            return item.catchRawId
+          }
+        }
+      })
+    } else if (Object.keys(datum).includes('ids')) {
+      idsAtPoint = datum.ids
+    }
 
     const selectedData = qcData.filter((response) => {
-      return ids.includes(response.createdCatchRawResponse.id)
+      const id = response.createdCatchRawResponse?.id
+      return idsAtPoint.includes(id)
     })
 
     setModalData(selectedData)
@@ -264,7 +401,61 @@ function CatchCategoricalQC({
   }
 
   const handleModalCellPressed = (fieldClicked: string, data: any) => {
-    setNestedModalData({ fieldClicked, data })
+    let rawData = get(
+      data,
+      identifierToDataValueFromRecord[
+        fieldClicked as keyof typeof identifierToDataValueFromRecord
+      ]
+    )
+    let parsedData = null
+
+    switch (fieldClicked) {
+      case 'taxonCode':
+        parsedData = taxonState.filter((obj: any) => {
+          return obj.code === rawData
+        })[0]?.commonname
+        break
+      case 'captureRunClass':
+        parsedData = runState.filter((obj: any) => {
+          return obj.id === rawData
+        })[0]?.definition
+        break
+      case 'lifeStage':
+        parsedData = lifeStageState.filter((obj: any) => {
+          return obj.id === rawData
+        })[0]?.definition
+        break
+      case 'markType':
+        parsedData = markTypeState.filter((obj: any) => {
+          return obj.id === rawData
+        })[0]?.definition
+        break
+      case 'markPos':
+        parsedData = markPositionState.filter((obj: any) => {
+          return obj.id === rawData
+        })[0]?.definition
+        break
+      case 'markColor':
+        parsedData = markColorState.filter((obj: any) => {
+          return obj.id === rawData
+        })[0]?.definition
+        break
+
+      default:
+        break
+    }
+
+    if (rawData === undefined) {
+      setNestedModalData({ [fieldClicked]: 'none' })
+    } else {
+      if (typeof rawData === 'boolean') {
+        rawData = rawData ? 'Yes' : 'No'
+      }
+      if (rawData === null) {
+        rawData = 'NA'
+      }
+      setNestedModalData({ [fieldClicked]: parsedData ? parsedData : rawData })
+    }
   }
 
   const handleCloseModal = () => {
@@ -339,9 +530,11 @@ function CatchCategoricalQC({
           <VStack>
             <Text>Edit Species</Text>
             <CustomSelect
-              selectedValue={nestedModalValue as string}
+              selectedValue={nestedModalInputValue.value as string}
               placeholder={'Species'}
-              onValueChange={(value: string) => setNestedModalValue(value)}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'taxonCode', value })
+              }
               setFieldTouched={() => console.log('species field touched')}
               selectOptions={reorderedTaxon.map((taxon: any) => ({
                 label: taxon?.commonname,
@@ -355,9 +548,14 @@ function CatchCategoricalQC({
           <VStack>
             <Text>Edit Run</Text>
             <CustomSelect
-              selectedValue={nestedModalValue as string}
+              selectedValue={nestedModalInputValue.value as string}
               placeholder={'Run'}
-              onValueChange={(value: string) => setNestedModalValue(value)}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({
+                  fieldClicked: 'captureRunClass',
+                  value,
+                })
+              }
               setFieldTouched={() => console.log('run field touched')}
               selectOptions={runState.map((run: any) => ({
                 label: run?.definition,
@@ -371,9 +569,11 @@ function CatchCategoricalQC({
           <VStack>
             <Text>Edit Lifestage</Text>
             <CustomSelect
-              selectedValue={nestedModalValue as string}
+              selectedValue={nestedModalInputValue.value as string}
               placeholder={'Lifestage'}
-              onValueChange={(value: string) => setNestedModalValue(value)}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'lifeStage', value })
+              }
               setFieldTouched={() => console.log('lifestage field touched')}
               selectOptions={lifeStageState.map((lifeStage: any) => ({
                 label: lifeStage?.definition,
@@ -393,12 +593,10 @@ function CatchCategoricalQC({
               placeholder='fork length...'
               keyboardType='numeric'
               onChangeText={(value) => {
-                let payload = { ...data }
-                payload.createdCatchRawResponse.forkLength = value
-                console.log('handle fork length edit submit')
+                setNestedModalInputValue({ fieldClicked: 'forkLength', value })
               }}
               // onBlur={handleBlur('comments')}
-              value={''}
+              value={nestedModalInputValue.value as string}
             />
           </VStack>
         )
@@ -407,13 +605,51 @@ function CatchCategoricalQC({
           <VStack>
             <Text>Edit Mark Type</Text>
             <CustomSelect
-              selectedValue={nestedModalValue as string}
+              selectedValue={nestedModalInputValue.value as string}
               placeholder={'Mark Type'}
-              onValueChange={(value: string) => setNestedModalValue(value)}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'markType', value })
+              }
               setFieldTouched={() => console.log('marktype field touched')}
               selectOptions={markTypeState.map((markType: any) => ({
                 label: markType?.definition,
                 value: markType?.definition,
+              }))}
+            />
+          </VStack>
+        )
+      case 'markColor':
+        return (
+          <VStack>
+            <Text>Edit Mark Color</Text>
+            <CustomSelect
+              selectedValue={nestedModalInputValue.value as string}
+              placeholder={'Mark Type'}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'markColor', value })
+              }
+              setFieldTouched={() => console.log('markcolor field touched')}
+              selectOptions={markColorState.map((markColor: any) => ({
+                label: markColor?.definition,
+                value: markColor?.definition,
+              }))}
+            />
+          </VStack>
+        )
+      case 'markPos':
+        return (
+          <VStack>
+            <Text>Edit Mark Position</Text>
+            <CustomSelect
+              selectedValue={nestedModalInputValue.value as string}
+              placeholder={'Mark Type'}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'markPos', value })
+              }
+              setFieldTouched={() => console.log('markposition field touched')}
+              selectOptions={markPositionState.map((markPosition: any) => ({
+                label: markPosition?.definition,
+                value: markPosition?.definition,
               }))}
             />
           </VStack>
@@ -425,12 +661,18 @@ function CatchCategoricalQC({
             <Radio.Group
               name='isLead'
               accessibilityLabel='is lead'
-              value={undefined}
+              value={nestedModalInputValue.value as string}
               onChange={(value: any) => {
                 if (value === 'true') {
-                  setNestedModalValue(true)
+                  setNestedModalInputValue({
+                    fieldClicked: 'dead',
+                    value: true,
+                  })
                 } else {
-                  setNestedModalValue(false)
+                  setNestedModalInputValue({
+                    fieldClicked: 'dead',
+                    value: false,
+                  })
                 }
               }}
             >
@@ -440,7 +682,7 @@ function CatchCategoricalQC({
                 my={1}
                 _icon={{ color: 'primary' }}
               >
-                Dead
+                Yes
               </Radio>
               <Radio
                 colorScheme='primary'
@@ -448,37 +690,53 @@ function CatchCategoricalQC({
                 my={1}
                 _icon={{ color: 'primary' }}
               >
-                Alive
+                No
+              </Radio>
+            </Radio.Group>
+          </VStack>
+        )
+      case 'adiposeClipped':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Adipose Clipped</Text>
+            <Radio.Group
+              name='isLead'
+              accessibilityLabel='is lead'
+              value={nestedModalInputValue.value as string}
+              onChange={(value: any) => {
+                if (value === 'true') {
+                  setNestedModalInputValue({
+                    fieldClicked: 'adiposeClipped',
+                    value: true,
+                  })
+                } else {
+                  setNestedModalInputValue({
+                    fieldClicked: 'adiposeClipped',
+                    value: false,
+                  })
+                }
+              }}
+            >
+              <Radio
+                colorScheme='primary'
+                value='false'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                Yes
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='true'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                No
               </Radio>
             </Radio.Group>
           </VStack>
         )
     }
-  }
-
-  const buttonNameToChartType = {
-    'Adipose Clipped': 'true-or-false',
-    Species: 'scatterplot',
-    Marks: 'bar',
-    Mortalities: 'bar',
-  }
-
-  const identifierToName = {
-    taxonCode: 'Species',
-    captureRunClass: 'Run',
-    lifeStage: 'Lifestage',
-    forkLength: 'Fork Length',
-    markType: 'Mark Type',
-    dead: 'Mortality',
-  }
-
-  const identifierToDataValueFromRecord = {
-    taxonCode: 'createdCatchRawResponse.taxonCode',
-    captureRunClass: 'createdCatchRawResponse.captureRunClass',
-    lifeStage: 'createdCatchRawResponse.captureRunClass',
-    forkLength: 'createdCatchRawResponse.forkLength',
-    markType: 'createdCatchRawResponse.markType',
-    dead: 'createdCatchRawResponse.dead',
   }
 
   return (
@@ -516,6 +774,7 @@ function CatchCategoricalQC({
                   yLabel={axisLabelDictionary[buttonName]['yLabel']}
                   key={buttonName}
                   chartType={buttonNameToChartType[buttonName] as any}
+                  showDates={['Species', 'Marks'].includes(buttonName)}
                   onPointClick={(datum) => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
@@ -524,6 +783,9 @@ function CatchCategoricalQC({
                   selectedBarColor='green'
                   height={400}
                   width={600}
+                  legendData={
+                    buttonName === 'Marks' ? markIdToSymbolArr : undefined
+                  }
                 />
               )
             })}
@@ -595,7 +857,9 @@ function CatchCategoricalQC({
                   </DataTable.Header>
 
                   <ScrollView size={'full'}>
-                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
                       <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
                         <Text>Species</Text>
                       </DataTable.Cell>
@@ -614,19 +878,31 @@ function CatchCategoricalQC({
                             }
                           >
                             <Text>
-                              {species.length ? species[0].commonname : 'NA'}
+                              {species.length
+                                ? `${truncateAndTrimString(
+                                    capitalizeFirstLetterOfEachWord(
+                                      species[0]?.commonname
+                                    ),
+                                    10
+                                  )}...`
+                                : 'NA'}
                             </Text>
                           </DataTable.Cell>
                         )
                       })}
                     </DataTable.Row>
 
-                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
                       <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
                         <Text>Run</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
                         let run = data.createdCatchRawResponse.captureRunClass
+                        let runDefinition = runState.filter((obj: any) => {
+                          return obj.id === run
+                        })[0]?.definition
 
                         return (
                           <DataTable.Cell
@@ -636,21 +912,26 @@ function CatchCategoricalQC({
                               handleModalCellPressed('captureRunClass', data)
                             }
                           >
-                            <Text>{run ?? 'NA'}</Text>
+                            <Text>
+                              {capitalizeFirstLetterOfEachWord(runDefinition) ??
+                                'NA'}
+                            </Text>
                           </DataTable.Cell>
                         )
                       })}
                     </DataTable.Row>
 
-                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
                       <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
-                        <Text>Lifestage</Text>
+                        <Text>Life Stage</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
                         let lifeStageId = data.createdCatchRawResponse.lifeStage
                         let lifeStage = lifeStageState.filter((obj: any) => {
                           return obj.id === lifeStageId
-                        })
+                        })[0]?.definition
 
                         return (
                           <DataTable.Cell
@@ -661,21 +942,23 @@ function CatchCategoricalQC({
                             }
                           >
                             <Text>
-                              {lifeStage.length
-                                ? lifeStage[0].definition
-                                : 'NA'}
+                              {capitalizeFirstLetterOfEachWord(lifeStage) ??
+                                'NA'}
                             </Text>
                           </DataTable.Cell>
                         )
                       })}
                     </DataTable.Row>
 
-                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
                       <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
                         <Text>Fork Length</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
-                        let forkLength = data.createdCatchRawResponse.forkLength
+                        let forkLength =
+                          data?.createdCatchRawResponse.forkLength
 
                         return (
                           <DataTable.Cell
@@ -685,18 +968,24 @@ function CatchCategoricalQC({
                               handleModalCellPressed('forkLength', data)
                             }
                           >
-                            <Text>{forkLength ?? 'NA'}</Text>
+                            <Text>
+                              {capitalizeFirstLetterOfEachWord(forkLength) ??
+                                'NA'}
+                            </Text>
                           </DataTable.Cell>
                         )
                       })}
                     </DataTable.Row>
 
-                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
                       <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
                         <Text>Mark Type</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
-                        let markTypeCode = data.createdCatchRawResponse.markType
+                        let markTypeCode =
+                          data?.createdCatchRawResponse.markType
                         let markType = markTypeState.filter((obj: any) => {
                           return obj.id === markTypeCode
                         })
@@ -710,19 +999,158 @@ function CatchCategoricalQC({
                             }
                           >
                             <Text>
-                              {markType.length ? markType[0].definition : 'NA'}
+                              {markType.length
+                                ? capitalizeFirstLetterOfEachWord(
+                                    markType[0]?.definition
+                                  )
+                                : 'NA'}
                             </Text>
                           </DataTable.Cell>
                         )
                       })}
                     </DataTable.Row>
 
-                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                        <Text>Mark Color</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        if (data.createdExistingMarksResponse) {
+                          let markColorCode =
+                            data?.createdExistingMarksResponse[0]?.markColorId
+                          let markColor = markColorState.filter((obj: any) => {
+                            return obj.id === markColorCode
+                          })
+
+                          return (
+                            <DataTable.Cell
+                              style={{ minWidth: 100, width: '100%' }}
+                              key={`markcolor-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('markColor', data)
+                              }
+                            >
+                              <Text>
+                                {markColor.length
+                                  ? capitalizeFirstLetterOfEachWord(
+                                      markColor[0]?.definition
+                                    )
+                                  : 'NA'}
+                              </Text>
+                            </DataTable.Cell>
+                          )
+                        } else {
+                          return (
+                            <DataTable.Cell
+                              style={{ minWidth: 100, width: '100%' }}
+                              key={`markcolor-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('markColor', data)
+                              }
+                            >
+                              <Text>NA</Text>
+                            </DataTable.Cell>
+                          )
+                        }
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                        <Text>Mark Position</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        if (data.createdExistingMarksResponse) {
+                          let markPositionCode =
+                            data?.createdExistingMarksResponse[0]
+                              ?.markPositionId
+
+                          let markPosition = markPositionState.filter(
+                            (obj: any) => {
+                              return obj.id === markPositionCode
+                            }
+                          )
+
+                          // let markTypeCode = data.createdCatchRawResponse.markType
+                          // let markType = markTypeState.filter((obj: any) => {
+                          //   return obj.id === markTypeCode
+                          // })
+
+                          return (
+                            <DataTable.Cell
+                              style={{ minWidth: 100, width: '100%' }}
+                              key={`markpos-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('markPos', data)
+                              }
+                            >
+                              <Text>
+                                {markPosition.length
+                                  ? capitalizeFirstLetterOfEachWord(
+                                      markPosition[0]?.definition
+                                    )
+                                  : 'NA'}
+                              </Text>
+                            </DataTable.Cell>
+                          )
+                        } else {
+                          return (
+                            <DataTable.Cell
+                              style={{ minWidth: 100, width: '100%' }}
+                              key={`markpos-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('markPos', data)
+                              }
+                            >
+                              <Text>NA</Text>
+                            </DataTable.Cell>
+                          )
+                        }
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                        <Text>Adipose Clip</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let adiposeClipped: boolean =
+                          data.createdCatchRawResponse.adiposeClipped
+
+                        return (
+                          <DataTable.Cell
+                            style={{ minWidth: 100, width: '100%' }}
+                            key={`adipose-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('adiposeClipped', data)
+                            }
+                          >
+                            <Text>
+                              {adiposeClipped != null
+                                ? adiposeClipped
+                                  ? 'Yes'
+                                  : 'No'
+                                : 'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
                       <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
                         <Text>Mort</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
-                        let mort = data.createdCatchRawResponse.dead
+                        let mort: boolean = data.createdCatchRawResponse.dead
 
                         return (
                           <DataTable.Cell
@@ -730,13 +1158,17 @@ function CatchCategoricalQC({
                             key={`mortality-${idx}`}
                             onPress={() => handleModalCellPressed('dead', data)}
                           >
-                            <Text>{mort != null ? `${mort}` : 'NA'}</Text>
+                            <Text>
+                              {mort != null ? (mort ? 'Yes' : 'No') : 'NA'}
+                            </Text>
                           </DataTable.Cell>
                         )
                       })}
                     </DataTable.Row>
 
-                    <DataTable.Row style={[{ justifyContent: 'center', width: '100%' }]}>
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
                       <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
                         <Text>Crew</Text>
                       </DataTable.Cell>
@@ -747,7 +1179,7 @@ function CatchCategoricalQC({
                             style={{ minWidth: 100, width: '100%' }}
                             key={`crew-${idx}`}
                           >
-                            <Text>crew members</Text>
+                            <Text>placeholder</Text>
                           </DataTable.Cell>
                         )
                       })}
@@ -771,7 +1203,9 @@ function CatchCategoricalQC({
             <CustomModalHeader
               headerText={
                 identifierToName[
-                  nestedModalData.fieldClicked as keyof typeof identifierToName
+                  Object.keys(
+                    nestedModalData
+                  )[0] as keyof typeof identifierToName
                 ]
               }
               headerFontSize={23}
@@ -801,19 +1235,19 @@ function CatchCategoricalQC({
               justifyItems={'center'}
             >
               <Text color='black' fontSize='2xl' mb={5} fontWeight={'light'}>
-                You have the {nestedModalData.fieldClicked} marked as{' '}
-                <Text fontWeight={'bold'}>
-                  {get(
-                    nestedModalData.data,
-                    identifierToDataValueFromRecord[
-                      nestedModalData.fieldClicked as keyof typeof identifierToDataValueFromRecord
-                    ]
-                  )}
-                </Text>{' '}
+                You have the{' '}
+                {
+                  identifierToName[
+                    Object.keys(
+                      nestedModalData
+                    )[0] as keyof typeof identifierToName
+                  ]
+                }{' '}
+                marked as {`${Object.values(nestedModalData)[0]}`}
               </Text>
               <Text color='black' fontSize='2xl' fontWeight={'light'}>
                 Click button below to flag data as low confidence or edit value
-                if you know true value.
+                if you know the correct value.
               </Text>
               <HStack
                 justifyContent={'space-between'}
@@ -851,7 +1285,12 @@ function CatchCategoricalQC({
                 />
               </HStack>
 
-              <View mt='50px'>{CustomNestedModalInput(nestedModalData)}</View>
+              <View mt='50px'>
+                {CustomNestedModalInput({
+                  fieldClicked: Object.keys(nestedModalData)[0],
+                  data: Object.values(nestedModalData)[0],
+                })}
+              </View>
             </VStack>
           </>
         </CustomModal>
@@ -867,13 +1306,19 @@ const mapStateToProps = (state: RootState) => {
   let run = state.dropdowns.values.run
   let lifeStage = state.dropdowns.values.lifeStage
   let markType = state.dropdowns.values.markType
+  let markColor = state.dropdowns.values.markColor
+  let markPosition = state.dropdowns.values.bodyPart
 
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions:
+      state.trapVisitFormPostBundler.previousCatchRawSubmissions,
     taxonState: taxon ?? [],
     runState: run ?? [],
     lifeStageState: lifeStage ?? [],
     markTypeState: markType ?? [],
+    markColorState: markColor ?? [],
+    markPositionState: markPosition ?? [],
   }
 }
 
