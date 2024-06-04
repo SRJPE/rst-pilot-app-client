@@ -21,7 +21,13 @@ import { every } from 'lodash'
 import { DataTable } from 'react-native-paper'
 import { MaterialIcons } from '@expo/vector-icons'
 import CustomSelect from '../../components/Shared/CustomSelect'
-import { capitalizeFirstLetterOfEachWord, getRandomColor, normalizeDate, reorderTaxon, truncateAndTrimString } from '../../utils/utils'
+import {
+  capitalizeFirstLetterOfEachWord,
+  getRandomColor,
+  normalizeDate,
+  reorderTaxon,
+  truncateAndTrimString,
+} from '../../utils/utils'
 import { get } from 'lodash'
 
 interface GraphDataI {
@@ -33,6 +39,11 @@ interface GraphDataI {
 
 interface NestedModalDataI {
   [fieldClicked: string]: string
+}
+
+interface NestedModalValueI {
+  fieldClicked: string
+  value: string | number | boolean
 }
 
 function CatchCategoricalQC({
@@ -72,7 +83,11 @@ function CatchCategoricalQC({
   const [modalData, setModalData] = useState<any[] | null>(null)
   const [nestedModalData, setNestedModalData] =
     useState<NestedModalDataI | null>(null)
-  const [nestedModalValue, setNestedModalValue] = useState<string | boolean>('')
+  const [nestedModalInputValue, setNestedModalInputValue] =
+    useState<NestedModalValueI>({
+      fieldClicked: '',
+      value: '',
+    })
   const [markIdToSymbolArr, setMarkIdToSymbolArr] = useState([])
 
   const axisLabelDictionary = {
@@ -515,9 +530,11 @@ function CatchCategoricalQC({
           <VStack>
             <Text>Edit Species</Text>
             <CustomSelect
-              selectedValue={nestedModalValue as string}
+              selectedValue={nestedModalInputValue.value as string}
               placeholder={'Species'}
-              onValueChange={(value: string) => setNestedModalValue(value)}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'taxonCode', value })
+              }
               setFieldTouched={() => console.log('species field touched')}
               selectOptions={reorderedTaxon.map((taxon: any) => ({
                 label: taxon?.commonname,
@@ -531,9 +548,14 @@ function CatchCategoricalQC({
           <VStack>
             <Text>Edit Run</Text>
             <CustomSelect
-              selectedValue={nestedModalValue as string}
+              selectedValue={nestedModalInputValue.value as string}
               placeholder={'Run'}
-              onValueChange={(value: string) => setNestedModalValue(value)}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({
+                  fieldClicked: 'captureRunClass',
+                  value,
+                })
+              }
               setFieldTouched={() => console.log('run field touched')}
               selectOptions={runState.map((run: any) => ({
                 label: run?.definition,
@@ -547,9 +569,11 @@ function CatchCategoricalQC({
           <VStack>
             <Text>Edit Lifestage</Text>
             <CustomSelect
-              selectedValue={nestedModalValue as string}
+              selectedValue={nestedModalInputValue.value as string}
               placeholder={'Lifestage'}
-              onValueChange={(value: string) => setNestedModalValue(value)}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'lifeStage', value })
+              }
               setFieldTouched={() => console.log('lifestage field touched')}
               selectOptions={lifeStageState.map((lifeStage: any) => ({
                 label: lifeStage?.definition,
@@ -569,12 +593,10 @@ function CatchCategoricalQC({
               placeholder='fork length...'
               keyboardType='numeric'
               onChangeText={(value) => {
-                let payload = { ...data }
-                payload.createdCatchRawResponse.forkLength = value
-                console.log('handle fork length edit submit')
+                setNestedModalInputValue({ fieldClicked: 'forkLength', value })
               }}
               // onBlur={handleBlur('comments')}
-              value={''}
+              value={nestedModalInputValue.value as string}
             />
           </VStack>
         )
@@ -583,9 +605,11 @@ function CatchCategoricalQC({
           <VStack>
             <Text>Edit Mark Type</Text>
             <CustomSelect
-              selectedValue={nestedModalValue as string}
+              selectedValue={nestedModalInputValue.value as string}
               placeholder={'Mark Type'}
-              onValueChange={(value: string) => setNestedModalValue(value)}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'markType', value })
+              }
               setFieldTouched={() => console.log('marktype field touched')}
               selectOptions={markTypeState.map((markType: any) => ({
                 label: markType?.definition,
@@ -599,9 +623,11 @@ function CatchCategoricalQC({
           <VStack>
             <Text>Edit Mark Color</Text>
             <CustomSelect
-              selectedValue={nestedModalValue as string}
+              selectedValue={nestedModalInputValue.value as string}
               placeholder={'Mark Type'}
-              onValueChange={(value: string) => setNestedModalValue(value)}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'markColor', value })
+              }
               setFieldTouched={() => console.log('markcolor field touched')}
               selectOptions={markColorState.map((markColor: any) => ({
                 label: markColor?.definition,
@@ -615,9 +641,11 @@ function CatchCategoricalQC({
           <VStack>
             <Text>Edit Mark Position</Text>
             <CustomSelect
-              selectedValue={nestedModalValue as string}
+              selectedValue={nestedModalInputValue.value as string}
               placeholder={'Mark Type'}
-              onValueChange={(value: string) => setNestedModalValue(value)}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'markPos', value })
+              }
               setFieldTouched={() => console.log('markposition field touched')}
               selectOptions={markPositionState.map((markPosition: any) => ({
                 label: markPosition?.definition,
@@ -633,12 +661,18 @@ function CatchCategoricalQC({
             <Radio.Group
               name='isLead'
               accessibilityLabel='is lead'
-              value={undefined}
+              value={nestedModalInputValue.value as string}
               onChange={(value: any) => {
                 if (value === 'true') {
-                  setNestedModalValue(true)
+                  setNestedModalInputValue({
+                    fieldClicked: 'dead',
+                    value: true,
+                  })
                 } else {
-                  setNestedModalValue(false)
+                  setNestedModalInputValue({
+                    fieldClicked: 'dead',
+                    value: false,
+                  })
                 }
               }}
             >
@@ -668,12 +702,18 @@ function CatchCategoricalQC({
             <Radio.Group
               name='isLead'
               accessibilityLabel='is lead'
-              value={undefined}
+              value={nestedModalInputValue.value as string}
               onChange={(value: any) => {
                 if (value === 'true') {
-                  setNestedModalValue(true)
+                  setNestedModalInputValue({
+                    fieldClicked: 'adiposeClipped',
+                    value: true,
+                  })
                 } else {
-                  setNestedModalValue(false)
+                  setNestedModalInputValue({
+                    fieldClicked: 'adiposeClipped',
+                    value: false,
+                  })
                 }
               }}
             >
@@ -734,7 +774,7 @@ function CatchCategoricalQC({
                   yLabel={axisLabelDictionary[buttonName]['yLabel']}
                   key={buttonName}
                   chartType={buttonNameToChartType[buttonName] as any}
-                  showDates={ ['Species', 'Marks'].includes(buttonName)}
+                  showDates={['Species', 'Marks'].includes(buttonName)}
                   onPointClick={(datum) => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
@@ -839,7 +879,12 @@ function CatchCategoricalQC({
                           >
                             <Text>
                               {species.length
-                                ? `${truncateAndTrimString(capitalizeFirstLetterOfEachWord(species[0]?.commonname), 10)}...`
+                                ? `${truncateAndTrimString(
+                                    capitalizeFirstLetterOfEachWord(
+                                      species[0]?.commonname
+                                    ),
+                                    10
+                                  )}...`
                                 : 'NA'}
                             </Text>
                           </DataTable.Cell>
@@ -868,7 +913,8 @@ function CatchCategoricalQC({
                             }
                           >
                             <Text>
-                              {capitalizeFirstLetterOfEachWord(runDefinition) ?? 'NA'}
+                              {capitalizeFirstLetterOfEachWord(runDefinition) ??
+                                'NA'}
                             </Text>
                           </DataTable.Cell>
                         )
@@ -896,7 +942,8 @@ function CatchCategoricalQC({
                             }
                           >
                             <Text>
-                              {capitalizeFirstLetterOfEachWord(lifeStage) ?? 'NA'}
+                              {capitalizeFirstLetterOfEachWord(lifeStage) ??
+                                'NA'}
                             </Text>
                           </DataTable.Cell>
                         )
@@ -922,7 +969,8 @@ function CatchCategoricalQC({
                             }
                           >
                             <Text>
-                              {capitalizeFirstLetterOfEachWord(forkLength) ?? 'NA'}
+                              {capitalizeFirstLetterOfEachWord(forkLength) ??
+                                'NA'}
                             </Text>
                           </DataTable.Cell>
                         )
@@ -952,7 +1000,9 @@ function CatchCategoricalQC({
                           >
                             <Text>
                               {markType.length
-                                ? capitalizeFirstLetterOfEachWord(markType[0]?.definition)
+                                ? capitalizeFirstLetterOfEachWord(
+                                    markType[0]?.definition
+                                  )
                                 : 'NA'}
                             </Text>
                           </DataTable.Cell>
@@ -1070,16 +1120,23 @@ function CatchCategoricalQC({
                         <Text>Adipose Clip</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
-                        let adiposeClipped: boolean = data.createdCatchRawResponse.adiposeClipped
+                        let adiposeClipped: boolean =
+                          data.createdCatchRawResponse.adiposeClipped
 
                         return (
                           <DataTable.Cell
                             style={{ minWidth: 100, width: '100%' }}
                             key={`adipose-${idx}`}
-                            onPress={() => handleModalCellPressed('adiposeClipped', data)}
+                            onPress={() =>
+                              handleModalCellPressed('adiposeClipped', data)
+                            }
                           >
                             <Text>
-                              {adiposeClipped != null ? (adiposeClipped ? 'Yes' : 'No') : 'NA'}
+                              {adiposeClipped != null
+                                ? adiposeClipped
+                                  ? 'Yes'
+                                  : 'No'
+                                : 'NA'}
                             </Text>
                           </DataTable.Cell>
                         )
