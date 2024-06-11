@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import {
   Button,
   HStack,
+  VStack,
   Flex,
   Text,
   View,
@@ -62,17 +63,13 @@ export default function BottomNavigation({
   staggerOpen?: boolean
 }) {
   const { isOpen, onToggle, onClose } = useDisclose()
-  const [topStaggerTranslateXValue, setTopStaggerTranslateXValue] = useState(
-    // -94.5 as number
-    -133.5 as number
-  )
-  const [bottomStaggerTranslateXValue, setBottomStaggerTranslateXValue] =
-    useState(
-      // -173 as number
-      -133.5 as number
-    )
 
-  // const { height: screenHeight } = useWindowDimensions()
+  const [staggerTranslateXValue, setstaggerTranslateXValue] = useState(
+    // -173 as number
+    -105.5 as number
+  )
+
+  const { height: screenHeight, width: screenWidth } = useWindowDimensions()
 
   // useEffect(() => {
   //   if (screenHeight > 1193) {
@@ -158,78 +155,86 @@ export default function BottomNavigation({
                 },
               }}
             >
-              <HStack
-                space={2}
-                justifyContent='flex-end'
-                style={[
-                  { transform: [{ translateX: topStaggerTranslateXValue }] },
-                ]}
-              >
-                <Badge
-                  alignSelf='center'
-                  variant={'solid'}
-                  bg='secondary'
-                  opacity='0.8'
-                  borderRadius='5'
+              <VStack space={2} alignItems='flex-end'>
+                <HStack
+                  space={2}
+                  justifyContent='flex-start'
+                  alignItems='center'
+                  style={[
+                    {
+                      transform: [{ translateX: staggerTranslateXValue }],
+                    },
+                  ]}
                 >
-                  <Text fontSize={23} fontWeight='400'>
-                    Standard Trap Visit
-                  </Text>
-                </Badge>
-                <IconButton
-                  mb='4'
-                  variant='solid'
-                  bg='primary'
-                  colorScheme='primary'
-                  borderRadius='full'
-                  size='lg'
-                  onPress={handlePressTrapVisit}
-                  icon={
-                    <Icon
-                      as={Entypo}
-                      size='12'
-                      name='plus'
-                      color='warmGray.50'
-                    />
-                  }
-                />
-              </HStack>
-              <HStack
-                space={2}
-                alignItems='center'
-                style={[
-                  { transform: [{ translateX: bottomStaggerTranslateXValue }] },
-                ]}
-              >
-                <Badge
-                  alignSelf='center'
-                  variant='solid'
-                  bg='secondary'
-                  opacity='0.8'
-                  borderRadius='5'
+                  <Badge
+                    alignSelf='center'
+                    variant={'solid'}
+                    bg='secondary'
+                    opacity='0.8'
+                    borderRadius='5'
+                  >
+                    <Text fontSize={23} fontWeight='400'>
+                      Standard Trap Visit
+                    </Text>
+                  </Badge>
+                  <IconButton
+                    mb='4'
+                    variant='solid'
+                    bg='primary'
+                    colorScheme='primary'
+                    borderRadius='full'
+                    size='lg'
+                    onPress={handlePressTrapVisit}
+                    icon={
+                      <Icon
+                        as={Entypo}
+                        size='12'
+                        name='plus'
+                        color='warmGray.50'
+                      />
+                    }
+                  />
+                </HStack>
+                <HStack
+                  space={2}
+                  alignItems='center'
+                  justifyContent='flex-start'
+                  style={[
+                    {
+                      transform: [{ translateX: staggerTranslateXValue }],
+                    },
+                  ]}
                 >
-                  <Text fontSize={23} fontWeight='400'>
-                    Mark Recapture Release
-                  </Text>
-                </Badge>
-                <IconButton
-                  mb='4'
-                  variant='solid'
-                  bg='primary'
-                  colorScheme='primary'
-                  borderRadius='full'
-                  size='lg'
-                  onPress={handlePressMarkRecapture}
-                  icon={
-                    <Icon
-                      as={Entypo}
-                      size='12'
-                      name='plus'
-                      color='warmGray.50'
-                    />
-                  }
-                />
-              </HStack>
+                  <Badge
+                    alignSelf='center'
+                    variant='solid'
+                    bg='secondary'
+                    opacity='0.8'
+                    borderRadius='5'
+                  >
+                    <Text fontSize={23} fontWeight='400'>
+                      Mark Recapture Release
+                    </Text>
+                  </Badge>
+                  <IconButton
+                    mb='4'
+                    variant='solid'
+                    bg='primary'
+                    colorScheme='primary'
+                    borderRadius='full'
+                    size='lg'
+                    onPress={handlePressMarkRecapture}
+                    icon={
+                      <Icon
+                        as={Entypo}
+                        size='12'
+                        name='plus'
+                        color='warmGray.50'
+                      />
+                    }
+                  />
+                </HStack>
+              </VStack>
             </Stagger>
           </Box>
           <HStack alignItems='center'>
