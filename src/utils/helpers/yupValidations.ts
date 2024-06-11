@@ -6,7 +6,7 @@ import * as yup from 'yup'
 
 export const trapVisitSchema = yup.object().shape({
   stream: yup.string().required('Stream required'),
-  // trapSite: yup.string().required('Trap site required'),
+  trapSite: yup.string().required('Trap site required'),
   // crew: yup.array().min(1).required('Crew cannot be blank.'),
 })
 
@@ -24,29 +24,19 @@ export const trapOperationsSchema = yup.object().shape({
   flowMeasureUnit: yup.string(),
   waterTemperature: yup
     .number()
-    .required('Water Temperature Required')
-    .typeError('Input must be a number'),
+    .typeError('Input must be a number')
+    .required('Water Temperature Required'),
   waterTemperatureUnit: yup.string(),
   waterTurbidity: yup
     .number()
     .nullable()
-    .required('Water Turbidity Required')
+    // .required('Water Turbidity Required')
     .typeError('Input must be a number'),
   waterTurbidityUnit: yup.string(),
-
-  totalRevolutions: yup
-    .number()
-    // .transform(value => (isNaN(value) ? undefined : value))
-    // .transform((value, originalValue) => {
-    //   return originalValue === '' ? undefined : value
-    // })
-    .nullable()
-    .required('Total Revolutions Required')
-    .typeError('Input must be a number'),
   rpm1: yup
     .number()
-    .required('Measurement 1 required')
-    .typeError('Input must be a number'),
+    .typeError('Input must be a number')
+    .required('Measurement 1 required'),
   rpm2: yup
     .number()
     .nullable()
@@ -62,12 +52,23 @@ export const trapOperationsSchema = yup.object().shape({
 export const trapPostProcessingSchema = yup.object().shape({
   debrisVolume: yup
     .number()
-    .required('Debris volume required')
-    .typeError('Input must be a number'),
+    .typeError('Input must be a number')
+    .required('Debris volume required'),
+  totalRevolutions: yup.number().nullable().typeError('Input must be a number'),
+  isWaterTurbidityPresent: yup.boolean(),
+  waterTurbidity: yup.number().when('isWaterTurbidityPresent', {
+    is: true,
+    then: yup
+      .number()
+      .typeError('Input must be a number')
+      .required('Water Turbidity Required'),
+    otherwise: yup.number().nullable(),
+  }),
+
   rpm1: yup
     .number()
-    .required('Measurement 1 required')
-    .typeError('Input must be a number'),
+    .typeError('Input must be a number')
+    .required('Measurement 1 required'),
   rpm2: yup
     .number()
     .nullable()
@@ -86,6 +87,7 @@ export const fishProcessingSchema = yup.object().shape({
     is:
       'no catch data, fish left in live box' || 'no catch data, fish released',
     then: yup.string().required('Reason for not processing required'),
+    otherwise: yup.string().nullable(),
   }),
   // willBeHoldingFishForMarkRecapture:
 })
@@ -157,7 +159,7 @@ export const addIndividualFishSchemaOtherSpecies = yup.object().shape({
 
 export const addMarksOrTagsSchema = yup.object().shape({
   markType: yup.string().required('Mark Type is required'),
-  markCode: yup.number().typeError('Input must be a number'),
+  markCode: yup.string().required('Mark Code is required'),
   // position: yup.string()
   crewMember: yup.string().required('Crew Member is required'),
   // comments: yup.string(),
@@ -180,6 +182,7 @@ export const addPlusCountsSchema = yup.object().shape({
     .required('Count is required')
     .typeError('Input must be a number'),
   plusCountMethod: yup.string().required('Plus count method required'),
+  dead: yup.boolean().required('Fish mortality required'),
 })
 
 /*----------------------------------------------------------------
@@ -216,7 +219,8 @@ export const releaseTrialSchema = yup.object().shape({
     is: true,
     then: yup
       .number()
-      .required('Hatchery run weight is required')
+
+      .nullable()
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
@@ -302,6 +306,11 @@ export const trappingSitesSchema = yup.object().shape({
     // .nullable()
     .required('Trap latitude required')
     .typeError('Input must be a number'),
+})
+
+export const crewMembersLeadSchema = yup.object().shape({
+  agency: yup.string().required('Agency required'),
+  orcidId: yup.string().nullable(),
 })
 export const crewMembersSchema = yup.object().shape({
   firstName: yup.string().required('First name required'),

@@ -8,7 +8,7 @@ import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { trapVisitQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import api from '../../api/axiosConfig'
+import { normalizeDate } from '../../utils/utils'
 
 interface GraphDataI {
   Temperature: any[]
@@ -23,10 +23,12 @@ function TrapQC({
   navigation,
   route,
   qcTrapVisitSubmissions,
+  previousTrapVisits,
 }: {
   navigation: any
   route: any
   qcTrapVisitSubmissions: any[]
+  previousTrapVisits: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -50,92 +52,126 @@ function TrapQC({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
 
+  const axisLabelDictionary = {
+    Temperature: { xLabel: 'Date', yLabel: 'Temperature (C)' },
+    Turbidity: { xLabel: 'Date', yLabel: 'Turbidity (ntu)' },
+    'RPM At Start': { xLabel: 'Date', yLabel: 'RPM' },
+    'RPM At End': { xLabel: 'Date', yLabel: 'RPM' },
+    Counter: { xLabel: 'Date', yLabel: 'Total Revolutions' },
+    Debris: { xLabel: 'Date', yLabel: 'Debris (L)' },
+  }
+
   useEffect(() => {
-    const previousTrapVisits = route.params.previousTrapVisits
+    const programId = route.params.programId
+    const programTrapVisits = previousTrapVisits.filter((trapVisit) => {
+      return trapVisit.createdTrapVisitResponse.programId === programId
+    })
 
-      let tempData: any[] = []
-      let turbidityData: any[] = []
-      let rpmAtStartData: any[] = []
-      let rpmAtEndData: any[] = []
-      let counterData: any[] = []
-      let debrisData: any[] = []
+    let tempData: any[] = []
+    let turbidityData: any[] = []
+    let rpmAtStartData: any[] = []
+    let rpmAtEndData: any[] = []
+    let counterData: any[] = []
+    let debrisData: any[] = []
 
-      Object.values([...qcTrapVisitSubmissions, ...previousTrapVisits]).forEach(
-        (response: any, idx: number) => {
-          const trapVisitId = response.createdTrapVisitResponse.id
-          const qcCompleted = response.createdTrapVisitResponse.qcCompleted
-          const qcNotStarted = qcCompleted ? false : true
+    Object.values([...qcTrapVisitSubmissions, ...programTrapVisits]).forEach(
+      (response: any, idx: number) => {
+        const {
+          createdTrapCoordinatesResponse,
+          createdTrapVisitCrewResponse,
+          createdTrapVisitEnvironmentalResponse,
+          createdTrapVisitResponse,
+        } = response || {}
 
-          if (trapVisitId) {
-            let temp = response.createdTrapVisitEnvironmentalResponse.filter(
-              (item: any) => {
+        const trapVisitId = createdTrapVisitResponse.id
+        const qcCompleted = createdTrapVisitResponse.qcCompleted
+        const qcNotStarted = qcCompleted ? false : true
+        const createdAt = new Date(createdTrapVisitResponse.createdAt)
+        const normalizedDate = normalizeDate(createdAt)
+
+        if (trapVisitId) {
+          let temp = createdTrapVisitEnvironmentalResponse
+            ? createdTrapVisitEnvironmentalResponse.filter((item: any) => {
                 return item.measureName === 'water temperature'
-              }
-            )[0]
+              })[0]
+            : null
+
+          if (temp) {
             tempData.push({
               id: trapVisitId,
-              x: idx + 1,
+              x: normalizedDate,
               y: Number(temp.measureValueNumeric),
               colorScale: qcNotStarted ? 'red' : undefined,
             })
+          }
 
-            let turbidity =
-              response.createdTrapVisitEnvironmentalResponse.filter(
-                (item: any) => {
-                  return item.measureName === 'water turbidity'
-                }
-              )[0]
+          let turbidity = createdTrapVisitEnvironmentalResponse
+            ? createdTrapVisitEnvironmentalResponse.filter((item: any) => {
+                return item.measureName === 'water turbidity'
+              })[0]
+            : null
+
+          if (turbidity) {
             turbidityData.push({
               id: trapVisitId,
-              x: idx + 1,
+              x: normalizedDate,
               y: Number(turbidity.measureValueNumeric),
               colorScale: qcNotStarted ? 'red' : undefined,
             })
+          }
 
+          if (createdTrapVisitResponse.rpmAtStart) {
             let rpmAtStart = {
               id: trapVisitId,
-              x: idx + 1,
+              x: normalizedDate,
               y: Number(response.createdTrapVisitResponse.rpmAtStart),
               colorScale: qcNotStarted ? 'red' : undefined,
             }
-            rpmAtStartData.push(rpmAtStart)
 
+            rpmAtStartData.push(rpmAtStart)
+          }
+
+          if (createdTrapVisitResponse.rpmAtEnd) {
             let rpmAtEnd = {
               id: trapVisitId,
-              x: idx + 1,
-              y: Number(response.createdTrapVisitResponse.rpmAtEnd),
+              x: normalizedDate,
+              y: Number(createdTrapVisitResponse.rpmAtEnd),
               colorScale: qcNotStarted ? 'red' : undefined,
             }
             rpmAtEndData.push(rpmAtEnd)
+          }
 
+          if (createdTrapVisitResponse.totalRevolutions) {
             let counter = {
               id: trapVisitId,
-              x: idx + 1,
-              y: response.createdTrapVisitResponse.totalRevolutions,
+              x: normalizedDate,
+              y: createdTrapVisitResponse.totalRevolutions,
               colorScale: qcNotStarted ? 'red' : undefined,
             }
             counterData.push(counter)
+          }
 
+          if (createdTrapVisitResponse.debrisVolumeLiters) {
             let debris = {
               id: trapVisitId,
-              x: idx + 1,
-              y: response.createdTrapVisitResponse.debrisVolumeLiters,
+              x: normalizedDate,
+              y: createdTrapVisitResponse.debrisVolumeLiters,
               colorScale: qcNotStarted ? 'red' : undefined,
             }
             debrisData.push(debris)
           }
         }
-      )
+      }
+    )
 
-      setGraphData({
-        Temperature: tempData,
-        Turbidity: turbidityData,
-        'RPM At Start': rpmAtStartData,
-        'RPM At End': rpmAtEndData,
-        Counter: counterData,
-        Debris: debrisData,
-      })
-
+    setGraphData({
+      Temperature: tempData,
+      Turbidity: turbidityData,
+      'RPM At Start': rpmAtStartData,
+      'RPM At End': rpmAtEndData,
+      Counter: counterData,
+      Debris: debrisData,
+    })
   }, [qcTrapVisitSubmissions])
 
   const GraphMenuButton = ({
@@ -183,7 +219,6 @@ function TrapQC({
 
   const handlePointClicked = (datum: any) => {
     setPointClicked(datum)
-    console.log('point clicked: ', datum)
     setIsModalOpen(true)
   }
 
@@ -227,9 +262,12 @@ function TrapQC({
             {activeButtons.map((buttonName) => {
               return (
                 <Graph
+                  xLabel={axisLabelDictionary[buttonName]['xLabel']}
+                  yLabel={axisLabelDictionary[buttonName]['yLabel']}
                   key={buttonName}
                   chartType='bar'
                   data={graphData[buttonName]}
+                  showDates={true}
                   onPointClick={(datum) => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
@@ -300,6 +338,8 @@ const mapStateToProps = (state: RootState) => {
   return {
     qcTrapVisitSubmissions:
       state.trapVisitFormPostBundler.qcTrapVisitSubmissions,
+    previousTrapVisits:
+      state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
   }
 }
 

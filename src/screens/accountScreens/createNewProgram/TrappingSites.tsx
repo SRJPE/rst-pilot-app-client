@@ -19,8 +19,10 @@ import CustomModal from '../../../components/Shared/CustomModal'
 import AddTrapModalContent from '../../../components/createNewProgram/AddTrapModalContent'
 import { RootState } from '../../../redux/store'
 import { connect } from 'react-redux'
-import { TrappingSitesStoreI } from '../../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
-import AppLogo from '../../../components/Shared/AppLogo'
+import {
+  TrappingSitesStoreI,
+  individualTrappingSiteState,
+} from '../../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 
 const TrappingSites = ({
   navigation,
@@ -29,13 +31,26 @@ const TrappingSites = ({
   navigation: any
   trappingSitesStore: TrappingSitesStoreI
 }) => {
-  const [addTrapModalOpen, setAddTrapModalOpen] = useState(false as boolean)
   const trapSitesArray = Object.values(trappingSitesStore)
+  const [addTrapModalOpen, setAddTrapModalOpen] = useState(false as boolean)
+  const [addTrapModalContent, setAddTrapModalContent] = useState(
+    individualTrappingSiteState as any
+  )
   useEffect(() => {
     if (Object.values(trappingSitesStore).length === 0) {
       setAddTrapModalOpen(true)
     }
   }, [])
+
+  const handleShowTableModal = (selectedRowData: any) => {
+    const modalDataContainer = {} as any
+    Object.keys(selectedRowData).forEach((key: string) => {
+      modalDataContainer[key] = selectedRowData[key].toString()
+    })
+    setAddTrapModalContent(modalDataContainer)
+    setAddTrapModalOpen(true)
+  }
+
   return (
     <>
       <View bg='#fff' flex={1} px={6}>
@@ -47,7 +62,12 @@ const TrappingSites = ({
             justifyContent='space-between'
           >
             <Heading alignSelf='left'>Trapping Sites</Heading>
-            <Pressable onPress={() => setAddTrapModalOpen(true)}>
+            <Pressable
+              onPress={() => {
+                setAddTrapModalContent(individualTrappingSiteState)
+                setAddTrapModalOpen(true)
+              }}
+            >
               <HStack alignItems='center' justifyContent='flex-end'>
                 <Icon
                   as={Ionicons}
@@ -63,7 +83,9 @@ const TrappingSites = ({
             </Pressable>
           </HStack>
           <ScrollView h={300}>
-            <TrappingSitesDataTable />
+            <TrappingSitesDataTable
+              handleShowTableModal={handleShowTableModal}
+            />
           </ScrollView>
         </Box>
         {trapSitesArray.length > 1 && (
@@ -109,7 +131,10 @@ const TrappingSites = ({
         closeModal={() => setAddTrapModalOpen(false)}
         height='70%'
       >
-        <AddTrapModalContent closeModal={() => setAddTrapModalOpen(false)} />
+        <AddTrapModalContent
+          addTrapModalContent={addTrapModalContent}
+          closeModal={() => setAddTrapModalOpen(false)}
+        />
       </CustomModal>
     </>
   )

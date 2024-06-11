@@ -111,12 +111,12 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             icon='home'
             title='Home'
           />
-          <MenuButton
+          {/* <MenuButton
             active={currentRoute === 'Sign In'}
             onPress={() => handlePressMainNavButton('Sign In')}
             icon='home'
             title='Sign In'
-          />
+          /> */}
           <MenuButton
             active={currentRoute === 'Profile'}
             onPress={() => {
@@ -140,10 +140,22 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             title='Generate Report'
           />
           <MenuButton
+            active={currentRoute === 'Quality Control'}
+            onPress={() => handlePressMainNavButton('Quality Control')}
+            icon='bar-chart'
+            title='QC Data'
+          />
+          <MenuButton
+            active={currentRoute === 'Inspector'}
+            onPress={() => handlePressMainNavButton('Inspector')}
+            icon='search'
+            title='Inspector'
+          />
+          <MenuButton
             active={false}
-            onPress={() => console.log('🚀 ~ reduxState:', reduxState)}
-            icon='bug'
-            title='Developer Log'
+            onPress={() => console.log('Redux Log: ', reduxState)}
+            icon='search'
+            title='Redux Log'
           />
           <MenuButton
             active={currentRoute === 'Mark Recapture'}

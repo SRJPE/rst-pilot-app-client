@@ -10,6 +10,7 @@ import {
   Text,
   View,
   VStack,
+  ScrollView,
 } from 'native-base'
 import MarkRecaptureNavButtons from '../../components/markRecapture/MarkRecaptureNavButtons'
 import { Formik } from 'formik'
@@ -61,11 +62,12 @@ const ReleaseTrial = ({
       validationSchema={releaseTrialSchema}
       initialValues={releaseTrialStore.values}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
-      initialTouched={{ willSupplement: true }}
-      initialErrors={
-        releaseTrialStore.completed ? undefined : { wildCount: '' }
-      }
-      onSubmit={(values) => {
+      initialTouched={{
+        willSupplement: true,
+        wildCount: true,
+        deadWildCount: true,
+      }}
+      onSubmit={values => {
         handleSubmit(values)
       }}
     >
@@ -80,7 +82,7 @@ const ReleaseTrial = ({
         values,
       }) => (
         <>
-          <View flex={1} bg='themeGrey'>
+          <ScrollView flex={1} bg='themeGrey'>
             <VStack space={8} p='10'>
               <Box bg='#FFF'>
                 <Center
@@ -101,7 +103,7 @@ const ReleaseTrial = ({
                   <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
-                        Confirm number of fish used in release trial
+                        Confirm number of wild fish used in release trial
                       </Text>
                     </FormControl.Label>
                     <HStack space={4}>
@@ -135,7 +137,7 @@ const ReleaseTrial = ({
                       keyboardType='numeric'
                       onChangeText={handleChange('deadWildCount')}
                       onBlur={handleBlur('deadWildCount')}
-                      value={values.deadWildCount}
+                      value={`${values.deadWildCount}`}
                     />
                     {touched.deadWildCount &&
                       errors.deadWildCount &&
@@ -268,7 +270,7 @@ const ReleaseTrial = ({
                 </Box>
               )}
             </VStack>
-          </View>
+          </ScrollView>
           <MarkRecaptureNavButtons
             navigation={navigation}
             handleSubmit={handleSubmit}

@@ -7,7 +7,7 @@ interface InitialStateI {
 interface TrapOperationsStateI {
   completed: boolean
   values: TrapOperationsValuesI
-  errors: {[name: string]: any}
+  errors: { [name: string]: any }
 }
 
 export interface TrapOperationsValuesI {
@@ -19,12 +19,13 @@ export interface TrapOperationsValuesI {
   waterTemperatureUnit: string
   waterTurbidity: number | null
   waterTurbidityUnit: string
+  recordTurbidityInPostProcessing: boolean
   coneSetting: string | null
-  totalRevolutions: number | null
   rpm1: number | null
   rpm2: number | null
   rpm3: number | null
   trapVisitStopTime: Date | null
+  trapVisitStartTime: Date | null
 }
 
 const initialState: InitialStateI = {
@@ -36,15 +37,16 @@ const initialState: InitialStateI = {
       flowMeasure: null,
       flowMeasureUnit: 'cfs',
       waterTemperature: null,
-      waterTemperatureUnit: '°F',
+      waterTemperatureUnit: '°C',
       waterTurbidity: null,
       waterTurbidityUnit: 'ntu',
+      recordTurbidityInPostProcessing: false,
       coneSetting: 'full',
-      totalRevolutions: null,
       rpm1: null,
       rpm2: null,
       rpm3: null,
       trapVisitStopTime: null,
+      trapVisitStartTime: null,
     },
     errors: {},
   },
@@ -56,16 +58,20 @@ export const trapOperationsSlice = createSlice({
   reducers: {
     resetTrapOperationsSlice: () => initialState,
     saveTrapOperations: (state, action) => {
-      const { tabId, values, errors} = action.payload
+      const { tabId, values, errors } = action.payload
       state[tabId] = {
         completed: true,
         values: {
           ...values,
+          trapVisitStartTime: state[tabId]
+            ? state[tabId].values.trapVisitStartTime
+            : action.payload.values.trapVisitStartTime,
+
           trapVisitStopTime: state[tabId]
             ? state[tabId].values.trapVisitStopTime
             : action.payload.values.trapVisitStopTime,
         },
-        errors
+        errors,
       }
     },
     markTrapOperationsCompleted: (state, action) => {

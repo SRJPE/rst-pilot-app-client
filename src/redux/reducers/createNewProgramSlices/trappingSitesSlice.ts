@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
+import { uid } from 'uid'
 
 export interface TrappingSitesInitialStateI {
   trappingSitesStore: TrappingSitesStoreI
@@ -21,6 +22,7 @@ export interface IndividualTrappingSiteValuesI {
   releaseSiteName: string | null
   releaseSiteLatitude: number | null
   releaseSiteLongitude: number | null
+  uid: string
 }
 export const individualTrappingSiteState: IndividualTrappingSiteValuesI = {
   trapName: '',
@@ -31,6 +33,7 @@ export const individualTrappingSiteState: IndividualTrappingSiteValuesI = {
   releaseSiteName: '',
   releaseSiteLatitude: null,
   releaseSiteLongitude: null,
+  uid: '',
 }
 
 export const trappingSitesSlice = createSlice({
@@ -41,6 +44,7 @@ export const trappingSitesSlice = createSlice({
     saveIndividualTrapSite: (state, action) => {
       let trappingSitesStoreCopy = cloneDeep(state.trappingSitesStore)
       let id = null
+
       if (Object.keys(trappingSitesStoreCopy).length) {
         // @ts-ignore
         const largestId = Math.max(...Object.keys(trappingSitesStoreCopy))
@@ -48,13 +52,31 @@ export const trappingSitesSlice = createSlice({
       } else {
         id = 0
       }
-      trappingSitesStoreCopy[id] = { ...action.payload }
+      trappingSitesStoreCopy[id] = { ...action.payload, uid: uid() }
       state.trappingSitesStore = trappingSitesStoreCopy
+    },
+    updateIndividualTrapSite: (state, action) => {
+      let trappingSitesStoreCopy = cloneDeep(state.trappingSitesStore)
+      let id: any = null
+
+      for (let key in trappingSitesStoreCopy) {
+        if (trappingSitesStoreCopy[key].uid === action.payload.uid) {
+          id = key
+          trappingSitesStoreCopy[id] = {
+            ...action.payload,
+            uid: action.payload.uid,
+          }
+          state.trappingSitesStore = trappingSitesStoreCopy
+        }
+      }
     },
   },
 })
 
-export const { resetTrappingSitesSlice, saveIndividualTrapSite } =
-  trappingSitesSlice.actions
+export const {
+  resetTrappingSitesSlice,
+  saveIndividualTrapSite,
+  updateIndividualTrapSite,
+} = trappingSitesSlice.actions
 
 export default trappingSitesSlice.reducer

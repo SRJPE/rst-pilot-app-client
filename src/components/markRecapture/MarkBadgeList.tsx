@@ -10,7 +10,8 @@ import { removeMarkFromBatchCountExistingMarks } from '../../redux/reducers/form
 interface markBadgeI {
   markType: string
   markColor: string
-  markPosition: string
+  markPosition?: string
+  bodyPart?: string
 }
 
 const MarkBadgeList = ({
@@ -64,7 +65,7 @@ const MarkBadgeList = ({
         <VStack space={5}>
           {badgeListContent.length > 0 &&
             badgeListContent.map((badge: markBadgeI, index: number) => {
-              const { markType, markColor, markPosition } = badge
+              const { markType, markColor, markPosition, bodyPart } = badge
               //TO-DO: incorporate the abbreviation lookup table
               return (
                 <Badge
@@ -88,7 +89,7 @@ const MarkBadgeList = ({
                   }
                 >
                   <Text color='white' fontWeight='500' fontSize='md'>
-                    {`${markType} - ${markColor} - ${markPosition}`}
+                    {`${markType} - ${markColor} - ${markPosition || bodyPart}`}
                   </Text>
                 </Badge>
               )

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -23,18 +23,22 @@ import { trapVisitSchema } from '../../utils/helpers/yupValidations'
 import {
   markStepCompleted,
   NavigationStateI,
+  updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
 import {
   createTab,
+  deleteTab,
   setTabName,
   TabStateI,
 } from '../../redux/reducers/formSlices/tabSlice'
 import { uniqBy } from 'lodash'
+import { DeviceEventEmitter } from 'react-native'
 
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import { uid } from 'uid'
 import TrapNameDropDown from '../../components/form/TrapNameDropDown'
+import { navigateHelper } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -92,12 +96,12 @@ const VisitSetup = ({
   }, [tabSlice?.activeTabId])
 
   const onSubmit = (values: any, tabId: string | null) => {
-    // values.crew = ['temp1']
     const programId = selectedProgramId
     const payload = {
       ...values,
       programId,
     }
+    console.log('submitting visit setup form')
     // if no current tabs, create all new tabs
     if (!tabId) {
       // if trapName, iterate through all trap names and create tabs
@@ -154,15 +158,27 @@ const VisitSetup = ({
     }
     // if there are current tabs, create and overwrite tabs
     else {
-      let currentTabsTrapNames = Object.keys(tabSlice.tabs).map(id => {
+      let currentTabsTrapNames = Object.keys(tabSlice.tabs).map((id) => {
         return tabSlice.tabs[id].name
       })
-      // if trapNames, iterate through all trap names and create / overwrite tabs
+
+      // if trapNames, iterate through all trap names and create / overwrite / delete tabs
       if (values.trapName) {
+        // remove any tabs that are not in values.trapName
+        if (values.trapName.length < currentTabsTrapNames.length) {
+          Object.keys(tabSlice.tabs).forEach((tabId) => {
+            const tabTrapName = tabSlice.tabs[tabId].name
+
+            if (!values.trapName.includes(tabTrapName)) {
+              dispatch(deleteTab(tabId))
+            }
+          })
+        }
+
         values.trapName.forEach((trapName: string) => {
           if (currentTabsTrapNames.includes(trapName)) {
             const tabIds = Object.keys(tabSlice.tabs)
-            const tabIdToUpdate = tabIds.filter(id => {
+            const tabIdToUpdate = tabIds.filter((id) => {
               return tabSlice.tabs[id].name == trapName
             })[0]
             dispatch(
@@ -181,33 +197,8 @@ const VisitSetup = ({
                 name: trapName ?? values.trapSite,
               })
             )
-            currentTabsTrapNames = currentTabsTrapNames.filter(name => {
+            currentTabsTrapNames = currentTabsTrapNames.filter((name) => {
               return name != trapName
-            })
-          } else if (currentTabsTrapNames.includes('New Tab')) {
-            const tabIds = Object.keys(tabSlice.tabs)
-            const tabIdToUpdate = tabIds.filter(id => {
-              return tabSlice.tabs[id].name == 'New Tab'
-            })[0]
-            dispatch(
-              saveVisitSetup({
-                tabId: tabIdToUpdate,
-                values: {
-                  ...payload,
-                  trapLocationId: getTrapLocationId({ trapName }),
-                },
-                isPaperEntry,
-              })
-            )
-            dispatch(
-              createTab({
-                tabId: tabIdToUpdate,
-                tabName: trapName ?? values.trapSite,
-                trapSite: values.trapSite,
-              })
-            )
-            currentTabsTrapNames = currentTabsTrapNames.filter(name => {
-              return name != 'New Tab'
             })
           } else {
             let tabId = uid()
@@ -275,7 +266,7 @@ const VisitSetup = ({
         )
       }
     }
-    dispatch(markStepCompleted([true, 'visitSetup']))
+    dispatch(markStepCompleted({ propName: 'visitSetup' }))
     console.log('🚀 ~ handleSubmit ~ Visit', payload)
   }
 
@@ -377,8 +368,35 @@ const VisitSetup = ({
       // maybe this is not needed for first step in form?
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
-      onSubmit={values => {
-        onSubmit(values, tabSlice?.activeTabId)
+      onSubmit={(values) => {
+        const callback = () => {
+          if (isPaperEntry) {
+            navigateHelper(
+              'Paper Entry',
+              navigationSlice,
+              navigation,
+              dispatch,
+              updateActiveStep
+            )
+          } else {
+            navigateHelper(
+              'Trap Operations',
+              navigationSlice,
+              navigation,
+              dispatch,
+              updateActiveStep
+            )
+          }
+        }
+
+        navigation.push('Loading...')
+
+        setTimeout(() => {
+          DeviceEventEmitter.emit('event.load', {
+            process: () => onSubmit(values, tabSlice?.activeTabId),
+            callback,
+          })
+        }, 2000)
       }}
     >
       {({
@@ -398,7 +416,30 @@ const VisitSetup = ({
             onSubmit(values, tabSlice.previouslyActiveTabId)
           }
         }, [tabSlice.previouslyActiveTabId])
-
+        const navButtons = useMemo(
+          () => (
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={handleSubmit}
+              errors={
+                values.crew.length
+                  ? errors
+                  : { ...errors, crew: Boolean(values.crew.length) }
+              }
+              touched={touched}
+              isPaperEntry={isPaperEntry}
+              shouldProceedToLoadingScreen={true}
+            />
+          ),
+          [
+            navigation,
+            handleSubmit,
+            errors,
+            touched,
+            isPaperEntry,
+            values.crew.length,
+          ]
+        )
         return (
           <>
             <View
@@ -533,6 +574,7 @@ const VisitSetup = ({
                         setFieldValue={setFieldValue}
                         setFieldTouched={setFieldTouched}
                         visitSetupState={visitSetupState}
+                        stream={values.stream}
                         tabId={tabSlice?.activeTabId}
                       />
                     </FormControl>
@@ -547,17 +589,7 @@ const VisitSetup = ({
                 )}
               </VStack>
             </View>
-            <NavButtons
-              navigation={navigation}
-              handleSubmit={handleSubmit}
-              errors={
-                values.crew.length
-                  ? errors
-                  : { ...errors, crew: Boolean(values.crew.length) }
-              }
-              touched={touched}
-              isPaperEntry={isPaperEntry}
-            />
+            {navButtons}
           </>
         )
       }}

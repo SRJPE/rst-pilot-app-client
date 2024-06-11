@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import {
+import navigationSlice, {
   checkIfFormIsComplete,
   numOfFormSteps,
   resetNavigationSlice,
+  updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
 import NavButtons from '../../components/formContainer/NavButtons'
 import IncompleteSectionButton from '../../components/form/IncompleteSectionButton'
@@ -25,12 +26,16 @@ import { resetTrapPostProcessingSlice } from '../../redux/reducers/formSlices/tr
 import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
+import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
 import { cloneDeep, flatten, uniq } from 'lodash'
 import { uid } from 'uid'
 import {
   setIncompleteSectionTouched,
   TabStateI,
 } from '../../redux/reducers/formSlices/tabSlice'
+import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
+import { DeviceEventEmitter } from 'react-native'
+import { navigateHelper } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -81,40 +86,64 @@ const IncompleteSections = ({
   addGeneticSamplesState: any
   appliedMarksState: any
 }) => {
-  // console.log('🚀 ~ navigation', navigation)
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
     0,
     numOfFormSteps - 1
   ) as Array<any>
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const hasSubmittedRef = useRef(false)
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
-    dispatch(checkIfFormIsComplete())
   }, [])
 
+  const emitSubmission = () => {
+    if (isSubmitting) return // If already submitting, return early
+
+    setIsSubmitting(true) // Set submitting state to true
+    const callback = () => {
+      navigateHelper(
+        'Start Mark Recapture',
+        navigationState,
+        navigation,
+        dispatch,
+        updateActiveStep
+      )
+      setIsSubmitting(false) // Reset submitting state after navigation
+    }
+
+    navigation.push('Loading...')
+
+    setTimeout(() => {
+      DeviceEventEmitter.emit('event.load', {
+        process: () => handleSubmit(),
+        callback,
+      })
+    }, 1000)
+  }
+
   const handleSubmit = () => {
-    saveTrapVisits()
-    saveCatchRawSubmission()
-    resetAllFormSlices()
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Visit Setup' }],
-    })
+    if (hasSubmittedRef.current) return // If already submitted, return early
+    try {
+      saveTrapVisits()
+      saveCatchRawSubmission()
+      resetAllFormSlices()
 
-    // navigation.dispatch(
-    //   CommonActions.reset({
-    //     index: 0,
-    //     routes: [{ name: 'Visit Setup' }],
-    //   })
-    // )
+      hasSubmittedRef.current = true // Set submitted state to true
 
-    // navigation.navigate.popToTop()
-
-    // navigation.dispatch(StackActions.popToTop())
-
-    if (connectivityState.isConnected) {
-      dispatch(postTrapVisitFormSubmissions())
+      if (
+        connectivityState.isConnected &&
+        connectivityState.isInternetReachable
+      ) {
+        dispatch(postTrapVisitFormSubmissions())
+      } else {
+        console.log('Connection issue during submission')
+      }
+    } catch (error) {
+      console.log('submit error: ', error)
+    } finally {
+      setIsSubmitting(false) // Reset submitting state after handling submission
     }
   }
 
@@ -128,12 +157,22 @@ const IncompleteSections = ({
     dispatch(resetTrapOperationsSlice())
     dispatch(resetVisitSetupSlice())
     dispatch(resetPaperEntrySlice())
+    dispatch(resetTabsSlice())
   }
 
   const returnDefinitionArray = (dropdownsArray: any[]) => {
     return dropdownsArray.map((dropdownObj: any) => {
       return dropdownObj.definition
     })
+  }
+
+  const findTrapLocationIds = () => {
+    let container = [] as any
+    for (let tabId in visitSetupState) {
+      if (tabId === 'placeholderId') continue
+      container.push(visitSetupState[tabId].values.trapLocationId)
+    }
+    return container
   }
 
   const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
@@ -179,7 +218,7 @@ const IncompleteSections = ({
       dropdownsState.values.trapStatusAtEnd
     )
     const calculateRpmAvg = (rpms: (string | null)[]) => {
-      const validRpms = rpms.filter((n) => n)
+      const validRpms = rpms.filter(n => n)
       if (!validRpms.length) {
         return null
       }
@@ -192,7 +231,7 @@ const IncompleteSections = ({
     }
 
     const tabIds = Object.keys(tabState.tabs)
-    tabIds.forEach((id) => {
+    tabIds.forEach(id => {
       const {
         rpm1: startRpm1,
         rpm2: startRpm2,
@@ -208,7 +247,7 @@ const IncompleteSections = ({
       const selectedCrewIds =
         findCrewIdsFromSelectedCrewNames(selectedCrewNames)
       const trapVisitSubmission = {
-        uid: id,
+        trapVisitUid: id,
         crew: selectedCrewIds,
         programId: visitSetupState[id].values.programId,
         visitTypeId: null,
@@ -250,8 +289,8 @@ const IncompleteSections = ({
             `${trapPostProcessingState[id].values.endingTrapStatus}`.toLowerCase()
           )
         ),
-        totalRevolutions: trapOperationsState[id].values.totalRevolutions
-          ? parseInt(trapOperationsState[id].values.totalRevolutions)
+        totalRevolutions: trapPostProcessingState[id].values.totalRevolutions
+          ? parseInt(trapPostProcessingState[id].values.totalRevolutions)
           : null,
         rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
         rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
@@ -260,7 +299,7 @@ const IncompleteSections = ({
             measureName: 'flow measure',
             measureValueNumeric: trapOperationsState[id].values.flowMeasure,
             measureValueText:
-              trapOperationsState[id].values.flowMeasure.toString(),
+              trapOperationsState[id].values.flowMeasure?.toString(),
             measureUnit: 5,
           },
           {
@@ -268,7 +307,7 @@ const IncompleteSections = ({
             measureValueNumeric:
               trapOperationsState[id].values.waterTemperature,
             measureValueText:
-              trapOperationsState[id].values.waterTemperature.toString(),
+              trapOperationsState[id].values.waterTemperature?.toString(),
             measureUnit:
               trapOperationsState[id].values.waterTemperatureUnit === '°F'
                 ? 1
@@ -276,9 +315,14 @@ const IncompleteSections = ({
           },
           {
             measureName: 'water turbidity',
-            measureValueNumeric: trapOperationsState[id].values.waterTurbidity,
+            measureValueNumeric:
+              trapOperationsState[id].values.waterTurbidity ||
+              trapPostProcessingState[id].values.waterTurbidity ||
+              null,
             measureValueText:
-              trapOperationsState[id].values.waterTurbidity.toString(),
+              trapOperationsState[id].values?.waterTurbidity?.toString() ||
+              trapPostProcessingState[id].values?.waterTurbidity?.toString() ||
+              '',
             measureUnit: 25,
           },
         ],
@@ -301,6 +345,14 @@ const IncompleteSections = ({
       }
 
       dispatch(saveTrapVisitSubmission(trapVisitSubmission))
+
+      dispatch(
+        saveTrapVisitInformation({
+          crew: visitSetupState[tabIds[0]].values.crew,
+          programId: visitSetupState[tabIds[0]].values.programId,
+          trapLocationIds: findTrapLocationIds(),
+        })
+      )
     })
   }
 
@@ -334,14 +386,14 @@ const IncompleteSections = ({
 
     const catchRawSubmissions: any[] = []
 
-    Object.keys(fishInputState).forEach((tabId) => {
+    Object.keys(fishInputState).forEach(tabId => {
       if (tabId != 'placeholderId') {
         const fishStoreKeys = Object.keys(fishInputState[tabId].fishStore)
         const programId = Object.keys(visitSetupState).includes(tabId)
           ? visitSetupState[tabId].values.programId
           : 1
 
-        fishStoreKeys.forEach((key) => {
+        fishStoreKeys.forEach(key => {
           const fishValue = fishInputState[tabId].fishStore[key]
 
           const filterAndPrepareData = (data: Array<any>) => {
@@ -394,6 +446,14 @@ const IncompleteSections = ({
             return releaseId
           }
 
+          const getRunClassMethod = (fishValue: any) => {
+            if (fishValue.species === 'Chinook salmon') {
+              return fishValue.run === 'not recorded' ? 5 : 6
+            } else {
+              return null
+            }
+          }
+
           catchRawSubmissions.push({
             uid: tabId,
             programId,
@@ -403,12 +463,12 @@ const IncompleteSections = ({
               runValues.indexOf(fishValue.run)
             ),
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
-            captureRunClassMethod: fishValue.run ? 5 : null,
+            captureRunClassMethod: getRunClassMethod(fishValue),
             // defaults to "none" (id: 1) if not selected
             markType: 1, // Check w/ Erin
             markedForRelease: fishValue.willBeUsedInRecapture,
-            adiposeClipped: fishValue.adiposeClipped,
-            dead: fishValue.dead,
+            adiposeClipped: fishValue.adiposeClipped ? true : false,
+            dead: fishValue.dead ? true : false,
             lifeStage: returnNullableTableId(
               lifeStageValues.indexOf(fishValue.lifeStage)
             ),
@@ -421,7 +481,7 @@ const IncompleteSections = ({
                 ? parseInt(fishValue?.weight as any)
                 : null,
             numFishCaught: fishValue?.numFishCaught,
-            plusCount: fishValue?.plusCount,
+            plusCount: fishValue?.plusCount ? true : false,
             plusCountMethodology: fishValue?.plusCountMethod
               ? returnNullableTableId(
                   plusCountMethodValues.indexOf(fishValue?.plusCountMethod)
@@ -431,8 +491,6 @@ const IncompleteSections = ({
             releaseId: findReleaseIdFromExistingMarks(),
             comments: null,
             createdBy: null,
-            createdAt: currentDateTime,
-            updatedAt: currentDateTime,
             qcCompleted: null,
             qcCompletedBy: null,
             qcTime: null,
@@ -494,7 +552,11 @@ const IncompleteSections = ({
           })}
         </VStack>
       </View>
-      <NavButtons navigation={navigation} handleSubmit={() => handleSubmit()} />
+      <NavButtons
+        navigation={navigation}
+        handleSubmit={emitSubmission}
+        shouldProceedToLoadingScreen={true}
+      />
     </>
   )
 }

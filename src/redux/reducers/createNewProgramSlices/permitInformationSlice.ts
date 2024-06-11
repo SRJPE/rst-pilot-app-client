@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
+import { uid } from 'uid'
 
 export interface PermitInformationInitialStateI {
   '4dPermitPDF': ''
@@ -36,6 +37,7 @@ export interface IndividualTakeAndMortalityStateI {
   lifeStage: string
   expectedTake: number | null
   indirectMortality: number | null
+  uid: string
 }
 export const IndividualTakeAndMortalityState: IndividualTakeAndMortalityStateI =
   {
@@ -44,6 +46,7 @@ export const IndividualTakeAndMortalityState: IndividualTakeAndMortalityStateI =
     lifeStage: '',
     expectedTake: null,
     indirectMortality: null,
+    uid: '',
   }
 
 export const permitInformationSlice = createSlice({
@@ -68,8 +71,25 @@ export const permitInformationSlice = createSlice({
       } else {
         id = 0
       }
-      takeAndMortalityValuesStoreCopy[id] = { ...action.payload }
+      takeAndMortalityValuesStoreCopy[id] = { ...action.payload, uid: uid() }
       state.takeAndMortalityValues = takeAndMortalityValuesStoreCopy
+    },
+    updateIndividualTakeAndMortality: (state, action) => {
+      let takeAndMortalityValuesStoreCopy = cloneDeep(
+        state.takeAndMortalityValues
+      )
+      let id: any = null
+
+      for (let key in takeAndMortalityValuesStoreCopy) {
+        if (takeAndMortalityValuesStoreCopy[key].uid === action.payload.uid) {
+          id = key
+          takeAndMortalityValuesStoreCopy[id] = {
+            ...action.payload,
+            uid: action.payload.uid,
+          }
+          state.takeAndMortalityValues = takeAndMortalityValuesStoreCopy
+        }
+      }
     },
   },
 })
@@ -78,6 +98,7 @@ export const {
   resetPermitInformationSlice,
   savePermitInformationValues,
   saveIndividualTakeAndMortality,
+  updateIndividualTakeAndMortality,
 } = permitInformationSlice.actions
 
 export default permitInformationSlice.reducer

@@ -35,7 +35,7 @@ const BatchCountButtonGrid = ({
     dispatch(
       addForkLengthToBatchStore({
         forkLength: num,
-        lifeStage: ignoreLifeStage ? 'not recorded' : selectedLifeStage,
+        lifeStage: ignoreLifeStage ? null : selectedLifeStage,
         dead: deadToggle,
         existingMark: markToggle,
         fishCondition: conditionToggle,
@@ -75,7 +75,7 @@ const BatchCountButtonGrid = ({
         })
       ) : (
         <Text bold fontSize='lg'>
-          PLease select a fork length size range.
+          Please select a fork length size range.
         </Text>
       )}
     </Box>

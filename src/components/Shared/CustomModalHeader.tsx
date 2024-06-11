@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
-import { StyleSheet } from 'react-native'
+import { StyleProp, StyleSheet, TextStyle } from 'react-native'
 import {
   Box,
   Button,
@@ -20,6 +20,7 @@ const CustomModalHeader = ({
   headerButton,
   closeModal,
   navigateBack,
+  headerStyle,
 }: {
   headerText: string
   headerFontSize?: number
@@ -27,6 +28,7 @@ const CustomModalHeader = ({
   headerButton?: any
   closeModal?: any
   navigateBack?: any
+  headerStyle?: StyleProp<TextStyle>
 }) => {
   const navigation = useNavigation() as any
   if (showHeaderButton) {
@@ -56,10 +58,13 @@ const CustomModalHeader = ({
             >
               <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
             </Button>
-            <Heading fontSize={headerFontSize}>{headerText}</Heading>
+            <Heading style={headerStyle} fontSize={headerFontSize}>
+              {headerText}
+            </Heading>
           </HStack>
           <Box mr='5'>{headerButton}</Box>
         </HStack>
+        <Divider my={2} thickness='3' />
       </>
     )
   } else {
@@ -82,6 +87,7 @@ const CustomModalHeader = ({
             flex={1}
             textAlign='center'
             mr='24'
+            style={headerStyle}
             fontSize={headerFontSize}
           >
             {headerText}

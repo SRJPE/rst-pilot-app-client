@@ -34,6 +34,7 @@ interface ValuesI {
   fundingAgency: any[]
   listingUnit: any[]
   frequency: any[]
+  fishCondition: any[]
 }
 
 interface APIResponseI {
@@ -64,6 +65,7 @@ const initialState: InitialStateI = {
     fundingAgency: [],
     listingUnit: [],
     frequency: [],
+    fishCondition: [],
   },
 }
 

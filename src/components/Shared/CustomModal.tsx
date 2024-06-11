@@ -19,9 +19,7 @@ const CustomModal = (props: ModalPropsI) => {
       h={props.height ? props.height : 'full'}
       style={{ marginBottom: 0, marginTop: 'auto' }}
     >
-      <Modal.Content height={'full'}>
-        <Modal.Body p='0'>{props.children}</Modal.Body>
-      </Modal.Content>
+      <Modal.Content height={'full'}>{props.children}</Modal.Content>
     </Modal>
   )
 }

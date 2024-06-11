@@ -11,6 +11,7 @@ import { RootState } from '../redux/store'
 import QCForm from './roots/QCFormRoot'
 import MonitoringProgram from './roots/MonitoringProgramRoot'
 import GenerateReport from './roots/GenerateReportRoot'
+import InspectorWindow from '../screens/InspectorWindow'
 
 const Drawer = createDrawerNavigator()
 
@@ -24,7 +25,7 @@ const DrawerNavigator = ({
       // initialRouteName='Sign In'
       initialRouteName='Home'
       screenOptions={{ drawerType: 'front' }}
-      drawerContent={(props) => <DrawerMenu {...props} />}
+      drawerContent={props => <DrawerMenu {...props} />}
     >
       {/* {storedCredentialsStore === null ? ( */}
       <Drawer.Screen
@@ -46,6 +47,7 @@ const DrawerNavigator = ({
         <Drawer.Screen name='Permit Info' component={PermitInfo} />
         <Drawer.Screen name='Generate Report' component={GenerateReport} />
         <Drawer.Screen name='Quality Control' component={QCForm} />
+        <Drawer.Screen name='Inspector' component={InspectorWindow} />
         <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
         <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
         <Drawer.Screen

@@ -1,5 +1,5 @@
 import { Formik, yupToFormErrors } from 'formik'
-import { connect, useDispatch } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
   Text,
@@ -15,9 +15,13 @@ import {
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
-import { Keyboard } from 'react-native'
+import { DeviceEventEmitter, Keyboard } from 'react-native'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
-import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  checkIfFormIsComplete,
+  markStepCompleted,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
@@ -25,22 +29,26 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import { QARanges } from '../../utils/utils'
-import { useCallback, useEffect, useState } from 'react'
+import { QARanges, navigateHelper } from '../../utils/utils'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 const mapStateToProps = (state: RootState) => {
-  let activeTabId = 'placeholderId'
-  if (
-    state.tabSlice.activeTabId &&
-    state.trapPostProcessing[state.tabSlice.activeTabId]
-  ) {
-    activeTabId = state.tabSlice.activeTabId
+  let activeTabId = state.tabSlice.activeTabId
+  let willBeHoldingFishForMarkRecapture = false
+
+  if (activeTabId) {
+    const tabsContainHoldingTrue = Object.keys(state.tabSlice).some(
+      (tabId) =>
+        state.fishProcessing?.[tabId]?.values?.willBeHoldingFishForMarkRecapture
+    )
+    willBeHoldingFishForMarkRecapture = tabsContainHoldingTrue
   }
 
   return {
     reduxState: state.trapPostProcessing,
     tabSlice: state.tabSlice,
-    activeTabId,
+    activeTabId: state.tabSlice.activeTabId,
+    willBeHoldingFishForMarkRecapture,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
   }
@@ -51,17 +59,26 @@ const TrapPostProcessing = ({
   reduxState,
   tabSlice,
   activeTabId,
+  willBeHoldingFishForMarkRecapture,
   previouslyActiveTabId,
   navigationSlice,
 }: {
   navigation: any
   reduxState: any
   tabSlice: any
-  activeTabId: string
+  activeTabId: any
+  willBeHoldingFishForMarkRecapture: boolean
   previouslyActiveTabId: string | null
   navigationSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const recordTurbidityInPostProcessing = useSelector(
+    (state: any) =>
+      state.trapOperations?.[tabSlice.activeTabId]?.values
+        ?.recordTurbidityInPostProcessing
+  )
+
+  const [locationClicked, setLocationClicked] = useState(false as boolean)
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
     ;(async () => {
@@ -75,6 +92,7 @@ const TrapPostProcessing = ({
         setFieldValue('trapLongitude', currentLocation.coords.longitude)
         setFieldTouched('trapLatitude', true)
         setFieldTouched('trapLongitude', true)
+        setLocationClicked(false)
       } catch (error) {
         console.error(error)
       }
@@ -120,18 +138,56 @@ const TrapPostProcessing = ({
     )
     dispatch(markTrapPostProcessingCompleted({ tabId, value: true }))
     let stepCompletedCheck = true
-    Object.keys(tabSlice.tabs).forEach((tabId) => {
-      if (!reduxState[tabId]) stepCompletedCheck = false
+    const allTabIds: string[] = Object.keys(tabSlice.tabs)
+    allTabIds.forEach((allTabId) => {
+      if (!Object.keys(reduxState).includes(allTabId)) {
+        if (Object.keys(reduxState).length < allTabIds.length) {
+          stepCompletedCheck = false
+        }
+        if (Object.keys(errors).length) {
+          stepCompletedCheck = false
+        }
+      } else {
+        if (!reduxState[allTabId].completed) {
+          stepCompletedCheck = false
+        }
+      }
     })
-    if (stepCompletedCheck) dispatch(markStepCompleted([true]))
+
+    if (stepCompletedCheck) {
+      dispatch(markStepCompleted({ propName: 'trapPostProcessing' }))
+      dispatch(checkIfFormIsComplete())
+    }
     console.log('🚀 ~ onSubmit ~ TrapPostProcessing', values)
   }
+
+  const initialValues = useMemo(() => {
+    let initialValues
+
+    if (reduxState[activeTabId]) {
+      initialValues = { ...reduxState[activeTabId].values }
+
+      if (recordTurbidityInPostProcessing) {
+        initialValues = {
+          ...initialValues,
+          isWaterTurbidityPresent: true,
+        }
+      }
+    } else {
+      initialValues = {
+        ...reduxState['placeholderId'].values,
+        isWaterTurbidityPresent: recordTurbidityInPostProcessing,
+      }
+    }
+
+    return initialValues
+  }, [reduxState, activeTabId])
 
   return (
     <Formik
       validationSchema={trapPostProcessingSchema}
       enableReinitialize={true}
-      initialValues={reduxState[activeTabId].values}
+      initialValues={initialValues}
       initialTouched={{ debrisVolume: true }}
       initialErrors={
         activeTabId && reduxState[activeTabId]
@@ -139,13 +195,37 @@ const TrapPostProcessing = ({
           : null
       }
       onSubmit={(values) => {
-        if (activeTabId != 'placeholderId') {
-          onSubmit(values, activeTabId)
-        } else {
-          if (tabSlice.activeTabId) onSubmit(values, tabSlice.activeTabId)
+        if (activeTabId && activeTabId != 'placeholderId') {
+          const callback = () => {
+            if (willBeHoldingFishForMarkRecapture) {
+              navigateHelper(
+                'Fish Holding',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            } else {
+              navigateHelper(
+                'Incomplete Sections',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            }
+          }
+
+          navigation.push('Loading...')
+
+          setTimeout(() => {
+            DeviceEventEmitter.emit('event.load', {
+              process: () => onSubmit(values, activeTabId),
+              callback,
+            })
+          }, 2000)
         }
       }}
-      validateOnChange={true}
     >
       {({
         handleChange,
@@ -164,7 +244,18 @@ const TrapPostProcessing = ({
             resetForm()
           }
         }, [previouslyActiveTabId])
-
+        const navButtons = useMemo(
+          () => (
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={handleSubmit}
+              errors={errors}
+              touched={touched}
+              shouldProceedToLoadingScreen={true}
+            />
+          ),
+          [navigation, handleSubmit, errors, touched]
+        )
         return (
           <>
             <Pressable
@@ -178,41 +269,102 @@ const TrapPostProcessing = ({
             >
               <VStack space={10}>
                 <Heading>Trap Post-Processing</Heading>
-                <FormControl w='1/2'>
-                  <HStack space={4} alignItems='center'>
+                <HStack space={8}>
+                  <FormControl w='30%'>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
                         Debris Volume
                       </Text>
                     </FormControl.Label>
+                    <Input
+                      height='50px'
+                      fontSize='16'
+                      placeholder='Numeric Value'
+                      keyboardType='numeric'
+                      onChangeText={handleChange('debrisVolume')}
+                      onBlur={handleBlur('debrisVolume')}
+                      value={values.debrisVolume}
+                    />
+                    <Text
+                      color='#A1A1A1'
+                      position='absolute'
+                      top={50}
+                      right={4}
+                      fontSize={16}
+                    >
+                      {'gal'}
+                    </Text>
                     {Number(values.debrisVolume) >
                       QARanges.debrisVolume.max && <RenderWarningMessage />}
                     {tabSlice.incompleteSectionTouched
-                      ? errors.reasonNotFunc &&
+                      ? errors.debrisVolume &&
                         RenderErrorMessage(errors, 'debrisVolume')
-                      : touched.reasonNotFunc &&
-                        errors.reasonNotFunc &&
+                      : touched.debrisVolume &&
+                        errors.debrisVolume &&
                         RenderErrorMessage(errors, 'debrisVolume')}
-                  </HStack>
-                  <Input
-                    height='50px'
-                    fontSize='16'
-                    placeholder='Numeric Value'
-                    keyboardType='numeric'
-                    onChangeText={handleChange('debrisVolume')}
-                    onBlur={handleBlur('debrisVolume')}
-                    value={values.debrisVolume}
-                  />
-                  <Text
-                    color='#A1A1A1'
-                    position='absolute'
-                    top={50}
-                    right={4}
-                    fontSize={16}
-                  >
-                    {'gal'}
-                  </Text>
-                </FormControl>
+                  </FormControl>
+                  <FormControl w='30%'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Total Revolutions
+                      </Text>
+                    </FormControl.Label>
+                    <Input
+                      height='50px'
+                      fontSize='16'
+                      placeholder='Numeric Value'
+                      keyboardType='numeric'
+                      onChangeText={handleChange('totalRevolutions')}
+                      onBlur={handleBlur('totalRevolutions')}
+                      value={values.totalRevolutions}
+                    />
+                    {Number(values.totalRevolutions) >
+                      QARanges.totalRevolutions.max && <RenderWarningMessage />}
+                    {tabSlice.incompleteSectionTouched
+                      ? errors.totalRevolutions &&
+                        RenderErrorMessage(errors, 'totalRevolutions')
+                      : touched.totalRevolutions &&
+                        errors.totalRevolutions &&
+                        RenderErrorMessage(errors, 'totalRevolutions')}
+                  </FormControl>
+                  {recordTurbidityInPostProcessing && (
+                    <FormControl w='30%'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Water Turbidity
+                        </Text>
+                      </FormControl.Label>
+                      <Input
+                        height='50px'
+                        fontSize='16'
+                        placeholder='Numeric Value'
+                        keyboardType='numeric'
+                        onChangeText={handleChange('waterTurbidity')}
+                        onBlur={handleBlur('waterTurbidity')}
+                        value={values.waterTurbidity}
+                      />
+
+                      <Text
+                        color='#A1A1A1'
+                        position='absolute'
+                        top={50}
+                        right={4}
+                        fontSize={16}
+                      >
+                        {'ntu'}
+                      </Text>
+
+                      {Number(values.waterTurbidity) >
+                        QARanges.waterTurbidity.max && <RenderWarningMessage />}
+                      {tabSlice.incompleteSectionTouched
+                        ? errors.waterTurbidity &&
+                          RenderErrorMessage(errors, 'waterTurbidity')
+                        : touched.waterTurbidity &&
+                          errors.waterTurbidity &&
+                          RenderErrorMessage(errors, 'waterTurbidity')}
+                    </FormControl>
+                  )}
+                </HStack>
 
                 <FormControl>
                   <HStack space={4} alignItems='center'>
@@ -221,7 +373,9 @@ const TrapPostProcessing = ({
                         RPM After Cleaning
                       </Text>
                     </FormControl.Label>
-                    {(errors.rpm1 || errors.rpm2 || errors.rpm3) && (
+                    {((touched.rpm1 && errors.rpm1) ||
+                      (touched.rpm2 && errors.rpm2) ||
+                      (touched.rpm3 && errors.rpm3)) && (
                       <HStack space={1}>
                         <Icon
                           marginTop={'.5'}
@@ -304,7 +458,16 @@ const TrapPostProcessing = ({
                       // h='12%'
                       bg='primary'
                       px='10'
+                      isLoading={locationClicked}
+                      spinnerPlacement='end'
+                      isLoadingText='Drop Pin at Current Location'
+                      _loading={{
+                        _text: {
+                          fontSize: 'xl',
+                        },
+                      }}
                       onPress={() => {
+                        setLocationClicked(true)
                         getCurrentLocation(setFieldTouched, setFieldValue)
                       }}
                     >
@@ -312,7 +475,6 @@ const TrapPostProcessing = ({
                         Drop Pin at Current Location
                       </Text>
                     </Button>
-
                     <VStack space={3} alignSelf='center'>
                       <Text fontSize='xl' color='black'>
                         {values.trapLatitude
@@ -321,8 +483,8 @@ const TrapPostProcessing = ({
                       </Text>
                       <Text fontSize='xl' color='black'>
                         {values.trapLongitude
-                          ? `Lat:  ${values.trapLongitude}`
-                          : 'Lat:'}
+                          ? `Long:  ${values.trapLongitude}`
+                          : 'Long:'}
                       </Text>
                     </VStack>
                   </HStack>
@@ -351,7 +513,7 @@ const TrapPostProcessing = ({
                       my={1}
                       _icon={{ color: 'primary' }}
                     >
-                      Restart Trap
+                      Continue Trapping
                     </Radio>
                     <Radio
                       colorScheme='primary'
@@ -365,12 +527,7 @@ const TrapPostProcessing = ({
                 </FormControl>
               </VStack>
             </Pressable>
-            <NavButtons
-              navigation={navigation}
-              handleSubmit={handleSubmit}
-              errors={errors}
-              touched={touched}
-            />
+            {navButtons}
           </>
         )
       }}

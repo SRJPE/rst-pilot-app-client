@@ -66,7 +66,7 @@ const AddAnotherMarkModalContent = ({
       validationSchema={addAnotherMarkSchema}
       initialValues={addAnotherMarkValues}
       initialErrors={{ markType: '' }}
-      onSubmit={(values) => {
+      onSubmit={values => {
         handleSubmit(values)
       }}
     >
@@ -101,7 +101,6 @@ const AddAnotherMarkModalContent = ({
               </Button>
             }
           />
-          <Divider my={2} thickness='3' />
           <View>
             <VStack space={6} paddingX='10' paddingTop='7' paddingBottom='3'>
               <FormControl>
@@ -115,9 +114,7 @@ const AddAnotherMarkModalContent = ({
                   placeholder='Type'
                   onValueChange={handleChange('markType')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={markType.concat([
-                    { id: 1, definition: 'Bismark Brown' },
-                  ])}
+                  selectOptions={markType}
                 />
                 {touched.markType &&
                   errors.markType &&

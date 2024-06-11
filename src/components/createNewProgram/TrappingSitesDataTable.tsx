@@ -26,9 +26,11 @@ const headers: Header[] = [
 const TrappingSitesDataTable = ({
   trappingSitesStore,
   multipleTrapsStore,
+  handleShowTableModal,
 }: {
   trappingSitesStore: TrappingSitesStoreI
   multipleTrapsStore: GroupTrapSiteValuesI
+  handleShowTableModal: any
 }) => {
   const [processedData, setProcessedData] = useState(
     [] as Array<IndividualTrappingSiteValuesI>
@@ -144,9 +146,9 @@ const TrappingSitesDataTable = ({
                 bg='primary'
                 colorScheme='primary'
                 size='sm'
-                onPress={() =>
-                  console.log('TRAP OBJECT ROW DATA: ', trapObject)
-                }
+                onPress={() => {
+                  handleShowTableModal(trapObject)
+                }}
               >
                 <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
               </IconButton>

@@ -20,6 +20,7 @@ import BatchCount from '../screens/formScreens/BatchCount'
 import { VStack } from 'native-base'
 import FishHolding from '../screens/formScreens/FishHolding'
 import TabBar from '../components/form/TabBar'
+import LoadingScreen from '../components/Shared/LoadingScreen'
 
 const FormStack = createNativeStackNavigator()
 
@@ -40,6 +41,13 @@ function FormStackNavigation() {
         ),
       }}
     >
+      <FormStack.Screen
+        name='Loading...'
+        component={LoadingScreen}
+        options={{
+          animationTypeForReplace: 'push',
+        }}
+      />
       <FormStack.Screen name='Visit Setup' component={VisitSetup} />
       <FormStack.Screen name='Trap Operations' component={TrapOperations} />
       <FormStack.Screen name='Fish Processing' component={FishProcessing} />

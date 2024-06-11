@@ -14,7 +14,10 @@ import {
 } from 'native-base'
 import React, { memo, useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { saveBatchCharacteristics } from '../../../redux/reducers/formSlices/batchCountSlice'
+import {
+  addMarkToBatchCountExistingMarks,
+  saveBatchCharacteristics,
+} from '../../../redux/reducers/formSlices/batchCountSlice'
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
@@ -26,24 +29,13 @@ import MarkBadgeList from '../../markRecapture/MarkBadgeList'
 import CustomModal from '../../Shared/CustomModal'
 import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
 import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
+import { ReleaseMarkI } from '../../../screens/formScreens/AddFish'
 
 const initialFormValues = {
   species: '',
   adiposeClipped: false,
-  fishCondition: '',
-  existingMarks: [],
+  fishCondition: 'none',
 }
-const fishConditionTempValues = [
-  { id: 1, definition: 'Dark coloration' },
-  { id: 2, definition: 'Swimming abnormally' },
-  { id: 3, definition: 'Bulging eyes' },
-  { id: 4, definition: 'Pale gills' },
-  { id: 5, definition: 'Bulging abdomen' },
-  { id: 6, definition: 'Swollen/protruding vent' },
-  { id: 7, definition: 'Bloody eye' },
-  { id: 8, definition: 'Fungus' },
-  { id: 9, definition: 'none' },
-]
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -56,6 +48,7 @@ const BatchCharacteristicsModalContent = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
+  const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
 
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -71,13 +64,61 @@ const BatchCharacteristicsModalContent = ({
   const handleFormSubmit = (values: any) => {
     let activeTabId = tabSlice.activeTabId
     if (activeTabId) {
-      dispatch(saveBatchCharacteristics({ ...values, tabId: activeTabId }))
-      console.log('🚀 ~handleFormSubmit BatchCount Values: ', {
-        ...values,
-        tabId: activeTabId,
-      })
-      showSlideAlert(dispatch, 'Batch characteristics')
+      if (recentExistingMarks.length === 1) {
+        dispatch(
+          saveBatchCharacteristics({
+            ...values,
+            tabId: activeTabId,
+          })
+        )
+        dispatch(addMarkToBatchCountExistingMarks(recentExistingMarks[0]))
+        console.log('🚀 ~handleFormSubmit BatchCount Values: ', {
+          ...values,
+          tabId: activeTabId,
+        })
+        showSlideAlert(dispatch, 'Batch characteristics')
+      } else {
+        dispatch(
+          saveBatchCharacteristics({
+            ...values,
+
+            tabId: activeTabId,
+          })
+        )
+        console.log('🚀 ~handleFormSubmit BatchCount Values: ', {
+          ...values,
+          tabId: activeTabId,
+        })
+        showSlideAlert(dispatch, 'Batch characteristics')
+      }
     }
+  }
+
+  const returnDefinitionArray = (dropdownsArray: any[]) => {
+    return dropdownsArray.map((dropdownObj: any) => {
+      return dropdownObj.definition
+    })
+  }
+
+  const markTypeValues = returnDefinitionArray(dropdownValues.markType)
+  const markColorValues = returnDefinitionArray(dropdownValues.markColor)
+  const bodyPartValues = returnDefinitionArray(dropdownValues.bodyPart)
+
+  const decodedRecentReleaseMarks = (twoMostRecentReleaseMarks: any) => {
+    return twoMostRecentReleaseMarks.map((mark: ReleaseMarkI) => {
+      return {
+        ...mark,
+        markType: markTypeValues[mark.markType - 1],
+        markColor: markColorValues[mark.markColor - 1],
+        bodyPart: bodyPartValues[mark.bodyPart - 1],
+      }
+    })
+  }
+
+  const handlePressRecentExistingMarkButton = (
+    selectedRecentReleaseMark: ReleaseMarkI
+  ) => {
+    setRecentExistingMarks([selectedRecentReleaseMark])
   }
 
   return (
@@ -123,7 +164,6 @@ const BatchCharacteristicsModalContent = ({
                 </Button>
               }
             />
-            <Divider my={2} thickness='3' />
             <VStack px='5%' space={4}>
               <Text justifyContent='center' fontSize='lg'>
                 Please return to the individual fish input if you plan on
@@ -172,7 +212,7 @@ const BatchCharacteristicsModalContent = ({
                       handleChange('fishCondition')(value)
                     }
                     setFieldTouched={setFieldTouched}
-                    selectOptions={fishConditionTempValues.map(
+                    selectOptions={dropdownValues.fishCondition.map(
                       (condition: any) => ({
                         label: condition?.definition,
                         value: condition?.definition,
@@ -226,6 +266,51 @@ const BatchCharacteristicsModalContent = ({
                   <Text color='black' fontSize='xl'>
                     Add Existing Mark
                   </Text>
+                  {batchCountStore.existingMarks.length < 1 && (
+                    <VStack space={5}>
+                      {dropdownValues.twoMostRecentReleaseMarks.length > 0 &&
+                        decodedRecentReleaseMarks(
+                          dropdownValues.twoMostRecentReleaseMarks
+                        ).map((recentReleaseMark: any, index: number) => {
+                          const { id, markType, markColor, bodyPart } =
+                            recentReleaseMark
+                          return (
+                            <Button
+                              key={index}
+                              bg={
+                                recentExistingMarks.some(
+                                  (mark: ReleaseMarkI) => mark.id === id
+                                )
+                                  ? 'primary'
+                                  : 'secondary'
+                              }
+                              shadow='3'
+                              borderRadius='5'
+                              w='90%'
+                              onPress={() => {
+                                handlePressRecentExistingMarkButton(
+                                  recentReleaseMark
+                                )
+                              }}
+                            >
+                              <Text
+                                color={
+                                  recentExistingMarks.some(
+                                    (mark: ReleaseMarkI) => mark.id === id
+                                  )
+                                    ? 'white'
+                                    : 'primary'
+                                }
+                                fontWeight='500'
+                                fontSize='md'
+                              >
+                                {`${markType} - ${markColor} - ${bodyPart}`}
+                              </Text>
+                            </Button>
+                          )
+                        })}
+                    </VStack>
+                  )}
                   <MarkBadgeList
                     badgeListContent={batchCountStore.existingMarks}
                     setFieldValue={setFieldValue}
@@ -235,7 +320,10 @@ const BatchCharacteristicsModalContent = ({
                   {batchCountStore.existingMarks.length < 1 && (
                     <Pressable
                       isDisabled={batchCountStore.existingMarks.length > 0}
-                      onPress={() => setAddMarkModalOpen(true)}
+                      onPress={() => {
+                        setRecentExistingMarks([])
+                        setAddMarkModalOpen(true)
+                      }}
                     >
                       <HStack alignItems='center'>
                         <Icon

@@ -10,6 +10,7 @@ export default function CrewDropDown({
   setFieldValue,
   setFieldTouched,
   visitSetupState,
+  stream,
   tabId,
 }: {
   open: boolean
@@ -19,6 +20,7 @@ export default function CrewDropDown({
   setFieldValue: any
   setFieldTouched: any
   visitSetupState: any
+  stream: string
   tabId: any
 }) {
   const [value, setValue] = useState([] as Array<any>)
@@ -33,6 +35,16 @@ export default function CrewDropDown({
     setFieldValue('crew', [...value])
     if (value.length) setFieldTouched('crew', true)
   }, [value])
+
+  useEffect(() => {
+    clearSelectedValues()
+  }, [stream])
+
+  const clearSelectedValues = () => {
+    setValue([])
+    setFieldValue('crew', [])
+    setFieldTouched('crew', false)
+  }
 
   return (
     <View

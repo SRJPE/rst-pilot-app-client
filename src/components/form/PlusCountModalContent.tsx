@@ -8,6 +8,7 @@ import {
   Button,
   Heading,
   HStack,
+  Radio,
 } from 'native-base'
 import React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
@@ -28,6 +29,7 @@ const initialFormValues = {
   run: '',
   count: '',
   plusCountMethod: '',
+  dead: false,
 }
 
 const PlusCountModalContent = ({
@@ -47,7 +49,12 @@ const PlusCountModalContent = ({
   const handleFormSubmit = (values: any) => {
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
-      dispatch(savePlusCount({ tabId: activeTabId, ...values }))
+      dispatch(
+        savePlusCount({
+          tabId: activeTabId,
+          ...values,
+        })
+      )
       console.log('🚀 ~ Plus Count Values: ', values)
       showSlideAlert(dispatch, 'Plus count')
     }
@@ -58,7 +65,7 @@ const PlusCountModalContent = ({
       <Formik
         validationSchema={addPlusCountsSchema}
         initialValues={{ ...initialFormValues, plusCountMethod: 'none' }}
-        onSubmit={(values) => handleFormSubmit(values)}
+        onSubmit={values => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -68,6 +75,8 @@ const PlusCountModalContent = ({
           touched,
           errors,
           values,
+          setFieldValue,
+          resetForm,
         }) => (
           <>
             <CustomModalHeader
@@ -120,79 +129,135 @@ const PlusCountModalContent = ({
                     }))}
                   />
                 </FormControl>
-                <FormControl w='31%'>
+                {(values.species === 'Chinook salmon' ||
+                  values.species === 'Steelhead / rainbow trout' ||
+                  !values.species) && (
+                  <FormControl w='31%'>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Life Stage
+                        </Text>
+                      </FormControl.Label>
+
+                      {touched.lifeStage &&
+                        errors.lifeStage &&
+                        RenderErrorMessage(errors, 'lifeStage')}
+                    </HStack>
+                    <CustomSelect
+                      selectedValue={values.lifeStage}
+                      placeholder={'Life stage'}
+                      onValueChange={handleChange('lifeStage')}
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={
+                        values.species === 'Chinook salmon'
+                          ? alphabeticalLifeStage.map((item: any) => ({
+                              label: item.definition,
+                              value: item.definition,
+                            }))
+                          : [
+                              { label: 'adult', value: 'adult' },
+                              { label: 'juvenile', value: 'juvenile' },
+                            ]
+                      }
+                    />
+                  </FormControl>
+                )}
+
+                {(values.species === 'Chinook salmon' || !values.species) && (
+                  <FormControl w='31%'>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Run
+                        </Text>
+                      </FormControl.Label>
+
+                      {touched.run &&
+                        errors.run &&
+                        RenderErrorMessage(errors, 'run')}
+                    </HStack>
+
+                    <CustomSelect
+                      selectedValue={values.run}
+                      placeholder={'Run'}
+                      onValueChange={handleChange('run')}
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={run.map((item: any) => ({
+                        label: item.definition,
+                        value: item.definition,
+                      }))}
+                    />
+                  </FormControl>
+                )}
+              </HStack>
+              <HStack space={6}>
+                <FormControl w='48.5%'>
                   <HStack space={4} alignItems='center'>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
-                        Life Stage
+                        Count
                       </Text>
                     </FormControl.Label>
-
-                    {touched.lifeStage &&
-                      errors.lifeStage &&
-                      RenderErrorMessage(errors, 'lifeStage')}
+                    {touched.count &&
+                      errors.count &&
+                      RenderErrorMessage(errors, 'count')}
                   </HStack>
-                  <CustomSelect
-                    selectedValue={values.lifeStage}
-                    placeholder={'Life stage'}
-                    onValueChange={handleChange('lifeStage')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={alphabeticalLifeStage.map((item: any) => ({
-                      label: item.definition,
-                      value: item.definition,
-                    }))}
+                  <Input
+                    height='50px'
+                    fontSize='16'
+                    placeholder='Enter count'
+                    keyboardType='numeric'
+                    onChangeText={handleChange('count')}
+                    onBlur={handleBlur('count')}
+                    value={values.count}
                   />
                 </FormControl>
-
-                <FormControl w='31%'>
+                <FormControl w='48.5%' paddingLeft='5'>
                   <HStack space={4} alignItems='center'>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
-                        Run
+                        Dead
                       </Text>
                     </FormControl.Label>
-
-                    {touched.run &&
-                      errors.run &&
-                      RenderErrorMessage(errors, 'run')}
+                    {touched.dead &&
+                      errors.dead &&
+                      RenderErrorMessage(errors, 'dead')}
                   </HStack>
-
-                  <CustomSelect
-                    selectedValue={values.run}
-                    placeholder={'Run'}
-                    onValueChange={handleChange('run')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={run.map((item: any) => ({
-                      label: item.definition,
-                      value: item.definition,
-                    }))}
-                  />
+                  <Radio.Group
+                    name='dead'
+                    accessibilityLabel='dead'
+                    value={`${values.dead}`}
+                    onChange={(value: any) => {
+                      setFieldTouched('dead', true)
+                      if (value === 'true') {
+                        setFieldValue('dead', true)
+                      } else {
+                        setFieldValue('dead', false)
+                      }
+                    }}
+                  >
+                    <HStack space={4}>
+                      <Radio
+                        colorScheme='primary'
+                        value='true'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        Yes
+                      </Radio>
+                      <Radio
+                        colorScheme='primary'
+                        value='false'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        No
+                      </Radio>
+                    </HStack>
+                  </Radio.Group>
                 </FormControl>
               </HStack>
-              <FormControl>
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Count
-                    </Text>
-                  </FormControl.Label>
-                  {Number(values.count) > QARanges.plusCount.max && (
-                    <RenderWarningMessage />
-                  )}
-                  {touched.count &&
-                    errors.count &&
-                    RenderErrorMessage(errors, 'count')}
-                </HStack>
-                <Input
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Enter count'
-                  keyboardType='numeric'
-                  onChangeText={handleChange('count')}
-                  onBlur={handleBlur('count')}
-                  value={values.count}
-                />
-              </FormControl>
 
               <FormControl>
                 <HStack space={4} alignItems='center'>

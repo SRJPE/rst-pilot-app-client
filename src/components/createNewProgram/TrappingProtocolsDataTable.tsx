@@ -49,11 +49,10 @@ const TrappingProtocolsDataTable = ({
               bg='primary'
               colorScheme='primary'
               size='sm'
-              onPress={
-                () =>
-                  console.log('TRAP OBJECT ROW DATA: ', trappingProtocolObject)
-                // handleShowTableModal(trappingProtocolObject)
-              }
+              onPress={() => {
+                console.log('TRAP OBJECT ROW DATA: ', trappingProtocolObject)
+                handleShowTableModal(trappingProtocolObject)
+              }}
             >
               <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
             </IconButton>
