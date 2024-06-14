@@ -66,7 +66,7 @@ const AddAnotherMarkModalContent = ({
       validationSchema={addAnotherMarkSchema}
       initialValues={addAnotherMarkValues}
       initialErrors={{ markType: '' }}
-      onSubmit={(values) => {
+      onSubmit={values => {
         handleSubmit(values)
       }}
     >
@@ -114,9 +114,7 @@ const AddAnotherMarkModalContent = ({
                   placeholder='Type'
                   onValueChange={handleChange('markType')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={markType.concat([
-                    { id: 1, definition: 'Bismark Brown' },
-                  ])}
+                  selectOptions={markType}
                 />
                 {touched.markType &&
                   errors.markType &&

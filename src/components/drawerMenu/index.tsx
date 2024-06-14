@@ -34,7 +34,7 @@ const DrawerMenu = ({
 }: ExtendedDrawerProps) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
-  // const reduxState = useSelector((state: any) => state)
+  const reduxState = useSelector((state: any) => state)
   const { steps, activeStep } = navigationState
   const { state, navigation } = props
   const currentRoute = state?.routeNames[state.index]
@@ -184,10 +184,16 @@ const DrawerMenu = ({
             title='QC Data'
           />
           <MenuButton
-            active={false}
+            active={currentRoute === 'Inspector'}
             onPress={() => handlePressMainNavButton('Inspector')}
             icon='search'
             title='Inspector'
+          />
+          <MenuButton
+            active={false}
+            onPress={() => console.log('Redux Log: ', reduxState)}
+            icon='search'
+            title='Redux Log'
           />
           <MenuButton
             active={currentRoute === 'Mark Recapture'}

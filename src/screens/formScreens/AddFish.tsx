@@ -399,7 +399,7 @@ const AddFishContent = ({
       plusCountMethod,
     ]
     let hasError = false
-    formValues.every((field) => {
+    formValues.every(field => {
       if (hasError) return false
       if (
         field.required &&
@@ -427,7 +427,7 @@ const AddFishContent = ({
     } else if (resetType === 'other') {
       identifier = 'whenSpeciesOther'
     }
-        // setSpecies(stateDefaults[identifier].species)
+    // setSpecies(stateDefaults[identifier].species)
     setForkLength(stateDefaults[identifier].forkLength)
     setRun(stateDefaults[identifier].run)
     setWeight(stateDefaults[identifier].weight)
@@ -470,13 +470,11 @@ const AddFishContent = ({
     selectedRecentReleaseMark: ReleaseMarkI
   ) => {
     if (
-      recentExistingMarks.some(
-        (mark) => mark.id === selectedRecentReleaseMark.id
-      )
+      recentExistingMarks.some(mark => mark.id === selectedRecentReleaseMark.id)
     ) {
       setRecentExistingMarks(
         recentExistingMarks.filter(
-          (mark) => mark.id !== selectedRecentReleaseMark.id
+          mark => mark.id !== selectedRecentReleaseMark.id
         )
       )
     } else {
@@ -486,14 +484,32 @@ const AddFishContent = ({
       ])
     }
   }
+  const determineValueNotRecordedOrNull = (
+    species: any,
+    fieldName: string,
+    fieldValue: any
+  ) => {
+    if (
+      species === 'Chinook salmon' ||
+      (species === 'Steelhead / rainbow trout' && fieldName === 'lifeStage')
+    ) {
+      return fieldValue || 'not recorded'
+    } else {
+      return fieldValue || null
+    }
+  }
   const returnFormValues = () => {
     let values = {
       species: species.value,
       forkLength: forkLength.value,
-      run: run.value,
+      run: determineValueNotRecordedOrNull(species.value, 'run', run.value),
       fishCondition: fishCondition.value,
       weight: weight.value,
-      lifeStage: lifeStage.value,
+      lifeStage: determineValueNotRecordedOrNull(
+        species.value,
+        'lifeStage',
+        lifeStage.value
+      ),
       adiposeClipped: adiposeClipped.value,
       // @ts-ignore
       existingMarks: [...existingMarks.value, ...recentExistingMarks],
@@ -551,13 +567,14 @@ const AddFishContent = ({
                   </FormControl.Label>
                   <Popover
                     placement='bottom right'
-                    trigger={(triggerProps) => {
+                    trigger={triggerProps => {
                       return (
                         <IconButton
                           {...triggerProps}
                           icon={
                             <Icon
                               as={MaterialIcons}
+                              color='black'
                               name='info-outline'
                               size='xl'
                             />
@@ -649,7 +666,7 @@ const AddFishContent = ({
                         fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
-                        onChangeText={(value) => setCount({ ...count, value })}
+                        onChangeText={value => setCount({ ...count, value })}
                         // TODO - onBlur logic?
                         // onBlur={handleBlur('numFishCaught')}
                         value={`${count.value}`}
@@ -684,7 +701,7 @@ const AddFishContent = ({
                         fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
-                        onChangeText={(value) => {
+                        onChangeText={value => {
                           let payload: FormValueI = {
                             ...forkLength,
                             value,
@@ -743,7 +760,7 @@ const AddFishContent = ({
                         fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
-                        onChangeText={(value) => {
+                        onChangeText={value => {
                           let payload: FormValueI = {
                             ...weight,
                             value,
@@ -789,13 +806,14 @@ const AddFishContent = ({
 
                           <Popover
                             placement='bottom right'
-                            trigger={(triggerProps) => {
+                            trigger={triggerProps => {
                               return (
                                 <IconButton
                                   {...triggerProps}
                                   icon={
                                     <Icon
                                       as={MaterialIcons}
+                                      color='black'
                                       name='info-outline'
                                       size='xl'
                                     />
@@ -1017,13 +1035,14 @@ const AddFishContent = ({
                           </FormControl.Label>
                           <Popover
                             placement='top right'
-                            trigger={(triggerProps) => {
+                            trigger={triggerProps => {
                               return (
                                 <IconButton
                                   {...triggerProps}
                                   icon={
                                     <Icon
                                       as={MaterialIcons}
+                                      color='black'
                                       name='info-outline'
                                       size='xl'
                                     />

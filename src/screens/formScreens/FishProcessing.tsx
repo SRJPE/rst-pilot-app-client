@@ -18,24 +18,27 @@ import {
   markFishProcessingCompleted,
   saveFishProcessing,
 } from '../../redux/reducers/formSlices/fishProcessingSlice'
-import { markStepCompleted } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  markStepCompleted,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { DeviceEventEmitter } from 'react-native'
+import { navigateHelper } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
-  let activeTabId = 'placeholderId'
-  if (
-    state.tabSlice.activeTabId &&
-    state.fishProcessing[state.tabSlice.activeTabId]
-  ) {
-    activeTabId = state.tabSlice.activeTabId
-  }
+  const activeTabId = state.tabSlice.activeTabId
+  let isPaperEntryStore = activeTabId
+    ? state.visitSetup[activeTabId]?.isPaperEntry
+    : false
 
   return {
     reduxState: state.fishProcessing,
     tabSlice: state.tabSlice,
-    activeTabId,
+    activeTabId: state.tabSlice.activeTabId,
+    isPaperEntryStore,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
   }
@@ -46,13 +49,15 @@ const FishProcessing = ({
   reduxState,
   tabSlice,
   activeTabId,
+  isPaperEntryStore,
   previouslyActiveTabId,
   navigationSlice,
 }: {
   navigation: any
   reduxState: any
   tabSlice: any
-  activeTabId: string
+  activeTabId: any
+  isPaperEntryStore: boolean
   previouslyActiveTabId: string | null
   navigationSlice: any
 }) => {
@@ -107,22 +112,72 @@ const FishProcessing = ({
     <Formik
       validationSchema={fishProcessingSchema}
       enableReinitialize={true}
-      initialValues={reduxState[activeTabId].values}
+      initialValues={
+        reduxState[activeTabId]
+          ? reduxState[activeTabId].values
+          : reduxState['placeholderId'].values
+      }
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       initialTouched={{ fishProcessedResult: true }}
       initialErrors={
         activeTabId && reduxState[activeTabId]
           ? reduxState[activeTabId].errors
-          : null
+          : { fishProcessedResult: '' }
       }
       onSubmit={(values) => {
-        if (activeTabId != 'placeholderId') {
-          onSubmit(values, activeTabId)
-        } else {
-          if (tabSlice.activeTabId) onSubmit(values, tabSlice.activeTabId)
+        if (activeTabId && activeTabId != 'placeholderId') {
+          const callback = () => {
+            if (!isPaperEntryStore) {
+              if (values?.fishProcessedResult === 'no fish caught') {
+                navigateHelper(
+                  'No Fish Caught',
+                  navigationSlice,
+                  navigation,
+                  dispatch,
+                  updateActiveStep
+                )
+              } else if (
+                values?.fishProcessedResult ===
+                  'no catch data, fish left in live box' ||
+                values?.fishProcessedResult === 'no catch data, fish released'
+              ) {
+                navigateHelper(
+                  'Trap Post-Processing',
+                  navigationSlice,
+                  navigation,
+                  dispatch,
+                  updateActiveStep
+                )
+              } else {
+                navigateHelper(
+                  'Fish Input',
+                  navigationSlice,
+                  navigation,
+                  dispatch,
+                  updateActiveStep
+                )
+              }
+            } else {
+              navigateHelper(
+                'Trap Post-Processing',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            }
+          }
+
+          navigation.push('Loading...')
+
+          setTimeout(() => {
+            DeviceEventEmitter.emit('event.load', {
+              process: () => onSubmit(values, activeTabId),
+              callback,
+            })
+          }, 2000)
         }
       }}
-      validateOnChange={true}
     >
       {({
         handleChange,
@@ -140,7 +195,19 @@ const FishProcessing = ({
             resetForm()
           }
         }, [previouslyActiveTabId])
-
+        const navButtons = useMemo(
+          () => (
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={handleSubmit}
+              errors={errors}
+              touched={touched}
+              values={values}
+              shouldProceedToLoadingScreen={true}
+            />
+          ),
+          [navigation, handleSubmit, errors, touched, values]
+        )
         return (
           <>
             <View
@@ -271,13 +338,7 @@ const FishProcessing = ({
                 )}
               </VStack>
             </View>
-            <NavButtons
-              navigation={navigation}
-              handleSubmit={handleSubmit}
-              errors={errors}
-              touched={touched}
-              values={values}
-            />
+            {navButtons}
           </>
         )
       }}

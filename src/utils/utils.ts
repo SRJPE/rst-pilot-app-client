@@ -99,14 +99,56 @@ export const calculateLifeStage = (forkLength: number) => {
 
 export const QARanges = {
   flowMeasure: {
-    'Mill Creek': { max: 2000, min: null },
-    'Deer Creek': { max: 2000, min: null },
-    'Feather River': {
-      standard: { max: 3500, min: 50 },
-      eyeRiffle: { max: 16000, min: 50 },
-      herringerRiffle: { max: 20000, min: 50 },
+    'Mill Creek': {
+      'Mill Creek RST': { max: 2000, min: null },
     },
-    'Yuba River': { max: 3500, min: 50 },
+    'Deer Creek': {
+      'Deer Creek RST': { max: 2000, min: null },
+    },
+    'Feather River': {
+      'Eye Riffle': {
+        'Eye riffle north': { max: 8000, min: 50 },
+        'Eye riffle Side Channel': { max: 8000, min: 50 },
+      },
+      'Live Oak': { max: 25000, min: 50 },
+      'Herringer Riffle': {
+        'Herringer east': { max: 25000, min: 50 },
+        'Herringer west': { max: 25000, min: 50 },
+        'Herringer Upper west': { max: 25000, min: 50 },
+      },
+      'Sunset Pumps': {
+        'Sunset East Bank': { max: 25000, min: 50 },
+        'Sunset West Bank': { max: 25000, min: 50 },
+      },
+      'Shawns Beach': {
+        'Shawns East': { max: 25000, min: 50 },
+        'Shawns West': { max: 25000, min: 50 },
+      },
+      'Gateway Riffle': {
+        'Gateway main1': { max: 8000, min: 50 },
+        'Gateway Rootball': { max: 8000, min: 50 },
+        "Gateway Main 400' Up River": { max: 8000, min: 50 },
+        'Gateway Rootball River Left': { max: 8000, min: 50 },
+      },
+      'Steep Riffle': {
+        'Steep Side Channel': { max: 6000, min: 50 },
+        "Steep Riffle 10' ext": { max: 6000, min: 50 },
+        'Steep Riffle RST': { max: 6000, min: 50 },
+      },
+    },
+    'Yuba River': {
+      Hallwood: {
+        'Hallwood 1': { max: 15000, min: 50 },
+        'Hallwood 2': { max: 15000, min: 50 },
+        'Hallwood 3': { max: 15000, min: 50 },
+      },
+    },
+    'FlowWest Test': {
+      'FlowWest Test': {
+        'FlowWest test 1': { max: 2000, min: 50 },
+        'FlowWest test 2': { max: 2000, min: 50 },
+      },
+    },
   } as any,
   waterTemperature: { maxF: 100, maxC: 30, min: null },
   waterTurbidity: { max: 1000, min: null },
@@ -195,8 +237,23 @@ export const getSubstring = (
   return str.substring(char1, char2)
 }
 
-export function GaussKDE(xi: number, x: number) {
-  return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(Math.pow(xi - x, 2) / -2)
+export function gaussianKernel(x: number) {
+    return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+}
+
+export function kernelDensityEstimation(data: number[], bandwidth: number, grid: number[]): number[] {
+  const density: number[] = [];
+
+  for (let i = 0; i < grid.length; i++) {
+    let sum = 0;
+    for (let j = 0; j < data.length; j++) {
+      const u = (grid[i] - data[j]) / bandwidth;
+      sum += gaussianKernel(u);
+    }
+    density[i] = sum / (data.length * bandwidth);
+  }
+
+  return density;
 }
 
 export const useDebounce = <T>(value: T, delay = 500) => {
@@ -211,4 +268,64 @@ export const useDebounce = <T>(value: T, delay = 500) => {
   }, [value, delay])
 
   return debouncedValue
+}
+
+export const navigateHelper = (
+  destination: string,
+  navigationState: any,
+  navigation: any,
+  dispatch: any,
+  updateActiveStep: any
+) => {
+  const formSteps = Object.values(navigationState?.steps) as any
+  let payload = null
+  for (let i = 0; i < formSteps.length; i++) {
+    if (formSteps[i].name === destination) {
+      payload = i + 1
+    }
+  }
+
+  navigation.navigate('Trap Visit Form', { screen: destination })
+  dispatch({
+    type: updateActiveStep,
+    payload: payload,
+  })
+}
+
+export const getRandomColor = () => {
+  // Generate random values for red, green, and blue channels
+  var red = Math.floor(Math.random() * 256)
+  var green = Math.floor(Math.random() * 256)
+  var blue = Math.floor(Math.random() * 256)
+
+  // Convert decimal values to hexadecimal
+  var redHex = red.toString(16).padStart(2, '0')
+  var greenHex = green.toString(16).padStart(2, '0')
+  var blueHex = blue.toString(16).padStart(2, '0')
+
+  // Concatenate hexadecimal values to form the color code
+  var color = '#' + redHex + greenHex + blueHex
+
+  return color
+}
+
+export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
+  if (!sentence) return sentence // Check if the sentence is not empty
+  return sentence
+    .split(' ') // Split the sentence into words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+    .join(' ') // Join the words back into a sentence
+}
+
+export const truncateAndTrimString = (str: string, length: number) => {
+  return str.length > length ? str.substring(0, length).trim() : str
+}
+
+export const normalizeDate = (date: Date) => {
+  date.setHours(0)
+  date.setMinutes(0)
+  date.setSeconds(0)
+  date.setMilliseconds(0)
+
+  return date.getTime()
 }

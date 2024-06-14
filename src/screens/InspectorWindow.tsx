@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Button, Divider, Icon, ScrollView, Text, View } from 'native-base'
-import { AppDispatch, RootState } from '../redux/store'
-import { reset } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { AppDispatch, RootState, persistor } from '../redux/store'
 import { connect, useDispatch } from 'react-redux'
 import { startCase } from 'lodash'
 import * as Clipboard from 'expo-clipboard'
@@ -83,12 +82,7 @@ const Debug = (props: DebugPropsI) => {
     visitSetupDefaults: '',
   })
 
-  useEffect(() => {
-    console.log('trapVisitFormPostBundler: ', props.trapVisitFormPostBundler)
-  }, [props.trapVisitFormPostBundler.fetchStatus])
-
   const rowComponent = ({ name, marginBottom }: RowComponentI) => {
-
     const messageBuilder = () => {
       if (name === 'trapVisitFormPostBundler') {
         logState[name]
@@ -98,7 +92,7 @@ const Debug = (props: DebugPropsI) => {
             })
           : setLogState({
               ...logState,
-              ['trapVisitFormPostBundler']: `fetch status: ${props[name]['fetchStatus']}. submission status: ${props[name]['submissionStatus']}. previous trap visit submissions length: ${props[name]['previousTrapVisitSubmissions'].length}. previous catch raw submissions: ${props[name]['previousCatchRawSubmissions'].length}. pending trap visit submissions: ${props[name]['trapVisitSubmissions'].length}. pending QC trap visit submissions: ${props[name]['qcTrapVisitSubmissions'].length}. pending QC catch raw submissions: ${props[name]['qcCatchRawSubmissions'].length}`,
+              ['trapVisitFormPostBundler']: `fetch status: ${props[name]['fetchStatus']}. submission status: ${props[name]['submissionStatus']}. previous trap visit submissions length: ${props[name]['previousTrapVisitSubmissions'].length}. previous catch raw submissions: ${props[name]['previousCatchRawSubmissions'].length}. pending trap visit submissions: ${props[name]['trapVisitSubmissions'].length}. pending catch raw submissions: ${props[name]['catchRawSubmissions'].length}. pending QC trap visit submissions: ${props[name]['qcTrapVisitSubmissions'].length}. pending QC catch raw submissions: ${props[name]['qcCatchRawSubmissions'].length}`,
             })
       } else {
         logState[name]
@@ -134,7 +128,11 @@ const Debug = (props: DebugPropsI) => {
             maxH={'500px'}
           >
             <ScrollView>
-              <Text color={'white'} fontSize='xl' onPress={() => Clipboard.setStringAsync(logState[name])}>
+              <Text
+                color={'white'}
+                fontSize='xl'
+                onPress={() => Clipboard.setStringAsync(logState[name])}
+              >
                 {logState[name]}
               </Text>
             </ScrollView>
@@ -156,7 +154,7 @@ const Debug = (props: DebugPropsI) => {
               onPress={() => messageBuilder()}
             >
               <Text fontSize={'2xl'} color='white'>
-                {logState[name] ? 'Clear' : 'Log'}
+                {logState[name] ? 'Close' : 'Log'}
               </Text>
             </Button>
           </View>
@@ -166,7 +164,7 @@ const Debug = (props: DebugPropsI) => {
             bgColor='#FF5B5B'
             shadow={'7'}
             onPress={() => {
-              dispatch(reset())
+              persistor.purge()
               setLogState({
                 ...logState,
                 ['trapVisitFormPostBundler']: '',
@@ -200,7 +198,7 @@ const Debug = (props: DebugPropsI) => {
         alignSelf='stretch'
         backgroundColor='#292929'
       >
-        {Object.keys(logState).map((key) =>
+        {Object.keys(logState).map(key =>
           rowComponent({ name: key as any, marginBottom: '10' })
         )}
       </ScrollView>

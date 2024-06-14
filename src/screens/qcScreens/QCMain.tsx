@@ -49,6 +49,8 @@ function QCMain({
       previousTrapVisits: programsTrapVisits ?? [],
       previousCatchRaw: programsCatchRaw ?? [],
     })
+
+    console.log('QCData', qcData)
   }, [route.params.programId])
 
   return (
@@ -59,7 +61,7 @@ function QCMain({
         onPress={() => {
           setActiveButton('trapBtn')
           navigation.navigate('Trap QC', {
-            previousTrapVisits: qcData.previousTrapVisits,
+            programId: route.params.programId,
           })
         }}
       >
@@ -105,7 +107,7 @@ function QCMain({
                 'Measured Variables and Associated Categories'
               )
               navigation.navigate('CatchMeasureQC', {
-                previousCatchRaw: qcData.previousCatchRaw,
+                programId: route.params.programId,
               })
             }}
           >
@@ -131,7 +133,7 @@ function QCMain({
             onPress={() => {
               setActiveCatchOption('Categorical Observations')
               navigation.navigate('CatchCategoricalQC', {
-                previousCatchRaw: qcData.previousCatchRaw,
+                programId: route.params.programId,
               })
             }}
           >
@@ -157,7 +159,7 @@ function QCMain({
             onPress={() => {
               setActiveCatchOption('Total Fish Counts')
               navigation.navigate('CatchFishCountQC', {
-                previousCatchRaw: qcData.previousCatchRaw,
+                programId: route.params.programId,
               })
             }}
           >
@@ -183,7 +185,7 @@ function QCMain({
             onPress={() => {
               setActiveCatchOption('Partial Records')
               navigation.navigate('PartialRecordsQC', {
-                previousCatchRaw: qcData.previousCatchRaw,
+                programId: route.params.programId,
               })
             }}
           >
@@ -206,7 +208,7 @@ function QCMain({
         onPress={() => {
           setActiveButton('efficiencyBtn')
           navigation.navigate('EfficiencyQC', {
-            previousCatchRaw: qcData.previousCatchRaw,
+            programId: route.params.programId,
           })
         }}
       >

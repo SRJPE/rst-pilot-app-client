@@ -1,5 +1,13 @@
 import { NativeStackHeaderProps } from '@react-navigation/native-stack'
-import { Badge, Box, ScrollView, HStack, Button, Text, VStack } from 'native-base'
+import {
+  Badge,
+  Box,
+  ScrollView,
+  HStack,
+  Button,
+  Text,
+  VStack,
+} from 'native-base'
 import { useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import {
@@ -49,12 +57,12 @@ const TabBar = ({
     const formSliceIds = Object.keys(formSlicesToValidateDict)
 
     // for each tab ID
-    tabIds.forEach((tabId) => {
+    tabIds.forEach(tabId => {
       tabsErrorDetails[tabId] = {}
       tabsErrorCount[tabId] = 0
 
       // for each tab's form slices
-      formSliceIds.forEach((formSliceId) => {
+      formSliceIds.forEach(formSliceId => {
         let formSlice =
           formSlicesToValidateDict[
             formSliceId as keyof typeof formSlicesToValidateDict
@@ -67,11 +75,11 @@ const TabBar = ({
       })
     })
 
-    Object.keys(tabsErrorCount).forEach((tabId) => {
+    Object.keys(tabsErrorCount).forEach(tabId => {
       dispatch(updateErrorCount({ tabId, errorCount: tabsErrorCount[tabId] }))
     })
 
-    Object.keys(tabsErrorDetails).forEach((tabId) => {
+    Object.keys(tabsErrorDetails).forEach(tabId => {
       dispatch(
         updateErrorDetails({ tabId, errorDetails: tabsErrorDetails[tabId] })
       )
@@ -88,11 +96,11 @@ const TabBar = ({
         <VStack>
           <ScrollView horizontal={true} width={'full'}>
             <HStack
-              alignItems={'center'}
+              alignItems={'top'}
               justifyContent='space-between'
               w={'full'}
             >
-              {Object.keys(tabSlice.tabs).map((tabId) => (
+              {Object.keys(tabSlice.tabs).map(tabId => (
                 <Box key={`button-${tabId}`}>
                   <Button
                     size={'lg'}
@@ -124,6 +132,7 @@ const TabBar = ({
                       colorScheme='danger'
                       rounded='full'
                       mr={2}
+                      mt={-3}
                       zIndex={1}
                       variant='solid'
                       alignSelf='flex-end'

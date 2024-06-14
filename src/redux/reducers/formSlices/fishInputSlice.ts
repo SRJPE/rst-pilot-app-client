@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { cloneDeep, isEqual } from 'lodash'
+import { cloneDeep, get, isEqual } from 'lodash'
 import { reformatBatchCountData } from '../../../utils/utils'
 import { ReleaseMarkI } from '../addAnotherMarkSlice'
 
@@ -63,6 +63,22 @@ const initialState: InitialStateI = {
     speciesCaptured: [],
     fishStore: {},
   },
+}
+
+const getRun = (species: string, runValue: any) => {
+  if (species === 'Chinook salmon') {
+    return runValue ? runValue.toLowerCase() : 'not recorded'
+  } else {
+    return null
+  }
+}
+
+const getLifeStage = (species: string, lifeStageValue: any) => {
+  if (species === 'Chinook salmon' || species === 'Steelhead / rainbow trout') {
+    return lifeStageValue ? lifeStageValue.toLowerCase() : 'not recorded'
+  } else {
+    return null
+  }
 }
 
 export const saveFishSlice = createSlice({
@@ -141,12 +157,9 @@ export const saveFishSlice = createSlice({
           species: species,
           numFishCaught: value.count,
           forkLength: forkLength,
-          run: 'not recorded', //updated
+          run: species === 'Chinook salmon' ? 'not recorded' : null, //updated
           weight: null,
-          lifeStage:
-            species === 'Chinook salmon'
-              ? lifeStage.toLowerCase()
-              : 'not recorded', //updated
+          lifeStage: getLifeStage(species, lifeStage),
           adiposeClipped: adiposeClipped,
           existingMarks: existingMark ? existingMarks : [],
           dead: dead,
@@ -200,7 +213,7 @@ export const saveFishSlice = createSlice({
       }
     },
     savePlusCount: (state, action) => {
-      const { tabId, species, count, run, lifeStage, plusCountMethod } =
+      const { tabId, species, count, run, lifeStage, plusCountMethod, dead } =
         action.payload
 
       const plusCountEntry = {
@@ -208,13 +221,13 @@ export const saveFishSlice = createSlice({
         species,
         numFishCaught: count,
         forkLength: null,
-        run,
+        run: getRun(species, run),
         weight: null,
         fishCondition: null,
-        lifeStage,
+        lifeStage: getLifeStage(species, lifeStage),
         adiposeClipped: null,
         existingMarks: [],
-        dead: null,
+        dead,
         willBeUsedInRecapture: null,
         plusCountMethod,
         plusCount: true,

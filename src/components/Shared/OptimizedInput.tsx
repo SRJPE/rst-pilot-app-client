@@ -8,6 +8,7 @@ import {
 
 interface OptimizedInputI {
   isDisabled?: boolean
+  isReadOnly?: boolean
   height?: string
   fontSize?: string
   placeholder?: string
@@ -53,6 +54,7 @@ const OptimizedInput: React.FC<OptimizedInputI> = (props) => {
       fontSize={props.fontSize}
       placeholder={props.placeholder}
       keyboardType={props.keyboardType}
+      isReadOnly={props.isReadOnly}
       // onChange={onChangeHandler}
       // onBlur={onBlurHandler}
       // value={value}

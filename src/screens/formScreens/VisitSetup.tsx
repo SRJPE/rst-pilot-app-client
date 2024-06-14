@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -23,6 +23,7 @@ import { trapVisitSchema } from '../../utils/helpers/yupValidations'
 import {
   markStepCompleted,
   NavigationStateI,
+  updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
 import {
   createTab,
@@ -31,11 +32,13 @@ import {
   TabStateI,
 } from '../../redux/reducers/formSlices/tabSlice'
 import { uniqBy } from 'lodash'
+import { DeviceEventEmitter } from 'react-native'
 
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import { uid } from 'uid'
 import TrapNameDropDown from '../../components/form/TrapNameDropDown'
+import { navigateHelper } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -93,12 +96,12 @@ const VisitSetup = ({
   }, [tabSlice?.activeTabId])
 
   const onSubmit = (values: any, tabId: string | null) => {
-    // values.crew = ['temp1']
     const programId = selectedProgramId
     const payload = {
       ...values,
       programId,
     }
+    console.log('submitting visit setup form')
     // if no current tabs, create all new tabs
     if (!tabId) {
       // if trapName, iterate through all trap names and create tabs
@@ -366,7 +369,34 @@ const VisitSetup = ({
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
       onSubmit={(values) => {
-        onSubmit(values, tabSlice?.activeTabId)
+        const callback = () => {
+          if (isPaperEntry) {
+            navigateHelper(
+              'Paper Entry',
+              navigationSlice,
+              navigation,
+              dispatch,
+              updateActiveStep
+            )
+          } else {
+            navigateHelper(
+              'Trap Operations',
+              navigationSlice,
+              navigation,
+              dispatch,
+              updateActiveStep
+            )
+          }
+        }
+
+        navigation.push('Loading...')
+
+        setTimeout(() => {
+          DeviceEventEmitter.emit('event.load', {
+            process: () => onSubmit(values, tabSlice?.activeTabId),
+            callback,
+          })
+        }, 2000)
       }}
     >
       {({
@@ -386,7 +416,30 @@ const VisitSetup = ({
             onSubmit(values, tabSlice.previouslyActiveTabId)
           }
         }, [tabSlice.previouslyActiveTabId])
-
+        const navButtons = useMemo(
+          () => (
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={handleSubmit}
+              errors={
+                values.crew.length
+                  ? errors
+                  : { ...errors, crew: Boolean(values.crew.length) }
+              }
+              touched={touched}
+              isPaperEntry={isPaperEntry}
+              shouldProceedToLoadingScreen={true}
+            />
+          ),
+          [
+            navigation,
+            handleSubmit,
+            errors,
+            touched,
+            isPaperEntry,
+            values.crew.length,
+          ]
+        )
         return (
           <>
             <View
@@ -536,17 +589,7 @@ const VisitSetup = ({
                 )}
               </VStack>
             </View>
-            <NavButtons
-              navigation={navigation}
-              handleSubmit={handleSubmit}
-              errors={
-                values.crew.length
-                  ? errors
-                  : { ...errors, crew: Boolean(values.crew.length) }
-              }
-              touched={touched}
-              isPaperEntry={isPaperEntry}
-            />
+            {navButtons}
           </>
         )
       }}

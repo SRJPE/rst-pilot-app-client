@@ -8,7 +8,7 @@ import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { trapVisitQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import api from '../../api/axiosConfig'
+import { normalizeDate } from '../../utils/utils'
 
 interface GraphDataI {
   Temperature: any[]
@@ -23,10 +23,12 @@ function TrapQC({
   navigation,
   route,
   qcTrapVisitSubmissions,
+  previousTrapVisits,
 }: {
   navigation: any
   route: any
   qcTrapVisitSubmissions: any[]
+  previousTrapVisits: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -60,7 +62,10 @@ function TrapQC({
   }
 
   useEffect(() => {
-    const previousTrapVisits = route.params.previousTrapVisits
+    const programId = route.params.programId
+    const programTrapVisits = previousTrapVisits.filter((trapVisit) => {
+      return trapVisit.createdTrapVisitResponse.programId === programId
+    })
 
     let tempData: any[] = []
     let turbidityData: any[] = []
@@ -69,14 +74,14 @@ function TrapQC({
     let counterData: any[] = []
     let debrisData: any[] = []
 
-    Object.values([...qcTrapVisitSubmissions, ...previousTrapVisits]).forEach(
+    Object.values([...qcTrapVisitSubmissions, ...programTrapVisits]).forEach(
       (response: any, idx: number) => {
         const {
           createdTrapCoordinatesResponse,
           createdTrapVisitCrewResponse,
           createdTrapVisitEnvironmentalResponse,
           createdTrapVisitResponse,
-        } = response
+        } = response || {}
 
         const trapVisitId = createdTrapVisitResponse.id
         const qcCompleted = createdTrapVisitResponse.qcCompleted
@@ -168,15 +173,6 @@ function TrapQC({
       Debris: debrisData,
     })
   }, [qcTrapVisitSubmissions])
-
-  const normalizeDate = (date: Date) => {
-    date.setHours(0)
-    date.setMinutes(0)
-    date.setSeconds(0)
-    date.setMilliseconds(0)
-
-    return date.getTime()
-  }
 
   const GraphMenuButton = ({
     buttonName,
@@ -271,6 +267,7 @@ function TrapQC({
                   key={buttonName}
                   chartType='bar'
                   data={graphData[buttonName]}
+                  showDates={true}
                   onPointClick={(datum) => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
@@ -341,6 +338,8 @@ const mapStateToProps = (state: RootState) => {
   return {
     qcTrapVisitSubmissions:
       state.trapVisitFormPostBundler.qcTrapVisitSubmissions,
+    previousTrapVisits:
+      state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
   }
 }
 
