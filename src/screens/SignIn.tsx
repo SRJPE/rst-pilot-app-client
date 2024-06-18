@@ -103,8 +103,11 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
             headers: { idToken: idToken as string },
           })
 
-          const personnelResponse = await api.get(`personnel/${22}`)
+          const personnelResponse = await api.get(
+            `personnel/azure/${userRes.data.azureUid}`
+          )
           await SecureStore.setItemAsync('userAccessToken', accessToken)
+
           await SecureStore.setItemAsync(
             'userRefreshToken',
             refreshToken as string
