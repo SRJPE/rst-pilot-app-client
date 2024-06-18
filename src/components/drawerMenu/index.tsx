@@ -1,9 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import {
-  DrawerContentComponentProps,
-  DrawerContentScrollView,
-} from '@react-navigation/drawer'
+import { DrawerContentComponentProps } from '@react-navigation/drawer'
 import {
   Box,
   Divider,
@@ -146,115 +143,109 @@ const DrawerMenu = ({
             </Pressable>
           </VStack>
         </HStack>
-        <AppLogo imageSize={225} />
-        <DrawerContentScrollView>
-          <MenuButton
-            active={currentRoute === 'Home'}
-            onPress={() => handlePressMainNavButton('Home')}
-            icon='home'
-            title='Home'
-          />
+        <Divider mt='2' />
 
-          <MenuButton
-            active={currentRoute === 'Profile'}
-            onPress={() => {
-              handlePressMainNavButton('Profile')
-            }}
-            icon='person'
-            title='Profile'
-          />
-          <MenuButton
-            active={currentRoute === 'Permit Info'}
-            onPress={() => {
-              handlePressMainNavButton('Permit Info')
-            }}
-            icon='information-circle'
-            title='Permit Info'
-          />
-          <MenuButton
-            active={currentRoute === 'Generate Report'}
-            onPress={() => handlePressMainNavButton('Generate Report')}
-            icon='bar-chart'
-            title='Generate Report'
-          />
-          <MenuButton
-            active={currentRoute === 'Quality Control'}
-            onPress={() => handlePressMainNavButton('Quality Control')}
-            icon='bar-chart'
-            title='QC Data'
-          />
-          <MenuButton
-            active={currentRoute === 'Inspector'}
-            onPress={() => handlePressMainNavButton('Inspector')}
-            icon='search'
-            title='Inspector'
-          />
-          <MenuButton
-            active={false}
-            onPress={() => console.log('Redux Log: ', reduxState)}
-            icon='search'
-            title='Redux Log'
-          />
-          <MenuButton
-            active={currentRoute === 'Mark Recapture'}
-            onPress={() => handlePressMainNavButton('Mark Recapture')}
-            icon='clipboard'
-            title='Mark Recapture'
-          />
-          {markRecaptureStepsArray && currentRoute === 'Mark Recapture' && (
-            <>
-              <Divider mt='2' />
-              {markRecaptureStepsArray.map((step: any, index: any) => {
-                return (
-                  <VStack ml='4' key={index}>
-                    <MenuButton
-                      active={currentRoute === step.name}
-                      completed={step.completed}
-                      icon='ellipse'
-                      listItem={true}
-                      title={step.name}
-                      // isDisabled={
-                      //   reduxState[step.propName]?.completed ? false : true
-                      // }
-                      onPress={() => handlePressMarkRecaptureButton(step.name)}
-                    />
-                  </VStack>
-                )
-              })}
-            </>
-          )}
-          <MenuButton
-            active={currentRoute === 'Trap Visit Form'}
-            onPress={() => handlePressMainNavButton('Trap Visit Form')}
-            icon='clipboard'
-            title='Trap Visit Form'
-            completed={true}
-          />
-          {stepsArray && currentRoute === 'Trap Visit Form' && (
-            <>
-              <Divider mt='2' />
-              {stepsArray.map((step: any, index: any) => {
-                return (
-                  <VStack ml='4' key={index}>
-                    <MenuButton
-                      active={currentRoute === step.name}
-                      // isDisabled={
-                      //   reduxState[step.propName]?.completed ? false : true
-                      // }
-                      completed={step.completed}
-                      onPress={() => handlePressFormButton(step.name)}
-                      icon='ellipse'
-                      listItem={true}
-                      title={step.name}
-                    />
-                  </VStack>
-                )
-              })}
-            </>
-          )}
-        </DrawerContentScrollView>
+        {/* <DrawerContentScrollView> */}
+        <MenuButton
+          active={currentRoute === 'Home'}
+          onPress={() => handlePressMainNavButton('Home')}
+          icon='home'
+          title='Home'
+        />
+
+        <MenuButton
+          active={currentRoute === 'Profile'}
+          onPress={() => {
+            handlePressMainNavButton('Profile')
+          }}
+          icon='person'
+          title='Profile'
+        />
+        <MenuButton
+          active={currentRoute === 'Permit Info'}
+          onPress={() => {
+            handlePressMainNavButton('Permit Info')
+          }}
+          icon='information-circle'
+          title='Permit Info'
+        />
+        <MenuButton
+          active={currentRoute === 'Generate Report'}
+          onPress={() => handlePressMainNavButton('Generate Report')}
+          icon='bar-chart'
+          title='Generate Report'
+        />
+        <MenuButton
+          active={currentRoute === 'Quality Control'}
+          onPress={() => handlePressMainNavButton('Quality Control')}
+          icon='bar-chart'
+          title='QC Data'
+        />
+        <MenuButton
+          active={false}
+          onPress={() => handlePressMainNavButton('Inspector')}
+          icon='search'
+          title='Inspector'
+        />
+        <MenuButton
+          active={currentRoute === 'Mark Recapture'}
+          onPress={() => handlePressMainNavButton('Mark Recapture')}
+          icon='clipboard'
+          title='Mark Recapture'
+        />
+        {markRecaptureStepsArray && currentRoute === 'Mark Recapture' && (
+          <>
+            <Divider mt='2' />
+            {markRecaptureStepsArray.map((step: any, index: any) => {
+              return (
+                <VStack ml='4' key={index}>
+                  <MenuButton
+                    active={currentRoute === step.name}
+                    completed={step.completed}
+                    icon='ellipse'
+                    listItem={true}
+                    title={step.name}
+                    // isDisabled={
+                    //   reduxState[step.propName]?.completed ? false : true
+                    // }
+                    onPress={() => handlePressMarkRecaptureButton(step.name)}
+                  />
+                </VStack>
+              )
+            })}
+          </>
+        )}
+        <MenuButton
+          active={currentRoute === 'Trap Visit Form'}
+          onPress={() => handlePressMainNavButton('Trap Visit Form')}
+          icon='clipboard'
+          title='Trap Visit Form'
+          completed={true}
+        />
+        {stepsArray && currentRoute === 'Trap Visit Form' && (
+          <>
+            <Divider mt='2' />
+            {stepsArray.map((step: any, index: any) => {
+              return (
+                <VStack ml='4' key={index}>
+                  <MenuButton
+                    active={currentRoute === step.name}
+                    // isDisabled={
+                    //   reduxState[step.propName]?.completed ? false : true
+                    // }
+                    completed={step.completed}
+                    onPress={() => handlePressFormButton(step.name)}
+                    icon='ellipse'
+                    listItem={true}
+                    title={step.name}
+                  />
+                </VStack>
+              )
+            })}
+          </>
+        )}
+        {/* </DrawerContentScrollView> */}
       </VStack>
-
     </>
   )
 }
