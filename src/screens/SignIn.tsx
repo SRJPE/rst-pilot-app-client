@@ -103,6 +103,7 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
             headers: { idToken: idToken as string },
           })
 
+          const personnelResponse = await api.get(`personnel/${22}`)
           await SecureStore.setItemAsync('userAccessToken', accessToken)
           await SecureStore.setItemAsync(
             'userRefreshToken',
@@ -114,6 +115,7 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
             saveUserCredentials({
               ...userCredentialsStore,
               ...userRes.data,
+              ...personnelResponse.data,
             })
           )
         })
