@@ -30,6 +30,7 @@ import api from '../api/axiosConfig'
 import AppLogo from '../components/Shared/AppLogo'
 import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState } from '../redux/store'
+import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -106,6 +107,9 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
           const personnelResponse = await api.get(
             `personnel/azure/${userRes.data.azureUid}`
           )
+
+          dispatch(getVisitSetupDefaults(personnelResponse.data.id))
+
           await SecureStore.setItemAsync('userAccessToken', accessToken)
 
           await SecureStore.setItemAsync(
