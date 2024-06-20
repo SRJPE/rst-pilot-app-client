@@ -11,18 +11,16 @@ function ProgramQC({
   navigation: any
   programs: any[]
 }) {
-  const userPrograms = [1]
-  // TODO: ^ hard coded value to be updated to user's program ids ^
   // Use programId of 'FlowWest Test Entry' program
 
   const returnButtonColor = (programId: any) => {
-    if (userPrograms.includes(programId)) {
+    if (programs.find(program => program.programId === programId)) {
       return 'primary'
     } else return 'gray.400'
   }
 
   const returnButtonDisabled = (programId: number) => {
-    if (userPrograms.includes(programId)) {
+    if (programs.find(program => program.programId === programId)) {
       return false
     } else return true
   }
@@ -47,8 +45,8 @@ function ProgramQC({
             w='4/5'
             bg={returnButtonColor(program.programId)}
             // hardcode TRUE for now
-            disabled={returnButtonDisabled(program.programId)}
-            isDisabled
+            // disabled={returnButtonDisabled(program.programId)}
+            isDisabled={returnButtonDisabled(program.programId)}
             mb={5}
             onPress={() => {
               navigation.navigate('Select Data to QC', {
