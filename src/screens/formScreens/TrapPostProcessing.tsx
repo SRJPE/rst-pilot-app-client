@@ -38,7 +38,7 @@ const mapStateToProps = (state: RootState) => {
 
   if (activeTabId) {
     const tabsContainHoldingTrue = Object.keys(state.tabSlice).some(
-      (tabId) =>
+      tabId =>
         state.fishProcessing?.[tabId]?.values?.willBeHoldingFishForMarkRecapture
     )
     willBeHoldingFishForMarkRecapture = tabsContainHoldingTrue
@@ -139,7 +139,7 @@ const TrapPostProcessing = ({
     dispatch(markTrapPostProcessingCompleted({ tabId, value: true }))
     let stepCompletedCheck = true
     const allTabIds: string[] = Object.keys(tabSlice.tabs)
-    allTabIds.forEach((allTabId) => {
+    allTabIds.forEach(allTabId => {
       if (!Object.keys(reduxState).includes(allTabId)) {
         if (Object.keys(reduxState).length < allTabIds.length) {
           stepCompletedCheck = false
@@ -194,7 +194,7 @@ const TrapPostProcessing = ({
           ? reduxState[activeTabId].errors
           : null
       }
-      onSubmit={(values) => {
+      onSubmit={values => {
         if (activeTabId && activeTabId != 'placeholderId') {
           const callback = () => {
             if (willBeHoldingFishForMarkRecapture) {
@@ -238,6 +238,7 @@ const TrapPostProcessing = ({
         values,
         resetForm,
       }) => {
+        console.log('error', errors)
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 5) {
             onSubmit(values, previouslyActiveTabId)
