@@ -49,8 +49,6 @@ function QCMain({
       previousTrapVisits: programsTrapVisits ?? [],
       previousCatchRaw: programsCatchRaw ?? [],
     })
-
-    console.log('QCData', qcData)
   }, [route.params.programId])
 
   return (

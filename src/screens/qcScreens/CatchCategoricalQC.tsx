@@ -38,7 +38,10 @@ interface GraphDataI {
 }
 
 interface NestedModalDataI {
-  [fieldClicked: string]: string
+  // [fieldClicked: string]: string
+  catchRawId: number
+  fieldClicked: string
+  value: string
 }
 
 interface NestedModalInputValueI {
@@ -107,7 +110,7 @@ function CatchCategoricalQC({
   const identifierToName = {
     taxonCode: 'Species',
     captureRunClass: 'Run',
-    lifeStage: 'Lifestage',
+    lifeStage: 'Life Stage',
     forkLength: 'Fork Length',
     markType: 'Mark Type',
     markColor: 'Mark Color',
@@ -401,6 +404,7 @@ function CatchCategoricalQC({
   }
 
   const handleModalCellPressed = (fieldClicked: string, data: any) => {
+    let catchRawId = get(data, 'createdCatchRawResponse.id')
     let rawData = get(
       data,
       identifierToDataValueFromRecord[
@@ -446,7 +450,7 @@ function CatchCategoricalQC({
     }
 
     if (rawData === undefined) {
-      setNestedModalData({ [fieldClicked]: 'none' })
+      setNestedModalData({ catchRawId, fieldClicked, value: 'none' })
     } else {
       if (typeof rawData === 'boolean') {
         rawData = rawData ? 'Yes' : 'No'
@@ -454,7 +458,11 @@ function CatchCategoricalQC({
       if (rawData === null) {
         rawData = 'NA'
       }
-      setNestedModalData({ [fieldClicked]: parsedData ? parsedData : rawData })
+      setNestedModalData({
+        catchRawId,
+        fieldClicked,
+        value: parsedData ? parsedData : rawData,
+      })
     }
   }
 
@@ -467,20 +475,19 @@ function CatchCategoricalQC({
     setNestedModalData(null)
   }
 
-  const handleModalSubmit = (submission: any) => {
-    if (modalData) {
-      const ids = Object.keys(submission).map((key: string) => {
-        if (submission[key]) {
-          return submission[key]['id']
-        }
-      })
-      const catchRawId = ids.find((val) => Boolean(Number(val)))
+  const handleSaveNestedModal = () => {
+    if (nestedModalData) {
+      let catchRawId = nestedModalData.catchRawId
+      let fieldName =
+        identifierToName[
+          nestedModalData.fieldClicked as keyof typeof identifierToName
+        ]
+      let submission = {
+        fieldName,
+        value: nestedModalInputValue.value,
+      }
       dispatch(catchRawQCSubmission({ catchRawId, submission }))
     }
-  }
-
-  const handleSaveNestedModal = () => {
-    console.log('handle nested modal save')
   }
 
   const GraphMenuButton = ({
@@ -567,10 +574,10 @@ function CatchCategoricalQC({
       case 'lifeStage':
         return (
           <VStack>
-            <Text>Edit Lifestage</Text>
+            <Text>Edit Life Stage</Text>
             <CustomSelect
               selectedValue={nestedModalInputValue.value as string}
-              placeholder={'Lifestage'}
+              placeholder={'Life Stage'}
               onValueChange={(value: string) =>
                 setNestedModalInputValue({ fieldClicked: 'lifeStage', value })
               }
@@ -829,7 +836,7 @@ function CatchCategoricalQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height='1/2'
+          height='5/6'
         >
           <>
             <CustomModalHeader
@@ -845,14 +852,26 @@ function CatchCategoricalQC({
               <Heading fontSize={23} mb={5}>
                 Table of Selected Points
               </Heading>
-              <ScrollView horizontal size={'full'}>
+              <ScrollView
+                horizontal
+                size={'80%'}
+                contentContainerStyle={{
+                  flexGrow: 1,
+                  justifyContent: 'center',
+                }}
+              >
                 <DataTable>
                   <DataTable.Header>
-                    <DataTable.Title>Variable</DataTable.Title>
+                    <DataTable.Title
+                      style={{ justifyContent: 'center', minWidth: 90 }}
+                    >
+                      Variable
+                    </DataTable.Title>
                     {modalData.map((data, idx) => (
-                      <DataTable.Title key={idx}>{`Fish ${
-                        idx + 1
-                      }`}</DataTable.Title>
+                      <DataTable.Title
+                        key={idx}
+                        style={{ justifyContent: 'center', minWidth: 90 }}
+                      >{`Fish ${idx + 1}`}</DataTable.Title>
                     ))}
                   </DataTable.Header>
 
@@ -860,7 +879,14 @@ function CatchCategoricalQC({
                     <DataTable.Row
                       style={[{ justifyContent: 'center', width: '100%' }]}
                     >
-                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Text>Species</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
@@ -871,7 +897,12 @@ function CatchCategoricalQC({
 
                         return (
                           <DataTable.Cell
-                            style={{ minWidth: 100, width: '100%' }}
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             key={`species-${idx}`}
                             onPress={() =>
                               handleModalCellPressed('taxonCode', data)
@@ -883,7 +914,7 @@ function CatchCategoricalQC({
                                     capitalizeFirstLetterOfEachWord(
                                       species[0]?.commonname
                                     ),
-                                    10
+                                    12
                                   )}...`
                                 : 'NA'}
                             </Text>
@@ -895,7 +926,14 @@ function CatchCategoricalQC({
                     <DataTable.Row
                       style={[{ justifyContent: 'center', width: '100%' }]}
                     >
-                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Text>Run</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
@@ -906,7 +944,12 @@ function CatchCategoricalQC({
 
                         return (
                           <DataTable.Cell
-                            style={{ minWidth: 100, width: '100%' }}
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             key={`run-${idx}`}
                             onPress={() =>
                               handleModalCellPressed('captureRunClass', data)
@@ -924,7 +967,14 @@ function CatchCategoricalQC({
                     <DataTable.Row
                       style={[{ justifyContent: 'center', width: '100%' }]}
                     >
-                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Text>Life Stage</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
@@ -935,7 +985,12 @@ function CatchCategoricalQC({
 
                         return (
                           <DataTable.Cell
-                            style={{ minWidth: 100, width: '100%' }}
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             key={`lifestage-${idx}`}
                             onPress={() =>
                               handleModalCellPressed('lifeStage', data)
@@ -953,7 +1008,14 @@ function CatchCategoricalQC({
                     <DataTable.Row
                       style={[{ justifyContent: 'center', width: '100%' }]}
                     >
-                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Text>Fork Length</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
@@ -962,7 +1024,12 @@ function CatchCategoricalQC({
 
                         return (
                           <DataTable.Cell
-                            style={{ minWidth: 100, width: '100%' }}
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             key={`forklength-${idx}`}
                             onPress={() =>
                               handleModalCellPressed('forkLength', data)
@@ -980,7 +1047,14 @@ function CatchCategoricalQC({
                     <DataTable.Row
                       style={[{ justifyContent: 'center', width: '100%' }]}
                     >
-                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Text>Mark Type</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
@@ -992,7 +1066,12 @@ function CatchCategoricalQC({
 
                         return (
                           <DataTable.Cell
-                            style={{ minWidth: 100, width: '100%' }}
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             key={`marktype-${idx}`}
                             onPress={() =>
                               handleModalCellPressed('markType', data)
@@ -1013,7 +1092,14 @@ function CatchCategoricalQC({
                     <DataTable.Row
                       style={[{ justifyContent: 'center', width: '100%' }]}
                     >
-                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Text>Mark Color</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
@@ -1026,7 +1112,12 @@ function CatchCategoricalQC({
 
                           return (
                             <DataTable.Cell
-                              style={{ minWidth: 100, width: '100%' }}
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
                               key={`markcolor-${idx}`}
                               onPress={() =>
                                 handleModalCellPressed('markColor', data)
@@ -1044,7 +1135,12 @@ function CatchCategoricalQC({
                         } else {
                           return (
                             <DataTable.Cell
-                              style={{ minWidth: 100, width: '100%' }}
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
                               key={`markcolor-${idx}`}
                               onPress={() =>
                                 handleModalCellPressed('markColor', data)
@@ -1060,7 +1156,14 @@ function CatchCategoricalQC({
                     <DataTable.Row
                       style={[{ justifyContent: 'center', width: '100%' }]}
                     >
-                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Text>Mark Position</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
@@ -1082,7 +1185,12 @@ function CatchCategoricalQC({
 
                           return (
                             <DataTable.Cell
-                              style={{ minWidth: 100, width: '100%' }}
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
                               key={`markpos-${idx}`}
                               onPress={() =>
                                 handleModalCellPressed('markPos', data)
@@ -1100,7 +1208,12 @@ function CatchCategoricalQC({
                         } else {
                           return (
                             <DataTable.Cell
-                              style={{ minWidth: 100, width: '100%' }}
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
                               key={`markpos-${idx}`}
                               onPress={() =>
                                 handleModalCellPressed('markPos', data)
@@ -1116,7 +1229,14 @@ function CatchCategoricalQC({
                     <DataTable.Row
                       style={[{ justifyContent: 'center', width: '100%' }]}
                     >
-                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Text>Adipose Clip</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
@@ -1125,7 +1245,12 @@ function CatchCategoricalQC({
 
                         return (
                           <DataTable.Cell
-                            style={{ minWidth: 100, width: '100%' }}
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             key={`adipose-${idx}`}
                             onPress={() =>
                               handleModalCellPressed('adiposeClipped', data)
@@ -1146,7 +1271,14 @@ function CatchCategoricalQC({
                     <DataTable.Row
                       style={[{ justifyContent: 'center', width: '100%' }]}
                     >
-                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Text>Mort</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
@@ -1154,7 +1286,12 @@ function CatchCategoricalQC({
 
                         return (
                           <DataTable.Cell
-                            style={{ minWidth: 100, width: '100%' }}
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             key={`mortality-${idx}`}
                             onPress={() => handleModalCellPressed('dead', data)}
                           >
@@ -1169,14 +1306,26 @@ function CatchCategoricalQC({
                     <DataTable.Row
                       style={[{ justifyContent: 'center', width: '100%' }]}
                     >
-                      <DataTable.Cell style={{ minWidth: 100, width: '100%' }}>
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
                         <Text>Crew</Text>
                       </DataTable.Cell>
 
                       {modalData.map((data, idx) => {
                         return (
                           <DataTable.Cell
-                            style={{ minWidth: 100, width: '100%' }}
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             key={`crew-${idx}`}
                           >
                             <Text>placeholder</Text>
@@ -1197,15 +1346,13 @@ function CatchCategoricalQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height='1/2'
+          height='3/4'
         >
           <>
             <CustomModalHeader
               headerText={
                 identifierToName[
-                  Object.keys(
-                    nestedModalData
-                  )[0] as keyof typeof identifierToName
+                  nestedModalData.fieldClicked as keyof typeof identifierToName
                 ]
               }
               headerFontSize={23}
@@ -1218,7 +1365,6 @@ function CatchCategoricalQC({
                   px='10'
                   shadow='3'
                   onPress={() => {
-                    console.log('handle nested modal submit')
                     handleSaveNestedModal()
                     handleCloseNestedModal()
                   }}
@@ -1238,12 +1384,10 @@ function CatchCategoricalQC({
                 You have the{' '}
                 {
                   identifierToName[
-                    Object.keys(
-                      nestedModalData
-                    )[0] as keyof typeof identifierToName
+                    nestedModalData.fieldClicked as keyof typeof identifierToName
                   ]
                 }{' '}
-                marked as {`${Object.values(nestedModalData)[0]}`}
+                marked as {`${nestedModalData.value}`}
               </Text>
               <Text color='black' fontSize='2xl' fontWeight={'light'}>
                 Click button below to flag data as low confidence or edit value
@@ -1287,8 +1431,8 @@ function CatchCategoricalQC({
 
               <View mt='50px'>
                 {CustomNestedModalInput({
-                  fieldClicked: Object.keys(nestedModalData)[0],
-                  data: Object.values(nestedModalData)[0],
+                  fieldClicked: nestedModalData.fieldClicked,
+                  data: nestedModalData.value,
                 })}
               </View>
             </VStack>

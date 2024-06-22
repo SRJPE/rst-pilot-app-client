@@ -60,41 +60,47 @@ function CatchMeasureQC({
 
     // array of all fork lengths within the qc dataset
     const forkLengthArray: any[] = qcData
-    .map((catchRawResponse) => {
-      const forkValue = Number(catchRawResponse.createdCatchRawResponse.forkLength)
-      if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
-        forkGraphSubData.push({
-          id: catchRawResponse.createdCatchRawResponse.id,
-          x: forkValue,
-          y: 0,
-        })
-      }
-      return forkValue
-    })
-    .filter((num) => {
-      return num != 0
-    })
+      .map((catchRawResponse) => {
+        const forkValue = Number(
+          catchRawResponse.createdCatchRawResponse.forkLength
+        )
 
-    // start point is the lowest value fork length
-    forkStartPoint = Math.min(...forkLengthArray)
+        if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
+          forkGraphSubData.push({
+            id: catchRawResponse.createdCatchRawResponse.id,
+            x: forkValue,
+            y: 0,
+          })
+        }
+        return forkValue
+      })
+      .filter((num) => {
+        return num != 0
+      })
 
-    // range is the range of largest fork length to smallest fork length
-    forkRange = Math.max(...forkLengthArray) - forkStartPoint
+    let kdeForkValues: any[] = []
+    if (forkLengthArray.length !== 0) {
+      // start point is the lowest value fork length
+      forkStartPoint = Math.min(...forkLengthArray)
 
-    // Calculate KDE values
-    const forkBinWidth = 10 // forkBinWidth for KDE
-    const minForkLength = Math.min(...forkLengthArray)
-    const maxForkLength = Math.max(...forkLengthArray)
-    const forkGrid = Array.from(
-      { length: 100 },
-      (_, i) => minForkLength + (i * (maxForkLength - minForkLength)) / 99
-    ) // Points to evaluate KDE
+      // range is the range of largest fork length to smallest fork length
+      forkRange = Math.max(...forkLengthArray) - forkStartPoint
 
-    const kdeForkValues = kernelDensityEstimation(
-      forkLengthArray,
-      forkBinWidth,
-      forkGrid
-    )
+      // Calculate KDE values
+      const forkBinWidth = 10 // forkBinWidth for KDE
+      const minForkLength = Math.min(...forkLengthArray)
+      const maxForkLength = Math.max(...forkLengthArray)
+      const forkGrid = Array.from(
+        { length: 100 },
+        (_, i) => minForkLength + (i * (maxForkLength - minForkLength)) / 99
+      ) // Points to evaluate KDE
+
+      kdeForkValues = kernelDensityEstimation(
+        forkLengthArray,
+        forkBinWidth,
+        forkGrid
+      )
+    }
 
     // Weight Density Calculations -----------------------------
 
@@ -103,39 +109,46 @@ function CatchMeasureQC({
     let weightGraphSubData: any[] = []
 
     const weightArray: any[] = qcData
-    .map((catchRawResponse) => {
-      const weightValue = Number(catchRawResponse.createdCatchRawResponse.weight)
-      if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
-        weightGraphSubData.push({
-          id: catchRawResponse.createdCatchRawResponse.id,
-          x: weightValue,
-          y: 0,
-        })
-      }
-      return weightValue
-    })
-    .filter((num) => {
-      return num != 0
-    })
+      .map((catchRawResponse) => {
+        const weightValue = Number(
+          catchRawResponse.createdCatchRawResponse.weight
+        )
 
-    weightStartPoint = Math.min(...weightArray)
+        if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
+          weightGraphSubData.push({
+            id: catchRawResponse.createdCatchRawResponse.id,
+            x: weightValue,
+            y: 0,
+          })
+        }
+        return weightValue
+      })
+      .filter((num) => {
+        return num != 0
+      })
 
-    weightRange = Math.max(...weightArray) - weightStartPoint
+    let kdeWeightValues: any[] = []
+    if (weightArray.length !== 0) {
+      weightStartPoint = Math.min(...weightArray)
 
-    // Calculate KDE values
-    const weightBinWidth = 10 // forkBinWidth for KDE
-    const minWeightLength = Math.min(...forkLengthArray)
-    const maxWeightLength = Math.max(...forkLengthArray)
-    const weightGrid = Array.from(
-      { length: 100 },
-      (_, i) => minWeightLength + (i * (maxWeightLength - minWeightLength)) / 99
-    ) // Points to evaluate KDE
+      weightRange = Math.max(...weightArray) - weightStartPoint
 
-    const kdeWeightValues = kernelDensityEstimation(
-      weightArray,
-      weightBinWidth,
-      weightGrid
-    )
+      // Calculate KDE values
+      const weightBinWidth = 10 // forkBinWidth for KDE
+      const minWeightLength = Math.min(...forkLengthArray)
+      const maxWeightLength = Math.max(...forkLengthArray)
+      const weightGrid = Array.from(
+        { length: 100 },
+        (_, i) =>
+          minWeightLength + (i * (maxWeightLength - minWeightLength)) / 99
+      ) // Points to evaluate KDE
+
+      kdeWeightValues = kernelDensityEstimation(
+        weightArray,
+        weightBinWidth,
+        weightGrid
+      )
+    }
 
     // Weight Density Calculations -----------------------------
 
@@ -212,7 +225,7 @@ function CatchMeasureQC({
       >
         <VStack alignItems={'center'} flex={1}>
           <CustomModalHeader
-            headerText={'Fork Length, Weight, Lifestage, Run'}
+            headerText={'Fork Length, Weight, Life Stage, Run'}
             showHeaderButton={false}
             closeModal={() => navigation.goBack()}
           />
@@ -293,7 +306,8 @@ function CatchMeasureQC({
             pointClicked={pointClicked}
             onSubmit={(submission: any) => handleModalSubmit(submission)}
             headerText={'Table of Selected Points'}
-            modalData={graphData}
+            modalData={graphSubData}
+            usesDensity={true}
           />
         </CustomModal>
       ) : (

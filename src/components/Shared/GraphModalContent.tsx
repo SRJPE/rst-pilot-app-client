@@ -23,6 +23,7 @@ const GraphModalContent = ({
   children,
   showHeaderButton,
   dataFormatter,
+  usesDensity,
 }: {
   closeModal: any
   onSubmit: any
@@ -32,10 +33,12 @@ const GraphModalContent = ({
   children?: JSX.Element
   showHeaderButton?: boolean
   dataFormatter?: (header: string, dataAtId: any) => any
+  usesDensity?: boolean
 }) => {
   const [payload, setPayload] = useState<any>({})
 
   const handleSubmit = () => {
+    console.log('graph modal content payload', payload)
     onSubmit(payload)
     closeModal()
   }
@@ -133,12 +136,18 @@ const GraphModalContent = ({
                         fontSize='16'
                         keyboardType='numeric'
                         onChangeText={(value) => {
-                          if (value != payload[header].y) {
+                          if (value != payload[header].y || value != payload[header].x) {
                             handleChange(header, value)
                           }
                         }}
                         onBlur={() => {}}
-                        value={payload[header] ? `${payload[header].y}` : 'NA'}
+                        value={
+                          payload[header]
+                            ? !usesDensity
+                              ? `${payload[header].y}`
+                              : `${payload[header].x}`
+                            : 'NA'
+                        }
                       />
                     </View>
                   )

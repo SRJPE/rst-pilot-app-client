@@ -11,6 +11,8 @@ import {
   Heading,
   Divider,
   Input,
+  Radio,
+  Box,
 } from 'native-base'
 import React, { useEffect, useState } from 'react'
 import { DataTable } from 'react-native-paper'
@@ -20,6 +22,12 @@ import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { RootState } from '../../redux/store'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import CustomSelect from '../../components/Shared/CustomSelect'
+import {
+  capitalizeFirstLetterOfEachWord,
+  reorderTaxon,
+  truncateAndTrimString,
+} from '../../utils/utils'
 
 interface NestedModalFieldDataI {
   catchRawId: number
@@ -27,7 +35,6 @@ interface NestedModalFieldDataI {
   fieldValue: any
   modalHeader: string
   modalText: any
-  modalInput: any
 }
 
 function PartialRecordsQC({
@@ -37,6 +44,9 @@ function PartialRecordsQC({
   previousCatchRawSubmissions,
   releaseSites,
   programs,
+  taxonDropdowns,
+  runDropdowns,
+  lifeStageDropdowns,
 }: {
   navigation: any
   route: any
@@ -44,6 +54,9 @@ function PartialRecordsQC({
   previousCatchRawSubmissions: any[]
   releaseSites: any[]
   programs: any[]
+  taxonDropdowns: any[]
+  runDropdowns: any[]
+  lifeStageDropdowns: any[]
 }) {
   const [qcData, setQCData] = useState<any[]>([])
   const [percentNotRecordedData, setPercentNotRecorded] = useState<any[]>([])
@@ -51,7 +64,8 @@ function PartialRecordsQC({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [nestedModalField, setNestedModalField] =
     useState<NestedModalFieldDataI | null>(null)
-  const [nestedModalValue, setNestedModalValue] = useState<any>('')
+  const [nestedModalInputValue, setNestedModalInputValue] = useState<string>('')
+  const [nestedModalComment, setNestedModalComment] = useState<string>('')
 
   useEffect(() => {
     const programId = route.params.programId
@@ -88,11 +102,11 @@ function PartialRecordsQC({
       'plusCountMethodology',
     ]
 
-    qcData.forEach(catchResponse => {
+    qcData.forEach((catchResponse) => {
       const catchRaw = catchResponse.createdCatchRawResponse
       const catchRawKeys = Object.keys(catchRaw)
 
-      catchRawKeys.forEach(key => {
+      catchRawKeys.forEach((key) => {
         if (!omittedPartialRecordKeys.includes(key)) {
           if (
             Object.keys(formattedData).includes(key) &&
@@ -114,7 +128,7 @@ function PartialRecordsQC({
       })
     })
 
-    Object.keys(formattedData).forEach(key => {
+    Object.keys(formattedData).forEach((key) => {
       percentNotRecordedPayload.push({
         variableName: key,
         percentNotRecorded: Math.round(
@@ -153,15 +167,202 @@ function PartialRecordsQC({
   }
 
   const handleSaveNestedModal = () => {
-    console.log('nestedModalValue: ', nestedModalValue)
+    console.log('handle save: ', nestedModalInputValue)
   }
 
   const handleCloseNestedModal = () => {
     setNestedModalField(null)
+    setNestedModalInputValue('')
+    setNestedModalComment('')
   }
 
-  const handleNestedModalSubmit = (submission: any) => {
-    console.log('nested modal submit, submission: ', submission)
+  // Missing:
+  // createdAt
+  // numFishCaught
+  // stream (nothing happens when clicked)
+  // releaseSite
+  //
+
+  const CustomNestedModalInput = ({
+    fieldClicked,
+    data,
+  }: {
+    fieldClicked: string
+    data: any
+  }) => {
+    const reorderedTaxon = reorderTaxon(taxonDropdowns)
+
+    switch (fieldClicked) {
+      case 'createdAt':
+        return (
+          <VStack>
+            <Text>Edit Date</Text>
+            <Box alignSelf='flex-start' mt={5}>
+              <DateTimePicker
+                value={new Date()}
+                mode={'date'}
+                display='default'
+                onChange={(event, selectedDate) => {
+                  console.log('date selected: ', selectedDate)
+                }}
+              />
+            </Box>
+          </VStack>
+        )
+      case 'taxonCode':
+        return (
+          <VStack>
+            <Text>Edit Species</Text>
+            <CustomSelect
+              selectedValue={nestedModalInputValue}
+              placeholder={'Species'}
+              onValueChange={(value: string) => setNestedModalInputValue(value)}
+              setFieldTouched={() => console.log('species field touched')}
+              selectOptions={reorderedTaxon.map((taxon: any) => ({
+                label: taxon?.commonname,
+                value: taxon?.commonname,
+              }))}
+            />
+          </VStack>
+        )
+      case 'captureRunClass':
+        return (
+          <VStack>
+            <Text>Edit Run</Text>
+            <CustomSelect
+              selectedValue={nestedModalInputValue}
+              placeholder={'Run'}
+              onValueChange={(value: string) => setNestedModalInputValue(value)}
+              setFieldTouched={() => console.log('run field touched')}
+              selectOptions={runDropdowns.map((run: any) => ({
+                label: run?.definition,
+                value: run?.definition,
+              }))}
+            />
+          </VStack>
+        )
+      case 'forkLength':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Fork Length</Text>
+            <Input
+              height='50px'
+              width='350px'
+              fontSize='16'
+              placeholder='fork length...'
+              keyboardType='numeric'
+              onChangeText={(value) => {
+                setNestedModalInputValue(value)
+              }}
+              // onBlur={handleBlur('comments')}
+              value={nestedModalInputValue}
+            />
+          </VStack>
+        )
+      case 'lifestage':
+        return (
+          <VStack>
+            <Text>Edit Life Stage</Text>
+            <CustomSelect
+              selectedValue={nestedModalInputValue}
+              placeholder={'Life Stage'}
+              onValueChange={(value: string) => setNestedModalInputValue(value)}
+              setFieldTouched={() => console.log('lifestage field touched')}
+              selectOptions={lifeStageDropdowns.map((lifeStage: any) => ({
+                label: lifeStage?.definition,
+                value: lifeStage?.definition,
+              }))}
+            />
+          </VStack>
+        )
+      case 'dead':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Mortality</Text>
+            <Radio.Group
+              name='isLead'
+              accessibilityLabel='is lead'
+              value={nestedModalInputValue}
+              onChange={(value: any) => {
+                if (value === 'true') {
+                  setNestedModalInputValue(value)
+                } else {
+                  setNestedModalInputValue(value)
+                }
+              }}
+            >
+              <Radio
+                colorScheme='primary'
+                value='false'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                Yes
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='true'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                No
+              </Radio>
+            </Radio.Group>
+          </VStack>
+        )
+      case 'numFishCaught':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Fish Count</Text>
+            <Input
+              height='50px'
+              width='350px'
+              fontSize='16'
+              placeholder='fish count...'
+              keyboardType='numeric'
+              onChangeText={(value) => {
+                setNestedModalInputValue(value)
+              }}
+              // onBlur={handleBlur('comments')}
+              value={nestedModalInputValue}
+            />
+          </VStack>
+        )
+      case 'stream':
+        return (
+          <VStack>
+            <Text>Edit Stream</Text>
+            <Input
+              height='50px'
+              width='350px'
+              fontSize='16'
+              placeholder='stream...'
+              keyboardType='default'
+              onChangeText={(value) => {
+                setNestedModalInputValue(value)
+              }}
+              // onBlur={handleBlur('comments')}
+              value={nestedModalInputValue}
+            />
+          </VStack>
+        )
+      case 'releaseSite':
+        return (
+          <VStack>
+            <Text>Edit Release Site</Text>
+            <CustomSelect
+              selectedValue={nestedModalInputValue}
+              placeholder={'Release Site'}
+              onValueChange={(value: string) => setNestedModalInputValue(value)}
+              setFieldTouched={() => console.log('release site field touched')}
+              selectOptions={releaseSites.map((site: any) => ({
+                label: site?.releaseSiteName,
+                value: site?.releaseSiteName,
+              }))}
+            />
+          </VStack>
+        )
+    }
   }
 
   return (
@@ -193,7 +394,7 @@ function PartialRecordsQC({
             </DataTable.Header>
 
             <ScrollView>
-              {percentNotRecordedData.map(rowData => {
+              {percentNotRecordedData.map((rowData) => {
                 return (
                   <DataTable.Row
                     key={rowData.variableName}
@@ -259,7 +460,7 @@ function PartialRecordsQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => setIsModalOpen(false)}
-          height='1/2'
+          height='5/6'
         >
           <VStack>
             <HStack alignItems={'center'}>
@@ -280,36 +481,52 @@ function PartialRecordsQC({
 
             <Divider my={2} thickness='3' />
 
-            <ScrollView horizontal={true} width={'100%'}>
+            <ScrollView horizontal={true}>
               <DataTable style={{ minWidth: '100%' }}>
                 <DataTable.Header>
-                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                  <DataTable.Title
+                    style={{ justifyContent: 'center', minWidth: 90 }}
+                  >
                     date
                   </DataTable.Title>
-                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                  <DataTable.Title
+                    style={{ justifyContent: 'center', minWidth: 90 }}
+                  >
                     run
                   </DataTable.Title>
-                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                  <DataTable.Title
+                    style={{ justifyContent: 'center', minWidth: 90 }}
+                  >
                     fork length
                   </DataTable.Title>
-                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                  <DataTable.Title
+                    style={{ justifyContent: 'center', minWidth: 90 }}
+                  >
                     lifestage
                   </DataTable.Title>
-                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                  <DataTable.Title
+                    style={{ justifyContent: 'center', minWidth: 90 }}
+                  >
                     dead
                   </DataTable.Title>
-                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                  <DataTable.Title
+                    style={{ justifyContent: 'center', minWidth: 90 }}
+                  >
                     count
                   </DataTable.Title>
-                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                  <DataTable.Title
+                    style={{ justifyContent: 'center', minWidth: 90 }}
+                  >
                     stream
                   </DataTable.Title>
-                  <DataTable.Title style={{ justifyContent: 'center' }}>
+                  <DataTable.Title
+                    style={{ justifyContent: 'center', minWidth: 90 }}
+                  >
                     site
                   </DataTable.Title>
                 </DataTable.Header>
 
-                <ScrollView>
+                <ScrollView marginBottom={100}>
                   {rowsNotRecordedData.map(
                     ({ createdCatchRawResponse, releaseResponse }, idx) => {
                       // Nested Modal Form Values
@@ -330,15 +547,17 @@ function PartialRecordsQC({
                       const numFishCaught =
                         createdCatchRawResponse.numFishCaught ?? 'NA'
                       const program = programs.filter(
-                        program => programId === program.id
+                        (program) => programId === program.id
                       )
                       const stream = program ? program[0].streamName : 'NA'
-                      let releaseSiteArr = releaseSites.filter(releaseSite => {
-                        if (releaseResponse)
-                          return (
-                            releaseSite.id === releaseResponse.releaseSiteId
-                          )
-                      })
+                      let releaseSiteArr = releaseSites.filter(
+                        (releaseSite) => {
+                          if (releaseResponse)
+                            return (
+                              releaseSite.id === releaseResponse.releaseSiteId
+                            )
+                        }
+                      )
                       const releaseSite = releaseSiteArr.length
                         ? releaseSiteArr[0].releaseSiteName
                         : 'NA'
@@ -346,10 +565,15 @@ function PartialRecordsQC({
                       return (
                         <DataTable.Row
                           key={`${createdCatchRawResponse.id}-${idx}`}
-                          style={[{ height: 55, justifyContent: 'center' }]}
+                          style={[{ justifyContent: 'center', width: '100%' }]}
                         >
                           <DataTable.Cell
-                            onPress={() =>
+                            style={{
+                              minWidth: 90,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            onPress={() => {
                               handleOpenNestedModal({
                                 catchRawId,
                                 fieldName: 'createdAt',
@@ -366,27 +590,21 @@ function PartialRecordsQC({
                                     <Text fontWeight={'bold'}>{createdAt}</Text>{' '}
                                   </Text>
                                 ),
-                                modalInput: (
-                                  <VStack alignItems={'flex-start'}>
-                                    <Text>Edit Date</Text>
-                                    <DateTimePicker
-                                      value={new Date(createdAt)}
-                                      mode='date'
-                                      onChange={(event, selectedDate) =>
-                                        setNestedModalValue(selectedDate)
-                                      }
-                                      accentColor='#007C7C'
-                                    />
-                                  </VStack>
-                                ),
                               })
-                            }
-                            style={{ justifyContent: 'center' }}
+                            }}
                             numeric
                           >
-                            {createdAt}
+                            {truncateAndTrimString(
+                              capitalizeFirstLetterOfEachWord(createdAt),
+                              10
+                            )}
                           </DataTable.Cell>
                           <DataTable.Cell
+                            style={{
+                              minWidth: 90,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             onPress={() =>
                               handleOpenNestedModal({
                                 catchRawId,
@@ -406,31 +624,21 @@ function PartialRecordsQC({
                                     </Text>{' '}
                                   </Text>
                                 ),
-                                modalInput: (
-                                  <VStack alignItems={'flex-start'}>
-                                    <Text>Edit run</Text>
-                                    <Input
-                                      height='50px'
-                                      width='350px'
-                                      fontSize='16'
-                                      placeholder='Write a comment'
-                                      keyboardType='default'
-                                      onChangeText={value =>
-                                        setNestedModalValue(value)
-                                      }
-                                      // onBlur={handleBlur('comments')}
-                                      value={captureRunClass}
-                                    />
-                                  </VStack>
-                                ),
                               })
                             }
-                            style={{ justifyContent: 'center' }}
                             numeric
                           >
-                            {captureRunClass}
+                            {truncateAndTrimString(
+                              capitalizeFirstLetterOfEachWord(captureRunClass),
+                              10
+                            )}
                           </DataTable.Cell>
                           <DataTable.Cell
+                            style={{
+                              minWidth: 90,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             onPress={() =>
                               handleOpenNestedModal({
                                 catchRawId,
@@ -450,31 +658,21 @@ function PartialRecordsQC({
                                     </Text>{' '}
                                   </Text>
                                 ),
-                                modalInput: (
-                                  <VStack alignItems={'flex-start'}>
-                                    <Text>Edit fork length</Text>
-                                    <Input
-                                      height='50px'
-                                      width='350px'
-                                      fontSize='16'
-                                      placeholder='Write a comment'
-                                      keyboardType='numeric'
-                                      onChangeText={value =>
-                                        setNestedModalValue(value)
-                                      }
-                                      // onBlur={handleBlur('comments')}
-                                      value={forkLength}
-                                    />
-                                  </VStack>
-                                ),
                               })
                             }
-                            style={{ justifyContent: 'center' }}
                             numeric
                           >
-                            {forkLength}
+                            {truncateAndTrimString(
+                              capitalizeFirstLetterOfEachWord(forkLength),
+                              10
+                            )}
                           </DataTable.Cell>
                           <DataTable.Cell
+                            style={{
+                              minWidth: 90,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             onPress={() =>
                               handleOpenNestedModal({
                                 catchRawId,
@@ -492,31 +690,21 @@ function PartialRecordsQC({
                                     <Text fontWeight={'bold'}>{lifestage}</Text>{' '}
                                   </Text>
                                 ),
-                                modalInput: (
-                                  <VStack alignItems={'flex-start'}>
-                                    <Text>Edit lifestage</Text>
-                                    <Input
-                                      height='50px'
-                                      width='350px'
-                                      fontSize='16'
-                                      placeholder='Write a comment'
-                                      keyboardType='default'
-                                      // onChangeText={(value) =>
-                                      //   setNestedModalValue(value)
-                                      // }
-                                      // onBlur={handleBlur('comments')}
-                                      value={'OUT OF SERVICE'}
-                                    />
-                                  </VStack>
-                                ),
                               })
                             }
-                            style={{ justifyContent: 'center' }}
                             numeric
                           >
-                            {lifestage}
+                            {truncateAndTrimString(
+                              capitalizeFirstLetterOfEachWord(lifestage),
+                              10
+                            )}
                           </DataTable.Cell>
                           <DataTable.Cell
+                            style={{
+                              minWidth: 90,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             onPress={() =>
                               handleOpenNestedModal({
                                 catchRawId,
@@ -540,31 +728,21 @@ function PartialRecordsQC({
                                     </Text>{' '}
                                   </Text>
                                 ),
-                                modalInput: (
-                                  <VStack alignItems={'flex-start'}>
-                                    <Text>Edit dead value</Text>
-                                    <Input
-                                      height='50px'
-                                      width='350px'
-                                      fontSize='16'
-                                      placeholder='Write a comment'
-                                      keyboardType='default'
-                                      onChangeText={value =>
-                                        setNestedModalValue(value)
-                                      }
-                                      // onBlur={handleBlur('comments')}
-                                      value={dead}
-                                    />
-                                  </VStack>
-                                ),
                               })
                             }
-                            style={{ justifyContent: 'center' }}
                             numeric
                           >
-                            {dead}
+                            {truncateAndTrimString(
+                              capitalizeFirstLetterOfEachWord(dead),
+                              10
+                            )}
                           </DataTable.Cell>
                           <DataTable.Cell
+                            style={{
+                              minWidth: 90,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             onPress={() =>
                               handleOpenNestedModal({
                                 catchRawId,
@@ -589,38 +767,53 @@ function PartialRecordsQC({
                                     fish.
                                   </Text>
                                 ),
-                                modalInput: (
-                                  <VStack alignItems={'flex-start'}>
-                                    <Text>Edit fish count value</Text>
-                                    <Input
-                                      height='50px'
-                                      width='350px'
-                                      fontSize='16'
-                                      placeholder='Write a comment'
-                                      keyboardType='default'
-                                      onChangeText={value =>
-                                        setNestedModalValue(value)
-                                      }
-                                      // onBlur={handleBlur('comments')}
-                                      value={numFishCaught}
-                                    />
-                                  </VStack>
+                              })
+                            }
+                            numeric
+                          >
+                            {truncateAndTrimString(
+                              capitalizeFirstLetterOfEachWord(numFishCaught),
+                              10
+                            )}
+                          </DataTable.Cell>
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 90,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            onPress={() =>
+                              handleOpenNestedModal({
+                                catchRawId,
+                                fieldName: 'stream',
+                                fieldValue: stream,
+                                modalHeader: 'Stream Editor',
+                                modalText: (
+                                  <Text
+                                    color='black'
+                                    fontSize='2xl'
+                                    mb={5}
+                                    fontWeight={'light'}
+                                  >
+                                    You have marked this stream as{' '}
+                                    <Text fontWeight={'bold'}>{stream}</Text>{' '}
+                                  </Text>
                                 ),
                               })
                             }
-                            style={{ justifyContent: 'center' }}
                             numeric
                           >
-                            {numFishCaught}
+                            {`${truncateAndTrimString(
+                              capitalizeFirstLetterOfEachWord(stream),
+                              10
+                            )}...`}
                           </DataTable.Cell>
                           <DataTable.Cell
-                            onPress={() => console.log('cell clicked')}
-                            style={{ justifyContent: 'center' }}
-                            numeric
-                          >
-                            {stream}
-                          </DataTable.Cell>
-                          <DataTable.Cell
+                            style={{
+                              minWidth: 90,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
                             onPress={() =>
                               handleOpenNestedModal({
                                 catchRawId,
@@ -640,29 +833,14 @@ function PartialRecordsQC({
                                     </Text>{' '}
                                   </Text>
                                 ),
-                                modalInput: (
-                                  <VStack alignItems={'flex-start'}>
-                                    <Text>Edit Release Site</Text>
-                                    <Input
-                                      height='50px'
-                                      width='350px'
-                                      fontSize='16'
-                                      placeholder='Write a comment'
-                                      keyboardType='default'
-                                      onChangeText={value =>
-                                        setNestedModalValue(value)
-                                      }
-                                      // onBlur={handleBlur('comments')}
-                                      value={'OUT OF SERVICE'}
-                                    />
-                                  </VStack>
-                                ),
                               })
                             }
-                            style={{ justifyContent: 'center' }}
                             numeric
                           >
-                            {releaseSite}
+                            {truncateAndTrimString(
+                              capitalizeFirstLetterOfEachWord(releaseSite),
+                              10
+                            )}
                           </DataTable.Cell>
                         </DataTable.Row>
                       )
@@ -680,7 +858,7 @@ function PartialRecordsQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseNestedModal()}
-          height='1/2'
+          height='3/4'
         >
           <>
             <CustomModalHeader
@@ -746,13 +924,20 @@ function PartialRecordsQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  // onChangeText={handleChange('comments')}
                   // onBlur={handleBlur('comments')}
-                  value={'Flag Comment (optional)'}
+                  onChangeText={(value) => {
+                    setNestedModalComment(value)
+                  }}
+                  value={nestedModalComment}
                 />
               </HStack>
 
-              <View mt='50px'>{nestedModalField.modalInput}</View>
+              <View mt='50px'>
+                {CustomNestedModalInput({
+                  fieldClicked: nestedModalField.fieldName,
+                  data: nestedModalField.fieldValue,
+                })}
+              </View>
             </VStack>
           </>
         </CustomModal>
@@ -764,12 +949,19 @@ function PartialRecordsQC({
 }
 
 const mapStateToProps = (state: RootState) => {
+  let taxon = state.dropdowns.values.taxon
+  let run = state.dropdowns.values.run
+  let lifeStage = state.dropdowns.values.lifeStage
+
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
     previousCatchRawSubmissions:
       state.trapVisitFormPostBundler.previousCatchRawSubmissions,
     releaseSites: state.visitSetupDefaults.releaseSites,
     programs: state.visitSetupDefaults.programs,
+    taxonDropdowns: taxon ?? [],
+    runDropdowns: run ?? [],
+    lifeStageDropdowns: lifeStage ?? [],
   }
 }
 

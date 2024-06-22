@@ -238,22 +238,26 @@ export const getSubstring = (
 }
 
 export function gaussianKernel(x: number) {
-    return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+  return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x)
 }
 
-export function kernelDensityEstimation(data: number[], bandwidth: number, grid: number[]): number[] {
-  const density: number[] = [];
+export function kernelDensityEstimation(
+  data: number[],
+  bandwidth: number,
+  grid: number[]
+): number[] {
+  const density: number[] = []
 
   for (let i = 0; i < grid.length; i++) {
-    let sum = 0;
+    let sum = 0
     for (let j = 0; j < data.length; j++) {
-      const u = (grid[i] - data[j]) / bandwidth;
-      sum += gaussianKernel(u);
+      const u = (grid[i] - data[j]) / bandwidth
+      sum += gaussianKernel(u)
     }
-    density[i] = sum / (data.length * bandwidth);
+    density[i] = sum / (data.length * bandwidth)
   }
 
-  return density;
+  return density
 }
 
 export const useDebounce = <T>(value: T, delay = 500) => {
@@ -310,7 +314,7 @@ export const getRandomColor = () => {
 }
 
 export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
-  if (!sentence) return sentence // Check if the sentence is not empty
+  if (!sentence || typeof sentence === 'number') return sentence // Check if the sentence is not empty
   return sentence
     .split(' ') // Split the sentence into words
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
@@ -318,6 +322,7 @@ export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
 }
 
 export const truncateAndTrimString = (str: string, length: number) => {
+  if (!(str.length > 10)) return str
   return str.length > length ? str.substring(0, length).trim() : str
 }
 
