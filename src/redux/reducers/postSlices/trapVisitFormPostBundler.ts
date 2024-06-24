@@ -165,7 +165,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           )
 
           const catchResults = await Promise.allSettled(catchPromises).catch(
-            (error) => {
+            error => {
               console.log('catch submission error: ', error)
               const { response } = error
               const errorDetail = response.data.detail
@@ -229,26 +229,25 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
 export const fetchPreviousTrapAndCatch = createAsyncThunk(
   'trapVisitPostBundler/fetchPreviousTrapAndCatch',
   async (_, thunkAPI) => {
-    const programIds = [1]
-    // ^ hard coded value to be updated to user's program ids ^
     const previousTrapVisits: any[] = []
     const previousCatchRaw: any[] = []
     try {
       const state = thunkAPI.getState() as RootState
+      const userPrograms = state.visitSetupDefaults.programs
       await Promise.all(
-        programIds.map(async (programId) => {
+        userPrograms.map(async program => {
           const trapVisitResponse = await api.get(
-            `trap-visit/program/${programId}`
+            `trap-visit/program/${program.programId}`
           )
           const catchRawResponse = await api.get(
-            `catch-raw/program/${programId}`
+            `catch-raw/program/${program.programId}`
           )
           let trapVisits = trapVisitResponse.data
           let catchRaws = catchRawResponse.data
 
           const alreadyActiveQCTrapVisitIds: number[] =
             state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
-              (trapVisit) => {
+              trapVisit => {
                 return trapVisit.createdTrapVisitResponse.id
               }
             )
@@ -263,7 +262,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCCatchRawIds: number[] =
             state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
-              (catchRaw) => {
+              catchRaw => {
                 return catchRaw.createdCatchRawResponse.id
               }
             )
@@ -601,7 +600,7 @@ export const trapVisitPostBundler = createSlice({
       )
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder.addCase(PURGE, () => {
       return initialState
     })
@@ -626,8 +625,6 @@ export const trapVisitPostBundler = createSlice({
         state.submissionStatus = 'submission-successful'
         state.catchRawSubmissions = [...failedCatchRawSubmissions]
         state.trapVisitSubmissions = [...failedTrapVisitSubmissions]
-
-        console.log('successful post processing: ', action.payload)
       }
     )
 

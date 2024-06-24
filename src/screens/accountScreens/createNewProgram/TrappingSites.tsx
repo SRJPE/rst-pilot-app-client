@@ -14,6 +14,7 @@ import {
 } from 'native-base'
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
 import TrappingSitesDataTable from '../../../components/createNewProgram/TrappingSitesDataTable'
+import AppLogo from '../../../components/Shared/AppLogo'
 import { Ionicons } from '@expo/vector-icons'
 import CustomModal from '../../../components/Shared/CustomModal'
 import AddTrapModalContent from '../../../components/createNewProgram/AddTrapModalContent'

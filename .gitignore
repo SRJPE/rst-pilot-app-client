@@ -79,3 +79,4 @@ dist/
 
 #Visual Studio Code Settings
 .vscode/settings.json
+rst-pilot-app-client.code-workspace

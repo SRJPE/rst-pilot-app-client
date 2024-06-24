@@ -1,28 +1,72 @@
 import { createSlice } from '@reduxjs/toolkit'
+import * as SecureStore from 'expo-secure-store'
+import { cloneDeep } from 'lodash'
+import api from '../../api/axiosConfig'
 
 interface InitialStateI {
-  storedCredentials: any
+  displayName: string | null
+  emailAddress: string | null
+  azureUid: string | null
 }
-
 const initialState: InitialStateI = {
-  storedCredentials: null,
+  displayName: null,
+  emailAddress: null,
+  azureUid: null,
 }
 
 export const userCredentialsSlice = createSlice({
   name: 'userCredentials',
   initialState: initialState,
   reducers: {
-    clearUserCredentials: (state) => {
-      state.storedCredentials = null
+    clearUserCredentials: state => {
+      api
+        .post(`user/${state.azureUid}/logout`)
+        .then(response => {
+          SecureStore.deleteItemAsync('userAccessToken')
+            .then(response => SecureStore.deleteItemAsync('userRefreshToken'))
+            .then(response => SecureStore.deleteItemAsync('userIdToken'))
+            .finally(() => console.log('Tokens Deleted'))
+        })
+        .catch(err => {
+          throw err
+        })
+      console.log('state should be empty', initialState)
+      return (state = cloneDeep(initialState))
     },
     saveUserCredentials: (state, action) => {
       console.log('PAYLOAD: ', action.payload)
-      state.storedCredentials = action.payload
+      // state.storedCredentials = action.payload
+      return (state = { ...action.payload })
+    },
+    editProfile: (state, action) => {
+      api
+        .patch(`user/${state.azureUid}/edit`, { ...action.payload })
+        .catch(err => {
+          throw err
+        })
+      return (state = {
+        azureUid: state.azureUid,
+        displayName: `${action.payload.firstName} ${action.payload.lastName}`,
+        ...action.payload,
+      })
+    },
+    changePassword: (state, action) => {
+      api
+        .post(`user/${state.azureUid}/change-password`, action.payload)
+        .then(response =>
+          console.log(
+            `Request Status: (${response.status}) ${response.statusText}`
+          )
+        )
     },
   },
 })
 
-export const { saveUserCredentials, clearUserCredentials } =
-  userCredentialsSlice.actions
+export const {
+  saveUserCredentials,
+  clearUserCredentials,
+  changePassword,
+  editProfile,
+} = userCredentialsSlice.actions
 
 export default userCredentialsSlice.reducer

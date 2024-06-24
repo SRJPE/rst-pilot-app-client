@@ -16,6 +16,7 @@ const AppLogo = ({
       borderColor={addBorder ? 'primary' : '#fff'}
       borderWidth={addBorder ? 5 : 0}
       alt='salmon logo'
+      mx='auto'
     />
   )
 }

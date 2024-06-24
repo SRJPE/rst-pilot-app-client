@@ -8,7 +8,7 @@ const dateTransformer: AxiosRequestTransformer = (data: any) => {
     return data.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })
   }
   if (Array.isArray(data)) {
-    return data.map((val) => dateTransformer(val))
+    return data.map(val => dateTransformer(val))
   }
   if (typeof data === 'object' && data !== null) {
     return Object.fromEntries(
@@ -43,6 +43,9 @@ api.interceptors.response.use(
       // unauthorized
       // sign out?
     } else if (response?.status === 403) {
+      // forbidden
+      // handle
+    } else if (response?.status === 404) {
       // forbidden
       // handle
     }

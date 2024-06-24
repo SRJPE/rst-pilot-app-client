@@ -22,6 +22,7 @@ export default ({ config }) => {
     updates: {
       url: 'https://u.expo.dev/a6f6224b-3c38-4476-ad72-6cbea4d1bdc6',
     },
+    scheme: 'com.onmicrosoft.rstb2c.rsttabletapp',
     plugins: ['expo-secure-store'],
   }
 }

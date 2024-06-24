@@ -18,7 +18,6 @@ const OnStartupProvider = (props: Props) => {
 
   useEffect(() => {
     dispatch(getTrapVisitDropdownValues())
-    dispatch(getVisitSetupDefaults(1))
     unsubscribe = NetInfo.addEventListener(connectionState => {
       if (
         props.isConnected != connectionState.isConnected ||
