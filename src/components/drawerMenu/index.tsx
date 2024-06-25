@@ -154,7 +154,7 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
             title='QC Data'
           />
           <MenuButton
-            active={false}
+            active={currentRoute === 'Inspector'}
             onPress={() => handlePressMainNavButton('Inspector')}
             icon='search'
             title='Inspector'
