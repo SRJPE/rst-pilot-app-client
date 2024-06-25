@@ -87,7 +87,7 @@ const FishProcessing = ({
       dispatch(markFishProcessingCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
       const allTabIds: string[] = Object.keys(tabSlice.tabs)
-      allTabIds.forEach((allTabId) => {
+      allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
             stepCompletedCheck = false
@@ -124,40 +124,23 @@ const FishProcessing = ({
           ? reduxState[activeTabId].errors
           : { fishProcessedResult: '' }
       }
-      onSubmit={(values) => {
+      onSubmit={values => {
         if (activeTabId && activeTabId != 'placeholderId') {
           const callback = () => {
-            if (!isPaperEntryStore) {
-              if (values?.fishProcessedResult === 'no fish caught') {
-                navigateHelper(
-                  'No Fish Caught',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              } else if (
-                values?.fishProcessedResult ===
-                  'no catch data, fish left in live box' ||
-                values?.fishProcessedResult === 'no catch data, fish released'
-              ) {
-                navigateHelper(
-                  'Trap Post-Processing',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              } else {
-                navigateHelper(
-                  'Fish Input',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              }
-            } else {
+            // if (!isPaperEntryStore) {
+            if (values?.fishProcessedResult === 'no fish caught') {
+              navigateHelper(
+                'No Fish Caught',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
+            } else if (
+              values?.fishProcessedResult ===
+                'no catch data, fish left in live box' ||
+              values?.fishProcessedResult === 'no catch data, fish released'
+            ) {
               navigateHelper(
                 'Trap Post-Processing',
                 navigationSlice,
@@ -165,7 +148,24 @@ const FishProcessing = ({
                 dispatch,
                 updateActiveStep
               )
+            } else {
+              navigateHelper(
+                'Fish Input',
+                navigationSlice,
+                navigation,
+                dispatch,
+                updateActiveStep
+              )
             }
+            // } else {
+            //   navigateHelper(
+            //     'Trap Post-Processing',
+            //     navigationSlice,
+            //     navigation,
+            //     dispatch,
+            //     updateActiveStep
+            //   )
+            // }
           }
 
           navigation.push('Loading...')
