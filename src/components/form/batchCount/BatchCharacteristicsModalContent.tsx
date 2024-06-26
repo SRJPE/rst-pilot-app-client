@@ -11,6 +11,7 @@ import {
   ScrollView,
   Text,
   VStack,
+  View,
 } from 'native-base'
 import React, { memo, useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
@@ -30,6 +31,7 @@ import CustomModal from '../../Shared/CustomModal'
 import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
 import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
 import { ReleaseMarkI } from '../../../screens/formScreens/AddFish'
+import SpeciesDropDown from '../SpeciesDropDown'
 
 const initialFormValues = {
   species: '',
@@ -56,9 +58,16 @@ const BatchCharacteristicsModalContent = ({
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
-  const alphabeticalLifeStage = alphabeticalSort(
-    dropdownValues.lifeStage,
-    'definition'
+  const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
+    false as boolean
+  )
+  const [speciesList, setSpeciesList] = useState<
+    { label: string; value: string }[]
+  >(
+    reorderedTaxon.map((taxon: any) => ({
+      label: taxon?.commonname,
+      value: taxon?.commonname,
+    }))
   )
 
   const handleFormSubmit = (values: any) => {
@@ -122,7 +131,7 @@ const BatchCharacteristicsModalContent = ({
   }
 
   return (
-    <ScrollView>
+    <View>
       <Formik
         validationSchema={batchCharacteristicsSchema}
         initialValues={initialFormValues}
@@ -170,7 +179,7 @@ const BatchCharacteristicsModalContent = ({
                 marking or sampling a fish.
               </Text>
               <HStack>
-                <FormControl w='1/2' pr='5'>
+                <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 250 : 0}>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Species
@@ -181,17 +190,13 @@ const BatchCharacteristicsModalContent = ({
                     errors.species &&
                     RenderErrorMessage(errors, 'species')}
 
-                  <CustomSelect
-                    selectedValue={values.species}
-                    placeholder={'Species'}
-                    onValueChange={(value: any) =>
-                      handleChange('species')(value)
-                    }
+                  <SpeciesDropDown
+                    open={speciesDropDownOpen}
+                    setOpen={setSpeciesDropDownOpen}
+                    list={speciesList}
+                    setList={setSpeciesList}
+                    setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={reorderedTaxon.map((taxon: any) => ({
-                      label: taxon?.commonname,
-                      value: taxon?.commonname,
-                    }))}
                   />
                 </FormControl>
                 <FormControl w='1/2' pr='5'>
@@ -357,7 +362,7 @@ const BatchCharacteristicsModalContent = ({
           </>
         )}
       </Formik>
-    </ScrollView>
+    </View>
   )
 }
 
