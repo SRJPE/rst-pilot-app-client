@@ -303,7 +303,7 @@ const BatchCount = ({
                         <Radio.Group
                           name='lifeStageRadioGroup'
                           value={lifeStageRadioValue}
-                          onChange={nextValue => {
+                          onChange={(nextValue) => {
                             setLifeStageRadioValue(nextValue)
                           }}
                         >
@@ -475,7 +475,7 @@ const BatchCount = ({
       <CustomModal
         isOpen={batchCharacteristicsModalOpen}
         closeModal={() => setBatchCharacteristicsModalOpen(false)}
-        height='1/2'
+        height='3/4'
       >
         <BatchCharacteristicsModalContent
           closeModal={() => setBatchCharacteristicsModalOpen(false)}
