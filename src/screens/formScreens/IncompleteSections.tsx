@@ -36,6 +36,7 @@ import {
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { DeviceEventEmitter } from 'react-native'
 import { navigateHelper } from '../../utils/utils'
+import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -113,7 +114,7 @@ const IncompleteSections = ({
       setIsSubmitting(false) // Reset submitting state after navigation
     }
 
-    navigation.push('Loading...')
+    navigation.dispatch(StackActions.replace('Loading...'))
 
     setTimeout(() => {
       DeviceEventEmitter.emit('event.load', {
@@ -218,7 +219,7 @@ const IncompleteSections = ({
       dropdownsState.values.trapStatusAtEnd
     )
     const calculateRpmAvg = (rpms: (string | null)[]) => {
-      const validRpms = rpms.filter(n => n)
+      const validRpms = rpms.filter((n) => n)
       if (!validRpms.length) {
         return null
       }
@@ -231,7 +232,7 @@ const IncompleteSections = ({
     }
 
     const tabIds = Object.keys(tabState.tabs)
-    tabIds.forEach(id => {
+    tabIds.forEach((id) => {
       const {
         rpm1: startRpm1,
         rpm2: startRpm2,
@@ -386,14 +387,14 @@ const IncompleteSections = ({
 
     const catchRawSubmissions: any[] = []
 
-    Object.keys(fishInputState).forEach(tabId => {
+    Object.keys(fishInputState).forEach((tabId) => {
       if (tabId != 'placeholderId') {
         const fishStoreKeys = Object.keys(fishInputState[tabId].fishStore)
         const programId = Object.keys(visitSetupState).includes(tabId)
           ? visitSetupState[tabId].values.programId
           : 1
 
-        fishStoreKeys.forEach(key => {
+        fishStoreKeys.forEach((key) => {
           const fishValue = fishInputState[tabId].fishStore[key]
 
           const filterAndPrepareData = (data: Array<any>) => {

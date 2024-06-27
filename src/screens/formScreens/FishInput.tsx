@@ -30,6 +30,8 @@ import PlusCountModalContent from '../../components/form/PlusCountModalContent'
 import { Ionicons } from '@expo/vector-icons'
 import { DeviceEventEmitter, useWindowDimensions } from 'react-native'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import { StackActions } from '@react-navigation/native'
+import { navigateHelper } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
@@ -102,13 +104,16 @@ const FishInput = ({
   const submissionLoader = () => {
     if (activeTabId && activeTabId != 'placeholderId') {
       const callback = () => {
-        navigation.navigate('Trap Visit Form', {
-          screen: navigationSlice.steps[navigationSlice.activeStep + 1]?.name,
-        })
-        dispatch(updateActiveStep(navigationSlice.activeStep + 1))
+        navigateHelper(
+          'Trap Post-Processing',
+          navigationSlice,
+          navigation,
+          dispatch,
+          updateActiveStep
+        )
       }
 
-      navigation.push('Loading...')
+      navigation.dispatch(StackActions.replace('Loading...'))
 
       setTimeout(() => {
         DeviceEventEmitter.emit('event.load', {

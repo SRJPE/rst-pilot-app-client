@@ -39,6 +39,7 @@ import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import OptimizedInput from '../../components/Shared/OptimizedInput'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -185,7 +186,7 @@ const TrapOperations = ({
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
       const allTabIds: string[] = Object.keys(tabSlice.tabs)
-      allTabIds.forEach(allTabId => {
+      allTabIds.forEach((allTabId) => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
             stepCompletedCheck = false
@@ -353,14 +354,14 @@ const TrapOperations = ({
             }
           }
 
-          navigation.push('Loading...')
+          navigation.dispatch(StackActions.replace('Loading...'))
 
           setTimeout(() => {
             DeviceEventEmitter.emit('event.load', {
               process: () => onSubmit(values, activeTabId),
               callback,
             })
-          }, 2000)
+          }, 1000)
         }
       }}
     >
@@ -584,7 +585,7 @@ const TrapOperations = ({
                           </FormControl.Label>
                           <Popover
                             placement='bottom left'
-                            trigger={triggerProps => {
+                            trigger={(triggerProps) => {
                               return (
                                 <IconButton
                                   {...triggerProps}

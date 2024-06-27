@@ -31,6 +31,7 @@ import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import { QARanges, navigateHelper } from '../../utils/utils'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = state.tabSlice.activeTabId
@@ -216,14 +217,14 @@ const TrapPostProcessing = ({
             }
           }
 
-          navigation.push('Loading...')
+          navigation.dispatch(StackActions.replace('Loading...'))
 
           setTimeout(() => {
             DeviceEventEmitter.emit('event.load', {
               process: () => onSubmit(values, activeTabId),
               callback,
             })
-          }, 2000)
+          }, 1000)
         }
       }}
     >

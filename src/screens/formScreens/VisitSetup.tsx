@@ -39,6 +39,7 @@ import CustomSelect from '../../components/Shared/CustomSelect'
 import { uid } from 'uid'
 import TrapNameDropDown from '../../components/form/TrapNameDropDown'
 import { navigateHelper } from '../../utils/utils'
+import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -389,14 +390,14 @@ const VisitSetup = ({
           }
         }
 
-        navigation.push('Loading...')
+        navigation.dispatch(StackActions.replace('Loading...'))
 
         setTimeout(() => {
           DeviceEventEmitter.emit('event.load', {
             process: () => onSubmit(values, tabSlice?.activeTabId),
             callback,
           })
-        }, 2000)
+        }, 1000)
       }}
     >
       {({

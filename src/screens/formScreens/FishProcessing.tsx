@@ -27,6 +27,7 @@ import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
 import { useEffect, useMemo } from 'react'
 import { DeviceEventEmitter } from 'react-native'
 import { navigateHelper } from '../../utils/utils'
+import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
   const activeTabId = state.tabSlice.activeTabId
@@ -168,14 +169,14 @@ const FishProcessing = ({
             }
           }
 
-          navigation.push('Loading...')
+          navigation.dispatch(StackActions.replace('Loading...'))
 
           setTimeout(() => {
             DeviceEventEmitter.emit('event.load', {
-              process: () => onSubmit(values, activeTabId),
+              process: () => onSubmit(values, tabSlice?.activeTabId),
               callback,
             })
-          }, 2000)
+          }, 1000)
         }
       }}
     >
