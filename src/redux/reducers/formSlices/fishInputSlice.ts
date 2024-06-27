@@ -24,7 +24,8 @@ export interface IndividualFishValuesI {
   forkLength: number | null
   run: string
   weight?: number | null
-  fishCondition: string | null
+  fishCondition: string[] | null //change in the future to array
+  // fishConditions: string[] | string
   lifeStage: string
   adiposeClipped: boolean | null
   existingMarks: Array<ReleaseMarkI>
@@ -42,7 +43,8 @@ export const individualFishInitialState = {
   forkLength: null,
   run: '',
   weight: null,
-  fishCondition: '',
+  fishCondition: '', //change in the future to array
+  // fishConditions: [],
   lifeStage: '',
   adiposeClipped: false,
   existingMarks: [],
@@ -97,14 +99,9 @@ export const saveFishSlice = createSlice({
     },
 
     saveBatchCount: (state, action) => {
-      const {
-        tabId,
-        species,
-        adiposeClipped,
-        existingMarks,
-        forkLengths,
-        fishCondition: fishConditionValue,
-      } = action.payload
+      const { tabId, batchCharacteristics, forkLengths } = action.payload
+      const { species, adiposeClipped, existingMarks, fishConditions } =
+        batchCharacteristics
       let fishStoreCopy = cloneDeep(
         state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
       )
@@ -114,7 +111,7 @@ export const saveFishSlice = createSlice({
         lifeStage: string
         dead: boolean
         existingMark: boolean
-        fishCondition: boolean
+        fishConditions: string[]
       }
 
       interface PreparedFishEntry {
@@ -151,7 +148,7 @@ export const saveFishSlice = createSlice({
       const organizedFishEntriesResult = organizeFishEntries(forkLengths)
 
       for (const value of Object.values(organizedFishEntriesResult)) {
-        const { forkLength, lifeStage, dead, existingMark, fishCondition } =
+        const { forkLength, lifeStage, dead, existingMark, fishConditions } =
           value.fishEntryData
         const batchCountEntry = {
           species: species,
@@ -163,7 +160,7 @@ export const saveFishSlice = createSlice({
           adiposeClipped: adiposeClipped,
           existingMarks: existingMark ? existingMarks : [],
           dead: dead,
-          fishCondition: fishCondition ? fishConditionValue : false,
+          fishCondition: fishConditions,
           willBeUsedInRecapture: null,
           plusCountMethod: null,
           plusCount: false,
