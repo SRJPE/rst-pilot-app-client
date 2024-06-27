@@ -67,15 +67,13 @@ const BatchCount = ({
   const [deadIsLocked, setDeadIsLocked] = useState(false as boolean)
   const [deadToggle, setDeadToggle] = useState(false as boolean)
   const [markToggle, setMarkToggle] = useState(false as boolean)
-  const [conditionToggle, setConditionToggle] = useState(false as boolean)
-  const {
-    tabId,
-    species,
-    adiposeClipped,
-    fishCondition,
-    existingMarks,
-    forkLengths,
-  } = batchCountStore
+  const [FC1Toggle, setFC1Toggle] = useState(false as boolean)
+  const [FC2Toggle, setFC2Toggle] = useState(false as boolean)
+  const [FC3Toggle, setFC3Toggle] = useState(false as boolean)
+
+  const { tabId, batchCharacteristics, forkLengths } = batchCountStore
+  const { species, adiposeClipped, fishConditions, existingMarks } =
+    batchCharacteristics
 
   useEffect(() => {
     if (species === '') {
@@ -147,13 +145,21 @@ const BatchCount = ({
       case 'mark':
         setMarkToggle(!markToggle)
         break
-      case 'condition':
-        setConditionToggle(!conditionToggle)
+      case 'FC1':
+        setFC1Toggle(!FC1Toggle)
+        break
+      case 'FC2':
+        setFC2Toggle(!FC2Toggle)
+        break
+      case 'FC3':
+        setFC3Toggle(!FC3Toggle)
         break
 
       default:
         setMarkToggle(false)
-        setConditionToggle(false)
+        setFC1Toggle(false)
+        setFC2Toggle(false)
+        setFC3Toggle(false)
         if (deadIsLocked) return
         setDeadToggle(false)
         break
@@ -204,12 +210,9 @@ const BatchCount = ({
                     <Text>
                       Species: <Text bold>{capitalize(species)}</Text>
                     </Text>
-                    <Text>
-                      Fish Condition:{' '}
-                      <Text bold>{capitalize(fishCondition)}</Text>
-                    </Text>
-                  </HStack>
-                  <HStack space={6} ml='100'>
+
+                    {/* </HStack>
+                  <HStack space={6} ml='100'> */}
                     <Text>
                       Adipose Clipped:{' '}
                       <Text bold>{adiposeClipped ? 'Yes' : 'No'}</Text>
@@ -228,6 +231,14 @@ const BatchCount = ({
                       </Text>
                     </Text>
                   </HStack>
+                  <Text>
+                    Fish Condition(s):{' '}
+                    {fishConditions.map((condition: string, index: number) => (
+                      <Text bold key={index}>
+                        {`${index + 1}. ${capitalize(condition)} `}
+                      </Text>
+                    ))}
+                  </Text>
                 </VStack>
               </HStack>
               <HStack space={4}>
@@ -303,7 +314,7 @@ const BatchCount = ({
                         <Radio.Group
                           name='lifeStageRadioGroup'
                           value={lifeStageRadioValue}
-                          onChange={nextValue => {
+                          onChange={(nextValue) => {
                             setLifeStageRadioValue(nextValue)
                           }}
                         >
@@ -373,7 +384,11 @@ const BatchCount = ({
                     ignoreLifeStage={species !== 'Chinook salmon'}
                     deadToggle={deadToggle}
                     markToggle={markToggle}
-                    conditionToggle={conditionToggle}
+                    fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
+                      .map((toggle, index) =>
+                        toggle ? fishConditions[index] : null
+                      )
+                      .filter((condition) => condition !== null)}
                     handleToggles={handleToggles}
                   />
                   {species !== 'Chinook salmon' && <View mb='65'></View>}
@@ -442,19 +457,26 @@ const BatchCount = ({
                     />
                   </VStack>
                 )}
-                {fishCondition !== 'none' && (
-                  <VStack alignItems='center' space={4} mt='2'>
-                    <Text fontSize='16'>Condition</Text>
-                    <Switch
-                      shadow='3'
-                      offTrackColor='secondary'
-                      onTrackColor='primary'
-                      size='md'
-                      isChecked={conditionToggle}
-                      onToggle={() => handleToggles('condition')}
-                    />
-                  </VStack>
-                )}
+                {fishConditions.length > 0 &&
+                  fishConditions.map((condition: string, index: number) => (
+                    <VStack alignItems='center' space={4} mt='2' key={index}>
+                      <Text fontSize='16'>{`FC${index + 1}`}</Text>
+                      <Switch
+                        shadow='3'
+                        offTrackColor='secondary'
+                        onTrackColor='primary'
+                        size='md'
+                        isChecked={
+                          index + 1 === 1
+                            ? FC1Toggle
+                            : index + 1 === 2
+                            ? FC2Toggle
+                            : FC3Toggle
+                        }
+                        onToggle={() => handleToggles(`FC${index + 1}`)}
+                      />
+                    </VStack>
+                  ))}
                 <VStack space={4}>
                   <Heading size='md'>
                     Last Fork length Entered: {calculateLastFish()}
@@ -475,7 +497,7 @@ const BatchCount = ({
       <CustomModal
         isOpen={batchCharacteristicsModalOpen}
         closeModal={() => setBatchCharacteristicsModalOpen(false)}
-        height='1/2'
+        height='3/4'
       >
         <BatchCharacteristicsModalContent
           closeModal={() => setBatchCharacteristicsModalOpen(false)}

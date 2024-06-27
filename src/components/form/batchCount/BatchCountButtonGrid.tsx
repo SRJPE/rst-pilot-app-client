@@ -12,7 +12,7 @@ const BatchCountButtonGrid = ({
   ignoreLifeStage,
   deadToggle,
   markToggle,
-  conditionToggle,
+  fishConditions,
   handleToggles,
 }: {
   firstButton: number
@@ -21,7 +21,7 @@ const BatchCountButtonGrid = ({
   ignoreLifeStage?: boolean
   deadToggle: boolean
   markToggle: boolean
-  conditionToggle: boolean
+  fishConditions: string[]
   handleToggles: any
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
@@ -38,7 +38,7 @@ const BatchCountButtonGrid = ({
         lifeStage: ignoreLifeStage ? null : selectedLifeStage,
         dead: deadToggle,
         existingMark: markToggle,
-        fishCondition: conditionToggle,
+        fishConditions,
       })
     )
     handleToggles('reset')

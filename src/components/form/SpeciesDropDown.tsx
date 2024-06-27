@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import { View } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
 
-export default function CrewDropDown({
+export default function SpeciesDropDown({
   open,
   onOpen,
   setOpen,
@@ -10,43 +9,23 @@ export default function CrewDropDown({
   setList,
   setFieldValue,
   setFieldTouched,
-  visitSetupState,
-  stream,
-  tabId,
 }: {
   open: boolean
-  onOpen: any
+  onOpen?: any
   setOpen: any
-  list: any
+  list: any[]
   setList: any
   setFieldValue: any
   setFieldTouched: any
-  visitSetupState: any
-  stream: string
-  tabId: any
 }) {
-  const [value, setValue] = useState([] as Array<any>)
+  const [value, setValue] = useState('' as string)
 
   useEffect(() => {
-    if (visitSetupState[tabId]?.values?.crew) {
-      setValue(visitSetupState[tabId]?.values?.crew)
+    if (value !== '') {
+      setFieldTouched('species', true)
     }
-  }, [tabId])
-
-  useEffect(() => {
-    setFieldValue('crew', [...value])
-    if (value.length) setFieldTouched('crew', true)
+    setFieldValue('species', value)
   }, [value])
-
-  useEffect(() => {
-    clearSelectedValues()
-  }, [stream])
-
-  const clearSelectedValues = () => {
-    setValue([])
-    setFieldValue('crew', [])
-    setFieldTouched('crew', false)
-  }
 
   return (
     <DropDownPicker
@@ -56,26 +35,26 @@ export default function CrewDropDown({
       items={list}
       setOpen={setOpen}
       setValue={setValue}
+      searchable={true}
       setItems={setList}
-      multiple={true}
-      mode='BADGE'
-      badgeDotColors={['#007C7C']}
-      placeholder='Select your crew'
+      multiple={false}
+      placeholder='Select your species'
       searchPlaceholder='Search...'
-      maxHeight={275}
+      maxHeight={250}
+      closeAfterSelecting={true}
       style={{
         marginTop: 4,
         borderColor: '#d4d4d4d4',
         borderRadius: 4,
         height: 50,
-        backgroundColor: '#fff',
+        backgroundColor: '#fafafa',
       }}
       arrowIconStyle={{
         width: 30,
         height: 30,
       }}
       dropDownContainerStyle={{
-        backgroundColor: '#fff',
+        backgroundColor: '#fafafa',
         borderColor: '#d4d4d4d4',
         borderBottomLeftRadius: 4,
         borderBottomRightRadius: 4,
@@ -83,7 +62,6 @@ export default function CrewDropDown({
       textStyle={{
         fontSize: 16,
       }}
-      // renderListItem={props => <CrewListItem {...props} />}
     />
   )
 }
