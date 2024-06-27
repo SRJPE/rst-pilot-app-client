@@ -3,6 +3,7 @@ import DropDownPicker from 'react-native-dropdown-picker'
 
 export default function SpeciesDropDown({
   open,
+  onOpen,
   setOpen,
   list,
   setList,
@@ -10,6 +11,7 @@ export default function SpeciesDropDown({
   setFieldTouched,
 }: {
   open: boolean
+  onOpen?: any
   setOpen: any
   list: any[]
   setList: any
@@ -19,13 +21,16 @@ export default function SpeciesDropDown({
   const [value, setValue] = useState('' as string)
 
   useEffect(() => {
+    if (value !== '') {
+      setFieldTouched('species', true)
+    }
     setFieldValue('species', value)
-    if (value.length > 0) setFieldTouched('species', true)
   }, [value])
 
   return (
     <DropDownPicker
       open={open}
+      onOpen={onOpen}
       value={value}
       items={list}
       setOpen={setOpen}
