@@ -13,7 +13,7 @@ import {
   VStack,
   View,
 } from 'native-base'
-import React, { memo, useState } from 'react'
+import React, { memo, useCallback, useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   addMarkToBatchCountExistingMarks,
@@ -32,12 +32,7 @@ import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
 import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
 import { ReleaseMarkI } from '../../../screens/formScreens/AddFish'
 import SpeciesDropDown from '../SpeciesDropDown'
-
-const initialFormValues = {
-  species: '',
-  adiposeClipped: false,
-  fishCondition: 'none',
-}
+import FishConditionsDropDown from '../FishConditionsDropDown'
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -58,6 +53,18 @@ const BatchCharacteristicsModalContent = ({
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
+  const [fishConditionDropdownOpen, setFishConditionDropdownOpen] = useState(
+    false as boolean
+  )
+  const [fishConditionList, setFishConditionList] = useState<
+    { label: string; value: string }[]
+  >(
+    dropdownValues.fishCondition.map((condition: any) => ({
+      label: condition?.definition,
+      value: condition?.definition,
+    }))
+  )
+
   const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
     false as boolean
   )
@@ -69,8 +76,16 @@ const BatchCharacteristicsModalContent = ({
       value: taxon?.commonname,
     }))
   )
+  const onSpeciesOpen = useCallback(() => {
+    setFishConditionDropdownOpen(false)
+  }, [])
+  const onFishConditionOpen = useCallback(() => {
+    setSpeciesDropDownOpen(false)
+  }, [])
 
   const handleFormSubmit = (values: any) => {
+    delete values.existingMarks
+    delete values.batchCountExistingMarks
     let activeTabId = tabSlice.activeTabId
     if (activeTabId) {
       if (recentExistingMarks.length === 1) {
@@ -134,7 +149,7 @@ const BatchCharacteristicsModalContent = ({
     <View>
       <Formik
         validationSchema={batchCharacteristicsSchema}
-        initialValues={initialFormValues}
+        initialValues={batchCountStore.batchCharacteristics}
         onSubmit={(values) => handleFormSubmit(values)}
       >
         {({
@@ -164,6 +179,8 @@ const BatchCharacteristicsModalContent = ({
                   }
                   onPress={() => {
                     handleSubmit()
+                    setFishConditionDropdownOpen(false)
+
                     closeModal()
                   }}
                 >
@@ -178,7 +195,7 @@ const BatchCharacteristicsModalContent = ({
                 Please return to the individual fish input if you plan on
                 marking or sampling a fish.
               </Text>
-              <HStack>
+              <VStack space={4}>
                 <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 250 : 0}>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
@@ -192,6 +209,7 @@ const BatchCharacteristicsModalContent = ({
 
                   <SpeciesDropDown
                     open={speciesDropDownOpen}
+                    onOpen={onSpeciesOpen}
                     setOpen={setSpeciesDropDownOpen}
                     list={speciesList}
                     setList={setSpeciesList}
@@ -199,33 +217,32 @@ const BatchCharacteristicsModalContent = ({
                     setFieldTouched={setFieldTouched}
                   />
                 </FormControl>
-                <FormControl w='1/2' pr='5'>
+                <FormControl
+                  w='100%'
+                  pr='5'
+                  mb={fishConditionDropdownOpen ? 160 : 0}
+                >
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Fish Condition
                     </Text>
                   </FormControl.Label>
 
-                  {touched.fishCondition &&
-                    errors.fishCondition &&
-                    RenderErrorMessage(errors, 'fishCondition')}
+                  {touched.fishConditions &&
+                    errors.fishConditions &&
+                    RenderErrorMessage(errors, 'fishConditions')}
 
-                  <CustomSelect
-                    selectedValue={values.fishCondition}
-                    placeholder={'Fish Condition'}
-                    onValueChange={(value: any) =>
-                      handleChange('fishCondition')(value)
-                    }
+                  <FishConditionsDropDown
+                    open={fishConditionDropdownOpen}
+                    onOpen={onFishConditionOpen}
+                    setOpen={setFishConditionDropdownOpen}
+                    list={fishConditionList}
+                    setList={setFishConditionList}
+                    setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues.fishCondition.map(
-                      (condition: any) => ({
-                        label: condition?.definition,
-                        value: condition?.definition,
-                      })
-                    )}
                   />
                 </FormControl>
-              </HStack>
+              </VStack>
 
               <HStack space={10}>
                 <VStack space={4} w={'20%'}>
@@ -271,7 +288,8 @@ const BatchCharacteristicsModalContent = ({
                   <Text color='black' fontSize='xl'>
                     Add Existing Mark
                   </Text>
-                  {batchCountStore.existingMarks.length < 1 && (
+                  {batchCountStore.batchCharacteristics.existingMarks.length <
+                    1 && (
                     <VStack space={5}>
                       {dropdownValues.twoMostRecentReleaseMarks.length > 0 &&
                         decodedRecentReleaseMarks(
@@ -317,14 +335,20 @@ const BatchCharacteristicsModalContent = ({
                     </VStack>
                   )}
                   <MarkBadgeList
-                    badgeListContent={batchCountStore.existingMarks}
+                    badgeListContent={
+                      batchCountStore.batchCharacteristics.existingMarks
+                    }
                     setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
                     field='batchCountExistingMarks'
                   />
-                  {batchCountStore.existingMarks.length < 1 && (
+                  {batchCountStore.batchCharacteristics.existingMarks.length <
+                    1 && (
                     <Pressable
-                      isDisabled={batchCountStore.existingMarks.length > 0}
+                      isDisabled={
+                        batchCountStore.batchCharacteristics.existingMarks
+                          .length > 0
+                      }
                       onPress={() => {
                         setRecentExistingMarks([])
                         setAddMarkModalOpen(true)
