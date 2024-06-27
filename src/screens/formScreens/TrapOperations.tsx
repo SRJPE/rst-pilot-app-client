@@ -34,7 +34,12 @@ import {
 } from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { DeviceEventEmitter, Keyboard } from 'react-native'
-import { QARanges, navigateHelper } from '../../utils/utils'
+import {
+  QARanges,
+  navigateHelper,
+  navigateFlowRightButton,
+  navigateFlowLeftButton,
+} from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import OptimizedInput from '../../components/Shared/OptimizedInput'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
@@ -83,6 +88,10 @@ const TrapOperations = ({
   tabSlice: TabStateI
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const navigationState = useSelector((state: any) => state.navigation)
+  console.log('navigationState', navigationState)
+  const activeStep = navigationState.activeStep
+  const activePage = navigationState.steps[activeStep]?.name
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
@@ -186,7 +195,7 @@ const TrapOperations = ({
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
       const allTabIds: string[] = Object.keys(tabSlice.tabs)
-      allTabIds.forEach((allTabId) => {
+      allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
             stepCompletedCheck = false
@@ -255,6 +264,33 @@ const TrapOperations = ({
     setEndTime(currentDate)
   }
 
+  const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
+    if (activeTabId && activeTabId != 'placeholderId') {
+      const destination =
+        direction === 'left'
+          ? navigateFlowLeftButton(activePage, false, navigation)
+          : navigateFlowRightButton(values, activePage, false, navigation)
+      const callback = () => {
+        navigateHelper(
+          destination,
+          navigationSlice,
+          navigation,
+          dispatch,
+          updateActiveStep
+        )
+      }
+
+      navigation.dispatch(StackActions.replace('Loading...'))
+
+      setTimeout(() => {
+        DeviceEventEmitter.emit('event.load', {
+          process: () => onSubmit(values, activeTabId),
+          callback,
+        })
+      }, 1000)
+    }
+  }
+
   return (
     <Formik
       validationSchema={trapOperationsSchema}
@@ -272,99 +308,7 @@ const TrapOperations = ({
           : null
       }
       // only create initial error when form is not completed
-      onSubmit={(values: any) => {
-        if (activeTabId && activeTabId != 'placeholderId') {
-          const activeTabName = tabSlice.tabs[activeTabId].name
-
-          const flowRange =
-            QARanges.flowMeasure?.[selectedStream.trim()]?.[
-              selectedTrapSite.trim()
-            ][activeTabName.trim()]
-
-          const callback = () => {
-            if (values?.trapStatus === 'trap not functioning') {
-              navigateHelper(
-                'Non Functional Trap',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            } else if (
-              values?.trapStatus === 'trap not in service - restart trapping'
-            ) {
-              navigateHelper(
-                'Started Trapping',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            } else if (values?.flowMeasure > flowRange?.max) {
-              navigateHelper(
-                'High Flows',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            } else if (values?.waterTemperatureUnit === '°C') {
-              if (values?.waterTemperature > 30) {
-                navigateHelper(
-                  'High Temperatures',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              } else {
-                navigateHelper(
-                  'Fish Processing',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              }
-            } else if (values?.waterTemperatureUnit === '°F') {
-              if (values?.waterTemperature > 86) {
-                navigateHelper(
-                  'High Temperatures',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              } else {
-                navigateHelper(
-                  'Fish Processing',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              }
-            } else {
-              navigateHelper(
-                'Fish Processing',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            }
-          }
-
-          navigation.dispatch(StackActions.replace('Loading...'))
-
-          setTimeout(() => {
-            DeviceEventEmitter.emit('event.load', {
-              process: () => onSubmit(values, activeTabId),
-              callback,
-            })
-          }, 1000)
-        }
-      }}
+      onSubmit={() => {}}
     >
       {({
         handleChange,
@@ -388,7 +332,9 @@ const TrapOperations = ({
           () => (
             <NavButtons
               navigation={navigation}
-              handleSubmit={handleSubmit}
+              handleSubmit={(buttonDirection: 'left' | 'right') => {
+                handleNavButtonClick(buttonDirection, values)
+              }}
               errors={errors}
               touched={touched}
               values={values}
@@ -629,7 +575,7 @@ const TrapOperations = ({
                           </FormControl.Label>
                           <Popover
                             placement='bottom left'
-                            trigger={(triggerProps) => {
+                            trigger={triggerProps => {
                               return (
                                 <IconButton
                                   {...triggerProps}

@@ -100,54 +100,44 @@ const NavButtons = ({
     //this is now kind of redundant with the implementation of the loading screen
     switch (activePage) {
       case 'Visit Setup':
-        if (isPaperEntry) {
-          navigateHelper('Paper Entry')
-        } else {
-          navigateHelper('Trap Operations')
-        }
+        navigateHelper('Trap Operations')
         break
       case 'Trap Operations':
-        if (!isPaperEntryStore) {
-          if (values?.trapStatus === 'trap not functioning') {
-            navigateHelper('Non Functional Trap')
-          } else if (
-            values?.trapStatus === 'trap not in service - restart trapping'
-          ) {
-            navigateHelper('Started Trapping')
-          } else if (values?.flowMeasure > 1000) {
-            navigateHelper('High Flows')
-          } else if (values?.waterTemperatureUnit === '°C') {
-            if (values?.waterTemperature > 30) {
-              navigateHelper('High Temperatures')
-            } else {
-              navigateHelper('Fish Processing')
-            }
-          } else if (values?.waterTemperatureUnit === '°F') {
-            if (values?.waterTemperature > 86) {
-              navigateHelper('High Temperatures')
-            } else {
-              navigateHelper('Fish Processing')
-            }
+        if (values?.trapStatus === 'trap not functioning') {
+          navigateHelper('Non Functional Trap')
+        } else if (
+          values?.trapStatus === 'trap not in service - restart trapping'
+        ) {
+          navigateHelper('Started Trapping')
+        } else if (values?.flowMeasure > 1000) {
+          navigateHelper('High Flows')
+        } else if (values?.waterTemperatureUnit === '°C') {
+          if (values?.waterTemperature > 30) {
+            navigateHelper('High Temperatures')
           } else {
             navigateHelper('Fish Processing')
           }
+        } else if (values?.waterTemperatureUnit === '°F') {
+          if (values?.waterTemperature > 86) {
+            navigateHelper('High Temperatures')
+          } else {
+            navigateHelper('Fish Processing')
+          }
+        } else {
+          navigateHelper('Fish Processing')
         }
         break
       case 'Fish Processing':
-        if (!isPaperEntryStore) {
-          if (values?.fishProcessedResult === 'no fish caught') {
-            navigateHelper('No Fish Caught')
-          } else if (
-            values?.fishProcessedResult ===
-              'no catch data, fish left in live box' ||
-            values?.fishProcessedResult === 'no catch data, fish released'
-          ) {
-            navigateHelper('Trap Post-Processing')
-          } else {
-            navigateHelper('Fish Input')
-          }
-        } else {
+        if (values?.fishProcessedResult === 'no fish caught') {
+          navigateHelper('No Fish Caught')
+        } else if (
+          values?.fishProcessedResult ===
+            'no catch data, fish left in live box' ||
+          values?.fishProcessedResult === 'no catch data, fish released'
+        ) {
           navigateHelper('Trap Post-Processing')
+        } else {
+          navigateHelper('Fish Input')
         }
         break
       case 'Fish Input':
@@ -240,7 +230,7 @@ const NavButtons = ({
   const handleRightButton = () => {
     //if handleSubmit truthy, submit form to save to redux
     if (handleSubmit) {
-      handleSubmit()
+      handleSubmit('right')
       showSlideAlert(dispatch)
     }
 
@@ -262,15 +252,19 @@ const NavButtons = ({
     }
 
     console.log('handleSubmit', handleSubmit)
+    // if function truthy, submit form to save to redux
+    if (handleSubmit) {
+      //do not submit when going back from incomplete sections page (prevents early submission errors)
+      if (activePage !== 'Incomplete Sections') {
+        handleSubmit('left')
+      } else {
+        navigateFlowLeftButton()
+      }
+    }
 
-    //if function truthy, submit form to save to redux
-    // if (handleSubmit) {
-    //   //do not submit when going back from incomplete sections page (prevents early submission errors)
-    //   if (activePage !== 'Incomplete Sections') {
-    //     handleSubmit()
-    //   }
-    // }
-    navigateFlowLeftButton()
+    if (!shouldProceedToLoadingScreen) {
+      navigateFlowLeftButton()
+    }
   }
 
   const renderRightButtonText = (activePage: string) => {

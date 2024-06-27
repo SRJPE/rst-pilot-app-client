@@ -373,23 +373,6 @@ const VisitSetup = ({
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
       onSubmit={values => {
         const callback = () => {
-          // if (isPaperEntry) {
-          //   navigateHelper(
-          //     'Paper Entry',
-          //     navigationSlice,
-          //     navigation,
-          //     dispatch,
-          //     updateActiveStep
-          //   )
-          // } else {
-          //   navigateHelper(
-          //     'Trap Operations',
-          //     navigationSlice,
-          //     navigation,
-          //     dispatch,
-          //     updateActiveStep
-          //   )
-          // }
           navigateHelper(
             'Trap Operations',
             navigationSlice,

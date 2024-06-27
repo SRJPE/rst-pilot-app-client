@@ -1,4 +1,4 @@
-import { Formik, yupToFormErrors } from 'formik'
+import { Formik, yupToFormErrors, FormikProps } from 'formik'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
@@ -29,7 +29,12 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import { QARanges, navigateHelper } from '../../utils/utils'
+import {
+  QARanges,
+  navigateHelper,
+  navigateFlowRightButton,
+  navigateFlowLeftButton,
+} from '../../utils/utils'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { StackActions } from '@react-navigation/native'
 
@@ -38,7 +43,7 @@ const mapStateToProps = (state: RootState) => {
   let willBeHoldingFishForMarkRecapture = false
 
   if (activeTabId) {
-    const tabsContainHoldingTrue = Object.keys(state.tabSlice).some(
+    const tabsContainHoldingTrue = Object.keys(state.tabSlice.tabs).some(
       tabId =>
         state.fishProcessing?.[tabId]?.values?.willBeHoldingFishForMarkRecapture
     )
@@ -73,6 +78,9 @@ const TrapPostProcessing = ({
   navigationSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const navigationState = useSelector((state: any) => state.navigation)
+  const activeStep = navigationState.activeStep
+  const activePage = navigationState.steps[activeStep]?.name
   const recordTurbidityInPostProcessing = useSelector(
     (state: any) =>
       state.trapOperations?.[tabSlice.activeTabId]?.values
@@ -125,6 +133,7 @@ const TrapPostProcessing = ({
   }
 
   const onSubmit = (values: any, tabId: string) => {
+    console.log('🚀 ~ onSubmit ~ values', values)
     let trapVisitStartTime = null
     if (values.endingTrapStatus == 'Restart Trap') {
       trapVisitStartTime = new Date()
@@ -184,6 +193,46 @@ const TrapPostProcessing = ({
     return initialValues
   }, [reduxState, activeTabId])
 
+  const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
+    console.log(
+      'willBeHoldingFishForMarkRecapture',
+      willBeHoldingFishForMarkRecapture
+    )
+    if (activeTabId && activeTabId != 'placeholderId') {
+      const destination =
+        direction === 'left'
+          ? navigateFlowLeftButton(
+              activePage,
+              willBeHoldingFishForMarkRecapture,
+              navigation
+            )
+          : navigateFlowRightButton(
+              values,
+              activePage,
+              willBeHoldingFishForMarkRecapture,
+              navigation
+            )
+      const callback = () => {
+        navigateHelper(
+          destination,
+          navigationSlice,
+          navigation,
+          dispatch,
+          updateActiveStep
+        )
+      }
+
+      navigation.dispatch(StackActions.replace('Loading...'))
+
+      setTimeout(() => {
+        DeviceEventEmitter.emit('event.load', {
+          process: () => onSubmit(values, activeTabId),
+          callback,
+        })
+      }, 1000)
+    }
+  }
+
   return (
     <Formik
       validationSchema={trapPostProcessingSchema}
@@ -195,38 +244,7 @@ const TrapPostProcessing = ({
           ? reduxState[activeTabId].errors
           : null
       }
-      onSubmit={values => {
-        if (activeTabId && activeTabId != 'placeholderId') {
-          const callback = () => {
-            if (willBeHoldingFishForMarkRecapture) {
-              navigateHelper(
-                'Fish Holding',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            } else {
-              navigateHelper(
-                'Incomplete Sections',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            }
-          }
-
-          navigation.dispatch(StackActions.replace('Loading...'))
-
-          setTimeout(() => {
-            DeviceEventEmitter.emit('event.load', {
-              process: () => onSubmit(values, activeTabId),
-              callback,
-            })
-          }, 1000)
-        }
-      }}
+      onSubmit={() => {}}
     >
       {({
         handleChange,
@@ -249,7 +267,9 @@ const TrapPostProcessing = ({
           () => (
             <NavButtons
               navigation={navigation}
-              handleSubmit={handleSubmit}
+              handleSubmit={(buttonDirection: 'left' | 'right') => {
+                handleNavButtonClick(buttonDirection, values)
+              }}
               errors={errors}
               touched={touched}
               shouldProceedToLoadingScreen={true}

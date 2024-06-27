@@ -101,27 +101,30 @@ const FishInput = ({
     console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
   }
 
-  const submissionLoader = () => {
-    if (activeTabId && activeTabId != 'placeholderId') {
-      const callback = () => {
-        navigateHelper(
-          'Trap Post-Processing',
-          navigationSlice,
-          navigation,
-          dispatch,
-          updateActiveStep
-        )
-      }
+  const submissionLoader = (direction: 'left' | 'right') => {
+    console.log('submissionLoader', activeTabId, activeTabId)
+    const destination =
+      direction === 'left' ? 'Fish Processing' : 'Trap Post-Processing'
 
-      navigation.dispatch(StackActions.replace('Loading...'))
-
-      setTimeout(() => {
-        DeviceEventEmitter.emit('event.load', {
-          process: () => handleSubmit(),
-          callback,
-        })
-      }, 1000)
+    console.log('destination', destination)
+    const callback = () => {
+      navigateHelper(
+        destination,
+        navigationSlice,
+        navigation,
+        dispatch,
+        updateActiveStep
+      )
     }
+
+    navigation.dispatch(StackActions.replace('Loading...'))
+
+    setTimeout(() => {
+      DeviceEventEmitter.emit('event.load', {
+        process: () => handleSubmit(),
+        callback,
+      })
+    }, 1000)
   }
 
   return (
@@ -270,7 +273,9 @@ const FishInput = ({
       </ScrollView>
       <NavButtons
         navigation={navigation}
-        handleSubmit={submissionLoader}
+        handleSubmit={(buttonDirection: 'left' | 'right') => {
+          submissionLoader(buttonDirection)
+        }}
         shouldProceedToLoadingScreen={true}
         values={checkboxGroupValue}
       />

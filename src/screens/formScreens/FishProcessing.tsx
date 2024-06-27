@@ -9,8 +9,7 @@ import {
   HStack,
   Radio,
 } from 'native-base'
-import { connect, useDispatch } from 'react-redux'
-import { useSelector } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import NavButtons from '../../components/formContainer/NavButtons'
 import CustomSelect from '../../components/Shared/CustomSelect'
@@ -26,7 +25,11 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
 import { useEffect, useMemo } from 'react'
 import { DeviceEventEmitter } from 'react-native'
-import { navigateHelper } from '../../utils/utils'
+import {
+  navigateHelper,
+  navigateFlowRightButton,
+  navigateFlowLeftButton,
+} from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
@@ -63,6 +66,9 @@ const FishProcessing = ({
   navigationSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const navigationState = useSelector((state: any) => state.navigation)
+  const activeStep = navigationState.activeStep
+  const activePage = navigationState.steps[activeStep]?.name
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const {
     fishProcessed: fishProcessedDropdowns,
@@ -109,6 +115,33 @@ const FishProcessing = ({
     }
   }
 
+  const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
+    if (activeTabId && activeTabId != 'placeholderId') {
+      const destination =
+        direction === 'left'
+          ? navigateFlowLeftButton(activePage, false, navigation)
+          : navigateFlowRightButton(values, activePage, false, navigation)
+      const callback = () => {
+        navigateHelper(
+          destination,
+          navigationSlice,
+          navigation,
+          dispatch,
+          updateActiveStep
+        )
+      }
+
+      navigation.dispatch(StackActions.replace('Loading...'))
+
+      setTimeout(() => {
+        DeviceEventEmitter.emit('event.load', {
+          process: () => onSubmit(values, activeTabId),
+          callback,
+        })
+      }, 1000)
+    }
+  }
+
   return (
     <Formik
       validationSchema={fishProcessingSchema}
@@ -125,60 +158,7 @@ const FishProcessing = ({
           ? reduxState[activeTabId].errors
           : { fishProcessedResult: '' }
       }
-      onSubmit={values => {
-        if (activeTabId && activeTabId != 'placeholderId') {
-          const callback = () => {
-            // if (!isPaperEntryStore) {
-            if (values?.fishProcessedResult === 'no fish caught') {
-              navigateHelper(
-                'No Fish Caught',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            } else if (
-              values?.fishProcessedResult ===
-                'no catch data, fish left in live box' ||
-              values?.fishProcessedResult === 'no catch data, fish released'
-            ) {
-              navigateHelper(
-                'Trap Post-Processing',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            } else {
-              navigateHelper(
-                'Fish Input',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            }
-            // } else {
-            //   navigateHelper(
-            //     'Trap Post-Processing',
-            //     navigationSlice,
-            //     navigation,
-            //     dispatch,
-            //     updateActiveStep
-            //   )
-            // }
-          }
-
-          navigation.dispatch(StackActions.replace('Loading...'))
-
-          setTimeout(() => {
-            DeviceEventEmitter.emit('event.load', {
-              process: () => onSubmit(values, tabSlice?.activeTabId),
-              callback,
-            })
-          }, 1000)
-        }
-      }}
+      onSubmit={() => {}}
     >
       {({
         handleChange,
@@ -200,7 +180,9 @@ const FishProcessing = ({
           () => (
             <NavButtons
               navigation={navigation}
-              handleSubmit={handleSubmit}
+              handleSubmit={(buttonDirection: 'left' | 'right') => {
+                handleNavButtonClick(buttonDirection, values)
+              }}
               errors={errors}
               touched={touched}
               values={values}
