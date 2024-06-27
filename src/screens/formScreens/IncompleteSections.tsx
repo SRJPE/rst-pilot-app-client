@@ -254,12 +254,9 @@ const IncompleteSections = ({
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
         isPaperEntry: visitSetupState[id].isPaperEntry,
-        trapVisitTimeStart: visitSetupState[id].isPaperEntry
-          ? paperEntryState[id].values.startDate
-          : trapPostProcessingState[id].values.trapVisitStartTime,
-        trapVisitTimeEnd: visitSetupState[id].isPaperEntry
-          ? paperEntryState[id].values.endDate
-          : trapOperationsState[id].values.trapVisitStopTime,
+        trapVisitTimeStart:
+          trapPostProcessingState[id].values.trapVisitStartTime,
+        trapVisitTimeEnd: trapOperationsState[id].values.trapVisitStopTime,
         fishProcessed: returnNullableTableId(
           fishProcessedValues.indexOf(
             fishProcessingState[id].values.fishProcessedResult
