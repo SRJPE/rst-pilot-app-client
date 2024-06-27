@@ -71,7 +71,7 @@ const NavButtons = ({
   const checkWillBeHoldingFishForMarkRecapture = () => {
     if (tabSlice.activeTabId) {
       const tabsContainHoldingTrue = Object.keys(tabSlice.tabs).some(
-        (tabId) =>
+        tabId =>
           fishProcessingSlice?.[tabId]?.values
             ?.willBeHoldingFishForMarkRecapture
       )
@@ -191,7 +191,8 @@ const NavButtons = ({
   const navigateFlowLeftButton = () => {
     switch (activePage) {
       case 'Trap Operations':
-        if (isPaperEntryStore) navigateHelper('Paper Entry')
+        // if (isPaperEntryStore) navigateHelper('Paper Entry')
+        navigateHelper('Visit Setup')
         break
       case 'High Flows':
         navigateHelper('Trap Operations')
@@ -260,13 +261,15 @@ const NavButtons = ({
       return
     }
 
+    console.log('handleSubmit', handleSubmit)
+
     //if function truthy, submit form to save to redux
-    if (handleSubmit) {
-      //do not submit when going back from incomplete sections page (prevents early submission errors)
-      if (activePage !== 'Incomplete Sections') {
-        handleSubmit()
-      }
-    }
+    // if (handleSubmit) {
+    //   //do not submit when going back from incomplete sections page (prevents early submission errors)
+    //   if (activePage !== 'Incomplete Sections') {
+    //     handleSubmit()
+    //   }
+    // }
     navigateFlowLeftButton()
   }
 

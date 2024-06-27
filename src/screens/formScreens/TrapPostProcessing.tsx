@@ -239,7 +239,6 @@ const TrapPostProcessing = ({
         values,
         resetForm,
       }) => {
-        console.log('error', errors)
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 5) {
             onSubmit(values, previouslyActiveTabId)

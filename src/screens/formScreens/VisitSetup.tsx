@@ -93,6 +93,8 @@ const VisitSetup = ({
           visitSetupState[tabSlice?.activeTabId]?.values?.trapSite
         )
       }
+      // set default values
+      setIsPaperEntry(visitSetupState[tabSlice?.activeTabId]?.isPaperEntry)
     }
   }, [tabSlice?.activeTabId])
 
@@ -584,6 +586,7 @@ const VisitSetup = ({
                         visitSetupState={visitSetupState}
                         stream={values.stream}
                         tabId={tabSlice?.activeTabId}
+                        values={values}
                       />
                     </FormControl>
                     {touched.crew &&
