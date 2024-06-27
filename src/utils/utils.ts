@@ -1,3 +1,4 @@
+import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
@@ -238,22 +239,26 @@ export const getSubstring = (
 }
 
 export function gaussianKernel(x: number) {
-    return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+  return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x)
 }
 
-export function kernelDensityEstimation(data: number[], bandwidth: number, grid: number[]): number[] {
-  const density: number[] = [];
+export function kernelDensityEstimation(
+  data: number[],
+  bandwidth: number,
+  grid: number[]
+): number[] {
+  const density: number[] = []
 
   for (let i = 0; i < grid.length; i++) {
-    let sum = 0;
+    let sum = 0
     for (let j = 0; j < data.length; j++) {
-      const u = (grid[i] - data[j]) / bandwidth;
-      sum += gaussianKernel(u);
+      const u = (grid[i] - data[j]) / bandwidth
+      sum += gaussianKernel(u)
     }
-    density[i] = sum / (data.length * bandwidth);
+    density[i] = sum / (data.length * bandwidth)
   }
 
-  return density;
+  return density
 }
 
 export const useDebounce = <T>(value: T, delay = 500) => {
@@ -285,7 +290,7 @@ export const navigateHelper = (
     }
   }
 
-  navigation.navigate('Trap Visit Form', { screen: destination })
+  navigation.dispatch(StackActions.replace(destination))
   dispatch({
     type: updateActiveStep,
     payload: payload,
