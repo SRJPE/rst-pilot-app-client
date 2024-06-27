@@ -6,7 +6,8 @@ import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import { debounce, isEqual } from 'lodash'
+import { isEqual } from 'lodash'
+import { StackActions } from '@react-navigation/native'
 
 const NavButtons = ({
   navigation,
@@ -88,7 +89,7 @@ const NavButtons = ({
       }
     }
 
-    navigation.navigate('Trap Visit Form', { screen: destination })
+    navigation.dispatch(StackActions.replace(destination))
     dispatch({
       type: updateActiveStep,
       payload: payload,
@@ -96,6 +97,7 @@ const NavButtons = ({
   }
 
   const navigateFlowRightButton = (values: any) => {
+    //this is now kind of redundant with the implementation of the loading screen
     switch (activePage) {
       case 'Visit Setup':
         if (isPaperEntry) {
@@ -148,6 +150,9 @@ const NavButtons = ({
           navigateHelper('Trap Post-Processing')
         }
         break
+      case 'Fish Input':
+        navigateHelper('Trap Post-Processing')
+        break
       case 'Trap Post-Processing':
         if (checkWillBeHoldingFishForMarkRecapture()) {
           navigateHelper('Fish Holding')
@@ -178,10 +183,7 @@ const NavButtons = ({
         navigation.navigate('Home')
         break
       default:
-        navigation.navigate('Trap Visit Form', {
-          screen: navigationState.steps[activeStep + 1]?.name,
-        })
-        dispatch(updateActiveStep(navigationState.activeStep + 1))
+        console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
         break
     }
   }
@@ -206,11 +208,17 @@ const NavButtons = ({
       case 'No Fish Caught':
         navigateHelper('Fish Processing')
         break
+      case 'Fish Input':
+        navigateHelper('Fish Processing')
+        break
       case 'Paper Entry':
         navigateHelper('Visit Setup')
         break
       case 'Started Trapping':
         navigateHelper('Trap Operations')
+        break
+      case 'Trap Post-Processing':
+        navigateHelper('Fish Input')
         break
       case 'Fish Holding':
         navigateHelper('Trap Post-Processing')
@@ -218,31 +226,40 @@ const NavButtons = ({
       case 'Incomplete Sections':
         if (checkWillBeHoldingFishForMarkRecapture()) {
           navigateHelper('Fish Holding')
+        } else {
+          navigateHelper('Trap Post-Processing')
         }
         break
       default:
+        console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
         break
     }
   }
 
   const handleRightButton = () => {
+    //if handleSubmit truthy, submit form to save to redux
     if (handleSubmit) {
       handleSubmit()
       showSlideAlert(dispatch)
     }
 
     if (!shouldProceedToLoadingScreen) {
-      // If proceeding to loading screen, do not navigate to next screen, instead navigate from loading screen
       navigateFlowRightButton(values)
     }
   }
 
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen
+    console.log('🚀 ~ handleLeftButton ~ activePage:', activePage)
     if (activePage === 'Visit Setup') {
       navigation.navigate('Home')
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Visit Setup' }],
+      })
       return
     }
+
     //if function truthy, submit form to save to redux
     if (handleSubmit) {
       //do not submit when going back from incomplete sections page (prevents early submission errors)
@@ -250,15 +267,6 @@ const NavButtons = ({
         handleSubmit()
       }
     }
-    //navigate left
-    navigation.navigate('Trap Visit Form', {
-      screen: navigationState.steps[activeStep - 1]?.name,
-    })
-    dispatch({
-      type: updateActiveStep,
-      payload: navigationState.activeStep - 1,
-    })
-    //navigate various flows if needed (This seems to not be causing performance issues even though it is kind of redundant to place it here)
     navigateFlowLeftButton()
   }
 
