@@ -34,11 +34,17 @@ import {
 } from '../../redux/reducers/formSlices/trapOperationsSlice'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { DeviceEventEmitter, Keyboard } from 'react-native'
-import { QARanges, navigateHelper } from '../../utils/utils'
+import {
+  QARanges,
+  navigateHelper,
+  navigateFlowRightButton,
+  navigateFlowLeftButton,
+} from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import OptimizedInput from '../../components/Shared/OptimizedInput'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -82,6 +88,10 @@ const TrapOperations = ({
   tabSlice: TabStateI
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const navigationState = useSelector((state: any) => state.navigation)
+  console.log('navigationState', navigationState)
+  const activeStep = navigationState.activeStep
+  const activePage = navigationState.steps[activeStep]?.name
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
@@ -89,7 +99,7 @@ const TrapOperations = ({
   const trapNotInServiceLabel = '- restart trapping'
   const trapNotInServiceIdentifier = 'trap not in service - restart trapping'
   const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
-  const [startTime, setStartTime] = useState(new Date() as any)
+  const [endTime, setEndTime] = useState(new Date() as any)
 
   const useFlowMeasureCalculationBool = (flowMeasureEntered: number) => {
     return useMemo(() => {
@@ -176,8 +186,8 @@ const TrapOperations = ({
           tabId,
           values: {
             ...values,
-            trapVisitStopTime: new Date(), //refactor needed
-            trapVisitStartTime: startTime,
+            trapVisitStopTime: endTime, //refactor needed
+            trapVisitStartTime: new Date(),
           },
           errors,
         })
@@ -236,6 +246,7 @@ const TrapOperations = ({
     return (
       <IconButton
         {...triggerProps}
+        marginTop={-2}
         icon={
           <Icon
             as={MaterialIcons}
@@ -248,9 +259,36 @@ const TrapOperations = ({
     )
   }
 
-  const onStartTimeChange = (event: any, selectedDate: any) => {
+  const onEndTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
-    setStartTime(currentDate)
+    setEndTime(currentDate)
+  }
+
+  const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
+    if (activeTabId && activeTabId != 'placeholderId') {
+      const destination =
+        direction === 'left'
+          ? navigateFlowLeftButton(activePage, false, navigation)
+          : navigateFlowRightButton(values, activePage, false, navigation)
+      const callback = () => {
+        navigateHelper(
+          destination,
+          navigationSlice,
+          navigation,
+          dispatch,
+          updateActiveStep
+        )
+      }
+
+      navigation.dispatch(StackActions.replace('Loading...'))
+
+      setTimeout(() => {
+        DeviceEventEmitter.emit('event.load', {
+          process: () => onSubmit(values, activeTabId),
+          callback,
+        })
+      }, 1000)
+    }
   }
 
   return (
@@ -270,99 +308,7 @@ const TrapOperations = ({
           : null
       }
       // only create initial error when form is not completed
-      onSubmit={(values: any) => {
-        if (activeTabId && activeTabId != 'placeholderId') {
-          const activeTabName = tabSlice.tabs[activeTabId].name
-
-          const flowRange =
-            QARanges.flowMeasure?.[selectedStream.trim()]?.[
-              selectedTrapSite.trim()
-            ][activeTabName.trim()]
-
-          const callback = () => {
-            if (values?.trapStatus === 'trap not functioning') {
-              navigateHelper(
-                'Non Functional Trap',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            } else if (
-              values?.trapStatus === 'trap not in service - restart trapping'
-            ) {
-              navigateHelper(
-                'Started Trapping',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            } else if (values?.flowMeasure > flowRange?.max) {
-              navigateHelper(
-                'High Flows',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            } else if (values?.waterTemperatureUnit === '°C') {
-              if (values?.waterTemperature > 30) {
-                navigateHelper(
-                  'High Temperatures',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              } else {
-                navigateHelper(
-                  'Fish Processing',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              }
-            } else if (values?.waterTemperatureUnit === '°F') {
-              if (values?.waterTemperature > 86) {
-                navigateHelper(
-                  'High Temperatures',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              } else {
-                navigateHelper(
-                  'Fish Processing',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              }
-            } else {
-              navigateHelper(
-                'Fish Processing',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            }
-          }
-
-          navigation.push('Loading...')
-
-          setTimeout(() => {
-            DeviceEventEmitter.emit('event.load', {
-              process: () => onSubmit(values, activeTabId),
-              callback,
-            })
-          }, 2000)
-        }
-      }}
+      onSubmit={() => {}}
     >
       {({
         handleChange,
@@ -386,7 +332,9 @@ const TrapOperations = ({
           () => (
             <NavButtons
               navigation={navigation}
-              handleSubmit={handleSubmit}
+              handleSubmit={(buttonDirection: 'left' | 'right') => {
+                handleNavButtonClick(buttonDirection, values)
+              }}
               errors={errors}
               touched={touched}
               values={values}
@@ -418,14 +366,57 @@ const TrapOperations = ({
                   <Heading>Trap Operations</Heading>
                   <FormControl>
                     <VStack space={2}>
-                      <Text color='black' fontSize='xl'>
-                        Trap Visit Start Date and Time:
-                      </Text>
+                      <HStack space={2}>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Trapping End Date and Time:
+                          </Text>
+                          <Popover
+                            placement='bottom left'
+                            trigger={popoverTrigger}
+                          >
+                            <Popover.Content
+                              accessibilityLabel='Trap Visit End Info'
+                              w='600'
+                              mr='10'
+                            >
+                              <Popover.Arrow />
+                              <Popover.CloseButton />
+                              <Popover.Header>
+                                Please set the Date and Time of when you removed
+                                the trap to collect data and ended the current
+                                trapping period.
+                              </Popover.Header>
+                              <Popover.Body p={4}>
+                                <VStack space={2}>
+                                  <HStack space={2} alignItems='flex-start'>
+                                    <Text fontSize='md'>
+                                      This value is used to record the date and
+                                      time of ending the current trapping period
+                                      and removing the trap from the water to
+                                      collect data.
+                                    </Text>
+                                  </HStack>
+                                  <HStack space={2} alignItems='flex-start'>
+                                    <Text fontSize='md'>
+                                      At the end of this form during the Post
+                                      Processing step, if you continue trapping,
+                                      you will set the "Trapping Start Date and
+                                      Time" to record the time of starting the
+                                      trap again.
+                                    </Text>
+                                  </HStack>
+                                </VStack>
+                              </Popover.Body>
+                            </Popover.Content>
+                          </Popover>
+                        </FormControl.Label>
+                      </HStack>
                       <Box alignSelf='flex-start' ml='-2'>
                         <DateTimePicker
-                          value={startTime}
+                          value={endTime}
                           mode='datetime'
-                          onChange={onStartTimeChange}
+                          onChange={onEndTimeChange}
                           accentColor='#007C7C'
                         />
                       </Box>

@@ -39,6 +39,7 @@ import CustomSelect from '../../components/Shared/CustomSelect'
 import { uid } from 'uid'
 import TrapNameDropDown from '../../components/form/TrapNameDropDown'
 import { navigateHelper } from '../../utils/utils'
+import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -92,6 +93,8 @@ const VisitSetup = ({
           visitSetupState[tabSlice?.activeTabId]?.values?.trapSite
         )
       }
+      // set default values
+      setIsPaperEntry(visitSetupState[tabSlice?.activeTabId]?.isPaperEntry)
     }
   }, [tabSlice?.activeTabId])
 
@@ -158,7 +161,7 @@ const VisitSetup = ({
     }
     // if there are current tabs, create and overwrite tabs
     else {
-      let currentTabsTrapNames = Object.keys(tabSlice.tabs).map((id) => {
+      let currentTabsTrapNames = Object.keys(tabSlice.tabs).map(id => {
         return tabSlice.tabs[id].name
       })
 
@@ -166,7 +169,7 @@ const VisitSetup = ({
       if (values.trapName) {
         // remove any tabs that are not in values.trapName
         if (values.trapName.length < currentTabsTrapNames.length) {
-          Object.keys(tabSlice.tabs).forEach((tabId) => {
+          Object.keys(tabSlice.tabs).forEach(tabId => {
             const tabTrapName = tabSlice.tabs[tabId].name
 
             if (!values.trapName.includes(tabTrapName)) {
@@ -178,7 +181,7 @@ const VisitSetup = ({
         values.trapName.forEach((trapName: string) => {
           if (currentTabsTrapNames.includes(trapName)) {
             const tabIds = Object.keys(tabSlice.tabs)
-            const tabIdToUpdate = tabIds.filter((id) => {
+            const tabIdToUpdate = tabIds.filter(id => {
               return tabSlice.tabs[id].name == trapName
             })[0]
             dispatch(
@@ -197,7 +200,7 @@ const VisitSetup = ({
                 name: trapName ?? values.trapSite,
               })
             )
-            currentTabsTrapNames = currentTabsTrapNames.filter((name) => {
+            currentTabsTrapNames = currentTabsTrapNames.filter(name => {
               return name != trapName
             })
           } else {
@@ -368,35 +371,25 @@ const VisitSetup = ({
       // maybe this is not needed for first step in form?
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
-      onSubmit={(values) => {
+      onSubmit={values => {
         const callback = () => {
-          if (isPaperEntry) {
-            navigateHelper(
-              'Paper Entry',
-              navigationSlice,
-              navigation,
-              dispatch,
-              updateActiveStep
-            )
-          } else {
-            navigateHelper(
-              'Trap Operations',
-              navigationSlice,
-              navigation,
-              dispatch,
-              updateActiveStep
-            )
-          }
+          navigateHelper(
+            'Trap Operations',
+            navigationSlice,
+            navigation,
+            dispatch,
+            updateActiveStep
+          )
         }
 
-        navigation.push('Loading...')
+        navigation.dispatch(StackActions.replace('Loading...'))
 
         setTimeout(() => {
           DeviceEventEmitter.emit('event.load', {
             process: () => onSubmit(values, tabSlice?.activeTabId),
             callback,
           })
-        }, 2000)
+        }, 1000)
       }}
     >
       {({
@@ -576,6 +569,7 @@ const VisitSetup = ({
                         visitSetupState={visitSetupState}
                         stream={values.stream}
                         tabId={tabSlice?.activeTabId}
+                        values={values}
                       />
                     </FormControl>
                     {touched.crew &&

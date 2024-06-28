@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
+import { set } from 'lodash'
 
 export default function CrewDropDown({
   open,
@@ -12,6 +13,7 @@ export default function CrewDropDown({
   visitSetupState,
   stream,
   tabId,
+  values,
 }: {
   open: boolean
   setOpen: any
@@ -22,12 +24,17 @@ export default function CrewDropDown({
   visitSetupState: any
   stream: string
   tabId: any
+  values: any
 }) {
   const [value, setValue] = useState([] as Array<any>)
+  const [selectedStream, setSelectedStream] = useState('' as string)
 
   useEffect(() => {
     if (visitSetupState[tabId]?.values?.crew) {
       setValue(visitSetupState[tabId]?.values?.crew)
+    }
+    if (visitSetupState[tabId]?.values?.stream) {
+      setSelectedStream(visitSetupState[tabId]?.values?.stream)
     }
   }, [tabId])
 
@@ -37,7 +44,10 @@ export default function CrewDropDown({
   }, [value])
 
   useEffect(() => {
-    clearSelectedValues()
+    if (selectedStream && stream !== selectedStream) {
+      clearSelectedValues()
+      setSelectedStream(stream)
+    }
   }, [stream])
 
   const clearSelectedValues = () => {

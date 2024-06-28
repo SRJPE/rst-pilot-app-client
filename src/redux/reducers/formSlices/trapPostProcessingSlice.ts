@@ -49,13 +49,12 @@ export const trapPostProcessingSlice = createSlice({
     resetTrapPostProcessingSlice: () => initialState,
     saveTrapPostProcessing: (state, action) => {
       const { tabId, values, errors } = action.payload
+
       state[tabId] = {
         completed: true,
         values: {
           ...values,
-          trapVisitStartTime: state[tabId]
-            ? state[tabId].values.trapVisitStartTime
-            : values.trapVisitStartTime,
+          trapVisitStartTime: values.trapVisitStartTime,
         },
         errors,
       }
