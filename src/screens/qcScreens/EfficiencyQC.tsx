@@ -34,7 +34,7 @@ function EfficiencyQC({
     qcData.forEach((catchRawResponse: any, idx: number) => {
       const catchRaw = catchRawResponse.createdCatchRawResponse
       const release = catchRawResponse.releaseResponse
-      const qcCompleted = catchRawResponse.qcCompleted
+      const qcCompleted = catchRaw.qcCompleted
 
       const numFishCaught: number = catchRaw.numFishCaught
       const releaseId: number | null = catchRaw.releaseId

@@ -8,6 +8,7 @@ import {
   ScrollView,
   Icon,
   Input,
+  Box,
 } from 'native-base'
 import { useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
@@ -16,23 +17,41 @@ import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { AppDispatch, RootState } from '../../redux/store'
-import { normalizeDate } from '../../utils/utils'
+import { normalizeDate, reorderTaxon } from '../../utils/utils'
+import CustomSelect from '../../components/Shared/CustomSelect'
+import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+
+interface ModalDataI {
+  measuredFish: number | null
+  plusCountFish: number | null
+  catchRawIdsWithPlusCount?: number[]
+}
 
 function CatchFishCountQC({
   navigation,
   route,
   qcCatchRawSubmissions,
   previousCatchRawSubmissions,
+  taxonDropdowns,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any
   previousCatchRawSubmissions: any
+  taxonDropdowns: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [graphData, setGraphData] = useState<any[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
+  const [selectedSpecies, setSelectedSpecies] = useState<string>('')
+  const [modalData, setModalData] = useState<ModalDataI>({
+    measuredFish: null,
+    plusCountFish: null,
+  })
+  const [modalInputValue, setModalInputValue] = useState<string>('')
+  const [modalCommentValue, setModalCommentValue] = useState<string>('')
+  const reorderedTaxon = reorderTaxon(taxonDropdowns)
 
   useEffect(() => {
     const programId = route.params.programId
@@ -41,36 +60,89 @@ function CatchFishCountQC({
         return catchRaw.createdCatchRawResponse.programId === programId
       }
     )
+    const selectedSpeciesTaxon = reorderedTaxon.find(
+      (taxon) => taxon.commonname == selectedSpecies
+    )?.code
+
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+
+    const qcDataFiltered = qcData.filter((catchRawResponse: any) => {
+      return (
+        catchRawResponse.createdCatchRawResponse.taxonCode ===
+        selectedSpeciesTaxon
+      )
+    })
+
     const totalCountByDay: any[] = []
     const datesFormatted: any = {}
+    // Structure: datesFormatted = { date: {count, catchRawIds: [...]}, ...}
 
-    qcData.forEach(catchResponse => {
+    qcDataFiltered.forEach((catchResponse) => {
       const catchRaw = catchResponse.createdCatchRawResponse
-      const numFishCaught = catchRaw?.numFishCaught
+      const numFishCaught: number = catchRaw?.numFishCaught
+      const plusCount: boolean = catchRaw?.plusCount
       const createdAt = new Date(catchRaw.createdAt)
       const normalizedDate = normalizeDate(createdAt)
 
       if (Object.keys(datesFormatted).includes(String(normalizedDate))) {
-        datesFormatted[normalizedDate] += numFishCaught
+        datesFormatted[normalizedDate].count += numFishCaught
+
+        // add catchRawId to array if not already included
+        if (!datesFormatted[normalizedDate].catchRawIds.includes(catchRaw.id)) {
+          datesFormatted[normalizedDate].catchRawIds.push(catchRaw.id)
+        }
+
+        // set containsPlusCount to true if any catchRaw has plusCount
+        if (plusCount) {
+          datesFormatted[normalizedDate].containsPlusCount = true
+          datesFormatted[normalizedDate].plusCountValue += numFishCaught
+          datesFormatted[normalizedDate].firstPlusCountRecordId = catchRaw.id
+        }
       } else {
-        datesFormatted[normalizedDate] = numFishCaught
+        datesFormatted[normalizedDate] = {
+          count: numFishCaught,
+          catchRawIds: [catchRaw.id],
+          containsPlusCount: plusCount,
+          firstPlusCountRecordId: plusCount ? catchRaw.id : null,
+          plusCountValue: plusCount ? numFishCaught : 0,
+        }
       }
     })
 
-    Object.keys(datesFormatted).forEach(dateString => {
+    Object.keys(datesFormatted).forEach((dateString) => {
       totalCountByDay.push({
         x: Number(dateString),
-        y: datesFormatted[dateString],
+        y: datesFormatted[dateString].count,
+        catchRawIds: datesFormatted[dateString].catchRawIds,
+        containsPlusCount: datesFormatted[dateString].containsPlusCount,
+        plusCountValue: datesFormatted[dateString].plusCountValue,
+        firstPlusCountRecordId:
+          datesFormatted[dateString].firstPlusCountRecordId,
       })
     })
 
     setGraphData(totalCountByDay)
-  }, [qcCatchRawSubmissions])
+  }, [selectedSpecies, qcCatchRawSubmissions])
 
   const handlePointClick = (datum: any) => {
     console.log('point clicked: ', datum)
-    console.log('graphData', graphData)
+    let catchRawIdsWithPlusCount = []
+
+    if (datum.containsPlusCount) {
+      // from datum.catchRawIds, get all catchRawIds that have plusCount
+      catchRawIdsWithPlusCount = datum.catchRawIds.filter(
+        (catchRawId: number) => {
+          return graphData.find((data) => data.catchRawIds.includes(catchRawId))
+        }
+      )
+
+      setModalData({
+        measuredFish: datum.y - datum.plusCountValue,
+        plusCountFish: datum.plusCountValue,
+        catchRawIdsWithPlusCount,
+      })
+    }
+
     setPointClicked(datum)
     setIsModalOpen(true)
   }
@@ -78,17 +150,32 @@ function CatchFishCountQC({
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setPointClicked(null)
+    setModalInputValue('')
+    setModalCommentValue('')
+    setModalData({ measuredFish: null, plusCountFish: null })
   }
 
-  const handleModalSubmit = (submission: any) => {
-    if (pointClicked) {
-      // const ids = Object.keys(submission).map((key: string) => {
-      //   if (submission[key]) {
-      //     return submission[key]['id']
-      //   }
-      // })
-      // const catchRawId = ids.find((val) => Boolean(Number(val)))
-      // dispatch(catchRawQCSubmission({ catchRawId, submission }))
+  const handleModalSubmit = () => {
+    let submissions: any[] = []
+
+    const catchRawId = pointClicked?.firstPlusCountRecordId
+
+    if (pointClicked && catchRawId) {
+      let submissionOne = {
+        fieldName: 'Plus Count',
+        value: modalInputValue,
+      }
+      submissions.push(submissionOne)
+
+      if (modalCommentValue) {
+        let submissionTwo = {
+          fieldName: 'Comments',
+          value: modalCommentValue,
+        }
+        submissions.push(submissionTwo)
+      }
+
+      dispatch(catchRawQCSubmission({ catchRawId, submissions }))
     }
   }
 
@@ -113,15 +200,31 @@ function CatchFishCountQC({
             show total daily counts for the past 5 years.
           </Text>
 
+          <Box width='70%' marginBottom={5}>
+            <CustomSelect
+              selectedValue={selectedSpecies}
+              placeholder={'Species'}
+              style={{ width: '100%' }}
+              onValueChange={(value: string) => {
+                console.log('value', value)
+                setSelectedSpecies(value)
+              }}
+              selectOptions={reorderedTaxon.map((taxon: any) => ({
+                label: taxon?.commonname,
+                value: taxon?.commonname,
+              }))}
+            />
+          </Box>
+
           <ScrollView>
             <Graph
               xLabel={'Date'}
               yLabel={'Total Daily Catch'}
               chartType='bar'
-              data={graphData}
+              data={selectedSpecies != '' ? graphData : []}
               showDates={true}
               barColor='grey'
-              onPointClick={datum => handlePointClick(datum)}
+              onPointClick={(datum) => handlePointClick(datum)}
               selectedBarColor='green'
               height={400}
               width={600}
@@ -162,28 +265,51 @@ function CatchFishCountQC({
           </HStack>
         </VStack>
       </View>
-      {pointClicked ? (
+
+      {modalData && pointClicked ? (
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height='1/2'
+          height='3/4'
         >
-          <GraphModalContent
-            closeModal={() => handleCloseModal()}
-            pointClicked={pointClicked}
-            onSubmit={(submission: any) => handleModalSubmit(submission)}
-            headerText={'Plus Count Editor'}
-            modalData={{ 'Total Daily Count': graphData }}
-            showHeaderButton={true}
-          >
+          <>
+            <CustomModalHeader
+              headerText={'Plus Count Editor'}
+              headerFontSize={23}
+              showHeaderButton={true}
+              closeModal={() => handleCloseModal()}
+              headerButton={
+                <Button
+                  bg='primary'
+                  mx='2'
+                  px='10'
+                  shadow='3'
+                  onPress={() => {
+                    handleModalSubmit()
+                    handleCloseModal()
+                  }}
+                >
+                  <Text fontSize='xl' color='white'>
+                    Save
+                  </Text>
+                </Button>
+              }
+            />
             <VStack
               paddingX={20}
               justifyContent='center'
               justifyItems={'center'}
             >
               <Text color='black' fontSize='2xl' mb={5} fontWeight={'light'}>
-                You collected <Text fontWeight={'bold'}>100 measured</Text> fish
-                and <Text fontWeight={'bold'}>30000 plus count</Text> fish.
+                You collected{' '}
+                <Text fontWeight={'bold'}>
+                  {modalData.measuredFish} measured
+                </Text>{' '}
+                fish and{' '}
+                <Text fontWeight={'bold'}>
+                  {modalData.plusCountFish} plus count
+                </Text>{' '}
+                fish.
               </Text>
               <Text color='black' fontSize='2xl' fontWeight={'light'}>
                 Click button below to flag data as low confidence or edit value
@@ -217,11 +343,10 @@ function CatchFishCountQC({
                   height='50px'
                   width='350px'
                   fontSize='16'
-                  placeholder='Write a comment'
+                  placeholder='Flag Comment (optional)'
                   keyboardType='default'
-                  // onChangeText={handleChange('comments')}
-                  // onBlur={handleBlur('comments')}
-                  value={'Flag Comment (optional)'}
+                  onChangeText={(value) => setModalCommentValue(value)}
+                  value={modalCommentValue}
                 />
               </HStack>
 
@@ -233,13 +358,12 @@ function CatchFishCountQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  // onChangeText={handleChange('comments')}
-                  // onBlur={handleBlur('comments')}
-                  value={'testing'}
+                  onChangeText={(value) => setModalInputValue(value)}
+                  value={modalInputValue}
                 />
               </View>
             </VStack>
-          </GraphModalContent>
+          </>
         </CustomModal>
       ) : (
         <></>
@@ -249,10 +373,13 @@ function CatchFishCountQC({
 }
 
 const mapStateToProps = (state: RootState) => {
+  let taxon = state.dropdowns.values.taxon
+
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
     previousCatchRawSubmissions:
       state.trapVisitFormPostBundler.previousCatchRawSubmissions,
+    taxonDropdowns: taxon ?? [],
   }
 }
 

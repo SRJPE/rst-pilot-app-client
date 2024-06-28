@@ -66,7 +66,7 @@ function TrapQC({
     const programTrapVisits = previousTrapVisits.filter((trapVisit) => {
       return trapVisit.createdTrapVisitResponse.programId === programId
     })
-
+    
     let tempData: any[] = []
     let turbidityData: any[] = []
     let rpmAtStartData: any[] = []
@@ -82,6 +82,10 @@ function TrapQC({
           createdTrapVisitEnvironmentalResponse,
           createdTrapVisitResponse,
         } = response || {}
+
+        if (!createdTrapVisitResponse) {
+          return
+        }
 
         const trapVisitId = createdTrapVisitResponse.id
         const qcCompleted = createdTrapVisitResponse.qcCompleted
@@ -218,13 +222,15 @@ function TrapQC({
   }
 
   const handlePointClicked = (datum: any) => {
+    console.log('point clicked: ', datum)
     setPointClicked(datum)
     setIsModalOpen(true)
   }
 
   const handleModalSubmit = (submission: any) => {
-    if (pointClicked) {
+        if (pointClicked) {
       const trapVisitId = submission['Temperature']['id']
+      console.log('this submission', submission)
       dispatch(trapVisitQCSubmission({ trapVisitId, submission }))
     }
   }

@@ -6,16 +6,19 @@ import { StyleProp, ViewStyle } from 'react-native'
 interface CustomSelectI {
   selectedValue: string
   placeholder: string
-  setFieldTouched: any
+  setFieldTouched?: any
   onValueChange: any
   selectOptions: any[]
   style?: StyleProp<ViewStyle>
 }
 
 const CustomSelect: React.FC<CustomSelectI> = (props) => {
-  const handleOnChange = useCallback((itemValue: any) => {
-    props.onValueChange(itemValue)
-  }, [props.selectedValue])
+  const handleOnChange = useCallback(
+    (itemValue: any) => {
+      props.onValueChange(itemValue)
+    },
+    [props.selectedValue]
+  )
 
   return (
     <Select
@@ -32,7 +35,9 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
       }}
       mt={1}
       onValueChange={handleOnChange}
-      onClose={() => props.setFieldTouched()}
+      onClose={() => {
+        if (props.setFieldTouched) props.setFieldTouched()
+      }}
     >
       {props.selectOptions ? (
         props?.selectOptions.map((item, idx) => {
