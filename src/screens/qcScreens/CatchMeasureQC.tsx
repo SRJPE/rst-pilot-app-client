@@ -67,6 +67,7 @@ function CatchMeasureQC({
 
         if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
           forkGraphSubData.push({
+            fieldClicked: 'Fork Length',
             id: catchRawResponse.createdCatchRawResponse.id,
             x: forkValue,
             y: 0,
@@ -116,6 +117,7 @@ function CatchMeasureQC({
 
         if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
           weightGraphSubData.push({
+            fieldClicked: 'Weight',
             id: catchRawResponse.createdCatchRawResponse.id,
             x: weightValue,
             y: 0,
@@ -208,8 +210,18 @@ function CatchMeasureQC({
 
   const handleModalSubmit = (submission: any) => {
     if (pointClicked) {
-      const catchRawId = submission['Weight']['id']
-      dispatch(catchRawQCSubmission({ catchRawId, submission }))
+      const catchRawId = pointClicked.id
+      let submissions = []
+
+      for (const fieldName in submission) {
+        submissions.push({
+          fieldName,
+          value: submission[fieldName].x,
+        })
+      }
+
+      if (submissions.length)
+        dispatch(catchRawQCSubmission({ catchRawId, submissions }))
     }
   }
 

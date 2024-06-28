@@ -19,6 +19,7 @@ import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { AppDispatch, RootState } from '../../redux/store'
 import { normalizeDate, reorderTaxon } from '../../utils/utils'
 import CustomSelect from '../../components/Shared/CustomSelect'
+import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
 interface ModalDataI {
   measuredFish: number | null
@@ -49,6 +50,7 @@ function CatchFishCountQC({
     plusCountFish: null,
   })
   const [modalInputValue, setModalInputValue] = useState<string>('')
+  const [modalCommentValue, setModalCommentValue] = useState<string>('')
   const reorderedTaxon = reorderTaxon(taxonDropdowns)
 
   useEffect(() => {
@@ -94,12 +96,14 @@ function CatchFishCountQC({
         if (plusCount) {
           datesFormatted[normalizedDate].containsPlusCount = true
           datesFormatted[normalizedDate].plusCountValue += numFishCaught
+          datesFormatted[normalizedDate].firstPlusCountRecordId = catchRaw.id
         }
       } else {
         datesFormatted[normalizedDate] = {
           count: numFishCaught,
           catchRawIds: [catchRaw.id],
           containsPlusCount: plusCount,
+          firstPlusCountRecordId: plusCount ? catchRaw.id : null,
           plusCountValue: plusCount ? numFishCaught : 0,
         }
       }
@@ -112,11 +116,13 @@ function CatchFishCountQC({
         catchRawIds: datesFormatted[dateString].catchRawIds,
         containsPlusCount: datesFormatted[dateString].containsPlusCount,
         plusCountValue: datesFormatted[dateString].plusCountValue,
+        firstPlusCountRecordId:
+          datesFormatted[dateString].firstPlusCountRecordId,
       })
     })
 
     setGraphData(totalCountByDay)
-  }, [selectedSpecies])
+  }, [selectedSpecies, qcCatchRawSubmissions])
 
   const handlePointClick = (datum: any) => {
     console.log('point clicked: ', datum)
@@ -145,19 +151,31 @@ function CatchFishCountQC({
     setIsModalOpen(false)
     setPointClicked(null)
     setModalInputValue('')
+    setModalCommentValue('')
     setModalData({ measuredFish: null, plusCountFish: null })
   }
 
-  const handleModalSubmit = (submission: any) => {
-    console.log('submission', submission)
-    if (pointClicked) {
-      // const ids = Object.keys(submission).map((key: string) => {
-      //   if (submission[key]) {
-      //     return submission[key]['id']
-      //   }
-      // })
-      // const catchRawId = ids.find((val) => Boolean(Number(val)))
-      // dispatch(catchRawQCSubmission({ catchRawId, submission }))
+  const handleModalSubmit = () => {
+    let submissions: any[] = []
+
+    const catchRawId = pointClicked?.firstPlusCountRecordId
+
+    if (pointClicked && catchRawId) {
+      let submissionOne = {
+        fieldName: 'Plus Count',
+        value: modalInputValue,
+      }
+      submissions.push(submissionOne)
+
+      if (modalCommentValue) {
+        let submissionTwo = {
+          fieldName: 'Comments',
+          value: modalCommentValue,
+        }
+        submissions.push(submissionTwo)
+      }
+
+      dispatch(catchRawQCSubmission({ catchRawId, submissions }))
     }
   }
 
@@ -247,20 +265,36 @@ function CatchFishCountQC({
           </HStack>
         </VStack>
       </View>
+
       {modalData && pointClicked ? (
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height='2/3'
+          height='3/4'
         >
-          <GraphModalContent
-            closeModal={() => handleCloseModal()}
-            pointClicked={pointClicked}
-            onSubmit={(submission: any) => handleModalSubmit(submission)}
-            headerText={'Plus Count Editor'}
-            modalData={{ 'Total Daily Count': graphData }}
-            showHeaderButton={true}
-          >
+          <>
+            <CustomModalHeader
+              headerText={'Plus Count Editor'}
+              headerFontSize={23}
+              showHeaderButton={true}
+              closeModal={() => handleCloseModal()}
+              headerButton={
+                <Button
+                  bg='primary'
+                  mx='2'
+                  px='10'
+                  shadow='3'
+                  onPress={() => {
+                    handleModalSubmit()
+                    handleCloseModal()
+                  }}
+                >
+                  <Text fontSize='xl' color='white'>
+                    Save
+                  </Text>
+                </Button>
+              }
+            />
             <VStack
               paddingX={20}
               justifyContent='center'
@@ -309,11 +343,10 @@ function CatchFishCountQC({
                   height='50px'
                   width='350px'
                   fontSize='16'
-                  placeholder='Write a comment'
+                  placeholder='Flag Comment (optional)'
                   keyboardType='default'
-                  // onChangeText={handleChange('comments')}
-                  // onBlur={handleBlur('comments')}
-                  value={'Flag Comment (optional)'}
+                  onChangeText={(value) => setModalCommentValue(value)}
+                  value={modalCommentValue}
                 />
               </HStack>
 
@@ -330,7 +363,7 @@ function CatchFishCountQC({
                 />
               </View>
             </VStack>
-          </GraphModalContent>
+          </>
         </CustomModal>
       ) : (
         <></>

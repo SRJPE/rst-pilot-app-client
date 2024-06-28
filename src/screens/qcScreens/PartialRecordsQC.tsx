@@ -20,7 +20,7 @@ import { connect, useDispatch } from 'react-redux'
 import CustomModal from '../../components/Shared/CustomModal'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
-import { RootState } from '../../redux/store'
+import { AppDispatch, RootState } from '../../redux/store'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
@@ -28,6 +28,7 @@ import {
   reorderTaxon,
   truncateAndTrimString,
 } from '../../utils/utils'
+import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
 interface NestedModalFieldDataI {
   catchRawId: number
@@ -58,6 +59,7 @@ function PartialRecordsQC({
   runDropdowns: any[]
   lifeStageDropdowns: any[]
 }) {
+  const dispatch = useDispatch<AppDispatch>()
   const [qcData, setQCData] = useState<any[]>([])
   const [percentNotRecordedData, setPercentNotRecorded] = useState<any[]>([])
   const [rowsNotRecordedData, setRowsNotRecorded] = useState<any[]>([])
@@ -65,7 +67,22 @@ function PartialRecordsQC({
   const [nestedModalField, setNestedModalField] =
     useState<NestedModalFieldDataI | null>(null)
   const [nestedModalInputValue, setNestedModalInputValue] = useState<string>('')
-  const [nestedModalComment, setNestedModalComment] = useState<string>('')
+  const [nestedModalCommentValue, setNestedModalCommentValue] = useState<string>('')
+
+  const identifierToName = {
+    taxonCode: 'Species',
+    captureRunClass: 'Run',
+    lifeStage: 'Life Stage',
+    forkLength: 'Fork Length',
+    markType: 'Mark Type',
+    markColor: 'Mark Color',
+    markPos: 'Mark Position',
+    dead: 'Mortality',
+    adiposeClipped: 'Adipose Clipped',
+    weight: 'Weight',
+    numFishCaught: 'Plus Count',
+    qcComments: 'Comments',
+  }
 
   useEffect(() => {
     const programId = route.params.programId
@@ -167,21 +184,35 @@ function PartialRecordsQC({
   }
 
   const handleSaveNestedModal = () => {
-    console.log('handle save: ', nestedModalInputValue)
+    const catchRawId = nestedModalField?.catchRawId
+    const fieldName = nestedModalField?.fieldName
+
+    let submissions = []
+
+    if (catchRawId && nestedModalInputValue) {
+      let submissionOne = {
+        fieldName: identifierToName[fieldName as keyof typeof identifierToName],
+        value: nestedModalInputValue,
+      }
+      submissions.push(submissionOne)
+
+      if (nestedModalCommentValue) {
+        let submissionTwo = {
+          fieldName: 'Comments',
+          value: nestedModalCommentValue,
+        }
+        submissions.push(submissionTwo)
+      }
+
+      dispatch(catchRawQCSubmission({ catchRawId, submissions }))
+    }
   }
 
   const handleCloseNestedModal = () => {
     setNestedModalField(null)
     setNestedModalInputValue('')
-    setNestedModalComment('')
+    setNestedModalCommentValue('')
   }
-
-  // Missing:
-  // createdAt
-  // numFishCaught
-  // stream (nothing happens when clicked)
-  // releaseSite
-  //
 
   const CustomNestedModalInput = ({
     fieldClicked,
@@ -876,6 +907,7 @@ function PartialRecordsQC({
                     console.log('handle nested modal submit')
                     handleSaveNestedModal()
                     handleCloseNestedModal()
+                    setIsModalOpen(false)
                   }}
                 >
                   <Text fontSize='xl' color='white'>
@@ -926,9 +958,9 @@ function PartialRecordsQC({
                   keyboardType='default'
                   // onBlur={handleBlur('comments')}
                   onChangeText={(value) => {
-                    setNestedModalComment(value)
+                    setNestedModalCommentValue(value)
                   }}
-                  value={nestedModalComment}
+                  value={nestedModalCommentValue}
                 />
               </HStack>
 

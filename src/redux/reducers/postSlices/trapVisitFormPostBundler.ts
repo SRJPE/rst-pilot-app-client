@@ -52,7 +52,7 @@ interface CatchRawSubmissionI {
   id?: number
   programId?: number
   trapVisitId?: number
-  taxonId?: number
+  taxonCode?: number
   captureRunClass?: number
   captureRunClassMethod?: number
   markType?: number
@@ -220,6 +220,93 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       await fetchWithPostParams(thunkAPI.dispatch, payload)
     } catch (err) {
       console.log('error in fetchWithPostParams: ', err)
+    }
+
+    return payload
+  }
+)
+
+export const postQCSubmissions = createAsyncThunk(
+  'trapVisitPostBundler/postQCSubmissions',
+  async (_, thunkAPI) => {
+    let payload: {
+      qcTrapVisitResponse: any[]
+      qcCatchRawResponse: any[]
+      qcFailedTrapVisitSubmissions: any[]
+      qcFailedCatchRawSubmissions: any[]
+    } = {
+      qcTrapVisitResponse: [],
+      qcCatchRawResponse: [],
+      qcFailedTrapVisitSubmissions: [],
+      qcFailedCatchRawSubmissions: [],
+    }
+
+    try {
+      const state = thunkAPI.getState() as RootState
+      const qcTrapVisitSubmissions =
+        state.trapVisitFormPostBundler.qcTrapVisitSubmissions
+      const qcCatchRawSubmissions =
+        state.trapVisitFormPostBundler.qcCatchRawSubmissions
+
+      const trapPromises = qcTrapVisitSubmissions.map((trapSubmission: any) => {
+        let id = trapSubmission.createdTrapVisitResponse.id
+        let payload = { ...trapSubmission.createdTrapVisitResponse }
+        delete payload.id
+        console.log('trap payload', payload)
+
+        return api.put(`trap-visit/${id}`, {
+          ...payload,
+        })
+      })
+
+      const catchPromises = qcCatchRawSubmissions.map(
+        (catchSubmission: any) => {
+          let id = catchSubmission.createdCatchRawResponse.id
+          let payload = { ...catchSubmission.createdCatchRawResponse }
+          delete payload.id
+          console.log('catch payload', payload)
+
+          return api.put(`catch-raw/${id}`, {
+            ...payload,
+          })
+        }
+      )
+
+      const trapResults = await Promise.allSettled(trapPromises).catch(
+        (error) => {
+          console.log('trap qc submission error: ', error)
+        }
+      )
+
+      const catchResults = await Promise.allSettled(catchPromises).catch(
+        (error) => {
+          console.log('catch qc submission error: ', error)
+        }
+      )
+
+      for (const result of trapResults as any) {
+        if (result.status === 'fulfilled') {
+          console.log('trap qc submission success: ', result)
+        } else {
+          console.log('trap qc submission fail: ', result)
+        }
+      }
+
+      for (const result of catchResults as any) {
+        if (result.status === 'fulfilled') {
+          console.log('catch qc submission success: ', result)
+        } else {
+          console.log('catch qc submission fail: ', result)
+        }
+      }
+    } catch (err) {
+      console.log('error in postQCSubmissions: ', err)
+    }
+
+    try {
+      await thunkAPI.dispatch(fetchPreviousTrapAndCatch())
+    } catch (err) {
+      console.log('error in fetchWithPostParams from postQCSubmissions: ', err)
     }
 
     return payload
@@ -501,22 +588,10 @@ export const trapVisitPostBundler = createSlice({
         state.qcTrapVisitSubmissions.push(qcTrapVisit)
       }
     },
-
-    //     'Species',
-    //     'Run',
-    //     'Life Stage',
-    //     'Fork Length',
-    //     'Mark Type',
-    //     'Mark Color',
-    //     'Mark Position',
-    //     'Mortality',
-    //     'Adipose Clipped',
-
     catchRawQCSubmission: (state, action) => {
-      let { catchRawId, submission } = action.payload
+      let { catchRawId, submissions } = action.payload
       let catchHasStartedQC = false
       let qcCatchRawIdx = -1
-      // const submissionKeys = Object.keys(submission)
 
       state.qcCatchRawSubmissions.forEach((catchRaw: any, idx: number) => {
         if (catchRaw.createdCatchRawResponse.id === catchRawId) {
@@ -538,41 +613,56 @@ export const trapVisitPostBundler = createSlice({
         })
         let catchRawToQC: any = state.previousCatchRawSubmissions[catchRawIdx]
 
-        switch (submission.fieldName) {
-          case 'Species':
-            catchRawToQC.createdCatchRawResponse.taxonId = submission.value
-            break
-          case 'Run':
-            catchRawToQC.createdCatchRawResponse.captureRunClass =
-              submission.value
-            break
-          case 'Life Stage':
-            catchRawToQC.createdCatchRawResponse.lifeStage = submission.value
-            break
-          case 'Fork Length':
-            catchRawToQC.createdCatchRawResponse.forkLength = submission.value
-            break
-          case 'Mark Type':
-            catchRawToQC.createdCatchRawResponse.markType = submission.value
-            break
-          case 'Mark Color':
-            catchRawToQC.createdCatchRawResponse.markColor = submission.value
-            break
-          case 'Mark Position':
-            catchRawToQC.createdCatchRawResponse.markPosition = submission.value
-            break
-          case 'Mortality':
-            catchRawToQC.createdCatchRawResponse.dead = submission.value
-            break
-          case 'Weight':
-            catchRawToQC.createdCatchRawResponse.weight = submission.value
-            break
-          case 'Adipose Clipped':
-            catchRawToQC.createdCatchRawResponse.adiposeClipped =
-              submission.value
-            break
-          default:
-            break
+        for (const submission of submissions) {
+          switch (submission.fieldName) {
+            case 'Species':
+              catchRawToQC.createdCatchRawResponse.taxonCode = submission.value
+              break
+            case 'Run':
+              catchRawToQC.createdCatchRawResponse.captureRunClass =
+                submission.value
+              break
+            case 'Life Stage':
+              catchRawToQC.createdCatchRawResponse.lifeStage = submission.value
+              break
+            case 'Fork Length':
+              catchRawToQC.createdCatchRawResponse.forkLength = Number(
+                submission.value
+              )
+              break
+            case 'Mark Type':
+              catchRawToQC.createdCatchRawResponse.markType = submission.value
+              break
+            case 'Mark Color':
+              catchRawToQC.createdCatchRawResponse.markColor = submission.value
+              break
+            case 'Mark Position':
+              catchRawToQC.createdCatchRawResponse.markPosition =
+                submission.value
+              break
+            case 'Mortality':
+              catchRawToQC.createdCatchRawResponse.dead = submission.value
+              break
+            case 'Weight':
+              catchRawToQC.createdCatchRawResponse.weight = Number(
+                submission.value
+              )
+              break
+            case 'Adipose Clipped':
+              catchRawToQC.createdCatchRawResponse.adiposeClipped =
+                submission.value
+              break
+            case 'Plus Count':
+              catchRawToQC.createdCatchRawResponse.numFishCaught = Number(
+                submission.value
+              )
+              break
+            case 'Comments':
+              catchRawToQC.createdCatchRawResponse.qcComments = submission.value
+              break
+            default:
+              break
+          }
         }
 
         catchRawToQC.createdCatchRawResponse.qcCompleted = true
@@ -588,40 +678,51 @@ export const trapVisitPostBundler = createSlice({
       else {
         let qcCatchRaw: any = state.qcCatchRawSubmissions[qcCatchRawIdx]
 
-        switch (submission.fieldName) {
-          case 'Species':
-            qcCatchRaw.createdCatchRawResponse.taxonId = submission.value
-            break
-          case 'Run':
-            qcCatchRaw.createdCatchRawResponse.captureRunClass =
-              submission.value
-            break
-          case 'Life Stage':
-            qcCatchRaw.createdCatchRawResponse.lifeStage = submission.value
-            break
-          case 'Fork Length':
-            qcCatchRaw.createdCatchRawResponse.forkLength = submission.value
-            break
-          case 'Mark Type':
-            qcCatchRaw.createdCatchRawResponse.markType = submission.value
-            break
-          case 'Mark Color':
-            qcCatchRaw.createdCatchRawResponse.markColor = submission.value
-            break
-          case 'Mark Position':
-            qcCatchRaw.createdCatchRawResponse.markPosition = submission.value
-            break
-          case 'Mortality':
-            qcCatchRaw.createdCatchRawResponse.dead = submission.value
-            break
-          case 'Weight':
-            qcCatchRaw.createdCatchRawResponse.weight = submission.value
-            break
-          case 'Adipose Clipped':
-            qcCatchRaw.createdCatchRawResponse.adiposeClipped = submission.value
-            break
-          default:
-            break
+        for (const submission of submissions) {
+          switch (submission.fieldName) {
+            case 'Species':
+              qcCatchRaw.createdCatchRawResponse.taxonCode = submission.value
+              break
+            case 'Run':
+              qcCatchRaw.createdCatchRawResponse.captureRunClass =
+                submission.value
+              break
+            case 'Life Stage':
+              qcCatchRaw.createdCatchRawResponse.lifeStage = submission.value
+              break
+            case 'Fork Length':
+              qcCatchRaw.createdCatchRawResponse.forkLength = submission.value
+              break
+            case 'Mark Type':
+              qcCatchRaw.createdCatchRawResponse.markType = submission.value
+              break
+            case 'Mark Color':
+              qcCatchRaw.createdCatchRawResponse.markColor = submission.value
+              break
+            case 'Mark Position':
+              qcCatchRaw.createdCatchRawResponse.markPosition = submission.value
+              break
+            case 'Mortality':
+              qcCatchRaw.createdCatchRawResponse.dead = submission.value
+              break
+            case 'Weight':
+              qcCatchRaw.createdCatchRawResponse.weight = submission.value
+              break
+            case 'Adipose Clipped':
+              qcCatchRaw.createdCatchRawResponse.adiposeClipped =
+                submission.value
+              break
+            case 'Plus Count':
+              qcCatchRaw.createdCatchRawResponse.numFishCaught = Number(
+                submission.value
+              )
+              break
+            case 'Comments':
+              qcCatchRaw.createdCatchRawResponse.qcComments = submission.value
+              break
+            default:
+              break
+          }
         }
 
         state.qcCatchRawSubmissions = [
@@ -698,6 +799,18 @@ export const trapVisitPostBundler = createSlice({
         console.log('successful post processing: ', action.payload)
       }
     )
+
+    builder.addCase(postQCSubmissions.fulfilled.type, (state, action: any) => {
+      const {
+        qcFailedTrapVisitSubmissions,
+        qcFailedCatchRawSubmissions,
+        qcTrapVisitResponse,
+        qcCatchRawResponse,
+      } = action.payload
+
+      state.qcTrapVisitSubmissions = [...qcFailedTrapVisitSubmissions]
+      state.qcCatchRawSubmissions = [...qcFailedCatchRawSubmissions]
+    })
 
     builder.addCase(
       fetchPreviousTrapAndCatch.fulfilled.type,

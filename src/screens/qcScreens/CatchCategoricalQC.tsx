@@ -92,6 +92,7 @@ function CatchCategoricalQC({
       value: '',
     })
   const [markIdToSymbolArr, setMarkIdToSymbolArr] = useState([])
+  const [nestedModalComment, setNestedModalComment] = useState<string>('')
 
   const axisLabelDictionary = {
     'Adipose Clipped': { xLabel: 'Sampling Time', yLabel: undefined },
@@ -117,6 +118,9 @@ function CatchCategoricalQC({
     markPos: 'Mark Position',
     dead: 'Mortality',
     adiposeClipped: 'Adipose Clipped',
+    weight: 'Weight',
+    numFishCaught: 'Plus Count',
+    qcComments: 'Comments',
   }
 
   const identifierToDataValueFromRecord = {
@@ -137,6 +141,7 @@ function CatchCategoricalQC({
       return catchRaw.createdCatchRawResponse.programId === programId
     })
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+    console.log('qcData', qcData)
 
     let adiposeClippedData: any[] = []
     let speciesData: any[] = []
@@ -374,6 +379,23 @@ function CatchCategoricalQC({
     })
   }, [qcCatchRawSubmissions])
 
+  // Not updating modal as intended - instead, currently closing modal to update data
+  // useEffect(() => {
+  //   // if any qcCatchRawSubmission is matching the id of the modalData, update modalData to reflect the correct data from the qcCatchRawSubmission
+  //   if (modalData) {
+  //     let updatedModalData = modalData.map((data) => {
+  //       let updatedData = qcCatchRawSubmissions.filter((qcData) => {
+  //         return qcData.createdCatchRawResponse.id === data.id
+  //       })[0]
+
+  //       return updatedData ? updatedData : data
+  //     })
+
+  //     console.log('hit this thing: ', updatedModalData)
+  //     setModalData(updatedModalData)
+  //   }
+  // }, [qcCatchRawSubmissions])
+
   const handlePointClick = (datum: any) => {
     const programId = route.params.programId
     const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
@@ -473,6 +495,7 @@ function CatchCategoricalQC({
 
   const handleCloseNestedModal = () => {
     setNestedModalData(null)
+    setNestedModalComment('')
   }
 
   const handleSaveNestedModal = () => {
@@ -482,11 +505,23 @@ function CatchCategoricalQC({
         identifierToName[
           nestedModalData.fieldClicked as keyof typeof identifierToName
         ]
-      let submission = {
+      let submissions: any[] = []
+
+      let submissionOne = {
         fieldName,
         value: nestedModalInputValue.value,
       }
-      dispatch(catchRawQCSubmission({ catchRawId, submission }))
+      submissions.push(submissionOne)
+
+      if (nestedModalComment) {
+        let submissionTwo = {
+          fieldName: 'comments',
+          value: nestedModalComment,
+        }
+        submissions.push(submissionTwo)
+      }
+
+      dispatch(catchRawQCSubmission({ catchRawId, submissions }))
     }
   }
 
@@ -537,15 +572,24 @@ function CatchCategoricalQC({
           <VStack>
             <Text>Edit Species</Text>
             <CustomSelect
+              // set selectedValue to using nestedModalInputValue.value as taxonCode to find commonname
               selectedValue={nestedModalInputValue.value as string}
               placeholder={'Species'}
-              onValueChange={(value: string) =>
-                setNestedModalInputValue({ fieldClicked: 'taxonCode', value })
-              }
+              onValueChange={(value: string) => {
+                const filteredTaxon = reorderedTaxon.filter(
+                  (taxon: any) => taxon.code === value
+                )
+                const taxonCode = filteredTaxon[0]?.code
+
+                setNestedModalInputValue({
+                  fieldClicked: 'taxonCode',
+                  value: taxonCode,
+                })
+              }}
               setFieldTouched={() => console.log('species field touched')}
               selectOptions={reorderedTaxon.map((taxon: any) => ({
                 label: taxon?.commonname,
-                value: taxon?.commonname,
+                value: taxon?.code,
               }))}
             />
           </VStack>
@@ -894,6 +938,7 @@ function CatchCategoricalQC({
                         let species = taxonState.filter((obj: any) => {
                           return obj.code === taxonCode
                         })
+                        let commonname = species[0]?.commonname
 
                         return (
                           <DataTable.Cell
@@ -911,9 +956,7 @@ function CatchCategoricalQC({
                             <Text>
                               {species.length
                                 ? `${truncateAndTrimString(
-                                    capitalizeFirstLetterOfEachWord(
-                                      species[0]?.commonname
-                                    ),
+                                    capitalizeFirstLetterOfEachWord(commonname),
                                     12
                                   )}...`
                                 : 'NA'}
@@ -1367,6 +1410,7 @@ function CatchCategoricalQC({
                   onPress={() => {
                     handleSaveNestedModal()
                     handleCloseNestedModal()
+                    handleCloseModal()
                   }}
                 >
                   <Text fontSize='xl' color='white'>
@@ -1423,9 +1467,11 @@ function CatchCategoricalQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  // onChangeText={handleChange('comments')}
+                  onChangeText={(value) => {
+                    setNestedModalComment(value)
+                  }}
                   // onBlur={handleBlur('comments')}
-                  value={'Flag Comment (optional)'}
+                  value={nestedModalComment}
                 />
               </HStack>
 
