@@ -23,7 +23,7 @@ import {
 } from '../../redux/reducers/formSlices/navigationSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DeviceEventEmitter } from 'react-native'
 import {
   navigateHelper,
@@ -119,8 +119,13 @@ const FishProcessing = ({
     if (activeTabId && activeTabId != 'placeholderId') {
       const destination =
         direction === 'left'
-          ? navigateFlowLeftButton(activePage, false, navigation)
-          : navigateFlowRightButton(values, activePage, false, navigation)
+          ? navigateFlowLeftButton('Fish Processing', false, navigation)
+          : navigateFlowRightButton(
+              values,
+              'Fish Processing',
+              false,
+              navigation
+            )
       const callback = () => {
         navigateHelper(
           destination,

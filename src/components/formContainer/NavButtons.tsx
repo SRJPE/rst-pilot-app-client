@@ -257,13 +257,16 @@ const NavButtons = ({
       //do not submit when going back from incomplete sections page (prevents early submission errors)
       if (activePage !== 'Incomplete Sections') {
         handleSubmit('left')
+        return
       } else {
         navigateFlowLeftButton()
+        return
       }
     }
 
     if (!shouldProceedToLoadingScreen) {
       navigateFlowLeftButton()
+      return
     }
   }
 

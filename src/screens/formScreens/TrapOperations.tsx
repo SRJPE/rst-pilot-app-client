@@ -268,8 +268,13 @@ const TrapOperations = ({
     if (activeTabId && activeTabId != 'placeholderId') {
       const destination =
         direction === 'left'
-          ? navigateFlowLeftButton(activePage, false, navigation)
-          : navigateFlowRightButton(values, activePage, false, navigation)
+          ? navigateFlowLeftButton('Trap Operations', false, navigation)
+          : navigateFlowRightButton(
+              values,
+              'Trap Operations',
+              false,
+              navigation
+            )
       const callback = () => {
         navigateHelper(
           destination,
