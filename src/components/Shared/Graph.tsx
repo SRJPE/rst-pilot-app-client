@@ -491,9 +491,10 @@ export default function Graph({
         ) : (
           <></>
         )}
-        {(chartType === 'linewithplot' && subData) ? (
+        {chartType === 'linewithplot' && subData ? (
           <VictoryScatter
             data={subData}
+            size={5}
             style={{
               data: {
                 fill: (props: any) => {

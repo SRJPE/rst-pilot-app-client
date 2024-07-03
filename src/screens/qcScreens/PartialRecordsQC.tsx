@@ -67,7 +67,8 @@ function PartialRecordsQC({
   const [nestedModalField, setNestedModalField] =
     useState<NestedModalFieldDataI | null>(null)
   const [nestedModalInputValue, setNestedModalInputValue] = useState<string>('')
-  const [nestedModalCommentValue, setNestedModalCommentValue] = useState<string>('')
+  const [nestedModalCommentValue, setNestedModalCommentValue] =
+    useState<string>('')
 
   const identifierToName = {
     taxonCode: 'Species',
@@ -234,7 +235,9 @@ function PartialRecordsQC({
                 mode={'date'}
                 display='default'
                 onChange={(event, selectedDate) => {
-                  console.log('date selected: ', selectedDate)
+                  console.log('date selected: ', selectedDate?.toISOString())
+                  if (selectedDate)
+                    setNestedModalInputValue(selectedDate?.toISOString())
                 }}
               />
             </Box>

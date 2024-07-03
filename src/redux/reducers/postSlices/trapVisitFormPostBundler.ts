@@ -657,6 +657,23 @@ export const trapVisitPostBundler = createSlice({
                 submission.value
               )
               break
+
+            // add these headers: 'Release Date', 'Number Released', 'Number Recaptured'
+            case 'Release Date':
+              catchRawToQC.createdCatchRawResponse.releaseDate =
+                submission.value
+              break
+
+            // case 'Number Released':
+            //   catchRawToQC.createdCatchRawResponse.numReleased = Number(submission.value)
+            //   break
+
+            case 'Number Recaptured':
+              catchRawToQC.createdCatchRawResponse.numFishCaught = Number(
+                submission.value
+              )
+              break
+
             case 'Comments':
               catchRawToQC.createdCatchRawResponse.qcComments = submission.value
               break
