@@ -39,7 +39,7 @@ Current Azure B2C Configuration Environmental Variables:
 ## Setup
 
 ### Local Development using Expo Go and iOS Simulator
-- Run `npm install` to install all package dependencies
+- Run `npm install` to install all package dependencies. If that fails, attempt running `npm install --legacy-peer-deps`
 - Run `npm start` to initiate the development client
 - In the terminal, ensure the client is set to using Expo Go
 ![Terminal Screenshot](https://rstmarkdownimages.blob.core.windows.net/markdown-images/Screenshot%202024-07-03%20at%209.08.16%20AM.png)
