@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import * as SecureStore from 'expo-secure-store'
-import { cloneDeep } from 'lodash'
+import { add, cloneDeep } from 'lodash'
 import api from '../../api/axiosConfig'
 
 interface InitialStateI {
@@ -50,6 +50,15 @@ export const userCredentialsSlice = createSlice({
         ...action.payload,
       })
     },
+    createNewUser: (_, action) => {
+      api
+        .post(`user/create`, action.payload)
+        .then(response =>
+          console.log(
+            `Request Status: (${response.status}) ${response.statusText}`
+          )
+        )
+    },
     changePassword: (state, action) => {
       api
         .post(`user/${state.azureUid}/change-password`, action.payload)
@@ -67,6 +76,7 @@ export const {
   clearUserCredentials,
   changePassword,
   editProfile,
+  createNewUser,
 } = userCredentialsSlice.actions
 
 export default userCredentialsSlice.reducer

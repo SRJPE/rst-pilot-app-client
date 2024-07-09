@@ -20,6 +20,7 @@ import {
 import { useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
+import AddNewUserModalContent from '../../components/profile/AddNewUserModalContent'
 import CustomModal from '../../components/Shared/CustomModal'
 import {
   clearUserCredentials,
@@ -47,6 +48,7 @@ const Profile = ({
     useState<boolean>(false)
   const [monitoringProgramInfoModalOpen, setMonitoringProgramInfoModalOpen] =
     useState<boolean>(false)
+  const [addNewUserModalOpen, setAddNewUserModalOpen] = useState<boolean>(false)
 
   const redirectUri = 'com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect'
   const clientId = REACT_APP_CLIENT_ID
@@ -196,6 +198,19 @@ const Profile = ({
             </HStack>
           </Pressable>
           <Divider bg='#414141' />
+          <Pressable
+            my='7'
+            onPress={async () => {
+              setAddNewUserModalOpen(true)
+            }}
+          >
+            <HStack justifyContent='space-between' alignItems='center'>
+              <Text fontSize='2xl' bold>
+                Create New User
+              </Text>
+            </HStack>
+          </Pressable>
+          <Divider bg='#414141' />
 
           <Pressable
             my='7'
@@ -231,6 +246,8 @@ const Profile = ({
         </VStack>
       </Box>
       {/* --------- Modals --------- */}
+
+      {/* Edit Account Info Modal */}
       {editAccountInfoModalOpen && (
         <CustomModal
           isOpen={editAccountInfoModalOpen}
@@ -252,6 +269,7 @@ const Profile = ({
         />
       </CustomModal>
 
+      {/* Logout Modal */}
       <CustomModal
         isOpen={logoutModalOpen}
         closeModal={() => setLogoutModalOpen(false)}
@@ -296,6 +314,24 @@ const Profile = ({
           </HStack>
         </Box>
       </CustomModal>
+
+      {/* Add New User Modal */}
+      {addNewUserModalOpen && (
+        <CustomModal
+          isOpen={addNewUserModalOpen}
+          closeModal={() => setAddNewUserModalOpen(false)}
+          style={{
+            marginTop: 'auto',
+            marginBottom: 'auto',
+          }}
+        >
+          <Box display='flex' paddingX={10} paddingY={5}>
+            <AddNewUserModalContent
+              closeModal={() => setAddNewUserModalOpen(false)}
+            />
+          </Box>
+        </CustomModal>
+      )}
     </>
   )
 }
