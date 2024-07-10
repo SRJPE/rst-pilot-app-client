@@ -7,12 +7,17 @@ import { AppDispatch, RootState } from '../../redux/store'
 import CustomModal from '../../components/Shared/CustomModal'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import { kernelDensityEstimation } from '../../utils/utils'
+import {
+  kernelDensityEstimation,
+  handleQCChartButtonClick,
+} from '../../utils/utils'
 
 interface GraphDataI {
   'Fork Length': any[]
   Weight: any[]
 }
+
+const allButtons = ['Fork Length', 'Weight']
 
 function CatchMeasureQC({
   navigation,
@@ -47,7 +52,7 @@ function CatchMeasureQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
@@ -60,7 +65,7 @@ function CatchMeasureQC({
 
     // array of all fork lengths within the qc dataset
     const forkLengthArray: any[] = qcData
-      .map((catchRawResponse) => {
+      .map(catchRawResponse => {
         const forkValue = Number(
           catchRawResponse.createdCatchRawResponse.forkLength
         )
@@ -75,7 +80,7 @@ function CatchMeasureQC({
         }
         return forkValue
       })
-      .filter((num) => {
+      .filter(num => {
         return num != 0
       })
 
@@ -110,7 +115,7 @@ function CatchMeasureQC({
     let weightGraphSubData: any[] = []
 
     const weightArray: any[] = qcData
-      .map((catchRawResponse) => {
+      .map(catchRawResponse => {
         const weightValue = Number(
           catchRawResponse.createdCatchRawResponse.weight
         )
@@ -125,7 +130,7 @@ function CatchMeasureQC({
         }
         return weightValue
       })
-      .filter((num) => {
+      .filter(num => {
         return num != 0
       })
 
@@ -176,14 +181,12 @@ function CatchMeasureQC({
         marginX={0.5}
         flex={1}
         onPress={() => {
-          let activeButtonsCopy = [...activeButtons]
-          if (activeButtons.includes(buttonName)) {
-            activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
-            setActiveButtons(activeButtonsCopy)
-          } else {
-            activeButtonsCopy.unshift(buttonName)
-            setActiveButtons(activeButtonsCopy)
-          }
+          const newActiveButtons = handleQCChartButtonClick(
+            allButtons,
+            activeButtons,
+            buttonName
+          ) as any
+          setActiveButtons(newActiveButtons)
         }}
       >
         <Text
@@ -253,7 +256,7 @@ function CatchMeasureQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map((buttonName) => {
+            {activeButtons.map(buttonName => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -262,7 +265,7 @@ function CatchMeasureQC({
                   chartType='linewithplot'
                   data={graphData[buttonName]}
                   subData={graphSubData[buttonName]}
-                  onPointClick={(datum) => handlePointClicked(datum)}
+                  onPointClick={datum => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'

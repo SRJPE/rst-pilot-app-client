@@ -27,6 +27,7 @@ import {
   normalizeDate,
   reorderTaxon,
   truncateAndTrimString,
+  handleQCChartButtonClick,
 } from '../../utils/utils'
 import { get } from 'lodash'
 
@@ -48,6 +49,8 @@ interface NestedModalInputValueI {
   fieldClicked: string
   value: string | number | boolean
 }
+
+const allButtons = ['Adipose Clipped', 'Species', 'Marks', 'Mortalities']
 
 function CatchCategoricalQC({
   navigation,
@@ -137,7 +140,7 @@ function CatchCategoricalQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
@@ -354,10 +357,10 @@ function CatchCategoricalQC({
     })
     setMarkIdToSymbolArr(markIdToColorBuilder)
 
-    Object.keys(fishCountByDateAndSpecies).forEach((date) => {
+    Object.keys(fishCountByDateAndSpecies).forEach(date => {
       const speciesCountFromDate = fishCountByDateAndSpecies[date]
 
-      Object.keys(speciesCountFromDate).forEach((species) => {
+      Object.keys(speciesCountFromDate).forEach(species => {
         let count = speciesCountFromDate[species]?.count
         let ids = speciesCountFromDate[species]?.ids
 
@@ -398,7 +401,7 @@ function CatchCategoricalQC({
 
   const handlePointClick = (datum: any) => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
 
@@ -416,7 +419,7 @@ function CatchCategoricalQC({
       idsAtPoint = datum.ids
     }
 
-    const selectedData = qcData.filter((response) => {
+    const selectedData = qcData.filter(response => {
       const id = response.createdCatchRawResponse?.id
       return idsAtPoint.includes(id)
     })
@@ -536,14 +539,12 @@ function CatchCategoricalQC({
         marginX={0.5}
         flex={1}
         onPress={() => {
-          let activeButtonsCopy = [...activeButtons]
-          if (activeButtons.includes(buttonName)) {
-            activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
-            setActiveButtons(activeButtonsCopy)
-          } else {
-            activeButtonsCopy.unshift(buttonName)
-            setActiveButtons(activeButtonsCopy)
-          }
+          const newActiveButtons = handleQCChartButtonClick(
+            allButtons,
+            activeButtons,
+            buttonName
+          ) as any
+          setActiveButtons(newActiveButtons)
         }}
       >
         <Text
@@ -643,7 +644,7 @@ function CatchCategoricalQC({
               fontSize='16'
               placeholder='fork length...'
               keyboardType='numeric'
-              onChangeText={(value) => {
+              onChangeText={value => {
                 setNestedModalInputValue({ fieldClicked: 'forkLength', value })
               }}
               // onBlur={handleBlur('comments')}
@@ -818,7 +819,7 @@ function CatchCategoricalQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map((buttonName) => {
+            {activeButtons.map(buttonName => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -826,7 +827,7 @@ function CatchCategoricalQC({
                   key={buttonName}
                   chartType={buttonNameToChartType[buttonName] as any}
                   showDates={['Species', 'Marks'].includes(buttonName)}
-                  onPointClick={(datum) => handlePointClick(datum)}
+                  onPointClick={datum => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
                   title={buttonName}
@@ -1467,7 +1468,7 @@ function CatchCategoricalQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  onChangeText={(value) => {
+                  onChangeText={value => {
                     setNestedModalComment(value)
                   }}
                   // onBlur={handleBlur('comments')}

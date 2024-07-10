@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { sortBy } from 'lodash'
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   //returns an alphabetically sorted copy of the original array
@@ -317,7 +318,7 @@ export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
   if (!sentence || typeof sentence === 'number') return sentence // Check if the sentence is not empty
   return sentence
     .split(' ') // Split the sentence into words
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
     .join(' ') // Join the words back into a sentence
 }
 
@@ -333,4 +334,21 @@ export const normalizeDate = (date: Date) => {
   date.setMilliseconds(0)
 
   return date.getTime()
+}
+
+export const handleQCChartButtonClick = (
+  allButtons: Array<string>,
+  activeButtons: Array<string>,
+  buttonName: string
+) => {
+  let activeButtonsCopy = [...activeButtons]
+  if (activeButtons.includes(buttonName)) {
+    activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
+  } else {
+    activeButtonsCopy.push(buttonName)
+    activeButtonsCopy = sortBy(activeButtonsCopy, button => {
+      return allButtons.indexOf(button)
+    })
+  }
+  return activeButtonsCopy
 }

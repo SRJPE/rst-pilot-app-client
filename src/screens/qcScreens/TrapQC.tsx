@@ -8,7 +8,7 @@ import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { trapVisitQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import { normalizeDate } from '../../utils/utils'
+import { handleQCChartButtonClick, normalizeDate } from '../../utils/utils'
 
 interface GraphDataI {
   Temperature: any[]
@@ -18,6 +18,15 @@ interface GraphDataI {
   Counter: any[]
   Debris: any[]
 }
+
+const allButtons = [
+  'Temperature',
+  'Turbidity',
+  'RPM At Start',
+  'RPM At End',
+  'Counter',
+  'Debris',
+]
 
 function TrapQC({
   navigation,
@@ -63,10 +72,10 @@ function TrapQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programTrapVisits = previousTrapVisits.filter((trapVisit) => {
+    const programTrapVisits = previousTrapVisits.filter(trapVisit => {
       return trapVisit.createdTrapVisitResponse.programId === programId
     })
-    
+
     let tempData: any[] = []
     let turbidityData: any[] = []
     let rpmAtStartData: any[] = []
@@ -195,18 +204,16 @@ function TrapQC({
         marginX={0.5}
         flex={1}
         onPress={() => {
-          let activeButtonsCopy = [...activeButtons]
-          if (activeButtons.includes(buttonName)) {
-            activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
-            setActiveButtons(activeButtonsCopy)
-          } else {
-            activeButtonsCopy.unshift(buttonName)
-            setActiveButtons(activeButtonsCopy)
-          }
+          const newActiveButtons = handleQCChartButtonClick(
+            allButtons,
+            activeButtons,
+            buttonName
+          ) as any
+          setActiveButtons(newActiveButtons)
         }}
       >
         <Text
-          fontSize='sm'
+          fontSize={13}
           color={activeButtons.includes(buttonName) ? 'secondary' : 'primary'}
           fontWeight={'bold'}
         >
@@ -228,7 +235,7 @@ function TrapQC({
   }
 
   const handleModalSubmit = (submission: any) => {
-        if (pointClicked) {
+    if (pointClicked) {
       const trapVisitId = submission['Temperature']['id']
       console.log('this submission', submission)
       dispatch(trapVisitQCSubmission({ trapVisitId, submission }))
@@ -265,7 +272,7 @@ function TrapQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map((buttonName) => {
+            {activeButtons.map(buttonName => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -274,7 +281,7 @@ function TrapQC({
                   chartType='bar'
                   data={graphData[buttonName]}
                   showDates={true}
-                  onPointClick={(datum) => handlePointClicked(datum)}
+                  onPointClick={datum => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'
