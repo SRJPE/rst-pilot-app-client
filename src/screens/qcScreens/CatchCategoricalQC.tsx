@@ -29,7 +29,7 @@ import {
   truncateAndTrimString,
   handleQCChartButtonClick,
 } from '../../utils/utils'
-import { get } from 'lodash'
+import { get, startCase } from 'lodash'
 import moment from 'moment'
 
 interface GraphDataI {
@@ -479,13 +479,18 @@ function CatchCategoricalQC({
       setNestedModalData({ catchRawId, fieldClicked, value: 'none' })
     } else {
       if (typeof rawData === 'boolean') {
-        rawData = rawData ? 'True' : 'False'
+        rawData = rawData ? 'true' : 'false'
       }
       if (rawData === null) {
         rawData = 'NA'
       }
       setNestedModalData({
         catchRawId,
+        fieldClicked,
+        value: parsedData ? parsedData : rawData,
+      })
+
+      setNestedModalInputValue({
         fieldClicked,
         value: parsedData ? parsedData : rawData,
       })
@@ -712,38 +717,31 @@ function CatchCategoricalQC({
           <VStack alignItems={'flex-start'}>
             <Text>Edit Mortality</Text>
             <Radio.Group
-              name='isLead'
-              accessibilityLabel='is lead'
+              name='mortality'
+              accessibilityLabel='mortality'
               value={nestedModalInputValue.value as string}
               onChange={(value: any) => {
-                if (value === 'true') {
-                  setNestedModalInputValue({
-                    fieldClicked: 'dead',
-                    value: true,
-                  })
-                } else {
-                  setNestedModalInputValue({
-                    fieldClicked: 'dead',
-                    value: false,
-                  })
-                }
+                setNestedModalInputValue({
+                  fieldClicked: 'adiposeClipped',
+                  value,
+                })
               }}
             >
-              <Radio
-                colorScheme='primary'
-                value='false'
-                my={1}
-                _icon={{ color: 'primary' }}
-              >
-                Yes
-              </Radio>
               <Radio
                 colorScheme='primary'
                 value='true'
                 my={1}
                 _icon={{ color: 'primary' }}
               >
-                No
+                True
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='false'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                False
               </Radio>
             </Radio.Group>
           </VStack>
@@ -753,38 +751,31 @@ function CatchCategoricalQC({
           <VStack alignItems={'flex-start'}>
             <Text>Edit Adipose Clipped</Text>
             <Radio.Group
-              name='isLead'
-              accessibilityLabel='is lead'
+              name='adiposeClipped'
+              accessibilityLabel='adiposeClipped'
               value={nestedModalInputValue.value as string}
               onChange={(value: any) => {
-                if (value === 'true') {
-                  setNestedModalInputValue({
-                    fieldClicked: 'adiposeClipped',
-                    value: true,
-                  })
-                } else {
-                  setNestedModalInputValue({
-                    fieldClicked: 'adiposeClipped',
-                    value: false,
-                  })
-                }
+                setNestedModalInputValue({
+                  fieldClicked: 'adiposeClipped',
+                  value,
+                })
               }}
             >
+              <Radio
+                colorScheme='primary'
+                value={'true'}
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                True
+              </Radio>
               <Radio
                 colorScheme='primary'
                 value='false'
                 my={1}
                 _icon={{ color: 'primary' }}
               >
-                Yes
-              </Radio>
-              <Radio
-                colorScheme='primary'
-                value='true'
-                my={1}
-                _icon={{ color: 'primary' }}
-              >
-                No
+                False
               </Radio>
             </Radio.Group>
           </VStack>
@@ -1447,7 +1438,7 @@ function CatchCategoricalQC({
                     nestedModalData.fieldClicked as keyof typeof identifierToName
                   ]
                 }{' '}
-                marked as {`${nestedModalData.value}`}
+                marked as {`${startCase(nestedModalData.value)}`}
               </Text>
               <Text color='black' fontSize='2xl' fontWeight={'light'}>
                 Click button below to flag data as low confidence or edit value
