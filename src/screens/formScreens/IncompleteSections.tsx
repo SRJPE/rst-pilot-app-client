@@ -490,6 +490,7 @@ const IncompleteSections = ({
             qcTime: null,
             qcComments: null,
             existingMarks: fishValue.existingMarks.map((markObj: any) => {
+              //need to pick between body part and mark position, we go back and forth and its causing problems
               return {
                 releaseId:
                   markObj.releaseId !== undefined ? markObj.releaseId : null,

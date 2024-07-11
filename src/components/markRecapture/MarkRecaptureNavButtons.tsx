@@ -86,6 +86,8 @@ export default function MarkRecaptureNavButtons({
   }
 
   const disableRightButton = () => {
+    console.log('🚀 ~ disableRightButton ~ errors:', errors) // there is a bug whith appliedMarks does not register the fist mark obj
+    console.log('🚀 ~ disableRightButton ~ touched:', touched)
     return (
       //if current screen uses formik && if form has first NOT been touched
       // OR
