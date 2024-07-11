@@ -20,11 +20,13 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { normalizeDate, reorderTaxon } from '../../utils/utils'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import moment from 'moment'
 
 interface ModalDataI {
   measuredFish: number | null
   plusCountFish: number | null
   catchRawIdsWithPlusCount?: number[]
+  dateTimestamp?: number | null
 }
 
 function CatchFishCountQC({
@@ -61,7 +63,7 @@ function CatchFishCountQC({
       }
     )
     const selectedSpeciesTaxon = reorderedTaxon.find(
-      (taxon) => taxon.commonname == selectedSpecies
+      taxon => taxon.commonname == selectedSpecies
     )?.code
 
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
@@ -75,9 +77,10 @@ function CatchFishCountQC({
 
     const totalCountByDay: any[] = []
     const datesFormatted: any = {}
+
     // Structure: datesFormatted = { date: {count, catchRawIds: [...]}, ...}
 
-    qcDataFiltered.forEach((catchResponse) => {
+    qcDataFiltered.forEach(catchResponse => {
       const catchRaw = catchResponse.createdCatchRawResponse
       const numFishCaught: number = catchRaw?.numFishCaught
       const plusCount: boolean = catchRaw?.plusCount
@@ -109,7 +112,7 @@ function CatchFishCountQC({
       }
     })
 
-    Object.keys(datesFormatted).forEach((dateString) => {
+    Object.keys(datesFormatted).forEach(dateString => {
       totalCountByDay.push({
         x: Number(dateString),
         y: datesFormatted[dateString].count,
@@ -125,26 +128,30 @@ function CatchFishCountQC({
   }, [selectedSpecies, qcCatchRawSubmissions])
 
   const handlePointClick = (datum: any) => {
-    console.log('point clicked: ', datum)
-    let catchRawIdsWithPlusCount = []
+    try {
+      let catchRawIdsWithPlusCount = []
 
-    if (datum.containsPlusCount) {
-      // from datum.catchRawIds, get all catchRawIds that have plusCount
-      catchRawIdsWithPlusCount = datum.catchRawIds.filter(
-        (catchRawId: number) => {
-          return graphData.find((data) => data.catchRawIds.includes(catchRawId))
-        }
-      )
-
+      if (datum.containsPlusCount) {
+        // from datum.catchRawIds, get all catchRawIds that have plusCount
+        catchRawIdsWithPlusCount = datum.catchRawIds.filter(
+          (catchRawId: number) => {
+            return graphData.find(data => data.catchRawIds.includes(catchRawId))
+          }
+        )
+      }
       setModalData({
-        measuredFish: datum.y - datum.plusCountValue,
+        measuredFish: datum._y - datum.plusCountValue,
         plusCountFish: datum.plusCountValue,
         catchRawIdsWithPlusCount,
+        dateTimestamp: datum.x,
       })
-    }
 
-    setPointClicked(datum)
-    setIsModalOpen(true)
+      setPointClicked(datum)
+      setIsModalOpen(true)
+      setModalInputValue(`${datum.plusCountValue}`)
+    } catch (error) {
+      console.log('error', error)
+    }
   }
 
   const handleCloseModal = () => {
@@ -196,8 +203,8 @@ function CatchFishCountQC({
             closeModal={() => navigation.goBack()}
           />
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
-            Edit values by selecting a point on the plot below. Gray lineplots
-            show total daily counts for the past 5 years.
+            Edit values by selecting a point on the plot below. Points show
+            total daily counts for the selected species.
           </Text>
 
           <Box width='70%' marginBottom={5}>
@@ -206,7 +213,6 @@ function CatchFishCountQC({
               placeholder={'Species'}
               style={{ width: '100%' }}
               onValueChange={(value: string) => {
-                console.log('value', value)
                 setSelectedSpecies(value)
               }}
               selectOptions={reorderedTaxon.map((taxon: any) => ({
@@ -224,7 +230,7 @@ function CatchFishCountQC({
               data={selectedSpecies != '' ? graphData : []}
               showDates={true}
               barColor='grey'
-              onPointClick={(datum) => handlePointClick(datum)}
+              onPointClick={datum => handlePointClick(datum)}
               selectedBarColor='green'
               height={400}
               width={600}
@@ -300,6 +306,12 @@ function CatchFishCountQC({
               justifyContent='center'
               justifyItems={'center'}
             >
+              {modalData.dateTimestamp && (
+                <Text color='black' fontSize='2xl' mb={5} fontWeight={'light'}>
+                  Selected Point Date:{' '}
+                  {moment(modalData.dateTimestamp).format('MMMM Do, YYYY')}
+                </Text>
+              )}
               <Text color='black' fontSize='2xl' mb={5} fontWeight={'light'}>
                 You collected{' '}
                 <Text fontWeight={'bold'}>
@@ -345,20 +357,20 @@ function CatchFishCountQC({
                   fontSize='16'
                   placeholder='Flag Comment (optional)'
                   keyboardType='default'
-                  onChangeText={(value) => setModalCommentValue(value)}
+                  onChangeText={value => setModalCommentValue(value)}
                   value={modalCommentValue}
                 />
               </HStack>
 
               <View mt='50px'>
-                <Text>Edit numeric Inout</Text>
+                <Text>Edit Plus Count</Text>
                 <Input
                   height='50px'
                   width='350px'
                   fontSize='16'
-                  placeholder='Write a comment'
+                  placeholder='Enter Plus Count Value'
                   keyboardType='default'
-                  onChangeText={(value) => setModalInputValue(value)}
+                  onChangeText={value => setModalInputValue(value)}
                   value={modalInputValue}
                 />
               </View>

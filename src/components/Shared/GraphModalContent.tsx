@@ -13,6 +13,7 @@ import { DataTable } from 'react-native-paper'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
+import moment from 'moment'
 
 const GraphModalContent = ({
   closeModal,
@@ -73,7 +74,7 @@ const GraphModalContent = ({
 
   useEffect(() => {
     let modalDataAtPointClicked: any = {}
-    Object.keys(modalData).forEach((header) => {
+    Object.keys(modalData).forEach(header => {
       let dataAtId = modalData[header].filter((obj: any) => {
         return obj.id == pointClicked.id
       })[0]
@@ -116,62 +117,77 @@ const GraphModalContent = ({
         {children ? (
           children
         ) : (
-          <DataTable>
-            <DataTable.Header style={[{ paddingLeft: 0 }]}>
-              {Object.keys(modalData).map((header: string, idx: number) => (
-                <DataTable.Title
-                  key={idx}
-                  numeric
-                  style={[{ justifyContent: 'space-evenly', flexWrap: 'wrap' }]}
+          <>
+            <DataTable>
+              {pointClicked.x && (
+                <Text
+                  color='black'
+                  fontSize='2xl'
+                  marginLeft={8}
+                  fontWeight={'light'}
                 >
-                  {header}
-                </DataTable.Title>
-              ))}
-            </DataTable.Header>
+                  Selected Point Date:{' '}
+                  {moment(pointClicked.x).format('MMMM Do, YYYY')}
+                </Text>
+              )}
+              <DataTable.Header style={[{ paddingLeft: 0 }]}>
+                {Object.keys(modalData).map((header: string, idx: number) => (
+                  <DataTable.Title
+                    key={idx}
+                    numeric
+                    style={[
+                      { justifyContent: 'space-evenly', flexWrap: 'wrap' },
+                    ]}
+                  >
+                    {header}
+                  </DataTable.Title>
+                ))}
+              </DataTable.Header>
 
-            <DataTable.Row style={[{ height: 55 }]}>
-              <HStack justifyContent={'space-evenly'} w='100%'>
-                {Object.keys(modalData).map((header: any, idx: number) => {
-                  return (
-                    <View
-                      key={`${header}-${idx}`}
-                      style={[
-                        {
-                          justifyContent: 'center',
-                          marginTop: 10,
-                          marginBottom: 10,
-                        },
-                      ]}
-                    >
-                      <Input
-                        height='50px'
-                        width='100px'
-                        textAlign={'center'}
-                        fontSize='16'
-                        keyboardType='numeric'
-                        onChangeText={(value) => {
-                          if (
-                            value != payload[header].y ||
-                            value != payload[header].x
-                          ) {
-                            handleChange(header, value)
+              <DataTable.Row style={[{ height: 55 }]}>
+                <HStack justifyContent={'space-evenly'} w='100%'>
+                  {Object.keys(modalData).map((header: any, idx: number) => {
+                    return (
+                      <View
+                        key={`${header}-${idx}`}
+                        style={[
+                          {
+                            justifyContent: 'center',
+                            marginTop: 10,
+                            marginBottom: 10,
+                          },
+                        ]}
+                      >
+                        <Input
+                          height='50px'
+                          width='100px'
+                          textAlign={'center'}
+                          fontSize='16'
+                          keyboardType='numeric'
+                          onChangeText={value => {
+                            if (
+                              value != payload[header].y ||
+                              value != payload[header].x
+                            ) {
+                              handleChange(header, value)
+                            }
+                          }}
+                          onBlur={() => {}}
+                          value={
+                            payload[header]
+                              ? !usesDensity
+                                ? `${payload[header].y}`
+                                : `${payload[header].x}`
+                              : 'NA'
                           }
-                        }}
-                        onBlur={() => {}}
-                        value={
-                          payload[header]
-                            ? !usesDensity
-                              ? `${payload[header].y}`
-                              : `${payload[header].x}`
-                            : 'NA'
-                        }
-                      />
-                    </View>
-                  )
-                })}
-              </HStack>
-            </DataTable.Row>
-          </DataTable>
+                        />
+                      </View>
+                    )
+                  })}
+                </HStack>
+              </DataTable.Row>
+            </DataTable>
+          </>
         )}
 
         <HStack width={'full'} justifyContent={'space-between'}>

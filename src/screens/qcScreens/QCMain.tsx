@@ -38,10 +38,10 @@ function QCMain({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programsTrapVisits = previousTrapVisits.filter((trapVisit) => {
+    const programsTrapVisits = previousTrapVisits.filter(trapVisit => {
       return trapVisit.createdTrapVisitResponse.programId === programId
     })
-    const programsCatchRaw = previousCatchRaw.filter((catchRaw) => {
+    const programsCatchRaw = previousCatchRaw.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
 
@@ -265,7 +265,7 @@ const Accordion = ({
   }, [activeButton])
 
   const toggleOpen = () => {
-    setIsOpen((value) => !value)
+    setIsOpen(value => !value)
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
   }
 

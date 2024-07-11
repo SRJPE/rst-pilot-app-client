@@ -294,7 +294,7 @@ export default function Graph({
                       // },
                       {
                         target: 'data',
-                        mutation: (props) => {
+                        mutation: props => {
                           console.log('data.datum', data.datum)
                           console.log('props', props)
                           handlePointClick(data.datum)
@@ -403,7 +403,7 @@ export default function Graph({
             />
           }
           fixLabelOverlap={true}
-          tickFormat={(value) => {
+          tickFormat={value => {
             let date = new Date(Number(value))
             if (String(date) !== 'Invalid Date' && showDates) {
               return `${moment(date).format('MMM Do YY')}`
@@ -427,15 +427,17 @@ export default function Graph({
           dependentAxis
           // label='Number of fish with mark'
           // fixLabelOverlap={true}
-          tickFormat={(value) => {
+          tickFormat={value => {
             if (chartType === 'true-or-false') {
               if (value === 1) {
-                return 'false'
+                return 'False'
               } else if (value === 2) {
-                return 'true'
+                return 'True'
               } else {
                 return ''
               }
+            } else if (chartType === 'linewithplot' && yLabel === 'Density') {
+              return ''
             } else {
               return `${value}`
             }

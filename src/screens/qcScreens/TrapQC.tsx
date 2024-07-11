@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Box, Button, Center, HStack, Text, View, VStack } from 'native-base'
+import {
+  Box,
+  Button,
+  Center,
+  HStack,
+  Modal,
+  Text,
+  View,
+  VStack,
+} from 'native-base'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -114,7 +123,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(temp.measureValueNumeric),
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
             })
           }
 
@@ -129,7 +138,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(turbidity.measureValueNumeric),
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
             })
           }
 
@@ -138,7 +147,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(response.createdTrapVisitResponse.rpmAtStart),
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
             }
 
             rpmAtStartData.push(rpmAtStart)
@@ -149,7 +158,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(createdTrapVisitResponse.rpmAtEnd),
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
             }
             rpmAtEndData.push(rpmAtEnd)
           }
@@ -159,7 +168,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.totalRevolutions,
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
             }
             counterData.push(counter)
           }
@@ -169,7 +178,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.debrisVolumeLiters,
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
             }
             debrisData.push(debris)
           }
@@ -242,6 +251,8 @@ function TrapQC({
     }
   }
 
+  console.log('modal data', pointClicked)
+
   return (
     <>
       <View
@@ -259,7 +270,9 @@ function TrapQC({
             closeModal={() => navigation.goBack()}
           />
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
-            Edit values by selecting a point on a plot below.
+            Edit values by selecting a point on a plot below. Red points
+            indicate records that have not been QC'd, while the gray points
+            indicate records that have been QC'd and approved.
           </Text>
 
           <HStack w={'full'} justifyContent='space-evenly' mb={'10'}>

@@ -443,6 +443,8 @@ const IncompleteSections = ({
               } else {
               }
             })
+            console.log('EM', fishValue.existingMarks)
+            console.log('release ID?', releaseId)
             return releaseId
           }
 
@@ -465,7 +467,7 @@ const IncompleteSections = ({
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
             captureRunClassMethod: getRunClassMethod(fishValue),
             // defaults to "none" (id: 1) if not selected
-            markType: 1, // Check w/ Erin
+            // markType: 1, // Check w/ Erin
             markedForRelease: fishValue.willBeUsedInRecapture,
             adiposeClipped: fishValue.adiposeClipped ? true : false,
             dead: fishValue.dead ? true : false,

@@ -206,7 +206,7 @@ function CatchCategoricalQC({
             dataId: 'Adipose Clipped',
             x: idx + 1,
             y: adiposeClipped ? 2 : 1,
-            colorScale: qcNotStarted ? 'red' : undefined,
+            colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
             // catchResponse,
           })
         }
@@ -302,7 +302,7 @@ function CatchCategoricalQC({
               dataId: 'Mortalities',
               x: species,
               y: speciesAlreadyExists.y + numFishCaught,
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
               // catchResponse,
             })
           } else {
@@ -311,7 +311,7 @@ function CatchCategoricalQC({
               dataId: 'Mortalities',
               x: species,
               y: numFishCaught,
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
               // catchResponse,
             })
           }
@@ -791,6 +791,8 @@ function CatchCategoricalQC({
     }
   }
 
+  console.log('modalData', modalData)
+
   return (
     <>
       <View
@@ -808,12 +810,14 @@ function CatchCategoricalQC({
             closeModal={() => navigation.goBack()}
           />
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
-            Edit values by selecting a point on the plot below.
+            Edit values by selecting a point on a plot below. Red points
+            indicate records that have not been QC'd, while the gray points
+            indicate records that have been QC'd and approved.
           </Text>
 
           <HStack mb={'10'}>
             <GraphMenuButton buttonName={'Adipose Clipped'} />
-            <GraphMenuButton buttonName={'Species'} />
+            {/* <GraphMenuButton buttonName={'Species'} /> */}
             <GraphMenuButton buttonName={'Marks'} />
             <GraphMenuButton buttonName={'Mortalities'} />
           </HStack>

@@ -228,6 +228,9 @@ function CatchMeasureQC({
     }
   }
 
+  // console.log('pointClicked', pointClicked)
+  // console.log('graphData', graphSubData)
+
   return (
     <>
       <View
@@ -246,7 +249,7 @@ function CatchMeasureQC({
           />
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
             Edit values by selecting a point on the plot below. Grey density
-            lines show historic fork length distribution
+            lines show historic distribution
           </Text>
 
           <HStack mb={'10'}>

@@ -99,7 +99,7 @@ function EfficiencyQC({
           id: catchRawId,
           x: efficiency,
           y: 1,
-          colorScale: qcNotStarted ? 'red' : undefined,
+          colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
         })
       }
     })
@@ -146,13 +146,13 @@ function EfficiencyQC({
   const handePointClick = (datum: any) => {
     const pointId = datum.id
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
 
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
-    const selectedData = qcData.filter((response) => {
+    const selectedData = qcData.filter(response => {
       const id = response.createdCatchRawResponse?.id
       return pointId === id
     })
@@ -275,7 +275,7 @@ function EfficiencyQC({
             fontSize='16'
             placeholder='Enter Number'
             keyboardType='numeric'
-            onChangeText={(value) => {
+            onChangeText={value => {
               console.log('number released: ', value)
               setNestedModalInputValue(value)
             }}
@@ -290,7 +290,7 @@ function EfficiencyQC({
             fontSize='16'
             placeholder='Enter Number'
             keyboardType='numeric'
-            onChangeText={(value) => {
+            onChangeText={value => {
               console.log('number recaptured: ', value)
               setNestedModalInputValue(value)
             }}
@@ -305,7 +305,7 @@ function EfficiencyQC({
             fontSize='16'
             placeholder='Enter Fork Length'
             keyboardType='numeric'
-            onChangeText={(value) => {
+            onChangeText={value => {
               console.log('fork length: ', value)
               setNestedModalInputValue(value)
             }}
@@ -348,7 +348,7 @@ function EfficiencyQC({
               height={400}
               width={600}
               zoomDomain={{ y: [0, 1.2], x: [0, graphData.length + 1] }}
-              onPointClick={(datum) => handePointClick(datum)}
+              onPointClick={datum => handePointClick(datum)}
             />
           </ScrollView>
 
@@ -674,7 +674,7 @@ function EfficiencyQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  onChangeText={(value) => {
+                  onChangeText={value => {
                     setNestedModalComment(value)
                   }}
                   // onBlur={handleBlur('comments')}
