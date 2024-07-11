@@ -2,8 +2,12 @@ import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { Ionicons } from '@expo/vector-icons'
-import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
+import {
+  resetMarkRecapSlice,
+  updateActiveMarkRecaptureStep,
+} from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
 import { useRoute } from '@react-navigation/native'
+import { reset } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
 export default function MarkRecaptureNavButtons({
   navigation,
@@ -43,6 +47,7 @@ export default function MarkRecaptureNavButtons({
         index: 0,
         routes: [{ name: 'Release Trial' }],
       })
+      dispatch(resetMarkRecapSlice())
       return
     }
     //navigate Right
@@ -68,6 +73,7 @@ export default function MarkRecaptureNavButtons({
         routes: [{ name: 'Release Trial' }],
       })
       navigation.navigate('Home')
+      dispatch(resetMarkRecapSlice())
       return
     }
 
