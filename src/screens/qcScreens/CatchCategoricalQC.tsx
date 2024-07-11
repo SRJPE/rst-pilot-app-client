@@ -30,6 +30,7 @@ import {
   handleQCChartButtonClick,
 } from '../../utils/utils'
 import { get } from 'lodash'
+import moment from 'moment'
 
 interface GraphDataI {
   'Adipose Clipped': any[]
@@ -98,7 +99,7 @@ function CatchCategoricalQC({
   const [nestedModalComment, setNestedModalComment] = useState<string>('')
 
   const axisLabelDictionary = {
-    'Adipose Clipped': { xLabel: 'Sampling Time', yLabel: undefined },
+    'Adipose Clipped': { xLabel: 'Date', yLabel: undefined },
     Species: { xLabel: 'Date', yLabel: 'Count' },
     Marks: { xLabel: 'Date', yLabel: 'Count' },
     Mortalities: { xLabel: 'Date', yLabel: 'Count' },
@@ -204,7 +205,7 @@ function CatchCategoricalQC({
           adiposeClippedData.push({
             ids: [id],
             dataId: 'Adipose Clipped',
-            x: idx + 1,
+            x: dateTime,
             y: adiposeClipped ? 2 : 1,
             colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
             // catchResponse,
@@ -478,7 +479,7 @@ function CatchCategoricalQC({
       setNestedModalData({ catchRawId, fieldClicked, value: 'none' })
     } else {
       if (typeof rawData === 'boolean') {
-        rawData = rawData ? 'Yes' : 'No'
+        rawData = rawData ? 'True' : 'False'
       }
       if (rawData === null) {
         rawData = 'NA'
@@ -791,8 +792,6 @@ function CatchCategoricalQC({
     }
   }
 
-  console.log('modalData', modalData)
-
   return (
     <>
       <View
@@ -830,7 +829,7 @@ function CatchCategoricalQC({
                   yLabel={axisLabelDictionary[buttonName]['yLabel']}
                   key={buttonName}
                   chartType={buttonNameToChartType[buttonName] as any}
-                  showDates={['Species', 'Marks'].includes(buttonName)}
+                  showDates
                   onPointClick={datum => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
@@ -897,6 +896,18 @@ function CatchCategoricalQC({
               closeModal={() => setModalData(null)}
             />
 
+            <Text
+              color='black'
+              fontSize='2xl'
+              marginLeft={8}
+              marginBottom={8}
+              fontWeight={'light'}
+            >
+              {`Selected Point${modalData.length > 1 ? `s` : ''} Date: `}
+              {moment(
+                modalData?.[0]?.createdCatchRawResponse?.createdAt
+              ).format('MMMM Do, YYYY')}
+            </Text>
             <VStack alignItems={'center'}>
               <Heading fontSize={23} mb={5}>
                 Table of Selected Points
@@ -1307,8 +1318,8 @@ function CatchCategoricalQC({
                             <Text>
                               {adiposeClipped != null
                                 ? adiposeClipped
-                                  ? 'Yes'
-                                  : 'No'
+                                  ? 'True'
+                                  : 'False'
                                 : 'NA'}
                             </Text>
                           </DataTable.Cell>
@@ -1344,7 +1355,7 @@ function CatchCategoricalQC({
                             onPress={() => handleModalCellPressed('dead', data)}
                           >
                             <Text>
-                              {mort != null ? (mort ? 'Yes' : 'No') : 'NA'}
+                              {mort != null ? (mort ? 'True' : 'False') : 'NA'}
                             </Text>
                           </DataTable.Cell>
                         )

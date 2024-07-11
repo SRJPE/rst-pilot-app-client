@@ -956,7 +956,7 @@ const AddFishContent = ({
                                 my={1}
                                 _icon={{ color: 'primary' }}
                               >
-                                Yes
+                                True
                               </Radio>
                               <Radio
                                 colorScheme='primary'
@@ -964,7 +964,7 @@ const AddFishContent = ({
                                 my={1}
                                 _icon={{ color: 'primary' }}
                               >
-                                No
+                                False
                               </Radio>
                             </HStack>
                           </Radio.Group>
@@ -1005,7 +1005,7 @@ const AddFishContent = ({
                                   my={1}
                                   _icon={{ color: 'primary' }}
                                 >
-                                  Yes
+                                  True
                                 </Radio>
                                 <Radio
                                   colorScheme='primary'
@@ -1013,7 +1013,7 @@ const AddFishContent = ({
                                   my={1}
                                   _icon={{ color: 'primary' }}
                                 >
-                                  No
+                                  False
                                 </Radio>
                               </HStack>
                             </Radio.Group>

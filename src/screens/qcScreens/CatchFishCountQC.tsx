@@ -9,6 +9,7 @@ import {
   Icon,
   Input,
   Box,
+  Divider,
 } from 'native-base'
 import { useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
@@ -307,10 +308,18 @@ function CatchFishCountQC({
               justifyItems={'center'}
             >
               {modalData.dateTimestamp && (
-                <Text color='black' fontSize='2xl' mb={5} fontWeight={'light'}>
-                  Selected Point Date:{' '}
-                  {moment(modalData.dateTimestamp).format('MMMM Do, YYYY')}
-                </Text>
+                <>
+                  <Text
+                    color='black'
+                    fontSize='2xl'
+                    mb={5}
+                    fontWeight={'light'}
+                  >
+                    Selected Point Date:{' '}
+                    {moment(modalData.dateTimestamp).format('MMMM Do, YYYY')}
+                  </Text>
+                  <Divider mb={5} />
+                </>
               )}
               <Text color='black' fontSize='2xl' mb={5} fontWeight={'light'}>
                 You collected{' '}
