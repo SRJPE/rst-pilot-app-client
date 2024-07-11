@@ -7,7 +7,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import CustomModal from '../../components/Shared/CustomModal'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import { GaussKDE } from '../../utils/utils'
+import { kernelDensityEstimation } from '../../utils/utils'
 
 interface GraphDataI {
   'Fork Length': any[]
@@ -18,16 +18,22 @@ function CatchMeasureQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions,
 }: {
   navigation: any
   route: any
-  qcCatchRawSubmissions: any
+  qcCatchRawSubmissions: any[]
+  previousCatchRawSubmissions: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
     ('Fork Length' | 'Weight')[]
   >(['Fork Length'])
   const [graphData, setGraphData] = useState<GraphDataI>({
+    'Fork Length': [],
+    Weight: [],
+  })
+  const [graphSubData, setGraphSubData] = useState<GraphDataI>({
     'Fork Length': [],
     Weight: [],
   })
@@ -40,80 +46,107 @@ function CatchMeasureQC({
   }
 
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
-
-    let N = qcData.length
-    let range: number | null = null
-    let startPoint: number | null = null
-    
-    // Fork Length Calculations
-    let xiDataOne: any[] = []
-    const forkLengthArray: any[] = qcData.map((catchRawResponse) => {
-      return Number(catchRawResponse.createdCatchRawResponse.forkLength)
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+      return catchRaw.createdCatchRawResponse.programId === programId
     })
-    startPoint = Math.min(...forkLengthArray)
-    range = Math.max(...forkLengthArray) - startPoint
-    for (let i = 0; i < range; i++) {
-      xiDataOne[i] = startPoint + i
-    }
-    const forkLengthPayload: any[] = []
-    for (let i = 0; i < xiDataOne.length; i++) {
-      let forkLength = 0
-      qcData.forEach((catchRawResponse) => {
-        forkLength =
-          forkLength +
-          GaussKDE(
-            xiDataOne[i],
-            catchRawResponse.createdCatchRawResponse.forkLength
-          )
-        forkLengthPayload.push([xiDataOne[i], (1 / N) * forkLength])
-      })
-    }
-    let forkLengthGraphData = forkLengthPayload.map((arr) => {
-      let x = arr[0]
-      let y = arr[1]
-      return {
-        x,
-        y,
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+
+    // Fork Length Density Calculations -----------------------------
+
+    let forkRange: number | null = null
+    let forkStartPoint: number | null = null
+    let forkGraphSubData: any[] = []
+
+    // array of all fork lengths within the qc dataset
+    const forkLengthArray: any[] = qcData
+    .map((catchRawResponse) => {
+      const forkValue = Number(catchRawResponse.createdCatchRawResponse.forkLength)
+      if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
+        forkGraphSubData.push({
+          id: catchRawResponse.createdCatchRawResponse.id,
+          x: forkValue,
+          y: 0,
+        })
       }
+      return forkValue
+    })
+    .filter((num) => {
+      return num != 0
     })
 
-    // Weight Calculations
-    let xiDataTwo: any[] = []
-    const weightArray: any[] = qcData.map((catchRawResponse) => {
-      return Number(catchRawResponse.createdCatchRawResponse.weight)
-    })
-    startPoint = Math.min(...weightArray)
-    range = Math.max(...weightArray) - startPoint
-    for (let i = 0; i < range; i++) {
-      xiDataTwo[i] = startPoint + i
-    }
-    const weightPayload: any[] = []
-    for (let i = 0; i < xiDataTwo.length; i++) {
-      let weight = 0
-      qcData.forEach((catchRawResponse) => {
-        weight =
-          weight +
-          GaussKDE(
-            xiDataTwo[i],
-            catchRawResponse.createdCatchRawResponse.weight
-          )
-        weightPayload.push([xiDataTwo[i], (1 / N) * weight])
-      })
-    }
-    let weightGraphData = weightPayload.map((arr) => {
-      let x = arr[0]
-      let y = arr[1]
-      return {
-        x,
-        y,
+    // start point is the lowest value fork length
+    forkStartPoint = Math.min(...forkLengthArray)
+
+    // range is the range of largest fork length to smallest fork length
+    forkRange = Math.max(...forkLengthArray) - forkStartPoint
+
+    // Calculate KDE values
+    const forkBinWidth = 10 // forkBinWidth for KDE
+    const minForkLength = Math.min(...forkLengthArray)
+    const maxForkLength = Math.max(...forkLengthArray)
+    const forkGrid = Array.from(
+      { length: 100 },
+      (_, i) => minForkLength + (i * (maxForkLength - minForkLength)) / 99
+    ) // Points to evaluate KDE
+
+    const kdeForkValues = kernelDensityEstimation(
+      forkLengthArray,
+      forkBinWidth,
+      forkGrid
+    )
+
+    // Weight Density Calculations -----------------------------
+
+    let weightRange: number | null = null
+    let weightStartPoint: number | null = null
+    let weightGraphSubData: any[] = []
+
+    const weightArray: any[] = qcData
+    .map((catchRawResponse) => {
+      const weightValue = Number(catchRawResponse.createdCatchRawResponse.weight)
+      if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
+        weightGraphSubData.push({
+          id: catchRawResponse.createdCatchRawResponse.id,
+          x: weightValue,
+          y: 0,
+        })
       }
+      return weightValue
     })
+    .filter((num) => {
+      return num != 0
+    })
+
+    weightStartPoint = Math.min(...weightArray)
+
+    weightRange = Math.max(...weightArray) - weightStartPoint
+
+    // Calculate KDE values
+    const weightBinWidth = 10 // forkBinWidth for KDE
+    const minWeightLength = Math.min(...forkLengthArray)
+    const maxWeightLength = Math.max(...forkLengthArray)
+    const weightGrid = Array.from(
+      { length: 100 },
+      (_, i) => minWeightLength + (i * (maxWeightLength - minWeightLength)) / 99
+    ) // Points to evaluate KDE
+
+    const kdeWeightValues = kernelDensityEstimation(
+      weightArray,
+      weightBinWidth,
+      weightGrid
+    )
+
+    // Weight Density Calculations -----------------------------
 
     setGraphData({
-      'Fork Length': forkLengthGraphData,
-      Weight: weightGraphData,
+      'Fork Length': kdeForkValues,
+      Weight: kdeWeightValues,
+    })
+
+    setGraphSubData({
+      'Fork Length': forkGraphSubData,
+      Weight: weightGraphSubData,
     })
   }, [qcCatchRawSubmissions])
 
@@ -201,9 +234,9 @@ function CatchMeasureQC({
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
                   yLabel={axisLabelDictionary[buttonName]['yLabel']}
                   key={buttonName}
-                  zoomDomain={{ x: [0, 60], y: [0, 0.3] }}
-                  chartType='line'
+                  chartType='linewithplot'
                   data={graphData[buttonName]}
+                  subData={graphSubData[buttonName]}
                   onPointClick={(datum) => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
@@ -273,6 +306,8 @@ function CatchMeasureQC({
 const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions:
+      state.trapVisitFormPostBundler.previousCatchRawSubmissions,
   }
 }
 

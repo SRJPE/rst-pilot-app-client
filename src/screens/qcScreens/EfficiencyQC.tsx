@@ -4,33 +4,44 @@ import { connect } from 'react-redux'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
 import { RootState } from '../../redux/store'
+import { kernelDensityEstimation } from '../../utils/utils'
 
 function EfficiencyQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions,
 }: {
   navigation: any
   route: any
-  qcCatchRawSubmissions: any
+  qcCatchRawSubmissions: any[]
+  previousCatchRawSubmissions: any[]
 }) {
   const [graphData, setGraphData] = useState<any[]>([])
+  const [graphSubData, setGraphSubData] = useState<any[]>([])
 
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
-    const graphDataPayload: any[] = []
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter(
+      (catchRaw: any) => {
+        return catchRaw.createdCatchRawResponse.programId === programId
+      }
+    )
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+    const efficienciesArray: any[] = []
+    const graphSubDataPayload: any[] = []
 
     qcData.forEach((catchRawResponse: any, idx: number) => {
       const catchRaw = catchRawResponse.createdCatchRawResponse
       const release = catchRawResponse.releaseResponse
+      const qcCompleted = catchRawResponse.qcCompleted
 
       const numFishCaught: number = catchRaw.numFishCaught
       const releaseId: number | null = catchRaw.releaseId
       const catchRawId = catchRaw.id
 
       let numberReleased = 0
-      let numberRecaptured = 0
+      let numberRecaptured = numFishCaught
 
       if (releaseId) {
         if (Object.keys(release)) {
@@ -38,18 +49,61 @@ function EfficiencyQC({
             Number(release.totalWildFishReleased) +
             Number(release.totalHatcheryFishReleased)
         }
-      } else {
-        numberRecaptured = numFishCaught
       }
 
-      graphDataPayload.push({
-        id: catchRawId,
-        x: idx + 1,
-        y: numberReleased !== 0 ? (numberRecaptured / numberReleased) : 0,
-      })
+      const efficiency =
+        numberReleased !== 0 ? numberRecaptured / numberReleased : 0
+
+      if (qcCompleted && typeof efficiency === 'number') {
+        efficienciesArray.push(efficiency)
+      }
+
+      if (!qcCompleted && typeof efficiency === 'number') {
+        graphSubDataPayload.push({
+          id: catchRawId,
+          x: efficiency,
+          y: 1,
+        })
+      }
     })
 
-    setGraphData(graphDataPayload)
+    // Efficiency Density Calculations -----------------------------
+
+    if (efficienciesArray.length === 0) {
+      return
+    }
+
+    let range: number | null = null
+    let startPoint: number | null = null
+
+    // array of all efficiencies within the qc dataset
+    // -> efficienciesArray
+
+    // start point is the lowest value fork length
+    startPoint = Math.min(...efficienciesArray)
+
+    // range is the range of largest fork length to smallest fork length
+    range = Math.max(...efficienciesArray) - startPoint
+
+    // Calculate KDE values
+    const binWidth = 10 // binWidth for KDE
+    const minEfficiencyValue = Math.min(...efficienciesArray)
+    const maxEfficiencyValue = Math.max(...efficienciesArray)
+    const grid = Array.from(
+      { length: 100 },
+      (_, i) =>
+        minEfficiencyValue +
+        (i * (maxEfficiencyValue - minEfficiencyValue)) / 99
+    ) // Points to evaluate KDE
+
+    const kdeEfficiencyValues = kernelDensityEstimation(
+      efficienciesArray,
+      binWidth,
+      grid
+    )
+
+    setGraphData(kdeEfficiencyValues)
+    setGraphSubData(graphSubDataPayload)
   }, [qcCatchRawSubmissions])
 
   return (
@@ -75,13 +129,16 @@ function EfficiencyQC({
 
           <ScrollView>
             <Graph
-              chartType='line'
+              xLabel={'Efficiency (Recaptured/Released)'}
+              yLabel={'Density'}
+              chartType='linewithplot'
               data={graphData}
+              subData={graphSubData}
               barColor='grey'
               selectedBarColor='green'
               height={400}
               width={600}
-              zoomDomain={{ y: [0, 1] }}
+              zoomDomain={{ y: [0, 1], x: [0, graphData.length + 1] }}
             />
           </ScrollView>
 
@@ -126,6 +183,8 @@ function EfficiencyQC({
 const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions:
+      state.trapVisitFormPostBundler.previousCatchRawSubmissions,
   }
 }
 

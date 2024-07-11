@@ -97,12 +97,32 @@ const TrapOperations = ({
         return false
       }
       let warningResult = false
-      const range = selectedTrapName
-        ? QARanges.flowMeasure[selectedStream][selectedTrapSite][
-            selectedTrapName
-          ]
-        : QARanges.flowMeasure[selectedStream][selectedTrapSite]
+      let activeTabName = selectedTrapName
 
+      if (activeTabId) {
+        activeTabName = tabSlice.tabs[activeTabId].name
+      }
+      let range
+
+      if (
+        !QARanges.flowMeasure?.[selectedStream.trim()]?.[
+          selectedTrapSite.trim()
+        ]
+      ) {
+        range = { max: 15000, min: 50 }
+      } else {
+        range = activeTabName
+          ? QARanges.flowMeasure?.[selectedStream.trim()]?.[
+              selectedTrapSite.trim()
+            ][activeTabName.trim()]
+          : QARanges.flowMeasure?.[selectedStream.trim()]?.[
+              selectedTrapSite.trim()
+            ]
+      }
+
+      if (!range) {
+        range = { max: 15000, min: 50 }
+      }
       if (flowMeasureEntered > range.max || flowMeasureEntered < range.min) {
         warningResult = true
       }
@@ -165,7 +185,7 @@ const TrapOperations = ({
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
       const allTabIds: string[] = Object.keys(tabSlice.tabs)
-      allTabIds.forEach((allTabId) => {
+      allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
             stepCompletedCheck = false
@@ -252,6 +272,13 @@ const TrapOperations = ({
       // only create initial error when form is not completed
       onSubmit={(values: any) => {
         if (activeTabId && activeTabId != 'placeholderId') {
+          const activeTabName = tabSlice.tabs[activeTabId].name
+
+          const flowRange =
+            QARanges.flowMeasure?.[selectedStream.trim()]?.[
+              selectedTrapSite.trim()
+            ][activeTabName.trim()]
+
           const callback = () => {
             if (values?.trapStatus === 'trap not functioning') {
               navigateHelper(
@@ -271,7 +298,7 @@ const TrapOperations = ({
                 dispatch,
                 updateActiveStep
               )
-            } else if (values?.flowMeasure > 1000) {
+            } else if (values?.flowMeasure > flowRange?.max) {
               navigateHelper(
                 'High Flows',
                 navigationSlice,
@@ -557,7 +584,7 @@ const TrapOperations = ({
                           </FormControl.Label>
                           <Popover
                             placement='bottom left'
-                            trigger={(triggerProps) => {
+                            trigger={triggerProps => {
                               return (
                                 <IconButton
                                   {...triggerProps}

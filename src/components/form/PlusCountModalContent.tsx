@@ -76,6 +76,7 @@ const PlusCountModalContent = ({
           errors,
           values,
           setFieldValue,
+          resetForm,
         }) => (
           <>
             <CustomModalHeader
@@ -128,54 +129,67 @@ const PlusCountModalContent = ({
                     }))}
                   />
                 </FormControl>
-                <FormControl w='31%'>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Life Stage
-                      </Text>
-                    </FormControl.Label>
+                {(values.species === 'Chinook salmon' ||
+                  values.species === 'Steelhead / rainbow trout' ||
+                  !values.species) && (
+                  <FormControl w='31%'>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Life Stage
+                        </Text>
+                      </FormControl.Label>
 
-                    {touched.lifeStage &&
-                      errors.lifeStage &&
-                      RenderErrorMessage(errors, 'lifeStage')}
-                  </HStack>
-                  <CustomSelect
-                    selectedValue={values.lifeStage}
-                    placeholder={'Life stage'}
-                    onValueChange={handleChange('lifeStage')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={alphabeticalLifeStage.map((item: any) => ({
-                      label: item.definition,
-                      value: item.definition,
-                    }))}
-                  />
-                </FormControl>
+                      {touched.lifeStage &&
+                        errors.lifeStage &&
+                        RenderErrorMessage(errors, 'lifeStage')}
+                    </HStack>
+                    <CustomSelect
+                      selectedValue={values.lifeStage}
+                      placeholder={'Life stage'}
+                      onValueChange={handleChange('lifeStage')}
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={
+                        values.species === 'Chinook salmon'
+                          ? alphabeticalLifeStage.map((item: any) => ({
+                              label: item.definition,
+                              value: item.definition,
+                            }))
+                          : [
+                              { label: 'adult', value: 'adult' },
+                              { label: 'juvenile', value: 'juvenile' },
+                            ]
+                      }
+                    />
+                  </FormControl>
+                )}
 
-                <FormControl w='31%'>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Run
-                      </Text>
-                    </FormControl.Label>
+                {(values.species === 'Chinook salmon' || !values.species) && (
+                  <FormControl w='31%'>
+                    <HStack space={4} alignItems='center'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Run
+                        </Text>
+                      </FormControl.Label>
 
-                    {touched.run &&
-                      errors.run &&
-                      RenderErrorMessage(errors, 'run')}
-                  </HStack>
+                      {touched.run &&
+                        errors.run &&
+                        RenderErrorMessage(errors, 'run')}
+                    </HStack>
 
-                  <CustomSelect
-                    selectedValue={values.run}
-                    placeholder={'Run'}
-                    onValueChange={handleChange('run')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={run.map((item: any) => ({
-                      label: item.definition,
-                      value: item.definition,
-                    }))}
-                  />
-                </FormControl>
+                    <CustomSelect
+                      selectedValue={values.run}
+                      placeholder={'Run'}
+                      onValueChange={handleChange('run')}
+                      setFieldTouched={setFieldTouched}
+                      selectOptions={run.map((item: any) => ({
+                        label: item.definition,
+                        value: item.definition,
+                      }))}
+                    />
+                  </FormControl>
+                )}
               </HStack>
               <HStack space={6}>
                 <FormControl w='48.5%'>

@@ -16,15 +16,18 @@ import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { AppDispatch, RootState } from '../../redux/store'
+import { normalizeDate } from '../../utils/utils'
 
 function CatchFishCountQC({
   navigation,
   route,
   qcCatchRawSubmissions,
+  previousCatchRawSubmissions,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any
+  previousCatchRawSubmissions: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [graphData, setGraphData] = useState<any[]>([])
@@ -32,12 +35,17 @@ function CatchFishCountQC({
   const [pointClicked, setPointClicked] = useState<any | null>(null)
 
   useEffect(() => {
-    const previousCatchRaw = route.params.previousCatchRaw
-    const qcData = [...qcCatchRawSubmissions, ...previousCatchRaw]
+    const programId = route.params.programId
+    const programCatchRaw = previousCatchRawSubmissions.filter(
+      (catchRaw: any) => {
+        return catchRaw.createdCatchRawResponse.programId === programId
+      }
+    )
+    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
     const totalCountByDay: any[] = []
     const datesFormatted: any = {}
 
-    qcData.forEach((catchResponse) => {
+    qcData.forEach(catchResponse => {
       const catchRaw = catchResponse.createdCatchRawResponse
       const numFishCaught = catchRaw?.numFishCaught
       const createdAt = new Date(catchRaw.createdAt)
@@ -50,7 +58,7 @@ function CatchFishCountQC({
       }
     })
 
-    Object.keys(datesFormatted).forEach((dateString) => {
+    Object.keys(datesFormatted).forEach(dateString => {
       totalCountByDay.push({
         x: Number(dateString),
         y: datesFormatted[dateString],
@@ -59,15 +67,6 @@ function CatchFishCountQC({
 
     setGraphData(totalCountByDay)
   }, [qcCatchRawSubmissions])
-
-  const normalizeDate = (date: Date) => {
-    date.setHours(0)
-    date.setMinutes(0)
-    date.setSeconds(0)
-    date.setMilliseconds(0)
-
-    return date.getTime()
-  }
 
   const handlePointClick = (datum: any) => {
     console.log('point clicked: ', datum)
@@ -120,8 +119,9 @@ function CatchFishCountQC({
               yLabel={'Total Daily Catch'}
               chartType='bar'
               data={graphData}
+              showDates={true}
               barColor='grey'
-              onPointClick={(datum) => handlePointClick(datum)}
+              onPointClick={datum => handlePointClick(datum)}
               selectedBarColor='green'
               height={400}
               width={600}
@@ -187,7 +187,7 @@ function CatchFishCountQC({
               </Text>
               <Text color='black' fontSize='2xl' fontWeight={'light'}>
                 Click button below to flag data as low confidence or edit value
-                if you know true value.
+                if you know the correct value.
               </Text>
               <HStack
                 justifyContent={'space-between'}
@@ -251,6 +251,8 @@ function CatchFishCountQC({
 const mapStateToProps = (state: RootState) => {
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
+    previousCatchRawSubmissions:
+      state.trapVisitFormPostBundler.previousCatchRawSubmissions,
   }
 }
 

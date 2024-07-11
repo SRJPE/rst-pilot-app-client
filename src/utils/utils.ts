@@ -143,10 +143,10 @@ export const QARanges = {
         'Hallwood 3': { max: 15000, min: 50 },
       },
     },
-    'Flowwest Test': {
-      'Flowwest Test': {
-        'FlowWest Test 1': { max: 2000, min: 50 },
-        'FlowWest Test 2': { max: 2000, min: 50 },
+    'FlowWest Test': {
+      'FlowWest Test': {
+        'FlowWest test 1': { max: 2000, min: 50 },
+        'FlowWest test 2': { max: 2000, min: 50 },
       },
     },
   } as any,
@@ -237,8 +237,23 @@ export const getSubstring = (
   return str.substring(char1, char2)
 }
 
-export function GaussKDE(xi: number, x: number) {
-  return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(Math.pow(xi - x, 2) / -2)
+export function gaussianKernel(x: number) {
+    return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+}
+
+export function kernelDensityEstimation(data: number[], bandwidth: number, grid: number[]): number[] {
+  const density: number[] = [];
+
+  for (let i = 0; i < grid.length; i++) {
+    let sum = 0;
+    for (let j = 0; j < data.length; j++) {
+      const u = (grid[i] - data[j]) / bandwidth;
+      sum += gaussianKernel(u);
+    }
+    density[i] = sum / (data.length * bandwidth);
+  }
+
+  return density;
 }
 
 export const useDebounce = <T>(value: T, delay = 500) => {
@@ -275,4 +290,42 @@ export const navigateHelper = (
     type: updateActiveStep,
     payload: payload,
   })
+}
+
+export const getRandomColor = () => {
+  // Generate random values for red, green, and blue channels
+  var red = Math.floor(Math.random() * 256)
+  var green = Math.floor(Math.random() * 256)
+  var blue = Math.floor(Math.random() * 256)
+
+  // Convert decimal values to hexadecimal
+  var redHex = red.toString(16).padStart(2, '0')
+  var greenHex = green.toString(16).padStart(2, '0')
+  var blueHex = blue.toString(16).padStart(2, '0')
+
+  // Concatenate hexadecimal values to form the color code
+  var color = '#' + redHex + greenHex + blueHex
+
+  return color
+}
+
+export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
+  if (!sentence) return sentence // Check if the sentence is not empty
+  return sentence
+    .split(' ') // Split the sentence into words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+    .join(' ') // Join the words back into a sentence
+}
+
+export const truncateAndTrimString = (str: string, length: number) => {
+  return str.length > length ? str.substring(0, length).trim() : str
+}
+
+export const normalizeDate = (date: Date) => {
+  date.setHours(0)
+  date.setMinutes(0)
+  date.setSeconds(0)
+  date.setMilliseconds(0)
+
+  return date.getTime()
 }
