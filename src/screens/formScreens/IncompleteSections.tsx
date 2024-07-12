@@ -443,8 +443,6 @@ const IncompleteSections = ({
               } else {
               }
             })
-            console.log('EM', fishValue.existingMarks)
-            console.log('release ID?', releaseId)
             return releaseId
           }
 
