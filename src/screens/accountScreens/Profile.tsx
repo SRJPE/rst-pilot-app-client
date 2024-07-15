@@ -56,7 +56,7 @@ const Profile = ({
   const passwordResetDiscovery = useAutoDiscovery(
     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/B2C_1_password_reset/v2.0/'
   )
-
+  const userIsLead = userCredentialsStore.role === 'lead'
   //////////////////////////////////////////////
 
   const [pwResetRequest, pwResetResponse, pwResetPromptAsync] = useAuthRequest(
@@ -126,9 +126,9 @@ const Profile = ({
       <Box overflow='hidden'>
         <VStack alignItems='center' marginTop='16' marginBottom='8'>
           <Text fontSize={'3xl'}>{userCredentialsStore.displayName}</Text>
-          <Text fontSize={'xl'}>{userCredentialsStore.jobTitle}</Text>
-          <Text fontSize={'lg'} mb={5}>
-            {userCredentialsStore.emailAddress}
+          <Text fontSize={'lg'}>{userCredentialsStore.emailAddress}</Text>
+          <Text fontSize={'xl'} mb={5}>
+            {userCredentialsStore.role === 'lead' ? 'Lead' : 'Non-Lead'}
           </Text>
           <Button
             alignSelf='center'
@@ -198,19 +198,23 @@ const Profile = ({
             </HStack>
           </Pressable>
           <Divider bg='#414141' />
-          <Pressable
-            my='7'
-            onPress={async () => {
-              setAddNewUserModalOpen(true)
-            }}
-          >
-            <HStack justifyContent='space-between' alignItems='center'>
-              <Text fontSize='2xl' bold>
-                Create New User
-              </Text>
-            </HStack>
-          </Pressable>
-          <Divider bg='#414141' />
+          {userIsLead && (
+            <>
+              <Pressable
+                my='7'
+                onPress={async () => {
+                  setAddNewUserModalOpen(true)
+                }}
+              >
+                <HStack justifyContent='space-between' alignItems='center'>
+                  <Text fontSize='2xl' bold>
+                    Create New User
+                  </Text>
+                </HStack>
+              </Pressable>
+              <Divider bg='#414141' />
+            </>
+          )}
 
           <Pressable
             my='7'
@@ -221,7 +225,6 @@ const Profile = ({
               const refreshToken = await SecureStore.getItemAsync(
                 'userRefreshToken'
               )
-              console.log('🚀 ~ onPress={ ~ refreshToken:', refreshToken)
 
               ///////
               setLogoutModalOpen(true)
@@ -316,7 +319,7 @@ const Profile = ({
       </CustomModal>
 
       {/* Add New User Modal */}
-      {addNewUserModalOpen && (
+      {userIsLead && addNewUserModalOpen && (
         <CustomModal
           isOpen={addNewUserModalOpen}
           closeModal={() => setAddNewUserModalOpen(false)}

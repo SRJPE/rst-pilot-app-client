@@ -10,12 +10,17 @@ interface CustomSelectI {
   onValueChange: any
   selectOptions: any[]
   style?: StyleProp<ViewStyle>
+  dataType?: string
+  disabled?: boolean
 }
 
-const CustomSelect: React.FC<CustomSelectI> = (props) => {
-  const handleOnChange = useCallback((itemValue: any) => {
-    props.onValueChange(itemValue)
-  }, [props.selectedValue])
+const CustomSelect: React.FC<CustomSelectI> = props => {
+  const handleOnChange = useCallback(
+    (itemValue: any) => {
+      props.onValueChange(itemValue)
+    },
+    [props.selectedValue]
+  )
 
   return (
     <Select
@@ -33,10 +38,19 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
       mt={1}
       onValueChange={handleOnChange}
       onClose={() => props.setFieldTouched()}
+      isDisabled={props?.disabled}
     >
       {props.selectOptions ? (
         props?.selectOptions.map((item, idx) => {
-          if (item.value) {
+          if (props.dataType === 'fundingAgency') {
+            return (
+              <Select.Item
+                key={item.id ?? idx}
+                label={item.definition}
+                value={item.id.toString()}
+              />
+            )
+          } else if (item.value) {
             return (
               <Select.Item
                 key={item.id ?? idx}

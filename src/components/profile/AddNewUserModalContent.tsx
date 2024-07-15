@@ -1,30 +1,40 @@
 import { Formik } from 'formik'
 import {
   Button,
-  Divider,
   FormControl,
   HStack,
   Input,
+  Select,
   Text,
   VStack,
 } from 'native-base'
-import React from 'react'
-import { useDispatch } from 'react-redux'
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import * as Yup from 'yup'
-import { createNewUser } from '../../redux/reducers/userCredentialsSlice'
-import { AppDispatch } from '../../redux/store'
+import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
+import api from '../../api/axiosConfig'
+import CustomSelect from '../Shared/CustomSelect'
 
 const editAccountValidationSchema = Yup.object().shape({
   firstName: Yup.string().label('First Name').required(),
   lastName: Yup.string().label('Last Name').required(),
-  jobTitle: Yup.string().label('Job Title'),
-  department: Yup.string().label('Department'),
+  mobilePhone: Yup.string().label('Job Title'),
+  agencyId: Yup.string().label('Agency').required(),
+  emailAddress: Yup.string().label('Email').email().required(),
+  role: Yup.string().label('Role').required(),
 })
 
 //just an initial outline
 const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
-  const dispatch = useDispatch<AppDispatch>()
+  const [submissionMessage, setSubmissionMessage] = useState({
+    success: false,
+    message: '',
+  })
+
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values.fundingAgency
+  )
 
   return (
     <>
@@ -33,19 +43,65 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
         showHeaderButton={true}
         closeModal={closeModal}
       />
-      <Divider my={2} thickness='3' />
       <Formik
         validationSchema={editAccountValidationSchema}
         initialValues={{
           firstName: '',
           lastName: '',
-          jobTitle: '',
-          department: '',
+          mobilePhone: '',
+          agencyId: '',
           emailAddress: '',
+          role: '',
         }}
-        onSubmit={(values, { setSubmitting }) => {
-          dispatch(createNewUser(values))
-          setSubmitting(false)
+        onSubmit={async (values, { setSubmitting }) => {
+          const {
+            firstName,
+            lastName,
+            mobilePhone,
+            agencyId,
+            emailAddress,
+            role,
+          } = values
+          const createdUserResponse = await api
+            .post(`user/create`, {
+              firstName,
+              lastName,
+              mobilePhone,
+              agencyId,
+              emailAddress,
+            })
+            .catch(err => {
+              console.log(
+                '🚀 ~ file: AddNewUserModalContent.tsx:240 ~ onSubmit={ ~ err:',
+                err
+              )
+
+              setSubmissionMessage({
+                success: false,
+                message:
+                  'There was an error creating the user. Please try again.',
+              })
+              setSubmitting(false)
+            })
+
+          if (createdUserResponse?.status === 200) {
+            setSubmissionMessage({
+              success: true,
+              message: 'User successfully created',
+            })
+            await api.post(`/personnel`, {
+              first_name: firstName,
+              last_name: lastName,
+              email: emailAddress,
+              phone: mobilePhone,
+              agencyId,
+              role,
+              azure_uid: createdUserResponse.data.id,
+            })
+            setTimeout(() => {
+              closeModal()
+            }, 1000)
+          }
         }}
       >
         {({
@@ -56,9 +112,10 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
           isSubmitting,
           errors,
           touched,
+          setFieldTouched,
         }) => {
           return (
-            <VStack space={5} m='5%'>
+            <VStack justifyContent={'space-between'} h={800} m='5%'>
               <FormControl>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
@@ -73,7 +130,13 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
                   onChangeText={handleChange('emailAddress')}
                   onBlur={handleBlur('emailAddress')}
                   value={values.emailAddress}
+                  isDisabled={isSubmitting}
                 />
+                {errors.emailAddress && touched.emailAddress ? (
+                  <Text mt='2' color='red.800'>
+                    {errors.emailAddress as string}
+                  </Text>
+                ) : null}
               </FormControl>
               <FormControl>
                 <FormControl.Label>
@@ -123,39 +186,74 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
               <FormControl>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
-                    Department
+                    Phone Number
                   </Text>
                 </FormControl.Label>
                 <Input
                   isDisabled={isSubmitting}
                   height='50px'
                   fontSize='16'
-                  placeholder='Department'
+                  placeholder='###-###-#### (Optional)'
                   keyboardType='default'
-                  onChangeText={handleChange('department')}
-                  onBlur={handleBlur('department')}
-                  value={values.department}
+                  onChangeText={handleChange('mobilePhone')}
+                  onBlur={handleBlur('mobilePhone')}
+                  value={values.mobilePhone}
                 />
               </FormControl>
               <FormControl>
                 <FormControl.Label>
                   <Text color='black' fontSize='xl'>
-                    Job Title
+                    Funding Agency
                   </Text>
                 </FormControl.Label>
-                <Input
-                  isDisabled={isSubmitting}
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Job Title'
-                  keyboardType='default'
-                  onChangeText={handleChange('jobTitle')}
-                  onBlur={handleBlur('jobTitle')}
-                  value={values.jobTitle}
+                <CustomSelect
+                  selectedValue={values.agencyId as string}
+                  placeholder='Funding Agency'
+                  onValueChange={handleChange('agencyId')}
+                  setFieldTouched={setFieldTouched}
+                  selectOptions={dropdownValues}
+                  dataType='fundingAgency'
+                  disabled={isSubmitting}
                 />
+                {errors.agencyId && touched.agencyId ? (
+                  <Text mt='2' color='red.800'>
+                    {errors.agencyId as string}
+                  </Text>
+                ) : null}
               </FormControl>
 
-              <HStack mt='50' space={5}>
+              <FormControl>
+                <FormControl.Label>
+                  <Text color='black' fontSize='xl'>
+                    Role
+                  </Text>
+                </FormControl.Label>
+                <Select
+                  height='50px'
+                  fontSize='16'
+                  placeholder='Select a role'
+                  onValueChange={handleChange('role')}
+                  isDisabled={isSubmitting}
+                >
+                  <Select.Item label='Lead' value='lead' />
+                  <Select.Item label='Non-Lead' value='non-lead' />
+                </Select>
+                {errors.role && touched.role ? (
+                  <Text mt='2' color='red.800'>
+                    {errors.role as string}
+                  </Text>
+                ) : null}
+              </FormControl>
+
+              {submissionMessage.message && (
+                <Text
+                  color={submissionMessage.success ? 'green.700' : 'red.700'}
+                >
+                  {submissionMessage.message}
+                </Text>
+              )}
+
+              <HStack space={5}>
                 <Button
                   variant='outline'
                   alignSelf='center'
@@ -184,8 +282,8 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
                   _disabled={{
                     opacity: '75',
                   }}
-                  // isDisabled={email === '' || password === ''}
-                  onPress={() => {
+                  isDisabled={isSubmitting || submissionMessage.success}
+                  onPress={async () => {
                     handleSubmit()
                   }}
                 >
