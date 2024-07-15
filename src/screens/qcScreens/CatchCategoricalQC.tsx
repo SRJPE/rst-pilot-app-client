@@ -145,7 +145,6 @@ function CatchCategoricalQC({
       return catchRaw.createdCatchRawResponse.programId === programId
     })
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
-    console.log('qcData', qcData)
 
     let adiposeClippedData: any[] = []
     let speciesData: any[] = []

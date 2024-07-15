@@ -204,8 +204,9 @@ function CatchFishCountQC({
             closeModal={() => navigation.goBack()}
           />
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
-            Edit values by selecting a point on the plot below. Points show
-            total daily counts for the selected species.
+            Select a species to see total daily counts for the selected species.
+            Points represent total daily counts of measured and plus count fish.
+            Edit values by selecting a point on the plot below.
           </Text>
 
           <Box width='70%' marginBottom={5}>
@@ -223,20 +224,25 @@ function CatchFishCountQC({
             />
           </Box>
 
-          <ScrollView>
-            <Graph
-              xLabel={'Date'}
-              yLabel={'Total Daily Catch'}
-              chartType='bar'
-              data={selectedSpecies != '' ? graphData : []}
-              showDates={true}
-              barColor='grey'
-              onPointClick={datum => handlePointClick(datum)}
-              selectedBarColor='green'
-              height={400}
-              width={600}
-            />
-          </ScrollView>
+          {selectedSpecies &&
+            (graphData.length > 0 ? (
+              <ScrollView>
+                <Graph
+                  xLabel={'Date'}
+                  yLabel={'Total Daily Catch'}
+                  chartType='bar'
+                  data={selectedSpecies != '' ? graphData : []}
+                  showDates={true}
+                  barColor='grey'
+                  onPointClick={datum => handlePointClick(datum)}
+                  selectedBarColor='green'
+                  height={400}
+                  width={600}
+                />
+              </ScrollView>
+            ) : (
+              <Text fontSize='xl'>No data available for this species</Text>
+            ))}
 
           <View flex={1}></View>
 
