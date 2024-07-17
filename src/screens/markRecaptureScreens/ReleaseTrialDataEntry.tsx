@@ -340,7 +340,6 @@ const ReleaseDataEntry = ({
                 setFieldValue={setFieldValue}
                 setFieldTouched={setFieldTouched}
                 field='appliedMarks'
-                validateField={validateField}
               />
 
               <Pressable onPress={() => setAddMarkModalOpen(true)}>
@@ -427,7 +426,6 @@ const ReleaseDataEntry = ({
             <AddAnotherMarkModalContent
               closeModal={() => setAddMarkModalOpen(false)}
               screenName={'markRecaptureRelease'}
-              validateField={validateField}
             />
           </CustomModal>
         </>

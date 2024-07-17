@@ -21,8 +21,6 @@ const MarkBadgeList = ({
   field,
   setExistingMarks,
   existingMarks,
-  validateField,
-  setFieldError,
 }: {
   badgeListContent: any
   setFieldValue?: any
@@ -30,8 +28,6 @@ const MarkBadgeList = ({
   field: string
   setExistingMarks?: any
   existingMarks?: any
-  validateField?: any
-  setFieldError?: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
@@ -40,11 +36,6 @@ const MarkBadgeList = ({
     if (setFieldValue && setFieldTouched) {
       setFieldValue(field, badgeListContent, true)
       setFieldTouched(field)
-    }
-    if (badgeListContent.length > 0) {
-      validateField(field)
-    } else if (!badgeListContent.length) {
-      setFieldError(field, 'Please add at least one mark')
     }
   }, [badgeListContent])
 

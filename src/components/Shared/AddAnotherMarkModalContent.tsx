@@ -30,7 +30,6 @@ const AddAnotherMarkModalContent = ({
   existingMarks,
   setExistingMarks,
   existingMarksArray,
-  validateField,
 }: {
   handleMarkFishFormSubmit?: any
   closeModal: any
@@ -39,22 +38,26 @@ const AddAnotherMarkModalContent = ({
   existingMarks?: any
   setExistingMarks?: any
   existingMarksArray?: any
-  validateField?: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const { markType, markColor, bodyPart } = dropdownValues.values
 
+  // sort markType dropdown values array where the object with definition key is 'Bismark Brown' is placed at the beginning of the array
+  const sortedDropdownValues = [...markType].sort((a: any, b: any) => {
+    if (a.definition === 'bismark brown') return -1
+    if (b.definition === 'bismark brown') return 1
+    return 0
+  })
+
   const handleSubmit = (values: ReleaseMarkI) => {
-    console.log('🚀 ~ handleSubmit ~ values:', values)
     //if the modal is opened in batch count
     if (screenName === 'batchCount') {
       dispatch(addMarkToBatchCountExistingMarks(values))
     } else if (screenName === 'markRecaptureRelease') {
       //if the modal is opened in mark recapture / release
       dispatch(addMarkToAppliedMarks(values))
-      validateField('appliedMarks')
     } else if (screenName === 'addIndividualFish') {
       setExistingMarks({
         ...existingMarks,
@@ -117,7 +120,7 @@ const AddAnotherMarkModalContent = ({
                   placeholder='Type'
                   onValueChange={handleChange('markType')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={markType}
+                  selectOptions={sortedDropdownValues}
                 />
                 {touched.markType &&
                   errors.markType &&
