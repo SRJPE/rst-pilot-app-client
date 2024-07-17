@@ -207,7 +207,7 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),
@@ -224,7 +224,7 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),
@@ -236,7 +236,7 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number'),
     otherwise: yup
       .number()
-      .transform((value) => (isNaN(value) ? 0 : value))
+      .transform(value => (isNaN(value) ? 0 : value))
       .typeError('Input must be a number')
       .notRequired(),
   }),
@@ -254,7 +254,7 @@ export const releaseTrialDataEntrySchema = yup.object().shape({
   //   then: yup.string().nullable(),
   //   otherwise: yup.string().required('Mark position required'),
   // }),
-  appliedMarks: yup.array().min(1).required('Must Add at lest one mark.'),
+  appliedMarks: yup.array(),
   releaseLocation: yup.string().required('Release location required'),
   // releaseTime: yup.
 })

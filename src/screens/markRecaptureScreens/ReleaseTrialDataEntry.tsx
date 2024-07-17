@@ -18,7 +18,7 @@ import CustomSelect from '../../components/Shared/CustomSelect'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { AppDispatch, RootState } from '../../redux/store'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { releaseTrialDataEntrySchema } from '../../utils/helpers/yupValidations'
 import {
@@ -33,7 +33,7 @@ import {
   postMarkRecaptureSubmissions,
   saveMarkRecaptureSubmission,
 } from '../../redux/reducers/postSlices/markRecapturePostBundler'
-import { flatten, uniq } from 'lodash'
+import { flatten, uniq, findIndex } from 'lodash'
 import { ReleaseMarkI } from '../../redux/reducers/addAnotherMarkSlice'
 import { returnDefinitionArray } from '../../utils/utils'
 
@@ -84,8 +84,9 @@ const ReleaseDataEntry = ({
   const [markedTime, setMarkedTime] = useState(new Date() as any)
   const [releaseTime, setReleaseTime] = useState(new Date() as any)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
-  const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
-
+  const [recentReleaseMarks, setRecentReleaseMarks] = useState<any[]>([])
+  const [preparedReleaseSites, setPreparedReleaseSites] = useState<any[]>([])
+  const [filteredReleaseSites, setFilteredReleaseSites] = useState<any[]>([])
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
@@ -103,15 +104,22 @@ const ReleaseDataEntry = ({
     return uniqueObj
   }
 
-  const preparedReleaseSites = removeDuplicates(
-    visitSetupDefaultsState.releaseSites
-  )
-  const filteredReleaseSites = preparedReleaseSites.filter(
-    (releaseSite: any) =>
-      releaseTrialDataEntryState.trapLocationIds.indexOf(
-        releaseSite.trapLocationsId
-      ) !== -1
-  )
+  useEffect(() => {
+    const preparedReleaseSites = removeDuplicates(
+      visitSetupDefaultsState.releaseSites
+    )
+    const filteredReleaseSites = preparedReleaseSites.filter(
+      (releaseSite: any) =>
+        releaseTrialDataEntryState.trapLocationIds.indexOf(
+          releaseSite.trapLocationsId
+        ) !== -1
+    )
+    setPreparedReleaseSites(preparedReleaseSites)
+    setFilteredReleaseSites(filteredReleaseSites)
+  }, [
+    visitSetupDefaultsState.releaseSites,
+    releaseTrialDataEntryState.trapLocationsIds,
+  ])
 
   const onReleaseTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
@@ -133,53 +141,74 @@ const ReleaseDataEntry = ({
       return releaseSiteObj.releaseSiteName
     }
   )
-  const handlePressRecentExistingMarkButton = (
+  const handlePressRecentReleaseMarkButton = (
     selectedRecentReleaseMark: any
   ) => {
-    setRecentExistingMarks([selectedRecentReleaseMark])
+    let updatedMarks = [...recentReleaseMarks]
+    const indexOfSelectedMark = findIndex(
+      updatedMarks,
+      selectedRecentReleaseMark
+    )
+
+    // present, remove
+    if (indexOfSelectedMark !== -1) {
+      updatedMarks.splice(indexOfSelectedMark, 1)
+    } else {
+      updatedMarks.push(selectedRecentReleaseMark)
+    }
+    setRecentReleaseMarks(updatedMarks)
   }
 
   const decodedRecentReleaseMarks = (twoMostRecentReleaseMarks: any) => {
     return twoMostRecentReleaseMarks.map((mark: any) => {
-      console.log('🚀 ~ twoMostRecentReleaseMarks.map ~ mark:', mark)
       return {
         ...mark,
         markType: markTypeValues[mark.markType - 1],
         markColor: markColorValues[mark.markColor - 1],
-        bodyPart: bodyPartValues[mark?.markPosition - 1],
+        markPosition: bodyPartValues[mark?.markPosition - 1],
       }
     })
   }
   const saveMarkRecaptureSubmissions = (formValues: any) => {
-    //crew data lookup (string => ID)
-    const selectedCrewNamesMap: Record<string, boolean> =
-      releaseTrialDataEntryState.crew.reduce(
-        (acc: Record<string, boolean>, name: string) => ({
-          ...acc,
-          [name]: true,
-        }),
-        {}
+    try {
+      //crew data lookup (string => ID)
+      const selectedCrewNamesMap: Record<string, boolean> =
+        releaseTrialDataEntryState.crew.reduce(
+          (acc: Record<string, boolean>, name: string) => ({
+            ...acc,
+            [name]: true,
+          }),
+          {}
+        )
+
+      const allCrewObjects = flatten(visitSetupDefaultsState.crewMembers)
+      const selectedCrewIds = uniq(
+        allCrewObjects
+          .filter(
+            (obj: any) =>
+              selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
+          )
+          .map((obj: any) => obj.personnelId)
       )
 
-    const allCrewObjects = flatten(visitSetupDefaultsState.crewMembers)
-    const selectedCrewIds = uniq(
-      allCrewObjects
-        .filter(
-          (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
-        )
-        .map((obj: any) => obj.personnelId)
-    )
+      const programIdOfReleaseLocation = preparedReleaseSites.find(
+        (releaseSite: any) =>
+          releaseSite.releaseSiteName === formValues.releaseLocation
+      )?.programId
 
-    const markRecaptureSubmission: MarkRecaptureSubmissionI = {
-      programId: releaseTrialDataEntryState.programId,
-      // releasePurposeId: null, //left as null
-      releaseSiteId: returnNullableTableId(
-        releaseSiteValues.indexOf(formValues.releaseLocation)
-      ),
-      releasedAt: releaseTime,
-      markedAt: markedTime,
-      marksArray: releaseTrialDataEntryState.values.appliedMarks.map(
-        (markObj: any) => {
+      const markRecaptureSubmission: MarkRecaptureSubmissionI = {
+        programId:
+          releaseTrialDataEntryState.programId || programIdOfReleaseLocation,
+        // releasePurposeId: null, //left as null
+        releaseSiteId: returnNullableTableId(
+          releaseSiteValues.indexOf(formValues.releaseLocation)
+        ),
+        releasedAt: releaseTime,
+        markedAt: markedTime,
+        marksArray: [
+          ...releaseTrialDataEntryState.values.appliedMarks,
+          ...recentReleaseMarks,
+        ].map((markObj: any) => {
           return {
             markType: returnNullableTableId(
               markTypeValues.indexOf(markObj.markType)
@@ -187,28 +216,32 @@ const ReleaseDataEntry = ({
             markColor: returnNullableTableId(
               markColorValues.indexOf(markObj.markColor)
             ),
-            bodyPart: returnNullableTableId(
+            markPosition: returnNullableTableId(
               bodyPartValues.indexOf(markObj.markPosition)
             ),
           }
-        }
-      ),
-      runHatcheryFish: returnNullableTableId(
-        runValues.indexOf(releaseTrialState.values.runIDHatchery)
-      ),
-      hatcheryFishWeight: Number(releaseTrialState.values.runWeightHatchery),
-      totalWildFishReleased: Number(releaseTrialState.values.wildCount),
-      totalHatcheryFishReleased: Number(releaseTrialState.values.hatcheryCount),
-      totalWildFishDead: Number(releaseTrialState.values.deadWildCount),
-      totalHatcheryFishDead: Number(releaseTrialState.values.deadHatcheryCount),
-      releaseCrew: selectedCrewIds,
-    }
+        }),
+        runHatcheryFish: returnNullableTableId(
+          runValues.indexOf(releaseTrialState.values.runIDHatchery)
+        ),
+        hatcheryFishWeight: Number(releaseTrialState.values.runWeightHatchery),
+        totalWildFishReleased: Number(releaseTrialState.values.wildCount),
+        totalHatcheryFishReleased: Number(
+          releaseTrialState.values.hatcheryCount
+        ),
+        totalWildFishDead: Number(releaseTrialState.values.deadWildCount),
+        totalHatcheryFishDead: Number(
+          releaseTrialState.values.deadHatcheryCount
+        ),
+        releaseCrew: selectedCrewIds,
+      }
 
-    dispatch(saveMarkRecaptureSubmission(markRecaptureSubmission))
-    if (connectivityState.isConnected) {
-      console.log('CONNECTED')
-      dispatch(postMarkRecaptureSubmissions())
-    }
+      dispatch(saveMarkRecaptureSubmission(markRecaptureSubmission))
+      if (connectivityState.isConnected) {
+        console.log('CONNECTED')
+        dispatch(postMarkRecaptureSubmissions())
+      }
+    } catch (error) {}
   }
 
   const handleSubmit = (values: any) => {
@@ -235,7 +268,7 @@ const ReleaseDataEntry = ({
         ...releaseTrialDataEntryState.values,
         releaseLocation: filteredReleaseSites[0],
       }}
-      onSubmit={(values) => {
+      onSubmit={values => {
         handleSubmit(values)
       }}
     >
@@ -248,6 +281,7 @@ const ReleaseDataEntry = ({
         touched,
         errors,
         values,
+        validateField,
       }) => (
         <>
           <View
@@ -264,15 +298,13 @@ const ReleaseDataEntry = ({
                   decodedRecentReleaseMarks(
                     dropdownValues.twoMostRecentReleaseMarks
                   ).map((recentReleaseMark: any, index: number) => {
-                    const { id, markType, markColor, bodyPart } =
+                    const { id, markType, markColor, markPosition } =
                       recentReleaseMark
                     return (
                       <Button
                         key={index}
                         bg={
-                          recentExistingMarks.some(
-                            (mark: any) => mark.id === id
-                          )
+                          recentReleaseMarks.some((mark: any) => mark.id === id)
                             ? 'primary'
                             : 'secondary'
                         }
@@ -280,12 +312,13 @@ const ReleaseDataEntry = ({
                         borderRadius='5'
                         w='90%'
                         onPress={() => {
-                          handlePressRecentExistingMarkButton(recentReleaseMark)
+                          handlePressRecentReleaseMarkButton(recentReleaseMark)
+                          validateField('appliedMarks')
                         }}
                       >
                         <Text
                           color={
-                            recentExistingMarks.some(
+                            recentReleaseMarks.some(
                               (mark: any) => mark.id === id
                             )
                               ? 'white'
@@ -294,7 +327,7 @@ const ReleaseDataEntry = ({
                           fontWeight='500'
                           fontSize='md'
                         >
-                          {`${markType} - ${markColor} - ${bodyPart}`}
+                          {`${markType} - ${markColor} - ${markPosition}`}
                         </Text>
                       </Button>
                     )
@@ -307,6 +340,7 @@ const ReleaseDataEntry = ({
                 setFieldValue={setFieldValue}
                 setFieldTouched={setFieldTouched}
                 field='appliedMarks'
+                validateField={validateField}
               />
 
               <Pressable onPress={() => setAddMarkModalOpen(true)}>
@@ -393,6 +427,7 @@ const ReleaseDataEntry = ({
             <AddAnotherMarkModalContent
               closeModal={() => setAddMarkModalOpen(false)}
               screenName={'markRecaptureRelease'}
+              validateField={validateField}
             />
           </CustomModal>
         </>

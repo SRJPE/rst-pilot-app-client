@@ -1,4 +1,4 @@
-import { Formik } from 'formik'
+import { Formik, useFormikContext } from 'formik'
 import { FormControl, View, VStack, Text, Button, Divider } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { addMarkToAppliedMarks } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
@@ -30,6 +30,7 @@ const AddAnotherMarkModalContent = ({
   existingMarks,
   setExistingMarks,
   existingMarksArray,
+  validateField,
 }: {
   handleMarkFishFormSubmit?: any
   closeModal: any
@@ -38,6 +39,7 @@ const AddAnotherMarkModalContent = ({
   existingMarks?: any
   setExistingMarks?: any
   existingMarksArray?: any
+  validateField?: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
@@ -52,6 +54,7 @@ const AddAnotherMarkModalContent = ({
     } else if (screenName === 'markRecaptureRelease') {
       //if the modal is opened in mark recapture / release
       dispatch(addMarkToAppliedMarks(values))
+      validateField('appliedMarks')
     } else if (screenName === 'addIndividualFish') {
       setExistingMarks({
         ...existingMarks,
