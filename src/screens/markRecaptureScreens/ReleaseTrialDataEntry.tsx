@@ -58,6 +58,7 @@ export interface MarkRecaptureSubmissionI {
   marksArray: Array<ReleaseMarkI>
   runHatcheryFish: number
   hatcheryFishWeight: number
+  hatcheryFishForkLength: number
   totalWildFishReleased: number
   totalHatcheryFishReleased: number
   totalWildFishDead: number
@@ -225,6 +226,9 @@ const ReleaseDataEntry = ({
           runValues.indexOf(releaseTrialState.values.runIDHatchery)
         ),
         hatcheryFishWeight: Number(releaseTrialState.values.runWeightHatchery),
+        hatcheryFishForkLength: Number(
+          releaseTrialState.values.runForkLengthHatchery
+        ),
         totalWildFishReleased: Number(releaseTrialState.values.wildCount),
         totalHatcheryFishReleased: Number(
           releaseTrialState.values.hatcheryCount

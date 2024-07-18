@@ -52,49 +52,53 @@ const initialState: InitialStateI = {
 export const postMarkRecaptureSubmissions = createAsyncThunk(
   'markRecapturePostBundler/postMarkRecaptureSubmissions',
   async (_, thunkAPI) => {
-    const state = thunkAPI.getState() as RootState
-    let payload: {
-      markRecaptureResponse: any[]
-      markRecaptureReleaseCrewResponse: any[]
-      markRecaptureReleaseMarksResponse: any[]
-    } = {
-      markRecaptureResponse: [],
-      markRecaptureReleaseCrewResponse: [],
-      markRecaptureReleaseMarksResponse: [],
-    }
-    //get submissions
-    const markRecaptureSubmissions =
-      state.markRecaptureFormPostBundler.markRecaptureSubmissions
+    try {
+      const state = thunkAPI.getState() as RootState
+      let payload: {
+        markRecaptureResponse: any[]
+        markRecaptureReleaseCrewResponse: any[]
+        markRecaptureReleaseMarksResponse: any[]
+      } = {
+        markRecaptureResponse: [],
+        markRecaptureReleaseCrewResponse: [],
+        markRecaptureReleaseMarksResponse: [],
+      }
+      //get submissions
+      const markRecaptureSubmissions =
+        state.markRecaptureFormPostBundler.markRecaptureSubmissions
 
-    await Promise.all(
-      markRecaptureSubmissions.map(async (markRecaptureSubmission: any) => {
-        const markRecaptureSubmissionCopy = cloneDeep(markRecaptureSubmission)
-        console.log(
-          '🚀 ~ hit... markRecaptureSubmissionCopy:',
-          markRecaptureSubmissionCopy
-        )
-        // submit mark recapture (release trial)
-        const apiResponse: APIResponseI = await api.post(
-          'release/',
-          markRecaptureSubmissionCopy
-        )
-        // get response from server
-        const {
-          createdReleaseResponse,
-          createdReleaseCrewResponse,
-          createdReleaseMarksResponse,
-        } = apiResponse.data
-        // save to payload
-        payload.markRecaptureResponse.push(createdReleaseResponse)
-        payload.markRecaptureReleaseCrewResponse.push(
-          createdReleaseCrewResponse
-        )
-        payload.markRecaptureReleaseMarksResponse.push(
-          createdReleaseMarksResponse
-        )
-      })
-    )
-    return payload
+      await Promise.all(
+        markRecaptureSubmissions.map(async (markRecaptureSubmission: any) => {
+          const markRecaptureSubmissionCopy = cloneDeep(markRecaptureSubmission)
+          console.log(
+            '🚀 ~ hit... markRecaptureSubmissionCopy:',
+            markRecaptureSubmissionCopy
+          )
+          // submit mark recapture (release trial)
+          const apiResponse: APIResponseI = await api.post(
+            'release/',
+            markRecaptureSubmissionCopy
+          )
+          // get response from server
+          const {
+            createdReleaseResponse,
+            createdReleaseCrewResponse,
+            createdReleaseMarksResponse,
+          } = apiResponse.data
+          // save to payload
+          payload.markRecaptureResponse.push(createdReleaseResponse)
+          payload.markRecaptureReleaseCrewResponse.push(
+            createdReleaseCrewResponse
+          )
+          payload.markRecaptureReleaseMarksResponse.push(
+            createdReleaseMarksResponse
+          )
+        })
+      )
+      return payload
+    } catch (error) {
+      console.log('catch error')
+    }
   }
 )
 
@@ -142,6 +146,7 @@ export const markRecapturePostBundler = createSlice({
     },
 
     [postMarkRecaptureSubmissions.rejected.type]: (state, action) => {
+      console.log('rejected mark Recap post processing: ', action.payload)
       state.submissionStatus = 'submission-failed'
     },
   },

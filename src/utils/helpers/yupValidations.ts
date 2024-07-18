@@ -228,6 +228,19 @@ export const releaseTrialSchema = yup.object().shape({
       .typeError('Input must be a number')
       .notRequired(),
   }),
+  runForkLengthHatchery: yup.number().when('willSupplement', {
+    is: true,
+    then: yup
+      .number()
+
+      .nullable()
+      .typeError('Input must be a number'),
+    otherwise: yup
+      .number()
+      .transform(value => (isNaN(value) ? 0 : value))
+      .typeError('Input must be a number')
+      .notRequired(),
+  }),
   deadHatcheryCount: yup.number().when('willSupplement', {
     is: true,
     then: yup

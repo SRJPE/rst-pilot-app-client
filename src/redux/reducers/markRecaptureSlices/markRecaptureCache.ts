@@ -13,6 +13,7 @@ export interface ReleaseTrialValuesI {
   hatcheryCount: number | null
   runIDHatchery: string
   runWeightHatchery: number | null
+  runForkLengthHatchery: number | null
   deadHatcheryCount: number | null
 }
 
@@ -26,6 +27,7 @@ const initialState: InitialStateI = {
     hatcheryCount: null,
     runIDHatchery: '',
     runWeightHatchery: null,
+    runForkLengthHatchery: null,
     deadHatcheryCount: null,
   },
 }
