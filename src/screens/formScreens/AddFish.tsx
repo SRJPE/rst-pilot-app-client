@@ -55,6 +55,7 @@ import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkMo
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import MarkBadgeList from '../../components/markRecapture/MarkBadgeList'
 import { uid } from 'uid'
+import SpeciesDropDown from '../../components/form/SpeciesDropDown'
 
 export interface ReleaseMarkI {
   id?: number
@@ -399,7 +400,7 @@ const AddFishContent = ({
       plusCountMethod,
     ]
     let hasError = false
-    formValues.every(field => {
+    formValues.every((field) => {
       if (hasError) return false
       if (
         field.required &&
@@ -470,11 +471,13 @@ const AddFishContent = ({
     selectedRecentReleaseMark: ReleaseMarkI
   ) => {
     if (
-      recentExistingMarks.some(mark => mark.id === selectedRecentReleaseMark.id)
+      recentExistingMarks.some(
+        (mark) => mark.id === selectedRecentReleaseMark.id
+      )
     ) {
       setRecentExistingMarks(
         recentExistingMarks.filter(
-          mark => mark.id !== selectedRecentReleaseMark.id
+          (mark) => mark.id !== selectedRecentReleaseMark.id
         )
       )
     } else {
@@ -519,6 +522,17 @@ const AddFishContent = ({
 
     return values
   }
+  const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
+    false as boolean
+  )
+  const [speciesList, setSpeciesList] = useState<
+    { label: string; value: string }[]
+  >(
+    reorderedTaxon.map((taxon: any) => ({
+      label: taxon?.commonname,
+      value: taxon?.commonname,
+    }))
+  )
 
   return (
     <>
@@ -567,7 +581,7 @@ const AddFishContent = ({
                   </FormControl.Label>
                   <Popover
                     placement='bottom right'
-                    trigger={triggerProps => {
+                    trigger={(triggerProps) => {
                       return (
                         <IconButton
                           {...triggerProps}
@@ -647,6 +661,15 @@ const AddFishContent = ({
                     value: taxon?.commonname,
                   }))}
                 />
+                <SpeciesDropDown
+                  open={speciesDropDownOpen}
+                  // onOpen={onSpeciesOpen}
+                  setOpen={setSpeciesDropDownOpen}
+                  list={speciesList}
+                  setList={setSpeciesList}
+                  // setFieldValue={setFieldValue}
+                  // setFieldTouched={setFieldTouched}
+                />
               </FormControl>
             </HStack>
 
@@ -666,7 +689,7 @@ const AddFishContent = ({
                         fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
-                        onChangeText={value => setCount({ ...count, value })}
+                        onChangeText={(value) => setCount({ ...count, value })}
                         // TODO - onBlur logic?
                         // onBlur={handleBlur('numFishCaught')}
                         value={`${count.value}`}
@@ -701,7 +724,7 @@ const AddFishContent = ({
                         fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
-                        onChangeText={value => {
+                        onChangeText={(value) => {
                           let payload: FormValueI = {
                             ...forkLength,
                             value,
@@ -760,7 +783,7 @@ const AddFishContent = ({
                         fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
-                        onChangeText={value => {
+                        onChangeText={(value) => {
                           let payload: FormValueI = {
                             ...weight,
                             value,
@@ -806,7 +829,7 @@ const AddFishContent = ({
 
                           <Popover
                             placement='bottom right'
-                            trigger={triggerProps => {
+                            trigger={(triggerProps) => {
                               return (
                                 <IconButton
                                   {...triggerProps}
@@ -1035,7 +1058,7 @@ const AddFishContent = ({
                           </FormControl.Label>
                           <Popover
                             placement='top right'
-                            trigger={triggerProps => {
+                            trigger={(triggerProps) => {
                               return (
                                 <IconButton
                                   {...triggerProps}

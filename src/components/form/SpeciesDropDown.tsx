@@ -15,16 +15,18 @@ export default function SpeciesDropDown({
   setOpen: any
   list: any[]
   setList: any
-  setFieldValue: any
-  setFieldTouched: any
+  setFieldValue?: any
+  setFieldTouched?: any
 }) {
   const [value, setValue] = useState('' as string)
 
   useEffect(() => {
-    if (value !== '') {
-      setFieldTouched('species', true)
+    if (setFieldTouched && setFieldValue) {
+      if (value !== '') {
+        setFieldTouched('species', true)
+      }
+      setFieldValue('species', value)
     }
-    setFieldValue('species', value)
   }, [value])
 
   return (
@@ -34,6 +36,10 @@ export default function SpeciesDropDown({
       value={value}
       items={list}
       setOpen={setOpen}
+      // setValue={() => {
+      //   setFieldTouched('species', true)
+      //   return setValue
+      // }}
       setValue={setValue}
       searchable={true}
       setItems={setList}
