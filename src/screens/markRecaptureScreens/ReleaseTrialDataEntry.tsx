@@ -85,7 +85,9 @@ const ReleaseDataEntry = ({
   const [markedTime, setMarkedTime] = useState(new Date() as any)
   const [releaseTime, setReleaseTime] = useState(new Date() as any)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
-  const [recentReleaseMarks, setRecentReleaseMarks] = useState<any[]>([])
+  const [selectedRecentReleaseMarks, setSelectedRecentReleaseMarks] = useState<
+    any[]
+  >([])
   const [preparedReleaseSites, setPreparedReleaseSites] = useState<any[]>([])
   const [filteredReleaseSites, setFilteredReleaseSites] = useState<any[]>([])
   const dropdownValues = useSelector(
@@ -145,7 +147,7 @@ const ReleaseDataEntry = ({
   const handlePressRecentReleaseMarkButton = (
     selectedRecentReleaseMark: any
   ) => {
-    let updatedMarks = [...recentReleaseMarks]
+    let updatedMarks = [...selectedRecentReleaseMarks]
     const indexOfSelectedMark = findIndex(
       updatedMarks,
       selectedRecentReleaseMark
@@ -157,7 +159,7 @@ const ReleaseDataEntry = ({
     } else {
       updatedMarks.push(selectedRecentReleaseMark)
     }
-    setRecentReleaseMarks(updatedMarks)
+    setSelectedRecentReleaseMarks(updatedMarks)
   }
 
   const decodedRecentReleaseMarks = (twoMostRecentReleaseMarks: any) => {
@@ -208,7 +210,7 @@ const ReleaseDataEntry = ({
         markedAt: markedTime,
         marksArray: [
           ...releaseTrialDataEntryState.values.appliedMarks,
-          ...recentReleaseMarks,
+          ...selectedRecentReleaseMarks,
         ].map((markObj: any) => {
           return {
             markType: returnNullableTableId(
@@ -308,7 +310,9 @@ const ReleaseDataEntry = ({
                       <Button
                         key={index}
                         bg={
-                          recentReleaseMarks.some((mark: any) => mark.id === id)
+                          selectedRecentReleaseMarks.some(
+                            (mark: any) => mark.id === id
+                          )
                             ? 'primary'
                             : 'secondary'
                         }
@@ -322,7 +326,7 @@ const ReleaseDataEntry = ({
                       >
                         <Text
                           color={
-                            recentReleaseMarks.some(
+                            selectedRecentReleaseMarks.some(
                               (mark: any) => mark.id === id
                             )
                               ? 'white'
