@@ -64,6 +64,7 @@ function CatchCategoricalQC({
   markTypeState,
   markColorState,
   markPositionState,
+  visitSetupDefaults,
 }: {
   navigation: any
   route: any
@@ -75,6 +76,7 @@ function CatchCategoricalQC({
   markTypeState: any
   markColorState: any
   markPositionState: any
+  visitSetupDefaults: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -141,7 +143,7 @@ function CatchCategoricalQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
@@ -357,10 +359,10 @@ function CatchCategoricalQC({
     })
     setMarkIdToSymbolArr(markIdToColorBuilder)
 
-    Object.keys(fishCountByDateAndSpecies).forEach(date => {
+    Object.keys(fishCountByDateAndSpecies).forEach((date) => {
       const speciesCountFromDate = fishCountByDateAndSpecies[date]
 
-      Object.keys(speciesCountFromDate).forEach(species => {
+      Object.keys(speciesCountFromDate).forEach((species) => {
         let count = speciesCountFromDate[species]?.count
         let ids = speciesCountFromDate[species]?.ids
 
@@ -401,7 +403,7 @@ function CatchCategoricalQC({
 
   const handlePointClick = (datum: any) => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
 
@@ -419,7 +421,7 @@ function CatchCategoricalQC({
       idsAtPoint = datum.ids
     }
 
-    const selectedData = qcData.filter(response => {
+    const selectedData = qcData.filter((response) => {
       const id = response.createdCatchRawResponse?.id
       return idsAtPoint.includes(id)
     })
@@ -649,7 +651,7 @@ function CatchCategoricalQC({
               fontSize='16'
               placeholder='fork length...'
               keyboardType='numeric'
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setNestedModalInputValue({ fieldClicked: 'forkLength', value })
               }}
               // onBlur={handleBlur('comments')}
@@ -812,7 +814,7 @@ function CatchCategoricalQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map(buttonName => {
+            {activeButtons.map((buttonName) => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -820,7 +822,7 @@ function CatchCategoricalQC({
                   key={buttonName}
                   chartType={buttonNameToChartType[buttonName] as any}
                   showDates
-                  onPointClick={datum => handlePointClick(datum)}
+                  onPointClick={(datum) => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
                   title={buttonName}
@@ -1367,6 +1369,24 @@ function CatchCategoricalQC({
                       </DataTable.Cell>
 
                       {modalData.map((data, idx) => {
+                        let trapVisitId =
+                          data.createdCatchRawResponse.trapVisitId
+                        let crew = visitSetupDefaults.trapVisitCrew.filter(
+                          (obj: any) => {
+                            return obj.trapVisitId === trapVisitId
+                          }
+                        )
+                        crew = crew.map((crewObj: any) => {
+                          return crewObj.personnelId
+                        })
+                        let selectedCrew: any = null
+
+                        visitSetupDefaults.crewMembers.forEach((arr: any[]) => {
+                          selectedCrew = arr.filter((crewMember: any) => {
+                            return crew.includes(crewMember.personnelId)
+                          })
+                        })
+
                         return (
                           <DataTable.Cell
                             style={{
@@ -1377,7 +1397,19 @@ function CatchCategoricalQC({
                             }}
                             key={`crew-${idx}`}
                           >
-                            <Text>placeholder</Text>
+                            {selectedCrew.length ? (
+                              selectedCrew.map(
+                                (crewMember: any, idx: number) => {
+                                  return (
+                                    <Text key={idx}>
+                                      {`${crewMember.firstName} ${crewMember.lastName}`}
+                                    </Text>
+                                  )
+                                }
+                              )
+                            ) : (
+                              <Text>NA</Text>
+                            )}
                           </DataTable.Cell>
                         )
                       })}
@@ -1473,7 +1505,7 @@ function CatchCategoricalQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  onChangeText={value => {
+                  onChangeText={(value) => {
                     setNestedModalComment(value)
                   }}
                   // onBlur={handleBlur('comments')}
@@ -1515,6 +1547,7 @@ const mapStateToProps = (state: RootState) => {
     markTypeState: markType ?? [],
     markColorState: markColor ?? [],
     markPositionState: markPosition ?? [],
+    visitSetupDefaults: state.visitSetupDefaults,
   }
 }
 
