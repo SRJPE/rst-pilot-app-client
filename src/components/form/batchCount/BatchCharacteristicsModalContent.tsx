@@ -196,7 +196,7 @@ const BatchCharacteristicsModalContent = ({
                 marking or sampling a fish.
               </Text>
               <VStack space={4}>
-                <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 250 : 0}>
+                <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 180 : 0}>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Species
