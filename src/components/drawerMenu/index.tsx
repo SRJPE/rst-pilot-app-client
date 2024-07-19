@@ -152,15 +152,6 @@ const DrawerMenu = ({
           icon='home'
           title='Home'
         />
-
-        <MenuButton
-          active={currentRoute === 'Profile'}
-          onPress={() => {
-            handlePressMainNavButton('Profile')
-          }}
-          icon='person'
-          title='Profile'
-        />
         <MenuButton
           active={currentRoute === 'Permit Info'}
           onPress={() => {
