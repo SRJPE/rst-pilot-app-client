@@ -147,8 +147,10 @@ function PartialRecordsQC({
     })
 
     Object.keys(formattedData).forEach(key => {
+      let dynamicKey = key
+      if (key === 'taxonCode') dynamicKey = 'species'
       percentNotRecordedPayload.push({
-        variableName: key,
+        variableName: dynamicKey,
         percentNotRecorded: Math.round(
           ((qcData.length - formattedData[key]) / qcData.length) * 100
           // ((total - num exist) / total) * 100 = percent not recorded
@@ -254,7 +256,7 @@ function PartialRecordsQC({
               setFieldTouched={() => console.log('species field touched')}
               selectOptions={reorderedTaxon.map((taxon: any) => ({
                 label: taxon?.commonname,
-                value: taxon?.commonname,
+                value: taxon?.code,
               }))}
             />
           </VStack>
@@ -526,6 +528,11 @@ function PartialRecordsQC({
                   <DataTable.Title
                     style={{ justifyContent: 'center', minWidth: 90 }}
                   >
+                    species
+                  </DataTable.Title>
+                  <DataTable.Title
+                    style={{ justifyContent: 'center', minWidth: 90 }}
+                  >
                     run
                   </DataTable.Title>
                   <DataTable.Title
@@ -571,6 +578,11 @@ function PartialRecordsQC({
                             createdCatchRawResponse.createdAt
                           ).toLocaleDateString()
                         : 'NA'
+                      const taxon = taxonDropdowns.filter(
+                        taxon =>
+                          createdCatchRawResponse.taxonCode === taxon.code
+                      )
+                      const species = taxon ? taxon[0].commonname : 'NA'
                       const captureRunClass =
                         createdCatchRawResponse.captureRunClass ?? 'NA'
                       const forkLength =
@@ -631,6 +643,39 @@ function PartialRecordsQC({
                               10
                             )}
                           </DataTable.Cell>
+
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 90,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            onPress={() => {
+                              handleOpenNestedModal({
+                                catchRawId,
+                                fieldName: 'taxonCode',
+                                fieldValue: species,
+                                modalHeader: 'Species Editor',
+                                modalText: (
+                                  <Text
+                                    color='black'
+                                    fontSize='2xl'
+                                    mb={5}
+                                    fontWeight={'light'}
+                                  >
+                                    You have the species marked as{' '}
+                                    <Text fontWeight={'bold'}>{species}</Text>{' '}
+                                  </Text>
+                                ),
+                              })
+                            }}
+                          >
+                            {truncateAndTrimString(
+                              capitalizeFirstLetterOfEachWord(species),
+                              10
+                            )}
+                          </DataTable.Cell>
+
                           <DataTable.Cell
                             style={{
                               minWidth: 90,
