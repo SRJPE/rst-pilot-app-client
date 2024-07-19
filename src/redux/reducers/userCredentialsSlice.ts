@@ -66,15 +66,6 @@ export const userCredentialsSlice = createSlice({
         role: action.payload.role,
       })
     },
-    createNewUser: (_, action) => {
-      api
-        .post(`user/create`, action.payload)
-        .then(response =>
-          console.log(
-            `Request Status: (${response.status}) ${response.statusText}`
-          )
-        )
-    },
     changePassword: (state, action) => {
       api
         .post(`user/${state.azureUid}/change-password`, action.payload)
@@ -92,7 +83,6 @@ export const {
   clearUserCredentials,
   changePassword,
   editProfile,
-  createNewUser,
 } = userCredentialsSlice.actions
 
 export default userCredentialsSlice.reducer

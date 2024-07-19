@@ -1,7 +1,6 @@
 import { Formik } from 'formik'
 import {
   Button,
-  Divider,
   FormControl,
   HStack,
   Input,
@@ -63,7 +62,6 @@ const EditAccountInfoModalContent = ({
           role: user.role || '',
         }}
         onSubmit={async (values, { setSubmitting }) => {
-          // const createdUserResponse = await dispatch(createNewUser(values))
           const { firstName, lastName, phone, agencyId, emailAddress, role } =
             values
           const editedUserResponse = await api
