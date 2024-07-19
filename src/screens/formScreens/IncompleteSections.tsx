@@ -370,6 +370,9 @@ const IncompleteSections = ({
       dropdownsState.values.markColor
     )
     const bodyPartValues = returnDefinitionArray(dropdownsState.values.bodyPart)
+    const fishConditionValues = returnDefinitionArray(
+      dropdownsState.values.fishCondition
+    )
     const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
       let code = null
       dropdownsState.values.taxon.forEach((taxonValue: any) => {
@@ -453,6 +456,21 @@ const IncompleteSections = ({
               return null
             }
           }
+          const getCatchFishConditions = (fishConditionArray: string[]) => {
+            if (Array.isArray(fishConditionArray)) {
+              return fishConditionArray.map((fishCondition: string) => {
+                return returnNullableTableId(
+                  fishConditionValues.indexOf(fishCondition)
+                )
+              })
+            } else {
+              return [
+                returnNullableTableId(
+                  fishConditionValues.indexOf(fishConditionArray)
+                ),
+              ]
+            }
+          }
 
           catchRawSubmissions.push({
             uid: tabId,
@@ -465,13 +483,12 @@ const IncompleteSections = ({
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
             captureRunClassMethod: getRunClassMethod(fishValue),
             // defaults to "none" (id: 1) if not selected
-            markType: 1, // Check w/ Erin
+            // markType: 1, // Check w/ Erin
             markedForRelease: fishValue.willBeUsedInRecapture,
             adiposeClipped: fishValue.adiposeClipped ? true : false,
             dead: fishValue.dead ? true : false,
-            // fishConditions: fishValue.fishConditions,
-            //Fish Conditions relation table needs to be added
-            //It seems we are currently not saving fish condition at all
+
+            fishCondition: getCatchFishConditions(fishValue.fishCondition),
             lifeStage: returnNullableTableId(
               lifeStageValues.indexOf(fishValue.lifeStage)
             ),
