@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import DropDownPicker from 'react-native-dropdown-picker'
 
 export default function SpeciesDropDown({
@@ -9,6 +9,7 @@ export default function SpeciesDropDown({
   setList,
   setFieldValue,
   setFieldTouched,
+  onChangeValue,
 }: {
   open: boolean
   onOpen?: any
@@ -17,6 +18,7 @@ export default function SpeciesDropDown({
   setList: any
   setFieldValue?: any
   setFieldTouched?: any
+  onChangeValue?: any
 }) {
   const [value, setValue] = useState('' as string)
 
@@ -26,6 +28,8 @@ export default function SpeciesDropDown({
         setFieldTouched('species', true)
       }
       setFieldValue('species', value)
+    } else {
+      onChangeValue(value)
     }
   }, [value])
 
@@ -36,17 +40,14 @@ export default function SpeciesDropDown({
       value={value}
       items={list}
       setOpen={setOpen}
-      // setValue={() => {
-      //   setFieldTouched('species', true)
-      //   return setValue
-      // }}
+      onClose={() => (setFieldTouched ? setFieldTouched() : null)}
       setValue={setValue}
       searchable={true}
       setItems={setList}
       multiple={false}
       placeholder='Select your species'
       searchPlaceholder='Search...'
-      maxHeight={250}
+      maxHeight={180}
       closeAfterSelecting={true}
       style={{
         marginTop: 4,
