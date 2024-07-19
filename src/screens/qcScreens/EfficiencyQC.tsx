@@ -99,7 +99,7 @@ function EfficiencyQC({
           id: catchRawId,
           x: efficiency,
           y: 1,
-          colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
+          colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
         })
       }
     })

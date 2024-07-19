@@ -123,7 +123,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(temp.measureValueNumeric),
-              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
+              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
             })
           }
 
@@ -138,7 +138,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(turbidity.measureValueNumeric),
-              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
+              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
             })
           }
 
@@ -147,7 +147,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(response.createdTrapVisitResponse.rpmAtStart),
-              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
+              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
             }
 
             rpmAtStartData.push(rpmAtStart)
@@ -158,7 +158,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(createdTrapVisitResponse.rpmAtEnd),
-              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
+              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
             }
             rpmAtEndData.push(rpmAtEnd)
           }
@@ -168,7 +168,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.totalRevolutions,
-              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
+              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
             }
             counterData.push(counter)
           }
@@ -178,7 +178,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.debrisVolumeLiters,
-              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
+              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
             }
             debrisData.push(debris)
           }

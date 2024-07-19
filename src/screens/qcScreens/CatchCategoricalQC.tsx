@@ -208,8 +208,7 @@ function CatchCategoricalQC({
             dataId: 'Adipose Clipped',
             x: dateTime,
             y: adiposeClipped ? 2 : 1,
-            colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
-            // catchResponse,
+            colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
           })
         }
 
@@ -304,8 +303,7 @@ function CatchCategoricalQC({
               dataId: 'Mortalities',
               x: species,
               y: speciesAlreadyExists.y + numFishCaught,
-              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
-              // catchResponse,
+              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
             })
           } else {
             deadData.push({
@@ -313,8 +311,7 @@ function CatchCategoricalQC({
               dataId: 'Mortalities',
               x: species,
               y: numFishCaught,
-              colorScale: qcNotStarted ? 'rgb(192, 57, 43)' : undefined,
-              // catchResponse,
+              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
             })
           }
         }

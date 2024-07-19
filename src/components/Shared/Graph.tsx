@@ -53,6 +53,8 @@ export default function Graph({
   zoomDomain?: ZoomDomainI
   legendData?: any[]
 }) {
+  const dotSize = 5
+
   const handlePointClick = (datum: any) => {
     if (onPointClick) {
       onPointClick(datum)
@@ -217,7 +219,7 @@ export default function Graph({
             data={data}
             x='x'
             y='y'
-            size={10}
+            size={dotSize}
             style={{
               data: {
                 fill: (props: any) => {
@@ -266,7 +268,7 @@ export default function Graph({
             data={data}
             x={({ x }) => x} // Add jitter to Y-axis value
             y={({ y }) => addJitter(y, 0.2)} // Add jitter to Y-axis value
-            size={7}
+            size={dotSize}
             style={{
               data: {
                 fill: (props: any) => {
@@ -447,6 +449,7 @@ export default function Graph({
         {chartType === 'bar' ? (
           <VictoryScatter
             data={data}
+            size={dotSize}
             style={{
               data: {
                 fill: (props: any) => {
@@ -496,7 +499,7 @@ export default function Graph({
         {chartType === 'linewithplot' && subData ? (
           <VictoryScatter
             data={subData}
-            size={5}
+            size={dotSize}
             style={{
               data: {
                 fill: (props: any) => {
