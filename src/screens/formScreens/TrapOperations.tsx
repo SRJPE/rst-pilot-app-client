@@ -89,7 +89,6 @@ const TrapOperations = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
-  console.log('navigationState', navigationState)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
   const dropdownValues = useSelector(
@@ -195,7 +194,7 @@ const TrapOperations = ({
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
       const allTabIds: string[] = Object.keys(tabSlice.tabs)
-      allTabIds.forEach(allTabId => {
+      allTabIds.forEach((allTabId) => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
             stepCompletedCheck = false
@@ -575,7 +574,7 @@ const TrapOperations = ({
                           </FormControl.Label>
                           <Popover
                             placement='bottom left'
-                            trigger={triggerProps => {
+                            trigger={(triggerProps) => {
                               return (
                                 <IconButton
                                   {...triggerProps}

@@ -71,7 +71,7 @@ const NavButtons = ({
   const checkWillBeHoldingFishForMarkRecapture = () => {
     if (tabSlice.activeTabId) {
       const tabsContainHoldingTrue = Object.keys(tabSlice.tabs).some(
-        tabId =>
+        (tabId) =>
           fishProcessingSlice?.[tabId]?.values
             ?.willBeHoldingFishForMarkRecapture
       )
@@ -154,7 +154,6 @@ const NavButtons = ({
         navigateHelper('Incomplete Sections')
         break
       case 'Incomplete Sections':
-        console.log('🚀 INCOMPLETE SECTIONS CASE HIT')
         navigateHelper('Start Mark Recapture')
         break
       case 'High Flows':
@@ -241,7 +240,6 @@ const NavButtons = ({
 
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen
-    console.log('🚀 ~ handleLeftButton ~ activePage:', activePage)
     if (activePage === 'Visit Setup') {
       navigation.navigate('Home')
       navigation.reset({
@@ -251,7 +249,6 @@ const NavButtons = ({
       return
     }
 
-    console.log('handleSubmit', handleSubmit)
     // if function truthy, submit form to save to redux
     if (handleSubmit) {
       //do not submit when going back from incomplete sections page (prevents early submission errors)
