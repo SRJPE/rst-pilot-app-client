@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { Ionicons } from '@expo/vector-icons'
 import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
-import { useRoute } from '@react-navigation/native'
+import { StackActions, useRoute } from '@react-navigation/native'
 
 export default function MarkRecaptureNavButtons({
   navigation,
@@ -46,9 +46,10 @@ export default function MarkRecaptureNavButtons({
       return
     }
     //navigate Right
-    navigation.navigate('Mark Recapture', {
-      screen: navigationState.steps[activeStep + 1]?.name,
-    })
+    navigation.dispatch(
+      StackActions.replace(navigationState.steps[activeStep + 1]?.name)
+    )
+
     dispatch({
       type: updateActiveMarkRecaptureStep,
       payload: navigationState.activeStep + 1,
@@ -76,9 +77,9 @@ export default function MarkRecaptureNavButtons({
       handleSubmit()
     }
     //navigate left
-    navigation.navigate('Mark Recapture', {
-      screen: navigationState.steps[activeStep - 1]?.name,
-    })
+    navigation.dispatch(
+      StackActions.replace(navigationState.steps[activeStep - 1]?.name)
+    )
     dispatch({
       type: updateActiveMarkRecaptureStep,
       payload: navigationState.activeStep - 1,
