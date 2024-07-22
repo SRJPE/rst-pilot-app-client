@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   Avatar,
   Box,
@@ -55,6 +55,8 @@ import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkMo
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import MarkBadgeList from '../../components/markRecapture/MarkBadgeList'
 import { uid } from 'uid'
+import SpeciesDropDown from '../../components/form/SpeciesDropDown'
+import FishConditionsDropDown from '../../components/form/FishConditionsDropDown'
 
 export interface ReleaseMarkI {
   id?: number
@@ -399,7 +401,7 @@ const AddFishContent = ({
       plusCountMethod,
     ]
     let hasError = false
-    formValues.every(field => {
+    formValues.every((field) => {
       if (hasError) return false
       if (
         field.required &&
@@ -470,11 +472,13 @@ const AddFishContent = ({
     selectedRecentReleaseMark: ReleaseMarkI
   ) => {
     if (
-      recentExistingMarks.some(mark => mark.id === selectedRecentReleaseMark.id)
+      recentExistingMarks.some(
+        (mark) => mark.id === selectedRecentReleaseMark.id
+      )
     ) {
       setRecentExistingMarks(
         recentExistingMarks.filter(
-          mark => mark.id !== selectedRecentReleaseMark.id
+          (mark) => mark.id !== selectedRecentReleaseMark.id
         )
       )
     } else {
@@ -520,11 +524,40 @@ const AddFishContent = ({
     return values
   }
 
+  /* Additions for species and fish condition dropdowns */
+  const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
+    false as boolean
+  )
+  const [speciesList, setSpeciesList] = useState<
+    { label: string; value: string }[]
+  >(
+    reorderedTaxon.map((taxon: any) => ({
+      label: taxon?.commonname,
+      value: taxon?.commonname,
+    }))
+  )
+  const [fishConditionDropdownOpen, setFishConditionDropdownOpen] = useState(
+    false as boolean
+  )
+  const [fishConditionList, setFishConditionList] = useState<
+    { label: string; value: string }[]
+  >(
+    dropdownValues.fishCondition.map((condition: any) => ({
+      label: condition?.definition,
+      value: condition?.definition,
+    }))
+  )
+  const onSpeciesOpen = useCallback(() => {
+    setFishConditionDropdownOpen(false)
+  }, [])
+  const onFishConditionOpen = useCallback(() => {
+    setSpeciesDropDownOpen(false)
+  }, [])
+
   return (
     <>
-      <ScrollView
+      <View
         flex={1}
-        scrollEnabled={screenHeight < 1180}
         bg='#fff'
         borderWidth='10'
         borderBottomWidth='0'
@@ -558,7 +591,7 @@ const AddFishContent = ({
           <Divider mb='1' />
           <VStack paddingX='10' paddingBottom='3' space={3}>
             <HStack alignItems='center'>
-              <FormControl w='1/2' pr='5'>
+              <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 180 : 0}>
                 <HStack space={4} alignItems='center'>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
@@ -567,7 +600,7 @@ const AddFishContent = ({
                   </FormControl.Label>
                   <Popover
                     placement='bottom right'
-                    trigger={triggerProps => {
+                    trigger={(triggerProps) => {
                       return (
                         <IconButton
                           {...triggerProps}
@@ -624,10 +657,13 @@ const AddFishContent = ({
                     species.error &&
                     RenderErrorMessage(species.error, 'species')}
                 </HStack>
-                <CustomSelect
-                  selectedValue={species.value as string}
-                  placeholder={'Species'}
-                  onValueChange={(value: string) => {
+                <SpeciesDropDown
+                  open={speciesDropDownOpen}
+                  onOpen={onSpeciesOpen}
+                  setOpen={setSpeciesDropDownOpen}
+                  list={speciesList}
+                  setList={setSpeciesList}
+                  onChangeValue={(value: string) => {
                     let payload = { ...species, value, touched: true }
                     if (value.toLowerCase().includes('chinook')) {
                       resetFormState('chinook')
@@ -636,365 +672,342 @@ const AddFishContent = ({
                     } else {
                       resetFormState('other')
                     }
-
                     setSpecies(payload)
                   }}
                   setFieldTouched={() =>
                     setSpecies({ ...species, touched: true })
                   }
-                  selectOptions={reorderedTaxon.map((taxon: any) => ({
-                    label: taxon?.commonname,
-                    value: taxon?.commonname,
-                  }))}
                 />
               </FormControl>
             </HStack>
 
             <Divider mt={1} />
-            {(species.value as string) !== '' && species.value !== null && (
-              <>
-                {route.params?.editModeData ? (
-                  <HStack alignItems='center'>
-                    <FormControl w='1/2' pr='5'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Count
-                        </Text>
-                      </FormControl.Label>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={value => setCount({ ...count, value })}
-                        // TODO - onBlur logic?
-                        // onBlur={handleBlur('numFishCaught')}
-                        value={`${count.value}`}
-                      />
-                    </FormControl>
-                  </HStack>
-                ) : (
-                  <></>
-                )}
-                <VStack space={6}>
-                  <HStack>
-                    <FormControl w='1/2' pr='5'>
-                      <HStack space={4} alignItems='center'>
+            <ScrollView scrollEnabled={screenHeight < 1180}>
+              {(species.value as string) !== '' && species.value !== null && (
+                <>
+                  {route.params?.editModeData ? (
+                    <HStack alignItems='center'>
+                      <FormControl w='1/2' pr='5'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
-                            Fork Length
+                            Count
                           </Text>
                         </FormControl.Label>
-                        {renderForkLengthWarning(
-                          Number(forkLength.value),
-                          lifeStage.value as string
-                        )}
-                        {forkLength.touched &&
-                          forkLength.error &&
-                          RenderErrorMessage(
-                            { forkLength: forkLength.error },
-                            'forkLength'
-                          )}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={value => {
-                          let payload: FormValueI = {
-                            ...forkLength,
-                            value,
-                            touched: true,
-                            error: '',
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={(value) =>
+                            setCount({ ...count, value })
                           }
-                          if (value === '') {
-                            payload.error = errorMessages.forkLength.emptyError
-                          } else if (!Number(value)) {
-                            payload.error = errorMessages.forkLength.typeError
-                          }
-                          setForkLength(payload)
-                        }}
-                        // TODO - onBlur logic?
-                        // onBlur={handleBlur('forkLength')}
-                        value={forkLength.value as string}
-                      />
-                      <Text
-                        color='#A1A1A1'
-                        position='absolute'
-                        top={50}
-                        right={8}
-                        fontSize={16}
-                      >
-                        {'mm'}
-                      </Text>
-                    </FormControl>
-                    <FormControl
-                      w='47%'
-                      paddingLeft={
-                        species.value === 'Chinook salmon' ||
-                        species.value === 'Steelhead / rainbow trout'
-                          ? '5'
-                          : '0'
-                      }
-                    >
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Weight (optional)
-                          </Text>
-                        </FormControl.Label>
-                        {renderWeightWarning(
-                          Number(weight.value),
-                          weight.value as string
-                        )}
-                        {weight.touched &&
-                          weight.error &&
-                          RenderErrorMessage(
-                            { weight: weight.error },
-                            'weight'
-                          )}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={value => {
-                          let payload: FormValueI = {
-                            ...weight,
-                            value,
-                            touched: true,
-                            error: '',
-                          }
-                          if (value === '') {
-                            payload.error = ''
-                          } else if (!Number(value)) {
-                            payload.error = errorMessages.weight.typeError
-                          }
-                          setWeight(payload)
-                        }}
-                        // TODO - onBlur logic?
-                        // onBlur={handleBlur('weight')}
-                        value={weight.value as string}
-                      />
-                      <Text
-                        color='#A1A1A1'
-                        position='absolute'
-                        top={50}
-                        right={4}
-                        fontSize={16}
-                      >
-                        {'g'}
-                      </Text>
-                    </FormControl>
-                  </HStack>
-
-                  <HStack space={4} alignItems='center'>
-                    {(species.value === 'Chinook salmon' ||
-                      species.value === 'Steelhead / rainbow trout') && (
-                      <FormControl w='1/2' paddingRight='5'>
-                        <HStack space={2} alignItems='center' mb='-1.5'>
+                          // TODO - onBlur logic?
+                          // onBlur={handleBlur('numFishCaught')}
+                          value={`${count.value}`}
+                        />
+                      </FormControl>
+                    </HStack>
+                  ) : (
+                    <></>
+                  )}
+                  <VStack space={6}>
+                    <HStack>
+                      <FormControl w='1/2' pr='5'>
+                        <HStack space={4} alignItems='center'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
-                              Life Stage{' '}
-                              {validationSchema == 'optionalLifeStage'
-                                ? '(optional)'
-                                : ''}
+                              Fork Length
                             </Text>
                           </FormControl.Label>
-
-                          <Popover
-                            placement='bottom right'
-                            trigger={triggerProps => {
-                              return (
-                                <IconButton
-                                  {...triggerProps}
-                                  icon={
-                                    <Icon
-                                      as={MaterialIcons}
-                                      color='black'
-                                      name='info-outline'
-                                      size='xl'
-                                    />
-                                  }
-                                ></IconButton>
-                              )
-                            }}
-                          >
-                            <Popover.Content
-                              ml='10'
-                              accessibilityLabel='Existing Mark Info'
-                              w='720'
-                              h='600'
-                            >
-                              <Popover.Arrow />
-                              <Popover.CloseButton />
-                              <Popover.Body p={0}>
-                                <ScrollView>
-                                  <Image
-                                    source={require('../../../assets/life_stage_image.png')}
-                                    alt='Life Stage Image'
-                                    width='720'
-                                  />
-                                  <Image
-                                    source={require('../../../assets/life_stage_table.png')}
-                                    alt='Life Stage Image'
-                                  />
-                                </ScrollView>
-                              </Popover.Body>
-                            </Popover.Content>
-                          </Popover>
-                          {lifeStage.touched &&
-                            lifeStage.error &&
+                          {renderForkLengthWarning(
+                            Number(forkLength.value),
+                            lifeStage.value as string
+                          )}
+                          {forkLength.touched &&
+                            forkLength.error &&
                             RenderErrorMessage(
-                              { lifeStage: lifeStage.error },
-                              'lifeStage'
+                              { forkLength: forkLength.error },
+                              'forkLength'
                             )}
                         </HStack>
-
-                        <CustomSelect
-                          selectedValue={lifeStage.value as string}
-                          placeholder={'Life Stage'}
-                          onValueChange={(value: string) => {
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={(value) => {
                             let payload: FormValueI = {
-                              ...lifeStage,
+                              ...forkLength,
                               value,
+                              touched: true,
                               error: '',
                             }
-                            setLifeStage(payload)
+                            if (value === '') {
+                              payload.error =
+                                errorMessages.forkLength.emptyError
+                            } else if (!Number(value)) {
+                              payload.error = errorMessages.forkLength.typeError
+                            }
+                            setForkLength(payload)
                           }}
-                          setFieldTouched={() => {
-                            let payload = { ...lifeStage, touched: true }
-                            if (!lifeStage.value)
-                              payload.error = errorMessages.lifeStage.emptyError
-                            setLifeStage(payload)
-                          }}
-                          selectOptions={alphabeticalLifeStage
-                            .filter((item: any) => {
-                              if (
-                                item?.definition?.includes('juvenile') ||
-                                item?.definition?.includes('adult')
-                              ) {
-                                return item
-                              } else if (species.value == 'Chinook salmon') {
-                                return item
-                              }
-                            })
-                            .map((item: any) => ({
-                              label: item?.definition,
-                              value: item?.definition,
-                            }))}
+                          // TODO - onBlur logic?
+                          // onBlur={handleBlur('forkLength')}
+                          value={forkLength.value as string}
                         />
+                        <Text
+                          color='#A1A1A1'
+                          position='absolute'
+                          top={50}
+                          right={8}
+                          fontSize={16}
+                        >
+                          {'mm'}
+                        </Text>
                       </FormControl>
-                    )}
-                    {species.value == 'Chinook salmon' && (
-                      <FormControl w='1/2' paddingRight='9'>
+                      <FormControl
+                        w='47%'
+                        paddingLeft={
+                          species.value === 'Chinook salmon' ||
+                          species.value === 'Steelhead / rainbow trout'
+                            ? '5'
+                            : '0'
+                        }
+                      >
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Weight (optional)
+                            </Text>
+                          </FormControl.Label>
+                          {renderWeightWarning(
+                            Number(weight.value),
+                            weight.value as string
+                          )}
+                          {weight.touched &&
+                            weight.error &&
+                            RenderErrorMessage(
+                              { weight: weight.error },
+                              'weight'
+                            )}
+                        </HStack>
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={(value) => {
+                            let payload: FormValueI = {
+                              ...weight,
+                              value,
+                              touched: true,
+                              error: '',
+                            }
+                            if (value === '') {
+                              payload.error = ''
+                            } else if (!Number(value)) {
+                              payload.error = errorMessages.weight.typeError
+                            }
+                            setWeight(payload)
+                          }}
+                          // TODO - onBlur logic?
+                          // onBlur={handleBlur('weight')}
+                          value={weight.value as string}
+                        />
+                        <Text
+                          color='#A1A1A1'
+                          position='absolute'
+                          top={50}
+                          right={4}
+                          fontSize={16}
+                        >
+                          {'g'}
+                        </Text>
+                      </FormControl>
+                    </HStack>
+
+                    <HStack space={4} alignItems='center'>
+                      {(species.value === 'Chinook salmon' ||
+                        species.value === 'Steelhead / rainbow trout') && (
+                        <FormControl w='1/2' paddingRight='5'>
+                          <HStack space={2} alignItems='center' mb='-1.5'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                Life Stage{' '}
+                                {validationSchema == 'optionalLifeStage'
+                                  ? '(optional)'
+                                  : ''}
+                              </Text>
+                            </FormControl.Label>
+
+                            <Popover
+                              placement='bottom right'
+                              trigger={(triggerProps) => {
+                                return (
+                                  <IconButton
+                                    {...triggerProps}
+                                    icon={
+                                      <Icon
+                                        as={MaterialIcons}
+                                        color='black'
+                                        name='info-outline'
+                                        size='xl'
+                                      />
+                                    }
+                                  ></IconButton>
+                                )
+                              }}
+                            >
+                              <Popover.Content
+                                ml='10'
+                                accessibilityLabel='Existing Mark Info'
+                                w='720'
+                                h='600'
+                              >
+                                <Popover.Arrow />
+                                <Popover.CloseButton />
+                                <Popover.Body p={0}>
+                                  <ScrollView>
+                                    <Image
+                                      source={require('../../../assets/life_stage_image.png')}
+                                      alt='Life Stage Image'
+                                      width='720'
+                                    />
+                                    <Image
+                                      source={require('../../../assets/life_stage_table.png')}
+                                      alt='Life Stage Image'
+                                    />
+                                  </ScrollView>
+                                </Popover.Body>
+                              </Popover.Content>
+                            </Popover>
+                            {lifeStage.touched &&
+                              lifeStage.error &&
+                              RenderErrorMessage(
+                                { lifeStage: lifeStage.error },
+                                'lifeStage'
+                              )}
+                          </HStack>
+
+                          <CustomSelect
+                            selectedValue={lifeStage.value as string}
+                            placeholder={'Life Stage'}
+                            onValueChange={(value: string) => {
+                              let payload: FormValueI = {
+                                ...lifeStage,
+                                value,
+                                error: '',
+                              }
+                              setLifeStage(payload)
+                            }}
+                            setFieldTouched={() => {
+                              let payload = { ...lifeStage, touched: true }
+                              if (!lifeStage.value)
+                                payload.error =
+                                  errorMessages.lifeStage.emptyError
+                              setLifeStage(payload)
+                            }}
+                            selectOptions={alphabeticalLifeStage
+                              .filter((item: any) => {
+                                if (
+                                  item?.definition?.includes('juvenile') ||
+                                  item?.definition?.includes('adult')
+                                ) {
+                                  return item
+                                } else if (species.value == 'Chinook salmon') {
+                                  return item
+                                }
+                              })
+                              .map((item: any) => ({
+                                label: item?.definition,
+                                value: item?.definition,
+                              }))}
+                          />
+                        </FormControl>
+                      )}
+                      {species.value == 'Chinook salmon' && (
+                        <FormControl w='1/2' paddingRight='9'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Run
+                            </Text>
+                          </FormControl.Label>
+                          <CustomSelect
+                            selectedValue={run.value as string}
+                            placeholder={'Run'}
+                            onValueChange={(value: string) =>
+                              setRun({ ...run, value })
+                            }
+                            setFieldTouched={() =>
+                              setRun({ ...run, touched: true })
+                            }
+                            selectOptions={dropdownValues?.run}
+                          />
+                        </FormControl>
+                      )}
+                    </HStack>
+                    <HStack space={6}>
+                      <FormControl
+                        // w='1' // for addition of fishConditionDropdown
+                        // paddingRight='9'
+                        // mb={fishConditionDropdownOpen ? 160 : 0}
+                        w='1/2'
+                        paddingRight='5'
+                      >
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
-                            Run
+                            Fish Condition
                           </Text>
                         </FormControl.Label>
                         <CustomSelect
-                          selectedValue={run.value as string}
-                          placeholder={'Run'}
+                          selectedValue={fishCondition.value as string}
+                          placeholder={'Fish Condition'}
                           onValueChange={(value: string) =>
-                            setRun({ ...run, value })
+                            setFishCondition({ ...fishCondition, value })
                           }
                           setFieldTouched={() =>
-                            setRun({ ...run, touched: true })
+                            setFishCondition({
+                              ...fishCondition,
+                              touched: true,
+                            })
                           }
-                          selectOptions={dropdownValues?.run}
+                          selectOptions={dropdownValues.fishCondition}
                         />
-                      </FormControl>
-                    )}
-                  </HStack>
-                  <HStack space={6}>
-                    <FormControl w='1/2' paddingRight='9'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Fish Condition
-                        </Text>
-                      </FormControl.Label>
-                      <CustomSelect
-                        selectedValue={fishCondition.value as string}
-                        placeholder={'Fish Condition'}
-                        onValueChange={(value: string) =>
+                        {/* <FishConditionsDropDown
+                        open={fishConditionDropdownOpen}
+                        onOpen={onFishConditionOpen}
+                        setOpen={setFishConditionDropdownOpen}
+                        list={fishConditionList}
+                        setList={setFishConditionList}
+                        onChangeValue={(value: string) =>{
                           setFishCondition({ ...fishCondition, value })
                         }
-                        setFieldTouched={() =>
-                          setFishCondition({ ...fishCondition, touched: true })
                         }
-                        selectOptions={dropdownValues.fishCondition}
-                      />
-                    </FormControl>
-                    <VStack space={6}>
-                      <FormControl>
-                        <HStack space={4}>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Dead
-                            </Text>
-                          </FormControl.Label>
-
-                          <Radio.Group
-                            name='dead'
-                            accessibilityLabel='dead'
-                            value={`${dead.value}`}
-                            onChange={(value: any) => {
-                              if (value === 'true') {
-                                setDead({ ...dead, value: true })
-                              } else {
-                                setDead({ ...dead, value: false })
-                              }
-                            }}
-                          >
-                            <HStack space={4}>
-                              <Radio
-                                colorScheme='primary'
-                                value='true'
-                                my={1}
-                                _icon={{ color: 'primary' }}
-                              >
-                                Yes
-                              </Radio>
-                              <Radio
-                                colorScheme='primary'
-                                value='false'
-                                my={1}
-                                _icon={{ color: 'primary' }}
-                              >
-                                No
-                              </Radio>
-                            </HStack>
-                          </Radio.Group>
-                        </HStack>
+                        setFieldTouched={() =>
+                          setFishCondition({
+                            ...fishCondition,
+                            touched: true,
+                          })
+                        }
+                      /> */}
                       </FormControl>
-
-                      {species.value === 'Chinook salmon' && (
-                        <FormControl w='2/3'>
+                      <VStack space={6}>
+                        <FormControl>
                           <HStack space={4}>
                             <FormControl.Label>
                               <Text color='black' fontSize='xl'>
-                                Adipose Clipped
+                                Dead
                               </Text>
                             </FormControl.Label>
 
                             <Radio.Group
-                              name='adiposeClipped'
-                              accessibilityLabel='adipose clipped'
-                              value={`${adiposeClipped.value}`}
+                              name='dead'
+                              accessibilityLabel='dead'
+                              value={`${dead.value}`}
                               onChange={(value: any) => {
                                 if (value === 'true') {
-                                  setAdiposeClipped({
-                                    ...adiposeClipped,
-                                    value: true,
-                                  })
+                                  setDead({ ...dead, value: true })
                                 } else {
-                                  setAdiposeClipped({
-                                    ...adiposeClipped,
-                                    value: false,
-                                  })
+                                  setDead({ ...dead, value: false })
                                 }
                               }}
                             >
@@ -1019,239 +1032,301 @@ const AddFishContent = ({
                             </Radio.Group>
                           </HStack>
                         </FormControl>
-                      )}
-                    </VStack>
-                  </HStack>
 
-                  <HStack space={4} w='80%'>
-                    {(species.value == 'Chinook salmon' ||
-                      species.value == 'Steelhead / rainbow trout') && (
-                      <FormControl w='full'>
-                        <HStack space={2} alignItems='center'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Add Existing Mark
-                            </Text>
-                          </FormControl.Label>
-                          <Popover
-                            placement='top right'
-                            trigger={triggerProps => {
-                              return (
-                                <IconButton
-                                  {...triggerProps}
-                                  icon={
-                                    <Icon
-                                      as={MaterialIcons}
-                                      color='black'
-                                      name='info-outline'
-                                      size='xl'
-                                    />
+                        {species.value === 'Chinook salmon' && (
+                          <FormControl w='2/3'>
+                            <HStack space={4}>
+                              <FormControl.Label>
+                                <Text color='black' fontSize='xl'>
+                                  Adipose Clipped
+                                </Text>
+                              </FormControl.Label>
+
+                              <Radio.Group
+                                name='adiposeClipped'
+                                accessibilityLabel='adipose clipped'
+                                value={`${adiposeClipped.value}`}
+                                onChange={(value: any) => {
+                                  if (value === 'true') {
+                                    setAdiposeClipped({
+                                      ...adiposeClipped,
+                                      value: true,
+                                    })
+                                  } else {
+                                    setAdiposeClipped({
+                                      ...adiposeClipped,
+                                      value: false,
+                                    })
                                   }
-                                ></IconButton>
-                              )
-                            }}
-                          >
-                            <Popover.Content
-                              accessibilityLabel='Existing Mark  Info'
-                              w='600'
-                              ml='10'
-                            >
-                              <Popover.Arrow />
-                              <Popover.CloseButton />
-                              <Popover.Header>
-                                Click on one more existing mark buttons to add
-                                marks.
-                              </Popover.Header>
-                              <Popover.Body p={4}>
-                                <VStack space={2}>
-                                  <Text fontSize='md'>
-                                    The existing mark buttons display
-                                    abbreviated versions of marks recently used
-                                    for efficiency trials. If you catch a fish
-                                    with other existing marks, please click on
-                                    “select another mark type”. This will open
-                                    up a window where you can specify mark type,
-                                    color, position, and code if applicable.
-                                  </Text>
-                                  <Divider />
-
-                                  <Text fontSize='md'>
-                                    Abbreviations follow a consistent format
-                                    “mark type abbreviation - color abbreviation
-                                    - position abbreviation”. All of these
-                                    fields are only applicable to some mark
-                                    types. Any fields that are not applicable to
-                                    a particular mark type are left blank.
-                                  </Text>
-                                  <Text fontSize='md'>
-                                    Below are some examples of common marks:
-                                  </Text>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Avatar size={'2'} mt={'2'} />
-                                    <Text fontSize='md'>
-                                      CWT: Coded wire tag
-                                    </Text>
-                                  </HStack>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Avatar size={'2'} mt={'2'} />
-                                    <Text fontSize='md'>Fin Clip</Text>
-                                  </HStack>
-                                </VStack>
-                              </Popover.Body>
-                            </Popover.Content>
-                          </Popover>
-                        </HStack>
-                        <VStack space={4}>
-                          <VStack space={5}>
-                            {dropdownValues.twoMostRecentReleaseMarks.length >
-                              0 &&
-                              decodedRecentReleaseMarks(
-                                dropdownValues.twoMostRecentReleaseMarks
-                              ).map((recentReleaseMark: any, index: number) => {
-                                const { id, markType, markColor, bodyPart } =
-                                  recentReleaseMark
-                                return (
-                                  <Button
-                                    key={index}
-                                    bg={
-                                      recentExistingMarks.some(
-                                        (mark: ReleaseMarkI) => mark.id === id
-                                      )
-                                        ? 'primary'
-                                        : 'secondary'
-                                    }
-                                    shadow='3'
-                                    borderRadius='5'
-                                    w='90%'
-                                    onPress={() => {
-                                      handlePressRecentExistingMarkButton(
-                                        recentReleaseMark
-                                      )
-                                    }}
+                                }}
+                              >
+                                <HStack space={4}>
+                                  <Radio
+                                    colorScheme='primary'
+                                    value='true'
+                                    my={1}
+                                    _icon={{ color: 'primary' }}
                                   >
-                                    <Text
-                                      color={
-                                        recentExistingMarks.some(
-                                          (mark: ReleaseMarkI) => mark.id === id
-                                        )
-                                          ? 'white'
-                                          : 'primary'
-                                      }
-                                      fontWeight='500'
-                                      fontSize='md'
-                                    >
-                                      {`${markType} - ${markColor} - ${bodyPart}`}
-                                    </Text>
-                                  </Button>
-                                )
-                              })}
-                          </VStack>
-                          <MarkBadgeList
-                            badgeListContent={existingMarks.value}
-                            field='existingMarks'
-                            setExistingMarks={setExistingMarks}
-                          />
-                          <Pressable onPress={() => setAddMarkModalOpen(true)}>
-                            <HStack alignItems='center'>
-                              <Icon
-                                as={Ionicons}
-                                name={'add-circle'}
-                                size='3xl'
-                                color='primary'
-                                marginRight='1'
-                              />
-                              <Text color='primary' fontSize='lg'>
-                                Add Another Mark
-                              </Text>
+                                    Yes
+                                  </Radio>
+                                  <Radio
+                                    colorScheme='primary'
+                                    value='false'
+                                    my={1}
+                                    _icon={{ color: 'primary' }}
+                                  >
+                                    No
+                                  </Radio>
+                                </HStack>
+                              </Radio.Group>
                             </HStack>
-                          </Pressable>
-                        </VStack>
+                          </FormControl>
+                        )}
+                      </VStack>
+                    </HStack>
+
+                    <HStack space={4} w='80%'>
+                      {(species.value == 'Chinook salmon' ||
+                        species.value == 'Steelhead / rainbow trout') && (
+                        <FormControl w='full'>
+                          <HStack space={2} alignItems='center'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                Add Existing Mark
+                              </Text>
+                            </FormControl.Label>
+                            <Popover
+                              placement='top right'
+                              trigger={(triggerProps) => {
+                                return (
+                                  <IconButton
+                                    {...triggerProps}
+                                    icon={
+                                      <Icon
+                                        as={MaterialIcons}
+                                        color='black'
+                                        name='info-outline'
+                                        size='xl'
+                                      />
+                                    }
+                                  ></IconButton>
+                                )
+                              }}
+                            >
+                              <Popover.Content
+                                accessibilityLabel='Existing Mark  Info'
+                                w='600'
+                                ml='10'
+                              >
+                                <Popover.Arrow />
+                                <Popover.CloseButton />
+                                <Popover.Header>
+                                  Click on one more existing mark buttons to add
+                                  marks.
+                                </Popover.Header>
+                                <Popover.Body p={4}>
+                                  <VStack space={2}>
+                                    <Text fontSize='md'>
+                                      The existing mark buttons display
+                                      abbreviated versions of marks recently
+                                      used for efficiency trials. If you catch a
+                                      fish with other existing marks, please
+                                      click on “select another mark type”. This
+                                      will open up a window where you can
+                                      specify mark type, color, position, and
+                                      code if applicable.
+                                    </Text>
+                                    <Divider />
+
+                                    <Text fontSize='md'>
+                                      Abbreviations follow a consistent format
+                                      “mark type abbreviation - color
+                                      abbreviation - position abbreviation”. All
+                                      of these fields are only applicable to
+                                      some mark types. Any fields that are not
+                                      applicable to a particular mark type are
+                                      left blank.
+                                    </Text>
+                                    <Text fontSize='md'>
+                                      Below are some examples of common marks:
+                                    </Text>
+                                    <HStack space={2} alignItems='flex-start'>
+                                      <Avatar size={'2'} mt={'2'} />
+                                      <Text fontSize='md'>
+                                        CWT: Coded wire tag
+                                      </Text>
+                                    </HStack>
+                                    <HStack space={2} alignItems='flex-start'>
+                                      <Avatar size={'2'} mt={'2'} />
+                                      <Text fontSize='md'>Fin Clip</Text>
+                                    </HStack>
+                                  </VStack>
+                                </Popover.Body>
+                              </Popover.Content>
+                            </Popover>
+                          </HStack>
+                          <VStack space={4}>
+                            <VStack space={5}>
+                              {dropdownValues.twoMostRecentReleaseMarks.length >
+                                0 &&
+                                decodedRecentReleaseMarks(
+                                  dropdownValues.twoMostRecentReleaseMarks
+                                ).map(
+                                  (recentReleaseMark: any, index: number) => {
+                                    const {
+                                      id,
+                                      markType,
+                                      markColor,
+                                      bodyPart,
+                                    } = recentReleaseMark
+                                    return (
+                                      <Button
+                                        key={index}
+                                        bg={
+                                          recentExistingMarks.some(
+                                            (mark: ReleaseMarkI) =>
+                                              mark.id === id
+                                          )
+                                            ? 'primary'
+                                            : 'secondary'
+                                        }
+                                        shadow='3'
+                                        borderRadius='5'
+                                        w='90%'
+                                        onPress={() => {
+                                          handlePressRecentExistingMarkButton(
+                                            recentReleaseMark
+                                          )
+                                        }}
+                                      >
+                                        <Text
+                                          color={
+                                            recentExistingMarks.some(
+                                              (mark: ReleaseMarkI) =>
+                                                mark.id === id
+                                            )
+                                              ? 'white'
+                                              : 'primary'
+                                          }
+                                          fontWeight='500'
+                                          fontSize='md'
+                                        >
+                                          {`${markType} - ${markColor} - ${bodyPart}`}
+                                        </Text>
+                                      </Button>
+                                    )
+                                  }
+                                )}
+                            </VStack>
+                            <MarkBadgeList
+                              badgeListContent={existingMarks.value}
+                              field='existingMarks'
+                              setExistingMarks={setExistingMarks}
+                            />
+                            <Pressable
+                              onPress={() => setAddMarkModalOpen(true)}
+                            >
+                              <HStack alignItems='center'>
+                                <Icon
+                                  as={Ionicons}
+                                  name={'add-circle'}
+                                  size='3xl'
+                                  color='primary'
+                                  marginRight='1'
+                                />
+                                <Text color='primary' fontSize='lg'>
+                                  Add Another Mark
+                                </Text>
+                              </HStack>
+                            </Pressable>
+                          </VStack>
+                        </FormControl>
+                      )}
+                    </HStack>
+                    {species.value === 'other' && (
+                      <FormControl w='full'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Life Stage
+                          </Text>
+                        </FormControl.Label>
+                        <Radio.Group
+                          name='lifeStage'
+                          accessibilityLabel='lifeStage'
+                          value={
+                            lifeStage.value !== ''
+                              ? (lifeStage.value as string)
+                              : 'adult'
+                          }
+                          onChange={(value: any) => {
+                            if (value === 'adult') {
+                              setLifeStage({ ...lifeStage, value })
+                            } else {
+                              setLifeStage({ ...lifeStage, value: 'juvenile' })
+                            }
+                          }}
+                        >
+                          <Radio
+                            colorScheme='primary'
+                            value='adult'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Adult
+                          </Radio>
+                          <Radio
+                            colorScheme='primary'
+                            value='juvenile'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Juvenile
+                          </Radio>
+                        </Radio.Group>
                       </FormControl>
                     )}
-                  </HStack>
-                  {species.value === 'other' && (
-                    <FormControl w='full'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Life Stage
-                        </Text>
-                      </FormControl.Label>
-                      <Radio.Group
-                        name='lifeStage'
-                        accessibilityLabel='lifeStage'
-                        value={
-                          lifeStage.value !== ''
-                            ? (lifeStage.value as string)
-                            : 'adult'
-                        }
-                        onChange={(value: any) => {
-                          if (value === 'adult') {
-                            setLifeStage({ ...lifeStage, value })
-                          } else {
-                            setLifeStage({ ...lifeStage, value: 'juvenile' })
-                          }
-                        }}
-                      >
-                        <Radio
-                          colorScheme='primary'
-                          value='adult'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          Adult
-                        </Radio>
-                        <Radio
-                          colorScheme='primary'
-                          value='juvenile'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          Juvenile
-                        </Radio>
-                      </Radio.Group>
-                    </FormControl>
-                  )}
 
-                  <HStack mb={'4'}>
-                    {(species.value === 'Chinook salmon' ||
-                      species.value === 'Steelhead / rainbow trout') && (
-                      <Button
-                        height='40px'
-                        fontSize='16'
-                        bg='secondary'
-                        color='#007C7C'
-                        py='1'
-                        px='20'
-                        shadow='3'
-                        borderRadius='5'
-                        maxWidth='40%'
-                        marginRight='10'
-                        onPress={() => setMarkFishModalOpen(true)}
-                      >
-                        <Text color='primary'>Tag Fish</Text>
-                      </Button>
-                    )}
-                    {species.value === 'Chinook salmon' && (
-                      <Button
-                        bg='secondary'
-                        color='#007C7C'
-                        py='1'
-                        px='12'
-                        shadow='3'
-                        borderRadius='5'
-                        maxWidth='40%'
-                        onPress={() => setAddGeneticModalOpen(true)}
-                      >
-                        <Text color='primary'>Take Genetic Sample</Text>
-                      </Button>
-                    )}
-                  </HStack>
-                </VStack>
-              </>
-            )}
+                    <HStack mb={'4'}>
+                      {(species.value === 'Chinook salmon' ||
+                        species.value === 'Steelhead / rainbow trout') && (
+                        <Button
+                          height='40px'
+                          fontSize='16'
+                          bg='secondary'
+                          color='#007C7C'
+                          py='1'
+                          px='20'
+                          shadow='3'
+                          borderRadius='5'
+                          maxWidth='40%'
+                          marginRight='10'
+                          onPress={() => setMarkFishModalOpen(true)}
+                        >
+                          <Text color='primary'>Tag Fish</Text>
+                        </Button>
+                      )}
+                      {species.value === 'Chinook salmon' && (
+                        <Button
+                          bg='secondary'
+                          color='#007C7C'
+                          py='1'
+                          px='12'
+                          shadow='3'
+                          borderRadius='5'
+                          maxWidth='40%'
+                          onPress={() => setAddGeneticModalOpen(true)}
+                        >
+                          <Text color='primary'>Take Genetic Sample</Text>
+                        </Button>
+                      )}
+                    </HStack>
+                  </VStack>
+                </>
+              )}
+            </ScrollView>
           </VStack>
         </Pressable>
-      </ScrollView>
+      </View>
       <Box bg='themeGrey' pb='12' py='6' px='3'>
         <HStack justifyContent='space-evenly'>
           <Button
