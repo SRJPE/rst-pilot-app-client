@@ -33,6 +33,7 @@ import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidation
 import { ReleaseMarkI } from '../../../screens/formScreens/AddFish'
 import SpeciesDropDown from '../SpeciesDropDown'
 import FishConditionsDropDown from '../FishConditionsDropDown'
+import { startCase } from 'lodash'
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -52,6 +53,10 @@ const BatchCharacteristicsModalContent = ({
   )
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
+  const reorderedFishCondition = alphabeticalSort(
+    dropdownValues.fishCondition,
+    'definition'
+  )
 
   const [fishConditionDropdownOpen, setFishConditionDropdownOpen] = useState(
     false as boolean
@@ -59,8 +64,9 @@ const BatchCharacteristicsModalContent = ({
   const [fishConditionList, setFishConditionList] = useState<
     { label: string; value: string }[]
   >(
+    // reorderedFishCondition.map((condition: any) => ({
     dropdownValues.fishCondition.map((condition: any) => ({
-      label: condition?.definition,
+      label: startCase(condition?.definition),
       value: condition?.definition,
     }))
   )
