@@ -114,7 +114,12 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       state.trapVisitFormPostBundler.catchRawSubmissions
 
     // try {
-    const promiseTracker: any = {
+    const promiseTracker: {
+      [key: string]: {
+        trapPromise: Promise<any>
+        linkedCatchRawSubmissions: any[]
+      }
+    } = {
       // '028u208u02934u': {
       //   trap: trapPromise,
       //   linkedCatchRawSubmissions: []
@@ -131,112 +136,115 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       promiseTracker[uuid] = {
         trapPromise,
         linkedCatchRawSubmissions,
-      }
+      } as any
     })
 
     // iterate through each uuid key in promiseTracker and await trap post, get back id, then await catches
-    for (const uuid in promiseTracker) {
-      const { trapPromise, linkedCatchRawSubmissions } = promiseTracker[uuid]
-
-      trapPromise
-        .then(async (response: any) => {
-          console.log('trap promise response: ', response)
-          let trapId = response.data.createdTrapVisitResponse.id
-          const {
-            createdTrapVisitResponse,
-            createdTrapVisitCrewResponse,
-            createdTrapCoordinatesResponse,
-            createdTrapVisitEnvironmentalResponse,
-          } = response.data
-          // save to payload
-          payload.trapVisitResponse.push({
-            createdTrapVisitResponse,
-            createdTrapVisitCrewResponse,
-            createdTrapCoordinatesResponse,
-            createdTrapVisitEnvironmentalResponse,
-          })
-
-          const catchPromises = linkedCatchRawSubmissions.map(
-            ({ uid, ...rest }: any) =>
-              api.post('catch-raw/', {
-                ...rest,
-                trapVisitId: trapId,
-              })
-          )
-
-          const catchResults = await Promise.allSettled(catchPromises).catch(
-            (error) => {
-              console.log('catch submission error: ', error)
-              const { response } = error
-              const errorDetail = response.data.detail
-              if (!errorDetail.includes('already exists')) {
-                payload.failedCatchRawSubmissions.push(
-                  catchRawSubmissions.find(
-                    (catchSubmission: any) => catchSubmission.uid === uuid
-                  )
-                )
-              }
-            }
-          )
-
-          for (const result of catchResults as any) {
-            if (result.status === 'fulfilled') {
-              const {
-                createdCatchRawResponse,
-                createdGeneticSamplingDataResponse,
-                createdExistingMarksResponse,
-                createdMarkAppliedResponse,
-              } = result.value.data
-
-              payload.catchRawResponse.push({
-                createdCatchRawResponse,
-                createdGeneticSamplingDataResponse,
-                createdExistingMarksResponse,
-                createdMarkAppliedResponse,
-              })
-            } else {
-              console.log('server processed catch fail: ', result)
-              // handle failed catch-raw request
-              // what is result in this case?
-            }
-          }
-        })
-        .catch((error: any) => {
-          console.log('trap submission error: ', error)
-          // handle failed trap submissions
-          const { response } = error
-          const errorDetail = response.data.detail
-          if (!errorDetail.includes('already exists')) {
-            payload.failedTrapVisitSubmissions.push(
-              trapVisitSubmissions.find(
-                (trapSubmission: any) => trapSubmission.trapVisitUid === uuid
-              )
+    const promises = Object.entries(promiseTracker).map(
+      ([uuid, { trapPromise, linkedCatchRawSubmissions }]) => {
+        return trapPromise
+          .then(async (response: any) => {
+            console.log('trap promise response: ', response)
+            let trapId = response.data.createdTrapVisitResponse.id
+            const {
+              createdTrapVisitResponse,
+              createdTrapVisitCrewResponse,
+              createdTrapCoordinatesResponse,
+              createdTrapVisitEnvironmentalResponse,
+            } = response.data
+            // save to payload
+            payload.trapVisitResponse.push({
+              createdTrapVisitResponse,
+              createdTrapVisitCrewResponse,
+              createdTrapCoordinatesResponse,
+              createdTrapVisitEnvironmentalResponse,
+            })
+            const catchPromises = linkedCatchRawSubmissions.map(
+              ({ uid, ...rest }: any) =>
+                api.post('catch-raw/', {
+                  ...rest,
+                  trapVisitId: trapId,
+                })
             )
-          }
-        })
-    }
+            return Promise.allSettled(catchPromises)
+              .then(catchResults => {
+                catchResults.forEach((result: any) => {
+                  if (result.status === 'fulfilled') {
+                    const {
+                      createdCatchRawResponse,
+                      createdGeneticSamplingDataResponse,
+                      createdExistingMarksResponse,
+                      createdMarkAppliedResponse,
+                    } = result.value.data
+                    payload.catchRawResponse.push({
+                      createdCatchRawResponse,
+                      createdGeneticSamplingDataResponse,
+                      createdExistingMarksResponse,
+                      createdMarkAppliedResponse,
+                    })
+                  } else {
+                    console.log('server processed catch fail: ', result)
+                    // handle failed catch-raw request
+                    // what is result in this case?
+                  }
+                })
+              })
+              .catch(error => {
+                console.log('catch submission error: ', error)
+                const { response } = error
+                const errorDetail = response.data.detail
+                if (!errorDetail.includes('already exists')) {
+                  payload.failedCatchRawSubmissions.push(
+                    catchRawSubmissions.find(
+                      (catchSubmission: any) => catchSubmission.uid === uuid
+                    )
+                  )
+                }
+              })
+          })
+          .catch((error: any) => {
+            console.log('trap submission error: ', error)
+            // handle failed trap submissions
+            const { response } = error
+            const errorDetail = response.data.detail
+            if (!errorDetail.includes('already exists')) {
+              payload.failedTrapVisitSubmissions.push(
+                trapVisitSubmissions.find(
+                  (trapSubmission: any) => trapSubmission.trapVisitUid === uuid
+                )
+              )
+            }
+          })
+      }
+    )
 
-    try {
-      await fetchWithPostParams(thunkAPI.dispatch, payload)
-    } catch (err) {
-      console.log('error in fetchWithPostParams: ', err)
-    }
-
-    return payload
+    return Promise.all(promises)
+      .then(async () => {
+        try {
+          await fetchWithPostParams(thunkAPI.dispatch, payload)
+        } catch (err) {
+          console.log('error in fetchWithPostParams: ', err)
+        }
+        return payload
+      })
+      .catch(err => {
+        console.log('error in fetchWithPostParams: ', err)
+        throw err
+      })
   }
 )
 
 export const fetchPreviousTrapAndCatch = createAsyncThunk(
   'trapVisitPostBundler/fetchPreviousTrapAndCatch',
   async (_, thunkAPI) => {
-    const programIds = [1]
+    const programIds = [5]
     // ^ hard coded value to be updated to user's program ids ^
     const previousTrapVisits: any[] = []
     const previousCatchRaw: any[] = []
     try {
       const state = thunkAPI.getState() as RootState
       await Promise.all(
-        programIds.map(async (programId) => {
+        programIds.map(async programId => {
           const trapVisitResponse = await api.get(
             `trap-visit/program/${programId}`
           )
@@ -248,7 +256,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCTrapVisitIds: number[] =
             state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
-              (trapVisit) => {
+              trapVisit => {
                 return trapVisit.createdTrapVisitResponse.id
               }
             )
@@ -263,7 +271,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCCatchRawIds: number[] =
             state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
-              (catchRaw) => {
+              catchRaw => {
                 return catchRaw.createdCatchRawResponse.id
               }
             )
@@ -601,7 +609,7 @@ export const trapVisitPostBundler = createSlice({
       )
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder.addCase(PURGE, () => {
       return initialState
     })
