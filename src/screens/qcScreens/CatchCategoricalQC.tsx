@@ -321,33 +321,19 @@ function CatchCategoricalQC({
     let markIdToColorBuilder: any = []
     let symbolCounter = 0
 
-    const addJitter = (value: any, jitterAmount = 0.1) => {
-      return value + Math.random() * jitterAmount - jitterAmount / 2
-    }
-
     Object.entries(markCombos).forEach(([dateTime, countObj], index) => {
       Object.entries(countObj as MarkCombosI).forEach(
         ([markIdentifier, itemsArray]) => {
           let randomColor = getRandomColor()
-          let symbol = every(itemsArray, ['qcCompleted', true])
-            ? 'circle'
-            : 'plus'
           markIdToColorBuilder.push({
             name: markIdentifier,
-            symbol: { type: symbol, fill: randomColor },
           })
-
-          // if other properties in the same countObj have same length,
-          // then symbol should be star
 
           marksData.push({
             id: `${markIdentifier}_${dateTime}`,
             x: dateTime,
             y: itemsArray.length,
             colorScale: randomColor,
-            symbol: every(itemsArray, ['qcCompleted', true])
-              ? 'circle'
-              : 'plus',
             itemsArray: itemsArray,
           })
           symbolCounter++
@@ -1106,10 +1092,11 @@ function CatchCategoricalQC({
                         <Text>Mark Type</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
-                        let markTypeCode =
-                          data?.createdCatchRawResponse.markType
+                        let markTypeId =
+                          data?.createdExistingMarksResponse[0].markTypeId
+
                         let markType = markTypeState.filter((obj: any) => {
-                          return obj.id === markTypeCode
+                          return obj.id === markTypeId
                         })
 
                         return (
@@ -1127,9 +1114,11 @@ function CatchCategoricalQC({
                           >
                             <Text>
                               {markType.length
-                                ? capitalizeFirstLetterOfEachWord(
-                                    markType[0]?.definition
-                                  )
+                                ? `${truncateAndTrimString(
+                                    capitalizeFirstLetterOfEachWord(
+                                      markType[0]?.definition
+                                    ), 12
+                                  )}...`
                                 : 'NA'}
                             </Text>
                           </DataTable.Cell>
@@ -1368,21 +1357,30 @@ function CatchCategoricalQC({
                       {modalData.map((data, idx) => {
                         let trapVisitId =
                           data.createdCatchRawResponse.trapVisitId
-                        let crew = visitSetupDefaults.trapVisitCrew.filter(
-                          (obj: any) => {
-                            return obj.trapVisitId === trapVisitId
-                          }
-                        )
-                        crew = crew.map((crewObj: any) => {
-                          return crewObj.personnelId
-                        })
-                        let selectedCrew: any = null
 
-                        visitSetupDefaults.crewMembers.forEach((arr: any[]) => {
-                          selectedCrew = arr.filter((crewMember: any) => {
-                            return crew.includes(crewMember.personnelId)
+                        let crew = []
+                        if (visitSetupDefaults?.trapVisitCrew) {
+                          crew = visitSetupDefaults?.trapVisitCrew?.filter(
+                            (obj: any) => {
+                              return obj.trapVisitId === trapVisitId
+                            }
+                          )
+
+                          crew = crew.map((crewObj: any) => {
+                            return crewObj.personnelId
                           })
-                        })
+                        }
+                        
+                        
+                        let selectedCrew: any = []
+
+                        if (crew.length > 0) {
+                          visitSetupDefaults.crewMembers.forEach((arr: any[]) => {
+                            selectedCrew = arr.filter((crewMember: any) => {
+                              return crew.includes(crewMember.personnelId)
+                            })
+                          })
+                        }
 
                         return (
                           <DataTable.Cell
