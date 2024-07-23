@@ -14,6 +14,7 @@ const mapStateToProps = (state: RootState) => {
     fishInput: state.fishInput,
     fishProcessing: state.fishProcessing,
     markRecaptureNavigation: state.markRecaptureNavigation,
+    markRecaptureFormPostBundler: state.markRecaptureFormPostBundler,
     navigation: state.navigation,
     paperEntry: state.paperEntry,
     releaseTrial: state.releaseTrial,
@@ -34,6 +35,7 @@ interface DebugPropsI {
   fishInput?: any
   fishProcessing?: any
   markRecaptureNavigation?: any
+  markRecaptureFormPostBundler?: any
   paperEntry?: any
   releaseTrial?: any
   slideAlert?: any
@@ -52,6 +54,7 @@ interface RowComponentI {
     | 'dropdowns'
     | 'fishInput'
     | 'fishProcessing'
+    | 'markRecaptureFormPostBundler'
     | 'markRecaptureNavigation'
     | 'paperEntry'
     | 'releaseTrial'
@@ -72,6 +75,7 @@ const Debug = (props: DebugPropsI) => {
     fishInput: '',
     fishProcessing: '',
     markRecaptureNavigation: '',
+    markRecaptureFormPostBundler: '',
     navigation: '',
     paperEntry: '',
     releaseTrial: '',
@@ -168,6 +172,24 @@ const Debug = (props: DebugPropsI) => {
               setLogState({
                 ...logState,
                 ['trapVisitFormPostBundler']: '',
+              })
+            }}
+            style={{ marginTop: 10, marginHorizontal: 10 }}
+          >
+            <Text fontSize={'2xl'} color='white'>
+              Reset
+            </Text>
+          </Button>
+        )}
+        {logState[name] && name === 'markRecaptureFormPostBundler' && (
+          <Button
+            bgColor='#FF5B5B'
+            shadow={'7'}
+            onPress={() => {
+              persistor.purge()
+              setLogState({
+                ...logState,
+                ['markRecaptureFormPostBundler']: '',
               })
             }}
             style={{ marginTop: 10, marginHorizontal: 10 }}
