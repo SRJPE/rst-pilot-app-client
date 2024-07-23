@@ -295,8 +295,6 @@ export const navigateHelper = (
     }
   }
 
-  console.log('navigateHelper', payload)
-
   navigation.dispatch(StackActions.replace(destination))
   dispatch({
     type: updateActiveStep,

@@ -16,6 +16,8 @@ import {
   SelectedFishStoreI,
 } from '../../redux/reducers/markRecaptureSlices/fishHoldingSlice'
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
+import { navigateHelper } from '../../utils/utils'
+import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -215,7 +217,7 @@ const FishHolding = ({
   }
 
   const tabIds = Object.keys(tabState.tabs)
-  const handleSubmit = (tabId: string) => {
+  const handleSubmit = (tabId: string, buttonDirection?: string) => {
     if (tabId) {
       //saves for release trial
       dispatch(saveTotalFishHolding(totalFish))
@@ -250,6 +252,20 @@ const FishHolding = ({
         })
       )
       dispatch(markFishHoldingCompleted(true))
+    }
+    if (buttonDirection) {
+      const destination =
+        buttonDirection === 'left'
+          ? 'Trap Post-Processing'
+          : 'Incomplete Sections'
+
+      navigateHelper(
+        destination,
+        navigationSlice,
+        navigation,
+        dispatch,
+        updateActiveStep
+      )
     }
   }
 
@@ -308,8 +324,8 @@ const FishHolding = ({
       </View>
       <NavButtons
         navigation={navigation}
-        handleSubmit={() => {
-          if (activeTabId) handleSubmit(activeTabId)
+        handleSubmit={(buttonDirection?: string) => {
+          if (activeTabId) handleSubmit(activeTabId, buttonDirection)
         }}
       />
     </>
