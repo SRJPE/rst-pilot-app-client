@@ -106,7 +106,6 @@ const FishInput = ({
     const destination =
       direction === 'left' ? 'Fish Processing' : 'Trap Post-Processing'
 
-    console.log('destination', destination)
     const callback = () => {
       navigateHelper(
         destination,
