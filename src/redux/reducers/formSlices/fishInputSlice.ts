@@ -24,8 +24,7 @@ export interface IndividualFishValuesI {
   forkLength: number | null
   run: string
   weight?: number | null
-  fishCondition: string[] | null //change in the future to array
-  // fishConditions: string[] | string
+  fishConditions: Array<string | null>
   lifeStage: string
   adiposeClipped: boolean | null
   existingMarks: Array<ReleaseMarkI>
@@ -43,8 +42,7 @@ export const individualFishInitialState = {
   forkLength: null,
   run: '',
   weight: null,
-  fishCondition: '', //change in the future to array
-  // fishConditions: [],
+  fishConditions: [],
   lifeStage: '',
   adiposeClipped: false,
   existingMarks: [],
@@ -220,7 +218,7 @@ export const saveFishSlice = createSlice({
         forkLength: null,
         run: getRun(species, run),
         weight: null,
-        fishCondition: null,
+        fishConditions: [],
         lifeStage: getLifeStage(species, lifeStage),
         adiposeClipped: null,
         existingMarks: [],
