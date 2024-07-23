@@ -57,6 +57,7 @@ import MarkBadgeList from '../../components/markRecapture/MarkBadgeList'
 import { uid } from 'uid'
 import SpeciesDropDown from '../../components/form/SpeciesDropDown'
 import FishConditionsDropDown from '../../components/form/FishConditionsDropDown'
+import { startCase } from 'lodash'
 
 export interface ReleaseMarkI {
   id?: number
@@ -543,7 +544,7 @@ const AddFishContent = ({
     { label: string; value: string }[]
   >(
     dropdownValues.fishCondition.map((condition: any) => ({
-      label: condition?.definition,
+      label: startCase(condition?.definition),
       value: condition?.definition,
     }))
   )
@@ -945,69 +946,101 @@ const AddFishContent = ({
                         </FormControl>
                       )}
                     </HStack>
-                    <HStack space={6}>
-                      <FormControl
-                        // w='1' // for addition of fishConditionDropdown
-                        // paddingRight='9'
-                        // mb={fishConditionDropdownOpen ? 160 : 0}
-                        w='1/2'
-                        paddingRight='5'
-                      >
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Fish Condition
-                          </Text>
-                        </FormControl.Label>
-                        <CustomSelect
-                          selectedValue={fishCondition.value as string}
-                          placeholder={'Fish Condition'}
-                          onValueChange={(value: string) =>
-                            setFishCondition({ ...fishCondition, value })
-                          }
-                          setFieldTouched={() =>
-                            setFishCondition({
-                              ...fishCondition,
-                              touched: true,
-                            })
-                          }
-                          selectOptions={dropdownValues.fishCondition}
-                        />
-                        {/* <FishConditionsDropDown
+
+                    <FormControl
+                      w='100%'
+                      paddingRight='9'
+                      mb={fishConditionDropdownOpen ? 160 : 0}
+                    >
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Fish Conditions
+                        </Text>
+                      </FormControl.Label>
+                      <FishConditionsDropDown
                         open={fishConditionDropdownOpen}
                         onOpen={onFishConditionOpen}
                         setOpen={setFishConditionDropdownOpen}
                         list={fishConditionList}
                         setList={setFishConditionList}
-                        onChangeValue={(value: string) =>{
+                        onChangeValue={(value: string) => {
                           setFishCondition({ ...fishCondition, value })
-                        }
-                        }
+                        }}
                         setFieldTouched={() =>
                           setFishCondition({
                             ...fishCondition,
                             touched: true,
                           })
                         }
-                      /> */}
+                      />
+                    </FormControl>
+                    <VStack space={6}>
+                      <FormControl>
+                        <HStack space={4}>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Dead
+                            </Text>
+                          </FormControl.Label>
+
+                          <Radio.Group
+                            name='dead'
+                            accessibilityLabel='dead'
+                            value={`${dead.value}`}
+                            onChange={(value: any) => {
+                              if (value === 'true') {
+                                setDead({ ...dead, value: true })
+                              } else {
+                                setDead({ ...dead, value: false })
+                              }
+                            }}
+                          >
+                            <HStack space={4}>
+                              <Radio
+                                colorScheme='primary'
+                                value='true'
+                                my={1}
+                                _icon={{ color: 'primary' }}
+                              >
+                                Yes
+                              </Radio>
+                              <Radio
+                                colorScheme='primary'
+                                value='false'
+                                my={1}
+                                _icon={{ color: 'primary' }}
+                              >
+                                No
+                              </Radio>
+                            </HStack>
+                          </Radio.Group>
+                        </HStack>
                       </FormControl>
-                      <VStack space={6}>
-                        <FormControl>
+
+                      {species.value === 'Chinook salmon' && (
+                        <FormControl w='2/3'>
                           <HStack space={4}>
                             <FormControl.Label>
                               <Text color='black' fontSize='xl'>
-                                Dead
+                                Adipose Clipped
                               </Text>
                             </FormControl.Label>
 
                             <Radio.Group
-                              name='dead'
-                              accessibilityLabel='dead'
-                              value={`${dead.value}`}
+                              name='adiposeClipped'
+                              accessibilityLabel='adipose clipped'
+                              value={`${adiposeClipped.value}`}
                               onChange={(value: any) => {
                                 if (value === 'true') {
-                                  setDead({ ...dead, value: true })
+                                  setAdiposeClipped({
+                                    ...adiposeClipped,
+                                    value: true,
+                                  })
                                 } else {
-                                  setDead({ ...dead, value: false })
+                                  setAdiposeClipped({
+                                    ...adiposeClipped,
+                                    value: false,
+                                  })
                                 }
                               }}
                             >
@@ -1032,58 +1065,8 @@ const AddFishContent = ({
                             </Radio.Group>
                           </HStack>
                         </FormControl>
-
-                        {species.value === 'Chinook salmon' && (
-                          <FormControl w='2/3'>
-                            <HStack space={4}>
-                              <FormControl.Label>
-                                <Text color='black' fontSize='xl'>
-                                  Adipose Clipped
-                                </Text>
-                              </FormControl.Label>
-
-                              <Radio.Group
-                                name='adiposeClipped'
-                                accessibilityLabel='adipose clipped'
-                                value={`${adiposeClipped.value}`}
-                                onChange={(value: any) => {
-                                  if (value === 'true') {
-                                    setAdiposeClipped({
-                                      ...adiposeClipped,
-                                      value: true,
-                                    })
-                                  } else {
-                                    setAdiposeClipped({
-                                      ...adiposeClipped,
-                                      value: false,
-                                    })
-                                  }
-                                }}
-                              >
-                                <HStack space={4}>
-                                  <Radio
-                                    colorScheme='primary'
-                                    value='true'
-                                    my={1}
-                                    _icon={{ color: 'primary' }}
-                                  >
-                                    Yes
-                                  </Radio>
-                                  <Radio
-                                    colorScheme='primary'
-                                    value='false'
-                                    my={1}
-                                    _icon={{ color: 'primary' }}
-                                  >
-                                    No
-                                  </Radio>
-                                </HStack>
-                              </Radio.Group>
-                            </HStack>
-                          </FormControl>
-                        )}
-                      </VStack>
-                    </HStack>
+                      )}
+                    </VStack>
 
                     <HStack space={4} w='80%'>
                       {(species.value == 'Chinook salmon' ||
