@@ -11,6 +11,7 @@ import {
   kernelDensityEstimation,
   handleQCChartButtonClick,
 } from '../../utils/utils'
+import DateSlider from '../../components/Shared/DateSlider'
 
 interface GraphDataI {
   'Fork Length': any[]
@@ -44,6 +45,7 @@ function CatchMeasureQC({
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
   const axisLabelDictionary = {
     'Fork Length': { xLabel: 'Fork Length (mm)', yLabel: 'Density' },
@@ -52,10 +54,17 @@ function CatchMeasureQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
-    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+    let qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+    
+    if (selectedDate != null) {
+      qcData = qcData.filter((data) => {
+        let createdAt = new Date(data.createdCatchRawResponse.createdAt)
+        return createdAt >= selectedDate
+      })
+    }
 
     // Fork Length Density Calculations -----------------------------
 
@@ -65,7 +74,7 @@ function CatchMeasureQC({
 
     // array of all fork lengths within the qc dataset
     const forkLengthArray: any[] = qcData
-      .map(catchRawResponse => {
+      .map((catchRawResponse) => {
         const forkValue = Number(
           catchRawResponse.createdCatchRawResponse.forkLength
         )
@@ -80,7 +89,7 @@ function CatchMeasureQC({
         }
         return forkValue
       })
-      .filter(num => {
+      .filter((num) => {
         return num != 0
       })
 
@@ -115,7 +124,7 @@ function CatchMeasureQC({
     let weightGraphSubData: any[] = []
 
     const weightArray: any[] = qcData
-      .map(catchRawResponse => {
+      .map((catchRawResponse) => {
         const weightValue = Number(
           catchRawResponse.createdCatchRawResponse.weight
         )
@@ -130,7 +139,7 @@ function CatchMeasureQC({
         }
         return weightValue
       })
-      .filter(num => {
+      .filter((num) => {
         return num != 0
       })
 
@@ -168,7 +177,7 @@ function CatchMeasureQC({
       'Fork Length': forkGraphSubData,
       Weight: weightGraphSubData,
     })
-  }, [qcCatchRawSubmissions])
+  }, [qcCatchRawSubmissions, selectedDate])
 
   const GraphMenuButton = ({
     buttonName,
@@ -255,11 +264,20 @@ function CatchMeasureQC({
           <HStack mb={'10'}>
             <GraphMenuButton buttonName={'Fork Length'} />
             <GraphMenuButton buttonName={'Weight'} />
-            <View flex={3}></View>
+            <View flex={2}></View>
+
+            <DateSlider
+              minDate={new Date('2023-01-01')}
+              maxDate={new Date()}
+              onDateChange={(value: any) => {
+                setSelectedDate(new Date(value))
+                console.log('hit: ', value)
+              }}
+            />
           </HStack>
 
           <ScrollView>
-            {activeButtons.map(buttonName => {
+            {activeButtons.map((buttonName) => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -268,7 +286,7 @@ function CatchMeasureQC({
                   chartType='linewithplot'
                   data={graphData[buttonName]}
                   subData={graphSubData[buttonName]}
-                  onPointClick={datum => handlePointClicked(datum)}
+                  onPointClick={(datum) => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'
