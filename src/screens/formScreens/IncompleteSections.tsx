@@ -463,7 +463,7 @@ const IncompleteSections = ({
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
             captureRunClassMethod: getRunClassMethod(fishValue),
             // defaults to "none" (id: 1) if not selected
-            markType: 1, // Check w/ Erin
+            // markType: 1, // Check w/ Erin
             markedForRelease: fishValue.willBeUsedInRecapture,
             adiposeClipped: fishValue.adiposeClipped ? true : false,
             dead: fishValue.dead ? true : false,
@@ -494,6 +494,7 @@ const IncompleteSections = ({
             qcTime: null,
             qcComments: null,
             existingMarks: fishValue.existingMarks.map((markObj: any) => {
+              //need to pick between body part and mark position, we go back and forth and its causing problems
               return {
                 releaseId:
                   markObj.releaseId !== undefined ? markObj.releaseId : null,
