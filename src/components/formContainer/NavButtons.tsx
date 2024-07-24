@@ -6,7 +6,8 @@ import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import { debounce, isEqual } from 'lodash'
+import { isEqual } from 'lodash'
+import { StackActions } from '@react-navigation/native'
 
 const NavButtons = ({
   navigation,
@@ -88,7 +89,7 @@ const NavButtons = ({
       }
     }
 
-    navigation.navigate('Trap Visit Form', { screen: destination })
+    navigation.dispatch(StackActions.replace(destination))
     dispatch({
       type: updateActiveStep,
       payload: payload,
@@ -96,57 +97,51 @@ const NavButtons = ({
   }
 
   const navigateFlowRightButton = (values: any) => {
+    //this is now kind of redundant with the implementation of the loading screen
     switch (activePage) {
       case 'Visit Setup':
-        if (isPaperEntry) {
-          navigateHelper('Paper Entry')
-        } else {
-          navigateHelper('Trap Operations')
-        }
+        navigateHelper('Trap Operations')
         break
       case 'Trap Operations':
-        if (!isPaperEntryStore) {
-          if (values?.trapStatus === 'trap not functioning') {
-            navigateHelper('Non Functional Trap')
-          } else if (
-            values?.trapStatus === 'trap not in service - restart trapping'
-          ) {
-            navigateHelper('Started Trapping')
-          } else if (values?.flowMeasure > 1000) {
-            navigateHelper('High Flows')
-          } else if (values?.waterTemperatureUnit === '°C') {
-            if (values?.waterTemperature > 30) {
-              navigateHelper('High Temperatures')
-            } else {
-              navigateHelper('Fish Processing')
-            }
-          } else if (values?.waterTemperatureUnit === '°F') {
-            if (values?.waterTemperature > 86) {
-              navigateHelper('High Temperatures')
-            } else {
-              navigateHelper('Fish Processing')
-            }
+        if (values?.trapStatus === 'trap not functioning') {
+          navigateHelper('Non Functional Trap')
+        } else if (
+          values?.trapStatus === 'trap not in service - restart trapping'
+        ) {
+          navigateHelper('Started Trapping')
+        } else if (values?.flowMeasure > 1000) {
+          navigateHelper('High Flows')
+        } else if (values?.waterTemperatureUnit === '°C') {
+          if (values?.waterTemperature > 30) {
+            navigateHelper('High Temperatures')
           } else {
             navigateHelper('Fish Processing')
           }
+        } else if (values?.waterTemperatureUnit === '°F') {
+          if (values?.waterTemperature > 86) {
+            navigateHelper('High Temperatures')
+          } else {
+            navigateHelper('Fish Processing')
+          }
+        } else {
+          navigateHelper('Fish Processing')
         }
         break
       case 'Fish Processing':
-        if (!isPaperEntryStore) {
-          if (values?.fishProcessedResult === 'no fish caught') {
-            navigateHelper('No Fish Caught')
-          } else if (
-            values?.fishProcessedResult ===
-              'no catch data, fish left in live box' ||
-            values?.fishProcessedResult === 'no catch data, fish released'
-          ) {
-            navigateHelper('Trap Post-Processing')
-          } else {
-            navigateHelper('Fish Input')
-          }
-        } else {
+        if (values?.fishProcessedResult === 'no fish caught') {
+          navigateHelper('No Fish Caught')
+        } else if (
+          values?.fishProcessedResult ===
+            'no catch data, fish left in live box' ||
+          values?.fishProcessedResult === 'no catch data, fish released'
+        ) {
           navigateHelper('Trap Post-Processing')
+        } else {
+          navigateHelper('Fish Input')
         }
+        break
+      case 'Fish Input':
+        navigateHelper('Trap Post-Processing')
         break
       case 'Trap Post-Processing':
         if (checkWillBeHoldingFishForMarkRecapture()) {
@@ -159,7 +154,6 @@ const NavButtons = ({
         navigateHelper('Incomplete Sections')
         break
       case 'Incomplete Sections':
-        console.log('🚀 INCOMPLETE SECTIONS CASE HIT')
         navigateHelper('Start Mark Recapture')
         break
       case 'High Flows':
@@ -178,10 +172,7 @@ const NavButtons = ({
         navigation.navigate('Home')
         break
       default:
-        navigation.navigate('Trap Visit Form', {
-          screen: navigationState.steps[activeStep + 1]?.name,
-        })
-        dispatch(updateActiveStep(navigationState.activeStep + 1))
+        console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
         break
     }
   }
@@ -189,7 +180,8 @@ const NavButtons = ({
   const navigateFlowLeftButton = () => {
     switch (activePage) {
       case 'Trap Operations':
-        if (isPaperEntryStore) navigateHelper('Paper Entry')
+        // if (isPaperEntryStore) navigateHelper('Paper Entry')
+        navigateHelper('Visit Setup')
         break
       case 'High Flows':
         navigateHelper('Trap Operations')
@@ -206,11 +198,17 @@ const NavButtons = ({
       case 'No Fish Caught':
         navigateHelper('Fish Processing')
         break
+      case 'Fish Input':
+        navigateHelper('Fish Processing')
+        break
       case 'Paper Entry':
         navigateHelper('Visit Setup')
         break
       case 'Started Trapping':
         navigateHelper('Trap Operations')
+        break
+      case 'Trap Post-Processing':
+        navigateHelper('Fish Input')
         break
       case 'Fish Holding':
         navigateHelper('Trap Post-Processing')
@@ -218,21 +216,24 @@ const NavButtons = ({
       case 'Incomplete Sections':
         if (checkWillBeHoldingFishForMarkRecapture()) {
           navigateHelper('Fish Holding')
+        } else {
+          navigateHelper('Trap Post-Processing')
         }
         break
       default:
+        console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
         break
     }
   }
 
   const handleRightButton = () => {
+    //if handleSubmit truthy, submit form to save to redux
     if (handleSubmit) {
-      handleSubmit()
+      handleSubmit('right')
       showSlideAlert(dispatch)
     }
 
     if (!shouldProceedToLoadingScreen) {
-      // If proceeding to loading screen, do not navigate to next screen, instead navigate from loading screen
       navigateFlowRightButton(values)
     }
   }
@@ -241,25 +242,29 @@ const NavButtons = ({
     //navigate back to home screen from visit setup screen
     if (activePage === 'Visit Setup') {
       navigation.navigate('Home')
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Visit Setup' }],
+      })
       return
     }
-    //if function truthy, submit form to save to redux
+
+    // if function truthy, submit form to save to redux
     if (handleSubmit) {
       //do not submit when going back from incomplete sections page (prevents early submission errors)
       if (activePage !== 'Incomplete Sections') {
-        handleSubmit()
+        handleSubmit('left')
+        return
+      } else {
+        navigateFlowLeftButton()
+        return
       }
     }
-    //navigate left
-    navigation.navigate('Trap Visit Form', {
-      screen: navigationState.steps[activeStep - 1]?.name,
-    })
-    dispatch({
-      type: updateActiveStep,
-      payload: navigationState.activeStep - 1,
-    })
-    //navigate various flows if needed (This seems to not be causing performance issues even though it is kind of redundant to place it here)
-    navigateFlowLeftButton()
+
+    if (!shouldProceedToLoadingScreen) {
+      navigateFlowLeftButton()
+      return
+    }
   }
 
   const renderRightButtonText = (activePage: string) => {

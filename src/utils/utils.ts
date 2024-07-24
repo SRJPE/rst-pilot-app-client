@@ -1,3 +1,4 @@
+import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
@@ -238,22 +239,26 @@ export const getSubstring = (
 }
 
 export function gaussianKernel(x: number) {
-    return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+  return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x)
 }
 
-export function kernelDensityEstimation(data: number[], bandwidth: number, grid: number[]): number[] {
-  const density: number[] = [];
+export function kernelDensityEstimation(
+  data: number[],
+  bandwidth: number,
+  grid: number[]
+): number[] {
+  const density: number[] = []
 
   for (let i = 0; i < grid.length; i++) {
-    let sum = 0;
+    let sum = 0
     for (let j = 0; j < data.length; j++) {
-      const u = (grid[i] - data[j]) / bandwidth;
-      sum += gaussianKernel(u);
+      const u = (grid[i] - data[j]) / bandwidth
+      sum += gaussianKernel(u)
     }
-    density[i] = sum / (data.length * bandwidth);
+    density[i] = sum / (data.length * bandwidth)
   }
 
-  return density;
+  return density
 }
 
 export const useDebounce = <T>(value: T, delay = 500) => {
@@ -271,12 +276,17 @@ export const useDebounce = <T>(value: T, delay = 500) => {
 }
 
 export const navigateHelper = (
-  destination: string,
+  destination: string | undefined,
   navigationState: any,
   navigation: any,
   dispatch: any,
   updateActiveStep: any
 ) => {
+  if (!destination) {
+    navigation.navigate('Home')
+    return
+  }
+
   const formSteps = Object.values(navigationState?.steps) as any
   let payload = null
   for (let i = 0; i < formSteps.length; i++) {
@@ -285,11 +295,132 @@ export const navigateHelper = (
     }
   }
 
-  navigation.navigate('Trap Visit Form', { screen: destination })
+  navigation.dispatch(StackActions.replace(destination))
   dispatch({
     type: updateActiveStep,
     payload: payload,
   })
+}
+
+export const navigateFlowRightButton = (
+  values: any,
+  activePage: string,
+  holdingForMarkRecap: boolean,
+  navigation: any
+) => {
+  console.log('right', activePage)
+  //this is now kind of redundant with the implementation of the loading screen
+  switch (activePage) {
+    case 'Visit Setup':
+      return 'Trap Operations'
+    case 'Trap Operations':
+      if (values?.trapStatus === 'trap not functioning') {
+        return 'Non Functional Trap'
+      } else if (
+        values?.trapStatus === 'trap not in service - restart trapping'
+      ) {
+        return 'Started Trapping'
+      } else if (values?.flowMeasure > 1000) {
+        return 'High Flows'
+      } else if (values?.waterTemperatureUnit === '°C') {
+        if (values?.waterTemperature > 30) {
+          return 'High Temperatures'
+        } else {
+          return 'Fish Processing'
+        }
+      } else if (values?.waterTemperatureUnit === '°F') {
+        if (values?.waterTemperature > 86) {
+          return 'High Temperatures'
+        } else {
+          return 'Fish Processing'
+        }
+      } else {
+        return 'Fish Processing'
+      }
+    case 'Fish Processing':
+      if (values?.fishProcessedResult === 'no fish caught') {
+        return 'No Fish Caught'
+      } else if (
+        values?.fishProcessedResult ===
+          'no catch data, fish left in live box' ||
+        values?.fishProcessedResult === 'no catch data, fish released'
+      ) {
+        return 'Trap Post-Processing'
+      } else {
+        return 'Fish Input'
+      }
+    case 'Fish Input':
+      return 'Trap Post-Processing'
+    case 'Trap Post-Processing':
+      if (holdingForMarkRecap) {
+        return 'Fish Holding'
+      } else {
+        return 'Incomplete Sections'
+      }
+    case 'Fish Holding':
+      return 'Incomplete Sections'
+    case 'Incomplete Sections':
+      console.log('🚀 INCOMPLETE SECTIONS CASE HIT')
+      return 'Start Mark Recapture'
+    case 'High Flows':
+      return 'End Trapping'
+    case 'High Temperatures':
+      return 'Fish Processing'
+    case 'No Fish Caught':
+      return 'Trap Post-Processing'
+    case 'Paper Entry':
+      return 'Trap Operations'
+    case 'Started Trapping':
+      navigation.navigate('Home')
+      break
+    default:
+      console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
+      navigation.navigate('Home')
+      break
+  }
+}
+
+export const navigateFlowLeftButton = (
+  activePage: string,
+  holdingForMarkRecap: boolean,
+  navigation: any
+) => {
+  console.log('left', activePage)
+  switch (activePage) {
+    case 'Trap Operations':
+      // if (isPaperEntryStore) navigateHelper('Paper Entry')
+      return 'Visit Setup'
+    case 'High Flows':
+      return 'Trap Operations'
+    case 'High Temperatures':
+      return 'Trap Operations'
+    case 'Non Functional Trap':
+      return 'Trap Operations'
+    case 'Fish Processing':
+      return 'Trap Operations'
+    case 'No Fish Caught':
+      return 'Fish Processing'
+    case 'Fish Input':
+      return 'Fish Processing'
+    case 'Paper Entry':
+      return 'Visit Setup'
+    case 'Started Trapping':
+      return 'Trap Operations'
+    case 'Trap Post-Processing':
+      return 'Fish Input'
+    case 'Fish Holding':
+      return 'Trap Post-Processing'
+    case 'Incomplete Sections':
+      if (holdingForMarkRecap) {
+        return 'Fish Holding'
+      } else {
+        return 'Trap Post-Processing'
+      }
+    default:
+      console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
+      navigation.navigate('Home')
+      break
+  }
 }
 
 export const getRandomColor = () => {
@@ -313,7 +444,7 @@ export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
   if (!sentence) return sentence // Check if the sentence is not empty
   return sentence
     .split(' ') // Split the sentence into words
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
     .join(' ') // Join the words back into a sentence
 }
 
