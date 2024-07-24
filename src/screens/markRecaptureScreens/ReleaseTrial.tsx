@@ -61,11 +61,12 @@ const ReleaseTrial = ({
     <Formik
       validationSchema={releaseTrialSchema}
       initialValues={releaseTrialStore.values}
+      validateOnMount={false}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       initialTouched={{
-        willSupplement: true,
-        wildCount: true,
-        deadWildCount: true,
+        willSupplement: false,
+        wildCount: false,
+        deadWildCount: false,
       }}
       onSubmit={values => {
         handleSubmit(values)
@@ -246,6 +247,26 @@ const ReleaseTrial = ({
                       {touched.runWeightHatchery &&
                         errors.runWeightHatchery &&
                         renderErrorMessage(errors, 'runWeightHatchery')}
+                    </FormControl>
+                    <FormControl>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Run Average Fork Length (provided by hatchery)
+                        </Text>
+                      </FormControl.Label>
+                      <Input
+                        w='1/2'
+                        height='50px'
+                        fontSize='16'
+                        placeholder='Numeric Value'
+                        keyboardType='numeric'
+                        onChangeText={handleChange('runForkLengthHatchery')}
+                        onBlur={handleBlur('runForkLengthHatchery')}
+                        value={values.runForkLengthHatchery}
+                      />
+                      {touched.runForkLengthHatchery &&
+                        errors.runForkLengthHatchery &&
+                        renderErrorMessage(errors, 'runForkLengthHatchery')}
                     </FormControl>
                     <FormControl w='1/2'>
                       <FormControl.Label>

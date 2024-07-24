@@ -32,8 +32,8 @@ const initialState: InitialStateI = {
   },
 }
 
-export const releaseTrialSlice = createSlice({
-  name: 'releaseTrial',
+export const markRecaptureCacheSlice = createSlice({
+  name: 'markRecaptureCache',
   initialState: initialState,
   reducers: {
     resetReleaseTrialSlice: () => initialState,
@@ -55,6 +55,6 @@ export const {
   saveReleaseTrial,
   saveTotalFishHolding,
   markReleaseTrialCompleted,
-} = releaseTrialSlice.actions
+} = markRecaptureCacheSlice.actions
 
-export default releaseTrialSlice.reducer
+export default markRecaptureCacheSlice.reducer

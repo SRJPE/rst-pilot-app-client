@@ -30,6 +30,8 @@ import PlusCountModalContent from '../../components/form/PlusCountModalContent'
 import { Ionicons } from '@expo/vector-icons'
 import { DeviceEventEmitter, useWindowDimensions } from 'react-native'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import { StackActions } from '@react-navigation/native'
+import { navigateHelper } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
@@ -99,24 +101,29 @@ const FishInput = ({
     console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
   }
 
-  const submissionLoader = () => {
-    if (activeTabId && activeTabId != 'placeholderId') {
-      const callback = () => {
-        navigation.navigate('Trap Visit Form', {
-          screen: navigationSlice.steps[navigationSlice.activeStep + 1]?.name,
-        })
-        dispatch(updateActiveStep(navigationSlice.activeStep + 1))
-      }
+  const submissionLoader = (direction: 'left' | 'right') => {
+    console.log('submissionLoader', activeTabId, activeTabId)
+    const destination =
+      direction === 'left' ? 'Fish Processing' : 'Trap Post-Processing'
 
-      navigation.push('Loading...')
-
-      setTimeout(() => {
-        DeviceEventEmitter.emit('event.load', {
-          process: () => handleSubmit(),
-          callback,
-        })
-      }, 1000)
+    const callback = () => {
+      navigateHelper(
+        destination,
+        navigationSlice,
+        navigation,
+        dispatch,
+        updateActiveStep
+      )
     }
+
+    navigation.dispatch(StackActions.replace('Loading...'))
+
+    setTimeout(() => {
+      DeviceEventEmitter.emit('event.load', {
+        process: () => handleSubmit(),
+        callback,
+      })
+    }, 1000)
   }
 
   return (
@@ -265,7 +272,9 @@ const FishInput = ({
       </ScrollView>
       <NavButtons
         navigation={navigation}
-        handleSubmit={submissionLoader}
+        handleSubmit={(buttonDirection: 'left' | 'right') => {
+          submissionLoader(buttonDirection)
+        }}
         shouldProceedToLoadingScreen={true}
         values={checkboxGroupValue}
       />

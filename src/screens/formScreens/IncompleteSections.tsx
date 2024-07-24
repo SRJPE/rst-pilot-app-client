@@ -36,6 +36,7 @@ import {
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { DeviceEventEmitter } from 'react-native'
 import { navigateHelper } from '../../utils/utils'
+import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -113,7 +114,7 @@ const IncompleteSections = ({
       setIsSubmitting(false) // Reset submitting state after navigation
     }
 
-    navigation.push('Loading...')
+    navigation.dispatch(StackActions.replace('Loading...'))
 
     setTimeout(() => {
       DeviceEventEmitter.emit('event.load', {
@@ -253,12 +254,9 @@ const IncompleteSections = ({
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
         isPaperEntry: visitSetupState[id].isPaperEntry,
-        trapVisitTimeStart: visitSetupState[id].isPaperEntry
-          ? paperEntryState[id].values.startDate
-          : trapPostProcessingState[id].values.trapVisitStartTime,
-        trapVisitTimeEnd: visitSetupState[id].isPaperEntry
-          ? paperEntryState[id].values.endDate
-          : trapOperationsState[id].values.trapVisitStopTime,
+        trapVisitTimeStart:
+          trapPostProcessingState[id].values.trapVisitStartTime,
+        trapVisitTimeEnd: trapOperationsState[id].values.trapVisitStopTime,
         fishProcessed: returnNullableTableId(
           fishProcessedValues.indexOf(
             fishProcessingState[id].values.fishProcessedResult
@@ -516,6 +514,7 @@ const IncompleteSections = ({
             qcTime: null,
             qcComments: null,
             existingMarks: fishValue.existingMarks.map((markObj: any) => {
+              //need to pick between body part and mark position, we go back and forth and its causing problems
               return {
                 releaseId:
                   markObj.releaseId !== undefined ? markObj.releaseId : null,
