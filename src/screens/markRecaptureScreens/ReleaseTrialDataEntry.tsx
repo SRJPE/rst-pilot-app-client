@@ -33,7 +33,7 @@ import {
   postMarkRecaptureSubmissions,
   saveMarkRecaptureSubmission,
 } from '../../redux/reducers/postSlices/markRecapturePostBundler'
-import { flatten, uniq, findIndex } from 'lodash'
+import { flatten, uniq, findIndex, find } from 'lodash'
 import { ReleaseMarkI } from '../../redux/reducers/addAnotherMarkSlice'
 import { returnDefinitionArray } from '../../utils/utils'
 
@@ -141,9 +141,13 @@ const ReleaseDataEntry = ({
   const bodyPartValues = returnDefinitionArray(dropdownValues.bodyPart)
   const releaseSiteValues = visitSetupDefaultsState.releaseSites.map(
     (releaseSiteObj: any) => {
-      return releaseSiteObj.releaseSiteName
+      return {
+        releaseSiteName: releaseSiteObj.releaseSiteName,
+        releaseSiteId: releaseSiteObj.id,
+      }
     }
   )
+
   const handlePressRecentReleaseMarkButton = (
     selectedRecentReleaseMark: any
   ) => {
@@ -203,9 +207,11 @@ const ReleaseDataEntry = ({
         programId:
           releaseTrialDataEntryState.programId || programIdOfReleaseLocation,
         // releasePurposeId: null, //left as null
-        releaseSiteId: returnNullableTableId(
-          releaseSiteValues.indexOf(formValues.releaseLocation)
-        ),
+        releaseSiteId:
+          find(releaseSiteValues, [
+            'releaseSiteName',
+            formValues.releaseLocation,
+          ]).releaseSiteId || null,
         releasedAt: releaseTime,
         markedAt: markedTime,
         marksArray: [
