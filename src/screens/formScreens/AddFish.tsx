@@ -402,7 +402,7 @@ const AddFishContent = ({
       plusCountMethod,
     ]
     let hasError = false
-    formValues.every((field) => {
+    formValues.every(field => {
       if (hasError) return false
       if (
         field.required &&
@@ -473,13 +473,11 @@ const AddFishContent = ({
     selectedRecentReleaseMark: ReleaseMarkI
   ) => {
     if (
-      recentExistingMarks.some(
-        (mark) => mark.id === selectedRecentReleaseMark.id
-      )
+      recentExistingMarks.some(mark => mark.id === selectedRecentReleaseMark.id)
     ) {
       setRecentExistingMarks(
         recentExistingMarks.filter(
-          (mark) => mark.id !== selectedRecentReleaseMark.id
+          mark => mark.id !== selectedRecentReleaseMark.id
         )
       )
     } else {
@@ -601,7 +599,7 @@ const AddFishContent = ({
                   </FormControl.Label>
                   <Popover
                     placement='bottom right'
-                    trigger={(triggerProps) => {
+                    trigger={triggerProps => {
                       return (
                         <IconButton
                           {...triggerProps}
@@ -699,9 +697,7 @@ const AddFishContent = ({
                           fontSize='16'
                           placeholder='Numeric Value'
                           keyboardType='numeric'
-                          onChangeText={(value) =>
-                            setCount({ ...count, value })
-                          }
+                          onChangeText={value => setCount({ ...count, value })}
                           // TODO - onBlur logic?
                           // onBlur={handleBlur('numFishCaught')}
                           value={`${count.value}`}
@@ -736,7 +732,7 @@ const AddFishContent = ({
                           fontSize='16'
                           placeholder='Numeric Value'
                           keyboardType='numeric'
-                          onChangeText={(value) => {
+                          onChangeText={value => {
                             let payload: FormValueI = {
                               ...forkLength,
                               value,
@@ -796,7 +792,7 @@ const AddFishContent = ({
                           fontSize='16'
                           placeholder='Numeric Value'
                           keyboardType='numeric'
-                          onChangeText={(value) => {
+                          onChangeText={value => {
                             let payload: FormValueI = {
                               ...weight,
                               value,
@@ -842,7 +838,7 @@ const AddFishContent = ({
 
                             <Popover
                               placement='bottom right'
-                              trigger={(triggerProps) => {
+                              trigger={triggerProps => {
                                 return (
                                   <IconButton
                                     {...triggerProps}
@@ -1080,7 +1076,7 @@ const AddFishContent = ({
                             </FormControl.Label>
                             <Popover
                               placement='top right'
-                              trigger={(triggerProps) => {
+                              trigger={triggerProps => {
                                 return (
                                   <IconButton
                                     {...triggerProps}
@@ -1160,7 +1156,7 @@ const AddFishContent = ({
                                       id,
                                       markType,
                                       markColor,
-                                      bodyPart,
+                                      markPosition,
                                     } = recentReleaseMark
                                     return (
                                       <Button
@@ -1194,7 +1190,7 @@ const AddFishContent = ({
                                           fontWeight='500'
                                           fontSize='md'
                                         >
-                                          {`${markType} - ${markColor} - ${bodyPart}`}
+                                          {`${markType} - ${markColor} - ${markPosition}`}
                                         </Text>
                                       </Button>
                                     )
