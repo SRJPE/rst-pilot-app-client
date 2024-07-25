@@ -59,7 +59,7 @@ import { uid } from 'uid'
 export interface ReleaseMarkI {
   id?: number
   releaseId?: number
-  bodyPart: number
+  markPosition: number
   markType: number
   markColor: number
 }
@@ -461,7 +461,7 @@ const AddFishContent = ({
         ...mark,
         markType: markTypeValues[mark.markType - 1],
         markColor: markColorValues[mark.markColor - 1],
-        bodyPart: bodyPartValues[mark.bodyPart - 1],
+        markPosition: bodyPartValues[mark.markPosition - 1],
       }
     })
   }
@@ -1108,8 +1108,12 @@ const AddFishContent = ({
                               decodedRecentReleaseMarks(
                                 dropdownValues.twoMostRecentReleaseMarks
                               ).map((recentReleaseMark: any, index: number) => {
-                                const { id, markType, markColor, bodyPart } =
-                                  recentReleaseMark
+                                const {
+                                  id,
+                                  markType,
+                                  markColor,
+                                  markPosition,
+                                } = recentReleaseMark
                                 return (
                                   <Button
                                     key={index}
@@ -1140,7 +1144,7 @@ const AddFishContent = ({
                                       fontWeight='500'
                                       fontSize='md'
                                     >
-                                      {`${markType} - ${markColor} - ${bodyPart}`}
+                                      {`${markType} - ${markColor} - ${markPosition}`}
                                     </Text>
                                   </Button>
                                 )
