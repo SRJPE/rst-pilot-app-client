@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { View, Text, VStack } from 'native-base'
+import { View, Text, VStack, ScrollView } from 'native-base'
 import React from 'react'
 import {
   VictoryAxis,
@@ -296,7 +296,7 @@ export default function Graph({
                       // },
                       {
                         target: 'data',
-                        mutation: props => {
+                        mutation: (props) => {
                           console.log('data.datum', data.datum)
                           console.log('props', props)
                           handlePointClick(data.datum)
@@ -405,7 +405,7 @@ export default function Graph({
             />
           }
           fixLabelOverlap={true}
-          tickFormat={value => {
+          tickFormat={(value) => {
             let date = new Date(Number(value))
             if (String(date) !== 'Invalid Date' && showDates) {
               return `${moment(date).format('MMM Do YY')}`
@@ -429,7 +429,7 @@ export default function Graph({
           dependentAxis
           // label='Number of fish with mark'
           // fixLabelOverlap={true}
-          tickFormat={value => {
+          tickFormat={(value) => {
             if (chartType === 'true-or-false') {
               if (value === 1) {
                 return 'False'
@@ -547,32 +547,32 @@ export default function Graph({
           <></>
         )}
       </VictoryChart>
-      {chartType === 'scatterplot' && legendData ? (
-        <View width={10} height={225}>
-          <VictoryLegend
-            x={55}
-            y={20}
-            // width={300}
-            standalone={true}
-            itemsPerRow={5}
-            title='Legend'
-            centerTitle
-            gutter={20}
-            style={{
-              border: { stroke: 'black' },
-              title: { fontSize: 20 },
-            }}
-            data={
-              legendData
-                ? legendData
-                : [
-                    { name: 'One', symbol: { type: 'star' } },
-                    { name: 'Two', symbol: { fill: 'orange' } },
-                    { name: 'Three', symbol: { fill: 'gold' } },
-                  ]
-            }
-          />
-        </View>
+      {legendData ? (
+          <ScrollView horizontal={true} maxW={'90%'}>
+            <VictoryLegend
+              x={85}
+              y={20}
+              // width={300}
+              standalone={true}
+              itemsPerRow={legendData.length > 10 ? 8 : 5}
+              title='Legend'
+              centerTitle
+              gutter={20}
+              style={{
+                border: { stroke: 'black' },
+                title: { fontSize: 20 },
+              }}
+              data={
+                legendData
+                  ? legendData
+                  : [
+                      { name: 'One', symbol: { type: 'star' } },
+                      { name: 'Two', symbol: { fill: 'orange' } },
+                      { name: 'Three', symbol: { fill: 'gold' } },
+                    ]
+              }
+            />
+          </ScrollView>
       ) : (
         <></>
       )}

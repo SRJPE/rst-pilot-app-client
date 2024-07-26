@@ -16,7 +16,10 @@ import Graph from '../../components/Shared/Graph'
 import { AppDispatch, RootState } from '../../redux/store'
 import { connect, useDispatch } from 'react-redux'
 import CustomModal from '../../components/Shared/CustomModal'
-import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import {
+  catchRawQCSubmission,
+  postQCSubmissions,
+} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { every } from 'lodash'
 import { DataTable } from 'react-native-paper'
 import { MaterialIcons } from '@expo/vector-icons'
@@ -104,14 +107,14 @@ function CatchCategoricalQC({
     'Adipose Clipped': { xLabel: 'Date', yLabel: undefined },
     Species: { xLabel: 'Date', yLabel: 'Count' },
     Marks: { xLabel: 'Date', yLabel: 'Count' },
-    Mortalities: { xLabel: 'Date', yLabel: 'Count' },
+    Mortalities: { xLabel: 'Date', yLabel: undefined },
   }
 
   const buttonNameToChartType = {
     'Adipose Clipped': 'true-or-false',
     Species: 'scatterplot',
     Marks: 'scatterplot',
-    Mortalities: 'bar',
+    Mortalities: 'true-or-false',
   }
 
   const identifierToName = {
@@ -285,35 +288,14 @@ function CatchCategoricalQC({
           })
         }
 
-        if (dead) {
-          let speciesAlreadyExistsIdx = null
-          let speciesAlreadyExists = deadData.filter(
-            (dataObj: any, idx: number) => {
-              if (dataObj.x === species) {
-                speciesAlreadyExistsIdx = idx
-                return dataObj.x === species
-              }
-            }
-          )[0]
-
-          if (speciesAlreadyExists && speciesAlreadyExistsIdx) {
-            deadData.splice(1, speciesAlreadyExistsIdx)
-            deadData.push({
-              ids: [id],
-              dataId: 'Mortalities',
-              x: species,
-              y: speciesAlreadyExists.y + numFishCaught,
-              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
-            })
-          } else {
-            deadData.push({
-              ids: [id],
-              dataId: 'Mortalities',
-              x: species,
-              y: numFishCaught,
-              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
-            })
-          }
+        if (dead != null) {
+          deadData.push({
+            ids: [id],
+            dataId: 'Mortalities',
+            x: dateTime,
+            y: dead ? 2 : 1,
+            colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
+          })
         }
       }
     })
@@ -324,22 +306,34 @@ function CatchCategoricalQC({
     Object.entries(markCombos).forEach(([dateTime, countObj], index) => {
       Object.entries(countObj as MarkCombosI).forEach(
         ([markIdentifier, itemsArray]) => {
-          let randomColor = getRandomColor()
-          markIdToColorBuilder.push({
-            name: markIdentifier,
-          })
+          if (
+            every(markIdToColorBuilder, (obj) => {
+              return obj.name !== markIdentifier
+            })
+          ) {
+            let randomColor = getRandomColor()
+            markIdToColorBuilder.push({
+              name: markIdentifier,
+              symbol: { fill: randomColor },
+            })
+          }
+
+          let dotColor = markIdToColorBuilder.filter((obj: any) => {
+            return obj.name === markIdentifier
+          })[0].symbol.fill
 
           marksData.push({
             id: `${markIdentifier}_${dateTime}`,
             x: dateTime,
             y: itemsArray.length,
-            colorScale: randomColor,
+            colorScale: dotColor,
             itemsArray: itemsArray,
           })
           symbolCounter++
         }
       )
     })
+
     setMarkIdToSymbolArr(markIdToColorBuilder)
 
     Object.keys(fishCountByDateAndSpecies).forEach((date) => {
@@ -601,7 +595,7 @@ function CatchCategoricalQC({
               setFieldTouched={() => console.log('run field touched')}
               selectOptions={runState.map((run: any) => ({
                 label: run?.definition,
-                value: run?.definition,
+                value: run?.id,
               }))}
             />
           </VStack>
@@ -619,7 +613,7 @@ function CatchCategoricalQC({
               setFieldTouched={() => console.log('lifestage field touched')}
               selectOptions={lifeStageState.map((lifeStage: any) => ({
                 label: lifeStage?.definition,
-                value: lifeStage?.definition,
+                value: lifeStage?.id,
               }))}
             />
           </VStack>
@@ -655,7 +649,7 @@ function CatchCategoricalQC({
               setFieldTouched={() => console.log('marktype field touched')}
               selectOptions={markTypeState.map((markType: any) => ({
                 label: markType?.definition,
-                value: markType?.definition,
+                value: markType?.id,
               }))}
             />
           </VStack>
@@ -673,7 +667,7 @@ function CatchCategoricalQC({
               setFieldTouched={() => console.log('markcolor field touched')}
               selectOptions={markColorState.map((markColor: any) => ({
                 label: markColor?.definition,
-                value: markColor?.definition,
+                value: markColor?.id,
               }))}
             />
           </VStack>
@@ -691,7 +685,7 @@ function CatchCategoricalQC({
               setFieldTouched={() => console.log('markposition field touched')}
               selectOptions={markPositionState.map((markPosition: any) => ({
                 label: markPosition?.definition,
-                value: markPosition?.definition,
+                value: markPosition?.id,
               }))}
             />
           </VStack>
@@ -845,7 +839,7 @@ function CatchCategoricalQC({
               shadow='5'
               bg='primary'
               onPress={() => {
-                console.log('approve')
+                dispatch(postQCSubmissions())
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
@@ -1092,8 +1086,12 @@ function CatchCategoricalQC({
                         <Text>Mark Type</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
-                        let markTypeId =
-                          data?.createdExistingMarksResponse[0].markTypeId
+                        let createdExistingMarksResponse =
+                          data.createdExistingMarksResponse
+
+                        let markTypeId = createdExistingMarksResponse
+                          ? createdExistingMarksResponse[0].markTypeId
+                          : null
 
                         let markType = markTypeState.filter((obj: any) => {
                           return obj.id === markTypeId
@@ -1117,7 +1115,8 @@ function CatchCategoricalQC({
                                 ? `${truncateAndTrimString(
                                     capitalizeFirstLetterOfEachWord(
                                       markType[0]?.definition
-                                    ), 12
+                                    ),
+                                    12
                                   )}...`
                                 : 'NA'}
                             </Text>
@@ -1370,16 +1369,17 @@ function CatchCategoricalQC({
                             return crewObj.personnelId
                           })
                         }
-                        
-                        
+
                         let selectedCrew: any = []
 
                         if (crew.length > 0) {
-                          visitSetupDefaults.crewMembers.forEach((arr: any[]) => {
-                            selectedCrew = arr.filter((crewMember: any) => {
-                              return crew.includes(crewMember.personnelId)
-                            })
-                          })
+                          visitSetupDefaults.crewMembers.forEach(
+                            (arr: any[]) => {
+                              selectedCrew = arr.filter((crewMember: any) => {
+                                return crew.includes(crewMember.personnelId)
+                              })
+                            }
+                          )
                         }
 
                         return (

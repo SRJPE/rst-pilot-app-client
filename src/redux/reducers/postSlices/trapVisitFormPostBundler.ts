@@ -250,8 +250,8 @@ export const postQCSubmissions = createAsyncThunk(
 
       const trapPromises = qcTrapVisitSubmissions.map((trapSubmission: any) => {
         let id = trapSubmission.createdTrapVisitResponse.id
-        let payload = { ...trapSubmission.createdTrapVisitResponse }
-        delete payload.id
+        let payload = {...trapSubmission}
+        delete payload.createdTrapVisitResponse.id
         console.log('trap payload', payload)
 
         return api.put(`trap-visit/${id}`, {
@@ -593,6 +593,8 @@ export const trapVisitPostBundler = createSlice({
       let catchHasStartedQC = false
       let qcCatchRawIdx = -1
 
+      console.log('hit catchRawQCSubmission: ', catchRawId, submissions)
+
       state.qcCatchRawSubmissions.forEach((catchRaw: any, idx: number) => {
         if (catchRaw.createdCatchRawResponse.id === catchRawId) {
           catchHasStartedQC = true
@@ -657,16 +659,13 @@ export const trapVisitPostBundler = createSlice({
                 submission.value
               )
               break
-
-            // add these headers: 'Release Date', 'Number Released', 'Number Recaptured'
+            case 'Release Site':
+              catchRawToQC.releaseResponse.releaseSiteId = submission.value
+              break
             case 'Release Date':
               catchRawToQC.createdCatchRawResponse.releaseDate =
                 submission.value
               break
-
-            // case 'Number Released':
-            //   catchRawToQC.createdCatchRawResponse.numReleased = Number(submission.value)
-            //   break
 
             case 'Number Recaptured':
               catchRawToQC.createdCatchRawResponse.numFishCaught = Number(

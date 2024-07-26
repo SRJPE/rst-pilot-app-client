@@ -28,7 +28,10 @@ import {
   reorderTaxon,
   truncateAndTrimString,
 } from '../../utils/utils'
-import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import {
+  catchRawQCSubmission,
+  postQCSubmissions,
+} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
 interface NestedModalFieldDataI {
   catchRawId: number
@@ -82,6 +85,7 @@ function PartialRecordsQC({
     adiposeClipped: 'Adipose Clipped',
     weight: 'Weight',
     numFishCaught: 'Plus Count',
+    releaseSite: 'Release Site',
     qcComments: 'Comments',
   }
 
@@ -120,11 +124,11 @@ function PartialRecordsQC({
       'plusCountMethodology',
     ]
 
-    qcData.forEach(catchResponse => {
+    qcData.forEach((catchResponse) => {
       const catchRaw = catchResponse.createdCatchRawResponse
       const catchRawKeys = Object.keys(catchRaw)
 
-      catchRawKeys.forEach(key => {
+      catchRawKeys.forEach((key) => {
         if (!omittedPartialRecordKeys.includes(key)) {
           if (
             Object.keys(formattedData).includes(key) &&
@@ -146,7 +150,7 @@ function PartialRecordsQC({
       })
     })
 
-    Object.keys(formattedData).forEach(key => {
+    Object.keys(formattedData).forEach((key) => {
       let dynamicKey = key
       if (key === 'taxonCode') dynamicKey = 'species'
       percentNotRecordedPayload.push({
@@ -160,7 +164,7 @@ function PartialRecordsQC({
 
     setQCData(qcData)
     setPercentNotRecorded(percentNotRecordedPayload)
-  }, [qcCatchRawSubmissions])
+  }, [qcCatchRawSubmissions, qcCatchRawSubmissions.length])
 
   const handleVariableClick = (variableName: string) => {
     let rowsNotRecorded = qcData.filter(({ createdCatchRawResponse }) => {
@@ -272,7 +276,7 @@ function PartialRecordsQC({
               setFieldTouched={() => console.log('run field touched')}
               selectOptions={runDropdowns.map((run: any) => ({
                 label: run?.definition,
-                value: run?.definition,
+                value: run?.id,
               }))}
             />
           </VStack>
@@ -287,7 +291,7 @@ function PartialRecordsQC({
               fontSize='16'
               placeholder='fork length...'
               keyboardType='numeric'
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setNestedModalInputValue(value)
               }}
               // onBlur={handleBlur('comments')}
@@ -306,7 +310,7 @@ function PartialRecordsQC({
               setFieldTouched={() => console.log('lifestage field touched')}
               selectOptions={lifeStageDropdowns.map((lifeStage: any) => ({
                 label: lifeStage?.definition,
-                value: lifeStage?.definition,
+                value: lifeStage?.id,
               }))}
             />
           </VStack>
@@ -356,7 +360,7 @@ function PartialRecordsQC({
               fontSize='16'
               placeholder='fish count...'
               keyboardType='numeric'
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setNestedModalInputValue(value)
               }}
               // onBlur={handleBlur('comments')}
@@ -374,7 +378,7 @@ function PartialRecordsQC({
               fontSize='16'
               placeholder='stream...'
               keyboardType='default'
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setNestedModalInputValue(value)
               }}
               // onBlur={handleBlur('comments')}
@@ -393,7 +397,7 @@ function PartialRecordsQC({
               setFieldTouched={() => console.log('release site field touched')}
               selectOptions={releaseSites.map((site: any) => ({
                 label: site?.releaseSiteName,
-                value: site?.releaseSiteName,
+                value: site?.id,
               }))}
             />
           </VStack>
@@ -426,11 +430,11 @@ function PartialRecordsQC({
             <DataTable.Header>
               <DataTable.Title>Variable</DataTable.Title>
               <DataTable.Title numeric>Percent Not Recorded</DataTable.Title>
-              <DataTable.Title numeric>Comments</DataTable.Title>
+              {/* <DataTable.Title numeric>Comments</DataTable.Title> */}
             </DataTable.Header>
 
             <ScrollView>
-              {percentNotRecordedData.map(rowData => {
+              {percentNotRecordedData.map((rowData) => {
                 return (
                   <DataTable.Row
                     key={rowData.variableName}
@@ -449,9 +453,9 @@ function PartialRecordsQC({
                     <DataTable.Cell
                       numeric
                     >{`${rowData.percentNotRecorded}%`}</DataTable.Cell>
-                    <DataTable.Cell numeric>
+                    {/* <DataTable.Cell numeric>
                       <AddCommentButton name={rowData.variableName} />
-                    </DataTable.Cell>
+                    </DataTable.Cell> */}
                   </DataTable.Row>
                 )
               })}
@@ -482,7 +486,7 @@ function PartialRecordsQC({
               shadow='5'
               bg='primary'
               onPress={() => {
-                console.log('approve')
+                dispatch(postQCSubmissions())
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
@@ -579,12 +583,15 @@ function PartialRecordsQC({
                           ).toLocaleDateString()
                         : 'NA'
                       const taxon = taxonDropdowns.filter(
-                        taxon =>
+                        (taxon) =>
                           createdCatchRawResponse.taxonCode === taxon.code
                       )
-                      const species = taxon ? taxon[0].commonname : 'NA'
-                      const captureRunClass =
-                        createdCatchRawResponse.captureRunClass ?? 'NA'
+                      const species = taxon.length ? taxon[0]?.commonname : 'NA'
+                      const captureRunClass = runDropdowns.filter(
+                        (run) =>
+                          createdCatchRawResponse.captureRunClass === run.id
+                      )
+                      const run = captureRunClass.length ? captureRunClass[0].definition : 'NA'
                       const forkLength =
                         createdCatchRawResponse.forkLength ?? 'NA'
                       const lifestage =
@@ -593,15 +600,19 @@ function PartialRecordsQC({
                       const numFishCaught =
                         createdCatchRawResponse.numFishCaught ?? 'NA'
                       const program = programs.filter(
-                        program => programId === program.id
+                        (program) => programId === program.id
                       )
-                      const stream = program ? program[0].streamName : 'NA'
-                      let releaseSiteArr = releaseSites.filter(releaseSite => {
-                        if (releaseResponse)
-                          return (
-                            releaseSite.id === releaseResponse.releaseSiteId
-                          )
-                      })
+                      const stream = program.length
+                        ? program[0].streamName
+                        : 'NA'
+                      let releaseSiteArr = releaseSites.filter(
+                        (releaseSite) => {
+                          if (releaseResponse)
+                            return (
+                              releaseSite.id === releaseResponse.releaseSiteId
+                            )
+                        }
+                      )
                       const releaseSite = releaseSiteArr.length
                         ? releaseSiteArr[0].releaseSiteName
                         : 'NA'
@@ -686,7 +697,7 @@ function PartialRecordsQC({
                               handleOpenNestedModal({
                                 catchRawId,
                                 fieldName: 'captureRunClass',
-                                fieldValue: captureRunClass,
+                                fieldValue: captureRunClass.length ? captureRunClass[0].id : 'NA',
                                 modalHeader: 'Run Editor',
                                 modalText: (
                                   <Text
@@ -697,7 +708,7 @@ function PartialRecordsQC({
                                   >
                                     You have the run marked as{' '}
                                     <Text fontWeight={'bold'}>
-                                      {captureRunClass}
+                                      {run}
                                     </Text>{' '}
                                   </Text>
                                 ),
@@ -706,7 +717,7 @@ function PartialRecordsQC({
                             numeric
                           >
                             {truncateAndTrimString(
-                              capitalizeFirstLetterOfEachWord(captureRunClass),
+                              capitalizeFirstLetterOfEachWord(run),
                               10
                             )}
                           </DataTable.Cell>
@@ -836,10 +847,6 @@ function PartialRecordsQC({
                                     You collected{' '}
                                     <Text fontWeight={'bold'}>
                                       {numFishCaught}
-                                    </Text>{' '}
-                                    fish and{' '}
-                                    <Text fontWeight={'bold'}>
-                                      30000 plus count
                                     </Text>{' '}
                                     fish.
                                   </Text>
@@ -1003,7 +1010,7 @@ function PartialRecordsQC({
                   placeholder='Write a comment'
                   keyboardType='default'
                   // onBlur={handleBlur('comments')}
-                  onChangeText={value => {
+                  onChangeText={(value) => {
                     setNestedModalCommentValue(value)
                   }}
                   value={nestedModalCommentValue}

@@ -6,16 +6,25 @@ import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModal from '../../components/Shared/CustomModal'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
-import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import {
+  catchRawQCSubmission,
+  postQCSubmissions,
+} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 import {
   kernelDensityEstimation,
   handleQCChartButtonClick,
+  getRandomColor,
 } from '../../utils/utils'
-import DateSlider from '../../components/Shared/DateSlider'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
 interface GraphDataI {
   'Fork Length': any[]
   Weight: any[]
+}
+
+interface DateRangeI {
+  startDate: Date
+  endDate: Date
 }
 
 const allButtons = ['Fork Length', 'Weight']
@@ -25,11 +34,13 @@ function CatchMeasureQC({
   route,
   qcCatchRawSubmissions,
   previousCatchRawSubmissions,
+  lifeStageState,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any[]
   previousCatchRawSubmissions: any[]
+  lifeStageState: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -45,7 +56,11 @@ function CatchMeasureQC({
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRangeI>({
+    startDate: new Date('2023-01-01'),
+    endDate: new Date(),
+  })
+  const [legendData, setLegendData] = useState<any>({})
 
   const axisLabelDictionary = {
     'Fork Length': { xLabel: 'Fork Length (mm)', yLabel: 'Density' },
@@ -58,26 +73,40 @@ function CatchMeasureQC({
       return catchRaw.createdCatchRawResponse.programId === programId
     })
     let qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
-    
-    if (selectedDate != null) {
-      qcData = qcData.filter((data) => {
-        let createdAt = new Date(data.createdCatchRawResponse.createdAt)
-        return createdAt >= selectedDate
-      })
-    }
+
+    qcData = qcData.filter((data) => {
+      let createdAt = new Date(data.createdCatchRawResponse.createdAt)
+      return (
+        createdAt >= selectedDateRange.startDate &&
+        createdAt <= selectedDateRange.endDate
+      )
+    })
 
     // Fork Length Density Calculations -----------------------------
 
     let forkRange: number | null = null
     let forkStartPoint: number | null = null
     let forkGraphSubData: any[] = []
+    const lifeStageMap: any = {}
 
     // array of all fork lengths within the qc dataset
     const forkLengthArray: any[] = qcData
       .map((catchRawResponse) => {
         const forkValue = Number(
-          catchRawResponse.createdCatchRawResponse.forkLength
+          catchRawResponse.createdCatchRawResponse?.forkLength
         )
+        const lifeStageId = catchRawResponse.createdCatchRawResponse?.lifeStage
+        let lifeStageDefinition = null
+        if (lifeStageId) {
+          lifeStageDefinition = lifeStageState.find(
+            (stage: any) => stage.id === lifeStageId
+          ).definition
+
+          if (lifeStageDefinition && !lifeStageMap[lifeStageDefinition]) {
+            let randomColor = getRandomColor()
+            lifeStageMap[lifeStageDefinition] = randomColor
+          }
+        }
 
         if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
           forkGraphSubData.push({
@@ -85,6 +114,9 @@ function CatchMeasureQC({
             id: catchRawResponse.createdCatchRawResponse.id,
             x: forkValue,
             y: 0,
+            colorScale: lifeStageDefinition
+              ? lifeStageMap[lifeStageDefinition]
+              : 'grey',
           })
         }
         return forkValue
@@ -128,6 +160,18 @@ function CatchMeasureQC({
         const weightValue = Number(
           catchRawResponse.createdCatchRawResponse.weight
         )
+        const lifeStageId = catchRawResponse.createdCatchRawResponse?.lifeStage
+        let lifeStageDefinition = null
+        if (lifeStageId) {
+          lifeStageDefinition = lifeStageState.find(
+            (stage: any) => stage.id === lifeStageId
+          ).definition
+
+          if (lifeStageDefinition && !lifeStageMap[lifeStageDefinition]) {
+            let randomColor = getRandomColor()
+            lifeStageMap[lifeStageDefinition] = randomColor
+          }
+        }
 
         if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
           weightGraphSubData.push({
@@ -135,6 +179,9 @@ function CatchMeasureQC({
             id: catchRawResponse.createdCatchRawResponse.id,
             x: weightValue,
             y: 0,
+            colorScale: lifeStageDefinition
+              ? lifeStageMap[lifeStageDefinition]
+              : 'grey',
           })
         }
         return weightValue
@@ -166,7 +213,18 @@ function CatchMeasureQC({
       )
     }
 
-    // Weight Density Calculations -----------------------------
+    let legendData: any[] = []
+
+    Object.keys(lifeStageMap).forEach(
+      (key: any) =>
+        (legendData = [
+          ...legendData,
+          { name: key, symbol: { fill: lifeStageMap[key] } },
+        ])
+    )
+
+    setLegendData(legendData)
+    console.log('weightGraphSubData', weightGraphSubData)
 
     setGraphData({
       'Fork Length': kdeForkValues,
@@ -177,7 +235,7 @@ function CatchMeasureQC({
       'Fork Length': forkGraphSubData,
       Weight: weightGraphSubData,
     })
-  }, [qcCatchRawSubmissions, selectedDate])
+  }, [qcCatchRawSubmissions, selectedDateRange])
 
   const GraphMenuButton = ({
     buttonName,
@@ -215,7 +273,6 @@ function CatchMeasureQC({
   }
 
   const handlePointClicked = (datum: any) => {
-    console.log('point clicked: ', datum)
     setPointClicked(datum)
     setIsModalOpen(true)
   }
@@ -236,9 +293,6 @@ function CatchMeasureQC({
         dispatch(catchRawQCSubmission({ catchRawId, submissions }))
     }
   }
-
-  // console.log('pointClicked', pointClicked)
-  // console.log('graphData', graphSubData)
 
   return (
     <>
@@ -266,14 +320,41 @@ function CatchMeasureQC({
             <GraphMenuButton buttonName={'Weight'} />
             <View flex={2}></View>
 
-            <DateSlider
-              minDate={new Date('2023-01-01')}
-              maxDate={new Date()}
-              onDateChange={(value: any) => {
-                setSelectedDate(new Date(value))
-                console.log('hit: ', value)
-              }}
-            />
+            <View>
+              <Text fontSize='xl' color='black' textAlign={'center'}>
+                Start Date
+              </Text>
+              <DateTimePicker
+                value={selectedDateRange.startDate}
+                mode='date'
+                onChange={(event, selectedDate) => {
+                  if (selectedDate) {
+                    setSelectedDateRange({
+                      ...selectedDateRange,
+                      startDate: selectedDate,
+                    })
+                  }
+                }}
+                accentColor='#007C7C'
+              />
+            </View>
+            <View>
+              <Text fontSize='xl' color='black' textAlign={'center'}>
+                End Date
+              </Text>
+              <DateTimePicker
+                value={selectedDateRange.endDate}
+                mode='date'
+                onChange={(event, selectedDate) => {
+                  if (selectedDate)
+                    setSelectedDateRange({
+                      ...selectedDateRange,
+                      endDate: selectedDate,
+                    })
+                }}
+                accentColor='#007C7C'
+              />
+            </View>
           </HStack>
 
           <ScrollView>
@@ -292,6 +373,7 @@ function CatchMeasureQC({
                   selectedBarColor='green'
                   height={400}
                   width={600}
+                  legendData={legendData.length ? legendData : undefined}
                 />
               )
             })}
@@ -321,7 +403,7 @@ function CatchMeasureQC({
               shadow='5'
               bg='primary'
               onPress={() => {
-                console.log('approve')
+                dispatch(postQCSubmissions())
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
@@ -354,10 +436,13 @@ function CatchMeasureQC({
 }
 
 const mapStateToProps = (state: RootState) => {
+  const lifeStage = state.dropdowns?.values?.lifeStage
+
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
     previousCatchRawSubmissions:
       state.trapVisitFormPostBundler.previousCatchRawSubmissions,
+    lifeStageState: lifeStage ?? [],
   }
 }
 

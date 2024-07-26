@@ -39,7 +39,6 @@ const GraphModalContent = ({
   const [payload, setPayload] = useState<any>({})
 
   const handleSubmit = () => {
-    console.log('graph modal content payload', payload)
     onSubmit(payload)
     closeModal()
   }
@@ -74,7 +73,7 @@ const GraphModalContent = ({
 
   useEffect(() => {
     let modalDataAtPointClicked: any = {}
-    Object.keys(modalData).forEach(header => {
+    Object.keys(modalData).forEach((header) => {
       let dataAtId = modalData[header].filter((obj: any) => {
         return obj.id == pointClicked.id
       })[0]
@@ -139,7 +138,7 @@ const GraphModalContent = ({
                       { justifyContent: 'space-evenly', flexWrap: 'wrap' },
                     ]}
                   >
-                    {header}
+                    <Text>{header}</Text>
                   </DataTable.Title>
                 ))}
               </DataTable.Header>
@@ -164,7 +163,7 @@ const GraphModalContent = ({
                           textAlign={'center'}
                           fontSize='16'
                           keyboardType='numeric'
-                          onChangeText={value => {
+                          onChangeText={(value) => {
                             if (
                               value != payload[header].y ||
                               value != payload[header].x

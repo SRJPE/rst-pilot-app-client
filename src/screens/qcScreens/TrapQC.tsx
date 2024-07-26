@@ -16,7 +16,7 @@ import CustomModal from '../../components/Shared/CustomModal'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { trapVisitQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { postQCSubmissions, trapVisitQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { handleQCChartButtonClick, normalizeDate } from '../../utils/utils'
 
 interface GraphDataI {
@@ -107,7 +107,6 @@ function TrapQC({
 
         const trapVisitId = createdTrapVisitResponse.id
         const qcCompleted = createdTrapVisitResponse.qcCompleted
-        const qcNotStarted = qcCompleted ? false : true
         const createdAt = new Date(createdTrapVisitResponse.createdAt)
         const normalizedDate = normalizeDate(createdAt)
 
@@ -123,7 +122,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(temp.measureValueNumeric),
-              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
             })
           }
 
@@ -138,7 +137,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(turbidity.measureValueNumeric),
-              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
             })
           }
 
@@ -147,7 +146,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(response.createdTrapVisitResponse.rpmAtStart),
-              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
             }
 
             rpmAtStartData.push(rpmAtStart)
@@ -158,7 +157,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(createdTrapVisitResponse.rpmAtEnd),
-              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
             }
             rpmAtEndData.push(rpmAtEnd)
           }
@@ -168,7 +167,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.totalRevolutions,
-              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
             }
             counterData.push(counter)
           }
@@ -178,7 +177,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.debrisVolumeLiters,
-              colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
             }
             debrisData.push(debris)
           }
@@ -250,8 +249,6 @@ function TrapQC({
       dispatch(trapVisitQCSubmission({ trapVisitId, submission }))
     }
   }
-
-  console.log('modal data', pointClicked)
 
   return (
     <>
@@ -329,7 +326,7 @@ function TrapQC({
               shadow='5'
               bg='primary'
               onPress={() => {
-                console.log('approve')
+                dispatch(postQCSubmissions())
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
