@@ -10,6 +10,7 @@ export default function FishConditionsDropDown({
   setFieldValue,
   setFieldTouched,
   onChangeValue,
+  editModeValue,
 }: {
   open: boolean
   onOpen?: any
@@ -19,8 +20,9 @@ export default function FishConditionsDropDown({
   setFieldValue?: any
   setFieldTouched?: any
   onChangeValue?: any
+  editModeValue?: string[]
 }) {
-  const [value, setValue] = useState([] as string[])
+  const [value, setValue] = useState((editModeValue || []) as string[])
 
   useEffect(() => {
     if (setFieldTouched && setFieldValue) {
@@ -28,6 +30,8 @@ export default function FishConditionsDropDown({
         setFieldTouched('fishConditions', true)
       }
       setFieldValue('fishConditions', value)
+    } else if (editModeValue) {
+      onChangeValue(editModeValue) //dev
     } else {
       onChangeValue(value)
     }

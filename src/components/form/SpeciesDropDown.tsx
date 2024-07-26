@@ -10,6 +10,7 @@ export default function SpeciesDropDown({
   setFieldValue,
   setFieldTouched,
   onChangeValue,
+  editModeValue,
 }: {
   open: boolean
   onOpen?: any
@@ -19,10 +20,21 @@ export default function SpeciesDropDown({
   setFieldValue?: any
   setFieldTouched?: any
   onChangeValue?: any
+  editModeValue?: string
 }) {
-  const [value, setValue] = useState('' as string)
+  console.log('🚀 ~ editModeValue:', editModeValue)
+  const [value, setValue] = useState(editModeValue || ('' as string))
+
+  const handleOnChange = useCallback(
+    //dev
+    (itemValue: any) => {
+      onChangeValue(itemValue)
+    },
+    [list]
+  )
 
   useEffect(() => {
+    console.log('🚀 ~ value:', value)
     if (setFieldTouched && setFieldValue) {
       if (value !== '') {
         setFieldTouched('species', true)
@@ -41,12 +53,14 @@ export default function SpeciesDropDown({
       items={list}
       setOpen={setOpen}
       onClose={() => (setFieldTouched ? setFieldTouched() : null)}
+      // onChangeValue={handleOnChange}
       setValue={setValue}
       searchable={true}
       setItems={setList}
       multiple={false}
       placeholder='Select your species'
       searchPlaceholder='Search...'
+      listMode='SCROLLVIEW'
       maxHeight={180}
       closeAfterSelecting={true}
       style={{
