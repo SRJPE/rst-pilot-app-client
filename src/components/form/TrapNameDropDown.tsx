@@ -75,6 +75,7 @@ export default function TrapNameDropDown({
       setItems={setList}
       multiple={true}
       mode='BADGE'
+      listMode='SCROLLVIEW'
       badgeDotColors={['#007C7C']}
       placeholder='Select trap names'
       searchPlaceholder='Search...'
