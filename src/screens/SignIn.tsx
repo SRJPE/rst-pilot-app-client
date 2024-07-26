@@ -99,13 +99,22 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
           },
           discoveryObj
         ).then(async res => {
-          const { accessToken, refreshToken, idToken } = res
+          const { accessToken, refreshToken, idToken, scope } = res
           const userRes = await api.get('user/current', {
-            headers: { idToken: idToken as string },
+            headers: {
+              idToken: idToken as string,
+              ['Authorization']: `Bearer ${accessToken}`,
+            },
           })
 
           const personnelResponse = await api.get(
-            `personnel/azure/${userRes.data.azureUid}`
+            `personnel/azure/${userRes.data.azureUid}`,
+            {
+              headers: {
+                idToken: idToken as string,
+                ['Authorization']: `Bearer ${accessToken}`,
+              },
+            }
           )
 
           dispatch(getVisitSetupDefaults(personnelResponse.data.id))
