@@ -88,53 +88,62 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
   ) =>
     promptAsyncFn().then((codeResponse: AuthSessionResult) => {
       if (requestObj && codeResponse?.type === 'success' && discoveryObj) {
-        exchangeCodeAsync(
-          {
-            clientId,
-            code: codeResponse.params.code,
-            extraParams: requestObj.codeVerifier
-              ? { code_verifier: requestObj.codeVerifier }
-              : undefined,
-            redirectUri,
-          },
-          discoveryObj
-        ).then(async res => {
-          const { accessToken, refreshToken, idToken, scope } = res
-          const userRes = await api.get('user/current', {
-            headers: {
-              idToken: idToken as string,
-              ['Authorization']: `Bearer ${accessToken}`,
-            },
-          })
-
-          const personnelResponse = await api.get(
-            `personnel/azure/${userRes.data.azureUid}`,
+        try {
+          exchangeCodeAsync(
             {
-              headers: {
-                idToken: idToken as string,
-                ['Authorization']: `Bearer ${accessToken}`,
-              },
+              clientId,
+              code: codeResponse.params.code,
+              extraParams: requestObj.codeVerifier
+                ? { code_verifier: requestObj.codeVerifier }
+                : undefined,
+              redirectUri,
+            },
+            discoveryObj
+          ).then(async res => {
+            try {
+              const { accessToken, refreshToken, idToken, scope } = res
+
+              await SecureStore.setItemAsync('userAccessToken', accessToken)
+
+              await SecureStore.setItemAsync(
+                'userRefreshToken',
+                refreshToken as string
+              )
+              await SecureStore.setItemAsync('userIdToken', idToken as string)
+
+              const userRes = await api.get('user/current', {
+                headers: {
+                  idToken: idToken as string,
+                  ['Authorization']: `Bearer ${accessToken}`,
+                },
+              })
+
+              const personnelResponse = await api.get(
+                `personnel/azure/${userRes.data.azureUid}`,
+                {
+                  headers: {
+                    idToken: idToken as string,
+                    ['Authorization']: `Bearer ${accessToken}`,
+                  },
+                }
+              )
+
+              // dispatch(getVisitSetupDefaults(personnelResponse.data.id))
+
+              dispatch(
+                saveUserCredentials({
+                  ...userCredentialsStore,
+                  ...userRes.data,
+                  ...personnelResponse.data,
+                })
+              )
+            } catch (error: any) {
+              console.log('error', error?.response.data.message)
             }
-          )
-
-          dispatch(getVisitSetupDefaults(personnelResponse.data.id))
-
-          await SecureStore.setItemAsync('userAccessToken', accessToken)
-
-          await SecureStore.setItemAsync(
-            'userRefreshToken',
-            refreshToken as string
-          )
-          await SecureStore.setItemAsync('userIdToken', idToken as string)
-
-          dispatch(
-            saveUserCredentials({
-              ...userCredentialsStore,
-              ...userRes.data,
-              ...personnelResponse.data,
-            })
-          )
-        })
+          })
+        } catch (error) {
+          console.error('Error exchanging code:', error)
+        }
       }
     })
 
