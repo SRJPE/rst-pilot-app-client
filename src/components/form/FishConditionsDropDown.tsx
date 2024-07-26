@@ -47,10 +47,13 @@ export default function FishConditionsDropDown({
       min={0}
       max={3}
       mode='BADGE'
+      listMode='SCROLLVIEW'
       badgeDotColors={['#007C7C']}
       placeholder='Select up to three fish conditions'
       searchPlaceholder='Search...'
       maxHeight={175}
+      // zIndex={5000}
+      // zIndexInverse={1000}
       style={{
         marginTop: 4,
         borderColor: '#d4d4d4d4',
@@ -64,9 +67,11 @@ export default function FishConditionsDropDown({
       }}
       dropDownContainerStyle={{
         backgroundColor: '#fafafa',
+        // backgroundColor: 'red',
         borderColor: '#d4d4d4d4',
         borderBottomLeftRadius: 4,
         borderBottomRightRadius: 4,
+        // zIndex: 5000,
       }}
       textStyle={{
         fontSize: 16,
