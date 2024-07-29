@@ -34,6 +34,7 @@ import efficiencyTrialProtocolsSlice from './createNewProgramSlices/efficiencyTr
 import permitInformationSlice from './createNewProgramSlices/permitInformationSlice'
 import multipleTrapsSlice from './createNewProgramSlices/multipleTrapsSlice'
 import monitoringProgramPostBundler from './postSlices/monitoringProgramPostBundler'
+import markRecaptureCacheSlice from './markRecaptureSlices/markRecaptureCache'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
@@ -43,6 +44,11 @@ const dropdownsPersistConfig = {
 
 const visitSetupDefaultsPersistConfig = {
   key: 'visitSetupDefaults',
+  version: 1,
+  storage: AsyncStorage,
+}
+const markRecaptureCachePersistConfig = {
+  key: 'markRecaptureCachePersistConfig',
   version: 1,
   storage: AsyncStorage,
 }
@@ -84,6 +90,10 @@ export default combineReducers({
   addGeneticSamples: addGeneticSamplesSlice,
   trapPostProcessing: trapPostProcessingSlice,
   markRecaptureNavigation: markRecaptureNavigationSlice,
+  markRecaptureCache: persistReducer(
+    markRecaptureCachePersistConfig,
+    markRecaptureCacheSlice
+  ),
   trapVisitFormPostBundler: persistReducer(
     trapVisitPostPersistConfig,
     trapVisitFormPostBundler

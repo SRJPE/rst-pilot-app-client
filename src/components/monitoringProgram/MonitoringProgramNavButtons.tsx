@@ -90,7 +90,6 @@ const MonitoringProgramNavButtons = ({
   const disableRightButton = () => {
     switch (activePage) {
       case 'Monitoring Program Existing':
-        console.log('🚀 ~ disableRightButton ~ program:', program)
         if (!program) {
           return true
         }

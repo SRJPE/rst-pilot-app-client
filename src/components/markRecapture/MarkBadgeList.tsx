@@ -34,7 +34,7 @@ const MarkBadgeList = ({
   //sets the field value to be the current badgeListContent and updates on change
   useEffect(() => {
     if (setFieldValue && setFieldTouched) {
-      setFieldValue(field, badgeListContent)
+      setFieldValue(field, badgeListContent, true)
       setFieldTouched(field)
     }
   }, [badgeListContent])

@@ -1,4 +1,4 @@
-import { Formik } from 'formik'
+import { Formik, useFormikContext } from 'formik'
 import { FormControl, View, VStack, Text, Button, Divider } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { addMarkToAppliedMarks } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
@@ -44,8 +44,14 @@ const AddAnotherMarkModalContent = ({
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const { markType, markColor, bodyPart } = dropdownValues.values
 
+  // sort markType dropdown values array where the object with definition key is 'Bismark Brown' is placed at the beginning of the array
+  const sortedDropdownValues = [...markType].sort((a: any, b: any) => {
+    if (a.definition === 'bismark brown') return -1
+    if (b.definition === 'bismark brown') return 1
+    return 0
+  })
+
   const handleSubmit = (values: ReleaseMarkI) => {
-    console.log('🚀 ~ handleSubmit ~ values:', values)
     //if the modal is opened in batch count
     if (screenName === 'batchCount') {
       dispatch(addMarkToBatchCountExistingMarks(values))
@@ -114,7 +120,7 @@ const AddAnotherMarkModalContent = ({
                   placeholder='Type'
                   onValueChange={handleChange('markType')}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={markType}
+                  selectOptions={sortedDropdownValues}
                 />
                 {touched.markType &&
                   errors.markType &&
