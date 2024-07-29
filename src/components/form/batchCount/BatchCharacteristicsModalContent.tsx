@@ -110,7 +110,7 @@ const BatchCharacteristicsModalContent = ({
         ...mark,
         markType: markTypeValues[mark.markType - 1],
         markColor: markColorValues[mark.markColor - 1],
-        bodyPart: bodyPartValues[mark.bodyPart - 1],
+        markPosition: bodyPartValues[mark.markPosition - 1],
       }
     })
   }
@@ -272,7 +272,7 @@ const BatchCharacteristicsModalContent = ({
                         decodedRecentReleaseMarks(
                           dropdownValues.twoMostRecentReleaseMarks
                         ).map((recentReleaseMark: any, index: number) => {
-                          const { id, markType, markColor, bodyPart } =
+                          const { id, markType, markColor, markPosition } =
                             recentReleaseMark
                           return (
                             <Button
@@ -304,7 +304,7 @@ const BatchCharacteristicsModalContent = ({
                                 fontWeight='500'
                                 fontSize='md'
                               >
-                                {`${markType} - ${markColor} - ${bodyPart}`}
+                                {`${markType} - ${markColor} - ${markPosition}`}
                               </Text>
                             </Button>
                           )
