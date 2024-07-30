@@ -11,6 +11,7 @@ export default function SpeciesDropDown({
   setFieldTouched,
   onChangeValue,
   editModeValue,
+  speciesValue,
 }: {
   open: boolean
   onOpen?: any
@@ -21,26 +22,30 @@ export default function SpeciesDropDown({
   setFieldTouched?: any
   onChangeValue?: any
   editModeValue?: string
+  speciesValue?: string
 }) {
   console.log('🚀 ~ editModeValue:', editModeValue)
   const [value, setValue] = useState(editModeValue || ('' as string))
 
   const handleOnChange = useCallback(
-    //dev
     (itemValue: any) => {
       onChangeValue(itemValue)
     },
-    [list]
+    [speciesValue, value]
   )
 
   useEffect(() => {
     console.log('🚀 ~ value:', value)
+    //if using formik
     if (setFieldTouched && setFieldValue) {
       if (value !== '') {
         setFieldTouched('species', true)
       }
       setFieldValue('species', value)
     } else {
+      if (value) {
+        setFieldTouched()
+      }
       onChangeValue(value)
     }
   }, [value])
@@ -53,7 +58,7 @@ export default function SpeciesDropDown({
       items={list}
       setOpen={setOpen}
       onClose={() => (setFieldTouched ? setFieldTouched() : null)}
-      // onChangeValue={handleOnChange}
+      onChangeValue={handleOnChange}
       setValue={setValue}
       searchable={true}
       setItems={setList}
