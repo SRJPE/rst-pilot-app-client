@@ -146,7 +146,7 @@ function CatchCategoricalQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
@@ -206,11 +206,15 @@ function CatchCategoricalQC({
 
       if (id) {
         if (adiposeClipped != null) {
+          let adValue = adiposeClipped
+          if (typeof adiposeClipped === 'string') {
+            adValue = adiposeClipped === 'true' ? true : false
+          }
           adiposeClippedData.push({
             ids: [id],
             dataId: 'Adipose Clipped',
             x: dateTime,
-            y: adiposeClipped ? 2 : 1,
+            y: adValue ? 2 : 1,
             colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
           })
         }
@@ -289,11 +293,15 @@ function CatchCategoricalQC({
         }
 
         if (dead != null) {
+          let deadValue = dead
+          if (typeof dead === 'string') {
+            deadValue = dead === 'true' ? true : false
+          }
           deadData.push({
             ids: [id],
             dataId: 'Mortalities',
             x: dateTime,
-            y: dead ? 2 : 1,
+            y: deadValue ? 2 : 1,
             colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
           })
         }
@@ -307,7 +315,7 @@ function CatchCategoricalQC({
       Object.entries(countObj as MarkCombosI).forEach(
         ([markIdentifier, itemsArray]) => {
           if (
-            every(markIdToColorBuilder, (obj) => {
+            every(markIdToColorBuilder, obj => {
               return obj.name !== markIdentifier
             })
           ) {
@@ -336,10 +344,10 @@ function CatchCategoricalQC({
 
     setMarkIdToSymbolArr(markIdToColorBuilder)
 
-    Object.keys(fishCountByDateAndSpecies).forEach((date) => {
+    Object.keys(fishCountByDateAndSpecies).forEach(date => {
       const speciesCountFromDate = fishCountByDateAndSpecies[date]
 
-      Object.keys(speciesCountFromDate).forEach((species) => {
+      Object.keys(speciesCountFromDate).forEach(species => {
         let count = speciesCountFromDate[species]?.count
         let ids = speciesCountFromDate[species]?.ids
 
@@ -380,7 +388,7 @@ function CatchCategoricalQC({
 
   const handlePointClick = (datum: any) => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
 
@@ -398,7 +406,7 @@ function CatchCategoricalQC({
       idsAtPoint = datum.ids
     }
 
-    const selectedData = qcData.filter((response) => {
+    const selectedData = qcData.filter(response => {
       const id = response.createdCatchRawResponse?.id
       return idsAtPoint.includes(id)
     })
@@ -628,7 +636,7 @@ function CatchCategoricalQC({
               fontSize='16'
               placeholder='fork length...'
               keyboardType='numeric'
-              onChangeText={(value) => {
+              onChangeText={value => {
                 setNestedModalInputValue({ fieldClicked: 'forkLength', value })
               }}
               // onBlur={handleBlur('comments')}
@@ -700,7 +708,7 @@ function CatchCategoricalQC({
               value={nestedModalInputValue.value as string}
               onChange={(value: any) => {
                 setNestedModalInputValue({
-                  fieldClicked: 'adiposeClipped',
+                  fieldClicked: 'dead',
                   value,
                 })
               }}
@@ -791,7 +799,7 @@ function CatchCategoricalQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map((buttonName) => {
+            {activeButtons.map(buttonName => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -799,7 +807,7 @@ function CatchCategoricalQC({
                   key={buttonName}
                   chartType={buttonNameToChartType[buttonName] as any}
                   showDates
-                  onPointClick={(datum) => handlePointClick(datum)}
+                  onPointClick={datum => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
                   title={buttonName}
@@ -1279,6 +1287,11 @@ function CatchCategoricalQC({
                         let adiposeClipped: boolean =
                           data.createdCatchRawResponse.adiposeClipped
 
+                        let adValue = adiposeClipped
+                        if (typeof adiposeClipped === 'string') {
+                          adValue = adiposeClipped === 'true' ? true : false
+                        }
+
                         return (
                           <DataTable.Cell
                             style={{
@@ -1293,8 +1306,8 @@ function CatchCategoricalQC({
                             }
                           >
                             <Text>
-                              {adiposeClipped != null
-                                ? adiposeClipped
+                              {adValue != null
+                                ? adValue
                                   ? 'True'
                                   : 'False'
                                 : 'NA'}
@@ -1318,7 +1331,10 @@ function CatchCategoricalQC({
                         <Text>Mort</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
-                        let mort: boolean = data.createdCatchRawResponse.dead
+                        let deadValue = data.createdCatchRawResponse.dead
+                        if (typeof deadValue === 'string') {
+                          deadValue = deadValue === 'true' ? true : false
+                        }
 
                         return (
                           <DataTable.Cell
@@ -1332,7 +1348,11 @@ function CatchCategoricalQC({
                             onPress={() => handleModalCellPressed('dead', data)}
                           >
                             <Text>
-                              {mort != null ? (mort ? 'True' : 'False') : 'NA'}
+                              {deadValue != null
+                                ? deadValue
+                                  ? 'True'
+                                  : 'False'
+                                : 'NA'}
                             </Text>
                           </DataTable.Cell>
                         )
@@ -1500,7 +1520,7 @@ function CatchCategoricalQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  onChangeText={(value) => {
+                  onChangeText={value => {
                     setNestedModalComment(value)
                   }}
                   // onBlur={handleBlur('comments')}
