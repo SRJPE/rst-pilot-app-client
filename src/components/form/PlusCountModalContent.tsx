@@ -64,8 +64,12 @@ const PlusCountModalContent = ({
     <ScrollView>
       <Formik
         validationSchema={addPlusCountsSchema}
+        enableReinitialize
         initialValues={{ ...initialFormValues, plusCountMethod: 'none' }}
-        onSubmit={values => handleFormSubmit(values)}
+        onSubmit={(values, { resetForm }) => {
+          handleFormSubmit(values)
+          resetForm()
+        }}
       >
         {({
           handleChange,

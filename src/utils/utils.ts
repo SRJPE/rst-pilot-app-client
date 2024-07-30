@@ -479,3 +479,27 @@ export const handleQCChartButtonClick = (
   }
   return activeButtonsCopy
 }
+
+export const combinePlusCounts = (arr: Array<any>) => {
+  const map = new Map()
+  const result = [] as Array<any>
+
+  arr.forEach(item => {
+    if (item.plusCount) {
+      const key = `${item.taxonCode}_${item.lifeStage}_${item.captureRunClass}`
+      if (!map.has(key)) {
+        map.set(key, {
+          ...item,
+          numFishCaught: Number(item.numFishCaught),
+        })
+      } else {
+        const existing = map.get(key)
+        existing.numFishCaught += Number(item.numFishCaught)
+      }
+    } else {
+      result.push({ ...item, numFishCaught: Number(item.numFishCaught) })
+    }
+  })
+
+  return [...result, ...Array.from(map.values())]
+}
