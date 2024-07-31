@@ -1041,6 +1041,7 @@ const AddFishContent = ({
                           touched: true,
                         })
                       }
+                      fishConditionsValues={fishConditions.value as string[]}
                     />
                   </FormControl>
                   {/* <VStack space={6}>
