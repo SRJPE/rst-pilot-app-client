@@ -24,7 +24,6 @@ export default function SpeciesDropDown({
   editModeValue?: string
   speciesValue?: string
 }) {
-  console.log('🚀 ~ editModeValue:', editModeValue)
   const [value, setValue] = useState(editModeValue || ('' as string))
 
   const handleOnChange = useCallback(
@@ -35,7 +34,6 @@ export default function SpeciesDropDown({
   )
 
   useEffect(() => {
-    console.log('🚀 ~ value:', value)
     //if using formik
     if (setFieldTouched && setFieldValue) {
       if (value !== '') {
