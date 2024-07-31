@@ -11,6 +11,7 @@ export default function FishConditionsDropDown({
   setFieldTouched,
   onChangeValue,
   editModeValue,
+  fishConditionsValues,
 }: {
   open: boolean
   onOpen?: any
@@ -21,30 +22,43 @@ export default function FishConditionsDropDown({
   setFieldTouched?: any
   onChangeValue?: any
   editModeValue?: string[]
+  fishConditionsValues?: string[]
 }) {
-  const [value, setValue] = useState((editModeValue || []) as string[])
+  const [values, setValues] = useState((editModeValue || []) as string[])
 
   useEffect(() => {
+    //if using formik
     if (setFieldTouched && setFieldValue) {
-      if (value[0] !== '') {
+      if (values.length > 0) {
         setFieldTouched('fishConditions', true)
       }
-      setFieldValue('fishConditions', value)
-    } else if (editModeValue) {
-      onChangeValue(editModeValue) //dev
+      setFieldValue('fishConditions', values)
     } else {
-      onChangeValue(value)
+      if (values.length > 0) {
+        setFieldTouched()
+      }
+      onChangeValue(values)
     }
-  }, [value])
+  }, [values])
+
+  useEffect(() => {
+    //if fishConditionsValue from parent is empty (form was reset)
+    if (fishConditionsValues && !fishConditionsValues[0]) {
+      //if local state value is not empty,reset values
+      if (values.length > 0) {
+        setValues([])
+      }
+    }
+  }, [fishConditionsValues])
 
   return (
     <DropDownPicker
       open={open}
       onOpen={onOpen}
-      value={value}
+      value={values}
       items={list}
       setOpen={setOpen}
-      setValue={setValue}
+      setValue={setValues}
       setItems={setList}
       searchable={true}
       multiple={true}
@@ -56,8 +70,6 @@ export default function FishConditionsDropDown({
       placeholder='Select up to three fish conditions'
       searchPlaceholder='Search...'
       maxHeight={175}
-      // zIndex={5000}
-      // zIndexInverse={1000}
       style={{
         marginTop: 4,
         borderColor: '#d4d4d4d4',
@@ -71,11 +83,9 @@ export default function FishConditionsDropDown({
       }}
       dropDownContainerStyle={{
         backgroundColor: '#fafafa',
-        // backgroundColor: 'red',
         borderColor: '#d4d4d4d4',
         borderBottomLeftRadius: 4,
         borderBottomRightRadius: 4,
-        // zIndex: 5000,
       }}
       textStyle={{
         fontSize: 16,
