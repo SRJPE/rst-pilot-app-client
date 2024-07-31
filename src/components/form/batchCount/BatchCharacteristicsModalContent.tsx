@@ -53,10 +53,6 @@ const BatchCharacteristicsModalContent = ({
   )
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
-  const reorderedFishCondition = alphabeticalSort(
-    dropdownValues.fishCondition,
-    'definition'
-  )
 
   const [fishConditionDropdownOpen, setFishConditionDropdownOpen] = useState(
     false as boolean
@@ -64,7 +60,6 @@ const BatchCharacteristicsModalContent = ({
   const [fishConditionList, setFishConditionList] = useState<
     { label: string; value: string }[]
   >(
-    // reorderedFishCondition.map((condition: any) => ({
     dropdownValues.fishCondition.map((condition: any) => ({
       label: startCase(condition?.definition),
       value: condition?.definition,
