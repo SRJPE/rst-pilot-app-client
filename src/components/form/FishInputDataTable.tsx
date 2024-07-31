@@ -102,7 +102,7 @@ const FishInputDataTable = ({
       let dataObj: any = cloneDeep(obj[Number(key)])
       dataObj.existingMarks = dataObj.existingMarks.length
       delete dataObj.UID
-      delete dataObj.fishConditions //come back to fix this
+      delete dataObj.fishConditions
       let dataObjPadded = { ...emptyTableData, ...dataObj }
 
       const dataObjKeys = Object.keys(dataObjPadded)
