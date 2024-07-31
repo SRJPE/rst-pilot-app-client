@@ -24,7 +24,6 @@ import CustomSelect from '../Shared/CustomSelect'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
 import RenderWarningMessage from '../Shared/RenderWarningMessage'
 import SpeciesDropDown from './SpeciesDropDown'
-import CustomDropDown from '../Shared/CustomDropDown'
 
 const initialFormValues = {
   species: '',
@@ -183,25 +182,6 @@ const PlusCountModalContent = ({
                             ]
                       }
                     />
-                    {/* <CustomDropDown
-                        formValue='lifeStage'
-                        open={lifeStageDropDownOpen}
-                        setOpen={setLifeStageDropDownOpen}
-                        list={
-                          values.species === 'Chinook salmon'
-                            ? alphabeticalLifeStage.map((item: any) => ({
-                                label: item.definition,
-                                value: item.definition,
-                              }))
-                            : [
-                                { label: 'adult', value: 'adult' },
-                                { label: 'juvenile', value: 'juvenile' },
-                              ]
-                        }
-                        setList={setLifeStageList}
-                        setFieldValue={setFieldValue}
-                        setFieldTouched={setFieldTouched}
-                      /> */}
                   </FormControl>
                 )}
 
