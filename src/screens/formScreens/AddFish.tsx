@@ -693,31 +693,6 @@ const AddFishContent = ({
 
             {(species.value as string) !== '' && species.value !== null && (
               <>
-                {/* {route.params?.editModeData ? (
-                    <HStack alignItems='center'>
-                      <FormControl w='1/2' pr='5'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Count
-                          </Text>
-                        </FormControl.Label>
-                        <Input
-                          height='50px'
-                          fontSize='16'
-                          placeholder='Numeric Value'
-                          keyboardType='numeric'
-                          onChangeText={(value) =>
-                            setCount({ ...count, value })
-                          }
-                          // TODO - onBlur logic?
-                          // onBlur={handleBlur('numFishCaught')}
-                          value={`${count.value}`}
-                        />
-                      </FormControl>
-                    </HStack>
-                  ) : (
-                    <></>
-                  )} */}
                 <VStack space={4}>
                   <HStack space={4}>
                     <FormControl
@@ -775,14 +750,7 @@ const AddFishContent = ({
                       </Text>
                     </FormControl>
                     <FormControl
-                      // w='47%'
                       w={route.params?.editModeData ? '1/3' : '1/2'}
-                      // paddingLeft={
-                      //   species.value === 'Chinook salmon' ||
-                      //   species.value === 'Steelhead / rainbow trout'
-                      //     ? '10'
-                      //     : '0'
-                      // }
                       paddingRight='9'
                     >
                       <HStack space={4} alignItems='center'>
@@ -1431,19 +1399,14 @@ const AddFishContent = ({
                     typeof species.value === 'string' &&
                     species.value.includes('Chinook')
                   ) {
-                    console.log('🚀 ~ chinook: inside button')
                     resetFormState('chinook')
                   } else if (
                     species.value &&
                     typeof species.value === 'string' &&
                     species.value.includes('Steelhead')
                   ) {
-                    console.log('🚀 ~ steelhead: inside button')
-
                     resetFormState('steelhead')
                   } else {
-                    console.log('🚀 ~ other: inside button')
-
                     resetFormState('other')
                   }
                 }
