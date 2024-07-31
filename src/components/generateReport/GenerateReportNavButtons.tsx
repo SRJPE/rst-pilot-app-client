@@ -102,21 +102,23 @@ const GenerateReportNavButtons = ({
             {handleLeftButtonText()}
           </Text>
         </Button>
-        <Button
-          alignSelf='flex-start'
-          bg='primary'
-          width='45%'
-          height='20'
-          rounded='xs'
-          borderRadius='5'
-          shadow='5'
-          isDisabled={disableRightButton()}
-          onPress={() => handleRightButton()}
-        >
-          <Text fontSize='xl' fontWeight='bold' color='white'>
-            {handleRightButtonText()}
-          </Text>
-        </Button>
+        {activePage !== 'Generate Report Home' && (
+          <Button
+            alignSelf='flex-start'
+            bg='primary'
+            width='45%'
+            height='20'
+            rounded='xs'
+            borderRadius='5'
+            shadow='5'
+            isDisabled={disableRightButton()}
+            onPress={() => handleRightButton()}
+          >
+            <Text fontSize='xl' fontWeight='bold' color='white'>
+              {handleRightButtonText()}
+            </Text>
+          </Button>
+        )}
       </HStack>
     </Box>
   )
