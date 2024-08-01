@@ -1,6 +1,22 @@
 import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
-import { AlignmentType, Document, Packer, Paragraph, TextRun } from 'docx'
+import {
+  AlignmentType,
+  SectionType,
+  PageOrientation,
+  Document,
+  Packer,
+  Paragraph,
+  HeadingLevel,
+  TextRun,
+  Table,
+  TableRow,
+  TableCell,
+  WidthType,
+  VerticalAlign,
+  TextDirection,
+  HeightRule,
+} from 'docx'
 import { uid } from 'uid'
 
 export const generateWordDocument = (tempData: any) => {
@@ -24,6 +40,52 @@ export const generateWordDocument = (tempData: any) => {
         new TextRun({
           text,
           size: 25,
+        }),
+      ],
+    })
+  }
+
+  const createTable = () => {
+    const tableData = {
+      headers: [
+        'Date',
+        'Discharge volume (cfs)',
+        'Water temperature (°C)',
+        'Water turbidity (NTU)',
+        'BY22 Winter',
+        'BY22 Spring',
+        'BY22 Fall',
+        'BY22 Late-Fal',
+        'BY22 RBT',
+      ],
+    }
+    return new Table({
+      width: {
+        // size: 14535,
+        // type: WidthType.DXA,
+        size: 100,
+        type: WidthType.PERCENTAGE,
+      },
+      rows: [
+        new TableRow({
+          tableHeader: true,
+          // height: { value: 40, rule: HeightRule.AUTO },
+          children: [
+            ...tableData.headers.map((headerText: string) => {
+              return new TableCell({
+                // width: {
+                //   size: 3505,
+                //   type: WidthType.DXA,
+                // },
+
+                children: [new Paragraph(headerText)],
+                width: {
+                  size: 100 / tableData.headers.length,
+                  type: WidthType.PERCENTAGE,
+                },
+              })
+            }),
+          ],
         }),
       ],
     })
@@ -104,6 +166,22 @@ export const generateWordDocument = (tempData: any) => {
             `If you have any questions, please feel free to contact me at ${programLeadPhoneNumber}, ${programLeadEmail}.`
           ),
           // createTable(),
+        ],
+      },
+      {
+        properties: {
+          // type: SectionType.NEXT_PAGE,
+          page: {
+            size: {
+              orientation: PageOrientation.LANDSCAPE,
+            },
+          },
+        },
+        children: [
+          createParagraph(
+            `Table 1.─ Preliminary estimates of passage by brood-year (BY) and run for unmarked juvenile Chinook salmon and steelhead trout captured by rotary- screw traps at Red Bluff Diversion Dam (RK391), Sacramento River, CA, for the dates listed below. Results include estimated passage, peak river discharge volume, water temperature, turbidity, and fork length (mm) range in parentheses. A dash (-) indicates that sampling was not conducted on that date.`
+          ),
+          createTable(),
         ],
       },
     ],
