@@ -4,21 +4,7 @@ import { useRoute } from '@react-navigation/native'
 import { Icon } from 'native-base'
 import { Ionicons } from '@expo/vector-icons'
 
-const GenerateReportNavButtons = ({
-  navigation,
-  handleSubmit,
-  errors,
-  touched,
-  values,
-  clearFormValues,
-}: {
-  navigation?: any
-  handleSubmit?: any
-  errors?: any
-  touched?: any
-  values?: any
-  clearFormValues?: any
-}) => {
+const GenerateReportNavButtons = ({ navigation }: { navigation?: any }) => {
   const activePage = useRoute().name
 
   const handleRightButton = async () => {
