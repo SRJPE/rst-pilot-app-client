@@ -14,15 +14,22 @@ import { generateWordDocument } from '../../components/generateReport/ReportGene
 import { getBiWeeklyPassageSummary } from '../../redux/reducers/generateReportSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import { Formik } from 'formik'
+import DocumentViewer from '../../components/Shared/DocumentViewer'
 
 const GenerateReportHome = ({ navigation }: { navigation: any }) => {
   const dispatch = useDispatch<AppDispatch>()
   const biWeeklyPassageSummaryStore = useSelector(
     (state: RootState) => state.generateReports
   )
+  const [filePath, setFilePath] = useState<string | null>(null)
+
+  const handleGenerateDocument = async (documentData: any) => {
+    const path = await generateWordDocument(documentData)
+    setFilePath(path)
+  }
 
   useEffect(() => {
     if (biWeeklyPassageSummaryStore.status === 'fulfilled') {
@@ -31,6 +38,7 @@ const GenerateReportHome = ({ navigation }: { navigation: any }) => {
         biWeeklyPassageSummaryStore
       )
       // generateWordDocument(biWeeklyPassageSummaryStore)
+      handleGenerateDocument(biWeeklyPassageSummaryStore)
     }
   }, [biWeeklyPassageSummaryStore])
 
@@ -86,6 +94,7 @@ const GenerateReportHome = ({ navigation }: { navigation: any }) => {
               <Button bg='primary' onPress={handleGenerateReport}>
                 Generate PDF
               </Button>
+              {filePath && <DocumentViewer filePath={filePath} />}
             </VStack>
           </View>
           <GenerateReportNavButtons navigation={navigation} />
