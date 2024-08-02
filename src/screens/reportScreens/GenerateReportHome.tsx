@@ -16,34 +16,23 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { useEffect } from 'react'
 
 const GenerateReportHome = ({ navigation }: { navigation: any }) => {
-  const tempData = {
-    systemDate: new Date().toLocaleString(),
-    programLead: 'FLOWWEST TEST',
-    programLeadAgency: 'TEST AGENCY',
-    streamName: 'TEST STREAM',
-    programRunDesignationMethod: 'TEST RUN METHOD',
-    programLeadPhoneNumber: '(123) 456-7890',
-    programLeadEmail: 'TEST@EMAIL.COM',
-    systemWeek: 'TEST WEEK',
-  }
   const dispatch = useDispatch<AppDispatch>()
-  const BiWeeklyPassageSummaryStore = useSelector(
+  const biWeeklyPassageSummaryStore = useSelector(
     (state: RootState) => state.generateReports
   )
 
   useEffect(() => {
-    if (BiWeeklyPassageSummaryStore) {
+    if (biWeeklyPassageSummaryStore.status === 'fulfilled') {
       console.log(
         '🚀 ~ GenerateReportHome ~ BiWeeklyPassageSummaryStore:',
-        BiWeeklyPassageSummaryStore
+        biWeeklyPassageSummaryStore
       )
-      // generateWordDocument(BiWeeklyPassageSummaryStore)
+      generateWordDocument(biWeeklyPassageSummaryStore)
     }
-  }, [BiWeeklyPassageSummaryStore])
+  }, [biWeeklyPassageSummaryStore])
 
   const handleGenerateReport = () => {
     dispatch(getBiWeeklyPassageSummary(1)) //change to selected program ID
-    // generateWordDocument(tempData)
   }
 
   return (

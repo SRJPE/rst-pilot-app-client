@@ -57,7 +57,6 @@ export const getBiWeeklyPassageSummary = createAsyncThunk(
     const response: APIResponseI = await api.get(
       `program/biWeeklyPassageSummary/${programId}`
     )
-    console.log('🚀 ~ response.data:', response.data)
     return response.data
   }
 )

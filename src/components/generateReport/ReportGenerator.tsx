@@ -19,17 +19,20 @@ import {
 } from 'docx'
 import { uid } from 'uid'
 
-export const generateWordDocument = (tempData: any) => {
+export const generateWordDocument = (BiWeeklyPassageSummaryData: any) => {
+  const { fundingAgency, personnelLead, program } = BiWeeklyPassageSummaryData
+  const { definition: programLeadAgency } = fundingAgency
+  const { streamName } = program
   const {
-    programLead,
-    programLeadAgency,
-    systemDate,
-    streamName,
-    programRunDesignationMethod,
-    programLeadPhoneNumber,
-    programLeadEmail,
-    systemWeek,
-  } = tempData
+    firstName,
+    lastName,
+    email: programLeadEmail,
+    phone: programLeadPhoneNumber,
+  } = personnelLead
+  const programLead = `${firstName} ${lastName}`
+  const systemDate = new Date().toLocaleString()
+  const systemWeek = 'TEST WEEK'
+  const programRunDesignationMethod = 'TEST RUN METHOD'
 
   const createParagraph = (text: string): Paragraph => {
     return new Paragraph({
@@ -170,7 +173,7 @@ export const generateWordDocument = (tempData: any) => {
       },
       {
         properties: {
-          // type: SectionType.NEXT_PAGE,
+          type: SectionType.NEXT_PAGE,
           page: {
             size: {
               orientation: PageOrientation.LANDSCAPE,
