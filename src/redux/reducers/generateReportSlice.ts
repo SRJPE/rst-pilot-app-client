@@ -55,8 +55,9 @@ export const getBiWeeklyPassageSummary = createAsyncThunk(
   'generateReportsSlice/getBiWeeklyPassageSummary',
   async (programId: string | number) => {
     const response: APIResponseI = await api.get(
-      `program/biWeeklyPassageSummary${programId}`
+      `program/biWeeklyPassageSummary/${programId}`
     )
+    console.log('🚀 ~ response.data:', response.data)
     return response.data
   }
 )
@@ -72,9 +73,9 @@ export const generateReportsSlice = createSlice({
 
     [getBiWeeklyPassageSummary.fulfilled.type]: (state, action) => {
       state.status = fulfilledStatus
-      state.program = action.payload.program
-      state.personnelLead = action.payload.personnelLead
-      state.fundingAgency = action.payload.fundingAgency
+      state.program = action.payload.program[0]
+      state.personnelLead = action.payload.personnelLead[0]
+      state.fundingAgency = action.payload.fundingAgency[0]
     },
 
     [getBiWeeklyPassageSummary.rejected.type]: (state, action) => {
