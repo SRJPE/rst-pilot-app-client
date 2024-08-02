@@ -10,6 +10,10 @@ import {
 import ReportCard from '../../components/generateReport/ReportCard'
 import GenerateReportNavButtons from '../../components/generateReport/GenerateReportNavButtons'
 import { generateWordDocument } from '../../components/generateReport/ReportGenerator'
+import { getBiWeeklyPassageSummary } from '../../redux/reducers/generateReportSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/store'
+import { useEffect } from 'react'
 
 const GenerateReportHome = ({ navigation }: { navigation: any }) => {
   const tempData = {
@@ -21,6 +25,25 @@ const GenerateReportHome = ({ navigation }: { navigation: any }) => {
     programLeadPhoneNumber: '(123) 456-7890',
     programLeadEmail: 'TEST@EMAIL.COM',
     systemWeek: 'TEST WEEK',
+  }
+  const dispatch = useDispatch<AppDispatch>()
+  const BiWeeklyPassageSummaryStore = useSelector(
+    (state: RootState) => state.generateReports
+  )
+
+  useEffect(() => {
+    if (BiWeeklyPassageSummaryStore) {
+      console.log(
+        '🚀 ~ GenerateReportHome ~ BiWeeklyPassageSummaryStore:',
+        BiWeeklyPassageSummaryStore
+      )
+      // generateWordDocument(BiWeeklyPassageSummaryStore)
+    }
+  }, [BiWeeklyPassageSummaryStore])
+
+  const handleGenerateReport = () => {
+    dispatch(getBiWeeklyPassageSummary(1)) //change to selected program ID
+    // generateWordDocument(tempData)
   }
 
   return (
@@ -35,7 +58,13 @@ const GenerateReportHome = ({ navigation }: { navigation: any }) => {
               <ReportCard key={i} navigation={navigation} />
             ))}
           </HStack>
-          <Button bg='primary' onPress={() => generateWordDocument(tempData)}>
+          <Button
+            bg='primary'
+            onPress={
+              // () => generateWordDocument(tempData)
+              handleGenerateReport
+            }
+          >
             Generate PDF
           </Button>
         </VStack>
