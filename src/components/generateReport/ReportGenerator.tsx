@@ -18,6 +18,7 @@ import {
   HeightRule,
 } from 'docx'
 import { uid } from 'uid'
+import { getTwoWeeksPriorDate } from '../../utils/utils'
 
 export const generateWordDocument = (BiWeeklyPassageSummaryData: any) => {
   const { fundingAgency, personnelLead, program } = BiWeeklyPassageSummaryData
@@ -30,8 +31,9 @@ export const generateWordDocument = (BiWeeklyPassageSummaryData: any) => {
     phone: programLeadPhoneNumber,
   } = personnelLead
   const programLead = `${firstName} ${lastName}`
-  const systemDate = new Date().toLocaleString()
-  const systemWeek = 'TEST WEEK'
+  const systemDate = new Date().toLocaleDateString()
+  const reportStartDate = getTwoWeeksPriorDate()
+  // needs to be updated based on the catch raw (we are defaulting to "EXPERT JUDGEMENT" For chinook)"
   const programRunDesignationMethod = 'TEST RUN METHOD'
 
   const createParagraph = (text: string): Paragraph => {
@@ -157,10 +159,10 @@ export const generateWordDocument = (BiWeeklyPassageSummaryData: any) => {
           createParagraph('To: Interested Parties'),
           createParagraph(`From: ${programLead}, ${programLeadAgency}`),
           createParagraph(
-            `Subject: Biweekly report( [SYS DATE - 14] - ${systemDate})`
+            `Subject: Biweekly report(${reportStartDate} - ${systemDate})`
           ),
           createParagraph(
-            `Please find attached preliminary daily estimates of passage, 90% confidence intervals, and fork length ranges of unmarked juvenile salmonids sampled at ${streamName} for the period [SYS Date - 14] through ${systemDate}. Race designation was assigned using ${programRunDesignationMethod}.`
+            `Please find attached preliminary daily estimates of passage, 90% confidence intervals, and fork length ranges of unmarked juvenile salmonids sampled at ${streamName} for the period ${reportStartDate} through ${systemDate}. Race designation was assigned using ${programRunDesignationMethod}.`
           ),
           createParagraph(
             `Please note that data contained in these reports is subject to revision as this data is preliminary and undergoing QA/QC procedures.`
