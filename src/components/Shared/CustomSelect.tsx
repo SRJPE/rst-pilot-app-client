@@ -13,9 +13,12 @@ interface CustomSelectI {
 }
 
 const CustomSelect: React.FC<CustomSelectI> = (props) => {
-  const handleOnChange = useCallback((itemValue: any) => {
-    props.onValueChange(itemValue)
-  }, [props.selectedValue])
+  const handleOnChange = useCallback(
+    (itemValue: any) => {
+      props.onValueChange(itemValue)
+    },
+    [props.selectedValue]
+  )
 
   return (
     <Select
@@ -53,7 +56,8 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
               <Select.Item
                 key={item.id}
                 label={
-                  props.placeholder === 'Species'
+                  props.placeholder === 'Species' ||
+                  props.placeholder === 'Program name'
                     ? item.definition
                     : item.definition.replace(/\w+/g, capitalize)
                 }
