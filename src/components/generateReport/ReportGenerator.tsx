@@ -20,7 +20,9 @@ import {
 import { uid } from 'uid'
 import { getTwoWeeksPriorDate } from '../../utils/utils'
 
-export const generateWordDocument = (BiWeeklyPassageSummaryData: any) => {
+export const generateWordDocument = async (
+  BiWeeklyPassageSummaryData: any
+): Promise<string> => {
   const { fundingAgency, personnelLead, program } = BiWeeklyPassageSummaryData
   const { definition: programLeadAgency } = fundingAgency
   const { streamName } = program
@@ -192,14 +194,38 @@ export const generateWordDocument = (BiWeeklyPassageSummaryData: any) => {
     ],
   })
 
-  Packer.toBase64String(doc).then((base64) => {
-    const filename =
-      FileSystem.documentDirectory + `MyWordDocument${uid()}.docx`
-    FileSystem.writeAsStringAsync(filename, base64, {
-      encoding: FileSystem.EncodingType.Base64,
-    }).then(() => {
-      console.log(`Saved file: ${filename}`)
-      Sharing.shareAsync(filename)
-    })
+  // Packer.toBase64String(doc).then((base64) => {
+  //   const filename =
+  //     FileSystem.documentDirectory + `MyWordDocument${uid()}.docx`
+  //   FileSystem.writeAsStringAsync(filename, base64, {
+  //     encoding: FileSystem.EncodingType.Base64,
+  //   }).then(() => {
+  //     console.log(`Saved file: ${filename}`)
+  //     Sharing.shareAsync(filename)
+  //   })
+  // })
+
+  const base64 = await Packer.toBase64String(doc)
+  const filename = FileSystem.documentDirectory + `MyWordDocument${uid()}.docx`
+  await FileSystem.writeAsStringAsync(filename, base64, {
+    encoding: FileSystem.EncodingType.Base64,
   })
+  // Sharing.shareAsync(filename)
+  console.log(`Saved file: ${filename}`)
+  return filename
 }
+//  try {
+//     const filename =
+//       FileSystem.documentDirectory + `MyWordDocument${uid()}.docx`
+//     const base64 = await Packer.toBase64String(doc)
+//     await FileSystem.writeAsStringAsync(filename, base64, {
+//       encoding: FileSystem.EncodingType.Base64,
+//     })
+//     Sharing.shareAsync(filename)
+//     console.log(`Saved file: ${filename}`)
+//     return filename
+//   } catch (error) {
+//     console.error('Error saving file:', error)
+//   }
+//   return null
+// }
