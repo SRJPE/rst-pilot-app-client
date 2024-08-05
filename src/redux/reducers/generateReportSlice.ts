@@ -45,9 +45,12 @@ interface APIResponseI {
 
 const initialState: any = {
   status: uninitializedStatus,
-  program: {},
-  personnelLead: {},
-  fundingAgency: {},
+  mostRecentReportFilePath: null,
+  values: {
+    program: {},
+    personnelLead: {},
+    fundingAgency: {},
+  },
 }
 
 // Async actions API calls
@@ -64,7 +67,11 @@ export const getBiWeeklyPassageSummary = createAsyncThunk(
 export const generateReportsSlice = createSlice({
   name: 'generateReports',
   initialState: initialState,
-  reducers: {},
+  reducers: {
+    updateMostRecentReportFilePath: (state, action) => {
+      state.mostRecentReportFilePath = action.payload
+    },
+  },
   extraReducers: {
     [getBiWeeklyPassageSummary.pending.type]: (state, action) => {
       state.status = pendingStatus
@@ -72,9 +79,9 @@ export const generateReportsSlice = createSlice({
 
     [getBiWeeklyPassageSummary.fulfilled.type]: (state, action) => {
       state.status = fulfilledStatus
-      state.program = action.payload.program[0]
-      state.personnelLead = action.payload.personnelLead[0]
-      state.fundingAgency = action.payload.fundingAgency[0]
+      state.values.program = action.payload.program[0]
+      state.values.personnelLead = action.payload.personnelLead[0]
+      state.values.fundingAgency = action.payload.fundingAgency[0]
     },
 
     [getBiWeeklyPassageSummary.rejected.type]: (state, action) => {
@@ -82,5 +89,7 @@ export const generateReportsSlice = createSlice({
     },
   },
 })
+
+export const { updateMostRecentReportFilePath } = generateReportsSlice.actions
 
 export default generateReportsSlice.reducer

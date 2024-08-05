@@ -11,7 +11,10 @@ import {
 import ReportCard from '../../components/generateReport/ReportCard'
 import GenerateReportNavButtons from '../../components/generateReport/GenerateReportNavButtons'
 import { generateWordDocument } from '../../components/generateReport/ReportGenerator'
-import { getBiWeeklyPassageSummary } from '../../redux/reducers/generateReportSlice'
+import {
+  getBiWeeklyPassageSummary,
+  updateMostRecentReportFilePath,
+} from '../../redux/reducers/generateReportSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { useEffect, useState } from 'react'
@@ -29,16 +32,14 @@ const GenerateReportHome = ({ navigation }: { navigation: any }) => {
   const handleGenerateDocument = async (documentData: any) => {
     const path = await generateWordDocument(documentData)
     setFilePath(path)
+    dispatch(updateMostRecentReportFilePath(path))
   }
 
   useEffect(() => {
-    if (biWeeklyPassageSummaryStore.status === 'fulfilled') {
-      console.log(
-        '🚀 ~ GenerateReportHome ~ BiWeeklyPassageSummaryStore:',
-        biWeeklyPassageSummaryStore
-      )
-      // generateWordDocument(biWeeklyPassageSummaryStore)
+    if (!filePath && biWeeklyPassageSummaryStore.status === 'fulfilled') {
+      // if (!filePath) {
       handleGenerateDocument(biWeeklyPassageSummaryStore)
+      // }
     }
   }, [biWeeklyPassageSummaryStore])
 
