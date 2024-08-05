@@ -23,7 +23,9 @@ import { getTwoWeeksPriorDate } from '../../utils/utils'
 export const generateWordDocument = async (
   BiWeeklyPassageSummaryData: any
 ): Promise<string> => {
-  const { fundingAgency, personnelLead, program } = BiWeeklyPassageSummaryData
+  //organize data
+  const { fundingAgency, personnelLead, program } =
+    BiWeeklyPassageSummaryData.values
   const { definition: programLeadAgency } = fundingAgency
   const { streamName } = program
   const {
@@ -212,6 +214,7 @@ export const generateWordDocument = async (
   })
   // Sharing.shareAsync(filename)
   console.log(`Saved file: ${filename}`)
+
   return filename
 }
 //  try {
