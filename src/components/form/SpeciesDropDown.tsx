@@ -28,7 +28,9 @@ export default function SpeciesDropDown({
 
   const handleOnChange = useCallback(
     (itemValue: any) => {
-      onChangeValue(itemValue)
+      if (onChangeValue) {
+        onChangeValue(itemValue)
+      }
     },
     [speciesValue, value]
   )
@@ -44,7 +46,9 @@ export default function SpeciesDropDown({
       if (value) {
         setFieldTouched()
       }
-      onChangeValue(value)
+      if (onChangeValue) {
+        onChangeValue(value)
+      }
     }
   }, [value])
 
