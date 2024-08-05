@@ -158,7 +158,7 @@ export const saveFishSlice = createSlice({
           adiposeClipped: adiposeClipped,
           existingMarks: existingMark ? existingMarks : [],
           dead: dead,
-          fishCondition: fishConditions,
+          fishConditions: fishConditions,
           willBeUsedInRecapture: null,
           plusCountMethod: null,
           plusCount: false,

@@ -10,7 +10,7 @@ export interface singleBatchRawI {
   forkLength: number
   lifeStage: string
   dead: boolean
-  fishCondition: boolean
+  fishConditions: boolean
   existingMark: boolean
 }
 export interface batchCharacteristicsI {
