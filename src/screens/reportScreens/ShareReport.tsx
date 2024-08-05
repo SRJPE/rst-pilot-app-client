@@ -13,13 +13,14 @@ import {
 import { useState } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { AppDispatch, RootState } from '../../redux/store'
-import { connect, useDispatch } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import GenerateReportNavButtons from '../../components/generateReport/GenerateReportNavButtons'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
 import { Formik } from 'formik'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import CustomModal from '../../components/Shared/CustomModal'
 import EditAccountInfoModalContent from '../../components/generateReport/ReportPreviewModalContent'
+import axios from 'axios'
 
 const ShareReport = ({
   navigation,
@@ -29,14 +30,44 @@ const ShareReport = ({
   dropdownsState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const generateReportsStore = useSelector(
+    (state: RootState) => state.generateReports
+  )
+
   const [reportPreviewModalOpen, setReportPreviewModalOpen] = useState(
     false as boolean
   )
-
   const [automatedReportChecked, setAutomatedReportChecked] = useState(
     false as boolean
   )
   const reportTitle = 'Biweekly Passage Summary'
+
+  const sendEmail = async (
+    filePath: string,
+    email: string,
+    subject: string
+  ) => {
+    try {
+      const { mostRecentReportFilePath } = generateReportsStore
+      console.log('🚀 ~ mostRecentReportFilePath:', mostRecentReportFilePath)
+      const response = await axios.post(
+        'http://localhost:8000/report/send-email',
+        {
+          to: email,
+          subject: subject,
+          filePath: mostRecentReportFilePath,
+        }
+      )
+
+      console.log('Email sent:', response)
+    } catch (error) {
+      console.error('Error sending email:', error)
+    }
+  }
+
+  const handleSubmitReport = (values: any) => {
+    sendEmail('file path', 'email@gmail.com', 'subject')
+  }
 
   return (
     <Formik
@@ -47,7 +78,7 @@ const ShareReport = ({
         frequency: '',
       }}
       onSubmit={(values) => {
-        // SubmitNewMonitoringProgramValues(values)
+        // handleSubmitReport(values)
       }}
     >
       {({
@@ -117,9 +148,14 @@ const ShareReport = ({
               </VStack>
 
               <VStack space={2}>
-                <Text fontSize='2xl' fontWeight='500'>
-                  Who do you want to share report to?
-                </Text>
+                <HStack space={5} alignItems='center'>
+                  <Text fontSize='2xl' fontWeight='500'>
+                    Who do you want to share report to?
+                  </Text>
+                  <Button bg='primary' onPress={handleSubmitReport}>
+                    test email
+                  </Button>
+                </HStack>
                 <FormInputComponent
                   label={'Name (First Last)'}
                   touched={touched}
