@@ -292,7 +292,7 @@ const AddFishContent = ({
     !route.params?.editModeData
       ? stateDefaults.whenSpeciesChinook.forkLength
       : createFormValueDefault({
-          value: route.params?.editModeData.forkLength,
+          value: route.params?.editModeData.forkLength.toString(),
           touched: true,
           required: false,
         })
@@ -670,9 +670,10 @@ const AddFishContent = ({
                   onChangeValue={(value: string) => {
                     let payload = { ...species, value, touched: true }
 
-                    //if not in edit mode, reset form state based on species
+                    //if in edit mode, do not reset form state based on species
                     if (route.params?.editModeData !== undefined) return
 
+                    //if not in edit mode, reset form state based on species
                     if (value.toLowerCase().includes('chinook')) {
                       resetFormState('chinook')
                     } else if (value.toLowerCase().includes('steelhead')) {
