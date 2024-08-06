@@ -194,7 +194,7 @@ const FishProcessing = ({
               shouldProceedToLoadingScreen={true}
             />
           ),
-          [navigation, handleSubmit, errors, touched, values]
+          [navigation, handleSubmit, errors, touched, values, activePage]
         )
         return (
           <>
