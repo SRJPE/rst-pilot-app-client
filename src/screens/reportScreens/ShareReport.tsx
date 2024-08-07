@@ -21,6 +21,7 @@ import CustomSelect from '../../components/Shared/CustomSelect'
 import CustomModal from '../../components/Shared/CustomModal'
 import EditAccountInfoModalContent from '../../components/generateReport/ReportPreviewModalContent'
 import axios from 'axios'
+import { postBiWeeklyPassageSummaryEmail } from '../../redux/reducers/generateReportSlice'
 
 const ShareReport = ({
   navigation,
@@ -42,31 +43,29 @@ const ShareReport = ({
   )
   const reportTitle = 'Biweekly Passage Summary'
 
-  const sendEmail = async (
-    filePath: string,
-    email: string,
-    subject: string
-  ) => {
-    try {
-      const { mostRecentReportFilePath } = generateReportsStore
-      console.log('🚀 ~ mostRecentReportFilePath:', mostRecentReportFilePath)
-      const response = await axios.post(
-        'http://localhost:8000/report/send-email',
-        {
-          to: email,
-          subject: subject,
-          filePath: mostRecentReportFilePath,
-        }
-      )
+  // const sendEmail = async (email: string, subject: string) => {
+  //   try {
+  //     const { mostRecentReportFilePath } = generateReportsStore
+  //     console.log('🚀 ~ mostRecentReportFilePath:', mostRecentReportFilePath)
+  //     const response = await axios.post(
+  //       'http://localhost:8000/report/send-email',
+  //       {
+  //         to: email,
+  //         subject: subject,
+  //         filePath: mostRecentReportFilePath,
+  //       }
+  //     )
 
-      console.log('Email sent:', response)
-    } catch (error) {
-      console.error('Error sending email:', error)
-    }
-  }
+  //     console.log('Email sent:', response)
+  //   } catch (error) {
+  //     console.error('Error sending email:', error)
+  //   }
+  // }
 
   const handleSubmitReport = (values: any) => {
-    sendEmail('file path', 'email@gmail.com', 'subject')
+    const { mostRecentReportFilePath } = generateReportsStore
+
+    dispatch(postBiWeeklyPassageSummaryEmail())
   }
 
   return (
