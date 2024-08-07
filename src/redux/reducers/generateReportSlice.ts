@@ -72,21 +72,23 @@ export const generateReportsSlice = createSlice({
       state.mostRecentReportFilePath = action.payload
     },
   },
-  extraReducers: {
-    [getBiWeeklyPassageSummary.pending.type]: (state, action) => {
-      state.status = pendingStatus
-    },
-
-    [getBiWeeklyPassageSummary.fulfilled.type]: (state, action) => {
-      state.status = fulfilledStatus
-      state.values.program = action.payload.program[0]
-      state.values.personnelLead = action.payload.personnelLead[0]
-      state.values.fundingAgency = action.payload.fundingAgency[0]
-    },
-
-    [getBiWeeklyPassageSummary.rejected.type]: (state, action) => {
-      state.status = rejectedStatus
-    },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getBiWeeklyPassageSummary.pending.type, (state) => {
+        state.status = pendingStatus
+      })
+      .addCase(
+        getBiWeeklyPassageSummary.fulfilled.type,
+        (state, action: any) => {
+          state.status = fulfilledStatus
+          state.values.program = action.payload.program[0]
+          state.values.personnelLead = action.payload.personnelLead[0]
+          state.values.fundingAgency = action.payload.fundingAgency[0]
+        }
+      )
+      .addCase(getBiWeeklyPassageSummary.rejected.type, (state) => {
+        state.status = rejectedStatus
+      })
   },
 })
 
