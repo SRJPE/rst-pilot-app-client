@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import api from '../../api/axiosConfig'
+import { RootState } from '../store'
+import { cloneDeep } from 'lodash'
 
 const uninitializedStatus = 'uninitialized'
 const pendingStatus = 'pending'
@@ -45,7 +47,15 @@ interface APIResponseI {
 
 const initialState: any = {
   status: uninitializedStatus,
+  submissionStatus: 'not-submitted',
   mostRecentReportFilePath: null,
+  previousEmailSubmissions: [],
+  emailValues: {
+    emailSubject: 'testSubject',
+    emailBody: 'test body',
+    emailRecipients: ['bpintel@gmail.com'],
+    // emailAttachments: [],
+  },
   values: {
     program: {},
     personnelLead: {},
@@ -63,6 +73,43 @@ export const getBiWeeklyPassageSummary = createAsyncThunk(
     return response.data
   }
 )
+// export const postBiWeeklyPassageSummaryEmail = createAsyncThunk(
+//   'generateReportsSlice/SendBiWeeklyPassageSummaryEmail',
+//   async (emailParams: any) => {
+//     const response: APIResponseI = await api.post(
+//       `report/send-email`,
+//       emailParams
+//     )
+//     return response.data
+//   }
+// )
+
+export const postBiWeeklyPassageSummaryEmail = createAsyncThunk(
+  'generateReportsSlice/postBiWeeklyPassageSummaryEmail',
+
+  async (_, thunkAPI) => {
+    const state = thunkAPI.getState() as RootState
+    let payload: {
+      biWeeklyPassageSummaryEmailResponse: any[]
+    } = {
+      biWeeklyPassageSummaryEmailResponse: [],
+    }
+    //get submissions
+    const emailSubmissionValues = state.generateReports.emailValues
+    const emailSubmissionValuesCopy = cloneDeep(emailSubmissionValues)
+    console.log('🚀 ~ emailSubmissionValuesCopy:', emailSubmissionValuesCopy)
+    const apiResponse: APIResponseI = await api.post(
+      'report/email',
+      emailSubmissionValuesCopy
+    )
+    // get response from server
+
+    console.log('🚀 ~ apiResponse.data:', apiResponse.data)
+    payload.biWeeklyPassageSummaryEmailResponse.push(apiResponse.data)
+
+    return payload
+  }
+)
 
 export const generateReportsSlice = createSlice({
   name: 'generateReports',
@@ -74,6 +121,7 @@ export const generateReportsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      //get cases
       .addCase(getBiWeeklyPassageSummary.pending.type, (state) => {
         state.status = pendingStatus
       })
@@ -88,6 +136,24 @@ export const generateReportsSlice = createSlice({
       )
       .addCase(getBiWeeklyPassageSummary.rejected.type, (state) => {
         state.status = rejectedStatus
+      })
+      //post cases
+      .addCase(postBiWeeklyPassageSummaryEmail.pending.type, (state) => {
+        state.submissionStatus = 'submitting...'
+      })
+      .addCase(
+        postBiWeeklyPassageSummaryEmail.fulfilled.type,
+        (state, action: any) => {
+          const biWeeklyPassageSummaryEmailResponse = action.payload
+          state.submissionStatus = 'submission-successful'
+          state.emailResponses = [
+            ...state.emailResponses,
+            ...biWeeklyPassageSummaryEmailResponse,
+          ]
+        }
+      )
+      .addCase(postBiWeeklyPassageSummaryEmail.rejected.type, (state) => {
+        state.submissionStatus = 'submission-failed'
       })
   },
 })
