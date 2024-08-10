@@ -71,9 +71,7 @@ const GenerateReportHome = ({ navigation }: { navigation: any }) => {
 
               <Divider bg='black' />
               <HStack my='5' space='10' alignSelf='center'>
-                {[1].map((i) => (
-                  <ReportCard key={i} navigation={navigation} />
-                ))}
+                <ReportCard navigation={navigation} />
               </HStack>
               <FormControl>
                 <FormControl.Label>

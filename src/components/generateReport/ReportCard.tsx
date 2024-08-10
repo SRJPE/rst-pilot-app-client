@@ -1,9 +1,12 @@
 import React from 'react'
 import { Center, Pressable, Text, VStack } from 'native-base'
 
-const ReportCard = ({ key, navigation }: { key: any; navigation: any }) => {
+const ReportCard = ({ navigation }: { navigation: any }) => {
   return (
-    <Pressable key={key} onPress={() => navigation.navigate('Share Report')}>
+    <Pressable
+      //key={key}
+      onPress={() => navigation.navigate('Share Report')}
+    >
       <VStack h='200' w='200'>
         <Center
           bg='secondary'
