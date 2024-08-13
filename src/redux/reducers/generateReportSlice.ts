@@ -73,16 +73,6 @@ export const getBiWeeklyPassageSummary = createAsyncThunk(
     return response.data
   }
 )
-// export const postBiWeeklyPassageSummaryEmail = createAsyncThunk(
-//   'generateReportsSlice/SendBiWeeklyPassageSummaryEmail',
-//   async (emailParams: any) => {
-//     const response: APIResponseI = await api.post(
-//       `report/send-email`,
-//       emailParams
-//     )
-//     return response.data
-//   }
-// )
 
 export const postBiWeeklyPassageSummaryEmail = createAsyncThunk(
   'generateReportsSlice/postBiWeeklyPassageSummaryEmail',
