@@ -53,21 +53,34 @@ export const generateWordDocument = async (
       ],
     })
   }
+  const tableData1 = {
+    headers: [
+      'Date',
+      'Discharge volume (cfs)',
+      'Water temperature (°C)',
+      'Water turbidity (NTU)',
+      'BY22 Winter',
+      'BY22 Spring',
+      'BY22 Fall',
+      'BY22 Late-Fal',
+      'BY22 RBT',
+    ],
+  }
+  const tableData2 = {
+    headers: [
+      'Date',
+      'Discharge volume (cfs)',
+      'Water temperature (°C)',
+      'Water turbidity (NTU)',
+      'BY22 Winter',
+      'BY22 Spring',
+      'BY22 Fall',
+      'BY22 Late-Fal',
+      'BY22 RBT',
+    ],
+  }
 
-  const createTable = () => {
-    const tableData = {
-      headers: [
-        'Date',
-        'Discharge volume (cfs)',
-        'Water temperature (°C)',
-        'Water turbidity (NTU)',
-        'BY22 Winter',
-        'BY22 Spring',
-        'BY22 Fall',
-        'BY22 Late-Fal',
-        'BY22 RBT',
-      ],
-    }
+  const createTable = (tableData: any) => {
     return new Table({
       width: {
         // size: 14535,
@@ -188,9 +201,18 @@ export const generateWordDocument = async (
         },
         children: [
           createParagraph(
-            `Table 1.─ Preliminary estimates of passage by brood-year (BY) and run for unmarked juvenile Chinook salmon and steelhead trout captured by rotary- screw traps at Red Bluff Diversion Dam (RK391), Sacramento River, CA, for the dates listed below. Results include estimated passage, peak river discharge volume, water temperature, turbidity, and fork length (mm) range in parentheses. A dash (-) indicates that sampling was not conducted on that date.`
+            `Table 1.─ 
+            Historical mean cumulative passage for week [System week] and run. Preliminary estimates of passage by brood-year (BY) and run for unmarked juvenile Chinook salmon and steelhead trout captured by rotary- screw traps at Red Bluff Diversion Dam (RK391), Sacramento River, CA, for the dates listed below. Results include estimated passage, peak river discharge volume, water temperature, turbidity, and fork length (mm) range in parentheses. A dash (-) indicates that sampling was not conducted on that date.`
           ),
-          createTable(),
+          createParagraph(
+            `Preliminary estimates of passage by brood-year (BY) and run for unmarked juvenile Chinook salmon and steelhead trout captured by rotary- screw traps at Red Bluff Diversion Dam (RK391), Sacramento River, CA, for the dates listed below. Results include estimated passage, peak river discharge volume, water temperature, turbidity, and fork length (mm) range in parentheses. A dash (-) indicates that sampling was not conducted on that date.`
+          ),
+          createTable(tableData1),
+          createParagraph(`Table 2.- Passage Estimates`),
+          createParagraph(
+            `[Generate table 2 based on querying database and expanding daily counts to passage estimate based on baileys efficiency - you will need to query catch, environmental, and releases (past 2 weeks`
+          ),
+          createTable(tableData2),
         ],
       },
     ],
