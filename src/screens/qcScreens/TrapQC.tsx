@@ -99,6 +99,7 @@ function TrapQC({
           createdTrapVisitCrewResponse,
           createdTrapVisitEnvironmentalResponse,
           createdTrapVisitResponse,
+          stagedForSubmission,
         } = response || {}
 
         if (!createdTrapVisitResponse) {
@@ -122,7 +123,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(temp.measureValueNumeric),
-              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: stagedForSubmission ? '#FBA72A' : !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
             })
           }
 
@@ -137,7 +138,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(turbidity.measureValueNumeric),
-              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             })
           }
 
@@ -146,7 +151,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(response.createdTrapVisitResponse.rpmAtStart),
-              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             }
 
             rpmAtStartData.push(rpmAtStart)
@@ -157,7 +166,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(createdTrapVisitResponse.rpmAtEnd),
-              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             }
             rpmAtEndData.push(rpmAtEnd)
           }
@@ -167,7 +180,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.totalRevolutions,
-              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             }
             counterData.push(counter)
           }
@@ -177,7 +194,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.debrisVolumeLiters,
-              colorScale: !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             }
             debrisData.push(debris)
           }
@@ -330,7 +351,7 @@ function TrapQC({
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Approve
+                Save
               </Text>
             </Button>
           </HStack>

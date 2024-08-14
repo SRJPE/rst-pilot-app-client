@@ -402,6 +402,37 @@ function PartialRecordsQC({
             />
           </VStack>
         )
+      case 'adiposeClipped':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Adipose Clipped</Text>
+            <Radio.Group
+              name='adiposeClipped'
+              accessibilityLabel='adiposeClipped'
+              value={nestedModalInputValue}
+              onChange={(value: any) => {
+                setNestedModalInputValue(value)
+              }}
+            >
+              <Radio
+                colorScheme='primary'
+                value={'true'}
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                True
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='false'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                False
+              </Radio>
+            </Radio.Group>
+          </VStack>
+        )
     }
   }
 
@@ -490,7 +521,7 @@ function PartialRecordsQC({
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Approve
+                Save
               </Text>
             </Button>
           </HStack>
@@ -552,6 +583,11 @@ function PartialRecordsQC({
                   <DataTable.Title
                     style={{ justifyContent: 'center', minWidth: 90 }}
                   >
+                    adipose clipped
+                  </DataTable.Title>
+                  <DataTable.Title
+                    style={{ justifyContent: 'center', minWidth: 90 }}
+                  >
                     dead
                   </DataTable.Title>
                   <DataTable.Title
@@ -587,11 +623,17 @@ function PartialRecordsQC({
                           createdCatchRawResponse.taxonCode === taxon.code
                       )
                       const species = taxon.length ? taxon[0]?.commonname : 'NA'
+                      const adiposeClipped =
+                        createdCatchRawResponse.adiposeClipped != null
+                          ? createdCatchRawResponse.adiposeClipped
+                          : 'NA'
                       const captureRunClass = runDropdowns.filter(
                         (run) =>
                           createdCatchRawResponse.captureRunClass === run.id
                       )
-                      const run = captureRunClass.length ? captureRunClass[0].definition : 'NA'
+                      const run = captureRunClass.length
+                        ? captureRunClass[0].definition
+                        : 'NA'
                       const forkLength =
                         createdCatchRawResponse.forkLength ?? 'NA'
                       const lifestage =
@@ -697,7 +739,9 @@ function PartialRecordsQC({
                               handleOpenNestedModal({
                                 catchRawId,
                                 fieldName: 'captureRunClass',
-                                fieldValue: captureRunClass.length ? captureRunClass[0].id : 'NA',
+                                fieldValue: captureRunClass.length
+                                  ? captureRunClass[0].id
+                                  : 'NA',
                                 modalHeader: 'Run Editor',
                                 modalText: (
                                   <Text
@@ -707,19 +751,17 @@ function PartialRecordsQC({
                                     fontWeight={'light'}
                                   >
                                     You have the run marked as{' '}
-                                    <Text fontWeight={'bold'}>
-                                      {run}
-                                    </Text>{' '}
+                                    <Text fontWeight={'bold'}>{run}</Text>{' '}
                                   </Text>
                                 ),
                               })
                             }
                             numeric
                           >
-                            {truncateAndTrimString(
+                            {`${truncateAndTrimString(
                               capitalizeFirstLetterOfEachWord(run),
-                              10
-                            )}
+                              9
+                            )}...`}
                           </DataTable.Cell>
                           <DataTable.Cell
                             style={{
@@ -796,6 +838,39 @@ function PartialRecordsQC({
                             onPress={() =>
                               handleOpenNestedModal({
                                 catchRawId,
+                                fieldName: 'adiposeClipped',
+                                fieldValue: adiposeClipped,
+                                modalHeader: 'Adipose Clipped Editor',
+                                modalText: (
+                                  <Text
+                                    color='black'
+                                    fontSize='2xl'
+                                    mb={5}
+                                    fontWeight={'light'}
+                                  >
+                                    You have the adipose clipped marked as{' '}
+                                    <Text fontWeight={'bold'}>
+                                      {`${adiposeClipped}`}
+                                    </Text>{' '}
+                                  </Text>
+                                ),
+                              })
+                            }
+                            numeric
+                          >
+                            {capitalizeFirstLetterOfEachWord(
+                              `${adiposeClipped}`
+                            )}
+                          </DataTable.Cell>
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 90,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            onPress={() =>
+                              handleOpenNestedModal({
+                                catchRawId,
                                 fieldName: 'dead',
                                 fieldValue: dead,
                                 modalHeader: 'Dead Editor',
@@ -807,23 +882,14 @@ function PartialRecordsQC({
                                     fontWeight={'light'}
                                   >
                                     You have this record marked as{' '}
-                                    <Text fontWeight={'bold'}>
-                                      {typeof dead == 'boolean'
-                                        ? dead
-                                          ? 'dead'
-                                          : 'not dead'
-                                        : 'NA'}
-                                    </Text>{' '}
+                                    <Text fontWeight={'bold'}>{`${dead}`}</Text>{' '}
                                   </Text>
                                 ),
                               })
                             }
                             numeric
                           >
-                            {truncateAndTrimString(
-                              capitalizeFirstLetterOfEachWord(dead),
-                              10
-                            )}
+                            {capitalizeFirstLetterOfEachWord(dead)}
                           </DataTable.Cell>
                           <DataTable.Cell
                             style={{

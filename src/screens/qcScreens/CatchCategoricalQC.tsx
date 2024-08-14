@@ -26,18 +26,17 @@ import { MaterialIcons } from '@expo/vector-icons'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
   capitalizeFirstLetterOfEachWord,
-  getRandomColor,
   normalizeDate,
   reorderTaxon,
   truncateAndTrimString,
   handleQCChartButtonClick,
+  legendColorList,
 } from '../../utils/utils'
 import { get, startCase } from 'lodash'
 import moment from 'moment'
 
 interface GraphDataI {
   'Adipose Clipped': any[]
-  Species: any[]
   Marks: any[]
   Mortalities: any[]
 }
@@ -83,11 +82,10 @@ function CatchCategoricalQC({
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
-    ('Adipose Clipped' | 'Species' | 'Marks' | 'Mortalities')[]
+    ('Adipose Clipped' | 'Marks' | 'Mortalities')[]
   >(['Adipose Clipped'])
   const [graphData, setGraphData] = useState<GraphDataI>({
     'Adipose Clipped': [],
-    Species: [],
     Marks: [],
     Mortalities: [],
   })
@@ -137,7 +135,7 @@ function CatchCategoricalQC({
     captureRunClass: 'createdCatchRawResponse.captureRunClass',
     lifeStage: 'createdCatchRawResponse.lifeStage',
     forkLength: 'createdCatchRawResponse.forkLength',
-    markType: 'createdCatchRawResponse.markTypeId',
+    markType: 'createdExistingMarksResponse[0].markTypeId',
     markColor: 'createdExistingMarksResponse[0].markColorId',
     markPos: 'createdExistingMarksResponse[0].markPositionId',
     dead: 'createdCatchRawResponse.dead',
@@ -146,15 +144,20 @@ function CatchCategoricalQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
     let adiposeClippedData: any[] = []
-    let speciesData: any[] = []
+    let adiposeClippedByDate: any = {}
     let marksData: any[] = []
     let deadData: any[] = []
+    let deadDataByDate: any = {}
+    /// {
+    //   '1715929200000' : {'true': [1,2], 'false': [3]},
+    //   '1715937800000' : {'true': [4], 'false': [5,6]},
+    // }
 
     interface MarkCombosI {
       [key: string]: any
@@ -162,17 +165,10 @@ function CatchCategoricalQC({
 
     const markCombos = {} as MarkCombosI
 
-    let fishCountByDateAndSpecies: any = {
-      // [date]: {
-      //    species: {count: 00, ids: [...]}
-      // }
-    }
-
     qcData.forEach((catchResponse: any, idx: number) => {
       const {
         id,
         adiposeClipped,
-        taxonCode,
         dead,
         numFishCaught,
         createdAt,
@@ -188,10 +184,9 @@ function CatchCategoricalQC({
       date.setMinutes(0)
       date.setSeconds(0)
       date.setMilliseconds(0)
-      // const dateTime = moment(createdAt).format('MMM Do YY')
-      // const date = new Date(createdAt)
       const dateTime = date.getTime()
       const normalizedDate = normalizeDate(new Date(createdAt))
+      // const stagedForSubmission = catchResponse.stagedForSubmission
 
       const marks = [
         ...createdExistingMarksResponse,
@@ -200,54 +195,30 @@ function CatchCategoricalQC({
         return mark.catchRawId === id
       })
 
-      const species = taxonState.filter((obj: any) => {
-        return obj.code === taxonCode
-      })[0]?.commonname
-
       if (id) {
         if (adiposeClipped != null) {
           let adValue = adiposeClipped
           if (typeof adiposeClipped === 'string') {
             adValue = adiposeClipped === 'true' ? true : false
           }
-          adiposeClippedData.push({
-            ids: [id],
-            dataId: 'Adipose Clipped',
-            x: dateTime,
-            y: adValue ? 2 : 1,
-            colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
-          })
-        }
 
-        if (species) {
-          if (
-            Object.keys(fishCountByDateAndSpecies).includes(
-              String(normalizedDate)
-            )
-          ) {
-            const fishAtDate = fishCountByDateAndSpecies[normalizedDate]
-
-            // add to already existing species count and ids
-            if (Object.keys(fishAtDate).includes(species)) {
-              let speciesAtDate = {
-                ...fishCountByDateAndSpecies[normalizedDate][species],
-              }
-              speciesAtDate.count += numFishCaught
-              speciesAtDate.ids.push(id)
-
-              fishCountByDateAndSpecies[normalizedDate][species] = speciesAtDate
-            }
-            // add new species with new count
-            else {
-              fishCountByDateAndSpecies[normalizedDate] = {
-                ...fishAtDate,
-                [species]: { count: numFishCaught, ids: [id] },
-              }
+          if (adiposeClippedByDate[normalizedDate]) {
+            if (adValue === true) {
+              adiposeClippedByDate[normalizedDate]['true'].push(id)
+            } else if (adValue === false) {
+              adiposeClippedByDate[normalizedDate]['false'].push(id)
             }
           } else {
-            // add date with new species and count
-            fishCountByDateAndSpecies[normalizedDate] = {
-              [species]: { count: numFishCaught, ids: [id] },
+            if (adValue === true) {
+              adiposeClippedByDate[normalizedDate] = {
+                true: [id],
+                false: [],
+              }
+            } else if (adValue === false) {
+              adiposeClippedByDate[normalizedDate] = {
+                true: [],
+                false: [id],
+              }
             }
           }
         }
@@ -297,14 +268,46 @@ function CatchCategoricalQC({
           if (typeof dead === 'string') {
             deadValue = dead === 'true' ? true : false
           }
-          deadData.push({
-            ids: [id],
-            dataId: 'Mortalities',
-            x: dateTime,
-            y: deadValue ? 2 : 1,
-            colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
-          })
+
+          if (deadDataByDate[normalizedDate]) {
+            if (deadValue === true) {
+              deadDataByDate[normalizedDate]['true'].push(id)
+            } else if (deadValue === false) {
+              deadDataByDate[normalizedDate]['false'].push(id)
+            }
+          } else {
+            if (deadValue === true) {
+              deadDataByDate[normalizedDate] = {
+                true: [id],
+                false: [],
+              }
+            } else if (deadValue === false) {
+              deadDataByDate[normalizedDate] = {
+                true: [],
+                false: [id],
+              }
+            }
+          }
         }
+      }
+    })
+
+    Object.keys(adiposeClippedByDate).forEach((date) => {
+      if (adiposeClippedByDate[date]['true'].length) {
+        adiposeClippedData.push({
+          ids: adiposeClippedByDate[date]['true'],
+          dataId: 'Adipose Clipped',
+          x: date,
+          y: 2,
+        })
+      }
+      if (adiposeClippedByDate[date]['false'].length) {
+        adiposeClippedData.push({
+          ids: adiposeClippedByDate[date]['false'],
+          dataId: 'Adipose Clipped',
+          x: date,
+          y: 1,
+        })
       }
     })
 
@@ -315,14 +318,21 @@ function CatchCategoricalQC({
       Object.entries(countObj as MarkCombosI).forEach(
         ([markIdentifier, itemsArray]) => {
           if (
-            every(markIdToColorBuilder, obj => {
+            every(markIdToColorBuilder, (obj) => {
               return obj.name !== markIdentifier
             })
           ) {
-            let randomColor = getRandomColor()
+            let usedColors = markIdToColorBuilder.map((obj: any) => {
+              return obj.symbol.fill
+            })
+
+            let colorOptions = legendColorList.filter((color: any) => {
+              return !usedColors.includes(color)
+            })
+
             markIdToColorBuilder.push({
               name: markIdentifier,
-              symbol: { fill: randomColor },
+              symbol: { fill: colorOptions[0] },
             })
           }
 
@@ -342,49 +352,33 @@ function CatchCategoricalQC({
       )
     })
 
-    setMarkIdToSymbolArr(markIdToColorBuilder)
-
-    Object.keys(fishCountByDateAndSpecies).forEach(date => {
-      const speciesCountFromDate = fishCountByDateAndSpecies[date]
-
-      Object.keys(speciesCountFromDate).forEach(species => {
-        let count = speciesCountFromDate[species]?.count
-        let ids = speciesCountFromDate[species]?.ids
-
-        speciesData.push({
-          ids,
-          dataId: 'Species',
+    Object.keys(deadDataByDate).forEach((date) => {
+      if (deadDataByDate[date]['true'].length) {
+        deadData.push({
+          ids: deadDataByDate[date]['true'],
+          dataId: 'Mortalities',
           x: date,
-          y: count,
-          // label: species
+          y: 2,
         })
-      })
+      }
+      if (deadDataByDate[date]['false'].length) {
+        deadData.push({
+          ids: deadDataByDate[date]['false'],
+          dataId: 'Mortalities',
+          x: date,
+          y: 1,
+        })
+      }
     })
+
+    setMarkIdToSymbolArr(markIdToColorBuilder)
 
     setGraphData({
       'Adipose Clipped': adiposeClippedData,
-      Species: speciesData,
       Marks: marksData,
       Mortalities: deadData,
     })
   }, [qcCatchRawSubmissions])
-
-  // Not updating modal as intended - instead, currently closing modal to update data
-  // useEffect(() => {
-  //   // if any qcCatchRawSubmission is matching the id of the modalData, update modalData to reflect the correct data from the qcCatchRawSubmission
-  //   if (modalData) {
-  //     let updatedModalData = modalData.map((data) => {
-  //       let updatedData = qcCatchRawSubmissions.filter((qcData) => {
-  //         return qcData.createdCatchRawResponse.id === data.id
-  //       })[0]
-
-  //       return updatedData ? updatedData : data
-  //     })
-
-  //     console.log('hit this thing: ', updatedModalData)
-  //     setModalData(updatedModalData)
-  //   }
-  // }, [qcCatchRawSubmissions])
 
   const handlePointClick = (datum: any) => {
     const programId = route.params.programId
@@ -462,7 +456,7 @@ function CatchCategoricalQC({
     }
 
     if (rawData === undefined) {
-      setNestedModalData({ catchRawId, fieldClicked, value: 'none' })
+      setNestedModalData({ catchRawId, fieldClicked, value: 'NA' })
     } else {
       if (typeof rawData === 'boolean') {
         rawData = rawData ? 'true' : 'false'
@@ -523,7 +517,7 @@ function CatchCategoricalQC({
   const GraphMenuButton = ({
     buttonName,
   }: {
-    buttonName: 'Adipose Clipped' | 'Species' | 'Marks' | 'Mortalities'
+    buttonName: 'Adipose Clipped' | 'Marks' | 'Mortalities'
   }) => {
     return (
       <Button
@@ -793,7 +787,6 @@ function CatchCategoricalQC({
 
           <HStack mb={'10'}>
             <GraphMenuButton buttonName={'Adipose Clipped'} />
-            {/* <GraphMenuButton buttonName={'Species'} /> */}
             <GraphMenuButton buttonName={'Marks'} />
             <GraphMenuButton buttonName={'Mortalities'} />
           </HStack>
@@ -818,6 +811,7 @@ function CatchCategoricalQC({
                   legendData={
                     buttonName === 'Marks' ? markIdToSymbolArr : undefined
                   }
+                  legendItemsPerRow={2}
                 />
               )
             })}
@@ -851,7 +845,7 @@ function CatchCategoricalQC({
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Approve
+                Save
               </Text>
             </Button>
           </HStack>

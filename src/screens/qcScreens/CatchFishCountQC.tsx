@@ -9,28 +9,38 @@ import {
   Icon,
   Input,
   Box,
-  Divider,
+  Heading,
+  Radio,
 } from 'native-base'
 import { useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import CustomModal from '../../components/Shared/CustomModal'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
-import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { AppDispatch, RootState } from '../../redux/store'
-import { normalizeDate, reorderTaxon } from '../../utils/utils'
+import {
+  capitalizeFirstLetterOfEachWord,
+  normalizeDate,
+  reorderTaxon,
+  truncateAndTrimString,
+} from '../../utils/utils'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
   catchRawQCSubmission,
   postQCSubmissions,
 } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 import moment from 'moment'
+import { DataTable } from 'react-native-paper'
+import { get, startCase } from 'lodash'
 
-interface ModalDataI {
-  measuredFish: number | null
-  plusCountFish: number | null
-  catchRawIdsWithPlusCount?: number[]
-  dateTimestamp?: number | null
+interface NestedModalDataI {
+  catchRawId: number
+  fieldClicked: string
+  value: string
+}
+interface NestedModalInputValueI {
+  fieldClicked: string
+  value: string | number | boolean
 }
 
 function CatchFishCountQC({
@@ -38,26 +48,67 @@ function CatchFishCountQC({
   route,
   qcCatchRawSubmissions,
   previousCatchRawSubmissions,
-  taxonDropdowns,
+  taxonState,
+  runState,
+  lifeStageState,
+  markTypeState,
+  markColorState,
+  markPositionState,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any
   previousCatchRawSubmissions: any
-  taxonDropdowns: any[]
+  taxonState: any[]
+  runState: any[]
+  lifeStageState: any[]
+  markTypeState: any[]
+  markColorState: any[]
+  markPositionState: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [graphData, setGraphData] = useState<any[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
   const [selectedSpecies, setSelectedSpecies] = useState<string>('')
-  const [modalData, setModalData] = useState<ModalDataI>({
-    measuredFish: null,
-    plusCountFish: null,
-  })
-  const [modalInputValue, setModalInputValue] = useState<string>('')
-  const [modalCommentValue, setModalCommentValue] = useState<string>('')
-  const reorderedTaxon = reorderTaxon(taxonDropdowns)
+  const [modalData, setModalData] = useState<any[] | null>(null)
+  const [nestedModalData, setNestedModalData] =
+    useState<NestedModalDataI | null>(null)
+  const [nestedModalInputValue, setNestedModalInputValue] =
+    useState<NestedModalInputValueI>({
+      fieldClicked: '',
+      value: '',
+    })
+  const [nestedModalComment, setNestedModalComment] = useState<string>('')
+  const reorderedTaxon = reorderTaxon(taxonState)
+
+  const identifierToName = {
+    taxonCode: 'Species',
+    captureRunClass: 'Run',
+    lifeStage: 'Life Stage',
+    forkLength: 'Fork Length',
+    markType: 'Mark Type',
+    markColor: 'Mark Color',
+    markPos: 'Mark Position',
+    dead: 'Mortality',
+    adiposeClipped: 'Adipose Clipped',
+    weight: 'Weight',
+    numFishCaught: 'Plus Count',
+    qcComments: 'Comments',
+  }
+
+  const identifierToDataValueFromRecord = {
+    taxonCode: 'createdCatchRawResponse.taxonCode',
+    captureRunClass: 'createdCatchRawResponse.captureRunClass',
+    lifeStage: 'createdCatchRawResponse.lifeStage',
+    forkLength: 'createdCatchRawResponse.forkLength',
+    markType: 'createdExistingMarksResponse[0].markTypeId',
+    markColor: 'createdExistingMarksResponse[0].markColorId',
+    markPos: 'createdExistingMarksResponse[0].markPositionId',
+    dead: 'createdCatchRawResponse.dead',
+    adiposeClipped: 'createdCatchRawResponse.adiposeClipped',
+    numFishCaught: 'createdCatchRawResponse.numFishCaught',
+  }
 
   useEffect(() => {
     const programId = route.params.programId
@@ -90,7 +141,7 @@ function CatchFishCountQC({
       const plusCount: boolean = catchRaw?.plusCount
       const createdAt = new Date(catchRaw.createdAt)
       const normalizedDate = normalizeDate(createdAt)
-      const qcCompleted = catchResponse.qcCompleted
+      const qcCompleted = catchResponse.createdCatchRawResponse.qcCompleted
 
       if (Object.keys(datesFormatted).includes(String(normalizedDate))) {
         datesFormatted[normalizedDate].count += numFishCaught
@@ -139,64 +190,376 @@ function CatchFishCountQC({
 
   const handlePointClick = (datum: any) => {
     try {
-      let catchRawIdsWithPlusCount = []
+      const programId = route.params.programId
+      const programCatchRaw = previousCatchRawSubmissions.filter(
+        (catchRaw: any) => {
+          return catchRaw.createdCatchRawResponse.programId === programId
+        }
+      )
+      const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
-      if (datum.containsPlusCount) {
-        // from datum.catchRawIds, get all catchRawIds that have plusCount
-        catchRawIdsWithPlusCount = datum.catchRawIds.filter(
-          (catchRawId: number) => {
-            return graphData.find((data) =>
-              data.catchRawIds.includes(catchRawId)
-            )
-          }
-        )
-      }
-      setModalData({
-        measuredFish: datum._y - datum.plusCountValue,
-        plusCountFish: datum.plusCountValue,
-        catchRawIdsWithPlusCount,
-        dateTimestamp: datum.x,
+      const selectedData = qcData.filter((response) => {
+        const id = response.createdCatchRawResponse?.id
+        return datum.catchRawIds.includes(id)
       })
+
+      setModalData(selectedData)
 
       setPointClicked(datum)
       setIsModalOpen(true)
-      setModalInputValue(`${datum.plusCountValue}`)
     } catch (error) {
       console.log('error', error)
+    }
+  }
+
+  const handleModalCellPressed = (fieldClicked: string, data: any) => {
+    let catchRawId = get(data, 'createdCatchRawResponse.id')
+    let rawData = get(
+      data,
+      identifierToDataValueFromRecord[
+        fieldClicked as keyof typeof identifierToDataValueFromRecord
+      ]
+    )
+    let parsedData = null
+
+    switch (fieldClicked) {
+      case 'taxonCode':
+        parsedData = taxonState.filter((obj: any) => {
+          return obj.code === rawData
+        })[0]?.commonname
+        break
+      case 'captureRunClass':
+        parsedData = runState.filter((obj: any) => {
+          return obj.id === rawData
+        })[0]?.definition
+        break
+      case 'lifeStage':
+        parsedData = lifeStageState.filter((obj: any) => {
+          return obj.id === rawData
+        })[0]?.definition
+        break
+      case 'markType':
+        parsedData = markTypeState.filter((obj: any) => {
+          return obj.id === rawData
+        })[0]?.definition
+        break
+      case 'markPos':
+        parsedData = markPositionState.filter((obj: any) => {
+          return obj.id === rawData
+        })[0]?.definition
+        break
+      case 'markColor':
+        parsedData = markColorState.filter((obj: any) => {
+          return obj.id === rawData
+        })[0]?.definition
+        break
+
+      default:
+        break
+    }
+
+    if (rawData === undefined) {
+      setNestedModalData({ catchRawId, fieldClicked, value: 'NA' })
+    } else {
+      if (typeof rawData === 'boolean') {
+        rawData = rawData ? 'true' : 'false'
+      }
+      if (rawData === null) {
+        rawData = 'NA'
+      }
+      setNestedModalData({
+        catchRawId,
+        fieldClicked,
+        value: parsedData ? parsedData : rawData,
+      })
+
+      setNestedModalInputValue({
+        fieldClicked,
+        value: parsedData ? parsedData : rawData,
+      })
     }
   }
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setPointClicked(null)
-    setModalInputValue('')
-    setModalCommentValue('')
-    setModalData({ measuredFish: null, plusCountFish: null })
+    setModalData(null)
   }
 
-  const handleModalSubmit = () => {
-    let submissions: any[] = []
+  const handleCloseNestedModal = () => {
+    setNestedModalData(null)
+    setNestedModalInputValue({ fieldClicked: '', value: '' })
+    setNestedModalComment('')
+  }
 
-    let catchRawId = pointClicked?.firstPlusCountRecordId
+  const handleSubmit = () => {
+    if (nestedModalData && nestedModalInputValue) {
+      if (`${nestedModalData.value}` !== `${nestedModalInputValue.value}`) {
+        let submissions: any[] = []
+        let identifier = nestedModalData.fieldClicked
 
-    catchRawId = catchRawId ? catchRawId : pointClicked?.catchRawIds[0]
-
-    if (pointClicked && catchRawId) {
-      let submissionOne = {
-        fieldName: 'Plus Count',
-        value: modalInputValue,
-      }
-      submissions.push(submissionOne)
-
-      if (modalCommentValue) {
-        let submissionTwo = {
-          fieldName: 'Comments',
-          value: modalCommentValue,
+        let submissionOne = {
+          fieldName:
+            identifierToName[identifier as keyof typeof identifierToName],
+          value: nestedModalInputValue.value,
         }
-        submissions.push(submissionTwo)
-      }
+        submissions.push(submissionOne)
 
-      dispatch(catchRawQCSubmission({ catchRawId, submissions }))
+        if (nestedModalComment) {
+          let submissionTwo = {
+            fieldName: 'Comments',
+            value: nestedModalComment,
+          }
+          submissions.push(submissionTwo)
+        }
+
+        dispatch(
+          catchRawQCSubmission({
+            catchRawId: nestedModalData.catchRawId,
+            submissions,
+          })
+        )
+      }
+    }
+  }
+
+  const CustomNestedModalInput = ({
+    fieldClicked,
+    data,
+  }: {
+    fieldClicked: string
+    data: any
+  }) => {
+    const reorderedTaxon = reorderTaxon(taxonState)
+
+    switch (fieldClicked) {
+      case 'taxonCode':
+        return (
+          <VStack>
+            <Text>Edit Species</Text>
+            <CustomSelect
+              // set selectedValue to using nestedModalInputValue.value as taxonCode to find commonname
+              selectedValue={nestedModalInputValue.value as string}
+              placeholder={'Species'}
+              onValueChange={(value: string) => {
+                const filteredTaxon = reorderedTaxon.filter(
+                  (taxon: any) => taxon.code === value
+                )
+                const taxonCode = filteredTaxon[0]?.code
+
+                setNestedModalInputValue({
+                  fieldClicked: 'taxonCode',
+                  value: taxonCode,
+                })
+              }}
+              setFieldTouched={() => console.log('species field touched')}
+              selectOptions={reorderedTaxon.map((taxon: any) => ({
+                label: taxon?.commonname,
+                value: taxon?.code,
+              }))}
+            />
+          </VStack>
+        )
+      case 'captureRunClass':
+        return (
+          <VStack>
+            <Text>Edit Run</Text>
+            <CustomSelect
+              selectedValue={nestedModalInputValue.value as string}
+              placeholder={'Run'}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({
+                  fieldClicked: 'captureRunClass',
+                  value,
+                })
+              }
+              setFieldTouched={() => console.log('run field touched')}
+              selectOptions={runState.map((run: any) => ({
+                label: run?.definition,
+                value: run?.id,
+              }))}
+            />
+          </VStack>
+        )
+      case 'numFishCaught':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Plus Count</Text>
+            <Input
+              height='50px'
+              width='350px'
+              fontSize='16'
+              placeholder='plus count...'
+              keyboardType='numeric'
+              onChangeText={(value) => {
+                setNestedModalInputValue({
+                  fieldClicked: 'numFishCaught',
+                  value,
+                })
+              }}
+              // onBlur={handleBlur('comments')}
+              value={nestedModalInputValue.value as string}
+            />
+          </VStack>
+        )
+      case 'lifeStage':
+        return (
+          <VStack>
+            <Text>Edit Life Stage</Text>
+            <CustomSelect
+              selectedValue={nestedModalInputValue.value as string}
+              placeholder={'Life Stage'}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'lifeStage', value })
+              }
+              setFieldTouched={() => console.log('lifestage field touched')}
+              selectOptions={lifeStageState.map((lifeStage: any) => ({
+                label: lifeStage?.definition,
+                value: lifeStage?.id,
+              }))}
+            />
+          </VStack>
+        )
+      case 'forkLength':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Fork Length</Text>
+            <Input
+              height='50px'
+              width='350px'
+              fontSize='16'
+              placeholder='fork length...'
+              keyboardType='numeric'
+              onChangeText={(value) => {
+                setNestedModalInputValue({ fieldClicked: 'forkLength', value })
+              }}
+              // onBlur={handleBlur('comments')}
+              value={nestedModalInputValue.value as string}
+            />
+          </VStack>
+        )
+      case 'markType':
+        return (
+          <VStack>
+            <Text>Edit Mark Type</Text>
+            <CustomSelect
+              selectedValue={nestedModalInputValue.value as string}
+              placeholder={'Mark Type'}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'markType', value })
+              }
+              setFieldTouched={() => console.log('marktype field touched')}
+              selectOptions={markTypeState.map((markType: any) => ({
+                label: markType?.definition,
+                value: markType?.id,
+              }))}
+            />
+          </VStack>
+        )
+      case 'markColor':
+        return (
+          <VStack>
+            <Text>Edit Mark Color</Text>
+            <CustomSelect
+              selectedValue={nestedModalInputValue.value as string}
+              placeholder={'Mark Type'}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'markColor', value })
+              }
+              setFieldTouched={() => console.log('markcolor field touched')}
+              selectOptions={markColorState.map((markColor: any) => ({
+                label: markColor?.definition,
+                value: markColor?.id,
+              }))}
+            />
+          </VStack>
+        )
+      case 'markPos':
+        return (
+          <VStack>
+            <Text>Edit Mark Position</Text>
+            <CustomSelect
+              selectedValue={nestedModalInputValue.value as string}
+              placeholder={'Mark Type'}
+              onValueChange={(value: string) =>
+                setNestedModalInputValue({ fieldClicked: 'markPos', value })
+              }
+              setFieldTouched={() => console.log('markposition field touched')}
+              selectOptions={markPositionState.map((markPosition: any) => ({
+                label: markPosition?.definition,
+                value: markPosition?.id,
+              }))}
+            />
+          </VStack>
+        )
+      case 'dead':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Mortality</Text>
+            <Radio.Group
+              name='mortality'
+              accessibilityLabel='mortality'
+              value={nestedModalInputValue.value as string}
+              onChange={(value: any) => {
+                setNestedModalInputValue({
+                  fieldClicked: 'dead',
+                  value,
+                })
+              }}
+            >
+              <Radio
+                colorScheme='primary'
+                value='true'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                True
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='false'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                False
+              </Radio>
+            </Radio.Group>
+          </VStack>
+        )
+      case 'adiposeClipped':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Adipose Clipped</Text>
+            <Radio.Group
+              name='adiposeClipped'
+              accessibilityLabel='adiposeClipped'
+              value={nestedModalInputValue.value as string}
+              onChange={(value: any) => {
+                setNestedModalInputValue({
+                  fieldClicked: 'adiposeClipped',
+                  value,
+                })
+              }}
+            >
+              <Radio
+                colorScheme='primary'
+                value={'true'}
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                True
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='false'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                False
+              </Radio>
+            </Radio.Group>
+          </VStack>
+        )
     }
   }
 
@@ -219,7 +582,7 @@ function CatchFishCountQC({
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
             Select a species to see total daily counts for the selected species.
             Points represent total daily counts of measured and plus count fish.
-            Edit values by selecting a point on the plot below.
+            Edit the plus count by selecting a point on the plot below.
           </Text>
 
           <Box width='70%' marginBottom={5}>
@@ -285,14 +648,562 @@ function CatchFishCountQC({
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Approve
+                Save
               </Text>
             </Button>
           </HStack>
         </VStack>
       </View>
 
-      {modalData && pointClicked ? (
+      {modalData ? (
+        <CustomModal
+          isOpen={isModalOpen}
+          closeModal={() => handleCloseModal()}
+          height='5/6'
+        >
+          <>
+            <CustomModalHeader
+              headerText={
+                'Click on a cell to flag data as low confidence or edit value'
+              }
+              headerStyle={{ fontSize: 23, fontWeight: '300' }}
+              showHeaderButton={false}
+              closeModal={() => setModalData(null)}
+            />
+
+            <Text
+              color='black'
+              fontSize='2xl'
+              marginLeft={8}
+              marginBottom={8}
+              fontWeight={'light'}
+            >
+              {`Selected Point${modalData.length > 1 ? `s` : ''} Date: `}
+              {moment(
+                modalData?.[0]?.createdCatchRawResponse?.createdAt
+              ).format('MMMM Do, YYYY')}
+            </Text>
+            <VStack alignItems={'center'}>
+              <Heading fontSize={23} mb={5}>
+                Table of Selected Points
+              </Heading>
+              <ScrollView
+                horizontal
+                size={'80%'}
+                contentContainerStyle={{
+                  flexGrow: 1,
+                  justifyContent: 'center',
+                }}
+              >
+                <DataTable>
+                  <DataTable.Header>
+                    <DataTable.Title
+                      style={{ justifyContent: 'center', minWidth: 90 }}
+                    >
+                      Variable
+                    </DataTable.Title>
+                    {modalData.map((data, idx) => (
+                      <DataTable.Title
+                        key={idx}
+                        style={{ justifyContent: 'center', minWidth: 90 }}
+                      >{`Fish ${idx + 1}`}</DataTable.Title>
+                    ))}
+                  </DataTable.Header>
+
+                  <ScrollView size={'full'}>
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>Species</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        const taxonCode = data.createdCatchRawResponse.taxonCode
+                        let species = taxonState.filter((obj: any) => {
+                          return obj.code === taxonCode
+                        })
+                        let commonname = species[0]?.commonname
+
+                        return (
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            key={`species-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('taxonCode', data)
+                            }
+                          >
+                            <Text>
+                              {species.length
+                                ? `${truncateAndTrimString(
+                                    capitalizeFirstLetterOfEachWord(commonname),
+                                    12
+                                  )}...`
+                                : 'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>Run</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let run = data.createdCatchRawResponse.captureRunClass
+                        let runObjFiltered = runState.filter((obj: any) => {
+                          return obj.id === run
+                        })
+                        let runDefinition = runObjFiltered.length
+                          ? runObjFiltered[0]?.definition
+                          : 'NA'
+
+                        return (
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            key={`run-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('captureRunClass', data)
+                            }
+                          >
+                            <Text>
+                              {capitalizeFirstLetterOfEachWord(runDefinition) ??
+                                'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>Life Stage</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let lifeStageId = data.createdCatchRawResponse.lifeStage
+                        let lifeStageObjFiltered = lifeStageState.filter(
+                          (obj: any) => {
+                            return obj.id === lifeStageId
+                          }
+                        )
+                        let lifeStage = lifeStageObjFiltered.length
+                          ? lifeStageObjFiltered[0]?.definition
+                          : 'NA'
+
+                        return (
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            key={`lifestage-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('lifeStage', data)
+                            }
+                          >
+                            <Text>
+                              {capitalizeFirstLetterOfEachWord(lifeStage) ??
+                                'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>Plus Count</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let numFishCaught =
+                          data.createdCatchRawResponse.numFishCaught
+
+                        return (
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            key={`lifestage-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('numFishCaught', data)
+                            }
+                          >
+                            <Text>{numFishCaught ?? 'NA'}</Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>Fork Length</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let forkLength =
+                          data?.createdCatchRawResponse.forkLength
+
+                        return (
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            key={`forklength-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('forkLength', data)
+                            }
+                          >
+                            <Text>
+                              {capitalizeFirstLetterOfEachWord(forkLength) ??
+                                'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>Mark Type</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let createdExistingMarksResponse =
+                          data.createdExistingMarksResponse
+
+                        let markTypeId = createdExistingMarksResponse
+                          ? createdExistingMarksResponse[0].markTypeId
+                          : null
+
+                        let markType = markTypeState.filter((obj: any) => {
+                          return obj.id === markTypeId
+                        })
+
+                        return (
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            key={`marktype-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('markType', data)
+                            }
+                          >
+                            <Text>
+                              {markType.length
+                                ? `${truncateAndTrimString(
+                                    capitalizeFirstLetterOfEachWord(
+                                      markType[0]?.definition
+                                    ),
+                                    12
+                                  )}...`
+                                : 'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>Mark Color</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        if (data.createdExistingMarksResponse) {
+                          let markColorCode =
+                            data?.createdExistingMarksResponse[0]?.markColorId
+                          let markColor = markColorState.filter((obj: any) => {
+                            return obj.id === markColorCode
+                          })
+
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`markcolor-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('markColor', data)
+                              }
+                            >
+                              <Text>
+                                {markColor.length
+                                  ? capitalizeFirstLetterOfEachWord(
+                                      markColor[0]?.definition
+                                    )
+                                  : 'NA'}
+                              </Text>
+                            </DataTable.Cell>
+                          )
+                        } else {
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`markcolor-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('markColor', data)
+                              }
+                            >
+                              <Text>NA</Text>
+                            </DataTable.Cell>
+                          )
+                        }
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>Mark Position</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        if (data.createdExistingMarksResponse) {
+                          let markPositionCode =
+                            data?.createdExistingMarksResponse[0]
+                              ?.markPositionId
+
+                          let markPositionObjFiltered =
+                            markPositionState.filter((obj: any) => {
+                              return obj.id === markPositionCode
+                            })
+                          let markPosition = markPositionObjFiltered.length
+                            ? markPositionObjFiltered[0]?.definition
+                            : 'NA'
+
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`markpos-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('markPos', data)
+                              }
+                            >
+                              <Text>
+                                {capitalizeFirstLetterOfEachWord(markPosition)}
+                              </Text>
+                            </DataTable.Cell>
+                          )
+                        } else {
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`markpos-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('markPos', data)
+                              }
+                            >
+                              <Text>NA</Text>
+                            </DataTable.Cell>
+                          )
+                        }
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>Adipose Clip</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let adiposeClipped: boolean =
+                          data.createdCatchRawResponse.adiposeClipped
+
+                        let adValue = adiposeClipped
+                        if (typeof adiposeClipped === 'string') {
+                          adValue = adiposeClipped === 'true' ? true : false
+                        }
+
+                        return (
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            key={`adipose-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed('adiposeClipped', data)
+                            }
+                          >
+                            <Text>
+                              {adValue != null
+                                ? adValue
+                                  ? 'True'
+                                  : 'False'
+                                : 'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>Mort</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        let deadValue = data.createdCatchRawResponse.dead
+                        if (typeof deadValue === 'string') {
+                          deadValue = deadValue === 'true' ? true : false
+                        }
+
+                        return (
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            key={`mortality-${idx}`}
+                            onPress={() => handleModalCellPressed('dead', data)}
+                          >
+                            <Text>
+                              {deadValue != null
+                                ? deadValue
+                                  ? 'True'
+                                  : 'False'
+                                : 'NA'}
+                            </Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+                  </ScrollView>
+                </DataTable>
+              </ScrollView>
+            </VStack>
+          </>
+        </CustomModal>
+      ) : (
+        <></>
+      )}
+
+      {nestedModalData ? (
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
@@ -300,10 +1211,14 @@ function CatchFishCountQC({
         >
           <>
             <CustomModalHeader
-              headerText={'Plus Count Editor'}
+              headerText={
+                identifierToName[
+                  nestedModalData.fieldClicked as keyof typeof identifierToName
+                ]
+              }
               headerFontSize={23}
               showHeaderButton={true}
-              closeModal={() => handleCloseModal()}
+              closeModal={() => handleCloseNestedModal()}
               headerButton={
                 <Button
                   bg='primary'
@@ -311,7 +1226,8 @@ function CatchFishCountQC({
                   px='10'
                   shadow='3'
                   onPress={() => {
-                    handleModalSubmit()
+                    handleSubmit()
+                    handleCloseNestedModal()
                     handleCloseModal()
                   }}
                 >
@@ -326,30 +1242,14 @@ function CatchFishCountQC({
               justifyContent='center'
               justifyItems={'center'}
             >
-              {modalData.dateTimestamp && (
-                <>
-                  <Text
-                    color='black'
-                    fontSize='2xl'
-                    mb={5}
-                    fontWeight={'light'}
-                  >
-                    Selected Point Date:{' '}
-                    {moment(modalData.dateTimestamp).format('MMMM Do, YYYY')}
-                  </Text>
-                  <Divider mb={5} />
-                </>
-              )}
               <Text color='black' fontSize='2xl' mb={5} fontWeight={'light'}>
-                You collected{' '}
-                <Text fontWeight={'bold'}>
-                  {modalData.measuredFish} measured
-                </Text>{' '}
-                fish and{' '}
-                <Text fontWeight={'bold'}>
-                  {modalData.plusCountFish} plus count
-                </Text>{' '}
-                fish.
+                You have the{' '}
+                {
+                  identifierToName[
+                    nestedModalData.fieldClicked as keyof typeof identifierToName
+                  ]
+                }{' '}
+                marked as {`${startCase(nestedModalData.value)}`}
               </Text>
               <Text color='black' fontSize='2xl' fontWeight={'light'}>
                 Click button below to flag data as low confidence or edit value
@@ -383,24 +1283,20 @@ function CatchFishCountQC({
                   height='50px'
                   width='350px'
                   fontSize='16'
-                  placeholder='Flag Comment (optional)'
+                  placeholder='Write a comment'
                   keyboardType='default'
-                  onChangeText={(value) => setModalCommentValue(value)}
-                  value={modalCommentValue}
+                  onChangeText={(value) => {
+                    setNestedModalComment(value)
+                  }}
+                  value={nestedModalComment}
                 />
               </HStack>
 
               <View mt='50px'>
-                <Text>Edit Plus Count</Text>
-                <Input
-                  height='50px'
-                  width='350px'
-                  fontSize='16'
-                  placeholder='Enter Plus Count Value'
-                  keyboardType='default'
-                  onChangeText={(value) => setModalInputValue(value)}
-                  value={modalInputValue}
-                />
+                {CustomNestedModalInput({
+                  fieldClicked: nestedModalData.fieldClicked,
+                  data: nestedModalData.value,
+                })}
               </View>
             </VStack>
           </>
@@ -414,12 +1310,22 @@ function CatchFishCountQC({
 
 const mapStateToProps = (state: RootState) => {
   let taxon = state.dropdowns.values.taxon
+  let run = state.dropdowns.values.run
+  let lifeStage = state.dropdowns.values.lifeStage
+  let markType = state.dropdowns.values.markType
+  let markColor = state.dropdowns.values.markColor
+  let markPosition = state.dropdowns.values.bodyPart
 
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
     previousCatchRawSubmissions:
       state.trapVisitFormPostBundler.previousCatchRawSubmissions,
-    taxonDropdowns: taxon ?? [],
+    taxonState: taxon ?? [],
+    runState: run ?? [],
+    lifeStageState: lifeStage ?? [],
+    markTypeState: markType ?? [],
+    markColorState: markColor ?? [],
+    markPositionState: markPosition ?? [],
   }
 }
 

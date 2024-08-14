@@ -442,10 +442,10 @@ export const getRandomColor = () => {
 }
 
 export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
-  if (!sentence || typeof sentence === 'number') return sentence // Check if the sentence is not empty
+  if (sentence === null || typeof sentence !== 'string') return `${sentence}` // Check if the sentence is not empty
   return sentence
     .split(' ') // Split the sentence into words
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
     .join(' ') // Join the words back into a sentence
 }
 
@@ -473,7 +473,7 @@ export const handleQCChartButtonClick = (
     activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
   } else {
     activeButtonsCopy.push(buttonName)
-    activeButtonsCopy = sortBy(activeButtonsCopy, button => {
+    activeButtonsCopy = sortBy(activeButtonsCopy, (button) => {
       return allButtons.indexOf(button)
     })
   }
@@ -484,7 +484,7 @@ export const combinePlusCounts = (arr: Array<any>) => {
   const map = new Map()
   const result = [] as Array<any>
 
-  arr.forEach(item => {
+  arr.forEach((item) => {
     if (item.plusCount) {
       const key = `${item.taxonCode}_${item.lifeStage}_${item.captureRunClass}`
       if (!map.has(key)) {
@@ -503,3 +503,16 @@ export const combinePlusCounts = (arr: Array<any>) => {
 
   return [...result, ...Array.from(map.values())]
 }
+
+export const legendColorList = [
+  '#007C7C',
+  '#F9A38C',
+  '#D1E8F0',
+  '#011936',
+  '#564e58',
+  '#846075',
+  '#2b3a67',
+  '#772E25',
+  '#FBA72A',
+  '#C0CAAD',
+]

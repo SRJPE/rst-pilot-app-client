@@ -243,6 +243,7 @@ export const postQCSubmissions = createAsyncThunk(
             let id = trapSubmission.createdTrapVisitResponse.id
             let payload = { ...trapSubmission }
             delete payload.createdTrapVisitResponse.id
+            delete payload.stagedForSubmission
             console.log('trap payload', payload)
 
             return api.put(`trap-visit/${id}`, {
@@ -256,6 +257,7 @@ export const postQCSubmissions = createAsyncThunk(
             let id = catchSubmission.createdCatchRawResponse.id
             let payload = { ...catchSubmission }
             delete payload.createdCatchRawResponse.id
+            delete payload.stagedForSubmission
             console.log('catch payload', payload)
 
             return api.put(`catch-raw/${id}`, {
@@ -544,6 +546,8 @@ export const trapVisitPostBundler = createSlice({
             new Date().toISOString()
         }
 
+        trapVisitToQC['stagedForSubmission'] = true
+
         state.previousTrapVisitSubmissions = [
           ...state.previousTrapVisitSubmissions.slice(0, trapVisitIdx),
           ...state.previousTrapVisitSubmissions.slice(trapVisitIdx + 1),
@@ -665,13 +669,21 @@ export const trapVisitPostBundler = createSlice({
               catchRawToQC.createdCatchRawResponse.releaseDate =
                 submission.value
               break
-
             case 'Number Recaptured':
               catchRawToQC.createdCatchRawResponse.numFishCaught = Number(
                 submission.value
               )
               break
-
+            case 'Wild Fish Released':
+              catchRawToQC.releaseResponse.totalWildFishReleased = Number(
+                submission.value
+              )
+              break
+            case 'Hatchery Fish Released':
+              catchRawToQC.releaseResponse.totalHatcheryFishReleased = Number(
+                submission.value
+              )
+              break
             case 'Comments':
               catchRawToQC.createdCatchRawResponse.qcComments = submission.value
               break
@@ -682,6 +694,8 @@ export const trapVisitPostBundler = createSlice({
 
         catchRawToQC.createdCatchRawResponse.qcCompleted = true
         catchRawToQC.createdCatchRawResponse.qcTime = new Date().toISOString()
+
+        catchRawToQC['stagedForSubmission'] = true
 
         state.previousCatchRawSubmissions = [
           ...state.previousCatchRawSubmissions.slice(0, catchRawIdx),
@@ -729,6 +743,28 @@ export const trapVisitPostBundler = createSlice({
               break
             case 'Plus Count':
               qcCatchRaw.createdCatchRawResponse.numFishCaught = Number(
+                submission.value
+              )
+              break
+            case 'Release Site':
+              qcCatchRaw.releaseResponse.releaseSiteId = submission.value
+              break
+            case 'Release Date':
+              qcCatchRaw.createdCatchRawResponse.releaseDate =
+                submission.value
+              break
+            case 'Number Recaptured':
+              qcCatchRaw.createdCatchRawResponse.numFishCaught = Number(
+                submission.value
+              )
+              break
+            case 'Wild Fish Released':
+              qcCatchRaw.releaseResponse.totalWildFishReleased = Number(
+                submission.value
+              )
+              break
+            case 'Hatchery Fish Released':
+              qcCatchRaw.releaseResponse.totalHatcheryFishReleased = Number(
                 submission.value
               )
               break

@@ -26,7 +26,10 @@ import { DataTable } from 'react-native-paper'
 import { get } from 'lodash'
 import { MaterialIcons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import {
+  catchRawQCSubmission,
+  postQCSubmissions,
+} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
 interface NestedModalDataI {
   catchRawId: number
@@ -64,6 +67,7 @@ function EfficiencyQC({
     )
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
     const efficienciesArray: any[] = []
+    const graphSubDataByValue: any = {}
     const graphSubDataPayload: any[] = []
 
     qcData.forEach((catchRawResponse: any, idx: number) => {
@@ -88,6 +92,7 @@ function EfficiencyQC({
 
       const efficiencyDecimal =
         numberReleased !== 0 ? numberRecaptured / numberReleased : 0
+
       const efficiency = efficiencyDecimal * 100
 
       if (qcCompleted && typeof efficiency === 'number') {
@@ -95,13 +100,20 @@ function EfficiencyQC({
       }
 
       if (typeof efficiency === 'number') {
-        graphSubDataPayload.push({
-          id: catchRawId,
-          x: efficiency,
-          y: 1,
-          colorScale: qcNotStarted ? 'rgb(255, 100, 84)' : undefined,
-        })
+        if (Object.keys(graphSubDataByValue).includes(efficiency.toString())) {
+          graphSubDataByValue[efficiency].push(catchRawId)
+        } else {
+          graphSubDataByValue[efficiency] = [catchRawId]
+        }
       }
+    })
+
+    Object.keys(graphSubDataByValue).forEach((efficiency) => {
+      graphSubDataPayload.push({
+        x: Number(efficiency),
+        y: 0,
+        ids: graphSubDataByValue[efficiency],
+      })
     })
 
     // Efficiency Density Calculations -----------------------------
@@ -143,18 +155,18 @@ function EfficiencyQC({
     setGraphSubData(graphSubDataPayload)
   }, [qcCatchRawSubmissions])
 
-  const handePointClick = (datum: any) => {
-    const pointId = datum.id
+  const handlePointClick = (datum: any) => {
+    const pointIds = datum.ids
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
 
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
-    const selectedData = qcData.filter(response => {
+    const selectedData = qcData.filter((response) => {
       const id = response.createdCatchRawResponse?.id
-      return pointId === id
+      return pointIds.includes(id)
     })
 
     console.log('selectedData', selectedData)
@@ -179,11 +191,13 @@ function EfficiencyQC({
         let releaseDate = get(data, 'releaseResponse.releasedAt')
         if (releaseDate) parsedData = releaseDate
         break
-      case 'Number Released':
-        console.log('number released')
-        parsedData =
-          Number(release?.totalWildFishReleased) +
-          Number(release?.totalHatcheryFishReleased)
+      case 'Wild Fish Released':
+        console.log('wild fish released')
+        parsedData = Number(release?.totalWildFishReleased)
+        break
+      case 'Hatchery Fish Released':
+        console.log('hatchery fish released')
+        parsedData = Number(release?.totalHatcheryFishReleased)
         break
       case 'Number Recaptured':
         console.log('number recaptured')
@@ -216,7 +230,7 @@ function EfficiencyQC({
 
     let submissions = []
 
-    // headers: 'Release Date', 'Number Released', 'Number Recaptured', 'Fork Length'
+    // headers: 'Release Date', 'Wild Fish Released', 'Hatchery Fish Released', 'Number Recaptured', 'Fork Length'
 
     if (catchRawId && nestedModalInputValue) {
       let submissionOne = {
@@ -236,6 +250,8 @@ function EfficiencyQC({
       dispatch(catchRawQCSubmission({ catchRawId, submissions }))
     }
   }
+
+  const xIsNotZero = (currentObj: any) => currentObj.x !== 0
 
   const CustomNestedModalInput = ({
     header,
@@ -267,7 +283,7 @@ function EfficiencyQC({
             </Box>
           </VStack>
         )
-      case 'Number Released':
+      case 'Wild Fish Released':
         return (
           <Input
             height='50px'
@@ -275,8 +291,21 @@ function EfficiencyQC({
             fontSize='16'
             placeholder='Enter Number'
             keyboardType='numeric'
-            onChangeText={value => {
-              console.log('number released: ', value)
+            onChangeText={(value) => {
+              setNestedModalInputValue(value)
+            }}
+            value={nestedModalInputValue}
+          />
+        )
+      case 'Hatchery Fish Released':
+        return (
+          <Input
+            height='50px'
+            width='350px'
+            fontSize='16'
+            placeholder='Enter Number'
+            keyboardType='numeric'
+            onChangeText={(value) => {
               setNestedModalInputValue(value)
             }}
             value={nestedModalInputValue}
@@ -290,8 +319,7 @@ function EfficiencyQC({
             fontSize='16'
             placeholder='Enter Number'
             keyboardType='numeric'
-            onChangeText={value => {
-              console.log('number recaptured: ', value)
+            onChangeText={(value) => {
               setNestedModalInputValue(value)
             }}
             value={nestedModalInputValue}
@@ -305,7 +333,7 @@ function EfficiencyQC({
             fontSize='16'
             placeholder='Enter Fork Length'
             keyboardType='numeric'
-            onChangeText={value => {
+            onChangeText={(value) => {
               console.log('fork length: ', value)
               setNestedModalInputValue(value)
             }}
@@ -336,25 +364,31 @@ function EfficiencyQC({
             lines show historic efficiency distributions
           </Text>
 
-          <ScrollView>
-            <Graph
-              xLabel={'Efficiency (Recaptured/Released)'}
-              yLabel={'Density'}
-              chartType='linewithplot'
-              data={graphData}
-              subData={graphSubData}
-              barColor='grey'
-              selectedBarColor='green'
-              height={400}
-              width={600}
-              zoomDomain={{ y: [0, 1.2], x: [0, graphData.length + 1] }}
-              onPointClick={datum => handePointClick(datum)}
-            />
-          </ScrollView>
+          {/* {graphSubData.length > 0 ? ( */}
+          {graphSubData.length > 0 && graphSubData.every(xIsNotZero) ? (
+            <ScrollView>
+              <Graph
+                xLabel={'Efficiency % (Recaptured/Released)'}
+                yLabel={'Density'}
+                chartType='linewithplot'
+                data={graphData}
+                subData={graphSubData}
+                barColor='grey'
+                selectedBarColor='green'
+                height={400}
+                width={600}
+                onPointClick={(datum) => handlePointClick(datum)}
+              />
+            </ScrollView>
+          ) : (
+            <Text fontSize='xl'>
+              No data currently available for this program
+            </Text>
+          )}
 
           <View flex={1}></View>
 
-          {/* <HStack width={'full'} justifyContent={'space-between'}>
+          <HStack width={'full'} justifyContent={'space-between'}>
             <Button
               marginBottom={5}
               width='49%'
@@ -376,14 +410,14 @@ function EfficiencyQC({
               shadow='5'
               bg='primary'
               onPress={() => {
-                console.log('approve')
+                dispatch(postQCSubmissions())
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Approve
+                Save
               </Text>
             </Button>
-          </HStack> */}
+          </HStack>
         </VStack>
       </View>
 
@@ -490,15 +524,15 @@ function EfficiencyQC({
                           justifyContent: 'center',
                         }}
                       >
-                        <Text>Number Released</Text>
+                        <Text>Wild Fish Released</Text>
                       </DataTable.Cell>
                       {modalData.map((data, idx) => {
                         const release = data.releaseResponse
-                        let numberReleased = 0
+                        let wildFishReleased = 0
                         if (release) {
-                          numberReleased =
-                            Number(release?.totalWildFishReleased) +
-                            Number(release?.totalHatcheryFishReleased)
+                          wildFishReleased = Number(
+                            release?.totalWildFishReleased
+                          )
                         }
 
                         return (
@@ -511,10 +545,54 @@ function EfficiencyQC({
                             }}
                             key={`species-${idx}`}
                             onPress={() =>
-                              handleModalCellPressed('Number Released', data)
+                              handleModalCellPressed('Wild Fish Released', data)
                             }
                           >
-                            <Text>{numberReleased}</Text>
+                            <Text>{wildFishReleased}</Text>
+                          </DataTable.Cell>
+                        )
+                      })}
+                    </DataTable.Row>
+
+                    <DataTable.Row
+                      style={[{ justifyContent: 'center', width: '100%' }]}
+                    >
+                      <DataTable.Cell
+                        style={{
+                          minWidth: 120,
+                          minHeight: 70,
+                          width: '100%',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>Hatchery Fish Released</Text>
+                      </DataTable.Cell>
+                      {modalData.map((data, idx) => {
+                        const release = data.releaseResponse
+                        let hatcheryFishReleased = 0
+                        if (release) {
+                          hatcheryFishReleased = Number(
+                            release?.totalHatcheryFishReleased
+                          )
+                        }
+
+                        return (
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 120,
+                              minHeight: 70,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            key={`species-${idx}`}
+                            onPress={() =>
+                              handleModalCellPressed(
+                                'Hatchery Fish Released',
+                                data
+                              )
+                            }
+                          >
+                            <Text>{hatcheryFishReleased}</Text>
                           </DataTable.Cell>
                         )
                       })}
@@ -547,7 +625,7 @@ function EfficiencyQC({
                             }}
                             key={`species-${idx}`}
                             onPress={() =>
-                              handleModalCellPressed('Number Released', data)
+                              handleModalCellPressed('Number Recaptured', data)
                             }
                           >
                             <Text>{numFishCaught ? numFishCaught : 'NA'}</Text>
@@ -674,10 +752,9 @@ function EfficiencyQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  onChangeText={value => {
+                  onChangeText={(value) => {
                     setNestedModalComment(value)
                   }}
-                  // onBlur={handleBlur('comments')}
                   value={nestedModalComment}
                 />
               </HStack>

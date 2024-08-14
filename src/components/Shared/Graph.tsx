@@ -35,6 +35,7 @@ export default function Graph({
   timeBased,
   zoomDomain,
   legendData,
+  legendItemsPerRow,
 }: {
   chartType: 'bar' | 'line' | 'true-or-false' | 'scatterplot' | 'linewithplot'
   title?: string
@@ -52,6 +53,7 @@ export default function Graph({
   timeBased?: boolean
   zoomDomain?: ZoomDomainI
   legendData?: any[]
+  legendItemsPerRow?: number
 }) {
   const dotSize = 5
 
@@ -548,31 +550,21 @@ export default function Graph({
         )}
       </VictoryChart>
       {legendData ? (
-          <ScrollView horizontal={true} maxW={'90%'}>
-            <VictoryLegend
-              x={85}
-              y={20}
-              // width={300}
-              standalone={true}
-              itemsPerRow={legendData.length > 10 ? 8 : 5}
-              title='Legend'
-              centerTitle
-              gutter={20}
-              style={{
-                border: { stroke: 'black' },
-                title: { fontSize: 20 },
-              }}
-              data={
-                legendData
-                  ? legendData
-                  : [
-                      { name: 'One', symbol: { type: 'star' } },
-                      { name: 'Two', symbol: { fill: 'orange' } },
-                      { name: 'Three', symbol: { fill: 'gold' } },
-                    ]
-              }
-            />
-          </ScrollView>
+        <VictoryLegend
+          orientation='horizontal'
+          x={85}
+          y={20}
+          itemsPerRow={legendItemsPerRow ? legendItemsPerRow : 5}
+          title='Legend'
+          centerTitle
+          gutter={20}
+          style={{
+            parent: { justifyContent: 'center', alignItems: 'center' },
+            border: { stroke: 'black' },
+            title: { fontSize: 20 },
+          }}
+          data={legendData}
+        />
       ) : (
         <></>
       )}

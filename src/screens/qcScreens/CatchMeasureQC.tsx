@@ -13,7 +13,7 @@ import {
 import {
   kernelDensityEstimation,
   handleQCChartButtonClick,
-  getRandomColor,
+  legendColorList,
 } from '../../utils/utils'
 import DateTimePicker from '@react-native-community/datetimepicker'
 
@@ -103,8 +103,11 @@ function CatchMeasureQC({
           ).definition
 
           if (lifeStageDefinition && !lifeStageMap[lifeStageDefinition]) {
-            let randomColor = getRandomColor()
-            lifeStageMap[lifeStageDefinition] = randomColor
+            let colorOptions = legendColorList.filter((color) => {
+              return !Object.values(lifeStageMap).includes(color)
+            })
+
+            lifeStageMap[lifeStageDefinition] = colorOptions[0]
           }
         }
 
@@ -168,8 +171,11 @@ function CatchMeasureQC({
           ).definition
 
           if (lifeStageDefinition && !lifeStageMap[lifeStageDefinition]) {
-            let randomColor = getRandomColor()
-            lifeStageMap[lifeStageDefinition] = randomColor
+            let colorOptions = legendColorList.filter((color) => {
+              return !Object.values(lifeStageMap).includes(color)
+            })
+
+            lifeStageMap[lifeStageDefinition] = colorOptions[0]
           }
         }
 
@@ -246,7 +252,7 @@ function CatchMeasureQC({
       <Button
         bg={activeButtons.includes(buttonName) ? 'primary' : 'secondary'}
         marginX={0.5}
-        flex={1}
+        flex={8}
         onPress={() => {
           const newActiveButtons = handleQCChartButtonClick(
             allButtons,
@@ -407,7 +413,7 @@ function CatchMeasureQC({
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Approve
+                Save
               </Text>
             </Button>
           </HStack>
