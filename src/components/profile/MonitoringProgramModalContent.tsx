@@ -14,86 +14,93 @@ import {
 } from 'native-base'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import { Input } from 'native-base'
-
-//just an initial outline
-const DUMMY_MONITORING_PROGRAM = {
-  streamName: 'Bay View Stream',
-  defaultTraps: {
-    uri: 'https://www.maptive.com/wp-content/uploads/2020/11/sales-use-case-mapping-software-e1600453645467.jpg',
-    alt: 'default trap image',
-  },
-  crewMembers: [
-    { crewId: 1, firstName: 'Barry', lastName: 'Birkman' },
-    { crewId: 2, firstName: 'Margaret', lastName: 'Wright' },
-    { crewId: 3, firstName: 'Ted', lastName: 'Lasso' },
-  ],
-  hatcheryInformation: {
-    hatcheryName: 'Chicken Hatchery',
-    location: 'Sacramento, CA',
-  },
-  measuringRequirements: { numberMeasured: 365 },
-}
+import { groupArrayItems } from '../../utils/utils'
+import type {
+  MonitoringProgram,
+  TrappingSite,
+  CrewMember,
+  HatcheryInformation,
+} from '../../utils/interfaces'
 
 const MonitoringProgramInfoModalContent = ({
   closeModal,
+  monitoringProgramInfo,
 }: {
-  closeModal: any
+  closeModal: () => void
+  monitoringProgramInfo: MonitoringProgram | null
 }) => {
-  const {
-    streamName,
-    defaultTraps,
-    crewMembers,
-    hatcheryInformation,
-    measuringRequirements,
-  } = DUMMY_MONITORING_PROGRAM
+  const groupedTrappingSites = groupArrayItems(
+    monitoringProgramInfo?.trappingSites || [],
+    10
+  ) as TrappingSite[][]
+
+  const groupedCrewMembers = groupArrayItems(
+    monitoringProgramInfo?.crewMembers || [],
+    6
+  ) as CrewMember[][]
+
   return (
     <>
       <CustomModalHeader
-        headerText={'Monitoring Program Info'}
+        headerText={monitoringProgramInfo?.programName || ''}
         showHeaderButton={true}
         closeModal={closeModal}
       />
       <VStack space={5} mx='5%'>
-        <Divider my={2} thickness='3' />
-        <Text fontSize='xl' fontWeight={500}>
-          Stream Name: <Text fontWeight={300}>{streamName}</Text>
+        <Text fontSize='lg' fontWeight={500}>
+          Stream Name:{' '}
+          <Text fontWeight={300}>{monitoringProgramInfo?.streamName}</Text>
         </Text>
         <VStack space={3}>
-          <Text fontSize='xl' fontWeight={500}>
-            Default Traps:
+          <Text fontSize='lg' fontWeight={500}>
+            Trap Sites:
           </Text>
-          <Image
-            source={{ uri: defaultTraps.uri }}
-            alt={defaultTraps.alt}
-            width={500}
-            height={250}
-          />
+          <HStack space={5}>
+            {groupedTrappingSites?.map(trappingSites => (
+              <VStack>
+                {trappingSites.map(site => {
+                  return (
+                    <Text
+                      key={site.trapName}
+                      fontSize='lg'
+                      fontWeight={300}
+                    >{`${site.trapName} - ${site.siteName}`}</Text>
+                  )
+                })}
+              </VStack>
+            ))}
+          </HStack>
         </VStack>
         <Divider my={2} thickness='3' />
-        <HStack alignItems='flex-start' space={2}>
-          <Text fontSize='xl' fontWeight={500}>
+        <VStack alignItems='flex-start' space={2}>
+          <Text fontSize='lg' fontWeight={500}>
             Crew Members:
           </Text>
-          <VStack>
-            {crewMembers.map(member => (
-              <Text
-                fontSize='xl'
-                fontWeight={300}
-              >{`${member.firstName} ${member.lastName}`}</Text>
+          <HStack space={5}>
+            {groupedCrewMembers?.map((crewMembers, index) => (
+              <VStack key={index}>
+                {crewMembers.map(member => (
+                  <Text key={member.id} fontSize='lg' fontWeight={300}>{`${
+                    member.firstName
+                  } ${member.lastName} ${
+                    member.role === 'lead' ? '(Lead)' : ''
+                  }`}</Text>
+                ))}
+              </VStack>
             ))}
-          </VStack>
-        </HStack>
+          </HStack>
+        </VStack>
         <Divider my={2} thickness='3' />
         <VStack space={3}>
-          <Text fontSize='xl' fontWeight={500}>
+          <Text fontSize='lg' fontWeight={500}>
             Hatchery Information:{' '}
           </Text>
           <HStack justifyContent='space-between'>
-            <Text fontWeight={300} fontSize='xl'>
+            <Text fontWeight={300} fontSize='lg'>
               Hatchery Name
             </Text>
-            <Text fontWeight={300} fontSize='xl'>
-              {hatcheryInformation.hatcheryName}
+            <Text fontWeight={300} fontSize='lg'>
+              {monitoringProgramInfo?.hatcheryInformation?.hatcheryName}
             </Text>
           </HStack>
         </VStack>
@@ -101,16 +108,17 @@ const MonitoringProgramInfoModalContent = ({
         <Divider my={2} thickness='3' />
 
         <VStack space={3}>
-          <Text fontSize='xl' fontWeight={500}>
+          <Text fontSize='lg' fontWeight={500}>
             Species Measuring Requirements:{' '}
           </Text>
           <HStack justifyContent='space-between'>
-            <Text fontWeight={300} fontSize='xl'>
+            <Text fontWeight={300} fontSize='lg'>
               Number of Chinook Measured
             </Text>
-            <Text fontWeight={300} fontSize='xl'>
+            {/* //TODO: Add this back in when the data is available */}
+            {/* <Text fontWeight={300} fontSize='lg'>
               {measuringRequirements.numberMeasured}
-            </Text>
+            </Text> */}
           </HStack>
         </VStack>
 
@@ -130,7 +138,7 @@ const MonitoringProgramInfoModalContent = ({
             closeModal()
           }}
         >
-          <Text fontSize='xl' fontWeight='bold' color='white'>
+          <Text fontSize='lg' fontWeight='bold' color='white'>
             Close
           </Text>
         </Button>
