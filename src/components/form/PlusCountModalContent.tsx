@@ -9,8 +9,9 @@ import {
   Heading,
   HStack,
   Radio,
+  View,
 } from 'native-base'
-import React from 'react'
+import React, { useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
@@ -22,6 +23,7 @@ import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
 import RenderWarningMessage from '../Shared/RenderWarningMessage'
+import SpeciesDropDown from './SpeciesDropDown'
 
 const initialFormValues = {
   species: '',
@@ -46,6 +48,27 @@ const PlusCountModalContent = ({
   const reorderedTaxon = reorderTaxon(taxon)
   const alphabeticalLifeStage = alphabeticalSort(lifeStage, 'definition')
 
+  const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
+    false as boolean
+  )
+  const [speciesList, setSpeciesList] = useState<
+    { label: string; value: string }[]
+  >(
+    reorderedTaxon.map((taxon: any) => ({
+      label: taxon?.commonname,
+      value: taxon?.commonname,
+    }))
+  )
+  const [lifeStageDropDownOpen, setLifeStageDropDownOpen] = useState(
+    false as boolean
+  )
+  const [lifeStageList, setLifeStageList] = useState<
+    { label: string; value: string }[]
+  >([
+    { label: 'adult', value: 'adult' },
+    { label: 'juvenile', value: 'juvenile' },
+  ])
+
   const handleFormSubmit = (values: any) => {
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
@@ -61,11 +84,11 @@ const PlusCountModalContent = ({
   }
 
   return (
-    <ScrollView>
+    <View>
       <Formik
         validationSchema={addPlusCountsSchema}
         initialValues={{ ...initialFormValues, plusCountMethod: 'none' }}
-        onSubmit={values => handleFormSubmit(values)}
+        onSubmit={(values) => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -106,7 +129,7 @@ const PlusCountModalContent = ({
             />
             <VStack space={5} paddingX='20' paddingTop='7' paddingBottom='3'>
               <HStack space={6}>
-                <FormControl w='31%'>
+                <FormControl w='31%' mb={speciesDropDownOpen ? 250 : 0}>
                   <HStack space={4} alignItems='center'>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
@@ -118,21 +141,19 @@ const PlusCountModalContent = ({
                       errors.species &&
                       RenderErrorMessage(errors, 'species')}
                   </HStack>
-                  <CustomSelect
-                    selectedValue={values.species}
-                    placeholder={'Species'}
-                    onValueChange={handleChange('species')}
+                  <SpeciesDropDown
+                    open={speciesDropDownOpen}
+                    setOpen={setSpeciesDropDownOpen}
+                    list={speciesList}
+                    setList={setSpeciesList}
+                    setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={reorderedTaxon.map((item: any) => ({
-                      label: item.commonname,
-                      value: item.commonname,
-                    }))}
                   />
                 </FormControl>
                 {(values.species === 'Chinook salmon' ||
                   values.species === 'Steelhead / rainbow trout' ||
                   !values.species) && (
-                  <FormControl w='31%'>
+                  <FormControl w='31%' mb={lifeStageDropDownOpen ? 250 : 0}>
                     <HStack space={4} alignItems='center'>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
@@ -286,7 +307,7 @@ const PlusCountModalContent = ({
           </>
         )}
       </Formik>
-    </ScrollView>
+    </View>
   )
 }
 const mapStateToProps = (state: RootState) => {
