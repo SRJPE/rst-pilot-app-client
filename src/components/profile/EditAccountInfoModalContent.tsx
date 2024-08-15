@@ -16,6 +16,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import api from '../../api/axiosConfig'
 import CustomSelect from '../Shared/CustomSelect'
+import * as SecureStore from 'expo-secure-store'
 
 const editAccountValidationSchema = Yup.object().shape({
   firstName: Yup.string().label('First Name').required(),
@@ -64,13 +65,26 @@ const EditAccountInfoModalContent = ({
         onSubmit={async (values, { setSubmitting }) => {
           const { firstName, lastName, phone, agencyId, emailAddress, role } =
             values
+
+          const accessToken = await SecureStore.getItemAsync('userAccessToken')
+          const idToken = await SecureStore.getItemAsync('userIdToken')
+
+          const headers = {
+            authorization: `Bearer ${accessToken}` as string,
+            idToken: idToken as string,
+          }
+
           const editedUserResponse = await api
-            .patch(`user/${user.azureUid}/edit`, {
-              firstName,
-              lastName,
-              phone,
-              agencyId,
-            })
+            .patch(
+              `user/${user.azureUid}/edit`,
+              {
+                firstName,
+                lastName,
+                phone,
+                agencyId,
+              },
+              { headers }
+            )
             .catch(err => {
               console.log(
                 '🚀 ~ file: AddNewUserModalContent.tsx:240 ~ onSubmit={ ~ err:',
