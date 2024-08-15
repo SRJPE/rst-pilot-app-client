@@ -50,6 +50,7 @@ const initialState: any = {
   submissionStatus: 'not-submitted',
   mostRecentReportFilePath: null,
   previousEmailSubmissions: [],
+  reportType: null,
   emailValues: {
     emailSubject: 'testSubject',
     emailBody: 'test body',
@@ -60,6 +61,9 @@ const initialState: any = {
     program: {},
     personnelLead: {},
     fundingAgency: {},
+    catchBiWeekly: {},
+    environmentalBiWeekly: {},
+    releaseBiWeekly: {},
   },
 }
 
@@ -68,7 +72,7 @@ export const getBiWeeklyPassageSummary = createAsyncThunk(
   'generateReportsSlice/getBiWeeklyPassageSummary',
   async (programId: string | number) => {
     const response: APIResponseI = await api.get(
-      `program/biWeeklyPassageSummary/${programId}`
+      `reports/biWeeklyPassageSummary/${programId}`
     )
     return response.data
   }
@@ -122,6 +126,10 @@ export const generateReportsSlice = createSlice({
           state.values.program = action.payload.program[0]
           state.values.personnelLead = action.payload.personnelLead[0]
           state.values.fundingAgency = action.payload.fundingAgency[0]
+          state.values.environmentalBiWeekly =
+            action.payload.environmentalBiWeekly
+          state.values.catchBiWeekly = action.payload.catchBiWeekly
+          state.values.releaseBiWeekly = action.payload.releaseBiWeekly
         }
       )
       .addCase(getBiWeeklyPassageSummary.rejected.type, (state) => {
