@@ -56,6 +56,7 @@ export const userCredentialsSlice = createSlice({
         ...action.payload,
       })
       return (state = {
+        ...state,
         azureUid: state.azureUid,
         displayName: `${action.payload.first_name} ${action.payload.last_name}`,
         emailAddress: state.emailAddress,
