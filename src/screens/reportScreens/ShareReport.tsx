@@ -20,7 +20,6 @@ import { Formik } from 'formik'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import CustomModal from '../../components/Shared/CustomModal'
 import EditAccountInfoModalContent from '../../components/generateReport/ReportPreviewModalContent'
-import axios from 'axios'
 import { postBiWeeklyPassageSummaryEmail } from '../../redux/reducers/generateReportSlice'
 
 const ShareReport = ({
@@ -149,7 +148,7 @@ const ShareReport = ({
               <VStack space={2}>
                 <HStack space={5} alignItems='center'>
                   <Text fontSize='2xl' fontWeight='500'>
-                    Who do you want to share report to?
+                    Who do you want to share the report to?
                   </Text>
                   <Button bg='primary' onPress={handleSubmitReport}>
                     test email
@@ -194,7 +193,7 @@ const ShareReport = ({
                 <FormControl>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
-                      How often do you want to share report?
+                      How often do you want to share the report?
                     </Text>
                   </FormControl.Label>
                   <CustomSelect
