@@ -24,8 +24,35 @@ export const generateWordDocument = async (
   BiWeeklyPassageSummaryData: any
 ): Promise<string> => {
   //organize data
-  const { fundingAgency, personnelLead, program } =
-    BiWeeklyPassageSummaryData.values
+  const {
+    fundingAgency,
+    personnelLead,
+    program,
+    catchBiWeekly,
+    environmentalBiWeekly,
+    releaseBiWeekly,
+  } = BiWeeklyPassageSummaryData.values
+  console.log('🚀 ~ file: ReportGenerator.tsx:35 ~ program:', program)
+  console.log(
+    '🚀 ~ file: ReportGenerator.tsx:35 ~ personnelLead:',
+    personnelLead
+  )
+  console.log(
+    '🚀 ~ file: ReportGenerator.tsx:35 ~ fundingAgency:',
+    fundingAgency
+  )
+  console.log(
+    '🚀 ~ file: ReportGenerator.tsx:35 ~ releaseBiWeekly:',
+    releaseBiWeekly
+  )
+  console.log(
+    '🚀 ~ file: ReportGenerator.tsx:35 ~ environmentalBiWeekly:',
+    environmentalBiWeekly
+  )
+  console.log(
+    '🚀 ~ file: ReportGenerator.tsx:35 ~ catchBiWeekly:',
+    catchBiWeekly
+  )
   const { definition: programLeadAgency } = fundingAgency
   const { streamName } = program
   const {
@@ -53,6 +80,8 @@ export const generateWordDocument = async (
       ],
     })
   }
+  const calculateHIstoricalCumulativePassage = () => {}
+  const calculatePassageEstimates = () => {}
   const tableData1 = {
     headers: [
       'Date',
