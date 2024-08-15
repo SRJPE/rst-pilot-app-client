@@ -28,6 +28,7 @@ import {
 } from '../../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import api from '../../api/axiosConfig'
+import { MonitoringProgram } from '../../utils/interfaces'
 
 import {
   // @ts-ignore
@@ -44,6 +45,8 @@ const Profile = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false)
+  const [selectedMonitoringProgramInfo, setSelectedMonitoringProgramInfo] =
+    useState<MonitoringProgram | null>(null)
   const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] =
     useState<boolean>(false)
   const [monitoringProgramInfoModalOpen, setMonitoringProgramInfoModalOpen] =
@@ -57,6 +60,8 @@ const Profile = ({
     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/B2C_1_password_reset/v2.0/'
   )
   const userIsLead = userCredentialsStore.role === 'lead'
+  const userPrograms = userCredentialsStore.userPrograms || []
+  // const userPrograms = userCredentialsStore.userPrograms.slice(0, 1)
   //////////////////////////////////////////////
 
   const [pwResetRequest, pwResetResponse, pwResetPromptAsync] = useAuthRequest(
@@ -159,18 +164,29 @@ const Profile = ({
           >
             <HStack justifyContent='space-between' alignItems='center'>
               <VStack>
-                <Text fontSize='2xl' bold>
-                  Monitoring Program
+                <Text fontSize='2xl' bold mb={5}>
+                  {userPrograms.length > 1
+                    ? 'Monitoring Programs'
+                    : 'Monitoring Program'}
                 </Text>
-                <Text fontSize='xl'> {'<Monitoring Program Team Name>'}</Text>
+                <HStack space={5} flexWrap={'wrap'}>
+                  {userPrograms.map((program: any) => (
+                    <Button
+                      key={program.id}
+                      borderWidth={1}
+                      borderColor='dark.500'
+                      mb={5}
+                      onPress={() => {
+                        setSelectedMonitoringProgramInfo(program)
+
+                        setMonitoringProgramInfoModalOpen(true)
+                      }}
+                    >
+                      <Text fontSize='xl'>{program.programName}</Text>
+                    </Button>
+                  ))}
+                </HStack>
               </VStack>
-              <Icon
-                as={Entypo}
-                name='chevron-right'
-                color='black'
-                size={8}
-                marginX={3}
-              />
             </HStack>
           </Pressable>
           <Divider bg='#414141' />
@@ -267,10 +283,11 @@ const Profile = ({
       <CustomModal
         isOpen={monitoringProgramInfoModalOpen}
         closeModal={() => setMonitoringProgramInfoModalOpen(false)}
-        // height='1/1'
+        height='full'
       >
         <MonitoringProgramInfoModalContent
           closeModal={() => setMonitoringProgramInfoModalOpen(false)}
+          monitoringProgramInfo={selectedMonitoringProgramInfo}
         />
       </CustomModal>
 
