@@ -128,13 +128,23 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
                 }
               )
 
-              // dispatch(getVisitSetupDefaults(personnelResponse.data.id))
+              const userProgramsResponse = await api.get(
+                `program/personnel/${personnelResponse.data.id}`,
+                {
+                  headers: {
+                    authorization: `Bearer ${accessToken}` as string,
+                    idToken: idToken as string,
+                  },
+                }
+              )
+              dispatch(getVisitSetupDefaults(personnelResponse.data.id))
 
               dispatch(
                 saveUserCredentials({
                   ...userCredentialsStore,
                   ...userRes.data,
                   ...personnelResponse.data,
+                  userPrograms: userProgramsResponse.data,
                 })
               )
             } catch (error: any) {
