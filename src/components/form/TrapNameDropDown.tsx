@@ -4,6 +4,9 @@ import DropDownPicker from 'react-native-dropdown-picker'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 
 export default function TrapNameDropDown({
+  open,
+  onOpen,
+  setOpen,
   list,
   setList,
   setFieldValue,
@@ -11,6 +14,9 @@ export default function TrapNameDropDown({
   visitSetupState,
   tabSlice,
 }: {
+  open: boolean
+  onOpen: any
+  setOpen: any
   list: any
   setList: any
   setFieldValue: any
@@ -18,8 +24,8 @@ export default function TrapNameDropDown({
   visitSetupState: any
   tabSlice: TabStateI
 }) {
-  const [open, setOpen] = useState(false as boolean)
   const [value, setValue] = useState([] as Array<any>)
+  const [marginBottom, setMarginBottom] = useState(0 as number)
 
   useEffect(() => {
     if (
@@ -54,31 +60,48 @@ export default function TrapNameDropDown({
       return 50
     }
   }
+  useEffect(() => {
+    setMarginBottom(generateMarginBottom())
+  }, [list])
 
   return (
-    <View
+    <DropDownPicker
+      open={open}
+      onOpen={onOpen}
+      value={value}
+      items={list}
+      setOpen={setOpen}
+      setValue={setValue}
+      setItems={setList}
+      multiple={true}
+      mode='BADGE'
+      listMode='SCROLLVIEW'
+      badgeDotColors={['#007C7C']}
+      placeholder='Select trap names'
+      searchPlaceholder='Search...'
+      maxHeight={275}
+      zIndex={2000}
       style={{
-        backgroundColor: '#171717',
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: open ? generateMarginBottom() : 0,
+        marginTop: 4,
+        borderColor: '#d4d4d4d4',
+        borderRadius: 4,
+        height: 50,
+        backgroundColor: '#fff',
+        marginBottom: open ? marginBottom : 0,
       }}
-    >
-      <DropDownPicker
-        open={open}
-        value={value}
-        items={list}
-        setOpen={setOpen}
-        setValue={setValue}
-        setItems={setList}
-        multiple={true}
-        mode='BADGE'
-        badgeDotColors={['#007C7C']}
-        placeholder='Select trap names'
-        searchPlaceholder='Search...'
-        maxHeight={275}
-      />
-    </View>
+      arrowIconStyle={{
+        width: 30,
+        height: 30,
+      }}
+      dropDownContainerStyle={{
+        backgroundColor: '#fff',
+        borderColor: '#d4d4d4d4',
+        borderBottomLeftRadius: 4,
+        borderBottomRightRadius: 4,
+      }}
+      textStyle={{
+        fontSize: 16,
+      }}
+    />
   )
 }

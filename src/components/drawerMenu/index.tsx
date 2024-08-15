@@ -145,7 +145,6 @@ const DrawerMenu = ({
         </HStack>
         <Divider mt='2' />
 
-        {/* <DrawerContentScrollView> */}
         <MenuButton
           active={currentRoute === 'Home'}
           onPress={() => handlePressMainNavButton('Home')}
@@ -235,7 +234,6 @@ const DrawerMenu = ({
             })}
           </>
         )}
-        {/* </DrawerContentScrollView> */}
       </VStack>
     </>
   )

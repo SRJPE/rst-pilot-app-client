@@ -114,7 +114,12 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       state.trapVisitFormPostBundler.catchRawSubmissions
 
     // try {
-    const promiseTracker: any = {
+    const promiseTracker: {
+      [key: string]: {
+        trapPromise: Promise<any>
+        linkedCatchRawSubmissions: any[]
+      }
+    } = {
       // '028u208u02934u': {
       //   trap: trapPromise,
       //   linkedCatchRawSubmissions: []
@@ -131,7 +136,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       promiseTracker[uuid] = {
         trapPromise,
         linkedCatchRawSubmissions,
-      }
+      } as any
     })
 
     // iterate through each uuid key in promiseTracker and await trap post, get back id, then await catches
@@ -221,7 +226,6 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
     } catch (err) {
       console.log('error in fetchWithPostParams: ', err)
     }
-
     return payload
   }
 )
