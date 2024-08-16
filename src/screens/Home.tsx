@@ -4,6 +4,9 @@ import BottomNavigation from '../components/home/HomeNavButtons'
 import { StyleSheet } from 'react-native'
 import AppLogo from '../components/Shared/AppLogo'
 import { Entypo } from '@expo/vector-icons'
+import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
+import { RootState, AppDispatch } from '../redux/store'
+import { connect, useDispatch } from 'react-redux'
 
 const styles = StyleSheet.create({
   recentItemsContainer: {
@@ -41,13 +44,30 @@ const styles = StyleSheet.create({
   },
 })
 
-export default function Home({ navigation }: { navigation: any }) {
+const Home = ({
+  navigation,
+  userCredentialsStore,
+}: {
+  navigation: any
+  userCredentialsStore: any
+}) => {
   const [staggerOpen, setStaggerOpen] = useState(false as boolean)
   const [opacity, setOpacity] = useState(1 as number)
+  const dispatch = useDispatch<AppDispatch>()
 
   useEffect(() => {
     staggerOpen ? setOpacity(0.25) : setOpacity(1)
   }, [staggerOpen])
+
+  useEffect(() => {
+    if (userCredentialsStore?.id) {
+      try {
+        dispatch(getVisitSetupDefaults(userCredentialsStore.id))
+      } catch (error) {
+        console.log('error from home screen: ', error)
+      }
+    }
+  }, [userCredentialsStore])
 
   const recentItemsCard = ({
     title,
@@ -115,3 +135,11 @@ export default function Home({ navigation }: { navigation: any }) {
     </VStack>
   )
 }
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    userCredentialsStore: state.userCredentials,
+  }
+}
+
+export default connect(mapStateToProps)(Home)

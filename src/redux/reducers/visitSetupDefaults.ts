@@ -89,10 +89,15 @@ const initialState: InitialStateI = {
 export const getVisitSetupDefaults = createAsyncThunk(
   'visitSetupDefaults/getVisitSetupDefaults',
   async (personnelId: number) => {
-    const response: APIResponseI = await api.get(
-      `trap-visit/visit-setup/default/${personnelId}`
-    )
-    return response.data
+    try {
+      const response: APIResponseI = await api.get(
+        `trap-visit/visit-setup/default/${personnelId}`
+      )
+      return response.data
+    } catch (error: any) {
+      console.log('err', error.response.data.message)
+      throw error
+    }
   }
 )
 

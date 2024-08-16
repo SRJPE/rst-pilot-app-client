@@ -53,6 +53,7 @@ const mapStateToProps = (state: RootState) => {
     tabState: state.tabSlice,
     addGeneticSamplesState: state.addGeneticSamples,
     appliedMarksState: state.addMarksOrTags,
+    userCredentialsStore: state.userCredentials,
   }
 }
 
@@ -71,6 +72,7 @@ const IncompleteSections = ({
   tabState,
   addGeneticSamplesState,
   appliedMarksState,
+  userCredentialsStore,
 }: {
   navigation: any
   navigationState: any
@@ -86,6 +88,7 @@ const IncompleteSections = ({
   tabState: TabStateI
   addGeneticSamplesState: any
   appliedMarksState: any
+  userCredentialsStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
@@ -508,7 +511,7 @@ const IncompleteSections = ({
             isRandom: null, // Check w/ Erin
             releaseId: findReleaseIdFromExistingMarks(),
             comments: null,
-            createdBy: null,
+            createdBy: userCredentialsStore.id,
             qcCompleted: null,
             qcCompletedBy: null,
             qcTime: null,
