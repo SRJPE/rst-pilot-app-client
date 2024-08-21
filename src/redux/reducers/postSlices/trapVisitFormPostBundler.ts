@@ -45,6 +45,8 @@ interface TrapVisitSubmissionI {
   qcCompleted?: boolean
   qcCompletedAt?: Date
   comments?: string
+  createdBy?: number
+  qcCompletedBy?: number
 }
 
 interface CatchRawSubmissionI {
