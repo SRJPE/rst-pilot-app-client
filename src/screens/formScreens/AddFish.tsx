@@ -1123,7 +1123,6 @@ const AddFishContent = ({
                           </HStack>
                         </FormControl>
                       )}
-                    {/* </VStack> */}
                   </HStack>
 
                   <HStack space={4} w='80%'>
