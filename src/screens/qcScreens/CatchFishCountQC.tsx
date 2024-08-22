@@ -143,20 +143,19 @@ function CatchFishCountQC({
       const normalizedDate = normalizeDate(createdAt)
       const qcCompleted = catchResponse.createdCatchRawResponse.qcCompleted
 
-      console.log('plusCount', plusCount)
-
       if (Object.keys(datesFormatted).includes(String(normalizedDate))) {
         datesFormatted[normalizedDate].count += numFishCaught
         if (!qcCompleted) datesFormatted[normalizedDate].qcCompleted = false
 
         // add catchRawId to array if not already included
-        if (!datesFormatted[normalizedDate].catchRawIds.includes(catchRaw.id) && plusCount) {
+        if (
+          !datesFormatted[normalizedDate].catchRawIds.includes(catchRaw.id) &&
+          plusCount
+        ) {
           datesFormatted[normalizedDate].catchRawIds.push(catchRaw.id)
         }
 
-        // set containsPlusCount to true if any catchRaw has plusCount
         if (plusCount) {
-          datesFormatted[normalizedDate].containsPlusCount = true
           datesFormatted[normalizedDate].plusCountValue += numFishCaught
           datesFormatted[normalizedDate].firstPlusCountRecordId = catchRaw.id
         }
@@ -164,7 +163,6 @@ function CatchFishCountQC({
         datesFormatted[normalizedDate] = {
           count: numFishCaught,
           catchRawIds: [catchRaw.id],
-          // containsPlusCount: plusCount,
           firstPlusCountRecordId: plusCount ? catchRaw.id : null,
           plusCountValue: plusCount ? numFishCaught : 0,
           qcCompleted,
@@ -172,14 +170,11 @@ function CatchFishCountQC({
       }
     })
 
-    console.log('datesFormatted', datesFormatted)
-
     Object.keys(datesFormatted).forEach((dateString) => {
       totalCountByDay.push({
         x: Number(dateString),
         y: datesFormatted[dateString].count,
         catchRawIds: datesFormatted[dateString].catchRawIds,
-        containsPlusCount: datesFormatted[dateString].containsPlusCount,
         plusCountValue: datesFormatted[dateString].plusCountValue,
         firstPlusCountRecordId:
           datesFormatted[dateString].firstPlusCountRecordId,
@@ -188,8 +183,6 @@ function CatchFishCountQC({
           : undefined,
       })
     })
-
-    console.log('totalCountByDay', totalCountByDay)
 
     setGraphData(totalCountByDay)
   }, [selectedSpecies, qcCatchRawSubmissions])
@@ -208,10 +201,6 @@ function CatchFishCountQC({
         const id = response.createdCatchRawResponse?.id
         return datum.catchRawIds.includes(id)
       })
-
-      console.log('selectedData', selectedData)
-      console.log('datum', datum)
-
 
       setModalData(selectedData)
 
@@ -362,7 +351,6 @@ function CatchFishCountQC({
                   value: taxonCode,
                 })
               }}
-              setFieldTouched={() => console.log('species field touched')}
               selectOptions={reorderedTaxon.map((taxon: any) => ({
                 label: taxon?.commonname,
                 value: taxon?.code,
@@ -383,7 +371,6 @@ function CatchFishCountQC({
                   value,
                 })
               }
-              setFieldTouched={() => console.log('run field touched')}
               selectOptions={runState.map((run: any) => ({
                 label: run?.definition,
                 value: run?.id,
@@ -422,7 +409,6 @@ function CatchFishCountQC({
               onValueChange={(value: string) =>
                 setNestedModalInputValue({ fieldClicked: 'lifeStage', value })
               }
-              setFieldTouched={() => console.log('lifestage field touched')}
               selectOptions={lifeStageState.map((lifeStage: any) => ({
                 label: lifeStage?.definition,
                 value: lifeStage?.id,
@@ -458,7 +444,6 @@ function CatchFishCountQC({
               onValueChange={(value: string) =>
                 setNestedModalInputValue({ fieldClicked: 'markType', value })
               }
-              setFieldTouched={() => console.log('marktype field touched')}
               selectOptions={markTypeState.map((markType: any) => ({
                 label: markType?.definition,
                 value: markType?.id,
@@ -476,7 +461,6 @@ function CatchFishCountQC({
               onValueChange={(value: string) =>
                 setNestedModalInputValue({ fieldClicked: 'markColor', value })
               }
-              setFieldTouched={() => console.log('markcolor field touched')}
               selectOptions={markColorState.map((markColor: any) => ({
                 label: markColor?.definition,
                 value: markColor?.id,
@@ -494,7 +478,6 @@ function CatchFishCountQC({
               onValueChange={(value: string) =>
                 setNestedModalInputValue({ fieldClicked: 'markPos', value })
               }
-              setFieldTouched={() => console.log('markposition field touched')}
               selectOptions={markPositionState.map((markPosition: any) => ({
                 label: markPosition?.definition,
                 value: markPosition?.id,
@@ -700,7 +683,15 @@ function CatchFishCountQC({
               marginBottom={8}
               fontWeight={'light'}
             >
-              You collected <Text fontWeight={'bold'}>{pointClicked.y - pointClicked.plusCountValue} measured</Text> fish and <Text fontWeight={'bold'}>{pointClicked.plusCountValue} plus count</Text> fish.
+              You collected{' '}
+              <Text fontWeight={'bold'}>
+                {pointClicked.y - pointClicked.plusCountValue} measured
+              </Text>{' '}
+              fish and{' '}
+              <Text fontWeight={'bold'}>
+                {pointClicked.plusCountValue} plus count
+              </Text>{' '}
+              fish.
             </Text>
             <VStack alignItems={'center'}>
               <Heading fontSize={23} mb={5}>
@@ -899,228 +890,6 @@ function CatchFishCountQC({
                             <Text>{numFishCaught ?? 'NA'}</Text>
                           </DataTable.Cell>
                         )
-                      })}
-                    </DataTable.Row>
-
-                    <DataTable.Row
-                      style={[{ justifyContent: 'center', width: '100%' }]}
-                    >
-                      <DataTable.Cell
-                        style={{
-                          minWidth: 120,
-                          minHeight: 70,
-                          width: '100%',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Text>Fork Length</Text>
-                      </DataTable.Cell>
-                      {modalData.map((data, idx) => {
-                        let forkLength =
-                          data?.createdCatchRawResponse.forkLength
-
-                        return (
-                          <DataTable.Cell
-                            style={{
-                              minWidth: 120,
-                              minHeight: 70,
-                              width: '100%',
-                              justifyContent: 'center',
-                            }}
-                            key={`forklength-${idx}`}
-                            onPress={() =>
-                              handleModalCellPressed('forkLength', data)
-                            }
-                          >
-                            <Text>
-                              {capitalizeFirstLetterOfEachWord(forkLength) ??
-                                'NA'}
-                            </Text>
-                          </DataTable.Cell>
-                        )
-                      })}
-                    </DataTable.Row>
-
-                    <DataTable.Row
-                      style={[{ justifyContent: 'center', width: '100%' }]}
-                    >
-                      <DataTable.Cell
-                        style={{
-                          minWidth: 120,
-                          minHeight: 70,
-                          width: '100%',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Text>Mark Type</Text>
-                      </DataTable.Cell>
-                      {modalData.map((data, idx) => {
-                        let createdExistingMarksResponse =
-                          data.createdExistingMarksResponse
-
-                        let markTypeId = createdExistingMarksResponse
-                          ? createdExistingMarksResponse[0].markTypeId
-                          : null
-
-                        let markType = markTypeState.filter((obj: any) => {
-                          return obj.id === markTypeId
-                        })
-
-                        return (
-                          <DataTable.Cell
-                            style={{
-                              minWidth: 120,
-                              minHeight: 70,
-                              width: '100%',
-                              justifyContent: 'center',
-                            }}
-                            key={`marktype-${idx}`}
-                            onPress={() =>
-                              handleModalCellPressed('markType', data)
-                            }
-                          >
-                            <Text>
-                              {markType.length
-                                ? `${truncateAndTrimString(
-                                    capitalizeFirstLetterOfEachWord(
-                                      markType[0]?.definition
-                                    ),
-                                    12
-                                  )}...`
-                                : 'NA'}
-                            </Text>
-                          </DataTable.Cell>
-                        )
-                      })}
-                    </DataTable.Row>
-
-                    <DataTable.Row
-                      style={[{ justifyContent: 'center', width: '100%' }]}
-                    >
-                      <DataTable.Cell
-                        style={{
-                          minWidth: 120,
-                          minHeight: 70,
-                          width: '100%',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Text>Mark Color</Text>
-                      </DataTable.Cell>
-                      {modalData.map((data, idx) => {
-                        if (data.createdExistingMarksResponse) {
-                          let markColorCode =
-                            data?.createdExistingMarksResponse[0]?.markColorId
-                          let markColor = markColorState.filter((obj: any) => {
-                            return obj.id === markColorCode
-                          })
-
-                          return (
-                            <DataTable.Cell
-                              style={{
-                                minWidth: 120,
-                                minHeight: 70,
-                                width: '100%',
-                                justifyContent: 'center',
-                              }}
-                              key={`markcolor-${idx}`}
-                              onPress={() =>
-                                handleModalCellPressed('markColor', data)
-                              }
-                            >
-                              <Text>
-                                {markColor.length
-                                  ? capitalizeFirstLetterOfEachWord(
-                                      markColor[0]?.definition
-                                    )
-                                  : 'NA'}
-                              </Text>
-                            </DataTable.Cell>
-                          )
-                        } else {
-                          return (
-                            <DataTable.Cell
-                              style={{
-                                minWidth: 120,
-                                minHeight: 70,
-                                width: '100%',
-                                justifyContent: 'center',
-                              }}
-                              key={`markcolor-${idx}`}
-                              onPress={() =>
-                                handleModalCellPressed('markColor', data)
-                              }
-                            >
-                              <Text>NA</Text>
-                            </DataTable.Cell>
-                          )
-                        }
-                      })}
-                    </DataTable.Row>
-
-                    <DataTable.Row
-                      style={[{ justifyContent: 'center', width: '100%' }]}
-                    >
-                      <DataTable.Cell
-                        style={{
-                          minWidth: 120,
-                          minHeight: 70,
-                          width: '100%',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Text>Mark Position</Text>
-                      </DataTable.Cell>
-                      {modalData.map((data, idx) => {
-                        if (data.createdExistingMarksResponse) {
-                          let markPositionCode =
-                            data?.createdExistingMarksResponse[0]
-                              ?.markPositionId
-
-                          let markPositionObjFiltered =
-                            markPositionState.filter((obj: any) => {
-                              return obj.id === markPositionCode
-                            })
-                          let markPosition = markPositionObjFiltered.length
-                            ? markPositionObjFiltered[0]?.definition
-                            : 'NA'
-
-                          return (
-                            <DataTable.Cell
-                              style={{
-                                minWidth: 120,
-                                minHeight: 70,
-                                width: '100%',
-                                justifyContent: 'center',
-                              }}
-                              key={`markpos-${idx}`}
-                              onPress={() =>
-                                handleModalCellPressed('markPos', data)
-                              }
-                            >
-                              <Text>
-                                {capitalizeFirstLetterOfEachWord(markPosition)}
-                              </Text>
-                            </DataTable.Cell>
-                          )
-                        } else {
-                          return (
-                            <DataTable.Cell
-                              style={{
-                                minWidth: 120,
-                                minHeight: 70,
-                                width: '100%',
-                                justifyContent: 'center',
-                              }}
-                              key={`markpos-${idx}`}
-                              onPress={() =>
-                                handleModalCellPressed('markPos', data)
-                              }
-                            >
-                              <Text>NA</Text>
-                            </DataTable.Cell>
-                          )
-                        }
                       })}
                     </DataTable.Row>
 

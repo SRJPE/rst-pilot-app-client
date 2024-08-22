@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/three_fish_app_icon.png",
     "userInterfaceStyle": "light",
-    "jsEngine": "hermes",
+    "jsEngine": "jsc",
     "plugins": [
       [
         "expo-location",
