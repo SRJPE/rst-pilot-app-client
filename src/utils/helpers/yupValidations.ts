@@ -279,7 +279,7 @@ export const addAnotherMarkSchema = yup.object().shape({
 })
 export const batchCharacteristicsSchema = yup.object().shape({
   species: yup.string().required('Species required'),
-  fishCondition: yup.string().required('Fish Condition required'),
+  // fishConditions: yup.any().required('Fish Condition required'),
 })
 
 /*----------------------------------------------------------------

@@ -11,7 +11,6 @@ import {
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import * as Yup from 'yup'
-import { editProfile } from '../../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import api from '../../api/axiosConfig'
@@ -20,21 +19,14 @@ import CustomSelect from '../Shared/CustomSelect'
 const editAccountValidationSchema = Yup.object().shape({
   firstName: Yup.string().label('First Name').required(),
   lastName: Yup.string().label('Last Name').required(),
-  phone: Yup.string().label('Job Title'),
+  mobilePhone: Yup.string().label('Job Title'),
   agencyId: Yup.string().label('Agency').required(),
   emailAddress: Yup.string().label('Email').email().required(),
   role: Yup.string().label('Role').required(),
 })
 
 //just an initial outline
-const EditAccountInfoModalContent = ({
-  closeModal,
-  user,
-}: {
-  closeModal: () => void
-  user: any
-}) => {
-  const dispatch = useDispatch<AppDispatch>()
+const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
   const [submissionMessage, setSubmissionMessage] = useState({
     success: false,
     message: '',
@@ -47,29 +39,36 @@ const EditAccountInfoModalContent = ({
   return (
     <>
       <CustomModalHeader
-        headerText={'Edit Account Info'}
+        headerText={'Add New User'}
         showHeaderButton={true}
         closeModal={closeModal}
       />
       <Formik
         validationSchema={editAccountValidationSchema}
         initialValues={{
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          phone: user.phone || '',
-          agencyId: user.agencyId || '',
-          emailAddress: user.emailAddress || '',
-          role: user.role || '',
+          firstName: '',
+          lastName: '',
+          mobilePhone: '',
+          agencyId: '',
+          emailAddress: '',
+          role: '',
         }}
         onSubmit={async (values, { setSubmitting }) => {
-          const { firstName, lastName, phone, agencyId, emailAddress, role } =
-            values
-          const editedUserResponse = await api
-            .patch(`user/${user.azureUid}/edit`, {
+          const {
+            firstName,
+            lastName,
+            mobilePhone,
+            agencyId,
+            emailAddress,
+            role,
+          } = values
+          const createdUserResponse = await api
+            .post(`user/create`, {
               firstName,
               lastName,
-              phone,
+              mobilePhone,
               agencyId,
+              emailAddress,
             })
             .catch(err => {
               console.log(
@@ -80,24 +79,24 @@ const EditAccountInfoModalContent = ({
               setSubmissionMessage({
                 success: false,
                 message:
-                  'There was an error updating the user. Please try again.',
+                  'There was an error creating the user. Please try again.',
               })
               setSubmitting(false)
             })
 
-          if (editedUserResponse?.status === 200) {
-            await dispatch(
-              editProfile({
-                first_name: firstName,
-                last_name: lastName,
-                phone: phone,
-                agencyId,
-                role,
-              })
-            )
+          if (createdUserResponse?.status === 200) {
             setSubmissionMessage({
               success: true,
-              message: 'User successfully updated',
+              message: 'User successfully created',
+            })
+            await api.post(`/personnel`, {
+              first_name: firstName,
+              last_name: lastName,
+              email: emailAddress,
+              phone: mobilePhone,
+              agencyId,
+              role,
+              azure_uid: createdUserResponse.data.id,
             })
             setTimeout(() => {
               closeModal()
@@ -127,8 +126,11 @@ const EditAccountInfoModalContent = ({
                   height='50px'
                   fontSize='16'
                   placeholder='Email'
+                  keyboardType='default'
+                  onChangeText={handleChange('emailAddress')}
+                  onBlur={handleBlur('emailAddress')}
                   value={values.emailAddress}
-                  isDisabled={true}
+                  isDisabled={isSubmitting}
                 />
                 {errors.emailAddress && touched.emailAddress ? (
                   <Text mt='2' color='red.800'>
@@ -193,9 +195,9 @@ const EditAccountInfoModalContent = ({
                   fontSize='16'
                   placeholder='###-###-#### (Optional)'
                   keyboardType='default'
-                  onChangeText={handleChange('phone')}
-                  onBlur={handleBlur('phone')}
-                  value={values.phone}
+                  onChangeText={handleChange('mobilePhone')}
+                  onBlur={handleBlur('mobilePhone')}
+                  value={values.mobilePhone}
                 />
               </FormControl>
               <FormControl>
@@ -205,7 +207,7 @@ const EditAccountInfoModalContent = ({
                   </Text>
                 </FormControl.Label>
                 <CustomSelect
-                  selectedValue={values.agencyId.toString()}
+                  selectedValue={values.agencyId as string}
                   placeholder='Funding Agency'
                   onValueChange={handleChange('agencyId')}
                   setFieldTouched={setFieldTouched}
@@ -227,7 +229,6 @@ const EditAccountInfoModalContent = ({
                   </Text>
                 </FormControl.Label>
                 <Select
-                  selectedValue={values.role as string}
                   height='50px'
                   fontSize='16'
                   placeholder='Select a role'
@@ -299,4 +300,4 @@ const EditAccountInfoModalContent = ({
   )
 }
 
-export default EditAccountInfoModalContent
+export default AddNewUserModalContent

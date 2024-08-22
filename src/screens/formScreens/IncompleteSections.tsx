@@ -53,6 +53,7 @@ const mapStateToProps = (state: RootState) => {
     tabState: state.tabSlice,
     addGeneticSamplesState: state.addGeneticSamples,
     appliedMarksState: state.addMarksOrTags,
+    userCredentialsStore: state.userCredentials,
   }
 }
 
@@ -71,6 +72,7 @@ const IncompleteSections = ({
   tabState,
   addGeneticSamplesState,
   appliedMarksState,
+  userCredentialsStore,
 }: {
   navigation: any
   navigationState: any
@@ -86,6 +88,7 @@ const IncompleteSections = ({
   tabState: TabStateI
   addGeneticSamplesState: any
   appliedMarksState: any
+  userCredentialsStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
@@ -340,6 +343,7 @@ const IncompleteSections = ({
         comments: paperEntryState[id]
           ? paperEntryState[id].values.comments
           : null,
+        createdBy: userCredentialsStore.id,
       }
 
       dispatch(saveTrapVisitSubmission(trapVisitSubmission))
@@ -368,6 +372,9 @@ const IncompleteSections = ({
       dropdownsState.values.markColor
     )
     const bodyPartValues = returnDefinitionArray(dropdownsState.values.bodyPart)
+    const fishConditionValues = returnDefinitionArray(
+      dropdownsState.values.fishCondition
+    )
     const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
       let code = null
       dropdownsState.values.taxon.forEach((taxonValue: any) => {
@@ -451,6 +458,21 @@ const IncompleteSections = ({
               return null
             }
           }
+          const getCatchFishConditions = (fishConditionArray: string[]) => {
+            if (Array.isArray(fishConditionArray)) {
+              return fishConditionArray.map((fishCondition: string) => {
+                return returnNullableTableId(
+                  fishConditionValues.indexOf(fishCondition)
+                )
+              })
+            } else {
+              return [
+                returnNullableTableId(
+                  fishConditionValues.indexOf(fishConditionArray)
+                ),
+              ]
+            }
+          }
 
           catchRawSubmissions.push({
             uid: tabId,
@@ -467,6 +489,8 @@ const IncompleteSections = ({
             markedForRelease: fishValue.willBeUsedInRecapture,
             adiposeClipped: fishValue.adiposeClipped ? true : false,
             dead: fishValue.dead ? true : false,
+
+            fishCondition: getCatchFishConditions(fishValue.fishCondition),
             lifeStage: returnNullableTableId(
               lifeStageValues.indexOf(fishValue.lifeStage)
             ),
@@ -488,7 +512,7 @@ const IncompleteSections = ({
             isRandom: null, // Check w/ Erin
             releaseId: findReleaseIdFromExistingMarks(),
             comments: null,
-            createdBy: null,
+            createdBy: userCredentialsStore.id,
             qcCompleted: null,
             qcCompletedBy: null,
             qcTime: null,

@@ -5,6 +5,7 @@ import { set } from 'lodash'
 
 export default function CrewDropDown({
   open,
+  onOpen,
   setOpen,
   list,
   setList,
@@ -16,6 +17,7 @@ export default function CrewDropDown({
   values,
 }: {
   open: boolean
+  onOpen: any
   setOpen: any
   list: any
   setList: any
@@ -57,29 +59,42 @@ export default function CrewDropDown({
   }
 
   return (
-    <View
+    <DropDownPicker
+      open={open}
+      onOpen={onOpen}
+      value={value}
+      items={list}
+      setOpen={setOpen}
+      setValue={setValue}
+      setItems={setList}
+      multiple={true}
+      mode='BADGE'
+      listMode='SCROLLVIEW'
+      badgeDotColors={['#007C7C']}
+      placeholder='Select your crew'
+      searchPlaceholder='Search...'
+      maxHeight={275}
       style={{
-        backgroundColor: '#171717',
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
+        marginTop: 4,
+        borderColor: '#d4d4d4d4',
+        borderRadius: 4,
+        height: 50,
+        backgroundColor: '#fff',
       }}
-    >
-      <DropDownPicker
-        open={open}
-        value={value}
-        items={list}
-        setOpen={setOpen}
-        setValue={setValue}
-        setItems={setList}
-        multiple={true}
-        mode='BADGE'
-        badgeDotColors={['#007C7C']}
-        placeholder='Select your crew'
-        searchPlaceholder='Search...'
-        maxHeight={275}
-        // renderListItem={props => <CrewListItem {...props} />}
-      />
-    </View>
+      arrowIconStyle={{
+        width: 30,
+        height: 30,
+      }}
+      dropDownContainerStyle={{
+        backgroundColor: '#fff',
+        borderColor: '#d4d4d4d4',
+        borderBottomLeftRadius: 4,
+        borderBottomRightRadius: 4,
+      }}
+      textStyle={{
+        fontSize: 16,
+      }}
+      // renderListItem={props => <CrewListItem {...props} />}
+    />
   )
 }

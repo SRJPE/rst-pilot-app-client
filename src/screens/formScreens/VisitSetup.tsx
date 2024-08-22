@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -75,7 +75,15 @@ const VisitSetup = ({
   const [crewList, setCrewList] = useState<{ label: string; value: string }[]>(
     []
   )
+  const [trapDropDownOpen, setTrapDropDownOpen] = useState(false as boolean)
   const [crewDropDownOpen, setCrewDropDownOpen] = useState(false as boolean)
+
+  const onTrapOpen = useCallback(() => {
+    setCrewDropDownOpen(false)
+  }, [])
+  const onCrewOpen = useCallback(() => {
+    setTrapDropDownOpen(false)
+  }, [])
 
   useEffect(() => {
     if (tabSlice.activeTabId != null) {
@@ -539,6 +547,9 @@ const VisitSetup = ({
                           </Text>
                         </FormControl.Label>
                         <TrapNameDropDown
+                          open={trapDropDownOpen}
+                          onOpen={onTrapOpen}
+                          setOpen={setTrapDropDownOpen}
                           list={trapNameList}
                           setList={setTrapNameList}
                           setFieldValue={setFieldValue}
@@ -552,7 +563,7 @@ const VisitSetup = ({
                       </FormControl>
                     )}
 
-                    <FormControl mt={showTrapNameField ? '12' : '0'} mb={10}>
+                    <FormControl mt={trapDropDownOpen ? '4' : '0'} mb={10}>
                       <FormControl.Label>
                         <Text color='black' fontSize='xl'>
                           Crew
@@ -561,6 +572,7 @@ const VisitSetup = ({
 
                       <CrewDropDown
                         open={crewDropDownOpen}
+                        onOpen={onCrewOpen}
                         setOpen={setCrewDropDownOpen}
                         list={crewList}
                         setList={setCrewList}
