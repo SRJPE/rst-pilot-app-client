@@ -56,9 +56,9 @@ const Profile = ({
     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/B2C_1_password_reset/v2.0/'
   )
   const userIsLead = userCredentialsStore.role === 'lead'
-  const userPrograms = userCredentialsStore.userPrograms || []
+  // const userPrograms = userCredentialsStore.userPrograms || []
   // const userPrograms = []
-  // const userPrograms = userCredentialsStore.userPrograms.slice(0, 1)
+  const userPrograms = userCredentialsStore.userPrograms.slice(0, 1)
   //////////////////////////////////////////////
 
   const [pwResetRequest, pwResetResponse, pwResetPromptAsync] = useAuthRequest(
@@ -154,70 +154,65 @@ const Profile = ({
           height={'100%'}
           roundedBottom='xl'
         >
-          <Pressable
-            my='7'
-            onPress={() => setMonitoringProgramInfoModalOpen(true)}
-          >
-            <HStack justifyContent='space-between' alignItems='center'>
-              <VStack>
-                <HStack
-                  justifyContent='space-between'
-                  alignItems='center'
-                  width='100%'
+          <HStack justifyContent='space-between' alignItems='center'>
+            <VStack py='7'>
+              <HStack
+                justifyContent='space-between'
+                alignItems='center'
+                width='100%'
+              >
+                <Text fontSize='2xl' bold mb={5}>
+                  {userPrograms.length === 1
+                    ? 'Monitoring Program'
+                    : 'Monitoring Programs'}
+                </Text>
+                <Button
+                  mb={15}
+                  alignSelf='center'
+                  bg='transparent'
+                  onPress={() => navigation.navigate('Monitoring Program')}
                 >
-                  <Text fontSize='2xl' bold mb={5}>
-                    {userPrograms.length === 1
-                      ? 'Monitoring Program'
-                      : 'Monitoring Programs'}
-                  </Text>
-                  <Button
-                    mb={15}
-                    alignSelf='center'
-                    bg='transparent'
-                    onPress={() => navigation.navigate('Monitoring Program')}
-                  >
-                    <HStack alignItems='center'>
-                      <Icon
-                        as={Ionicons}
-                        name={'add'}
-                        size={'lg'}
-                        opacity={0.75}
-                        color={'primary'}
-                        mr='1'
-                      />
-                      <Text fontSize='lg' fontWeight='bold' color='primary'>
-                        Create New Program
-                      </Text>
-                    </HStack>
-                  </Button>
-                </HStack>
-                <HStack
-                  // space={5}
-                  style={{ columnGap: 10 }}
-                  flexWrap={'wrap'}
-                >
-                  {userPrograms.length === 0 ? (
-                    <Text fontSize='xl'>No Monitoring Programs Available</Text>
-                  ) : (
-                    userPrograms.map((program: any) => (
-                      <Button
-                        key={program.id}
-                        borderWidth={1}
-                        borderColor='dark.500'
-                        mb={5}
-                        onPress={() => {
-                          setSelectedMonitoringProgramInfo(program)
-                          setMonitoringProgramInfoModalOpen(true)
-                        }}
-                      >
-                        <Text fontSize='lg'>{program.programName}</Text>
-                      </Button>
-                    ))
-                  )}
-                </HStack>
-              </VStack>
-            </HStack>
-          </Pressable>
+                  <HStack alignItems='center'>
+                    <Icon
+                      as={Ionicons}
+                      name={'add'}
+                      size={'lg'}
+                      opacity={0.75}
+                      color={'primary'}
+                      mr='1'
+                    />
+                    <Text fontSize='lg' fontWeight='bold' color='primary'>
+                      Create New Program
+                    </Text>
+                  </HStack>
+                </Button>
+              </HStack>
+              <HStack
+                // space={5}
+                style={{ columnGap: 10 }}
+                flexWrap={'wrap'}
+              >
+                {userPrograms.length === 0 ? (
+                  <Text fontSize='xl'>No Monitoring Programs Available</Text>
+                ) : (
+                  userPrograms.map((program: any) => (
+                    <Button
+                      key={program.id}
+                      borderWidth={1}
+                      borderColor='dark.500'
+                      mb={5}
+                      onPress={() => {
+                        setSelectedMonitoringProgramInfo(program)
+                        setMonitoringProgramInfoModalOpen(true)
+                      }}
+                    >
+                      <Text fontSize='lg'>{program.programName}</Text>
+                    </Button>
+                  ))
+                )}
+              </HStack>
+            </VStack>
+          </HStack>
           <Divider bg='#414141' />
           <Pressable my='7'>
             <HStack justifyContent='space-between' alignItems='center'>
