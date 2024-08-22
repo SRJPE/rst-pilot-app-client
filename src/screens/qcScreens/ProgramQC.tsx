@@ -11,7 +11,7 @@ function ProgramQC({
   navigation: any
   programs: any[]
 }) {
-  const userPrograms = [1]
+  const userPrograms = [5]
   // TODO: ^ hard coded value to be updated to user's program ids ^
   // Use programId of 'FlowWest Test Entry' program
 

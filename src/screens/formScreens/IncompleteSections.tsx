@@ -520,6 +520,7 @@ const IncompleteSections = ({
 
     if (catchRawSubmissions.length) {
       const catchRawPlusCountCombined = combinePlusCounts(catchRawSubmissions)
+      console.log('catchRawPlusCountCombined', catchRawPlusCountCombined)
       dispatch(saveCatchRawSubmissions(catchRawPlusCountCombined))
     }
   }

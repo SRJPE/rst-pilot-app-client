@@ -143,12 +143,14 @@ function CatchFishCountQC({
       const normalizedDate = normalizeDate(createdAt)
       const qcCompleted = catchResponse.createdCatchRawResponse.qcCompleted
 
+      console.log('plusCount', plusCount)
+
       if (Object.keys(datesFormatted).includes(String(normalizedDate))) {
         datesFormatted[normalizedDate].count += numFishCaught
         if (!qcCompleted) datesFormatted[normalizedDate].qcCompleted = false
 
         // add catchRawId to array if not already included
-        if (!datesFormatted[normalizedDate].catchRawIds.includes(catchRaw.id)) {
+        if (!datesFormatted[normalizedDate].catchRawIds.includes(catchRaw.id) && plusCount) {
           datesFormatted[normalizedDate].catchRawIds.push(catchRaw.id)
         }
 
@@ -162,13 +164,15 @@ function CatchFishCountQC({
         datesFormatted[normalizedDate] = {
           count: numFishCaught,
           catchRawIds: [catchRaw.id],
-          containsPlusCount: plusCount,
+          // containsPlusCount: plusCount,
           firstPlusCountRecordId: plusCount ? catchRaw.id : null,
           plusCountValue: plusCount ? numFishCaught : 0,
           qcCompleted,
         }
       }
     })
+
+    console.log('datesFormatted', datesFormatted)
 
     Object.keys(datesFormatted).forEach((dateString) => {
       totalCountByDay.push({
@@ -184,6 +188,8 @@ function CatchFishCountQC({
           : undefined,
       })
     })
+
+    console.log('totalCountByDay', totalCountByDay)
 
     setGraphData(totalCountByDay)
   }, [selectedSpecies, qcCatchRawSubmissions])
@@ -202,6 +208,10 @@ function CatchFishCountQC({
         const id = response.createdCatchRawResponse?.id
         return datum.catchRawIds.includes(id)
       })
+
+      console.log('selectedData', selectedData)
+      console.log('datum', datum)
+
 
       setModalData(selectedData)
 
@@ -675,13 +685,22 @@ function CatchFishCountQC({
               color='black'
               fontSize='2xl'
               marginLeft={8}
-              marginBottom={8}
+              marginBottom={4}
               fontWeight={'light'}
             >
               {`Selected Point${modalData.length > 1 ? `s` : ''} Date: `}
               {moment(
                 modalData?.[0]?.createdCatchRawResponse?.createdAt
               ).format('MMMM Do, YYYY')}
+            </Text>
+            <Text
+              color='black'
+              fontSize='2xl'
+              marginLeft={8}
+              marginBottom={8}
+              fontWeight={'light'}
+            >
+              You collected <Text fontWeight={'bold'}>{pointClicked.y - pointClicked.plusCountValue} measured</Text> fish and <Text fontWeight={'bold'}>{pointClicked.plusCountValue} plus count</Text> fish.
             </Text>
             <VStack alignItems={'center'}>
               <Heading fontSize={23} mb={5}>
