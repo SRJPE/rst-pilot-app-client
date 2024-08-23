@@ -10,6 +10,8 @@ interface CustomSelectI {
   onValueChange: any
   selectOptions: any[]
   style?: StyleProp<ViewStyle>
+  dataType?: string
+  disabled?: boolean
 }
 
 const CustomSelect: React.FC<CustomSelectI> = (props) => {
@@ -38,10 +40,19 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
       onClose={() => {
         if (props.setFieldTouched) props.setFieldTouched()
       }}
+      isDisabled={props?.disabled}
     >
       {props.selectOptions ? (
         props?.selectOptions.map((item, idx) => {
-          if (item.value) {
+          if (props.dataType === 'fundingAgency') {
+            return (
+              <Select.Item
+                key={item.id ?? idx}
+                label={item.definition}
+                value={item.id.toString()}
+              />
+            )
+          } else if (item.value) {
             return (
               <Select.Item
                 key={item.id ?? idx}

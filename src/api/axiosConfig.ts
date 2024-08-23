@@ -1,6 +1,11 @@
-import axios, { AxiosResponse, AxiosRequestTransformer } from 'axios'
+import axios, {
+  AxiosResponse,
+  AxiosRequestTransformer,
+  AxiosRequestConfig,
+} from 'axios'
 import { camelizeKeys } from 'humps'
 import Constants from 'expo-constants'
+import * as SecureStore from 'expo-secure-store'
 
 const dateTransformer: AxiosRequestTransformer = (data: any) => {
   if (data instanceof Date) {
@@ -8,7 +13,7 @@ const dateTransformer: AxiosRequestTransformer = (data: any) => {
     return data.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })
   }
   if (Array.isArray(data)) {
-    return data.map((val) => dateTransformer(val))
+    return data.map(val => dateTransformer(val))
   }
   if (typeof data === 'object' && data !== null) {
     return Object.fromEntries(
@@ -24,6 +29,29 @@ const api = axios.create({
     axios.defaults.transformRequest as AxiosRequestTransformer[]
   ),
 })
+
+// Axios middleware to retrieve and add authorization token
+api.interceptors.request.use(
+  async (config: AxiosRequestConfig) => {
+    try {
+      const accessToken = await SecureStore.getItemAsync('userAccessToken')
+      const idToken = await SecureStore.getItemAsync('userIdToken')
+
+      if (accessToken && idToken) {
+        const newConfig = config as any
+        newConfig.headers['Authorization'] = `Bearer ${accessToken}`
+        newConfig.headers['idToken'] = idToken
+        return newConfig
+      }
+      return config
+    } catch (error) {
+      return config
+    }
+  },
+  error => {
+    return Promise.reject(error)
+  }
+)
 
 // Axios middleware to convert all api responses to camelCase
 api.interceptors.response.use(
@@ -43,6 +71,9 @@ api.interceptors.response.use(
       // unauthorized
       // sign out?
     } else if (response?.status === 403) {
+      // forbidden
+      // handle
+    } else if (response?.status === 404) {
       // forbidden
       // handle
     }

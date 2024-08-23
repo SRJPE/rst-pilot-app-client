@@ -275,7 +275,7 @@ const TrapPostProcessing = ({
               shouldProceedToLoadingScreen={true}
             />
           ),
-          [navigation, handleSubmit, errors, touched]
+          [navigation, handleSubmit, errors, touched, activePage]
         )
         return (
           <>

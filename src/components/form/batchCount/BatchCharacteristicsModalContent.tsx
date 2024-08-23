@@ -11,8 +11,9 @@ import {
   ScrollView,
   Text,
   VStack,
+  View,
 } from 'native-base'
-import React, { memo, useState } from 'react'
+import React, { memo, useCallback, useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   addMarkToBatchCountExistingMarks,
@@ -30,12 +31,9 @@ import CustomModal from '../../Shared/CustomModal'
 import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
 import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
 import { ReleaseMarkI } from '../../../screens/formScreens/AddFish'
-
-const initialFormValues = {
-  species: '',
-  adiposeClipped: false,
-  fishCondition: 'none',
-}
+import SpeciesDropDown from '../SpeciesDropDown'
+import FishConditionsDropDown from '../FishConditionsDropDown'
+import { startCase } from 'lodash'
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -56,12 +54,39 @@ const BatchCharacteristicsModalContent = ({
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
-  const alphabeticalLifeStage = alphabeticalSort(
-    dropdownValues.lifeStage,
-    'definition'
+  const [fishConditionDropdownOpen, setFishConditionDropdownOpen] = useState(
+    false as boolean
+  )
+  const [fishConditionList, setFishConditionList] = useState<
+    { label: string; value: string }[]
+  >(
+    dropdownValues.fishCondition.map((condition: any) => ({
+      label: startCase(condition?.definition),
+      value: condition?.definition,
+    }))
   )
 
+  const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
+    false as boolean
+  )
+  const [speciesList, setSpeciesList] = useState<
+    { label: string; value: string }[]
+  >(
+    reorderedTaxon.map((taxon: any) => ({
+      label: taxon?.commonname,
+      value: taxon?.commonname,
+    }))
+  )
+  const onSpeciesOpen = useCallback(() => {
+    setFishConditionDropdownOpen(false)
+  }, [])
+  const onFishConditionOpen = useCallback(() => {
+    setSpeciesDropDownOpen(false)
+  }, [])
+
   const handleFormSubmit = (values: any) => {
+    delete values.existingMarks
+    delete values.batchCountExistingMarks
     let activeTabId = tabSlice.activeTabId
     if (activeTabId) {
       if (recentExistingMarks.length === 1) {
@@ -122,11 +147,11 @@ const BatchCharacteristicsModalContent = ({
   }
 
   return (
-    <ScrollView>
+    <View>
       <Formik
         validationSchema={batchCharacteristicsSchema}
-        initialValues={initialFormValues}
-        onSubmit={values => handleFormSubmit(values)}
+        initialValues={batchCountStore.batchCharacteristics}
+        onSubmit={(values) => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -155,6 +180,8 @@ const BatchCharacteristicsModalContent = ({
                   }
                   onPress={() => {
                     handleSubmit()
+                    setFishConditionDropdownOpen(false)
+
                     closeModal()
                   }}
                 >
@@ -169,8 +196,8 @@ const BatchCharacteristicsModalContent = ({
                 Please return to the individual fish input if you plan on
                 marking or sampling a fish.
               </Text>
-              <HStack>
-                <FormControl w='1/2' pr='5'>
+              <VStack space={4}>
+                <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 180 : 0}>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Species
@@ -181,46 +208,42 @@ const BatchCharacteristicsModalContent = ({
                     errors.species &&
                     RenderErrorMessage(errors, 'species')}
 
-                  <CustomSelect
-                    selectedValue={values.species}
-                    placeholder={'Species'}
-                    onValueChange={(value: any) =>
-                      handleChange('species')(value)
-                    }
+                  <SpeciesDropDown
+                    open={speciesDropDownOpen}
+                    onOpen={onSpeciesOpen}
+                    setOpen={setSpeciesDropDownOpen}
+                    list={speciesList}
+                    setList={setSpeciesList}
+                    setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={reorderedTaxon.map((taxon: any) => ({
-                      label: taxon?.commonname,
-                      value: taxon?.commonname,
-                    }))}
                   />
                 </FormControl>
-                <FormControl w='1/2' pr='5'>
+                <FormControl
+                  w='100%'
+                  pr='5'
+                  mb={fishConditionDropdownOpen ? 160 : 0}
+                >
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
                       Fish Condition
                     </Text>
                   </FormControl.Label>
 
-                  {touched.fishCondition &&
-                    errors.fishCondition &&
-                    RenderErrorMessage(errors, 'fishCondition')}
+                  {touched.fishConditions &&
+                    errors.fishConditions &&
+                    RenderErrorMessage(errors, 'fishConditions')}
 
-                  <CustomSelect
-                    selectedValue={values.fishCondition}
-                    placeholder={'Fish Condition'}
-                    onValueChange={(value: any) =>
-                      handleChange('fishCondition')(value)
-                    }
+                  <FishConditionsDropDown
+                    open={fishConditionDropdownOpen}
+                    onOpen={onFishConditionOpen}
+                    setOpen={setFishConditionDropdownOpen}
+                    list={fishConditionList}
+                    setList={setFishConditionList}
+                    setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues.fishCondition.map(
-                      (condition: any) => ({
-                        label: condition?.definition,
-                        value: condition?.definition,
-                      })
-                    )}
                   />
                 </FormControl>
-              </HStack>
+              </VStack>
 
               <HStack space={10}>
                 <VStack space={4} w={'20%'}>
@@ -266,7 +289,8 @@ const BatchCharacteristicsModalContent = ({
                   <Text color='black' fontSize='xl'>
                     Add Existing Mark
                   </Text>
-                  {batchCountStore.existingMarks.length < 1 && (
+                  {batchCountStore.batchCharacteristics.existingMarks.length <
+                    1 && (
                     <VStack space={5}>
                       {dropdownValues.twoMostRecentReleaseMarks.length > 0 &&
                         decodedRecentReleaseMarks(
@@ -312,14 +336,20 @@ const BatchCharacteristicsModalContent = ({
                     </VStack>
                   )}
                   <MarkBadgeList
-                    badgeListContent={batchCountStore.existingMarks}
+                    badgeListContent={
+                      batchCountStore.batchCharacteristics.existingMarks
+                    }
                     setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
                     field='batchCountExistingMarks'
                   />
-                  {batchCountStore.existingMarks.length < 1 && (
+                  {batchCountStore.batchCharacteristics.existingMarks.length <
+                    1 && (
                     <Pressable
-                      isDisabled={batchCountStore.existingMarks.length > 0}
+                      isDisabled={
+                        batchCountStore.batchCharacteristics.existingMarks
+                          .length > 0
+                      }
                       onPress={() => {
                         setRecentExistingMarks([])
                         setAddMarkModalOpen(true)
@@ -357,7 +387,7 @@ const BatchCharacteristicsModalContent = ({
           </>
         )}
       </Formik>
-    </ScrollView>
+    </View>
   )
 }
 

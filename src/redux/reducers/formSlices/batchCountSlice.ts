@@ -10,23 +10,28 @@ export interface singleBatchRawI {
   forkLength: number
   lifeStage: string
   dead: boolean
-  fishCondition: boolean
+  fishConditions: boolean
   existingMark: boolean
 }
 export interface batchCharacteristicsI {
-  tabId: string | null
   species: string
   adiposeClipped: boolean
-  fishCondition: string
+  fishConditions: string[]
   existingMarks: Array<ReleaseMarkI>
+}
+export interface batchCountI {
+  tabId: string | null
+  batchCharacteristics: batchCharacteristicsI
   forkLengths?: BatchStoreI
 }
-export const initialState: batchCharacteristicsI = {
+export const initialState: batchCountI = {
   tabId: null,
-  species: '',
-  adiposeClipped: false,
-  fishCondition: '',
-  existingMarks: [],
+  batchCharacteristics: {
+    species: '',
+    adiposeClipped: false,
+    fishConditions: [],
+    existingMarks: [],
+  },
   forkLengths: {},
 }
 
@@ -36,19 +41,22 @@ export const batchCountSlice = createSlice({
   reducers: {
     resetBatchCountSlice: () => initialState,
     saveBatchCharacteristics: (state, action) => {
-      const { tabId, species, adiposeClipped, fishCondition } = action.payload
+      const { tabId, species, adiposeClipped, fishConditions } = action.payload
       const forkLengthsCopy = cloneDeep(state.forkLengths) as any
       state.tabId = tabId
-      state.species = species
-      state.adiposeClipped = adiposeClipped
-      state.fishCondition = fishCondition
+      state.batchCharacteristics.species = species
+      state.batchCharacteristics.adiposeClipped = adiposeClipped
+      state.batchCharacteristics.fishConditions = fishConditions
       state.forkLengths = forkLengthsCopy
     },
     addMarkToBatchCountExistingMarks: (state, action) => {
-      state.existingMarks = [...state.existingMarks, action.payload]
+      state.batchCharacteristics.existingMarks = [
+        ...state.batchCharacteristics.existingMarks,
+        action.payload,
+      ]
     },
     removeMarkFromBatchCountExistingMarks: (state, action) => {
-      state.existingMarks = action.payload
+      state.batchCharacteristics.existingMarks = action.payload
     },
     addForkLengthToBatchStore: (state, action) => {
       const forkLengthsCopy = cloneDeep(state.forkLengths) || {
@@ -59,7 +67,7 @@ export const batchCountSlice = createSlice({
         lifeStage: action.payload.lifeStage,
         dead: action.payload.dead,
         existingMark: action.payload.existingMark,
-        fishCondition: action.payload.fishCondition,
+        fishConditions: action.payload.fishConditions,
       } as any
       let id = null
       if (Object.keys(forkLengthsCopy).length) {
