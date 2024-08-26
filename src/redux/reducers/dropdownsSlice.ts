@@ -35,6 +35,7 @@ interface ValuesI {
   listingUnit: any[]
   frequency: any[]
   fishCondition: any[]
+  programs: any[]
 }
 
 interface APIResponseI {
@@ -66,6 +67,7 @@ const initialState: InitialStateI = {
     listingUnit: [],
     frequency: [],
     fishCondition: [],
+    programs: [],
   },
 }
 
