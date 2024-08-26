@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Box,
+  Button,
   Center,
   Checkbox,
   FormControl,
@@ -18,24 +19,41 @@ import { saveNewProgramValues } from '../../redux/reducers/createNewProgramSlice
 import MonitoringProgramNavButtons from '../../components/monitoringProgram/MonitoringProgramNavButtons'
 import { setUpNewProgramSchema } from '../../utils/helpers/yupValidations'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
+import { getAllProgramRelatedContent } from '../../redux/reducers/createNewProgramSlices/existingProgramsSlice'
+import { postMonitoringProgramSubmissions } from '../../redux/reducers/postSlices/monitoringProgramPostBundler'
+import { updateEntireCrewMembersStore } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 
 const MonitoringProgramNew = ({
   navigation,
   createNewProgramHomeStore,
+  existingProgramStore,
 }: {
   navigation: any
   createNewProgramHomeStore: any
+  existingProgramStore: any
 }) => {
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
   const dispatch = useDispatch<AppDispatch>()
-
+  // const [dataFetched, setDataFetched] = useState(false as boolean)
   const [copyValuesChecked, setCopyValuesChecked] = useState(false as boolean)
-
   const SubmitNewMonitoringProgramValues = (values: any) => {
     dispatch(saveNewProgramValues(values))
   }
+  const fetchAllProgramRelatedContent = (values: any) => {
+    dispatch(getAllProgramRelatedContent(values))
+    // setDataFetched(true)
+    // updateEntireCrewMembersStore()
+  }
+  // useEffect(() => {
+  //   // if (existingProgramStore.status === 'fulfilled') {
+  //   updateEntireCrewMembersStore(
+  //     existingProgramStore.allProgramContents.Personnel
+  //   )
+
+  //   // }
+  // }, [existingProgramStore, dataFetched])
 
   return (
     <>
@@ -113,23 +131,37 @@ const MonitoringProgramNew = ({
                   ></Checkbox>
                 </HStack>
                 {copyValuesChecked && (
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Program{' '}
-                      </Text>
-                    </FormControl.Label>
-                    <CustomSelect
-                      selectedValue={values.program}
-                      placeholder='Choose Program'
-                      onValueChange={handleChange('program')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={[
-                        { id: 1, definition: 'Program 1' },
-                        { id: 2, definition: 'Program 2' },
-                      ]}
-                    />
-                  </FormControl>
+                  <>
+                    <FormControl>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Program{' '}
+                        </Text>
+                      </FormControl.Label>
+                      <CustomSelect
+                        selectedValue={values.program}
+                        placeholder='Choose Program'
+                        onValueChange={handleChange('program')}
+                        setFieldTouched={setFieldTouched}
+                        selectOptions={dropdownValues?.programs.map(
+                          (item: any) => ({
+                            label: item.programName,
+                            value: item.programName,
+                          })
+                        )}
+                      />
+                    </FormControl>
+                    <Button
+                      bg='primary'
+                      w='40'
+                      h='10'
+                      onPress={() => {
+                        fetchAllProgramRelatedContent(1)
+                      }}
+                    >
+                      TEST SAVE
+                    </Button>
+                  </>
                 )}
               </VStack>
             </Box>
@@ -149,6 +181,7 @@ const MonitoringProgramNew = ({
 const mapStateToProps = (state: RootState) => {
   return {
     createNewProgramHomeStore: state.createNewProgramHome,
+    existingProgramStore: state.existingProgram,
   }
 }
 
