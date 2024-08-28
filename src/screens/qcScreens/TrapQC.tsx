@@ -42,11 +42,13 @@ function TrapQC({
   route,
   qcTrapVisitSubmissions,
   previousTrapVisits,
+  userCredentialsStore,
 }: {
-  navigation: any
-  route: any
-  qcTrapVisitSubmissions: any[]
-  previousTrapVisits: any[]
+  navigation: any,
+  route: any,
+  qcTrapVisitSubmissions: any[],
+  previousTrapVisits: any[],
+  userCredentialsStore: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -81,7 +83,7 @@ function TrapQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programTrapVisits = previousTrapVisits.filter(trapVisit => {
+    const programTrapVisits = previousTrapVisits.filter((trapVisit) => {
       return trapVisit.createdTrapVisitResponse.programId === programId
     })
 
@@ -123,7 +125,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(temp.measureValueNumeric),
-              colorScale: stagedForSubmission ? '#FBA72A' : !qcCompleted ? 'rgb(255, 100, 84)' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             })
           }
 
@@ -266,8 +272,7 @@ function TrapQC({
   const handleModalSubmit = (submission: any) => {
     if (pointClicked) {
       const trapVisitId = submission['Temperature']['id']
-      console.log('this submission', submission)
-      dispatch(trapVisitQCSubmission({ trapVisitId, submission }))
+      dispatch(trapVisitQCSubmission({ trapVisitId, userId: userCredentialsStore.id, submission }))
     }
   }
 
@@ -303,7 +308,7 @@ function TrapQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map(buttonName => {
+            {activeButtons.map((buttonName) => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -312,7 +317,7 @@ function TrapQC({
                   chartType='bar'
                   data={graphData[buttonName]}
                   showDates={true}
-                  onPointClick={datum => handlePointClicked(datum)}
+                  onPointClick={(datum) => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'
@@ -384,6 +389,7 @@ const mapStateToProps = (state: RootState) => {
       state.trapVisitFormPostBundler.qcTrapVisitSubmissions,
     previousTrapVisits:
       state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
+    userCredentialsStore: state.userCredentials,
   }
 }
 

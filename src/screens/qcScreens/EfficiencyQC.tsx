@@ -42,11 +42,13 @@ function EfficiencyQC({
   route,
   qcCatchRawSubmissions,
   previousCatchRawSubmissions,
+  userCredentialsStore,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any[]
   previousCatchRawSubmissions: any[]
+  userCredentialsStore: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [graphData, setGraphData] = useState<any[]>([])
@@ -247,7 +249,13 @@ function EfficiencyQC({
         submissions.push(submissionTwo)
       }
 
-      dispatch(catchRawQCSubmission({ catchRawId, submissions }))
+      dispatch(
+        catchRawQCSubmission({
+          catchRawId,
+          userId: userCredentialsStore.id,
+          submissions,
+        })
+      )
     }
   }
 
@@ -793,6 +801,7 @@ const mapStateToProps = (state: RootState) => {
     markTypeState: markType ?? [],
     markColorState: markColor ?? [],
     markPositionState: markPosition ?? [],
+    userCredentialsStore: state.userCredentials,
   }
 }
 

@@ -67,6 +67,7 @@ function CatchCategoricalQC({
   markColorState,
   markPositionState,
   visitSetupDefaults,
+  userCredentialsStore,
 }: {
   navigation: any
   route: any
@@ -79,6 +80,7 @@ function CatchCategoricalQC({
   markColorState: any
   markPositionState: any
   visitSetupDefaults: any
+  userCredentialsStore: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -382,7 +384,7 @@ function CatchCategoricalQC({
 
   const handlePointClick = (datum: any) => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
+    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
 
@@ -400,7 +402,7 @@ function CatchCategoricalQC({
       idsAtPoint = datum.ids
     }
 
-    const selectedData = qcData.filter(response => {
+    const selectedData = qcData.filter((response) => {
       const id = response.createdCatchRawResponse?.id
       return idsAtPoint.includes(id)
     })
@@ -510,7 +512,13 @@ function CatchCategoricalQC({
         submissions.push(submissionTwo)
       }
 
-      dispatch(catchRawQCSubmission({ catchRawId, submissions }))
+      dispatch(
+        catchRawQCSubmission({
+          catchRawId,
+          userId: userCredentialsStore.id,
+          submissions,
+        })
+      )
     }
   }
 
@@ -630,7 +638,7 @@ function CatchCategoricalQC({
               fontSize='16'
               placeholder='fork length...'
               keyboardType='numeric'
-              onChangeText={value => {
+              onChangeText={(value) => {
                 setNestedModalInputValue({ fieldClicked: 'forkLength', value })
               }}
               // onBlur={handleBlur('comments')}
@@ -792,7 +800,7 @@ function CatchCategoricalQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map(buttonName => {
+            {activeButtons.map((buttonName) => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -800,7 +808,7 @@ function CatchCategoricalQC({
                   key={buttonName}
                   chartType={buttonNameToChartType[buttonName] as any}
                   showDates
-                  onPointClick={datum => handlePointClick(datum)}
+                  onPointClick={(datum) => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
                   title={buttonName}
@@ -1514,7 +1522,7 @@ function CatchCategoricalQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  onChangeText={value => {
+                  onChangeText={(value) => {
                     setNestedModalComment(value)
                   }}
                   // onBlur={handleBlur('comments')}
@@ -1557,6 +1565,7 @@ const mapStateToProps = (state: RootState) => {
     markColorState: markColor ?? [],
     markPositionState: markPosition ?? [],
     visitSetupDefaults: state.visitSetupDefaults,
+    userCredentialsStore: state.userCredentials,
   }
 }
 

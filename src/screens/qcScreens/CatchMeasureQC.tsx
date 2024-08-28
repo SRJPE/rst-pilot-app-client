@@ -35,12 +35,14 @@ function CatchMeasureQC({
   qcCatchRawSubmissions,
   previousCatchRawSubmissions,
   lifeStageState,
+  userCredentialsStore,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any[]
   previousCatchRawSubmissions: any[]
   lifeStageState: any[]
+  userCredentialsStore: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -296,7 +298,13 @@ function CatchMeasureQC({
       }
 
       if (submissions.length)
-        dispatch(catchRawQCSubmission({ catchRawId, submissions }))
+        dispatch(
+          catchRawQCSubmission({
+            catchRawId,
+            userId: userCredentialsStore.id,
+            submissions,
+          })
+        )
     }
   }
 
@@ -449,6 +457,7 @@ const mapStateToProps = (state: RootState) => {
     previousCatchRawSubmissions:
       state.trapVisitFormPostBundler.previousCatchRawSubmissions,
     lifeStageState: lifeStage ?? [],
+    userCredentialsStore: state.userCredentials,
   }
 }
 

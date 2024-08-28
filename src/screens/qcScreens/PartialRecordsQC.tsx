@@ -51,6 +51,7 @@ function PartialRecordsQC({
   taxonDropdowns,
   runDropdowns,
   lifeStageDropdowns,
+  userCredentialsStore,
 }: {
   navigation: any
   route: any
@@ -61,6 +62,7 @@ function PartialRecordsQC({
   taxonDropdowns: any[]
   runDropdowns: any[]
   lifeStageDropdowns: any[]
+  userCredentialsStore: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [qcData, setQCData] = useState<any[]>([])
@@ -211,7 +213,13 @@ function PartialRecordsQC({
         submissions.push(submissionTwo)
       }
 
-      dispatch(catchRawQCSubmission({ catchRawId, submissions }))
+      dispatch(
+        catchRawQCSubmission({
+          catchRawId,
+          userId: userCredentialsStore.id,
+          submissions,
+        })
+      )
     }
   }
 
@@ -1113,6 +1121,7 @@ const mapStateToProps = (state: RootState) => {
     taxonDropdowns: taxon ?? [],
     runDropdowns: run ?? [],
     lifeStageDropdowns: lifeStage ?? [],
+    userCredentialsStore: state.userCredentials,
   }
 }
 

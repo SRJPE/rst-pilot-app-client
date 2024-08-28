@@ -54,6 +54,7 @@ function CatchFishCountQC({
   markTypeState,
   markColorState,
   markPositionState,
+  userCredentialsStore,
 }: {
   navigation: any
   route: any
@@ -65,6 +66,7 @@ function CatchFishCountQC({
   markTypeState: any[]
   markColorState: any[]
   markPositionState: any[]
+  userCredentialsStore: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [graphData, setGraphData] = useState<any[]>([])
@@ -315,6 +317,7 @@ function CatchFishCountQC({
         dispatch(
           catchRawQCSubmission({
             catchRawId: nestedModalData.catchRawId,
+            userId: userCredentialsStore.id,
             submissions,
           })
         )
@@ -1114,6 +1117,7 @@ const mapStateToProps = (state: RootState) => {
     markTypeState: markType ?? [],
     markColorState: markColor ?? [],
     markPositionState: markPosition ?? [],
+    userCredentialsStore: state.userCredentials,
   }
 }
 
