@@ -117,7 +117,6 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       const catchRawSubmissions: any =
         state.trapVisitFormPostBundler.catchRawSubmissions
 
-      // try {
       const promiseTracker: {
         [key: string]: {
           trapPromise: Promise<any>

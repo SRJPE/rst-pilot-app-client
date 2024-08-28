@@ -1024,6 +1024,7 @@ const AddFishContent = ({
                         </Radio.Group>
                       </HStack>
                     </FormControl>
+
                     {species.value === 'Chinook salmon' && (
                       <FormControl w='1/3'>
                         <HStack space={4} alignItems='center'>
