@@ -123,8 +123,8 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
               await SecureStore.setItemAsync('userIdToken', idToken as string)
 
               await SecureStore.setItemAsync(
-                'tokenExpiresAt',
-                moment((10 as number) * 1000 + issuedAt * 1000).format()
+                'userAccessTokenExpiresAt',
+                moment((expiresIn as number) * 1000 + issuedAt * 1000).format()
               )
 
               const userRes = await api.get('user/current', {
@@ -161,10 +161,6 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
                   ...userRes.data,
                   ...personnelResponse.data,
                   userPrograms: userProgramsResponse.data,
-                  // tokenIssuedAt: moment(issuedAt * 1000).format(),
-                  // tokenExpiresAt: moment(
-                  //   (10 as number) * 1000 + issuedAt * 1000
-                  // ).format(),
                 })
               )
             } catch (error: any) {

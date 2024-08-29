@@ -6,6 +6,12 @@ import axios, {
 import { camelizeKeys } from 'humps'
 import Constants from 'expo-constants'
 import * as SecureStore from 'expo-secure-store'
+import { refreshAsync } from 'expo-auth-session'
+import moment from 'moment'
+import {
+  // @ts-ignore
+  REACT_APP_CLIENT_ID,
+} from '@env'
 
 const dateTransformer: AxiosRequestTransformer = (data: any) => {
   if (data instanceof Date) {
@@ -36,6 +42,55 @@ api.interceptors.request.use(
     try {
       const accessToken = await SecureStore.getItemAsync('userAccessToken')
       const idToken = await SecureStore.getItemAsync('userIdToken')
+      const tokenExpiresAt = await SecureStore.getItemAsync(
+        'userAccessTokenExpiresAt'
+      )
+
+      const tokenIsExpired = moment().isAfter(tokenExpiresAt)
+
+      if (tokenIsExpired) {
+        //refreshAsync to exchave for new token
+        const existingRefreshToken =
+          (await SecureStore.getItemAsync('userRefreshToken')) || undefined
+
+        const tokenEndpoint =
+          'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_signin'
+
+        const refreshResponse = await refreshAsync(
+          {
+            clientId: REACT_APP_CLIENT_ID,
+            refreshToken: existingRefreshToken,
+          },
+          { tokenEndpoint }
+        )
+
+        if (refreshResponse.accessToken) {
+          const { accessToken, refreshToken, idToken, issuedAt, expiresIn } =
+            refreshResponse
+
+          await SecureStore.setItemAsync('userAccessToken', accessToken)
+
+          await SecureStore.setItemAsync(
+            'userRefreshToken',
+            refreshToken as string
+          )
+          await SecureStore.setItemAsync('userIdToken', idToken as string)
+
+          await SecureStore.setItemAsync(
+            'userAccessTokenExpiresAt',
+            moment((expiresIn as number) * 1000 + issuedAt * 1000).format()
+          )
+
+          const newConfig = config as any
+          newConfig.headers['Authorization'] = `Bearer ${accessToken}`
+          newConfig.headers['idToken'] = idToken
+          return newConfig
+        } else {
+          //force logout if new token cannot be retrieved
+          // setForcedLogoutModalOpen(true)
+          return
+        }
+      }
 
       if (accessToken && idToken) {
         const newConfig = config as any
@@ -68,6 +123,7 @@ api.interceptors.response.use(
     const { response } = error
     console.log('error axios from config: ', response)
     if (response?.status === 401) {
+      console.log('unauthorized. token needs to be refreshed')
       // unauthorized
       // sign out?
     } else if (response?.status === 403) {
