@@ -10,6 +10,7 @@ import {
 } from 'native-base'
 import React from 'react'
 import { ImageBackground } from 'react-native'
+import moment from 'moment'
 
 import {
   // @ts-ignore
@@ -28,9 +29,13 @@ import * as SecureStore from 'expo-secure-store'
 import { connect, useDispatch } from 'react-redux'
 import api from '../api/axiosConfig'
 import AppLogo from '../components/Shared/AppLogo'
-import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
+import {
+  clearUserCredentials,
+  saveUserCredentials,
+} from '../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState } from '../redux/store'
 import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
+import { set } from 'lodash'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -101,7 +106,13 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
             discoveryObj
           ).then(async res => {
             try {
-              const { accessToken, refreshToken, idToken, scope } = res
+              const {
+                accessToken,
+                refreshToken,
+                idToken,
+                issuedAt,
+                expiresIn,
+              } = res
 
               await SecureStore.setItemAsync('userAccessToken', accessToken)
 
@@ -110,6 +121,11 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
                 refreshToken as string
               )
               await SecureStore.setItemAsync('userIdToken', idToken as string)
+
+              await SecureStore.setItemAsync(
+                'tokenExpiresAt',
+                moment((10 as number) * 1000 + issuedAt * 1000).format()
+              )
 
               const userRes = await api.get('user/current', {
                 headers: {
@@ -145,6 +161,10 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
                   ...userRes.data,
                   ...personnelResponse.data,
                   userPrograms: userProgramsResponse.data,
+                  // tokenIssuedAt: moment(issuedAt * 1000).format(),
+                  // tokenExpiresAt: moment(
+                  //   (10 as number) * 1000 + issuedAt * 1000
+                  // ).format(),
                 })
               )
             } catch (error: any) {
