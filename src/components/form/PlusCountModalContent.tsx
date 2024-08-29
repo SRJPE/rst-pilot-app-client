@@ -87,8 +87,12 @@ const PlusCountModalContent = ({
     <View>
       <Formik
         validationSchema={addPlusCountsSchema}
+        enableReinitialize
         initialValues={{ ...initialFormValues, plusCountMethod: 'none' }}
-        onSubmit={(values) => handleFormSubmit(values)}
+        onSubmit={(values, { resetForm }) => {
+          handleFormSubmit(values)
+          resetForm()
+        }}
       >
         {({
           handleChange,
@@ -265,7 +269,7 @@ const PlusCountModalContent = ({
                         my={1}
                         _icon={{ color: 'primary' }}
                       >
-                        Yes
+                        True
                       </Radio>
                       <Radio
                         colorScheme='primary'
@@ -273,7 +277,7 @@ const PlusCountModalContent = ({
                         my={1}
                         _icon={{ color: 'primary' }}
                       >
-                        No
+                        False
                       </Radio>
                     </HStack>
                   </Radio.Group>

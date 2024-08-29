@@ -38,7 +38,7 @@ function ProgramQC({
       </Button>
       {/* ---------------------------------------------------------------------------------------- */}
 
-      {programs.map(program => {
+      {programs.map((program) => {
         return (
           <Button
             key={program.programName}

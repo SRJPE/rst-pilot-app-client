@@ -1024,6 +1024,7 @@ const AddFishContent = ({
                         </Radio.Group>
                       </HStack>
                     </FormControl>
+
                     {species.value === 'Chinook salmon' && (
                       <FormControl w='1/3'>
                         <HStack space={4} alignItems='center'>
@@ -1058,7 +1059,7 @@ const AddFishContent = ({
                                 my={1}
                                 _icon={{ color: 'primary' }}
                               >
-                                Yes
+                                True
                               </Radio>
                               <Radio
                                 colorScheme='primary'
@@ -1066,7 +1067,7 @@ const AddFishContent = ({
                                 my={1}
                                 _icon={{ color: 'primary' }}
                               >
-                                No
+                                False
                               </Radio>
                             </HStack>
                           </Radio.Group>

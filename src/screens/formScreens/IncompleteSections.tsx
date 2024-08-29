@@ -35,7 +35,7 @@ import {
 } from '../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { DeviceEventEmitter } from 'react-native'
-import { navigateHelper } from '../../utils/utils'
+import { combinePlusCounts, navigateHelper } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
@@ -543,7 +543,8 @@ const IncompleteSections = ({
     })
 
     if (catchRawSubmissions.length) {
-      dispatch(saveCatchRawSubmissions(catchRawSubmissions))
+      const catchRawPlusCountCombined = combinePlusCounts(catchRawSubmissions)
+      dispatch(saveCatchRawSubmissions(catchRawPlusCountCombined))
     }
   }
 

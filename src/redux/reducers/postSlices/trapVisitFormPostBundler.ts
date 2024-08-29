@@ -4,6 +4,7 @@ import { RootState } from '../../store'
 import { cloneDeep } from 'lodash'
 import { getSubstring } from '../../../utils/utils'
 import { PURGE } from 'redux-persist'
+import { showSlideAlert } from '../slideAlertSlice'
 
 interface InitialStateI {
   fetchStatus: 'initial-state' | 'fetch-failed' | 'fetch-successful'
@@ -54,7 +55,7 @@ interface CatchRawSubmissionI {
   id?: number
   programId?: number
   trapVisitId?: number
-  taxonId?: number
+  taxonCode?: number
   captureRunClass?: number
   captureRunClassMethod?: number
   markType?: number
@@ -109,126 +110,163 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       failedCatchRawSubmissions: [],
     }
 
-    // getting submissions for trap / catch_raw
-    const trapVisitSubmissions: any =
-      state.trapVisitFormPostBundler.trapVisitSubmissions
-    const catchRawSubmissions: any =
-      state.trapVisitFormPostBundler.catchRawSubmissions
+    try {
+      const trapVisitSubmissions =
+        state.trapVisitFormPostBundler.trapVisitSubmissions
+      const catchRawSubmissions =
+        state.trapVisitFormPostBundler.catchRawSubmissions
 
-    // try {
-    const promiseTracker: {
-      [key: string]: {
-        trapPromise: Promise<any>
-        linkedCatchRawSubmissions: any[]
-      }
-    } = {
-      // '028u208u02934u': {
-      //   trap: trapPromise,
-      //   linkedCatchRawSubmissions: []
-      // },
-    }
+      const promiseTracker: {
+        [key: string]: {
+          trapPromise: Promise<any>
+          linkedCatchRawSubmissions: any[]
+        }
+      } = {}
 
-    trapVisitSubmissions.forEach((trapSubmission: any) => {
-      const uuid = trapSubmission.trapVisitUid
-      const trapPromise = api.post('trap-visit/', trapSubmission)
-      const linkedCatchRawSubmissions = catchRawSubmissions.filter(
-        (catchSubmission: any) => catchSubmission.uid === uuid
-      )
+      trapVisitSubmissions.forEach((trapSubmission) => {
+        const uuid = trapSubmission.trapVisitUid
+        const trapPromise = api.post('trap-visit/', trapSubmission)
+        const linkedCatchRawSubmissions = catchRawSubmissions.filter(
+          (catchSubmission) => catchSubmission.uid === uuid
+        )
 
-      promiseTracker[uuid] = {
-        trapPromise,
-        linkedCatchRawSubmissions,
-      } as any
-    })
+        promiseTracker[uuid] = {
+          trapPromise,
+          linkedCatchRawSubmissions,
+        }
+      })
 
-    // iterate through each uuid key in promiseTracker and await trap post, get back id, then await catches
-    for (const uuid in promiseTracker) {
-      const { trapPromise, linkedCatchRawSubmissions } = promiseTracker[uuid]
+      for (const uuid in promiseTracker) {
+        const { trapPromise, linkedCatchRawSubmissions } = promiseTracker[uuid]
 
-      trapPromise
-        .then(async (response: any) => {
-          console.log('trap promise response: ', response)
-          let trapId = response.data.createdTrapVisitResponse.id
-          const {
-            createdTrapVisitResponse,
-            createdTrapVisitCrewResponse,
-            createdTrapCoordinatesResponse,
-            createdTrapVisitEnvironmentalResponse,
-          } = response.data
-          // save to payload
-          payload.trapVisitResponse.push({
-            createdTrapVisitResponse,
-            createdTrapVisitCrewResponse,
-            createdTrapCoordinatesResponse,
-            createdTrapVisitEnvironmentalResponse,
-          })
+        await trapPromise
+          .then(async (response: any) => {
+            let trapId = response.data.createdTrapVisitResponse.id
 
-          const catchPromises = linkedCatchRawSubmissions.map(
-            ({ uid, ...rest }: any) =>
-              api.post('catch-raw/', {
-                ...rest,
-                trapVisitId: trapId,
-              })
-          )
+            // Save to payload
+            payload.trapVisitResponse.push(response.data)
 
-          const catchResults = await Promise.allSettled(catchPromises).catch(
-            error => {
-              console.log('catch submission error: ', error)
-              const { response } = error
-              const errorDetail = response.data.detail
-              if (!errorDetail.includes('already exists')) {
-                payload.failedCatchRawSubmissions.push(
-                  catchRawSubmissions.find(
-                    (catchSubmission: any) => catchSubmission.uid === uuid
-                  )
-                )
+            const catchPromises = linkedCatchRawSubmissions.map(
+              ({ uid, ...rest }: {uid: string}) =>
+                api.post('catch-raw/', {
+                  ...rest,
+                  trapVisitId: trapId,
+                })
+            )
+
+            const catchResults = await Promise.allSettled(catchPromises)
+
+            for (const result of catchResults) {
+              if (result.status === 'fulfilled') {
+                payload.catchRawResponse.push(result.value.data)
+              } else {
+                console.log('server processed catch fail: ', result)
+                // handle failed catch-raw request
               }
             }
-          )
-
-          for (const result of catchResults as any) {
-            if (result.status === 'fulfilled') {
-              const {
-                createdCatchRawResponse,
-                createdGeneticSamplingDataResponse,
-                createdExistingMarksResponse,
-                createdMarkAppliedResponse,
-              } = result.value.data
-
-              payload.catchRawResponse.push({
-                createdCatchRawResponse,
-                createdGeneticSamplingDataResponse,
-                createdExistingMarksResponse,
-                createdMarkAppliedResponse,
-              })
-            } else {
-              console.log('server processed catch fail: ', result)
-              // handle failed catch-raw request
-              // what is result in this case?
-            }
-          }
-        })
-        .catch((error: any) => {
-          console.log('trap submission error: ', error)
-          // handle failed trap submissions
-          const { response } = error
-          const errorDetail = response.data.detail
-          if (!errorDetail.includes('already exists')) {
-            payload.failedTrapVisitSubmissions.push(
-              trapVisitSubmissions.find(
-                (trapSubmission: any) => trapSubmission.trapVisitUid === uuid
+          })
+          .catch((error: any) => {
+            console.log('trap submission error: ', error)
+            const { response } = error
+            const errorDetail = response.data.detail
+            if (!errorDetail.includes('already exists')) {
+              payload.failedTrapVisitSubmissions.push(
+                trapVisitSubmissions.find(
+                  (trapSubmission) => trapSubmission.trapVisitUid === uuid
+                )
               )
-            )
-          }
-        })
-    }
-
-    try {
-      await fetchWithPostParams(thunkAPI.dispatch, payload)
+            }
+          })
+      }
     } catch (err) {
       console.log('error in fetchWithPostParams: ', err)
+    } finally {
+      await fetchWithPostParams(thunkAPI.dispatch, payload)
     }
+
     return payload
+  }
+)
+
+export const postQCSubmissions = createAsyncThunk(
+  'trapVisitPostBundler/postQCSubmissions',
+  async (_, thunkAPI) => {
+    try {
+      const state = thunkAPI.getState() as RootState
+      const qcTrapVisitSubmissions =
+        state.trapVisitFormPostBundler.qcTrapVisitSubmissions
+      const qcCatchRawSubmissions =
+        state.trapVisitFormPostBundler.qcCatchRawSubmissions
+
+      if (qcTrapVisitSubmissions.length || qcCatchRawSubmissions.length) {
+        const trapPromises = qcTrapVisitSubmissions.map(
+          (trapSubmission: any) => {
+            let id = trapSubmission.createdTrapVisitResponse.id
+            let payload = { ...trapSubmission }
+            delete payload.createdTrapVisitResponse.id
+            delete payload.stagedForSubmission
+
+            return api.put(`trap-visit/${id}`, {
+              ...payload,
+            })
+          }
+        )
+
+        const catchPromises = qcCatchRawSubmissions.map(
+          (catchSubmission: any) => {
+            let id = catchSubmission.createdCatchRawResponse.id
+            let payload = { ...catchSubmission }
+            delete payload.createdCatchRawResponse.id
+            delete payload.stagedForSubmission
+
+            return api.put(`catch-raw/${id}`, {
+              ...payload,
+            })
+          }
+        )
+
+        const trapResults = await Promise.allSettled(trapPromises).catch(
+          (error) => {
+            console.log('trap qc submission error: ', error)
+          }
+        )
+
+        const catchResults = await Promise.allSettled(catchPromises).catch(
+          (error) => {
+            console.log('catch qc submission error: ', error)
+          }
+        )
+
+        const trapVisitResponse = []
+
+        for (const result of trapResults as any) {
+          if (result.status === 'fulfilled') {
+            trapVisitResponse.push(result.value.data)
+          } else {
+            console.log('trap qc submission fail: ', result)
+          }
+        }
+
+        const catchRawResponse = []
+
+        for (const result of catchResults as any) {
+          if (result.status === 'fulfilled') {
+            catchRawResponse.push(result.value.data)
+          } else {
+            console.log('catch qc submission fail: ', result)
+          }
+        }
+
+        showSlideAlert(thunkAPI.dispatch, 'QC submissions')
+
+        return {
+          trapVisitResponse,
+          catchRawResponse,
+        }
+      }
+    } catch (err) {
+      console.log('error in postQCSubmissions: ', err)
+    }
   }
 )
 
@@ -241,7 +279,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
       const state = thunkAPI.getState() as RootState
       const userPrograms = state.visitSetupDefaults.programs
       await Promise.all(
-        userPrograms.map(async program => {
+        userPrograms.map(async (program) => {
           const trapVisitResponse = await api.get(
             `trap-visit/program/${program.programId}`
           )
@@ -253,7 +291,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCTrapVisitIds: number[] =
             state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
-              trapVisit => {
+              (trapVisit) => {
                 return trapVisit.createdTrapVisitResponse.id
               }
             )
@@ -268,7 +306,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCCatchRawIds: number[] =
             state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
-              catchRaw => {
+              (catchRaw) => {
                 return catchRaw.createdCatchRawResponse.id
               }
             )
@@ -301,19 +339,18 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
 const fetchWithPostParams = async (dispatch: any, postResults: any) => {
   const { trapVisitResponse, catchRawResponse } = postResults
-
-  if (trapVisitResponse.length) {
-    const fetchResults = await dispatch(fetchPreviousTrapAndCatch())
+  let fetchResults = null
+  try {
+    fetchResults = await dispatch(fetchPreviousTrapAndCatch())
 
     if (fetchResults.meta.requestStatus === 'fulfilled') {
       const fetchPayload = fetchResults.payload
       const { previousTrapVisits, previousCatchRaw } = fetchPayload
-      console.log('fetchPayload: ', fetchPayload)
 
-      const fetchedTrapIds = previousTrapVisits.map(
+      const fetchedTrapUids = previousTrapVisits.map(
         (trap: any) => trap.createdTrapVisitResponse.trapVisitUid
       )
-      const postedTrapIds = trapVisitResponse.map(
+      const postedTrapUids = trapVisitResponse.map(
         (trap: any) => trap.createdTrapVisitResponse.trapVisitUid
       )
 
@@ -329,32 +366,40 @@ const fetchWithPostParams = async (dispatch: any, postResults: any) => {
       const doesFetchContainPost = (arr: any, target: any) =>
         target.every((v: any) => arr.includes(v))
 
+      let missedTrapVisitRecords: any[] = []
+      let missedCatchRawRecords: any[] = []
+
       // check trap visit
       // if fetch DOES NOT contain post results
-      if (!doesFetchContainPost(fetchedTrapIds, postedTrapIds)) {
-        const missedFetchIds = postedTrapIds.filter((id: number) => {
-          return !fetchedTrapIds.includes(id)
+      if (!doesFetchContainPost(fetchedTrapUids, postedTrapUids)) {
+        missedTrapVisitRecords = trapVisitResponse.filter((response: any) => {
+          return !fetchedTrapUids.includes(
+            response.createdTrapVisitResponse.trapVisitUid
+          )
         })
-        dispatch(addMissingFetchedTrapVisitSubs({ missedFetchIds }))
-      }
-      // if fetch results DOES contain post results
-      else {
-        dispatch(clearPendingTrapVisitSubs())
       }
 
       // check catch raw
       // if fetch DOES NOT contain post results
       if (!doesFetchContainPost(fetchedCatchRawIds, postedCatchRawIds)) {
-        const missedFetchIds = postedCatchRawIds.filter((id: number) => {
-          return !fetchedCatchRawIds.includes(id)
+        missedCatchRawRecords = catchRawResponse.filter((response: any) => {
+          return !fetchedCatchRawIds.includes(
+            response.createdCatchRawResponse.id
+          )
         })
-        dispatch(addMissingFetchedCatchRawSubs({ missedFetchIds }))
       }
-      // if fetch results DOES contain post results
-      else {
-        dispatch(clearPendingCatchRawSubs())
+
+      if (missedTrapVisitRecords.length || missedCatchRawRecords.length) {
+        dispatch(
+          addMissingFetchedRecords({
+            missedTrapVisitRecords,
+            missedCatchRawRecords,
+          })
+        )
       }
     }
+  } catch (error) {
+    console.log('error in fetchWithPostParams: ', error)
   }
 }
 
@@ -406,25 +451,28 @@ export const trapVisitPostBundler = createSlice({
       state.submissionStatus = 'not-submitted'
     },
     trapVisitQCSubmission: (state, action) => {
-      let { trapVisitId, submission } = action.payload
+      let { trapVisitId, userId, submission } = action.payload
       let visitHasStartedQC = false
       let qcTrapVisitIdx = -1
 
       state.qcTrapVisitSubmissions.forEach((trapVisit: any, idx: number) => {
-        if (trapVisit.createdTrapVisitResponse.trapVisitUid === trapVisitId) {
+        if (trapVisit.createdTrapVisitResponse.id === trapVisitId) {
           visitHasStartedQC = true
           qcTrapVisitIdx = idx
         }
       })
 
       // if trap visit has not started QC
+
       if (!visitHasStartedQC && qcTrapVisitIdx === -1) {
         let trapVisitIdx = -1
+
         state.previousTrapVisitSubmissions.forEach((trapVisit: any, idx) => {
           if (trapVisit.createdTrapVisitResponse.id === trapVisitId) {
             trapVisitIdx = idx
           }
         })
+
         let trapVisitToQC: any =
           state.previousTrapVisitSubmissions[trapVisitIdx]
 
@@ -456,27 +504,24 @@ export const trapVisitPostBundler = createSlice({
           trapVisitToQC.createdTrapVisitResponse.rpmAtEnd =
             submission['RPM At End'].y
           trapVisitToQC.createdTrapVisitResponse.qcCompleted = true
-          trapVisitToQC.createdTrapVisitResponse.qcCompletedAt = new Date()
+          trapVisitToQC.createdTrapVisitResponse.qcCompletedAt =
+            new Date().toISOString()
+          trapVisitToQC.createdTrapVisitResponse.qcCompletedBy = userId
         }
+
+        trapVisitToQC['stagedForSubmission'] = true
 
         state.previousTrapVisitSubmissions = [
           ...state.previousTrapVisitSubmissions.slice(0, trapVisitIdx),
           ...state.previousTrapVisitSubmissions.slice(trapVisitIdx + 1),
         ]
         state.qcTrapVisitSubmissions.push(trapVisitToQC)
-        console.log(
-          'previousTrapVisitSubmissions in bundler',
-          state.previousTrapVisitSubmissions.length
-        )
-
-        console.log(
-          'qcTrapVisitSubmissions in bundler: ',
-          state.qcTrapVisitSubmissions.length
-        )
       }
       // if trap visit has started QC
       else {
         let qcTrapVisit: any = state.qcTrapVisitSubmissions[qcTrapVisitIdx]
+
+        qcTrapVisit.createdTrapVisitResponse.qcCompletedBy = userId
 
         // env data
         qcTrapVisit.createdTrapVisitEnvironmentalResponse.forEach(
@@ -507,14 +552,14 @@ export const trapVisitPostBundler = createSlice({
           ...state.qcTrapVisitSubmissions.slice(0, qcTrapVisitIdx),
           ...state.qcTrapVisitSubmissions.slice(qcTrapVisitIdx + 1),
         ]
+
         state.qcTrapVisitSubmissions.push(qcTrapVisit)
       }
     },
     catchRawQCSubmission: (state, action) => {
-      let { catchRawId, submission } = action.payload
+      let { catchRawId, userId, submissions } = action.payload
       let catchHasStartedQC = false
       let qcCatchRawIdx = -1
-      const submissionKeys = Object.keys(submission)
 
       state.qcCatchRawSubmissions.forEach((catchRaw: any, idx: number) => {
         if (catchRaw.createdCatchRawResponse.id === catchRawId) {
@@ -523,6 +568,7 @@ export const trapVisitPostBundler = createSlice({
         }
       })
 
+      // if catch has not started QC
       if (!catchHasStartedQC && qcCatchRawIdx === -1) {
         let catchRawIdx = -1
         state.previousCatchRawSubmissions.forEach((catchRaw: any, idx) => {
@@ -532,33 +578,165 @@ export const trapVisitPostBundler = createSlice({
         })
         let catchRawToQC: any = state.previousCatchRawSubmissions[catchRawIdx]
 
-        if (submissionKeys.includes('Fork Length')) {
-          catchRawToQC.createdCatchRawResponse.forkLength =
-            submission['Fork Length'].y
-        }
-
-        if (submissionKeys.includes('Weight')) {
-          catchRawToQC.createdCatchRawResponse.weight = submission['Weight'].y
+        for (const submission of submissions) {
+          switch (submission.fieldName) {
+            case 'Species':
+              catchRawToQC.createdCatchRawResponse.taxonCode = submission.value
+              break
+            case 'Run':
+              catchRawToQC.createdCatchRawResponse.captureRunClass =
+                submission.value
+              break
+            case 'Life Stage':
+              catchRawToQC.createdCatchRawResponse.lifeStage = submission.value
+              break
+            case 'Fork Length':
+              catchRawToQC.createdCatchRawResponse.forkLength = Number(
+                submission.value
+              )
+              break
+            case 'Mark Type':
+              catchRawToQC.createdCatchRawResponse.markType = submission.value
+              break
+            case 'Mark Color':
+              catchRawToQC.createdCatchRawResponse.markColor = submission.value
+              break
+            case 'Mark Position':
+              catchRawToQC.createdCatchRawResponse.markPosition =
+                submission.value
+              break
+            case 'Mortality':
+              catchRawToQC.createdCatchRawResponse.dead = submission.value
+              break
+            case 'Weight':
+              catchRawToQC.createdCatchRawResponse.weight = Number(
+                submission.value
+              )
+              break
+            case 'Adipose Clipped':
+              catchRawToQC.createdCatchRawResponse.adiposeClipped =
+                submission.value
+              break
+            case 'Plus Count':
+              catchRawToQC.createdCatchRawResponse.numFishCaught = Number(
+                submission.value
+              )
+              break
+            case 'Release Site':
+              catchRawToQC.releaseResponse.releaseSiteId = submission.value
+              break
+            case 'Release Date':
+              catchRawToQC.createdCatchRawResponse.releaseDate =
+                submission.value
+              break
+            case 'Number Recaptured':
+              catchRawToQC.createdCatchRawResponse.numFishCaught = Number(
+                submission.value
+              )
+              break
+            case 'Wild Fish Released':
+              catchRawToQC.releaseResponse.totalWildFishReleased = Number(
+                submission.value
+              )
+              break
+            case 'Hatchery Fish Released':
+              catchRawToQC.releaseResponse.totalHatcheryFishReleased = Number(
+                submission.value
+              )
+              break
+            case 'Comments':
+              catchRawToQC.createdCatchRawResponse.qcComments = submission.value
+              break
+            default:
+              break
+          }
         }
 
         catchRawToQC.createdCatchRawResponse.qcCompleted = true
-        catchRawToQC.createdCatchRawResponse.qcTime = new Date()
+        catchRawToQC.createdCatchRawResponse.qcTime = new Date().toISOString()
+        catchRawToQC.createdCatchRawResponse.qcCompletedBy = userId
+
+
+        catchRawToQC['stagedForSubmission'] = true
 
         state.previousCatchRawSubmissions = [
           ...state.previousCatchRawSubmissions.slice(0, catchRawIdx),
           ...state.previousCatchRawSubmissions.slice(catchRawIdx + 1),
         ]
         state.qcCatchRawSubmissions.push(catchRawToQC)
-      } else {
+      }
+      // if catch has started QC
+      else {
         let qcCatchRaw: any = state.qcCatchRawSubmissions[qcCatchRawIdx]
+        
+        qcCatchRaw.createdCatchRawResponse.qcCompletedBy = userId
 
-        if (submissionKeys.includes('Fork Length')) {
-          qcCatchRaw.createdCatchRawResponse.forkLength =
-            submission['Fork Length'].y
-        }
-
-        if (submissionKeys.includes('Weight')) {
-          qcCatchRaw.createdCatchRawResponse.weight = submission['Weight'].y
+        for (const submission of submissions) {
+          switch (submission.fieldName) {
+            case 'Species':
+              qcCatchRaw.createdCatchRawResponse.taxonCode = submission.value
+              break
+            case 'Run':
+              qcCatchRaw.createdCatchRawResponse.captureRunClass =
+                submission.value
+              break
+            case 'Life Stage':
+              qcCatchRaw.createdCatchRawResponse.lifeStage = submission.value
+              break
+            case 'Fork Length':
+              qcCatchRaw.createdCatchRawResponse.forkLength = submission.value
+              break
+            case 'Mark Type':
+              qcCatchRaw.createdCatchRawResponse.markType = submission.value
+              break
+            case 'Mark Color':
+              qcCatchRaw.createdCatchRawResponse.markColor = submission.value
+              break
+            case 'Mark Position':
+              qcCatchRaw.createdCatchRawResponse.markPosition = submission.value
+              break
+            case 'Mortality':
+              qcCatchRaw.createdCatchRawResponse.dead = submission.value
+              break
+            case 'Weight':
+              qcCatchRaw.createdCatchRawResponse.weight = submission.value
+              break
+            case 'Adipose Clipped':
+              qcCatchRaw.createdCatchRawResponse.adiposeClipped =
+                submission.value
+              break
+            case 'Plus Count':
+              qcCatchRaw.createdCatchRawResponse.numFishCaught = Number(
+                submission.value
+              )
+              break
+            case 'Release Site':
+              qcCatchRaw.releaseResponse.releaseSiteId = submission.value
+              break
+            case 'Release Date':
+              qcCatchRaw.createdCatchRawResponse.releaseDate = submission.value
+              break
+            case 'Number Recaptured':
+              qcCatchRaw.createdCatchRawResponse.numFishCaught = Number(
+                submission.value
+              )
+              break
+            case 'Wild Fish Released':
+              qcCatchRaw.releaseResponse.totalWildFishReleased = Number(
+                submission.value
+              )
+              break
+            case 'Hatchery Fish Released':
+              qcCatchRaw.releaseResponse.totalHatcheryFishReleased = Number(
+                submission.value
+              )
+              break
+            case 'Comments':
+              qcCatchRaw.createdCatchRawResponse.qcComments = submission.value
+              break
+            default:
+              break
+          }
         }
 
         state.qcCatchRawSubmissions = [
@@ -571,42 +749,38 @@ export const trapVisitPostBundler = createSlice({
     reset: () => {
       return initialState
     },
-    clearPendingTrapVisitSubs: state => {
+    clearPendingTrapVisitSubs: (state) => {
       state.trapVisitSubmissions = []
     },
-    clearPendingCatchRawSubs: state => {
+    clearPendingCatchRawSubs: (state) => {
       state.catchRawSubmissions = []
     },
-    addMissingFetchedTrapVisitSubs: (state, action) => {
-      const { missedFetchIds } = action.payload
-      const missedTrapVisits = state.trapVisitSubmissions.filter(
-        (trapVisit: any) => {
-          return missedFetchIds.includes(trapVisit.trapVisitUid)
-        }
+    addMissingFetchedRecords: (state, action) => {
+      const { missedTrapVisitRecords, missedCatchRawRecords } = action.payload
+      let missedTrapFetchUids = missedTrapVisitRecords.map(
+        (trapVisit: any) => trapVisit.createdTrapVisitResponse.trapVisitUid
       )
-      state.previousTrapVisitSubmissions.push(...missedTrapVisits)
-      state.trapVisitSubmissions = state.trapVisitSubmissions.filter(
-        (trapVisit: any) => {
-          return !missedFetchIds.includes(trapVisit.trapVisitUid)
-        }
-      )
-    },
-    addMissingFetchedCatchRawSubs: (state, action) => {
-      const { missedFetchIds } = action.payload
-      const missedCatchRaws = state.catchRawSubmissions.filter(
-        (catchRaw: any) => {
-          return missedFetchIds.includes(catchRaw.id)
-        }
-      )
-      state.previousCatchRawSubmissions.push(...missedCatchRaws)
-      state.catchRawSubmissions = state.catchRawSubmissions.filter(
-        (catchRaw: any) => {
-          return !missedFetchIds.includes(catchRaw.uid)
-        }
-      )
+
+      if (missedTrapVisitRecords.length) {
+        state.previousTrapVisitSubmissions.push(...missedTrapVisitRecords)
+        state.trapVisitSubmissions = state.trapVisitSubmissions.filter(
+          (trapVisit: any) => {
+            return !missedTrapFetchUids.includes(trapVisit.trapVisitUid)
+          }
+        )
+      }
+
+      if (missedCatchRawRecords.length) {
+        state.previousCatchRawSubmissions.push(...missedCatchRawRecords)
+        state.catchRawSubmissions = state.catchRawSubmissions.filter(
+          (catchRaw: any) => {
+            return !missedTrapFetchUids.includes(catchRaw.uid)
+          }
+        )
+      }
     },
   },
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     builder.addCase(PURGE, () => {
       return initialState
     })
@@ -633,6 +807,46 @@ export const trapVisitPostBundler = createSlice({
         state.trapVisitSubmissions = [...failedTrapVisitSubmissions]
       }
     )
+
+    builder.addCase(postQCSubmissions.fulfilled.type, (state, action: any) => {
+      const { trapVisitResponse, catchRawResponse } = action.payload
+      console.log('fufilled postQCSubmissions: ', action.payload)
+
+      // remove all updated trap visit and catch raw in trapVisitResponse and catchRawResponse from qcTrapVisitSubmissions and qcCatchRawSubmissions
+      if (trapVisitResponse.length) {
+        state.qcTrapVisitSubmissions = state.qcTrapVisitSubmissions.filter(
+          (qcTrapVisit: any) => {
+            let trapVisitResponseIds = trapVisitResponse.map(
+              (trapVisit: any) => trapVisit.createdTrapVisitResponse.id
+            )
+            return !trapVisitResponseIds.includes(
+              qcTrapVisit.createdTrapVisitResponse.id
+            )
+          }
+        )
+      }
+
+      if (catchRawResponse.length) {
+        state.qcCatchRawSubmissions = state.qcCatchRawSubmissions.filter(
+          (qcCatchRaw: any) => {
+            let catchRawResponseIds = catchRawResponse.map(
+              (catchRaw: any) => catchRaw.createdCatchRawResponse.id
+            )
+            return !catchRawResponseIds.includes(
+              qcCatchRaw.createdCatchRawResponse.id
+            )
+          }
+        )
+      }
+
+      if (trapVisitResponse.length) {
+        state.previousTrapVisitSubmissions.push(...trapVisitResponse)
+      }
+
+      if (catchRawResponse.length) {
+        state.previousCatchRawSubmissions.push(...catchRawResponse)
+      }
+    })
 
     builder.addCase(
       fetchPreviousTrapAndCatch.fulfilled.type,
@@ -661,8 +875,9 @@ export const {
   reset,
   clearPendingTrapVisitSubs,
   clearPendingCatchRawSubs,
-  addMissingFetchedTrapVisitSubs,
-  addMissingFetchedCatchRawSubs,
+  addMissingFetchedRecords,
+  // addMissingFetchedTrapVisitSubs,
+  // addMissingFetchedCatchRawSubs,
 } = trapVisitPostBundler.actions
 
 export default trapVisitPostBundler.reducer
