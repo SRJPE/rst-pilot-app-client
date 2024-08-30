@@ -2,7 +2,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 // import { RootState } from '../store'
 import { cloneDeep } from 'lodash'
 import api from '../../../api/axiosConfig'
-import { updateEntireCrewMembersStore } from './crewMembersSlice'
+import { updateAllCrewMembersFromExisting } from './crewMembersSlice'
+import { updateAllEfficiencyTrialProtocolsFromExisting } from './efficiencyTrialProtocolsSlice'
+import { updateAllPermitInformationFromExisting } from './permitInformationSlice'
+import { updateAllTrappingProtocolsFromExisting } from './trappingProtocolsSlice'
+import { updateAllTrappingSitesFromExisting } from './trappingSitesSlice'
+import { updateAllMultipleTrapFromExisting } from './multipleTrapsSlice'
 
 const uninitializedStatus = 'uninitialized'
 const pendingStatus = 'pending'
@@ -120,7 +125,18 @@ export const getAllProgramRelatedContent = createAsyncThunk(
   async (personnelID: string | number, { dispatch }) => {
     const response: APIResponseI = await api.get(`program/${personnelID}`)
     const data = response.data
-    dispatch(updateEntireCrewMembersStore(data.personnel))
+    console.log(
+      '🚀 ~ file: existingProgramsSlice.ts:128 ~ response.data:',
+      response.data
+    )
+    dispatch(updateAllCrewMembersFromExisting(data.personnel))
+    dispatch(updateAllEfficiencyTrialProtocolsFromExisting(data.personnel))
+    dispatch(updateAllPermitInformationFromExisting(data.permitInformation))
+    dispatch(updateAllTrappingProtocolsFromExisting(data.fishMeasureProtocol))
+    dispatch(updateAllTrappingSitesFromExisting(data.trappingSites))
+    dispatch(updateAllMultipleTrapFromExisting(data.personnel))
+    //hatchery info
+    //program metaData
     return data
   }
 )
