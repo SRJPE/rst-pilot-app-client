@@ -33,9 +33,16 @@ export const multipleTrapsSlice = createSlice({
       console.log('🚀 ~ multipleTrapsStorePayload:', multipleTrapsStorePayload)
       state.groupTrapSiteValues = multipleTrapsStorePayload
     },
+    updateAllMultipleTrapFromExisting: (state, action) => {
+      let multipleTrapsStorePayload = cloneDeep(action.payload)
+      delete multipleTrapsStorePayload.numberOfTrapSites
+
+      state.groupTrapSiteValues = multipleTrapsStorePayload
+    },
   },
 })
 
-export const { saveMultipleTraps } = multipleTrapsSlice.actions
+export const { saveMultipleTraps, updateAllMultipleTrapFromExisting } =
+  multipleTrapsSlice.actions
 
 export default multipleTrapsSlice.reducer

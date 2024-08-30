@@ -41,12 +41,19 @@ export const efficiencyTrialProtocolsSlice = createSlice({
     saveHatcheryInformationValues: (state, action) => {
       state.values = action.payload
     },
+    updateAllEfficiencyTrialProtocolsFromExisting: (state, action) => {
+      state.efficiencyMonitoringProtocolsPDF =
+        action.payload.efficiencyMonitoringProtocolsPDF
+      state.hatcheryAgreementPDF = action.payload.hatcheryAgreementPDF
+      state.values = action.payload.values
+    },
   },
 })
 
 export const {
   resetEfficiencyTrialProtocolsSlice,
   saveHatcheryInformationValues,
+  updateAllEfficiencyTrialProtocolsFromExisting,
 } = efficiencyTrialProtocolsSlice.actions
 
 export default efficiencyTrialProtocolsSlice.reducer

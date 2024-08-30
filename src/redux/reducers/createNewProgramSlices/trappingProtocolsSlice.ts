@@ -74,6 +74,10 @@ export const trappingProtocolsSlice = createSlice({
         }
       }
     },
+
+    updateAllTrappingProtocolsFromExisting: (state, action) => {
+      state.trappingProtocolsStore = action.payload
+    },
   },
 })
 
@@ -82,6 +86,7 @@ export const {
   saveIndividualTrappingProtocol,
   updateIndividualTrappingProtocol,
   deleteIndividualTrappingProtocol,
+  updateAllTrappingProtocolsFromExisting,
 } = trappingProtocolsSlice.actions
 
 export default trappingProtocolsSlice.reducer

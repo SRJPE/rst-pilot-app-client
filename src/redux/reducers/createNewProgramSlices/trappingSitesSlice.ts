@@ -82,6 +82,9 @@ export const trappingSitesSlice = createSlice({
         }
       }
     },
+    updateAllTrappingSitesFromExisting: (state, action) => {
+      state.trappingSitesStore = action.payload
+    },
   },
 })
 
@@ -90,6 +93,7 @@ export const {
   saveIndividualTrapSite,
   updateIndividualTrapSite,
   deleteIndividualTrapSite,
+  updateAllTrappingSitesFromExisting,
 } = trappingSitesSlice.actions
 
 export default trappingSitesSlice.reducer

@@ -105,6 +105,10 @@ export const permitInformationSlice = createSlice({
         }
       }
     },
+    updateAllPermitInformationFromExisting: (state, action) => {
+      state.values = action.payload.values
+      state.takeAndMortalityValues = action.payload.takeAndMortalityValues
+    },
   },
 })
 
@@ -114,6 +118,7 @@ export const {
   saveIndividualTakeAndMortality,
   updateIndividualTakeAndMortality,
   deleteIndividualTakeAndMortality,
+  updateAllPermitInformationFromExisting,
 } = permitInformationSlice.actions
 
 export default permitInformationSlice.reducer
