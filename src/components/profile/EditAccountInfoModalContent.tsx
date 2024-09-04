@@ -66,25 +66,13 @@ const EditAccountInfoModalContent = ({
           const { firstName, lastName, phone, agencyId, emailAddress, role } =
             values
 
-          const accessToken = await SecureStore.getItemAsync('userAccessToken')
-          const idToken = await SecureStore.getItemAsync('userIdToken')
-
-          const headers = {
-            authorization: `Bearer ${accessToken}` as string,
-            idToken: idToken as string,
-          }
-
           const editedUserResponse = await api
-            .patch(
-              `user/${user.azureUid}/edit`,
-              {
-                firstName,
-                lastName,
-                phone,
-                agencyId,
-              },
-              { headers }
-            )
+            .patch(`user/${user.azureUid}/edit`, {
+              firstName,
+              lastName,
+              phone,
+              agencyId,
+            })
             .catch(err => {
               console.log(
                 '🚀 ~ file: AddNewUserModalContent.tsx:240 ~ onSubmit={ ~ err:',

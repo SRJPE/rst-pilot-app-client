@@ -35,6 +35,9 @@ export const userCredentialsSlice = createSlice({
           SecureStore.deleteItemAsync('userAccessToken')
             .then(response => SecureStore.deleteItemAsync('userRefreshToken'))
             .then(response => SecureStore.deleteItemAsync('userIdToken'))
+            .then(response =>
+              SecureStore.deleteItemAsync('userAccessTokenExpiresAt')
+            )
             .finally(() => console.log('Tokens Deleted'))
         })
         .catch(err => {

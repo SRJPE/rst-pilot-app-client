@@ -8,10 +8,14 @@ import Constants from 'expo-constants'
 import * as SecureStore from 'expo-secure-store'
 import { refreshAsync } from 'expo-auth-session'
 import moment from 'moment'
+import { store } from '../redux/store'
+import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
+
 import {
   // @ts-ignore
   REACT_APP_CLIENT_ID,
 } from '@env'
+import { storeAccessTokens } from '../utils/authUtils'
 
 const dateTransformer: AxiosRequestTransformer = (data: any) => {
   if (data instanceof Date) {
@@ -39,19 +43,27 @@ const api = axios.create({
 // Axios middleware to retrieve and add authorization token
 api.interceptors.request.use(
   async (config: AxiosRequestConfig) => {
-    try {
-      const accessToken = await SecureStore.getItemAsync('userAccessToken')
-      const idToken = await SecureStore.getItemAsync('userIdToken')
-      const tokenExpiresAt = await SecureStore.getItemAsync(
-        'userAccessTokenExpiresAt'
-      )
+    const accessToken = await SecureStore.getItemAsync('userAccessToken')
 
-      const tokenIsExpired = moment().isAfter(tokenExpiresAt)
+    const idToken = await SecureStore.getItemAsync('userIdToken')
+    const tokenExpiresAt = await SecureStore.getItemAsync(
+      'userAccessTokenExpiresAt'
+    )
+    const tokenIsExpired = moment().isAfter(tokenExpiresAt)
+    try {
+      console.log(
+        '🚀 ~ file: axiosConfig.ts:55 ~ tokenIsExpired:',
+        tokenIsExpired
+      )
 
       if (tokenIsExpired) {
         //refreshAsync to exchave for new token
         const existingRefreshToken =
           (await SecureStore.getItemAsync('userRefreshToken')) || undefined
+
+        if (!existingRefreshToken) {
+          store.dispatch(setForcedLogoutModalOpen(true))
+        }
 
         const tokenEndpoint =
           'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_signin'
@@ -68,27 +80,18 @@ api.interceptors.request.use(
           const { accessToken, refreshToken, idToken, issuedAt, expiresIn } =
             refreshResponse
 
-          await SecureStore.setItemAsync('userAccessToken', accessToken)
-
-          await SecureStore.setItemAsync(
-            'userRefreshToken',
-            refreshToken as string
-          )
-          await SecureStore.setItemAsync('userIdToken', idToken as string)
-
-          await SecureStore.setItemAsync(
-            'userAccessTokenExpiresAt',
-            moment((expiresIn as number) * 1000 + issuedAt * 1000).format()
-          )
+          await storeAccessTokens({
+            accessToken,
+            refreshToken,
+            idToken,
+            expiresIn,
+            issuedAt,
+          })
 
           const newConfig = config as any
           newConfig.headers['Authorization'] = `Bearer ${accessToken}`
           newConfig.headers['idToken'] = idToken
           return newConfig
-        } else {
-          //force logout if new token cannot be retrieved
-          // setForcedLogoutModalOpen(true)
-          return
         }
       }
 

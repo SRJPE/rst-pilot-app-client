@@ -260,14 +260,7 @@ const Profile = ({
 
           <Pressable
             my='7'
-            onPress={async () => {
-              const accessToken = await SecureStore.getItemAsync(
-                'userAccessToken'
-              )
-              const refreshToken = await SecureStore.getItemAsync(
-                'userRefreshToken'
-              )
-
+            onPress={() => {
               ///////
               setLogoutModalOpen(true)
             }}

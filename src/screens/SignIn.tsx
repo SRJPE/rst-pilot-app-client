@@ -36,6 +36,7 @@ import {
 import { AppDispatch, RootState } from '../redux/store'
 import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
 import { set } from 'lodash'
+import { storeAccessTokens } from '../utils/authUtils'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -114,18 +115,13 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
                 expiresIn,
               } = res
 
-              await SecureStore.setItemAsync('userAccessToken', accessToken)
-
-              await SecureStore.setItemAsync(
-                'userRefreshToken',
-                refreshToken as string
-              )
-              await SecureStore.setItemAsync('userIdToken', idToken as string)
-
-              await SecureStore.setItemAsync(
-                'userAccessTokenExpiresAt',
-                moment((expiresIn as number) * 1000 + issuedAt * 1000).format()
-              )
+              await storeAccessTokens({
+                accessToken,
+                refreshToken,
+                idToken,
+                expiresIn,
+                issuedAt,
+              })
 
               const userRes = await api.get('user/current', {
                 headers: {
