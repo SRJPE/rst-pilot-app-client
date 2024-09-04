@@ -207,19 +207,25 @@ function CatchCategoricalQC({
           if (adiposeClippedByDate[normalizedDate]) {
             if (adValue === true) {
               adiposeClippedByDate[normalizedDate]['true'].push(id)
+              if (qcNotStarted)
+                adiposeClippedByDate[normalizedDate].colorScale = 'red'
             } else if (adValue === false) {
               adiposeClippedByDate[normalizedDate]['false'].push(id)
+              if (qcNotStarted)
+                adiposeClippedByDate[normalizedDate].colorScale = 'red'
             }
           } else {
             if (adValue === true) {
               adiposeClippedByDate[normalizedDate] = {
                 true: [id],
                 false: [],
+                colorScale: qcNotStarted ? 'red' : 'grey',
               }
             } else if (adValue === false) {
               adiposeClippedByDate[normalizedDate] = {
                 true: [],
                 false: [id],
+                colorScale: qcNotStarted ? 'red' : 'grey',
               }
             }
           }
@@ -274,19 +280,25 @@ function CatchCategoricalQC({
           if (deadDataByDate[normalizedDate]) {
             if (deadValue === true) {
               deadDataByDate[normalizedDate]['true'].push(id)
+              if (qcNotStarted)
+                deadDataByDate[normalizedDate].colorScale = 'red'
             } else if (deadValue === false) {
               deadDataByDate[normalizedDate]['false'].push(id)
+              if (qcNotStarted)
+                deadDataByDate[normalizedDate].colorScale = 'red'
             }
           } else {
             if (deadValue === true) {
               deadDataByDate[normalizedDate] = {
                 true: [id],
                 false: [],
+                colorScale: qcNotStarted ? 'red' : 'grey',
               }
             } else if (deadValue === false) {
               deadDataByDate[normalizedDate] = {
                 true: [],
                 false: [id],
+                colorScale: qcNotStarted ? 'red' : 'grey',
               }
             }
           }
@@ -301,6 +313,7 @@ function CatchCategoricalQC({
           dataId: 'Adipose Clipped',
           x: date,
           y: 2,
+          colorScale: adiposeClippedByDate[date]['colorScale'],
         })
       }
       if (adiposeClippedByDate[date]['false'].length) {
@@ -309,6 +322,7 @@ function CatchCategoricalQC({
           dataId: 'Adipose Clipped',
           x: date,
           y: 1,
+          colorScale: adiposeClippedByDate[date]['colorScale'],
         })
       }
     })
@@ -361,6 +375,7 @@ function CatchCategoricalQC({
           dataId: 'Mortalities',
           x: date,
           y: 2,
+          colorScale: deadDataByDate[date]['colorScale'],
         })
       }
       if (deadDataByDate[date]['false'].length) {
@@ -369,6 +384,7 @@ function CatchCategoricalQC({
           dataId: 'Mortalities',
           x: date,
           y: 1,
+          colorScale: deadDataByDate[date]['colorScale'],
         })
       }
     })
@@ -383,6 +399,7 @@ function CatchCategoricalQC({
   }, [qcCatchRawSubmissions])
 
   const handlePointClick = (datum: any) => {
+    console.log('datum', datum)
     const programId = route.params.programId
     const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
       return catchRaw.createdCatchRawResponse.programId === programId

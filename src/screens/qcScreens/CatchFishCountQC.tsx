@@ -150,14 +150,12 @@ function CatchFishCountQC({
         if (!qcCompleted) datesFormatted[normalizedDate].qcCompleted = false
 
         // add catchRawId to array if not already included
-        if (
-          !datesFormatted[normalizedDate].catchRawIds.includes(catchRaw.id) &&
-          plusCount
-        ) {
+        if (!datesFormatted[normalizedDate].catchRawIds.includes(catchRaw.id)) {
           datesFormatted[normalizedDate].catchRawIds.push(catchRaw.id)
         }
 
         if (plusCount) {
+          datesFormatted[normalizedDate].plusCountIds.push(catchRaw.id)
           datesFormatted[normalizedDate].plusCountValue += numFishCaught
           datesFormatted[normalizedDate].firstPlusCountRecordId = catchRaw.id
         }
@@ -166,6 +164,7 @@ function CatchFishCountQC({
           count: numFishCaught,
           catchRawIds: [catchRaw.id],
           firstPlusCountRecordId: plusCount ? catchRaw.id : null,
+          plusCountIds: plusCount ? [catchRaw.id] : [],
           plusCountValue: plusCount ? numFishCaught : 0,
           qcCompleted,
         }
@@ -177,6 +176,7 @@ function CatchFishCountQC({
         x: Number(dateString),
         y: datesFormatted[dateString].count,
         catchRawIds: datesFormatted[dateString].catchRawIds,
+        plusCountIds: datesFormatted[dateString].plusCountIds,
         plusCountValue: datesFormatted[dateString].plusCountValue,
         firstPlusCountRecordId:
           datesFormatted[dateString].firstPlusCountRecordId,
@@ -199,10 +199,14 @@ function CatchFishCountQC({
       )
       const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
+      console.log('datum', datum)
+
       const selectedData = qcData.filter((response) => {
         const id = response.createdCatchRawResponse?.id
-        return datum.catchRawIds.includes(id)
+        return datum.plusCountIds.includes(id)
       })
+
+      console.log('selectedData', selectedData)
 
       setModalData(selectedData)
 
@@ -655,7 +659,7 @@ function CatchFishCountQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height='5/6'
+          height={modalData.length > 1 ? '5/6' : '1/4'}
         >
           <>
             <CustomModalHeader
@@ -696,298 +700,308 @@ function CatchFishCountQC({
               </Text>{' '}
               fish.
             </Text>
-            <VStack alignItems={'center'}>
-              <Heading fontSize={23} mb={5}>
-                Table of Selected Points
-              </Heading>
-              <ScrollView
-                horizontal
-                size={'80%'}
-                contentContainerStyle={{
-                  flexGrow: 1,
-                  justifyContent: 'center',
-                }}
-              >
-                <DataTable>
-                  <DataTable.Header>
-                    <DataTable.Title
-                      style={{ justifyContent: 'center', minWidth: 90 }}
-                    >
-                      Variable
-                    </DataTable.Title>
-                    {modalData.map((data, idx) => (
+
+            {modalData.length > 1 && (
+              <VStack alignItems={'center'}>
+                <Heading fontSize={23} mb={5}>
+                  Table of Selected Points
+                </Heading>
+                <ScrollView
+                  horizontal
+                  size={'80%'}
+                  contentContainerStyle={{
+                    flexGrow: 1,
+                    justifyContent: 'center',
+                  }}
+                >
+                  <DataTable>
+                    <DataTable.Header>
                       <DataTable.Title
-                        key={idx}
                         style={{ justifyContent: 'center', minWidth: 90 }}
-                      >{`Fish ${idx + 1}`}</DataTable.Title>
-                    ))}
-                  </DataTable.Header>
-
-                  <ScrollView size={'full'}>
-                    <DataTable.Row
-                      style={[{ justifyContent: 'center', width: '100%' }]}
-                    >
-                      <DataTable.Cell
-                        style={{
-                          minWidth: 120,
-                          minHeight: 70,
-                          width: '100%',
-                          justifyContent: 'center',
-                        }}
                       >
-                        <Text>Species</Text>
-                      </DataTable.Cell>
-                      {modalData.map((data, idx) => {
-                        const taxonCode = data.createdCatchRawResponse.taxonCode
-                        let species = taxonState.filter((obj: any) => {
-                          return obj.code === taxonCode
-                        })
-                        let commonname = species[0]?.commonname
+                        Variable
+                      </DataTable.Title>
+                      {modalData.map((data, idx) => (
+                        <DataTable.Title
+                          key={idx}
+                          style={{ justifyContent: 'center', minWidth: 90 }}
+                        >{`Fish ${idx + 1}`}</DataTable.Title>
+                      ))}
+                    </DataTable.Header>
 
-                        return (
-                          <DataTable.Cell
-                            style={{
-                              minWidth: 120,
-                              minHeight: 70,
-                              width: '100%',
-                              justifyContent: 'center',
-                            }}
-                            key={`species-${idx}`}
-                            onPress={() =>
-                              handleModalCellPressed('taxonCode', data)
+                    <ScrollView size={'full'}>
+                      <DataTable.Row
+                        style={[{ justifyContent: 'center', width: '100%' }]}
+                      >
+                        <DataTable.Cell
+                          style={{
+                            minWidth: 120,
+                            minHeight: 70,
+                            width: '100%',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Text>Species</Text>
+                        </DataTable.Cell>
+                        {modalData.map((data, idx) => {
+                          const taxonCode =
+                            data.createdCatchRawResponse.taxonCode
+                          let species = taxonState.filter((obj: any) => {
+                            return obj.code === taxonCode
+                          })
+                          let commonname = species[0]?.commonname
+
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`species-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('taxonCode', data)
+                              }
+                            >
+                              <Text>
+                                {species.length
+                                  ? `${truncateAndTrimString(
+                                      capitalizeFirstLetterOfEachWord(
+                                        commonname
+                                      ),
+                                      12
+                                    )}...`
+                                  : 'NA'}
+                              </Text>
+                            </DataTable.Cell>
+                          )
+                        })}
+                      </DataTable.Row>
+
+                      <DataTable.Row
+                        style={[{ justifyContent: 'center', width: '100%' }]}
+                      >
+                        <DataTable.Cell
+                          style={{
+                            minWidth: 120,
+                            minHeight: 70,
+                            width: '100%',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Text>Run</Text>
+                        </DataTable.Cell>
+                        {modalData.map((data, idx) => {
+                          let run = data.createdCatchRawResponse.captureRunClass
+                          let runObjFiltered = runState.filter((obj: any) => {
+                            return obj.id === run
+                          })
+                          let runDefinition = runObjFiltered.length
+                            ? runObjFiltered[0]?.definition
+                            : 'NA'
+
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`run-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('captureRunClass', data)
+                              }
+                            >
+                              <Text>
+                                {capitalizeFirstLetterOfEachWord(
+                                  runDefinition
+                                ) ?? 'NA'}
+                              </Text>
+                            </DataTable.Cell>
+                          )
+                        })}
+                      </DataTable.Row>
+
+                      <DataTable.Row
+                        style={[{ justifyContent: 'center', width: '100%' }]}
+                      >
+                        <DataTable.Cell
+                          style={{
+                            minWidth: 120,
+                            minHeight: 70,
+                            width: '100%',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Text>Life Stage</Text>
+                        </DataTable.Cell>
+                        {modalData.map((data, idx) => {
+                          let lifeStageId =
+                            data.createdCatchRawResponse.lifeStage
+                          let lifeStageObjFiltered = lifeStageState.filter(
+                            (obj: any) => {
+                              return obj.id === lifeStageId
                             }
-                          >
-                            <Text>
-                              {species.length
-                                ? `${truncateAndTrimString(
-                                    capitalizeFirstLetterOfEachWord(commonname),
-                                    12
-                                  )}...`
-                                : 'NA'}
-                            </Text>
-                          </DataTable.Cell>
-                        )
-                      })}
-                    </DataTable.Row>
+                          )
+                          let lifeStage = lifeStageObjFiltered.length
+                            ? lifeStageObjFiltered[0]?.definition
+                            : 'NA'
 
-                    <DataTable.Row
-                      style={[{ justifyContent: 'center', width: '100%' }]}
-                    >
-                      <DataTable.Cell
-                        style={{
-                          minWidth: 120,
-                          minHeight: 70,
-                          width: '100%',
-                          justifyContent: 'center',
-                        }}
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`lifestage-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('lifeStage', data)
+                              }
+                            >
+                              <Text>
+                                {capitalizeFirstLetterOfEachWord(lifeStage) ??
+                                  'NA'}
+                              </Text>
+                            </DataTable.Cell>
+                          )
+                        })}
+                      </DataTable.Row>
+
+                      <DataTable.Row
+                        style={[{ justifyContent: 'center', width: '100%' }]}
                       >
-                        <Text>Run</Text>
-                      </DataTable.Cell>
-                      {modalData.map((data, idx) => {
-                        let run = data.createdCatchRawResponse.captureRunClass
-                        let runObjFiltered = runState.filter((obj: any) => {
-                          return obj.id === run
-                        })
-                        let runDefinition = runObjFiltered.length
-                          ? runObjFiltered[0]?.definition
-                          : 'NA'
+                        <DataTable.Cell
+                          style={{
+                            minWidth: 120,
+                            minHeight: 70,
+                            width: '100%',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Text>Plus Count</Text>
+                        </DataTable.Cell>
+                        {modalData.map((data, idx) => {
+                          let numFishCaught =
+                            data.createdCatchRawResponse.numFishCaught
 
-                        return (
-                          <DataTable.Cell
-                            style={{
-                              minWidth: 120,
-                              minHeight: 70,
-                              width: '100%',
-                              justifyContent: 'center',
-                            }}
-                            key={`run-${idx}`}
-                            onPress={() =>
-                              handleModalCellPressed('captureRunClass', data)
-                            }
-                          >
-                            <Text>
-                              {capitalizeFirstLetterOfEachWord(runDefinition) ??
-                                'NA'}
-                            </Text>
-                          </DataTable.Cell>
-                        )
-                      })}
-                    </DataTable.Row>
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`lifestage-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('numFishCaught', data)
+                              }
+                            >
+                              <Text>{numFishCaught ?? 'NA'}</Text>
+                            </DataTable.Cell>
+                          )
+                        })}
+                      </DataTable.Row>
 
-                    <DataTable.Row
-                      style={[{ justifyContent: 'center', width: '100%' }]}
-                    >
-                      <DataTable.Cell
-                        style={{
-                          minWidth: 120,
-                          minHeight: 70,
-                          width: '100%',
-                          justifyContent: 'center',
-                        }}
+                      <DataTable.Row
+                        style={[{ justifyContent: 'center', width: '100%' }]}
                       >
-                        <Text>Life Stage</Text>
-                      </DataTable.Cell>
-                      {modalData.map((data, idx) => {
-                        let lifeStageId = data.createdCatchRawResponse.lifeStage
-                        let lifeStageObjFiltered = lifeStageState.filter(
-                          (obj: any) => {
-                            return obj.id === lifeStageId
+                        <DataTable.Cell
+                          style={{
+                            minWidth: 120,
+                            minHeight: 70,
+                            width: '100%',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Text>Adipose Clip</Text>
+                        </DataTable.Cell>
+                        {modalData.map((data, idx) => {
+                          let adiposeClipped: boolean =
+                            data.createdCatchRawResponse.adiposeClipped
+
+                          let adValue = adiposeClipped
+                          if (typeof adiposeClipped === 'string') {
+                            adValue = adiposeClipped === 'true' ? true : false
                           }
-                        )
-                        let lifeStage = lifeStageObjFiltered.length
-                          ? lifeStageObjFiltered[0]?.definition
-                          : 'NA'
 
-                        return (
-                          <DataTable.Cell
-                            style={{
-                              minWidth: 120,
-                              minHeight: 70,
-                              width: '100%',
-                              justifyContent: 'center',
-                            }}
-                            key={`lifestage-${idx}`}
-                            onPress={() =>
-                              handleModalCellPressed('lifeStage', data)
-                            }
-                          >
-                            <Text>
-                              {capitalizeFirstLetterOfEachWord(lifeStage) ??
-                                'NA'}
-                            </Text>
-                          </DataTable.Cell>
-                        )
-                      })}
-                    </DataTable.Row>
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`adipose-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('adiposeClipped', data)
+                              }
+                            >
+                              <Text>
+                                {adValue != null
+                                  ? adValue
+                                    ? 'True'
+                                    : 'False'
+                                  : 'NA'}
+                              </Text>
+                            </DataTable.Cell>
+                          )
+                        })}
+                      </DataTable.Row>
 
-                    <DataTable.Row
-                      style={[{ justifyContent: 'center', width: '100%' }]}
-                    >
-                      <DataTable.Cell
-                        style={{
-                          minWidth: 120,
-                          minHeight: 70,
-                          width: '100%',
-                          justifyContent: 'center',
-                        }}
+                      <DataTable.Row
+                        style={[{ justifyContent: 'center', width: '100%' }]}
                       >
-                        <Text>Plus Count</Text>
-                      </DataTable.Cell>
-                      {modalData.map((data, idx) => {
-                        let numFishCaught =
-                          data.createdCatchRawResponse.numFishCaught
+                        <DataTable.Cell
+                          style={{
+                            minWidth: 120,
+                            minHeight: 70,
+                            width: '100%',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Text>Mort</Text>
+                        </DataTable.Cell>
+                        {modalData.map((data, idx) => {
+                          let deadValue = data.createdCatchRawResponse.dead
+                          if (typeof deadValue === 'string') {
+                            deadValue = deadValue === 'true' ? true : false
+                          }
 
-                        return (
-                          <DataTable.Cell
-                            style={{
-                              minWidth: 120,
-                              minHeight: 70,
-                              width: '100%',
-                              justifyContent: 'center',
-                            }}
-                            key={`lifestage-${idx}`}
-                            onPress={() =>
-                              handleModalCellPressed('numFishCaught', data)
-                            }
-                          >
-                            <Text>{numFishCaught ?? 'NA'}</Text>
-                          </DataTable.Cell>
-                        )
-                      })}
-                    </DataTable.Row>
-
-                    <DataTable.Row
-                      style={[{ justifyContent: 'center', width: '100%' }]}
-                    >
-                      <DataTable.Cell
-                        style={{
-                          minWidth: 120,
-                          minHeight: 70,
-                          width: '100%',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Text>Adipose Clip</Text>
-                      </DataTable.Cell>
-                      {modalData.map((data, idx) => {
-                        let adiposeClipped: boolean =
-                          data.createdCatchRawResponse.adiposeClipped
-
-                        let adValue = adiposeClipped
-                        if (typeof adiposeClipped === 'string') {
-                          adValue = adiposeClipped === 'true' ? true : false
-                        }
-
-                        return (
-                          <DataTable.Cell
-                            style={{
-                              minWidth: 120,
-                              minHeight: 70,
-                              width: '100%',
-                              justifyContent: 'center',
-                            }}
-                            key={`adipose-${idx}`}
-                            onPress={() =>
-                              handleModalCellPressed('adiposeClipped', data)
-                            }
-                          >
-                            <Text>
-                              {adValue != null
-                                ? adValue
-                                  ? 'True'
-                                  : 'False'
-                                : 'NA'}
-                            </Text>
-                          </DataTable.Cell>
-                        )
-                      })}
-                    </DataTable.Row>
-
-                    <DataTable.Row
-                      style={[{ justifyContent: 'center', width: '100%' }]}
-                    >
-                      <DataTable.Cell
-                        style={{
-                          minWidth: 120,
-                          minHeight: 70,
-                          width: '100%',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Text>Mort</Text>
-                      </DataTable.Cell>
-                      {modalData.map((data, idx) => {
-                        let deadValue = data.createdCatchRawResponse.dead
-                        if (typeof deadValue === 'string') {
-                          deadValue = deadValue === 'true' ? true : false
-                        }
-
-                        return (
-                          <DataTable.Cell
-                            style={{
-                              minWidth: 120,
-                              minHeight: 70,
-                              width: '100%',
-                              justifyContent: 'center',
-                            }}
-                            key={`mortality-${idx}`}
-                            onPress={() => handleModalCellPressed('dead', data)}
-                          >
-                            <Text>
-                              {deadValue != null
-                                ? deadValue
-                                  ? 'True'
-                                  : 'False'
-                                : 'NA'}
-                            </Text>
-                          </DataTable.Cell>
-                        )
-                      })}
-                    </DataTable.Row>
-                  </ScrollView>
-                </DataTable>
-              </ScrollView>
-            </VStack>
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`mortality-${idx}`}
+                              onPress={() =>
+                                handleModalCellPressed('dead', data)
+                              }
+                            >
+                              <Text>
+                                {deadValue != null
+                                  ? deadValue
+                                    ? 'True'
+                                    : 'False'
+                                  : 'NA'}
+                              </Text>
+                            </DataTable.Cell>
+                          )
+                        })}
+                      </DataTable.Row>
+                    </ScrollView>
+                  </DataTable>
+                </ScrollView>
+              </VStack>
+            )}
           </>
         </CustomModal>
       ) : (
