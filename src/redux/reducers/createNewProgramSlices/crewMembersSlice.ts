@@ -67,9 +67,6 @@ export const crewMembersSlice = createSlice({
         }
       }
     },
-    updateAllCrewMembersFromExisting: (state, action) => {
-      state.crewMembersStore = action.payload
-    },
 
     deleteIndividualCrewMember: (state, action) => {
       let trappingSitesStoreCopy = cloneDeep(state.crewMembersStore)
@@ -82,6 +79,20 @@ export const crewMembersSlice = createSlice({
           state.crewMembersStore = trappingSitesStoreCopy
         }
       }
+    },
+    updateAllCrewMembersFromExisting: (state, action) => {
+      console.log(
+        '🚀 ~ file: crewMembersSlice.ts:72 ~ action.payload:',
+        action.payload
+      )
+
+      const crewMembersObject = action.payload
+        .map(({ id, ...rest }: any) => ({ id, data: rest }))
+        .reduce((acc: any, { id, data }: any) => {
+          acc[id] = data
+          return acc
+        }, {})
+      state.crewMembersStore = crewMembersObject
     },
   },
 })
