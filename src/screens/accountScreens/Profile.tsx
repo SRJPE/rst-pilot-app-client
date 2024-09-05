@@ -77,8 +77,6 @@ const Profile = ({
     passwordResetDiscovery
   )
 
-  console.log('userCredentialsStore', userCredentialsStore)
-
   //////////////////////////////////////////////
   //Web Browser Change Password
   const handleChangePasswordButtonAsync = async () => {

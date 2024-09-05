@@ -36,6 +36,10 @@ const DrawerNavigator = ({
       refreshUserToken(dispatch).then(tokenRefreshed => {
         if (!tokenRefreshed) {
           dispatch(setForcedLogoutModalOpen(true))
+        } else {
+          console.log(
+            '🚀 ~ file: MainDrawerNavigator.tsx:42 ~ Tokens refreshed from main drawer navigation provider'
+          )
         }
       })
   }, [isSignInScreen])

@@ -24,8 +24,8 @@ export const refreshUserToken = async (
       'userAccessTokenExpiresAt'
     )
     console.log(
-      '🚀 ~ file: authUtils.ts:15 ~ refreshUserToken ~ tokenExpiresAt:',
-      tokenExpiresAt
+      '🚀 ~ file: authUtils.ts:26 ~ current token expiration time',
+      moment(tokenExpiresAt).format('MMMM Do YYYY, h:mm:ss a')
     )
 
     const tokenIsExpired = moment().isAfter(tokenExpiresAt)
@@ -85,14 +85,19 @@ export const storeAccessTokens = async ({
   expiresIn?: number
   issuedAt: number
 }) => {
-  const formattedTokenExpiresAt = moment(
-    (expiresIn as number) * 1000 + issuedAt * 1000
-  ).format()
-  console.log(
-    '🚀 ~ file: authUtils.ts:97 ~ formattedTokenExpiresAt:',
-    formattedTokenExpiresAt
-  )
+  // const formattedTokenExpiresAt = moment(
+  //   (expiresIn as number) * 1000 + issuedAt * 1000
+  // ).format()
 
+  // Setting the token expiration to 10 seconds for testing purposes
+  const formattedTokenExpiresAt = moment(
+    (10 as number) * 1000 + issuedAt * 1000
+  ).format()
+
+  console.log(
+    '🚀 ~ file: authUtils.ts:104 ~ New token expiration time',
+    moment(formattedTokenExpiresAt).format('MMMM Do YYYY, h:mm:ss a')
+  )
   await SecureStore.setItemAsync('userAccessToken', accessToken)
 
   await SecureStore.setItemAsync('userRefreshToken', refreshToken)

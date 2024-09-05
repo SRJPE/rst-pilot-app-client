@@ -1,24 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { AppDispatch, RootState } from './store'
-import { connect, useDispatch, useSelector } from 'react-redux'
-import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo'
-import { getTrapVisitDropdownValues } from './reducers/dropdownsSlice'
-import { getVisitSetupDefaults } from './reducers/visitSetupDefaults'
-import { connectionChanged } from './reducers/connectivitySlice'
-import moment from 'moment'
-import { clear } from 'console'
-import { clearUserCredentials } from './reducers/userCredentialsSlice'
-import { AlertDialog, Button, Center } from 'native-base'
-import { Text, Icon, HStack } from 'native-base'
 import { Ionicons } from '@expo/vector-icons'
-import { refreshAsync, useAutoDiscovery } from 'expo-auth-session'
-import * as SecureStore from 'expo-secure-store'
-import { setForcedLogoutModalOpen } from './reducers/userAuthSlice'
+import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo'
+import { AlertDialog, Button, Center, HStack, Icon, Text } from 'native-base'
+import React, { useEffect, useRef } from 'react'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { refreshUserToken } from '../utils/authUtils'
-import {
-  // @ts-ignore
-  REACT_APP_CLIENT_ID,
-} from '@env'
+import { connectionChanged } from './reducers/connectivitySlice'
+import { setForcedLogoutModalOpen } from './reducers/userAuthSlice'
+import { clearUserCredentials } from './reducers/userCredentialsSlice'
+import { AppDispatch, RootState } from './store'
 
 type Props = {
   children: React.ReactNode
@@ -46,7 +35,6 @@ const OnStartupProvider = (props: Props) => {
         }
       })
 
-      console.log('user on start', props.userCredentialsStore)
       const userOnStart = props.userCredentialsStore.azureUid
 
       if (userOnStart) {
@@ -55,6 +43,10 @@ const OnStartupProvider = (props: Props) => {
         if (tokenRefreshed === 'No refresh token found') {
           dispatch(setForcedLogoutModalOpen(true))
           return
+        } else if (tokenRefreshed === 'Tokens refreshed') {
+          console.log(
+            '🚀 ~ file: onStartupProvider.tsx:47 ~ Tokens refreshed on application launch'
+          )
         }
       }
     })()

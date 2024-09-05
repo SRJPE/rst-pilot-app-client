@@ -87,6 +87,9 @@ api.interceptors.request.use(
             expiresIn,
             issuedAt,
           })
+          console.log(
+            '🚀 ~ file: axiosConfig.ts:90 ~ Tokens refreshed from the Axios Middleware'
+          )
 
           const newConfig = config as any
           newConfig.headers['Authorization'] = `Bearer ${accessToken}`
@@ -124,7 +127,7 @@ api.interceptors.response.use(
   },
   function (error) {
     const { response } = error
-    console.log('error axios from config: ', response)
+    //console.log('error axios from config: ', response)
     if (response?.status === 401) {
       console.log('unauthorized. token needs to be refreshed')
       // unauthorized
