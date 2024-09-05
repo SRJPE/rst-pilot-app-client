@@ -460,3 +460,11 @@ export const normalizeDate = (date: Date) => {
 
   return date.getTime()
 }
+
+export const groupArrayItems = (array: any, size: number) => {
+  const groupedItems = []
+  for (let i = 0; i < array.length; i += size) {
+    groupedItems.push(array.slice(i, i + size))
+  }
+  return groupedItems
+}

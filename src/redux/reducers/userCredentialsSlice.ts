@@ -35,6 +35,9 @@ export const userCredentialsSlice = createSlice({
           SecureStore.deleteItemAsync('userAccessToken')
             .then(response => SecureStore.deleteItemAsync('userRefreshToken'))
             .then(response => SecureStore.deleteItemAsync('userIdToken'))
+            .then(response =>
+              SecureStore.deleteItemAsync('userAccessTokenExpiresAt')
+            )
             .finally(() => console.log('Tokens Deleted'))
         })
         .catch(err => {
@@ -56,6 +59,7 @@ export const userCredentialsSlice = createSlice({
         ...action.payload,
       })
       return (state = {
+        ...state,
         azureUid: state.azureUid,
         displayName: `${action.payload.first_name} ${action.payload.last_name}`,
         emailAddress: state.emailAddress,

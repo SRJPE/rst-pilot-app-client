@@ -1,8 +1,9 @@
 import { createDrawerNavigator } from '@react-navigation/drawer'
+import { useNavigationState } from '@react-navigation/native'
 import * as SecureStore from 'expo-secure-store'
-import { connect } from 'react-redux'
+import { connect, useDispatch } from 'react-redux'
 import DrawerMenu from '../components/drawerMenu'
-import { RootState } from '../redux/store'
+import { AppDispatch, RootState } from '../redux/store'
 import GenerateReport from '../screens/GenerateReport'
 import Home from '../screens/Home'
 import PermitInfo from '../screens/PermitInfo'
@@ -13,6 +14,9 @@ import MonitoringProgram from './roots/MonitoringProgramRoot'
 import QCForm from './roots/QCFormRoot'
 import TrapVisitForm from './roots/TrapVisitFormRoot'
 import InspectorWindow from '../screens/InspectorWindow'
+import { refreshUserToken } from '../utils/authUtils'
+import { useEffect } from 'react'
+import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
 
 const Drawer = createDrawerNavigator()
 
@@ -21,6 +25,25 @@ const DrawerNavigator = ({
 }: {
   userCredentialsStore: any
 }) => {
+  const dispatch = useDispatch<AppDispatch>()
+
+  const currentRouteIndex = useNavigationState(state => state?.index)
+
+  const isSignInScreen = currentRouteIndex === 0
+
+  useEffect(() => {
+    !isSignInScreen &&
+      refreshUserToken(dispatch).then(tokenRefreshed => {
+        if (!tokenRefreshed) {
+          dispatch(setForcedLogoutModalOpen(true))
+        } else {
+          console.log(
+            '🚀 ~ file: MainDrawerNavigator.tsx:42 ~ Tokens refreshed from main drawer navigation provider'
+          )
+        }
+      })
+  }, [isSignInScreen])
+
   async function getValueFor(key: string) {
     let result = await SecureStore.getItemAsync(key)
     if (result) {
