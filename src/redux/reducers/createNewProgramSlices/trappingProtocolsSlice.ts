@@ -76,7 +76,13 @@ export const trappingProtocolsSlice = createSlice({
     },
 
     updateAllTrappingProtocolsFromExisting: (state, action) => {
-      state.trappingProtocolsStore = action.payload
+      const trappingProtocolsObject = action.payload
+        .map(({ id, ...rest }: any) => ({ id, data: rest }))
+        .reduce((acc: any, { id, data }: any) => {
+          acc[id] = data
+          return acc
+        }, {})
+      state.trappingProtocolsStore = trappingProtocolsObject
     },
   },
 })
