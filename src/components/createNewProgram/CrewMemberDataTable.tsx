@@ -75,8 +75,6 @@ const CrewMemberDataTable = ({
                 const currentCol = headers.find(
                   (header) => header.colData === key
                 )
-                console.log('🚀 ~ {processedData.map ~ key:', key)
-                console.log('🚀 ~ {processedData.map ~ cellValue:', cellValue)
 
                 if (currentCol)
                   return (
