@@ -6,7 +6,7 @@ export interface CreateNewProgramInitialStateI {
     monitoringProgramName: string
     streamName: string
     fundingAgency: string
-    program?: string
+    // program?: string
   }
   steps: Array<{ name: string; completed: boolean }>
 }
@@ -15,7 +15,7 @@ export const initialState: CreateNewProgramInitialStateI = {
     monitoringProgramName: '',
     streamName: '',
     fundingAgency: '',
-    program: '',
+    // program: '',
   },
   steps: [
     { name: 'trappingSites', completed: false },
@@ -50,6 +50,11 @@ export const createNewProgramHomeSlice = createSlice({
       stepsCopy[stepIndex].completed = true
       state.steps = stepsCopy
     },
+    updateProgramMetaDataFromExisting: (state, action) => {
+      const { monitoringProgramName, streamName, fundingAgency } =
+        action.payload
+      state.values = { monitoringProgramName, streamName, fundingAgency }
+    },
   },
 })
 
@@ -57,6 +62,7 @@ export const {
   resetCreateNewProgramHomeSlice,
   saveNewProgramValues,
   markCreateNewProgramStepCompleted,
+  updateProgramMetaDataFromExisting,
 } = createNewProgramHomeSlice.actions
 
 export default createNewProgramHomeSlice.reducer
