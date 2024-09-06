@@ -116,3 +116,17 @@ export const storeAccessTokens = async ({
     formattedTokenExpiresAt
   )
 }
+
+export const getTokenData = async () => {
+  const accessToken = await SecureStore.getItemAsync('userAccessToken')
+  const idToken = await SecureStore.getItemAsync('userIdToken')
+  const tokenExpiresAt = await SecureStore.getItemAsync(
+    'userAccessTokenExpiresAt'
+  )
+  const refreshToken = await SecureStore.getItemAsync('userRefreshToken')
+  return { accessToken, idToken, tokenExpiresAt, refreshToken }
+}
+
+export const isTokenExpired = (tokenExpiresAt: string | null) => {
+  return moment().isAfter(tokenExpiresAt)
+}
