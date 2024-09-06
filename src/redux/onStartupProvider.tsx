@@ -21,34 +21,48 @@ const OnStartupProvider = (props: Props) => {
   const { forcedLogoutModalOpen } = useSelector(
     (state: RootState) => state.userAuth
   )
+  const { isConnected, isInternetReachable, userCredentialsStore } = props
 
   let unsubscribe: NetInfoSubscription
 
   useEffect(() => {
     ;(async () => {
-      unsubscribe = NetInfo.addEventListener(connectionState => {
+      unsubscribe = NetInfo.addEventListener(async connectionState => {
         if (
-          props.isConnected != connectionState.isConnected ||
-          props.isInternetReachable != connectionState.isInternetReachable
+          isConnected != connectionState.isConnected ||
+          isInternetReachable != connectionState.isInternetReachable
         ) {
           dispatch(connectionChanged(connectionState as any))
+        } else {
+          const userOnStart = userCredentialsStore.azureUid
+          if (userOnStart) {
+            const tokenRefreshResponse = await refreshUserToken(dispatch)
+
+            if (
+              tokenRefreshResponse &&
+              [
+                'No refresh token found',
+                'Tokens could not be refreshed',
+              ].includes(tokenRefreshResponse) &&
+              isConnected
+            ) {
+              dispatch(setForcedLogoutModalOpen(true))
+              return
+            }
+
+            if (tokenRefreshResponse === 'Tokens refreshed') {
+              console.log(
+                '🚀 ~ file: onStartupProvider.tsx:47 ~ Tokens refreshed on application launch'
+              )
+              return
+            }
+
+            console.log(
+              '🚀 ~ file: onStartupProvider.tsx:54 ~ Tokens still valid on application launch'
+            )
+          }
         }
       })
-
-      const userOnStart = props.userCredentialsStore.azureUid
-
-      if (userOnStart) {
-        const tokenRefreshed = await refreshUserToken(dispatch)
-
-        if (tokenRefreshed === 'No refresh token found') {
-          dispatch(setForcedLogoutModalOpen(true))
-          return
-        } else if (tokenRefreshed === 'Tokens refreshed') {
-          console.log(
-            '🚀 ~ file: onStartupProvider.tsx:47 ~ Tokens refreshed on application launch'
-          )
-        }
-      }
     })()
   }, [props.isConnected])
 
