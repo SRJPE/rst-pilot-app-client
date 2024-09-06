@@ -17,13 +17,16 @@ import InspectorWindow from '../screens/InspectorWindow'
 import { refreshUserToken } from '../utils/authUtils'
 import { useEffect } from 'react'
 import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
-
+import type { InitialStateI as UserCredentialStopeProps } from '../redux/reducers/userCredentialsSlice'
+import type { InitialStateI as ConnectivityStoreProps } from '../redux/reducers/connectivitySlice'
 const Drawer = createDrawerNavigator()
 
 const DrawerNavigator = ({
   userCredentialsStore,
+  connectivityStore,
 }: {
-  userCredentialsStore: any
+  userCredentialsStore: UserCredentialStopeProps
+  connectivityStore: ConnectivityStoreProps
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
@@ -31,17 +34,42 @@ const DrawerNavigator = ({
 
   const isSignInScreen = currentRouteIndex === 0
 
+  const { isConnected: connectivityStoreIsConnected, isInternetReachable } =
+    connectivityStore
+
+  const isConnected =
+    connectivityStoreIsConnected && isInternetReachable !== false
+
   useEffect(() => {
-    !isSignInScreen &&
-      refreshUserToken(dispatch).then(tokenRefreshed => {
-        if (!tokenRefreshed) {
+    if (!isSignInScreen && isConnected) {
+      refreshUserToken(dispatch).then(tokenRefreshResponse => {
+        if (
+          tokenRefreshResponse &&
+          ['No refresh token found', 'Tokens could not be refreshed'].includes(
+            tokenRefreshResponse
+          )
+        ) {
           dispatch(setForcedLogoutModalOpen(true))
-        } else {
+        }
+
+        if (tokenRefreshResponse === 'Tokens refreshed') {
           console.log(
             '🚀 ~ file: MainDrawerNavigator.tsx:42 ~ Tokens refreshed from main drawer navigation provider'
           )
+          return
+        }
+
+        if (tokenRefreshResponse === 'Tokens still valid') {
+          console.log(
+            '🚀 ~ file: MainDrawerNavigator.tsx:49 ~ Tokens still valid from main drawer navigation provider'
+          )
         }
       })
+    } else {
+      console.log(
+        '🚀 ~ file: MainDrawerNavigator.tsx:71 ~ No network connection, token cannot be refreshed:'
+      )
+    }
   }, [isSignInScreen])
 
   async function getValueFor(key: string) {
@@ -100,6 +128,7 @@ const DrawerNavigator = ({
 const mapStateToProps = (state: RootState) => {
   return {
     userCredentialsStore: state.userCredentials,
+    connectivityStore: state.connectivity,
   }
 }
 export default connect(mapStateToProps)(DrawerNavigator)
