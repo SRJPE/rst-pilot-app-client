@@ -99,7 +99,7 @@ export const storeAccessTokens = async ({
 
   // Setting the token expiration to 10 seconds for testing purposes
   const formattedTokenExpiresAt = moment(
-    (30 as number) * 1000 + issuedAt * 1000
+    (expiresIn as number) * 1000 + issuedAt * 1000
   ).format()
 
   console.log(
