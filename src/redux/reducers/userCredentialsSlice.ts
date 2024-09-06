@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store'
 import { add, cloneDeep } from 'lodash'
 import api from '../../api/axiosConfig'
 
-interface InitialStateI {
+export interface InitialStateI {
   displayName: string | null
   emailAddress: string | null
   azureUid: string | null

@@ -6,7 +6,7 @@ import {
 import { postMarkRecaptureSubmissions } from './postSlices/markRecapturePostBundler'
 import { postMonitoringProgramSubmissions } from './postSlices/monitoringProgramPostBundler'
 
-interface InitialStateI {
+export interface InitialStateI {
   type: string
   isConnected: boolean
   isInternetReachable: boolean
