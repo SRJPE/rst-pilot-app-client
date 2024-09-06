@@ -93,14 +93,14 @@ export const storeAccessTokens = async ({
   expiresIn?: number
   issuedAt: number
 }) => {
-  // const formattedTokenExpiresAt = moment(
-  //   (expiresIn as number) * 1000 + issuedAt * 1000
-  // ).format()
-
-  // Setting the token expiration to 10 seconds for testing purposes
   const formattedTokenExpiresAt = moment(
     (expiresIn as number) * 1000 + issuedAt * 1000
   ).format()
+
+  // Setting the token expiration to 30 seconds for testing purposes
+  // const formattedTokenExpiresAt = moment(
+  //   (30 as number) * 1000 + issuedAt * 1000
+  // ).format()
 
   console.log(
     '🚀 ~ file: authUtils.ts:107 ~ New token expiration time',
