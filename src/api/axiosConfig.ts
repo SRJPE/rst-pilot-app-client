@@ -43,70 +43,100 @@ const api = axios.create({
 // Axios middleware to retrieve and add authorization token
 api.interceptors.request.use(
   async (config: AxiosRequestConfig) => {
-    const accessToken = await SecureStore.getItemAsync('userAccessToken')
+    const { isConnected, isInternetReachable } = store.getState().connectivity
 
-    const idToken = await SecureStore.getItemAsync('userIdToken')
-    const tokenExpiresAt = await SecureStore.getItemAsync(
-      'userAccessTokenExpiresAt'
+    console.log('🚀 ~ file: axiosConfig.ts:48 ~ isConnected:', isConnected)
+    console.log(
+      '🚀 ~ file: axiosConfig.ts:50 ~ isInternetReachable:',
+      isInternetReachable
     )
-    const tokenIsExpired = moment().isAfter(tokenExpiresAt)
-    try {
-      console.log(
-        '🚀 ~ file: axiosConfig.ts:55 ~ tokenIsExpired:',
-        tokenIsExpired
+
+    //Attempt to refresh token only if there is a network connection
+    if (isConnected && isInternetReachable) {
+      const accessToken = await SecureStore.getItemAsync('userAccessToken')
+      const idToken = await SecureStore.getItemAsync('userIdToken')
+      const tokenExpiresAt = await SecureStore.getItemAsync(
+        'userAccessTokenExpiresAt'
       )
-
-      if (tokenIsExpired) {
-        //refreshAsync to exchave for new token
-        const existingRefreshToken =
-          (await SecureStore.getItemAsync('userRefreshToken')) || undefined
-
-        if (!existingRefreshToken) {
-          store.dispatch(setForcedLogoutModalOpen(true))
-        }
-
-        const tokenEndpoint =
-          'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_signin'
-
-        const refreshResponse = await refreshAsync(
-          {
-            clientId: REACT_APP_CLIENT_ID,
-            refreshToken: existingRefreshToken,
-          },
-          { tokenEndpoint }
+      const tokenIsExpired = moment().isAfter(tokenExpiresAt)
+      try {
+        console.log(
+          '🚀 ~ file: axiosConfig.ts:64 ~ tokenIsExpired:',
+          tokenIsExpired
         )
 
-        if (refreshResponse.accessToken) {
-          const { accessToken, refreshToken, idToken, issuedAt, expiresIn } =
-            refreshResponse
+        if (tokenIsExpired) {
+          //refreshAsync to exchange for new token
+          const existingRefreshToken =
+            (await SecureStore.getItemAsync('userRefreshToken')) || undefined
 
-          await storeAccessTokens({
-            accessToken,
-            refreshToken,
-            idToken,
-            expiresIn,
-            issuedAt,
-          })
-          console.log(
-            '🚀 ~ file: axiosConfig.ts:90 ~ Tokens refreshed from the Axios Middleware'
+          if (!existingRefreshToken) {
+            store.dispatch(setForcedLogoutModalOpen(true))
+          }
+
+          const tokenEndpoint =
+            'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_signin'
+
+          const refreshResponse = await refreshAsync(
+            {
+              clientId: REACT_APP_CLIENT_ID,
+              refreshToken: existingRefreshToken,
+            },
+            { tokenEndpoint }
           )
 
+          if (refreshResponse.accessToken) {
+            const { accessToken, refreshToken, idToken, issuedAt, expiresIn } =
+              refreshResponse
+
+            await storeAccessTokens({
+              accessToken,
+              refreshToken,
+              idToken,
+              expiresIn,
+              issuedAt,
+            })
+            console.log(
+              '🚀 ~ file: axiosConfig.ts:90 ~ Tokens refreshed from the Axios Middleware'
+            )
+
+            const newConfig = config as AxiosRequestConfig<any>
+
+            //@ts-ignore - this is a hack to add the headers to the config
+            newConfig.headers['Authorization'] = `Bearer ${accessToken}`
+            //@ts-ignore - see above
+            newConfig.headers['idToken'] = idToken as string
+
+            return newConfig
+          }
+        }
+
+        if (accessToken && idToken) {
           const newConfig = config as any
           newConfig.headers['Authorization'] = `Bearer ${accessToken}`
           newConfig.headers['idToken'] = idToken
           return newConfig
         }
-      }
 
-      if (accessToken && idToken) {
-        const newConfig = config as any
-        newConfig.headers['Authorization'] = `Bearer ${accessToken}`
-        newConfig.headers['idToken'] = idToken
-        return newConfig
+        if (!tokenIsExpired) {
+          console.log(
+            '🚀 ~ file: axiosConfig.ts:121 ~ Tokens still valid, no refresh necessary'
+          )
+          return config
+        }
+
+        throw new Error('No tokens found')
+      } catch (error) {
+        console.log(
+          '🚀 ~ file: axiosConfig.ts:129 ~ There is an issue with token exchange'
+        )
+        return config
       }
-      return config
-    } catch (error) {
-      return config
+    } else {
+      console.log(
+        '🚀 ~ file: axiosConfig.ts:135 ~ No network connection, cannot retrieve token'
+      )
+      throw new Error('No network connection, cannot retrieve token')
     }
   },
   error => {
