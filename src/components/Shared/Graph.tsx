@@ -408,6 +408,9 @@ export default function Graph({
           }
           fixLabelOverlap={true}
           tickFormat={(value) => {
+            if (data.length === 0) {
+              return ''
+            }
             let date = new Date(Number(value))
             if (String(date) !== 'Invalid Date' && showDates) {
               return `${moment(date).format('MMM Do YY')}`
@@ -432,6 +435,9 @@ export default function Graph({
           // label='Number of fish with mark'
           // fixLabelOverlap={true}
           tickFormat={(value) => {
+            if (data.length === 0) {
+              return ''
+            }
             if (chartType === 'true-or-false') {
               if (value === 1) {
                 return 'False'
@@ -549,7 +555,9 @@ export default function Graph({
           <></>
         )}
       </VictoryChart>
-      {legendData ? (
+      {legendData 
+      && legendData.length
+       ? (
         <VictoryLegend
           orientation='horizontal'
           x={85}
@@ -559,7 +567,7 @@ export default function Graph({
           centerTitle
           gutter={20}
           style={{
-            parent: { justifyContent: 'center', alignItems: 'center' },
+            parent: { justifyContent: 'center', alignItems: 'center', marginRight: -220 },
             border: { stroke: 'black' },
             title: { fontSize: 20 },
           }}

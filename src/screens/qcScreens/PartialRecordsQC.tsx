@@ -307,6 +307,24 @@ function PartialRecordsQC({
             />
           </VStack>
         )
+      case 'weight':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Weight</Text>
+            <Input
+              height='50px'
+              width='350px'
+              fontSize='16'
+              placeholder='Weight...'
+              keyboardType='numeric'
+              onChangeText={(value) => {
+                setNestedModalInputValue(value)
+              }}
+              // onBlur={handleBlur('comments')}
+              value={nestedModalInputValue}
+            />
+          </VStack>
+        )
       case 'lifestage':
         return (
           <VStack>
@@ -586,6 +604,11 @@ function PartialRecordsQC({
                   <DataTable.Title
                     style={{ justifyContent: 'center', minWidth: 90 }}
                   >
+                    weight
+                  </DataTable.Title>
+                  <DataTable.Title
+                    style={{ justifyContent: 'center', minWidth: 90 }}
+                  >
                     lifestage
                   </DataTable.Title>
                   <DataTable.Title
@@ -644,6 +667,7 @@ function PartialRecordsQC({
                         : 'NA'
                       const forkLength =
                         createdCatchRawResponse.forkLength ?? 'NA'
+                      const weight = createdCatchRawResponse.weight ?? 'NA'
                       const lifestage =
                         createdCatchRawResponse.lifestage ?? 'NA'
                       const dead = `${createdCatchRawResponse.dead ?? 'NA'}`
@@ -771,6 +795,7 @@ function PartialRecordsQC({
                               9
                             )}...`}
                           </DataTable.Cell>
+
                           <DataTable.Cell
                             style={{
                               minWidth: 90,
@@ -805,6 +830,44 @@ function PartialRecordsQC({
                               10
                             )}
                           </DataTable.Cell>
+
+                          <DataTable.Cell
+                            style={{
+                              minWidth: 90,
+                              width: '100%',
+                              justifyContent: 'center',
+                            }}
+                            onPress={() =>
+                              handleOpenNestedModal({
+                                catchRawId,
+                                fieldName: 'weight',
+                                fieldValue: weight,
+                                modalHeader: 'Weight Editor',
+                                modalText: (
+                                  <Text
+                                    color='black'
+                                    fontSize='2xl'
+                                    mb={5}
+                                    fontWeight={'light'}
+                                  >
+                                    You have the weight marked as{' '}
+                                    <Text fontWeight={'bold'}>
+                                      {weight}
+                                    </Text>{' '}
+                                  </Text>
+                                ),
+                              })
+                            }
+                            numeric
+                          >
+                            {truncateAndTrimString(
+                              capitalizeFirstLetterOfEachWord(weight),
+                              10
+                            )}
+                          </DataTable.Cell>
+
+
+
                           <DataTable.Cell
                             style={{
                               minWidth: 90,
