@@ -215,7 +215,7 @@ const BatchCount = ({
                   <HStack space={6} ml='100'> */}
                     <Text>
                       Adipose Clipped:{' '}
-                      <Text bold>{adiposeClipped ? 'Yes' : 'No'}</Text>
+                      <Text bold>{adiposeClipped ? 'True' : 'False'}</Text>
                     </Text>
                     <Text>
                       Mark:{' '}

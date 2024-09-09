@@ -271,7 +271,7 @@ const BatchCharacteristicsModalContent = ({
                         my={1}
                         _icon={{ color: 'primary' }}
                       >
-                        Yes
+                        True
                       </Radio>
                       <Radio
                         colorScheme='primary'
@@ -279,7 +279,7 @@ const BatchCharacteristicsModalContent = ({
                         my={1}
                         _icon={{ color: 'primary' }}
                       >
-                        No
+                        False
                       </Radio>
                     </Radio.Group>
                   </FormControl>

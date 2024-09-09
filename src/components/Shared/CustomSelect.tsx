@@ -6,7 +6,7 @@ import { StyleProp, ViewStyle } from 'react-native'
 interface CustomSelectI {
   selectedValue: string
   placeholder: string
-  setFieldTouched: any
+  setFieldTouched?: any
   onValueChange: any
   selectOptions: any[]
   style?: StyleProp<ViewStyle>
@@ -14,7 +14,7 @@ interface CustomSelectI {
   disabled?: boolean
 }
 
-const CustomSelect: React.FC<CustomSelectI> = props => {
+const CustomSelect: React.FC<CustomSelectI> = (props) => {
   const handleOnChange = useCallback(
     (itemValue: any) => {
       props.onValueChange(itemValue)
@@ -37,7 +37,9 @@ const CustomSelect: React.FC<CustomSelectI> = props => {
       }}
       mt={1}
       onValueChange={handleOnChange}
-      onClose={() => props.setFieldTouched()}
+      onClose={() => {
+        if (props.setFieldTouched) props.setFieldTouched()
+      }}
       isDisabled={props?.disabled}
     >
       {props.selectOptions ? (
