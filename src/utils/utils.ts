@@ -1,5 +1,6 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
+import { sortBy } from 'lodash'
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   //returns an alphabetically sorted copy of the original array
@@ -441,7 +442,7 @@ export const getRandomColor = () => {
 }
 
 export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
-  if (!sentence) return sentence // Check if the sentence is not empty
+  if (sentence === null || typeof sentence !== 'string') return `${sentence}` // Check if the sentence is not empty
   return sentence
     .split(' ') // Split the sentence into words
     .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
@@ -449,6 +450,7 @@ export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
 }
 
 export const truncateAndTrimString = (str: string, length: number) => {
+  if (!(str.length > 10)) return str
   return str.length > length ? str.substring(0, length).trim() : str
 }
 
@@ -468,3 +470,56 @@ export const groupArrayItems = (array: any, size: number) => {
   }
   return groupedItems
 }
+export const handleQCChartButtonClick = (
+  allButtons: Array<string>,
+  activeButtons: Array<string>,
+  buttonName: string
+) => {
+  let activeButtonsCopy = [...activeButtons]
+  if (activeButtons.includes(buttonName)) {
+    activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
+  } else {
+    activeButtonsCopy.push(buttonName)
+    activeButtonsCopy = sortBy(activeButtonsCopy, button => {
+      return allButtons.indexOf(button)
+    })
+  }
+  return activeButtonsCopy
+}
+
+export const combinePlusCounts = (arr: Array<any>) => {
+  const map = new Map()
+  const result = [] as Array<any>
+
+  arr.forEach(item => {
+    if (item.plusCount) {
+      const key = `${item.taxonCode}_${item.lifeStage}_${item.captureRunClass}`
+      if (!map.has(key)) {
+        map.set(key, {
+          ...item,
+          numFishCaught: Number(item.numFishCaught),
+        })
+      } else {
+        const existing = map.get(key)
+        existing.numFishCaught += Number(item.numFishCaught)
+      }
+    } else {
+      result.push({ ...item, numFishCaught: Number(item.numFishCaught) })
+    }
+  })
+
+  return [...result, ...Array.from(map.values())]
+}
+
+export const legendColorList = [
+  '#007C7C',
+  '#F9A38C',
+  '#D1E8F0',
+  '#011936',
+  '#564e58',
+  '#846075',
+  '#2b3a67',
+  '#772E25',
+  '#FBA72A',
+  '#C0CAAD',
+]

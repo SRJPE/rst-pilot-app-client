@@ -12,6 +12,7 @@ interface InitialStateI {
   trapLocations: TrapLocationI[]
   releaseSites: ReleaseSiteI[]
   crewMembers: CrewMemberI[][]
+  trapVisitCrew: TrapVisitCrewI[]
 }
 
 interface ProgramI {
@@ -73,6 +74,12 @@ interface CrewMemberI {
   updatedAt: string
 }
 
+interface TrapVisitCrewI {
+  id: number
+  personnelId: number, 
+  trapVisitId: number
+}
+
 interface APIResponseI {
   data: any
 }
@@ -83,6 +90,7 @@ const initialState: InitialStateI = {
   trapLocations: [],
   releaseSites: [],
   crewMembers: [],
+  trapVisitCrew: []
 }
 
 // Async actions API calls
@@ -116,6 +124,7 @@ export const visitSetupDefaultsSlice = createSlice({
       state.trapLocations = action.payload.trapLocations
       state.releaseSites = action.payload.releaseSites
       state.crewMembers = action.payload.crewMembers
+      state.trapVisitCrew = action.payload.trapVisitCrew
     },
 
     [getVisitSetupDefaults.rejected.type]: (state, action) => {

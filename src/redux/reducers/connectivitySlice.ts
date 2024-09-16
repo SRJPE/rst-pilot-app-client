@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import {
   fetchPreviousTrapAndCatch,
+  postQCSubmissions,
   postTrapVisitFormSubmissions,
 } from './postSlices/trapVisitFormPostBundler'
 import { postMarkRecaptureSubmissions } from './postSlices/markRecapturePostBundler'
@@ -49,6 +50,7 @@ export const connectionChanged = createAsyncThunk(
       if (connectionState.isConnected && connectionState.isInternetReachable) {
         thunkAPI.dispatch(fetchPreviousTrapAndCatch())
         thunkAPI.dispatch(postTrapVisitFormSubmissions())
+        thunkAPI.dispatch(postQCSubmissions())
         thunkAPI.dispatch(postMarkRecaptureSubmissions())
         thunkAPI.dispatch(postMonitoringProgramSubmissions())
       }
