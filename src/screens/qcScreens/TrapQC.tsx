@@ -63,7 +63,7 @@ function TrapQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programTrapVisits = previousTrapVisits.filter((trapVisit) => {
+    const programTrapVisits = previousTrapVisits.filter(trapVisit => {
       return trapVisit.createdTrapVisitResponse.programId === programId
     })
 
@@ -151,11 +151,11 @@ function TrapQC({
             counterData.push(counter)
           }
 
-          if (createdTrapVisitResponse.debrisVolumeLiters) {
+          if (createdTrapVisitResponse.debrisVolumeGal) {
             let debris = {
               id: trapVisitId,
               x: normalizedDate,
-              y: createdTrapVisitResponse.debrisVolumeLiters,
+              y: createdTrapVisitResponse.debrisVolumeGal,
               colorScale: qcNotStarted ? 'red' : undefined,
             }
             debrisData.push(debris)
@@ -259,7 +259,7 @@ function TrapQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map((buttonName) => {
+            {activeButtons.map(buttonName => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -268,7 +268,7 @@ function TrapQC({
                   chartType='bar'
                   data={graphData[buttonName]}
                   showDates={true}
-                  onPointClick={(datum) => handlePointClicked(datum)}
+                  onPointClick={datum => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'

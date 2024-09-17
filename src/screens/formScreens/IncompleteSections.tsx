@@ -335,7 +335,7 @@ const IncompleteSections = ({
         },
         inHalfConeConfiguration:
           trapOperationsState[id].values.coneSetting === 'half' ? true : false,
-        debrisVolumeLiters: trapPostProcessingState[id].values.debrisVolume
+        debrisVolumeGal: trapPostProcessingState[id].values.debrisVolume
           ? parseInt(trapPostProcessingState[id].values.debrisVolume)
           : null,
         qcCompleted: null,

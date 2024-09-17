@@ -449,7 +449,7 @@ export const trapVisitPostBundler = createSlice({
           //trap visit record data
           trapVisitToQC.createdTrapVisitResponse.totalRevolutions =
             submission['Counter'].y
-          trapVisitToQC.createdTrapVisitResponse.debrisVolumeLiters =
+          trapVisitToQC.createdTrapVisitResponse.debrisVolumeGal =
             submission['Debris'].y
           trapVisitToQC.createdTrapVisitResponse.rpmAtStart =
             submission['RPM At Start'].y
@@ -496,7 +496,7 @@ export const trapVisitPostBundler = createSlice({
         //trap visit record data
         qcTrapVisit.createdTrapVisitResponse.totalRevolutions =
           submission['Counter'].y
-        qcTrapVisit.createdTrapVisitResponse.debrisVolumeLiters =
+        qcTrapVisit.createdTrapVisitResponse.debrisVolumeGal =
           submission['Debris'].y
         qcTrapVisit.createdTrapVisitResponse.rpmAtStart =
           submission['RPM At Start'].y
