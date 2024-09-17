@@ -16,7 +16,10 @@ import CustomModal from '../../components/Shared/CustomModal'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { postQCSubmissions, trapVisitQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import {
+  postQCSubmissions,
+  trapVisitQCSubmission,
+} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { handleQCChartButtonClick, normalizeDate } from '../../utils/utils'
 
 interface GraphDataI {
@@ -44,10 +47,10 @@ function TrapQC({
   previousTrapVisits,
   userCredentialsStore,
 }: {
-  navigation: any,
-  route: any,
-  qcTrapVisitSubmissions: any[],
-  previousTrapVisits: any[],
+  navigation: any
+  route: any
+  qcTrapVisitSubmissions: any[]
+  previousTrapVisits: any[]
   userCredentialsStore: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
@@ -83,7 +86,7 @@ function TrapQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programTrapVisits = previousTrapVisits.filter((trapVisit) => {
+    const programTrapVisits = previousTrapVisits.filter(trapVisit => {
       return trapVisit.createdTrapVisitResponse.programId === programId
     })
 
@@ -195,11 +198,11 @@ function TrapQC({
             counterData.push(counter)
           }
 
-          if (createdTrapVisitResponse.debrisVolumeLiters) {
+          if (createdTrapVisitResponse.debrisVolumeGal) {
             let debris = {
               id: trapVisitId,
               x: normalizedDate,
-              y: createdTrapVisitResponse.debrisVolumeLiters,
+              y: createdTrapVisitResponse.debrisVolumeGal,
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
@@ -272,7 +275,13 @@ function TrapQC({
   const handleModalSubmit = (submission: any) => {
     if (pointClicked) {
       const trapVisitId = submission['Temperature']['id']
-      dispatch(trapVisitQCSubmission({ trapVisitId, userId: userCredentialsStore.id, submission }))
+      dispatch(
+        trapVisitQCSubmission({
+          trapVisitId,
+          userId: userCredentialsStore.id,
+          submission,
+        })
+      )
     }
   }
 
@@ -308,7 +317,7 @@ function TrapQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map((buttonName) => {
+            {activeButtons.map(buttonName => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -317,7 +326,7 @@ function TrapQC({
                   chartType='bar'
                   data={graphData[buttonName]}
                   showDates={true}
-                  onPointClick={(datum) => handlePointClicked(datum)}
+                  onPointClick={datum => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'
