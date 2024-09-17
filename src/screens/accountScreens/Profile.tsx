@@ -56,9 +56,7 @@ const Profile = ({
     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/B2C_1_password_reset/v2.0/'
   )
   const userIsLead = userCredentialsStore.role === 'lead'
-  // const userPrograms = userCredentialsStore.userPrograms || []
-  // const userPrograms = []
-  const userPrograms = userCredentialsStore.userPrograms.slice(0, 1)
+  const userPrograms = userCredentialsStore?.userPrograms?.slice(0, 1) || []
   //////////////////////////////////////////////
 
   const [pwResetRequest, pwResetResponse, pwResetPromptAsync] = useAuthRequest(
