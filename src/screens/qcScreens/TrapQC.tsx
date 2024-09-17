@@ -58,7 +58,7 @@ function TrapQC({
     'RPM At Start': { xLabel: 'Date', yLabel: 'RPM' },
     'RPM At End': { xLabel: 'Date', yLabel: 'RPM' },
     Counter: { xLabel: 'Date', yLabel: 'Total Revolutions' },
-    Debris: { xLabel: 'Date', yLabel: 'Debris (L)' },
+    Debris: { xLabel: 'Date', yLabel: 'Debris (gal)' },
   }
 
   useEffect(() => {
