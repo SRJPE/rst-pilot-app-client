@@ -16,6 +16,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import api from '../../api/axiosConfig'
 import CustomSelect from '../Shared/CustomSelect'
+import * as SecureStore from 'expo-secure-store'
 
 const editAccountValidationSchema = Yup.object().shape({
   firstName: Yup.string().label('First Name').required(),
@@ -64,6 +65,7 @@ const EditAccountInfoModalContent = ({
         onSubmit={async (values, { setSubmitting }) => {
           const { firstName, lastName, phone, agencyId, emailAddress, role } =
             values
+
           const editedUserResponse = await api
             .patch(`user/${user.azureUid}/edit`, {
               firstName,

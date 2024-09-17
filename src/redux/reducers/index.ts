@@ -34,6 +34,7 @@ import permitInformationSlice from './createNewProgramSlices/permitInformationSl
 import multipleTrapsSlice from './createNewProgramSlices/multipleTrapsSlice'
 import monitoringProgramPostBundler from './postSlices/monitoringProgramPostBundler'
 import markRecaptureCacheSlice from './markRecaptureSlices/markRecaptureCache'
+import userAuthSlice from './userAuthSlice'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
@@ -168,4 +169,5 @@ export default combineReducers({
   efficiencyTrialProtocols: efficiencyTrialProtocolsSlice,
   permitInformation: permitInformationSlice,
   multipleTraps: multipleTrapsSlice,
+  userAuth: userAuthSlice,
 })

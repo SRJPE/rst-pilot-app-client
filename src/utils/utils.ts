@@ -445,7 +445,7 @@ export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
   if (sentence === null || typeof sentence !== 'string') return `${sentence}` // Check if the sentence is not empty
   return sentence
     .split(' ') // Split the sentence into words
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
     .join(' ') // Join the words back into a sentence
 }
 
@@ -463,6 +463,13 @@ export const normalizeDate = (date: Date) => {
   return date.getTime()
 }
 
+export const groupArrayItems = (array: any, size: number) => {
+  const groupedItems = []
+  for (let i = 0; i < array.length; i += size) {
+    groupedItems.push(array.slice(i, i + size))
+  }
+  return groupedItems
+}
 export const handleQCChartButtonClick = (
   allButtons: Array<string>,
   activeButtons: Array<string>,
@@ -473,7 +480,7 @@ export const handleQCChartButtonClick = (
     activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
   } else {
     activeButtonsCopy.push(buttonName)
-    activeButtonsCopy = sortBy(activeButtonsCopy, (button) => {
+    activeButtonsCopy = sortBy(activeButtonsCopy, button => {
       return allButtons.indexOf(button)
     })
   }
@@ -484,7 +491,7 @@ export const combinePlusCounts = (arr: Array<any>) => {
   const map = new Map()
   const result = [] as Array<any>
 
-  arr.forEach((item) => {
+  arr.forEach(item => {
     if (item.plusCount) {
       const key = `${item.taxonCode}_${item.lifeStage}_${item.captureRunClass}`
       if (!map.has(key)) {

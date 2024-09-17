@@ -1,4 +1,5 @@
 import { Entypo } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import {
   AuthSessionResult,
   exchangeCodeAsync,
@@ -6,7 +7,6 @@ import {
   useAutoDiscovery,
 } from 'expo-auth-session'
 import * as SecureStore from 'expo-secure-store'
-import * as WebBrowser from 'expo-web-browser'
 import {
   Box,
   Button,
@@ -19,15 +19,12 @@ import {
 } from 'native-base'
 import { useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
-import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
 import AddNewUserModalContent from '../../components/profile/AddNewUserModalContent'
+import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
 import CustomModal from '../../components/Shared/CustomModal'
-import {
-  clearUserCredentials,
-  saveUserCredentials,
-} from '../../redux/reducers/userCredentialsSlice'
+import { clearUserCredentials } from '../../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import api from '../../api/axiosConfig'
+import { MonitoringProgram } from '../../utils/interfaces'
 
 import {
   // @ts-ignore
@@ -44,6 +41,8 @@ const Profile = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false)
+  const [selectedMonitoringProgramInfo, setSelectedMonitoringProgramInfo] =
+    useState<MonitoringProgram | null>(null)
   const [editAccountInfoModalOpen, setEditAccountInfoModalOpen] =
     useState<boolean>(false)
   const [monitoringProgramInfoModalOpen, setMonitoringProgramInfoModalOpen] =
@@ -57,6 +56,9 @@ const Profile = ({
     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/B2C_1_password_reset/v2.0/'
   )
   const userIsLead = userCredentialsStore.role === 'lead'
+  // const userPrograms = userCredentialsStore.userPrograms || []
+  // const userPrograms = []
+  const userPrograms = userCredentialsStore.userPrograms.slice(0, 1)
   //////////////////////////////////////////////
 
   const [pwResetRequest, pwResetResponse, pwResetPromptAsync] = useAuthRequest(
@@ -74,8 +76,6 @@ const Profile = ({
     },
     passwordResetDiscovery
   )
-
-  console.log('userCredentialsStore', userCredentialsStore)
 
   //////////////////////////////////////////////
   //Web Browser Change Password
@@ -150,29 +150,67 @@ const Profile = ({
           pt='4'
           overflow='hidden'
           height={'100%'}
-          // bg='secondary'
           roundedBottom='xl'
         >
-          <Pressable
-            my='7'
-            onPress={() => setMonitoringProgramInfoModalOpen(true)}
-          >
-            <HStack justifyContent='space-between' alignItems='center'>
-              <VStack>
-                <Text fontSize='2xl' bold>
-                  Monitoring Program
+          <HStack justifyContent='space-between' alignItems='center'>
+            <VStack py='7'>
+              <HStack
+                justifyContent='space-between'
+                alignItems='center'
+                width='100%'
+              >
+                <Text fontSize='2xl' bold mb={5}>
+                  {userPrograms.length === 1
+                    ? 'Monitoring Program'
+                    : 'Monitoring Programs'}
                 </Text>
-                <Text fontSize='xl'> {'<Monitoring Program Team Name>'}</Text>
-              </VStack>
-              <Icon
-                as={Entypo}
-                name='chevron-right'
-                color='black'
-                size={8}
-                marginX={3}
-              />
-            </HStack>
-          </Pressable>
+                <Button
+                  mb={15}
+                  alignSelf='center'
+                  bg='transparent'
+                  onPress={() => navigation.navigate('Monitoring Program')}
+                >
+                  <HStack alignItems='center'>
+                    <Icon
+                      as={Ionicons}
+                      name={'add'}
+                      size={'lg'}
+                      opacity={0.75}
+                      color={'primary'}
+                      mr='1'
+                    />
+                    <Text fontSize='lg' fontWeight='bold' color='primary'>
+                      Create New Program
+                    </Text>
+                  </HStack>
+                </Button>
+              </HStack>
+              <HStack
+                // space={5}
+                style={{ columnGap: 10 }}
+                flexWrap={'wrap'}
+              >
+                {userPrograms.length === 0 ? (
+                  <Text fontSize='xl'>No Monitoring Programs Available</Text>
+                ) : (
+                  userPrograms.map((program: any) => (
+                    <Button
+                      key={program.id}
+                      borderWidth={1}
+                      borderColor='dark.500'
+                      mb={5}
+                      onPress={() => {
+                        setSelectedMonitoringProgramInfo(program)
+                        setMonitoringProgramInfoModalOpen(true)
+                      }}
+                    >
+                      <Text fontSize='lg'>{program.programName}</Text>
+                    </Button>
+                  ))
+                )}
+              </HStack>
+            </VStack>
+          </HStack>
           <Divider bg='#414141' />
           <Pressable my='7'>
             <HStack justifyContent='space-between' alignItems='center'>
@@ -220,14 +258,7 @@ const Profile = ({
 
           <Pressable
             my='7'
-            onPress={async () => {
-              const accessToken = await SecureStore.getItemAsync(
-                'userAccessToken'
-              )
-              const refreshToken = await SecureStore.getItemAsync(
-                'userRefreshToken'
-              )
-
+            onPress={() => {
               ///////
               setLogoutModalOpen(true)
             }}
@@ -236,18 +267,6 @@ const Profile = ({
               Sign out
             </Text>
           </Pressable>
-
-          <Button
-            mt='20'
-            alignSelf='center'
-            bg='primary'
-            color='white'
-            onPress={() => navigation.navigate('Monitoring Program')}
-          >
-            <Text fontSize='xl' fontWeight='bold' color='white'>
-              MONITORING PROGRAM
-            </Text>
-          </Button>
         </VStack>
       </Box>
       {/* --------- Modals --------- */}
@@ -264,16 +283,18 @@ const Profile = ({
           />
         </CustomModal>
       )}
-      <CustomModal
-        isOpen={monitoringProgramInfoModalOpen}
-        closeModal={() => setMonitoringProgramInfoModalOpen(false)}
-        // height='1/1'
-      >
-        <MonitoringProgramInfoModalContent
+      {monitoringProgramInfoModalOpen && (
+        <CustomModal
+          isOpen={monitoringProgramInfoModalOpen}
           closeModal={() => setMonitoringProgramInfoModalOpen(false)}
-        />
-      </CustomModal>
-
+          height='full'
+        >
+          <MonitoringProgramInfoModalContent
+            closeModal={() => setMonitoringProgramInfoModalOpen(false)}
+            monitoringProgramInfo={selectedMonitoringProgramInfo}
+          />
+        </CustomModal>
+      )}
       {/* Logout Modal */}
       <CustomModal
         isOpen={logoutModalOpen}

@@ -6,6 +6,16 @@ import axios, {
 import { camelizeKeys } from 'humps'
 import Constants from 'expo-constants'
 import * as SecureStore from 'expo-secure-store'
+import { refreshAsync } from 'expo-auth-session'
+import moment from 'moment'
+import { store } from '../redux/store'
+import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
+
+import {
+  // @ts-ignore
+  REACT_APP_CLIENT_ID,
+} from '@env'
+import { storeAccessTokens } from '../utils/authUtils'
 
 const dateTransformer: AxiosRequestTransformer = (data: any) => {
   if (data instanceof Date) {
@@ -33,19 +43,100 @@ const api = axios.create({
 // Axios middleware to retrieve and add authorization token
 api.interceptors.request.use(
   async (config: AxiosRequestConfig) => {
-    try {
+    const { isConnected, isInternetReachable } = store.getState().connectivity
+
+    console.log('🚀 ~ file: axiosConfig.ts:48 ~ isConnected:', isConnected)
+    console.log(
+      '🚀 ~ file: axiosConfig.ts:50 ~ isInternetReachable:',
+      isInternetReachable
+    )
+
+    //Attempt to refresh token only if there is a network connection
+    if (isConnected && isInternetReachable) {
       const accessToken = await SecureStore.getItemAsync('userAccessToken')
       const idToken = await SecureStore.getItemAsync('userIdToken')
+      const tokenExpiresAt = await SecureStore.getItemAsync(
+        'userAccessTokenExpiresAt'
+      )
+      const tokenIsExpired = moment().isAfter(tokenExpiresAt)
+      try {
+        console.log(
+          '🚀 ~ file: axiosConfig.ts:64 ~ tokenIsExpired:',
+          tokenIsExpired
+        )
 
-      if (accessToken && idToken) {
-        const newConfig = config as any
-        newConfig.headers['Authorization'] = `Bearer ${accessToken}`
-        newConfig.headers['idToken'] = idToken
-        return newConfig
+        if (tokenIsExpired) {
+          //refreshAsync to exchange for new token
+          const existingRefreshToken =
+            (await SecureStore.getItemAsync('userRefreshToken')) || undefined
+
+          if (!existingRefreshToken) {
+            store.dispatch(setForcedLogoutModalOpen(true))
+          }
+
+          const tokenEndpoint =
+            'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_signin'
+
+          const refreshResponse = await refreshAsync(
+            {
+              clientId: REACT_APP_CLIENT_ID,
+              refreshToken: existingRefreshToken,
+            },
+            { tokenEndpoint }
+          )
+
+          if (refreshResponse.accessToken) {
+            const { accessToken, refreshToken, idToken, issuedAt, expiresIn } =
+              refreshResponse
+
+            await storeAccessTokens({
+              accessToken,
+              refreshToken,
+              idToken,
+              expiresIn,
+              issuedAt,
+            })
+            console.log(
+              '🚀 ~ file: axiosConfig.ts:90 ~ Tokens refreshed from the Axios Middleware'
+            )
+
+            const newConfig = config as AxiosRequestConfig<any>
+
+            //@ts-ignore - this is a hack to add the headers to the config
+            newConfig.headers['Authorization'] = `Bearer ${accessToken}`
+            //@ts-ignore - see above
+            newConfig.headers['idToken'] = idToken as string
+
+            return newConfig
+          }
+        }
+
+        if (accessToken && idToken) {
+          const newConfig = config as any
+          newConfig.headers['Authorization'] = `Bearer ${accessToken}`
+          newConfig.headers['idToken'] = idToken
+          return newConfig
+        }
+
+        if (!tokenIsExpired) {
+          console.log(
+            '🚀 ~ file: axiosConfig.ts:121 ~ Tokens still valid, no refresh necessary'
+          )
+          return config
+        }
+
+        throw new Error('No tokens found')
+      } catch (error) {
+        console.log(
+          '🚀 ~ file: axiosConfig.ts:129 ~ There is an issue with token exchange'
+        )
+        return config
       }
-      return config
-    } catch (error) {
-      return config
+    } else {
+      console.log(
+        '🚀 ~ file: axiosConfig.ts:135 ~ No network connection, cannot retrieve token'
+      )
+      throw new Error('No network connection, cannot retrieve token')
     }
   },
   error => {
@@ -66,8 +157,9 @@ api.interceptors.response.use(
   },
   function (error) {
     const { response } = error
-    console.log('error axios from config: ', response)
+    //console.log('error axios from config: ', response)
     if (response?.status === 401) {
+      console.log('unauthorized. token needs to be refreshed')
       // unauthorized
       // sign out?
     } else if (response?.status === 403) {
