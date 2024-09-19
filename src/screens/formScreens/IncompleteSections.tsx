@@ -440,17 +440,6 @@ const IncompleteSections = ({
             })
           }
 
-          const findReleaseIdFromExistingMarks = () => {
-            let releaseId = null
-            fishValue.existingMarks.forEach((existingMark: any) => {
-              if (existingMark.releaseId) {
-                releaseId = existingMark.releaseId
-              } else {
-              }
-            })
-            return releaseId
-          }
-
           const getRunClassMethod = (fishValue: any) => {
             if (fishValue.species === 'Chinook salmon') {
               return fishValue.run === 'not recorded' ? 5 : 6
@@ -510,7 +499,6 @@ const IncompleteSections = ({
                 )
               : null,
             isRandom: null, // Check w/ Erin
-            releaseId: findReleaseIdFromExistingMarks(),
             comments: null,
             createdBy: userCredentialsStore.id,
             qcCompleted: null,
