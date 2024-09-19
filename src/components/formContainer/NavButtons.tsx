@@ -317,7 +317,12 @@ const NavButtons = ({
         (errors && Object.keys(errors).length > 0)
       )
     }
-  }, [useDeepCompareMemoize(touched), useDeepCompareMemoize(errors)])
+  }, [
+    useDeepCompareMemoize(touched),
+    useDeepCompareMemoize(errors),
+    isValid,
+    activePage,
+  ])
 
   return (
     <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>

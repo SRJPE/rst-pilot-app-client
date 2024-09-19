@@ -6,6 +6,7 @@ import {
   markTrapVisitPaperEntry,
   markVisitSetupCompleted,
   saveVisitSetup,
+  resetVisitSetupSlice,
 } from '../../redux/reducers/formSlices/visitSetupSlice'
 import {
   FormControl,
@@ -30,6 +31,7 @@ import {
   deleteTab,
   setTabName,
   TabStateI,
+  resetTabsSlice,
 } from '../../redux/reducers/formSlices/tabSlice'
 import { uniqBy } from 'lodash'
 import { DeviceEventEmitter } from 'react-native'
@@ -112,7 +114,6 @@ const VisitSetup = ({
       ...values,
       programId,
     }
-    console.log('submitting visit setup form')
     // if no current tabs, create all new tabs
     if (!tabId) {
       // if trapName, iterate through all trap names and create tabs
@@ -282,6 +283,8 @@ const VisitSetup = ({
   }
 
   const updateSelectedProgram = (streamName: string) => {
+    dispatch(resetTabsSlice())
+    dispatch(resetVisitSetupSlice())
     let programId = null
     visitSetupDefaultsState?.programs.forEach((program: any) => {
       if (program.streamName === streamName) programId = program.id
@@ -488,6 +491,8 @@ const VisitSetup = ({
                         setFieldValue('trapSite', 'Deer Creek RST')
                       }
                       updateSelectedProgram(itemValue)
+                      setFieldValue('crew', [])
+                      setFieldTouched('crew', false)
                     }}
                     setFieldTouched={setFieldTouched}
                     selectOptions={visitSetupDefaultsState?.programs?.map(

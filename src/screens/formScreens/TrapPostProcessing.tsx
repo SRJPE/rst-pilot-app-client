@@ -62,6 +62,7 @@ const mapStateToProps = (state: RootState) => {
     willBeHoldingFishForMarkRecapture,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
+    userCredentialsStore: state.userCredentials,
   }
 }
 
@@ -73,6 +74,7 @@ const TrapPostProcessing = ({
   willBeHoldingFishForMarkRecapture,
   previouslyActiveTabId,
   navigationSlice,
+  userCredentialsStore,
 }: {
   navigation: any
   reduxState: any
@@ -81,6 +83,7 @@ const TrapPostProcessing = ({
   willBeHoldingFishForMarkRecapture: boolean
   previouslyActiveTabId: string | null
   navigationSlice: any
+  userCredentialsStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -94,6 +97,9 @@ const TrapPostProcessing = ({
 
   const [locationClicked, setLocationClicked] = useState(false as boolean)
   const [startTime, setStartTime] = useState(new Date() as any)
+
+  const userPrograms = userCredentialsStore?.userPrograms || []
+  const programNames = userPrograms.map((program: any) => program.programName)
 
   const onStartTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
@@ -292,6 +298,7 @@ const TrapPostProcessing = ({
           errors,
           values,
           resetForm,
+          isValid,
         }) => {
           useEffect(() => {
             if (previouslyActiveTabId && navigationSlice.activeStep === 5) {
@@ -309,6 +316,7 @@ const TrapPostProcessing = ({
                 errors={errors}
                 touched={touched}
                 shouldProceedToLoadingScreen={true}
+                isValid={isValid}
               />
             ),
             [
@@ -319,6 +327,7 @@ const TrapPostProcessing = ({
               activePage,
               values,
               startTime,
+              isValid,
             ]
           )
           return (
@@ -520,43 +529,50 @@ const TrapPostProcessing = ({
                       Take one or more measure of cone rotations. We will save
                       the average in our database.
                     </Text>
-
-                    <HStack space={3} mt='5'>
-                      <Button
-                        w='1/2'
-                        // h='12%'
-                        bg='primary'
-                        px='10'
-                        isLoading={locationClicked}
-                        spinnerPlacement='end'
-                        isLoadingText='Drop Pin at Current Location'
-                        _loading={{
-                          _text: {
-                            fontSize: 'xl',
-                          },
-                        }}
-                        onPress={() => {
-                          setLocationClicked(true)
-                          getCurrentLocation(setFieldTouched, setFieldValue)
-                        }}
-                      >
-                        <Text fontSize='xl' color='white'>
-                          Drop Pin at Current Location
-                        </Text>
-                      </Button>
-                      <VStack space={3} alignSelf='center'>
-                        <Text fontSize='xl' color='black'>
-                          {values.trapLatitude
-                            ? `Lat:  ${values.trapLatitude}`
-                            : 'Lat:'}
-                        </Text>
-                        <Text fontSize='xl' color='black'>
-                          {values.trapLongitude
-                            ? `Long:  ${values.trapLongitude}`
-                            : 'Long:'}
-                        </Text>
-                      </VStack>
-                    </HStack>
+                    {/* if user programs is not F/Y, okay to show drop pin */}
+                    {!userPrograms.some((element: string) =>
+                      [
+                        'Feather RST Monitoring',
+                        'Yuba River RST Monitoring',
+                      ].includes(element)
+                    ) && (
+                      <HStack space={3} mt='5'>
+                        <Button
+                          w='1/2'
+                          // h='12%'
+                          bg='primary'
+                          px='10'
+                          isLoading={locationClicked}
+                          spinnerPlacement='end'
+                          isLoadingText='Drop Pin at Current Location'
+                          _loading={{
+                            _text: {
+                              fontSize: 'xl',
+                            },
+                          }}
+                          onPress={() => {
+                            setLocationClicked(true)
+                            getCurrentLocation(setFieldTouched, setFieldValue)
+                          }}
+                        >
+                          <Text fontSize='xl' color='white'>
+                            Drop Pin at Current Location
+                          </Text>
+                        </Button>
+                        <VStack space={3} alignSelf='center'>
+                          <Text fontSize='xl' color='black'>
+                            {values.trapLatitude
+                              ? `Lat:  ${values.trapLatitude}`
+                              : 'Lat:'}
+                          </Text>
+                          <Text fontSize='xl' color='black'>
+                            {values.trapLongitude
+                              ? `Long:  ${values.trapLongitude}`
+                              : 'Long:'}
+                          </Text>
+                        </VStack>
+                      </HStack>
+                    )}
                   </FormControl>
                   <FormControl w='30%'>
                     <FormControl.Label>

@@ -45,7 +45,7 @@ export const tabsSlice = createSlice({
       }
       const timestamp = new Date()
       let groupId = uid()
-      Object.keys(state.tabs).forEach((id) => {
+      Object.keys(state.tabs).forEach(id => {
         if (state.tabs[id].trapSite === trapSite) {
           groupId = state.tabs[id].groupId
         }
@@ -88,7 +88,7 @@ export const tabsSlice = createSlice({
     },
     setIncompleteSectionTouched: (state, action) => {
       state.incompleteSectionTouched = action.payload
-    }
+    },
   },
 })
 
