@@ -194,7 +194,7 @@ const TrapOperations = ({
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
       const allTabIds: string[] = Object.keys(tabSlice.tabs)
-      allTabIds.forEach((allTabId) => {
+      allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
             stepCompletedCheck = false
@@ -262,6 +262,17 @@ const TrapOperations = ({
     const currentDate = selectedDate
     setEndTime(currentDate)
   }
+
+  useEffect(() => {
+    if (activeTabId) {
+      if (
+        reduxState[activeTabId]?.values?.trapVisitStopTime &&
+        reduxState[activeTabId]?.values?.trapVisitStopTime !== 'Invalid Date'
+      ) {
+        setEndTime(reduxState[activeTabId]?.values?.trapVisitStopTime)
+      }
+    }
+  }, [activeTabId, reduxState])
 
   const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
     if (activeTabId && activeTabId != 'placeholderId') {
@@ -579,7 +590,7 @@ const TrapOperations = ({
                           </FormControl.Label>
                           <Popover
                             placement='bottom left'
-                            trigger={(triggerProps) => {
+                            trigger={triggerProps => {
                               return (
                                 <IconButton
                                   {...triggerProps}

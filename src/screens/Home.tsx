@@ -8,6 +8,8 @@ import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
 import { getTrapVisitDropdownValues } from '../redux/reducers/dropdownsSlice'
 import { RootState, AppDispatch } from '../redux/store'
 import { connect, useDispatch } from 'react-redux'
+import api from '../api/axiosConfig'
+import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
 
 const styles = StyleSheet.create({
   recentItemsContainer: {
@@ -70,6 +72,30 @@ const Home = ({
       }
     }
   }, [userCredentialsStore])
+
+  useEffect(() => {
+    ;(async () => {
+      if (userCredentialsStore?.id && !userCredentialsStore.userPrograms) {
+        try {
+          dispatch(getVisitSetupDefaults(userCredentialsStore.id))
+          dispatch(getTrapVisitDropdownValues())
+
+          const userProgramsResponse = await api.get(
+            `program/personnel/${userCredentialsStore.id}`
+          )
+
+          dispatch(
+            saveUserCredentials({
+              ...userCredentialsStore,
+              userPrograms: userProgramsResponse.data,
+            })
+          )
+        } catch (error) {
+          console.log('error from home screen: ', error)
+        }
+      }
+    })()
+  }, [userCredentialsStore.userPrograms])
 
   const recentItemsCard = ({
     title,

@@ -10,7 +10,6 @@ import {
 } from 'native-base'
 import React from 'react'
 import { ImageBackground } from 'react-native'
-import moment from 'moment'
 
 import {
   // @ts-ignore
@@ -29,10 +28,7 @@ import * as SecureStore from 'expo-secure-store'
 import { connect, useDispatch } from 'react-redux'
 import api from '../api/axiosConfig'
 import AppLogo from '../components/Shared/AppLogo'
-import {
-  clearUserCredentials,
-  saveUserCredentials,
-} from '../redux/reducers/userCredentialsSlice'
+import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState } from '../redux/store'
 import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
 import { set } from 'lodash'
@@ -149,6 +145,7 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
                   },
                 }
               )
+
               dispatch(getVisitSetupDefaults(personnelResponse.data.id))
 
               dispatch(

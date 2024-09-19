@@ -42,7 +42,7 @@ interface TrapVisitSubmissionI {
   rpmAtStart?: number
   rpmAtEnd?: number
   inHalfConeConfiguration?: boolean
-  debrisVolumeGallons?: number
+  debrisVolumeGal?: number
   qcCompleted?: boolean
   qcCompletedAt?: Date
   comments?: string
@@ -123,11 +123,11 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
         }
       } = {}
 
-      trapVisitSubmissions.forEach((trapSubmission) => {
+      trapVisitSubmissions.forEach(trapSubmission => {
         const uuid = trapSubmission.trapVisitUid
         const trapPromise = api.post('trap-visit/', trapSubmission)
         const linkedCatchRawSubmissions = catchRawSubmissions.filter(
-          (catchSubmission) => catchSubmission.uid === uuid
+          catchSubmission => catchSubmission.uid === uuid
         )
 
         promiseTracker[uuid] = {
@@ -147,7 +147,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
             payload.trapVisitResponse.push(response.data)
 
             const catchPromises = linkedCatchRawSubmissions.map(
-              ({ uid, ...rest }: {uid: string}) =>
+              ({ uid, ...rest }: { uid: string }) =>
                 api.post('catch-raw/', {
                   ...rest,
                   trapVisitId: trapId,
@@ -172,7 +172,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
             if (!errorDetail.includes('already exists')) {
               payload.failedTrapVisitSubmissions.push(
                 trapVisitSubmissions.find(
-                  (trapSubmission) => trapSubmission.trapVisitUid === uuid
+                  trapSubmission => trapSubmission.trapVisitUid === uuid
                 )
               )
             }
@@ -226,13 +226,13 @@ export const postQCSubmissions = createAsyncThunk(
         )
 
         const trapResults = await Promise.allSettled(trapPromises).catch(
-          (error) => {
+          error => {
             console.log('trap qc submission error: ', error)
           }
         )
 
         const catchResults = await Promise.allSettled(catchPromises).catch(
-          (error) => {
+          error => {
             console.log('catch qc submission error: ', error)
           }
         )
@@ -279,7 +279,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
       const state = thunkAPI.getState() as RootState
       const userPrograms = state.visitSetupDefaults.programs
       await Promise.all(
-        userPrograms.map(async (program) => {
+        userPrograms.map(async program => {
           const trapVisitResponse = await api.get(
             `trap-visit/program/${program.programId}`
           )
@@ -291,7 +291,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCTrapVisitIds: number[] =
             state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
-              (trapVisit) => {
+              trapVisit => {
                 return trapVisit.createdTrapVisitResponse.id
               }
             )
@@ -306,7 +306,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
 
           const alreadyActiveQCCatchRawIds: number[] =
             state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
-              (catchRaw) => {
+              catchRaw => {
                 return catchRaw.createdCatchRawResponse.id
               }
             )
@@ -656,7 +656,6 @@ export const trapVisitPostBundler = createSlice({
         catchRawToQC.createdCatchRawResponse.qcTime = new Date().toISOString()
         catchRawToQC.createdCatchRawResponse.qcCompletedBy = userId
 
-
         catchRawToQC['stagedForSubmission'] = true
 
         state.previousCatchRawSubmissions = [
@@ -668,7 +667,7 @@ export const trapVisitPostBundler = createSlice({
       // if catch has started QC
       else {
         let qcCatchRaw: any = state.qcCatchRawSubmissions[qcCatchRawIdx]
-        
+
         qcCatchRaw.createdCatchRawResponse.qcCompletedBy = userId
 
         for (const submission of submissions) {
@@ -749,10 +748,10 @@ export const trapVisitPostBundler = createSlice({
     reset: () => {
       return initialState
     },
-    clearPendingTrapVisitSubs: (state) => {
+    clearPendingTrapVisitSubs: state => {
       state.trapVisitSubmissions = []
     },
-    clearPendingCatchRawSubs: (state) => {
+    clearPendingCatchRawSubs: state => {
       state.catchRawSubmissions = []
     },
     addMissingFetchedRecords: (state, action) => {
@@ -780,7 +779,7 @@ export const trapVisitPostBundler = createSlice({
       }
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder.addCase(PURGE, () => {
       return initialState
     })

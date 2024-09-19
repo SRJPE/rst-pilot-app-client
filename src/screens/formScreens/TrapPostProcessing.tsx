@@ -100,6 +100,17 @@ const TrapPostProcessing = ({
     setStartTime(currentDate)
   }
 
+  useEffect(() => {
+    if (activeTabId) {
+      if (
+        reduxState[activeTabId]?.values?.trapVisitStartTime &&
+        reduxState[activeTabId]?.values?.trapVisitStartTime !== 'Invalid Date'
+      ) {
+        setStartTime(reduxState[activeTabId]?.values?.trapVisitStartTime)
+      }
+    }
+  }, [activeTabId, reduxState])
+
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
     ;(async () => {
       let { status } = await Location.requestForegroundPermissionsAsync()
@@ -205,10 +216,6 @@ const TrapPostProcessing = ({
   }, [reduxState, activeTabId])
 
   const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
-    console.log(
-      'willBeHoldingFishForMarkRecapture',
-      willBeHoldingFishForMarkRecapture
-    )
     if (activeTabId && activeTabId != 'placeholderId') {
       const destination =
         direction === 'left'
@@ -291,7 +298,7 @@ const TrapPostProcessing = ({
               onSubmit(values, previouslyActiveTabId)
               resetForm()
             }
-          }, [previouslyActiveTabId, values, startTime])
+          }, [previouslyActiveTabId])
           const navButtons = useMemo(
             () => (
               <NavButtons
