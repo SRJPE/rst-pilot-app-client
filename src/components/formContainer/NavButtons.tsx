@@ -22,6 +22,7 @@ const NavButtons = ({
   fishProcessingSlice,
   reduxState,
   shouldProceedToLoadingScreen = false,
+  isValid,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -35,6 +36,7 @@ const NavButtons = ({
   fishProcessingSlice: any
   reduxState: RootState
   shouldProceedToLoadingScreen?: boolean
+  isValid?: boolean
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -71,7 +73,7 @@ const NavButtons = ({
   const checkWillBeHoldingFishForMarkRecapture = () => {
     if (tabSlice.activeTabId) {
       const tabsContainHoldingTrue = Object.keys(tabSlice.tabs).some(
-        (tabId) =>
+        tabId =>
           fishProcessingSlice?.[tabId]?.values
             ?.willBeHoldingFishForMarkRecapture
       )
@@ -307,6 +309,8 @@ const NavButtons = ({
       return true
     } else if (activePage === 'Fish Input') {
       return !(values?.length >= 1)
+    } else if (isValid) {
+      return !isValid
     } else {
       return (
         (touched && Object.keys(touched).length === 0) ||

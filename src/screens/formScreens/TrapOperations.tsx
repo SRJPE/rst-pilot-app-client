@@ -335,6 +335,7 @@ const TrapOperations = ({
         errors,
         values,
         resetForm,
+        isValid,
       }) => {
         const warningResultFlow = useFlowMeasureCalculationBool(
           Number(values.flowMeasure)
@@ -354,9 +355,10 @@ const TrapOperations = ({
               touched={touched}
               values={values}
               shouldProceedToLoadingScreen={true}
+              isValid={isValid}
             />
           ),
-          [navigation, handleSubmit, errors, touched, values]
+          [navigation, handleSubmit, errors, touched, values, isValid]
         )
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
