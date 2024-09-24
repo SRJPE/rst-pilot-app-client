@@ -62,3 +62,14 @@ Please visit the GitHub repositories for the Server and Database to access setup
 [DataTackle App Server](https://github.com/SRJPE/jpe-app-server)
 
 [RST Database Repo](https://github.com/SRJPE/rst-database)
+
+## Troubleshooting
+**Error**:
+```
+Error: xcrun exited with non-zero code: 148
+Invalid device or device pair: 3C84B562-463E-4524-AD01-4E8A959D3415
+```
+**Fix**:
+If that happens and you have created a new simulator:
+You can also press shift + i in the Expo CLI to interactively select a simulator to open.
+You can then select the specific simulator you want to use and the app will now be up running
