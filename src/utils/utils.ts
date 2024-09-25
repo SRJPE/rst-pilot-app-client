@@ -80,7 +80,7 @@ export const buttonLookup: any = {
     additionalButtons: 29,
     lifeStage: 'Silvery Parr',
   },
-  '90-105': { firstButton: 90, additionalButtons: 15, lifeStage: 'Smolt' },
+  '90-120': { firstButton: 90, additionalButtons: 30, lifeStage: 'Smolt' },
 }
 
 export const calculateLifeStage = (forkLength: number) => {
