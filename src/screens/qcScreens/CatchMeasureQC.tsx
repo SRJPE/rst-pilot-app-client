@@ -71,12 +71,12 @@ function CatchMeasureQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
     let qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
-    qcData = qcData.filter((data) => {
+    qcData = qcData.filter(data => {
       let createdAt = new Date(data.createdCatchRawResponse.createdAt)
       return (
         createdAt >= selectedDateRange.startDate &&
@@ -93,7 +93,7 @@ function CatchMeasureQC({
 
     // array of all fork lengths within the qc dataset
     const forkLengthArray: any[] = qcData
-      .map((catchRawResponse) => {
+      .map(catchRawResponse => {
         const forkValue = Number(
           catchRawResponse.createdCatchRawResponse?.forkLength
         )
@@ -105,7 +105,7 @@ function CatchMeasureQC({
           ).definition
 
           if (lifeStageDefinition && !lifeStageMap[lifeStageDefinition]) {
-            let colorOptions = legendColorList.filter((color) => {
+            let colorOptions = legendColorList.filter(color => {
               return !Object.values(lifeStageMap).includes(color)
             })
 
@@ -119,6 +119,7 @@ function CatchMeasureQC({
             id: catchRawResponse.createdCatchRawResponse.id,
             x: forkValue,
             y: 0,
+            createdAt: catchRawResponse.createdCatchRawResponse?.createdAt,
             colorScale: lifeStageDefinition
               ? lifeStageMap[lifeStageDefinition]
               : 'grey',
@@ -126,7 +127,7 @@ function CatchMeasureQC({
         }
         return forkValue
       })
-      .filter((num) => {
+      .filter(num => {
         return num != 0
       })
 
@@ -161,7 +162,7 @@ function CatchMeasureQC({
     let weightGraphSubData: any[] = []
 
     const weightArray: any[] = qcData
-      .map((catchRawResponse) => {
+      .map(catchRawResponse => {
         const weightValue = Number(
           catchRawResponse.createdCatchRawResponse.weight
         )
@@ -173,7 +174,7 @@ function CatchMeasureQC({
           ).definition
 
           if (lifeStageDefinition && !lifeStageMap[lifeStageDefinition]) {
-            let colorOptions = legendColorList.filter((color) => {
+            let colorOptions = legendColorList.filter(color => {
               return !Object.values(lifeStageMap).includes(color)
             })
 
@@ -187,6 +188,7 @@ function CatchMeasureQC({
             id: catchRawResponse.createdCatchRawResponse.id,
             x: weightValue,
             y: 0,
+            createdAt: catchRawResponse.createdCatchRawResponse?.createdAt,
             colorScale: lifeStageDefinition
               ? lifeStageMap[lifeStageDefinition]
               : 'grey',
@@ -194,7 +196,7 @@ function CatchMeasureQC({
         }
         return weightValue
       })
-      .filter((num) => {
+      .filter(num => {
         return num != 0
       })
 
@@ -232,7 +234,6 @@ function CatchMeasureQC({
     )
 
     setLegendData(legendData)
-    console.log('weightGraphSubData', weightGraphSubData)
 
     setGraphData({
       'Fork Length': kdeForkValues,
@@ -372,7 +373,7 @@ function CatchMeasureQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map((buttonName) => {
+            {activeButtons.map(buttonName => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -381,7 +382,7 @@ function CatchMeasureQC({
                   chartType='linewithplot'
                   data={graphData[buttonName]}
                   subData={graphSubData[buttonName]}
-                  onPointClick={(datum) => handlePointClicked(datum)}
+                  onPointClick={datum => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'

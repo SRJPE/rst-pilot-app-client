@@ -73,7 +73,7 @@ const GraphModalContent = ({
 
   useEffect(() => {
     let modalDataAtPointClicked: any = {}
-    Object.keys(modalData).forEach((header) => {
+    Object.keys(modalData).forEach(header => {
       let dataAtId = modalData[header].filter((obj: any) => {
         return obj.id == pointClicked.id
       })[0]
@@ -126,7 +126,7 @@ const GraphModalContent = ({
                   fontWeight={'light'}
                 >
                   Selected Point Date:{' '}
-                  {moment(pointClicked.x).format('MMMM Do, YYYY')}
+                  {moment(pointClicked.createdAt).format('MMMM Do, YYYY')}
                 </Text>
               )}
               <DataTable.Header style={[{ paddingLeft: 0 }]}>
@@ -163,7 +163,7 @@ const GraphModalContent = ({
                           textAlign={'center'}
                           fontSize='16'
                           keyboardType='numeric'
-                          onChangeText={(value) => {
+                          onChangeText={value => {
                             if (
                               value != payload[header].y ||
                               value != payload[header].x
