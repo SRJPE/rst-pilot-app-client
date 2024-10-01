@@ -165,7 +165,7 @@ const NavButtons = ({
         navigateHelper('Fish Processing')
         break
       case 'No Fish Caught':
-        navigateHelper('Trap Post-Processing')
+        navigateHelper('Start Mark Recapture')
         break
       case 'Paper Entry':
         navigateHelper('Trap Operations')
@@ -210,7 +210,17 @@ const NavButtons = ({
         navigateHelper('Trap Operations')
         break
       case 'Trap Post-Processing':
-        navigateHelper('Fish Input')
+        if (values?.fishProcessedResult === 'no fish caught') {
+          navigateHelper('Fish Processing')
+        } else if (
+          values?.fishProcessedResult ===
+            'no catch data, fish left in live box' ||
+          values?.fishProcessedResult === 'no catch data, fish released'
+        ) {
+          navigateHelper('Fish Processing')
+        } else {
+          navigateHelper('Fish Input')
+        }
         break
       case 'Fish Holding':
         navigateHelper('Trap Post-Processing')
@@ -273,13 +283,13 @@ const NavButtons = ({
     let buttonText
     switch (activePage) {
       case 'High Flows':
-        buttonText = 'End Trapping'
+        buttonText = 'End Trap Visit'
         break
       case 'Non Functional Trap':
-        buttonText = 'End Trapping'
+        buttonText = 'End Trap Visit'
         break
       case 'No Fish Caught':
-        buttonText = 'End Trapping'
+        buttonText = 'End Trap Visit'
         break
       case 'Started Trapping':
         buttonText = 'Home'
@@ -303,8 +313,7 @@ const NavButtons = ({
       return !isFormComplete
     } else if (
       activePage === 'High Flows' ||
-      activePage === 'Non Functional Trap' ||
-      activePage === 'No Fish Caught'
+      activePage === 'Non Functional Trap'
     ) {
       return true
     } else if (activePage === 'Fish Input') {

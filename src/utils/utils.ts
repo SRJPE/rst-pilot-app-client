@@ -384,9 +384,9 @@ export const navigateFlowRightButton = (
 export const navigateFlowLeftButton = (
   activePage: string,
   holdingForMarkRecap: boolean,
-  navigation: any
+  navigation: any,
+  values?: any
 ) => {
-  console.log('left', activePage)
   switch (activePage) {
     case 'Trap Operations':
       // if (isPaperEntryStore) navigateHelper('Paper Entry')
@@ -408,6 +408,18 @@ export const navigateFlowLeftButton = (
     case 'Started Trapping':
       return 'Trap Operations'
     case 'Trap Post-Processing':
+      if (values?.fishProcessedResult === 'no fish caught') {
+        return 'Fish Processing'
+      } else if (
+        values?.fishProcessedResult ===
+          'no catch data, fish left in live box' ||
+        values?.fishProcessedResult === 'no catch data, fish released'
+      ) {
+        return 'Fish Processing'
+      } else {
+        return 'Fish Input'
+      }
+      break
       return 'Fish Input'
     case 'Fish Holding':
       return 'Trap Post-Processing'
