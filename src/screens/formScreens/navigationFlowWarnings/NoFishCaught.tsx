@@ -2,44 +2,30 @@ import { Heading, Image, View, VStack } from 'native-base'
 import NavButtons from '../../../components/formContainer/NavButtons'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { useEffect, useRef, useState } from 'react'
-import navigationSlice, {
-  checkIfFormIsComplete,
+import { useRef, useState } from 'react'
+import {
   numOfFormSteps,
   resetNavigationSlice,
-  updateActiveStep,
 } from '../../../redux/reducers/formSlices/navigationSlice'
 import {
   postTrapVisitFormSubmissions,
-  saveCatchRawSubmissions,
   saveTrapVisitSubmission,
 } from '../../../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { resetGeneticSamplesSlice } from '../../../redux/reducers/formSlices/addGeneticSamplesSlice'
 import { resetMarksOrTagsSlice } from '../../../redux/reducers/formSlices/addMarksOrTagsSlice'
-import {
-  IndividualFishValuesI,
-  resetFishInputSlice,
-} from '../../../redux/reducers/formSlices/fishInputSlice'
+import { resetFishInputSlice } from '../../../redux/reducers/formSlices/fishInputSlice'
 import { resetFishProcessingSlice } from '../../../redux/reducers/formSlices/fishProcessingSlice'
 import { resetTrapPostProcessingSlice } from '../../../redux/reducers/formSlices/trapPostProcessingSlice'
 import { resetTrapOperationsSlice } from '../../../redux/reducers/formSlices/trapOperationsSlice'
 import { resetVisitSetupSlice } from '../../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../../redux/reducers/formSlices/paperEntrySlice'
 import { resetTabsSlice } from '../../../redux/reducers/formSlices/tabSlice'
-import { cloneDeep, flatten, uniq } from 'lodash'
-import { uid } from 'uid'
-import {
-  setIncompleteSectionTouched,
-  TabStateI,
-} from '../../../redux/reducers/formSlices/tabSlice'
+import { flatten, uniq } from 'lodash'
+import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
-import { DeviceEventEmitter } from 'react-native'
-import { combinePlusCounts, navigateHelper } from '../../../utils/utils'
-import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
   return {
-    navigationState: state.navigation,
     visitSetupState: state.visitSetup,
     visitSetupDefaultState: state.visitSetupDefaults,
     fishProcessingState: state.fishProcessing,
@@ -58,7 +44,6 @@ const mapStateToProps = (state: RootState) => {
 
 const NoFishCaught = ({
   navigation,
-  navigationState,
   visitSetupState,
   visitSetupDefaultState,
   fishProcessingState,
@@ -66,15 +51,11 @@ const NoFishCaught = ({
   trapOperationsState,
   dropdownsState,
   connectivityState,
-  fishInputState,
   paperEntryState,
   tabState,
-  addGeneticSamplesState,
-  appliedMarksState,
   userCredentialsStore,
 }: {
   navigation: any
-  navigationState: any
   visitSetupState: any
   visitSetupDefaultState: any
   fishProcessingState: any
@@ -82,18 +63,12 @@ const NoFishCaught = ({
   trapOperationsState: any
   dropdownsState: any
   connectivityState: any
-  fishInputState: any
   paperEntryState: any
   tabState: TabStateI
-  addGeneticSamplesState: any
-  appliedMarksState: any
   userCredentialsStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const stepsArray = Object.values(navigationState.steps).slice(
-    0,
-    numOfFormSteps - 1
-  ) as Array<any>
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const hasSubmittedRef = useRef(false)
 

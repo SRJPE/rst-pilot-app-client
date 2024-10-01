@@ -159,7 +159,7 @@ const NavButtons = ({
         navigateHelper('Start Mark Recapture')
         break
       case 'High Flows':
-        navigateHelper('End Trapping')
+        navigateHelper('Start Mark Recapture')
         break
       case 'High Temperatures':
         navigateHelper('Fish Processing')
@@ -316,10 +316,7 @@ const NavButtons = ({
     if (activePage === 'Incomplete Sections') {
       // if form is complete, then do not disable button
       return !isFormComplete
-    } else if (
-      activePage === 'High Flows' ||
-      activePage === 'Non Functional Trap'
-    ) {
+    } else if (activePage === 'Non Functional Trap') {
       return true
     } else if (activePage === 'Fish Input') {
       return !(values?.length >= 1)
