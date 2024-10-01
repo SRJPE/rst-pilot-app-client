@@ -180,6 +180,7 @@ const NavButtons = ({
   }
 
   const navigateFlowLeftButton = () => {
+    console.log('activePage', activePage)
     switch (activePage) {
       case 'Trap Operations':
         // if (isPaperEntryStore) navigateHelper('Paper Entry')
@@ -261,8 +262,12 @@ const NavButtons = ({
       return
     }
 
-    // if function truthy, submit form to save to redux
+    if (activePage === 'No Fish Caught') {
+      navigateFlowLeftButton()
+      return
+    }
     if (handleSubmit) {
+      // if function truthy, submit form to save to redux
       //do not submit when going back from incomplete sections page (prevents early submission errors)
       if (activePage !== 'Incomplete Sections') {
         handleSubmit('left')
