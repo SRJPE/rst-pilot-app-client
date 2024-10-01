@@ -52,7 +52,7 @@ api.interceptors.request.use(
     )
 
     //Attempt to refresh token only if there is a network connection
-    if (isConnected && isInternetReachable) {
+    if (isConnected) {
       const accessToken = await SecureStore.getItemAsync('userAccessToken')
       const idToken = await SecureStore.getItemAsync('userIdToken')
       const tokenExpiresAt = await SecureStore.getItemAsync(

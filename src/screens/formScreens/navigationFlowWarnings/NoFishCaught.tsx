@@ -73,7 +73,6 @@ const NoFishCaught = ({
   const hasSubmittedRef = useRef(false)
 
   const handleSubmit = () => {
-    console.log('handleSubmit')
     if (hasSubmittedRef.current) return // If already submitted, return early
     try {
       saveTrapVisits()
