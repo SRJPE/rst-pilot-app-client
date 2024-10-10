@@ -181,7 +181,9 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
     } catch (err) {
       console.log('error in fetchWithPostParams: ', err)
     } finally {
-      await fetchWithPostParams(thunkAPI.dispatch, payload)
+      if (payload.catchRawResponse.length || payload.trapVisitResponse.length) {
+        await fetchWithPostParams(thunkAPI.dispatch, payload)
+      }
     }
 
     return payload
@@ -314,7 +316,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
           const previousCatchRawPayload: any[] = catchRaws.filter(
             (catchRaw: any) => {
               return !alreadyActiveQCCatchRawIds.includes(
-                catchRaw.createdCatchRawResponse.id
+                catchRaw?.createdCatchRawResponse?.id
               )
             }
           )
@@ -329,6 +331,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
         previousCatchRaw,
       }
     } catch (err) {
+      console.log('errr', err)
       thunkAPI.rejectWithValue({
         previousTrapVisits: [],
         previousCatchRaw: [],
@@ -345,7 +348,10 @@ const fetchWithPostParams = async (dispatch: any, postResults: any) => {
 
     if (fetchResults.meta.requestStatus === 'fulfilled') {
       const fetchPayload = fetchResults.payload
-      const { previousTrapVisits, previousCatchRaw } = fetchPayload
+      if (!fetchPayload) {
+        return
+      }
+      const { previousTrapVisits, previousCatchRaw } = fetchPayload || {}
 
       const fetchedTrapUids = previousTrapVisits.map(
         (trap: any) => trap.createdTrapVisitResponse.trapVisitUid
@@ -850,9 +856,9 @@ export const trapVisitPostBundler = createSlice({
     builder.addCase(
       fetchPreviousTrapAndCatch.fulfilled.type,
       (state, action: any) => {
-        const { previousTrapVisits, previousCatchRaw } = action.payload
-        state.previousTrapVisitSubmissions = previousTrapVisits
-        state.previousCatchRawSubmissions = previousCatchRaw
+        const { previousTrapVisits, previousCatchRaw } = action.payload || {}
+        state.previousTrapVisitSubmissions = previousTrapVisits || []
+        state.previousCatchRawSubmissions = previousCatchRaw || []
         state.fetchStatus = 'fetch-successful'
       }
     )

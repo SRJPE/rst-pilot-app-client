@@ -344,7 +344,9 @@ const ReleaseDataEntry = ({
                           fontWeight='500'
                           fontSize='md'
                         >
-                          {`${markType} - ${markColor} - ${markPosition}`}
+                          {`${markType}${markColor ? `- ${markColor}` : ''} ${
+                            markPosition ? `- ${markPosition}` : ''
+                          }`}
                         </Text>
                       </Button>
                     )

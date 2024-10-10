@@ -43,12 +43,14 @@ function EfficiencyQC({
   qcCatchRawSubmissions,
   previousCatchRawSubmissions,
   userCredentialsStore,
+  markRecaptureFormPostBundler,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any[]
   previousCatchRawSubmissions: any[]
   userCredentialsStore: any
+  markRecaptureFormPostBundler: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [graphData, setGraphData] = useState<any[]>([])
@@ -61,112 +63,191 @@ function EfficiencyQC({
   const [nestedModalComment, setNestedModalComment] = useState<string>('')
 
   useEffect(() => {
-    const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter(
-      (catchRaw: any) => {
-        return catchRaw.createdCatchRawResponse.programId === programId
-      }
-    )
-    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
-    const efficienciesArray: any[] = []
-    const graphSubDataByValue: any = {}
-    const graphSubDataPayload: any[] = []
-
-    qcData.forEach((catchRawResponse: any, idx: number) => {
-      const catchRaw = catchRawResponse.createdCatchRawResponse
-      const release = catchRawResponse.releaseResponse
-      const qcCompleted = catchRaw.qcCompleted
-      const qcNotStarted = qcCompleted ? false : true
-
-      const numFishCaught: number = catchRaw.numFishCaught
-      const catchRawId = catchRaw.id
-
-      let numberReleased = 0
-      let numberRecaptured = numFishCaught
-
-      if (release) {
-        if (Object.keys(release)) {
-          numberReleased =
-            Number(release.totalWildFishReleased) +
-            Number(release.totalHatcheryFishReleased)
+    try {
+      const programId = route.params.programId
+      const programCatchRaw = previousCatchRawSubmissions.filter(
+        (catchRaw: any) => {
+          return catchRaw.createdCatchRawResponse.programId === programId
         }
-      }
+      )
+      const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+      const efficienciesArray: any[] = []
+      const graphSubDataByValue: any = {}
+      const graphSubDataPayload: any[] = []
 
-      const efficiencyDecimal =
-        numberReleased !== 0 ? numberRecaptured / numberReleased : 0
+      // old logic
+      /*
+      1. go over all catch records
+      2. for each catch record, get the numfishcaught as the number recapture
+      3. if release record, get numb released 
+      4. calculate efficiency
 
-      const efficiency = efficiencyDecimal * 100
+      */
 
-      if (qcCompleted && typeof efficiency === 'number') {
-        efficienciesArray.push(efficiency)
-      }
+      const programExistingMarks =
+        markRecaptureFormPostBundler.allUserExistingMarks.filter(
+          (existingMark: any) => {
+            return existingMark.programId === programId
+          }
+        )
 
-      if (typeof efficiency === 'number') {
-        if (Object.keys(graphSubDataByValue).includes(efficiency.toString())) {
-          graphSubDataByValue[efficiency].push(catchRawId)
+      console.log('programExistingMarks', programExistingMarks[0])
+      const releaseRecaps = {} as any
+      programExistingMarks.forEach((mark: any) => {
+        if (!releaseRecaps[mark.releaseId]) {
+          releaseRecaps[mark.releaseId] = {
+            recapCount: 1,
+            totalWildFishReleased: Number(mark.totalWildFishReleased),
+            totalHatcheryFishReleased: Number(mark.totalHatcheryFishReleased),
+            hatcheryFishForkLength: Number(mark.hatcheryFishForkLength),
+            hatcheryFishWeight: Number(mark.hatcheryFishWeight),
+            releasePurposeId: mark.releasePurposeId,
+            releaseSiteId: mark.releaseSiteId,
+            programId: mark.programId,
+            releasedAt: mark.releasedAt,
+            markedAt: mark.markedAt,
+          }
         } else {
-          graphSubDataByValue[efficiency] = [catchRawId]
+          releaseRecaps[mark.releaseId].recapCount += 1
         }
-      }
-    })
-
-    Object.keys(graphSubDataByValue).forEach((efficiency) => {
-      graphSubDataPayload.push({
-        x: Number(efficiency),
-        y: 0,
-        ids: graphSubDataByValue[efficiency],
       })
-    })
 
-    // Efficiency Density Calculations -----------------------------
+      console.log('releaseRecaps', releaseRecaps)
+      Object.keys(releaseRecaps).forEach(releaseId => {
+        const numberReleased =
+          Number(releaseRecaps[releaseId].totalWildFishReleased) +
+          Number(releaseRecaps[releaseId].totalHatcheryFishReleased)
 
-    if (efficienciesArray.length === 0) {
-      return
+        const numberRecaptured = releaseRecaps[releaseId].recapCount
+        console.log(
+          'releaseId',
+          releaseId,
+          ': ',
+          numberRecaptured,
+          '/',
+          numberReleased
+        )
+        console.log(
+          'const efficiencyDecimal',
+          numberReleased !== 0 ? numberRecaptured / numberReleased : 0
+        )
+        const efficiencyDecimal =
+          numberReleased !== 0 ? numberRecaptured / numberReleased : 0
+
+        const efficiency = efficiencyDecimal * 100
+        efficienciesArray.push(efficiency)
+      })
+
+      qcData.forEach((catchRawResponse: any, idx: number) => {
+        const catchRaw = catchRawResponse.createdCatchRawResponse
+        const release = catchRawResponse.releaseResponse
+        const qcCompleted = catchRaw.qcCompleted
+        const qcNotStarted = qcCompleted ? false : true
+
+        const numFishCaught: number = catchRaw.numFishCaught
+        const catchRawId = catchRaw.id
+
+        let numberReleased = 0
+        let numberRecaptured = numFishCaught
+
+        if (release) {
+          const count =
+            markRecaptureFormPostBundler.allUserExistingMarks.filter(
+              (item: any) => item.releaseId === release.releaseId
+            ).length
+
+          numberRecaptured = count
+
+          if (Object.keys(release)) {
+            numberReleased =
+              Number(release.totalWildFishReleased) +
+              Number(release.totalHatcheryFishReleased)
+          }
+        }
+
+        // will be 0 if no release
+        const efficiencyDecimal =
+          numberReleased !== 0 ? numberRecaptured / numberReleased : 0
+
+        const efficiency = efficiencyDecimal * 100
+
+        // pushed to EA if completed
+        // if (qcCompleted && typeof efficiency === 'number') {
+        //   efficienciesArray.push(efficiency)
+        // }
+
+        if (typeof efficiency === 'number') {
+          if (
+            Object.keys(graphSubDataByValue).includes(efficiency.toString())
+          ) {
+            graphSubDataByValue[efficiency].push(catchRawId)
+          } else {
+            graphSubDataByValue[efficiency] = [catchRawId]
+          }
+        }
+      })
+
+      Object.keys(graphSubDataByValue).forEach(efficiency => {
+        graphSubDataPayload.push({
+          x: Number(efficiency),
+          y: 0,
+          ids: graphSubDataByValue[efficiency],
+        })
+      })
+
+      console.log('ea', efficienciesArray)
+
+      // Efficiency Density Calculations -----------------------------
+      if (efficienciesArray.length === 0) {
+        return
+      }
+
+      let range: number | null = null
+      let startPoint: number | null = null
+
+      // array of all efficiencies within the qc dataset
+      // -> efficienciesArray
+
+      // start point is the lowest value efficiency
+      startPoint = Math.min(...efficienciesArray)
+
+      // range is the range of largest efficiency to smallest efficiency
+      range = Math.max(...efficienciesArray) - startPoint
+
+      // Calculate KDE values
+      const binWidth = 10 // binWidth for KDE
+      const minEfficiencyValue = Math.min(...efficienciesArray)
+      const maxEfficiencyValue = Math.max(...efficienciesArray)
+      const grid = Array.from(
+        { length: 100 },
+        (_, i) =>
+          minEfficiencyValue +
+          (i * (maxEfficiencyValue - minEfficiencyValue)) / 99
+      ) // Points to evaluate KDE
+
+      const kdeEfficiencyValues = kernelDensityEstimation(
+        efficienciesArray,
+        binWidth,
+        grid
+      )
+
+      setGraphData(kdeEfficiencyValues)
+      setGraphSubData(graphSubDataPayload)
+    } catch (error) {
+      console.log('error in efficiency qc', error)
     }
-
-    let range: number | null = null
-    let startPoint: number | null = null
-
-    // array of all efficiencies within the qc dataset
-    // -> efficienciesArray
-
-    // start point is the lowest value fork length
-    startPoint = Math.min(...efficienciesArray)
-
-    // range is the range of largest fork length to smallest fork length
-    range = Math.max(...efficienciesArray) - startPoint
-
-    // Calculate KDE values
-    const binWidth = 10 // binWidth for KDE
-    const minEfficiencyValue = Math.min(...efficienciesArray)
-    const maxEfficiencyValue = Math.max(...efficienciesArray)
-    const grid = Array.from(
-      { length: 100 },
-      (_, i) =>
-        minEfficiencyValue +
-        (i * (maxEfficiencyValue - minEfficiencyValue)) / 99
-    ) // Points to evaluate KDE
-
-    const kdeEfficiencyValues = kernelDensityEstimation(
-      efficienciesArray,
-      binWidth,
-      grid
-    )
-
-    setGraphData(kdeEfficiencyValues)
-    setGraphSubData(graphSubDataPayload)
   }, [qcCatchRawSubmissions])
 
   const handlePointClick = (datum: any) => {
     const pointIds = datum.ids
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
 
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
-    const selectedData = qcData.filter((response) => {
+    const selectedData = qcData.filter(response => {
       const id = response.createdCatchRawResponse?.id
       return pointIds.includes(id)
     })
@@ -299,7 +380,7 @@ function EfficiencyQC({
             fontSize='16'
             placeholder='Enter Number'
             keyboardType='numeric'
-            onChangeText={(value) => {
+            onChangeText={value => {
               setNestedModalInputValue(value)
             }}
             value={nestedModalInputValue}
@@ -313,7 +394,7 @@ function EfficiencyQC({
             fontSize='16'
             placeholder='Enter Number'
             keyboardType='numeric'
-            onChangeText={(value) => {
+            onChangeText={value => {
               setNestedModalInputValue(value)
             }}
             value={nestedModalInputValue}
@@ -327,7 +408,7 @@ function EfficiencyQC({
             fontSize='16'
             placeholder='Enter Number'
             keyboardType='numeric'
-            onChangeText={(value) => {
+            onChangeText={value => {
               setNestedModalInputValue(value)
             }}
             value={nestedModalInputValue}
@@ -341,7 +422,7 @@ function EfficiencyQC({
             fontSize='16'
             placeholder='Enter Fork Length'
             keyboardType='numeric'
-            onChangeText={(value) => {
+            onChangeText={value => {
               console.log('fork length: ', value)
               setNestedModalInputValue(value)
             }}
@@ -350,6 +431,8 @@ function EfficiencyQC({
         )
     }
   }
+
+  console.log('graphSubData.every(xIsNotZero)', graphSubData.every(xIsNotZero))
 
   return (
     <>
@@ -385,7 +468,7 @@ function EfficiencyQC({
                 selectedBarColor='green'
                 height={400}
                 width={600}
-                onPointClick={(datum) => handlePointClick(datum)}
+                onPointClick={datum => handlePointClick(datum)}
               />
             </ScrollView>
           ) : (
@@ -760,7 +843,7 @@ function EfficiencyQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  onChangeText={(value) => {
+                  onChangeText={value => {
                     setNestedModalComment(value)
                   }}
                   value={nestedModalComment}
@@ -802,6 +885,7 @@ const mapStateToProps = (state: RootState) => {
     markColorState: markColor ?? [],
     markPositionState: markPosition ?? [],
     userCredentialsStore: state.userCredentials,
+    markRecaptureFormPostBundler: state.markRecaptureFormPostBundler,
   }
 }
 

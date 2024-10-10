@@ -60,7 +60,7 @@ function CatchMeasureQC({
   const [pointClicked, setPointClicked] = useState<any | null>(null)
   const [selectedDateRange, setSelectedDateRange] = useState<DateRangeI>({
     startDate: new Date('2023-01-01'),
-    endDate: new Date(),
+    endDate: new Date(new Date().setHours(23, 59, 59, 999)),
   })
   const [legendData, setLegendData] = useState<any>({})
 
@@ -321,7 +321,7 @@ function CatchMeasureQC({
       >
         <VStack alignItems={'center'} flex={1}>
           <CustomModalHeader
-            headerText={'Fork Length, Weight, Life Stage, Run'}
+            headerText={'Fork Length and Weight'}
             showHeaderButton={false}
             closeModal={() => navigation.goBack()}
           />
