@@ -63,6 +63,7 @@ function CatchMeasureQC({
     endDate: new Date(new Date().setHours(23, 59, 59, 999)),
   })
   const [legendData, setLegendData] = useState<any>({})
+  const [programName, setProgramName] = useState('' as string)
 
   const axisLabelDictionary = {
     'Fork Length': { xLabel: 'Fork Length (mm)', yLabel: 'Density' },
@@ -71,6 +72,13 @@ function CatchMeasureQC({
 
   useEffect(() => {
     const programId = route.params.programId
+    const currentProgram = userCredentialsStore.userPrograms.find(
+      (program: any) => {
+        return program.programId === programId
+      }
+    )
+    setProgramName(currentProgram.programName)
+
     const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
@@ -441,6 +449,7 @@ function CatchMeasureQC({
             headerText={'Table of Selected Points'}
             modalData={graphSubData}
             usesDensity={true}
+            programName={programName}
           />
         </CustomModal>
       ) : (

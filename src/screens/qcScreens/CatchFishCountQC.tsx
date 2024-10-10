@@ -82,6 +82,7 @@ function CatchFishCountQC({
       value: '',
     })
   const [nestedModalComment, setNestedModalComment] = useState<string>('')
+  const [programName, setProgramName] = useState('' as string)
   const reorderedTaxon = reorderTaxon(taxonState)
 
   const identifierToName = {
@@ -114,13 +115,19 @@ function CatchFishCountQC({
 
   useEffect(() => {
     const programId = route.params.programId
+    const currentProgram = userCredentialsStore.userPrograms.find(
+      (program: any) => {
+        return program.programId === programId
+      }
+    )
+    setProgramName(currentProgram.programName)
     const programCatchRaw = previousCatchRawSubmissions.filter(
       (catchRaw: any) => {
         return catchRaw.createdCatchRawResponse.programId === programId
       }
     )
     const selectedSpeciesTaxon = reorderedTaxon.find(
-      (taxon) => taxon.commonname == selectedSpecies
+      taxon => taxon.commonname == selectedSpecies
     )?.code
 
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
@@ -137,7 +144,7 @@ function CatchFishCountQC({
 
     // Structure: datesFormatted = { date: {count, catchRawIds: [...]}, ...}
 
-    qcDataFiltered.forEach((catchResponse) => {
+    qcDataFiltered.forEach(catchResponse => {
       const catchRaw = catchResponse.createdCatchRawResponse
       const numFishCaught: number = catchRaw?.numFishCaught
       const plusCount: boolean = catchRaw?.plusCount
@@ -171,7 +178,7 @@ function CatchFishCountQC({
       }
     })
 
-    Object.keys(datesFormatted).forEach((dateString) => {
+    Object.keys(datesFormatted).forEach(dateString => {
       totalCountByDay.push({
         x: Number(dateString),
         y: datesFormatted[dateString].count,
@@ -201,7 +208,7 @@ function CatchFishCountQC({
 
       console.log('datum', datum)
 
-      const selectedData = qcData.filter((response) => {
+      const selectedData = qcData.filter(response => {
         const id = response.createdCatchRawResponse?.id
         return datum.plusCountIds.includes(id)
       })
@@ -395,7 +402,7 @@ function CatchFishCountQC({
               fontSize='16'
               placeholder='plus count...'
               keyboardType='numeric'
-              onChangeText={(value) => {
+              onChangeText={value => {
                 setNestedModalInputValue({
                   fieldClicked: 'numFishCaught',
                   value,
@@ -433,7 +440,7 @@ function CatchFishCountQC({
               fontSize='16'
               placeholder='fork length...'
               keyboardType='numeric'
-              onChangeText={(value) => {
+              onChangeText={value => {
                 setNestedModalInputValue({ fieldClicked: 'forkLength', value })
               }}
               // onBlur={handleBlur('comments')}
@@ -610,7 +617,7 @@ function CatchFishCountQC({
                   data={selectedSpecies != '' ? graphData : []}
                   showDates={true}
                   barColor='grey'
-                  onPointClick={(datum) => handlePointClick(datum)}
+                  onPointClick={datum => handlePointClick(datum)}
                   selectedBarColor='green'
                   height={400}
                   width={600}
@@ -670,7 +677,16 @@ function CatchFishCountQC({
               showHeaderButton={false}
               closeModal={() => setModalData(null)}
             />
-
+            {programName && (
+              <Text
+                color='black'
+                fontSize='2xl'
+                marginLeft={8}
+                fontWeight={'bold'}
+              >
+                {programName}
+              </Text>
+            )}
             <Text
               color='black'
               fontSize='2xl'
@@ -1090,7 +1106,7 @@ function CatchFishCountQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  onChangeText={(value) => {
+                  onChangeText={value => {
                     setNestedModalComment(value)
                   }}
                   value={nestedModalComment}

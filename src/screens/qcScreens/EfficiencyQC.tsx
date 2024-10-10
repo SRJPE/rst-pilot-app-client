@@ -21,7 +21,6 @@ import {
   truncateAndTrimString,
 } from '../../utils/utils'
 import CustomModal from '../../components/Shared/CustomModal'
-import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { DataTable } from 'react-native-paper'
 import { get } from 'lodash'
 import { MaterialIcons } from '@expo/vector-icons'

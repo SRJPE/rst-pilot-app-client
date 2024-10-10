@@ -102,6 +102,7 @@ function CatchCategoricalQC({
     })
   const [markIdToSymbolArr, setMarkIdToSymbolArr] = useState([])
   const [nestedModalComment, setNestedModalComment] = useState<string>('')
+  const [programName, setProgramName] = useState('' as string)
 
   const axisLabelDictionary = {
     'Adipose Clipped': { xLabel: 'Date', yLabel: undefined },
@@ -146,9 +147,15 @@ function CatchCategoricalQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
+    const currentProgram = userCredentialsStore.userPrograms.find(
+      (program: any) => {
+        return program.programId === programId
+      }
+    )
+    setProgramName(currentProgram.programName)
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
     let adiposeClippedData: any[] = []
@@ -306,7 +313,7 @@ function CatchCategoricalQC({
       }
     })
 
-    Object.keys(adiposeClippedByDate).forEach((date) => {
+    Object.keys(adiposeClippedByDate).forEach(date => {
       if (adiposeClippedByDate[date]['true'].length) {
         adiposeClippedData.push({
           ids: adiposeClippedByDate[date]['true'],
@@ -334,7 +341,7 @@ function CatchCategoricalQC({
       Object.entries(countObj as MarkCombosI).forEach(
         ([markIdentifier, itemsArray]) => {
           if (
-            every(markIdToColorBuilder, (obj) => {
+            every(markIdToColorBuilder, obj => {
               return obj.name !== markIdentifier
             })
           ) {
@@ -368,7 +375,7 @@ function CatchCategoricalQC({
       )
     })
 
-    Object.keys(deadDataByDate).forEach((date) => {
+    Object.keys(deadDataByDate).forEach(date => {
       if (deadDataByDate[date]['true'].length) {
         deadData.push({
           ids: deadDataByDate[date]['true'],
@@ -401,7 +408,7 @@ function CatchCategoricalQC({
   const handlePointClick = (datum: any) => {
     console.log('datum', datum)
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
 
@@ -419,7 +426,7 @@ function CatchCategoricalQC({
       idsAtPoint = datum.ids
     }
 
-    const selectedData = qcData.filter((response) => {
+    const selectedData = qcData.filter(response => {
       const id = response.createdCatchRawResponse?.id
       return idsAtPoint.includes(id)
     })
@@ -655,7 +662,7 @@ function CatchCategoricalQC({
               fontSize='16'
               placeholder='fork length...'
               keyboardType='numeric'
-              onChangeText={(value) => {
+              onChangeText={value => {
                 setNestedModalInputValue({ fieldClicked: 'forkLength', value })
               }}
               // onBlur={handleBlur('comments')}
@@ -817,7 +824,7 @@ function CatchCategoricalQC({
           </HStack>
 
           <ScrollView>
-            {activeButtons.map((buttonName) => {
+            {activeButtons.map(buttonName => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -825,7 +832,7 @@ function CatchCategoricalQC({
                   key={buttonName}
                   chartType={buttonNameToChartType[buttonName] as any}
                   showDates
-                  onPointClick={(datum) => handlePointClick(datum)}
+                  onPointClick={datum => handlePointClick(datum)}
                   timeBased={false}
                   data={graphData[buttonName]}
                   title={buttonName}
@@ -891,7 +898,16 @@ function CatchCategoricalQC({
               showHeaderButton={false}
               closeModal={() => setModalData(null)}
             />
-
+            {programName && (
+              <Text
+                color='black'
+                fontSize='2xl'
+                marginLeft={8}
+                fontWeight={'bold'}
+              >
+                {programName}
+              </Text>
+            )}
             <Text
               color='black'
               fontSize='2xl'
@@ -1539,7 +1555,7 @@ function CatchCategoricalQC({
                   fontSize='16'
                   placeholder='Write a comment'
                   keyboardType='default'
-                  onChangeText={(value) => {
+                  onChangeText={value => {
                     setNestedModalComment(value)
                   }}
                   // onBlur={handleBlur('comments')}

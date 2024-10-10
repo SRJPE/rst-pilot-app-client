@@ -74,6 +74,7 @@ function TrapQC({
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
+  const [programName, setProgramName] = useState('' as string)
 
   const axisLabelDictionary = {
     Temperature: { xLabel: 'Date', yLabel: 'Temperature (C)' },
@@ -89,6 +90,13 @@ function TrapQC({
     const programTrapVisits = previousTrapVisits.filter(trapVisit => {
       return trapVisit.createdTrapVisitResponse.programId === programId
     })
+
+    const currentProgram = userCredentialsStore.userPrograms.find(
+      (program: any) => {
+        return program.programId === programId
+      }
+    )
+    setProgramName(currentProgram.programName)
 
     let tempData: any[] = []
     let turbidityData: any[] = []
@@ -383,6 +391,7 @@ function TrapQC({
             onSubmit={(submission: any) => handleModalSubmit(submission)}
             headerText={'Table of Selected Points'}
             modalData={graphData}
+            programName={programName}
           />
         </CustomModal>
       ) : (

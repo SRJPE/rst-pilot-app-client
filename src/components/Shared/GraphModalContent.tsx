@@ -25,6 +25,7 @@ const GraphModalContent = ({
   showHeaderButton,
   dataFormatter,
   usesDensity,
+  programName,
 }: {
   closeModal: any
   onSubmit: any
@@ -35,6 +36,7 @@ const GraphModalContent = ({
   showHeaderButton?: boolean
   dataFormatter?: (header: string, dataAtId: any) => any
   usesDensity?: boolean
+  programName?: string
 }) => {
   const [payload, setPayload] = useState<any>({})
 
@@ -119,15 +121,27 @@ const GraphModalContent = ({
           <>
             <DataTable>
               {pointClicked.x && (
-                <Text
-                  color='black'
-                  fontSize='2xl'
-                  marginLeft={8}
-                  fontWeight={'light'}
-                >
-                  Selected Point Date:{' '}
-                  {moment(pointClicked.createdAt).format('MMMM Do, YYYY')}
-                </Text>
+                <>
+                  {programName && (
+                    <Text
+                      color='black'
+                      fontSize='2xl'
+                      marginLeft={8}
+                      fontWeight={'bold'}
+                    >
+                      {programName}
+                    </Text>
+                  )}
+                  <Text
+                    color='black'
+                    fontSize='2xl'
+                    marginLeft={8}
+                    fontWeight={'light'}
+                  >
+                    Selected Point Date:{' '}
+                    {moment(pointClicked.createdAt).format('MMMM Do, YYYY')}
+                  </Text>
+                </>
               )}
               <DataTable.Header style={[{ paddingLeft: 0 }]}>
                 {Object.keys(modalData).map((header: string, idx: number) => (

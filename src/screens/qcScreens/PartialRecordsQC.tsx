@@ -19,7 +19,6 @@ import { DataTable } from 'react-native-paper'
 import { connect, useDispatch } from 'react-redux'
 import CustomModal from '../../components/Shared/CustomModal'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
-import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { AppDispatch, RootState } from '../../redux/store'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import CustomSelect from '../../components/Shared/CustomSelect'
@@ -126,11 +125,11 @@ function PartialRecordsQC({
       'plusCountMethodology',
     ]
 
-    qcData.forEach((catchResponse) => {
+    qcData.forEach(catchResponse => {
       const catchRaw = catchResponse.createdCatchRawResponse
       const catchRawKeys = Object.keys(catchRaw)
 
-      catchRawKeys.forEach((key) => {
+      catchRawKeys.forEach(key => {
         if (!omittedPartialRecordKeys.includes(key)) {
           if (
             Object.keys(formattedData).includes(key) &&
@@ -152,7 +151,7 @@ function PartialRecordsQC({
       })
     })
 
-    Object.keys(formattedData).forEach((key) => {
+    Object.keys(formattedData).forEach(key => {
       let dynamicKey = key
       if (key === 'taxonCode') dynamicKey = 'species'
       percentNotRecordedPayload.push({
@@ -299,7 +298,7 @@ function PartialRecordsQC({
               fontSize='16'
               placeholder='fork length...'
               keyboardType='numeric'
-              onChangeText={(value) => {
+              onChangeText={value => {
                 setNestedModalInputValue(value)
               }}
               // onBlur={handleBlur('comments')}
@@ -317,7 +316,7 @@ function PartialRecordsQC({
               fontSize='16'
               placeholder='Weight...'
               keyboardType='numeric'
-              onChangeText={(value) => {
+              onChangeText={value => {
                 setNestedModalInputValue(value)
               }}
               // onBlur={handleBlur('comments')}
@@ -386,7 +385,7 @@ function PartialRecordsQC({
               fontSize='16'
               placeholder='fish count...'
               keyboardType='numeric'
-              onChangeText={(value) => {
+              onChangeText={value => {
                 setNestedModalInputValue(value)
               }}
               // onBlur={handleBlur('comments')}
@@ -404,7 +403,7 @@ function PartialRecordsQC({
               fontSize='16'
               placeholder='stream...'
               keyboardType='default'
-              onChangeText={(value) => {
+              onChangeText={value => {
                 setNestedModalInputValue(value)
               }}
               // onBlur={handleBlur('comments')}
@@ -491,7 +490,7 @@ function PartialRecordsQC({
             </DataTable.Header>
 
             <ScrollView>
-              {percentNotRecordedData.map((rowData) => {
+              {percentNotRecordedData.map(rowData => {
                 return (
                   <DataTable.Row
                     key={rowData.variableName}
@@ -650,7 +649,7 @@ function PartialRecordsQC({
                           ).toLocaleDateString()
                         : 'NA'
                       const taxon = taxonDropdowns.filter(
-                        (taxon) =>
+                        taxon =>
                           createdCatchRawResponse.taxonCode === taxon.code
                       )
                       const species = taxon.length ? taxon[0]?.commonname : 'NA'
@@ -659,7 +658,7 @@ function PartialRecordsQC({
                           ? createdCatchRawResponse.adiposeClipped
                           : 'NA'
                       const captureRunClass = runDropdowns.filter(
-                        (run) =>
+                        run =>
                           createdCatchRawResponse.captureRunClass === run.id
                       )
                       const run = captureRunClass.length
@@ -674,19 +673,17 @@ function PartialRecordsQC({
                       const numFishCaught =
                         createdCatchRawResponse.numFishCaught ?? 'NA'
                       const program = programs.filter(
-                        (program) => programId === program.id
+                        program => programId === program.id
                       )
                       const stream = program.length
                         ? program[0].streamName
                         : 'NA'
-                      let releaseSiteArr = releaseSites.filter(
-                        (releaseSite) => {
-                          if (releaseResponse)
-                            return (
-                              releaseSite.id === releaseResponse.releaseSiteId
-                            )
-                        }
-                      )
+                      let releaseSiteArr = releaseSites.filter(releaseSite => {
+                        if (releaseResponse)
+                          return (
+                            releaseSite.id === releaseResponse.releaseSiteId
+                          )
+                      })
                       const releaseSite = releaseSiteArr.length
                         ? releaseSiteArr[0].releaseSiteName
                         : 'NA'
@@ -851,9 +848,7 @@ function PartialRecordsQC({
                                     fontWeight={'light'}
                                   >
                                     You have the weight marked as{' '}
-                                    <Text fontWeight={'bold'}>
-                                      {weight}
-                                    </Text>{' '}
+                                    <Text fontWeight={'bold'}>{weight}</Text>{' '}
                                   </Text>
                                 ),
                               })
@@ -865,8 +860,6 @@ function PartialRecordsQC({
                               10
                             )}
                           </DataTable.Cell>
-
-
 
                           <DataTable.Cell
                             style={{
@@ -1147,7 +1140,7 @@ function PartialRecordsQC({
                   placeholder='Write a comment'
                   keyboardType='default'
                   // onBlur={handleBlur('comments')}
-                  onChangeText={(value) => {
+                  onChangeText={value => {
                     setNestedModalCommentValue(value)
                   }}
                   value={nestedModalCommentValue}
