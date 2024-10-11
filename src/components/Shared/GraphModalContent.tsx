@@ -148,16 +148,16 @@ const GraphModalContent = ({
                   <DataTable.Title
                     key={idx}
                     numeric
-                    style={[
-                      { justifyContent: 'space-evenly', flexWrap: 'wrap' },
-                    ]}
+                    style={[{ justifyContent: 'space-evenly', width: '100%' }]}
                   >
-                    <Text>{header}</Text>
+                    <Text fontSize='lg'>{header}</Text>
                   </DataTable.Title>
                 ))}
               </DataTable.Header>
 
-              <DataTable.Row style={[{ height: 55 }]}>
+              <DataTable.Row
+                style={[{ height: 55, marginTop: 10, borderBottomWidth: 0 }]}
+              >
                 <HStack justifyContent={'space-evenly'} w='100%'>
                   {Object.keys(modalData).map((header: any, idx: number) => {
                     return (
