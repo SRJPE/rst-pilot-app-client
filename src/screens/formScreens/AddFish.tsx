@@ -22,11 +22,6 @@ import {
 } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import {
-  addIndividualFishSchema,
-  addIndividualFishSchemaOptionalLifeStage,
-  addIndividualFishSchemaOtherSpecies,
-} from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import CustomModal from '../../components/Shared/CustomModal'
 import CustomSelect from '../../components/Shared/CustomSelect'
@@ -127,9 +122,9 @@ const AddFishContent = ({
     saveGeneticSampleData({ ...values, UID: fishUID })
   }
 
-  useEffect(() => {
-    setFishUID(uid())
-  }, [])
+  // useEffect(() => {
+  //   setFishUID(uid())
+  // }, [])
 
   const renderForkLengthWarning = (
     forkLengthValue: number,

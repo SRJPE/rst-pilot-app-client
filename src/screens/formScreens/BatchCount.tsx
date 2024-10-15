@@ -58,7 +58,7 @@ const BatchCount = ({
   const [showTable, setShowTable] = useState(false as boolean)
   const [lifeStageRadioValue, setLifeStageRadioValue] = useState('' as string)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
-    useState(false as boolean)
+    useState(true as boolean)
   const [modalInitialData, setModalInitialData] = useState({
     forkLength: '',
     count: '',
@@ -75,11 +75,11 @@ const BatchCount = ({
   const { species, adiposeClipped, fishConditions, existingMarks } =
     batchCharacteristics
 
-  useEffect(() => {
-    if (species === '') {
-      setBatchCharacteristicsModalOpen(true)
-    }
-  }, [])
+  // useEffect(() => {
+  //   if (species === '') {
+  //     setBatchCharacteristicsModalOpen(true)
+  //   }
+  // }, [])
 
   const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())
@@ -314,7 +314,7 @@ const BatchCount = ({
                         <Radio.Group
                           name='lifeStageRadioGroup'
                           value={lifeStageRadioValue}
-                          onChange={(nextValue) => {
+                          onChange={nextValue => {
                             setLifeStageRadioValue(nextValue)
                           }}
                         >
@@ -388,7 +388,7 @@ const BatchCount = ({
                       .map((toggle, index) =>
                         toggle ? fishConditions[index] : null
                       )
-                      .filter((condition) => condition !== null)}
+                      .filter(condition => condition !== null)}
                     handleToggles={handleToggles}
                   />
                   {species !== 'Chinook salmon' && <View mb='65'></View>}
