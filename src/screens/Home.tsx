@@ -6,6 +6,7 @@ import AppLogo from '../components/Shared/AppLogo'
 import { Entypo } from '@expo/vector-icons'
 import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
 import { getTrapVisitDropdownValues } from '../redux/reducers/dropdownsSlice'
+import { fetchPreviousTrapAndCatch } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { RootState, AppDispatch } from '../redux/store'
 import { connect, useDispatch } from 'react-redux'
 import api from '../api/axiosConfig'
@@ -67,6 +68,7 @@ const Home = ({
       try {
         dispatch(getVisitSetupDefaults(userCredentialsStore.id))
         dispatch(getTrapVisitDropdownValues())
+        dispatch(fetchPreviousTrapAndCatch())
       } catch (error) {
         console.log('error from home screen: ', error)
       }
