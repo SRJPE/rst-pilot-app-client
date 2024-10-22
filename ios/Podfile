@@ -28,7 +28,7 @@ target 'rstpilotapp' do
     :fabric_enabled => flags[:fabric_enabled],
 # @generated begin expo-community-flipper-urn - expo prebuild (DO NOT MODIFY) sync-2c72a3e830aecfd65d973c105092ad560f1397e6
     # Flipper arguments generated from app.json
-    :flipper_configuration => ENV['FLIPPER_DISABLE'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled,
+    
 # @generated end expo-community-flipper-urn
     # An absolute path to your application root.
     :app_path => "#{Dir.pwd}/.."

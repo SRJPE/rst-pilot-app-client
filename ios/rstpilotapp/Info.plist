@@ -25,7 +25,8 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>com.flowwest.rstapp</string>
+          <string>com.onmicrosoft.rstb2c.rsttabletapp</string>
+          <string>com.flowwest.datatackle</string>
         </array>
       </dict>
       <dict>
@@ -52,6 +53,8 @@
         </dict>
       </dict>
     </dict>
+    <key>NSFaceIDUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your Face ID biometric data.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your location</string>
     <key>NSLocationAlwaysUsageDescription</key>

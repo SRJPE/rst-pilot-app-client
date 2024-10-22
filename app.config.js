@@ -10,11 +10,17 @@ export default ({ config }) => {
       policy: 'sdkVersion',
     },
     ios: {
-      bundleIdentifier: 'com.flowwest.rstapp',
+      bundleIdentifier: 'com.flowwest.datatackle',
       supportsTablet: true,
+    },
+    android: {
+      package: 'com.flowwest.datatackle',
     },
     extra: {
       REACT_APP_BASE_URL: process.env.REACT_APP_BASE_URL,
+      REACT_APP_CLIENT_ID: process.env.REACT_APP_CLIENT_ID,
+      REACT_APP_CLIENT_SECRET_VALUE: process.env.REACT_APP_CLIENT_SECRET_VALUE,
+      REACT_APP_CLIENT_SECRET_ID: process.env.REACT_APP_CLIENT_SECRET_ID,
       eas: {
         projectId: 'a6f6224b-3c38-4476-ad72-6cbea4d1bdc6',
       },
