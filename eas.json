@@ -34,7 +34,8 @@
       },
       "ios": {
         "simulator": true,
-        "image": "latest"
+        "image": "latest",
+        "autoIncrement": "version"
       }
     }
   },
