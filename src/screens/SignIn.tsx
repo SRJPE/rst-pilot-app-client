@@ -13,7 +13,7 @@ import { ImageBackground } from 'react-native'
 
 import {
   // @ts-ignore
-  REACT_APP_CLIENT_ID,
+  EXPO_PUBLIC_CLIENT_ID,
 } from '@env'
 import {
   AuthRequest,
@@ -47,7 +47,7 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/B2C_1_password_reset/v2.0/'
   )
   const redirectUri = 'com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect'
-  const clientId = REACT_APP_CLIENT_ID
+  const clientId = EXPO_PUBLIC_CLIENT_ID
 
   // Request
   const [request, response, promptAsync] = useAuthRequest(

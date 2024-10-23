@@ -3,7 +3,7 @@ import moment from 'moment'
 import { refreshAsync } from 'expo-auth-session'
 import {
   // @ts-ignore
-  REACT_APP_CLIENT_ID,
+  EXPO_PUBLIC_CLIENT_ID,
 } from '@env'
 import { error } from 'console'
 import { AppDispatch, store } from '../redux/store'
@@ -44,7 +44,7 @@ export const refreshUserToken = async (
 
         const refreshResponse = await refreshAsync(
           {
-            clientId: REACT_APP_CLIENT_ID,
+            clientId: EXPO_PUBLIC_CLIENT_ID,
             refreshToken: existingRefreshToken || undefined,
           },
           { tokenEndpoint }

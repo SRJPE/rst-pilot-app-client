@@ -13,7 +13,7 @@ import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
 
 import {
   // @ts-ignore
-  REACT_APP_CLIENT_ID,
+  EXPO_PUBLIC_CLIENT_ID,
 } from '@env'
 import { storeAccessTokens } from '../utils/authUtils'
 
@@ -32,7 +32,7 @@ const dateTransformer: AxiosRequestTransformer = (data: any) => {
   }
   return data
 }
-const baseURL = Constants.expoConfig?.extra?.REACT_APP_BASE_URL
+const baseURL = Constants.expoConfig?.extra?.EXPO_PUBLIC_BASE_URL
 const api = axios.create({
   baseURL,
   transformRequest: [dateTransformer].concat(
@@ -79,7 +79,7 @@ api.interceptors.request.use(
 
           const refreshResponse = await refreshAsync(
             {
-              clientId: REACT_APP_CLIENT_ID,
+              clientId: EXPO_PUBLIC_CLIENT_ID,
               refreshToken: existingRefreshToken,
             },
             { tokenEndpoint }
