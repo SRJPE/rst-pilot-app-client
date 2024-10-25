@@ -19,6 +19,10 @@ Please ensure these software are installed on your computer:
 - Node.js
 - Xcode for running the iOS Simulator (If you are developing from a Windows or a Linux machine, you will need a physical iOS device for testing)
   - View this page for assistance: https://docs.expo.dev/workflow/ios-simulator/
+ 
+## Install Source Code
+
+- Using your method of choice, install the source code (`git clone`, GitHub Desktop, zip file, etc)
 
 ## Environment Variables
 
