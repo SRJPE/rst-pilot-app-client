@@ -48,8 +48,8 @@ export default function CrewDropDown({
   useEffect(() => {
     if (selectedStream && stream !== selectedStream) {
       clearSelectedValues()
-      setSelectedStream(stream)
     }
+    setSelectedStream(stream)
   }, [stream])
 
   const clearSelectedValues = () => {

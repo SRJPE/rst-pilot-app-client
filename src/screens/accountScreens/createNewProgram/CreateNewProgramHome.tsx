@@ -139,7 +139,7 @@ const CreateNewProgramHome = ({
 
   useEffect(() => {
     const checkForm = createNewProgramHomeStore.steps.every(
-      (step) => step.completed === true
+      step => step.completed === true
     )
     if (checkForm) {
       setFormIsCompleteAndValid(true)
@@ -167,7 +167,10 @@ const CreateNewProgramHome = ({
       }
 
       dispatch(saveMonitoringProgramSubmission(monitoringProgramSubmission))
-      if (connectivityState.isConnected) {
+      if (
+        connectivityState.isConnected &&
+        connectivityState.isInternetReachable
+      ) {
         console.log('CONNECTED')
         dispatch(postMonitoringProgramSubmissions())
       }

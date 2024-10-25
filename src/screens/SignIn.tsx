@@ -13,7 +13,7 @@ import { ImageBackground } from 'react-native'
 
 import {
   // @ts-ignore
-  REACT_APP_CLIENT_ID,
+  EXPO_PUBLIC_CLIENT_ID,
 } from '@env'
 import {
   AuthRequest,
@@ -31,6 +31,8 @@ import AppLogo from '../components/Shared/AppLogo'
 import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState } from '../redux/store'
 import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
+import { set } from 'lodash'
+import { storeAccessTokens } from '../utils/authUtils'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -45,7 +47,7 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
     'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/B2C_1_password_reset/v2.0/'
   )
   const redirectUri = 'com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect'
-  const clientId = REACT_APP_CLIENT_ID
+  const clientId = EXPO_PUBLIC_CLIENT_ID
 
   // Request
   const [request, response, promptAsync] = useAuthRequest(
@@ -101,15 +103,21 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
             discoveryObj
           ).then(async res => {
             try {
-              const { accessToken, refreshToken, idToken, scope } = res
+              const {
+                accessToken,
+                refreshToken,
+                idToken,
+                issuedAt,
+                expiresIn,
+              } = res
 
-              await SecureStore.setItemAsync('userAccessToken', accessToken)
-
-              await SecureStore.setItemAsync(
-                'userRefreshToken',
-                refreshToken as string
-              )
-              await SecureStore.setItemAsync('userIdToken', idToken as string)
+              await storeAccessTokens({
+                accessToken,
+                refreshToken,
+                idToken,
+                expiresIn,
+                issuedAt,
+              })
 
               const userRes = await api.get('user/current', {
                 headers: {
@@ -128,13 +136,24 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
                 }
               )
 
-              // dispatch(getVisitSetupDefaults(personnelResponse.data.id))
+              const userProgramsResponse = await api.get(
+                `program/personnel/${personnelResponse.data.id}`,
+                {
+                  headers: {
+                    authorization: `Bearer ${accessToken}` as string,
+                    idToken: idToken as string,
+                  },
+                }
+              )
+
+              dispatch(getVisitSetupDefaults(personnelResponse.data.id))
 
               dispatch(
                 saveUserCredentials({
                   ...userCredentialsStore,
                   ...userRes.data,
                   ...personnelResponse.data,
+                  userPrograms: userProgramsResponse.data,
                 })
               )
             } catch (error: any) {

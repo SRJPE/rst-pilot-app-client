@@ -249,7 +249,10 @@ const ReleaseDataEntry = ({
       }
 
       dispatch(saveMarkRecaptureSubmission(markRecaptureSubmission))
-      if (connectivityState.isConnected) {
+      if (
+        connectivityState.isConnected &&
+        connectivityState.isInternetReachable
+      ) {
         console.log('CONNECTED')
         dispatch(postMarkRecaptureSubmissions())
       }
@@ -341,7 +344,9 @@ const ReleaseDataEntry = ({
                           fontWeight='500'
                           fontSize='md'
                         >
-                          {`${markType} - ${markColor} - ${markPosition}`}
+                          {`${markType}${markColor ? `- ${markColor}` : ''} ${
+                            markPosition ? `- ${markPosition}` : ''
+                          }`}
                         </Text>
                       </Button>
                     )

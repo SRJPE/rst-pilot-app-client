@@ -22,11 +22,6 @@ import {
 } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import {
-  addIndividualFishSchema,
-  addIndividualFishSchemaOptionalLifeStage,
-  addIndividualFishSchemaOtherSpecies,
-} from '../../utils/helpers/yupValidations'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import CustomModal from '../../components/Shared/CustomModal'
 import CustomSelect from '../../components/Shared/CustomSelect'
@@ -127,9 +122,9 @@ const AddFishContent = ({
     saveGeneticSampleData({ ...values, UID: fishUID })
   }
 
-  useEffect(() => {
-    setFishUID(uid())
-  }, [])
+  // useEffect(() => {
+  //   setFishUID(uid())
+  // }, [])
 
   const renderForkLengthWarning = (
     forkLengthValue: number,
@@ -402,7 +397,7 @@ const AddFishContent = ({
       plusCountMethod,
     ]
     let hasError = false
-    formValues.every((field) => {
+    formValues.every(field => {
       if (hasError) return false
       if (
         field.required &&
@@ -473,13 +468,11 @@ const AddFishContent = ({
     selectedRecentReleaseMark: ReleaseMarkI
   ) => {
     if (
-      recentExistingMarks.some(
-        (mark) => mark.id === selectedRecentReleaseMark.id
-      )
+      recentExistingMarks.some(mark => mark.id === selectedRecentReleaseMark.id)
     ) {
       setRecentExistingMarks(
         recentExistingMarks.filter(
-          (mark) => mark.id !== selectedRecentReleaseMark.id
+          mark => mark.id !== selectedRecentReleaseMark.id
         )
       )
     } else {
@@ -602,7 +595,7 @@ const AddFishContent = ({
                   </FormControl.Label>
                   <Popover
                     placement='bottom right'
-                    trigger={(triggerProps) => {
+                    trigger={triggerProps => {
                       return (
                         <IconButton
                           {...triggerProps}
@@ -722,7 +715,7 @@ const AddFishContent = ({
                         fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
-                        onChangeText={(value) => {
+                        onChangeText={value => {
                           let payload: FormValueI = {
                             ...forkLength,
                             value,
@@ -776,7 +769,7 @@ const AddFishContent = ({
                         fontSize='16'
                         placeholder='Numeric Value'
                         keyboardType='numeric'
-                        onChangeText={(value) => {
+                        onChangeText={value => {
                           let payload: FormValueI = {
                             ...weight,
                             value,
@@ -816,9 +809,7 @@ const AddFishContent = ({
                           fontSize='16'
                           placeholder='Numeric Value'
                           keyboardType='numeric'
-                          onChangeText={(value) =>
-                            setCount({ ...count, value })
-                          }
+                          onChangeText={value => setCount({ ...count, value })}
                           // TODO - onBlur logic?
                           // onBlur={handleBlur('numFishCaught')}
                           value={`${count.value}`}
@@ -845,7 +836,7 @@ const AddFishContent = ({
 
                           <Popover
                             placement='bottom right'
-                            trigger={(triggerProps) => {
+                            trigger={triggerProps => {
                               return (
                                 <IconButton
                                   {...triggerProps}
@@ -1024,6 +1015,7 @@ const AddFishContent = ({
                         </Radio.Group>
                       </HStack>
                     </FormControl>
+
                     {species.value === 'Chinook salmon' && (
                       <FormControl w='1/3'>
                         <HStack space={4} alignItems='center'>
@@ -1058,7 +1050,7 @@ const AddFishContent = ({
                                 my={1}
                                 _icon={{ color: 'primary' }}
                               >
-                                Yes
+                                True
                               </Radio>
                               <Radio
                                 colorScheme='primary'
@@ -1066,7 +1058,7 @@ const AddFishContent = ({
                                 my={1}
                                 _icon={{ color: 'primary' }}
                               >
-                                No
+                                False
                               </Radio>
                             </HStack>
                           </Radio.Group>
@@ -1087,7 +1079,7 @@ const AddFishContent = ({
                           </FormControl.Label>
                           <Popover
                             placement='top right'
-                            trigger={(triggerProps) => {
+                            trigger={triggerProps => {
                               return (
                                 <IconButton
                                   {...triggerProps}
@@ -1196,7 +1188,11 @@ const AddFishContent = ({
                                       fontWeight='500'
                                       fontSize='md'
                                     >
-                                      {`${markType} - ${markColor} - ${markPosition}`}
+                                      {`${markType}${
+                                        markColor ? `- ${markColor}` : ''
+                                      } ${
+                                        markPosition ? `- ${markPosition}` : ''
+                                      }`}
                                     </Text>
                                   </Button>
                                 )

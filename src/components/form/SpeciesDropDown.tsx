@@ -69,6 +69,7 @@ export default function SpeciesDropDown({
       searchPlaceholder='Search...'
       listMode='SCROLLVIEW'
       maxHeight={180}
+      scrollViewProps={{ keyboardShouldPersistTaps: 'always' }}
       closeAfterSelecting={true}
       style={{
         marginTop: 4,

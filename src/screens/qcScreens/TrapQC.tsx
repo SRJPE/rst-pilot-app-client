@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Box, Button, Center, HStack, Text, View, VStack } from 'native-base'
+import {
+  Box,
+  Button,
+  Center,
+  HStack,
+  Modal,
+  Text,
+  View,
+  VStack,
+} from 'native-base'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import Graph from '../../components/Shared/Graph'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -7,8 +16,11 @@ import CustomModal from '../../components/Shared/CustomModal'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { trapVisitQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import { normalizeDate } from '../../utils/utils'
+import {
+  postQCSubmissions,
+  trapVisitQCSubmission,
+} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { handleQCChartButtonClick, normalizeDate } from '../../utils/utils'
 
 interface GraphDataI {
   Temperature: any[]
@@ -19,16 +31,27 @@ interface GraphDataI {
   Debris: any[]
 }
 
+const allButtons = [
+  'Temperature',
+  'Turbidity',
+  'RPM At Start',
+  'RPM At End',
+  'Counter',
+  'Debris',
+]
+
 function TrapQC({
   navigation,
   route,
   qcTrapVisitSubmissions,
   previousTrapVisits,
+  userCredentialsStore,
 }: {
   navigation: any
   route: any
   qcTrapVisitSubmissions: any[]
   previousTrapVisits: any[]
+  userCredentialsStore: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -51,6 +74,7 @@ function TrapQC({
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
+  const [programName, setProgramName] = useState('' as string)
 
   const axisLabelDictionary = {
     Temperature: { xLabel: 'Date', yLabel: 'Temperature (C)' },
@@ -67,6 +91,13 @@ function TrapQC({
       return trapVisit.createdTrapVisitResponse.programId === programId
     })
 
+    const currentProgram = userCredentialsStore.userPrograms.find(
+      (program: any) => {
+        return program.programId === programId
+      }
+    )
+    setProgramName(currentProgram.programName)
+
     let tempData: any[] = []
     let turbidityData: any[] = []
     let rpmAtStartData: any[] = []
@@ -81,11 +112,15 @@ function TrapQC({
           createdTrapVisitCrewResponse,
           createdTrapVisitEnvironmentalResponse,
           createdTrapVisitResponse,
+          stagedForSubmission,
         } = response || {}
+
+        if (!createdTrapVisitResponse) {
+          return
+        }
 
         const trapVisitId = createdTrapVisitResponse.id
         const qcCompleted = createdTrapVisitResponse.qcCompleted
-        const qcNotStarted = qcCompleted ? false : true
         const createdAt = new Date(createdTrapVisitResponse.createdAt)
         const normalizedDate = normalizeDate(createdAt)
 
@@ -101,7 +136,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(temp.measureValueNumeric),
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             })
           }
 
@@ -116,7 +155,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(turbidity.measureValueNumeric),
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             })
           }
 
@@ -125,7 +168,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(response.createdTrapVisitResponse.rpmAtStart),
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             }
 
             rpmAtStartData.push(rpmAtStart)
@@ -136,7 +183,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: Number(createdTrapVisitResponse.rpmAtEnd),
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             }
             rpmAtEndData.push(rpmAtEnd)
           }
@@ -146,7 +197,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.totalRevolutions,
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             }
             counterData.push(counter)
           }
@@ -156,7 +211,11 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.debrisVolumeGal,
-              colorScale: qcNotStarted ? 'red' : undefined,
+              colorScale: stagedForSubmission
+                ? '#FBA72A'
+                : !qcCompleted
+                ? 'rgb(255, 100, 84)'
+                : undefined,
             }
             debrisData.push(debris)
           }
@@ -191,18 +250,16 @@ function TrapQC({
         marginX={0.5}
         flex={1}
         onPress={() => {
-          let activeButtonsCopy = [...activeButtons]
-          if (activeButtons.includes(buttonName)) {
-            activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
-            setActiveButtons(activeButtonsCopy)
-          } else {
-            activeButtonsCopy.unshift(buttonName)
-            setActiveButtons(activeButtonsCopy)
-          }
+          const newActiveButtons = handleQCChartButtonClick(
+            allButtons,
+            activeButtons,
+            buttonName
+          ) as any
+          setActiveButtons(newActiveButtons)
         }}
       >
         <Text
-          fontSize='sm'
+          fontSize={13}
           color={activeButtons.includes(buttonName) ? 'secondary' : 'primary'}
           fontWeight={'bold'}
         >
@@ -218,6 +275,7 @@ function TrapQC({
   }
 
   const handlePointClicked = (datum: any) => {
+    console.log('point clicked: ', datum)
     setPointClicked(datum)
     setIsModalOpen(true)
   }
@@ -225,7 +283,13 @@ function TrapQC({
   const handleModalSubmit = (submission: any) => {
     if (pointClicked) {
       const trapVisitId = submission['Temperature']['id']
-      dispatch(trapVisitQCSubmission({ trapVisitId, submission }))
+      dispatch(
+        trapVisitQCSubmission({
+          trapVisitId,
+          userId: userCredentialsStore.id,
+          submission,
+        })
+      )
     }
   }
 
@@ -246,7 +310,9 @@ function TrapQC({
             closeModal={() => navigation.goBack()}
           />
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
-            Edit values by selecting a point on a plot below.
+            Edit values by selecting a point on a plot below. Red points
+            indicate records that have not been QC'd, while the gray points
+            indicate records that have been QC'd and approved.
           </Text>
 
           <HStack w={'full'} justifyContent='space-evenly' mb={'10'}>
@@ -303,11 +369,11 @@ function TrapQC({
               shadow='5'
               bg='primary'
               onPress={() => {
-                console.log('approve')
+                dispatch(postQCSubmissions())
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Approve
+                Save
               </Text>
             </Button>
           </HStack>
@@ -325,6 +391,7 @@ function TrapQC({
             onSubmit={(submission: any) => handleModalSubmit(submission)}
             headerText={'Table of Selected Points'}
             modalData={graphData}
+            programName={programName}
           />
         </CustomModal>
       ) : (
@@ -340,6 +407,7 @@ const mapStateToProps = (state: RootState) => {
       state.trapVisitFormPostBundler.qcTrapVisitSubmissions,
     previousTrapVisits:
       state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
+    userCredentialsStore: state.userCredentials,
   }
 }
 

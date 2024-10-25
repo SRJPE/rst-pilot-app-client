@@ -22,6 +22,7 @@ const NavButtons = ({
   fishProcessingSlice,
   reduxState,
   shouldProceedToLoadingScreen = false,
+  isValid,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -35,6 +36,7 @@ const NavButtons = ({
   fishProcessingSlice: any
   reduxState: RootState
   shouldProceedToLoadingScreen?: boolean
+  isValid?: boolean
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -71,7 +73,7 @@ const NavButtons = ({
   const checkWillBeHoldingFishForMarkRecapture = () => {
     if (tabSlice.activeTabId) {
       const tabsContainHoldingTrue = Object.keys(tabSlice.tabs).some(
-        (tabId) =>
+        tabId =>
           fishProcessingSlice?.[tabId]?.values
             ?.willBeHoldingFishForMarkRecapture
       )
@@ -157,13 +159,13 @@ const NavButtons = ({
         navigateHelper('Start Mark Recapture')
         break
       case 'High Flows':
-        navigateHelper('End Trapping')
+        navigateHelper('Start Mark Recapture')
         break
       case 'High Temperatures':
         navigateHelper('Fish Processing')
         break
       case 'No Fish Caught':
-        navigateHelper('Trap Post-Processing')
+        navigateHelper('Start Mark Recapture')
         break
       case 'Paper Entry':
         navigateHelper('Trap Operations')
@@ -178,6 +180,7 @@ const NavButtons = ({
   }
 
   const navigateFlowLeftButton = () => {
+    console.log('activePage', activePage)
     switch (activePage) {
       case 'Trap Operations':
         // if (isPaperEntryStore) navigateHelper('Paper Entry')
@@ -208,7 +211,17 @@ const NavButtons = ({
         navigateHelper('Trap Operations')
         break
       case 'Trap Post-Processing':
-        navigateHelper('Fish Input')
+        if (values?.fishProcessedResult === 'no fish caught') {
+          navigateHelper('Fish Processing')
+        } else if (
+          values?.fishProcessedResult ===
+            'no catch data, fish left in live box' ||
+          values?.fishProcessedResult === 'no catch data, fish released'
+        ) {
+          navigateHelper('Fish Processing')
+        } else {
+          navigateHelper('Fish Input')
+        }
         break
       case 'Fish Holding':
         navigateHelper('Trap Post-Processing')
@@ -249,8 +262,12 @@ const NavButtons = ({
       return
     }
 
-    // if function truthy, submit form to save to redux
+    if (activePage === 'No Fish Caught') {
+      navigateFlowLeftButton()
+      return
+    }
     if (handleSubmit) {
+      // if function truthy, submit form to save to redux
       //do not submit when going back from incomplete sections page (prevents early submission errors)
       if (activePage !== 'Incomplete Sections') {
         handleSubmit('left')
@@ -271,13 +288,13 @@ const NavButtons = ({
     let buttonText
     switch (activePage) {
       case 'High Flows':
-        buttonText = 'End Trapping'
+        buttonText = 'End Trap Visit'
         break
       case 'Non Functional Trap':
-        buttonText = 'End Trapping'
+        buttonText = 'End Trap Visit'
         break
       case 'No Fish Caught':
-        buttonText = 'End Trapping'
+        buttonText = 'End Trap Visit'
         break
       case 'Started Trapping':
         buttonText = 'Home'
@@ -299,21 +316,24 @@ const NavButtons = ({
     if (activePage === 'Incomplete Sections') {
       // if form is complete, then do not disable button
       return !isFormComplete
-    } else if (
-      activePage === 'High Flows' ||
-      activePage === 'Non Functional Trap' ||
-      activePage === 'No Fish Caught'
-    ) {
+    } else if (activePage === 'Non Functional Trap') {
       return true
     } else if (activePage === 'Fish Input') {
       return !(values?.length >= 1)
+    } else if (isValid) {
+      return !isValid
     } else {
       return (
         (touched && Object.keys(touched).length === 0) ||
         (errors && Object.keys(errors).length > 0)
       )
     }
-  }, [useDeepCompareMemoize(touched), useDeepCompareMemoize(errors)])
+  }, [
+    useDeepCompareMemoize(touched),
+    useDeepCompareMemoize(errors),
+    isValid,
+    activePage,
+  ])
 
   return (
     <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>

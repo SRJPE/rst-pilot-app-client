@@ -1,12 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import {
   fetchPreviousTrapAndCatch,
+  postQCSubmissions,
   postTrapVisitFormSubmissions,
 } from './postSlices/trapVisitFormPostBundler'
-import { postMarkRecaptureSubmissions } from './postSlices/markRecapturePostBundler'
+import {
+  postMarkRecaptureSubmissions,
+  fetchExistingMarks,
+} from './postSlices/markRecapturePostBundler'
 import { postMonitoringProgramSubmissions } from './postSlices/monitoringProgramPostBundler'
 
-interface InitialStateI {
+export interface InitialStateI {
   type: string
   isConnected: boolean
   isInternetReachable: boolean
@@ -47,10 +51,12 @@ export const connectionChanged = createAsyncThunk(
     console.log('connection changed...', connectionState)
     try {
       if (connectionState.isConnected && connectionState.isInternetReachable) {
-        thunkAPI.dispatch(fetchPreviousTrapAndCatch())
         thunkAPI.dispatch(postTrapVisitFormSubmissions())
+        thunkAPI.dispatch(postQCSubmissions())
         thunkAPI.dispatch(postMarkRecaptureSubmissions())
         thunkAPI.dispatch(postMonitoringProgramSubmissions())
+        thunkAPI.dispatch(fetchPreviousTrapAndCatch())
+        thunkAPI.dispatch(fetchExistingMarks())
       }
       return payload
     } catch (e) {

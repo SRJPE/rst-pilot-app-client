@@ -1,5 +1,6 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
+import { sortBy } from 'lodash'
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   //returns an alphabetically sorted copy of the original array
@@ -79,7 +80,7 @@ export const buttonLookup: any = {
     additionalButtons: 29,
     lifeStage: 'Silvery Parr',
   },
-  '90-105': { firstButton: 90, additionalButtons: 15, lifeStage: 'Smolt' },
+  '90-120': { firstButton: 90, additionalButtons: 30, lifeStage: 'Smolt' },
 }
 
 export const calculateLifeStage = (forkLength: number) => {
@@ -383,9 +384,9 @@ export const navigateFlowRightButton = (
 export const navigateFlowLeftButton = (
   activePage: string,
   holdingForMarkRecap: boolean,
-  navigation: any
+  navigation: any,
+  values?: any
 ) => {
-  console.log('left', activePage)
   switch (activePage) {
     case 'Trap Operations':
       // if (isPaperEntryStore) navigateHelper('Paper Entry')
@@ -407,6 +408,18 @@ export const navigateFlowLeftButton = (
     case 'Started Trapping':
       return 'Trap Operations'
     case 'Trap Post-Processing':
+      if (values?.fishProcessedResult === 'no fish caught') {
+        return 'Fish Processing'
+      } else if (
+        values?.fishProcessedResult ===
+          'no catch data, fish left in live box' ||
+        values?.fishProcessedResult === 'no catch data, fish released'
+      ) {
+        return 'Fish Processing'
+      } else {
+        return 'Fish Input'
+      }
+      break
       return 'Fish Input'
     case 'Fish Holding':
       return 'Trap Post-Processing'
@@ -441,7 +454,7 @@ export const getRandomColor = () => {
 }
 
 export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
-  if (!sentence) return sentence // Check if the sentence is not empty
+  if (sentence === null || typeof sentence !== 'string') return `${sentence}` // Check if the sentence is not empty
   return sentence
     .split(' ') // Split the sentence into words
     .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
@@ -449,6 +462,7 @@ export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
 }
 
 export const truncateAndTrimString = (str: string, length: number) => {
+  if (!(str.length > 10)) return str
   return str.length > length ? str.substring(0, length).trim() : str
 }
 
@@ -460,3 +474,64 @@ export const normalizeDate = (date: Date) => {
 
   return date.getTime()
 }
+
+export const groupArrayItems = (array: any, size: number) => {
+  const groupedItems = []
+  for (let i = 0; i < array.length; i += size) {
+    groupedItems.push(array.slice(i, i + size))
+  }
+  return groupedItems
+}
+export const handleQCChartButtonClick = (
+  allButtons: Array<string>,
+  activeButtons: Array<string>,
+  buttonName: string
+) => {
+  let activeButtonsCopy = [...activeButtons]
+  if (activeButtons.includes(buttonName)) {
+    activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
+  } else {
+    activeButtonsCopy.push(buttonName)
+    activeButtonsCopy = sortBy(activeButtonsCopy, button => {
+      return allButtons.indexOf(button)
+    })
+  }
+  return activeButtonsCopy
+}
+
+export const combinePlusCounts = (arr: Array<any>) => {
+  const map = new Map()
+  const result = [] as Array<any>
+
+  arr.forEach(item => {
+    if (item.plusCount) {
+      const key = `${item.taxonCode}_${item.lifeStage}_${item.captureRunClass}`
+      if (!map.has(key)) {
+        map.set(key, {
+          ...item,
+          numFishCaught: Number(item.numFishCaught),
+        })
+      } else {
+        const existing = map.get(key)
+        existing.numFishCaught += Number(item.numFishCaught)
+      }
+    } else {
+      result.push({ ...item, numFishCaught: Number(item.numFishCaught) })
+    }
+  })
+
+  return [...result, ...Array.from(map.values())]
+}
+
+export const legendColorList = [
+  '#007C7C',
+  '#F9A38C',
+  '#D1E8F0',
+  '#011936',
+  '#564e58',
+  '#846075',
+  '#2b3a67',
+  '#772E25',
+  '#FBA72A',
+  '#C0CAAD',
+]

@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../../api/axiosConfig'
 import { RootState } from '../../store'
-import { cloneDeep } from 'lodash'
 
 interface InitialStateI {
   submissionStatus:
@@ -9,9 +8,12 @@ interface InitialStateI {
     | 'submitting...'
     | 'submission-failed'
     | 'submission-successful'
+    | 'fetch-successful'
+    | 'fetch-failed'
   markRecaptureSubmissions: MarkRecaptureSubmissionI[]
   previousMarkRecaptureSubmissions: MarkRecaptureSubmissionI[]
   previousMarkRecaptureReleaseMarksSubmissions: MarkRecaptureSubmissionI[]
+  allUserExistingMarks: any[]
 }
 
 interface MarkRecaptureSubmissionI {
@@ -41,6 +43,7 @@ const initialState: InitialStateI = {
   markRecaptureSubmissions: [],
   previousMarkRecaptureSubmissions: [],
   previousMarkRecaptureReleaseMarksSubmissions: [],
+  allUserExistingMarks: [],
 }
 
 export const postMarkRecaptureSubmissions = createAsyncThunk(
@@ -120,6 +123,37 @@ export const postMarkRecaptureSubmissions = createAsyncThunk(
   }
 )
 
+export const fetchExistingMarks = createAsyncThunk(
+  'markRecapturePostBundler/fetchExistingMarks',
+  async (_, thunkAPI) => {
+    const allUserExistingMarks: any[] = []
+    try {
+      const state = thunkAPI.getState() as RootState
+      const userPrograms = state.visitSetupDefaults.programs
+      await Promise.all(
+        userPrograms.map(async program => {
+          const existingMarkResponse = await api.get(
+            `existing-marks/program/${program.programId}`
+          )
+
+          let existingMarks = existingMarkResponse.data
+          console.log('existingMarks', existingMarks)
+
+          allUserExistingMarks.push(...existingMarks)
+        })
+      )
+
+      return {
+        allUserExistingMarks,
+      }
+    } catch (err) {
+      thunkAPI.rejectWithValue({
+        allUserExistingMarks: [],
+      })
+    }
+  }
+)
+
 export const markRecapturePostBundler = createSlice({
   name: 'markRecapturePostBundler',
   initialState: initialState,
@@ -166,6 +200,21 @@ export const markRecapturePostBundler = createSlice({
     [postMarkRecaptureSubmissions.rejected.type]: (state, action) => {
       console.log('rejected mark Recap post processing: ', action.payload)
       state.submissionStatus = 'submission-failed'
+    },
+    [fetchExistingMarks.rejected.type]: (state, action) => {
+      console.log('rejected fetch existing marks: ', action.payload)
+      state.submissionStatus = 'fetch-failed'
+    },
+    [fetchExistingMarks.fulfilled.type]: (state, action) => {
+      console.log('successful fetch existing marks: ', action.payload)
+      if (action.payload) {
+        try {
+          state.allUserExistingMarks = action.payload.allUserExistingMarks
+          state.submissionStatus = 'fetch-successful'
+        } catch (error) {
+          console.log('eror in fullfilled', error)
+        }
+      }
     },
   },
 })

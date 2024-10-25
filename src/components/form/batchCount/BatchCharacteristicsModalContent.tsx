@@ -151,7 +151,7 @@ const BatchCharacteristicsModalContent = ({
       <Formik
         validationSchema={batchCharacteristicsSchema}
         initialValues={batchCountStore.batchCharacteristics}
-        onSubmit={(values) => handleFormSubmit(values)}
+        onSubmit={values => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -271,7 +271,7 @@ const BatchCharacteristicsModalContent = ({
                         my={1}
                         _icon={{ color: 'primary' }}
                       >
-                        Yes
+                        True
                       </Radio>
                       <Radio
                         colorScheme='primary'
@@ -279,7 +279,7 @@ const BatchCharacteristicsModalContent = ({
                         my={1}
                         _icon={{ color: 'primary' }}
                       >
-                        No
+                        False
                       </Radio>
                     </Radio.Group>
                   </FormControl>
@@ -328,7 +328,9 @@ const BatchCharacteristicsModalContent = ({
                                 fontWeight='500'
                                 fontSize='md'
                               >
-                                {`${markType} - ${markColor} - ${markPosition}`}
+                                {`${markType}${
+                                  markColor ? `- ${markColor}` : ''
+                                } ${markPosition ? `- ${markPosition}` : ''}`}
                               </Text>
                             </Button>
                           )

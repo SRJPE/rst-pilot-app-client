@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { View, Text, VStack } from 'native-base'
+import { View, Text, VStack, ScrollView } from 'native-base'
 import React from 'react'
 import {
   VictoryAxis,
@@ -35,6 +35,7 @@ export default function Graph({
   timeBased,
   zoomDomain,
   legendData,
+  legendItemsPerRow,
 }: {
   chartType: 'bar' | 'line' | 'true-or-false' | 'scatterplot' | 'linewithplot'
   title?: string
@@ -52,7 +53,10 @@ export default function Graph({
   timeBased?: boolean
   zoomDomain?: ZoomDomainI
   legendData?: any[]
+  legendItemsPerRow?: number
 }) {
+  const dotSize = 5
+
   const handlePointClick = (datum: any) => {
     if (onPointClick) {
       onPointClick(datum)
@@ -217,7 +221,7 @@ export default function Graph({
             data={data}
             x='x'
             y='y'
-            size={10}
+            size={dotSize}
             style={{
               data: {
                 fill: (props: any) => {
@@ -266,7 +270,7 @@ export default function Graph({
             data={data}
             x={({ x }) => x} // Add jitter to Y-axis value
             y={({ y }) => addJitter(y, 0.2)} // Add jitter to Y-axis value
-            size={7}
+            size={dotSize}
             style={{
               data: {
                 fill: (props: any) => {
@@ -404,6 +408,9 @@ export default function Graph({
           }
           fixLabelOverlap={true}
           tickFormat={(value) => {
+            if (data.length === 0) {
+              return ''
+            }
             let date = new Date(Number(value))
             if (String(date) !== 'Invalid Date' && showDates) {
               return `${moment(date).format('MMM Do YY')}`
@@ -428,14 +435,19 @@ export default function Graph({
           // label='Number of fish with mark'
           // fixLabelOverlap={true}
           tickFormat={(value) => {
+            if (data.length === 0) {
+              return ''
+            }
             if (chartType === 'true-or-false') {
               if (value === 1) {
-                return 'false'
+                return 'False'
               } else if (value === 2) {
-                return 'true'
+                return 'True'
               } else {
                 return ''
               }
+            } else if (chartType === 'linewithplot' && yLabel === 'Density') {
+              return ''
             } else {
               return `${value}`
             }
@@ -445,6 +457,7 @@ export default function Graph({
         {chartType === 'bar' ? (
           <VictoryScatter
             data={data}
+            size={dotSize}
             style={{
               data: {
                 fill: (props: any) => {
@@ -491,9 +504,10 @@ export default function Graph({
         ) : (
           <></>
         )}
-        {(chartType === 'linewithplot' && subData) ? (
+        {chartType === 'linewithplot' && subData ? (
           <VictoryScatter
             data={subData}
+            size={dotSize}
             style={{
               data: {
                 fill: (props: any) => {
@@ -541,32 +555,24 @@ export default function Graph({
           <></>
         )}
       </VictoryChart>
-      {chartType === 'scatterplot' && legendData ? (
-        <View width={10} height={225}>
-          <VictoryLegend
-            x={55}
-            y={20}
-            // width={300}
-            standalone={true}
-            itemsPerRow={5}
-            title='Legend'
-            centerTitle
-            gutter={20}
-            style={{
-              border: { stroke: 'black' },
-              title: { fontSize: 20 },
-            }}
-            data={
-              legendData
-                ? legendData
-                : [
-                    { name: 'One', symbol: { type: 'star' } },
-                    { name: 'Two', symbol: { fill: 'orange' } },
-                    { name: 'Three', symbol: { fill: 'gold' } },
-                  ]
-            }
-          />
-        </View>
+      {legendData 
+      && legendData.length
+       ? (
+        <VictoryLegend
+          orientation='horizontal'
+          x={85}
+          y={20}
+          itemsPerRow={legendItemsPerRow ? legendItemsPerRow : 5}
+          title='Legend'
+          centerTitle
+          gutter={20}
+          style={{
+            parent: { justifyContent: 'center', alignItems: 'center', marginRight: -220 },
+            border: { stroke: 'black' },
+            title: { fontSize: 20 },
+          }}
+          data={legendData}
+        />
       ) : (
         <></>
       )}

@@ -56,7 +56,7 @@ const CustomModalHeader = ({
                 }
               }}
             >
-              <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
+              <Icon as={Ionicons} name={'close'} size='3xl' color='black' />
             </Button>
             <Heading style={headerStyle} fontSize={headerFontSize}>
               {headerText}

@@ -211,7 +211,7 @@ const FishInput = ({
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>
-                Input Fish Measurements
+                Input Fish
               </Text>
             </Button>
             <Button
@@ -225,7 +225,7 @@ const FishInput = ({
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>
-                Input Batch Count
+                Batch Count
               </Text>
             </Button>
 
