@@ -26,7 +26,7 @@ Please ensure these software are installed on your computer:
 
 ## Environment Variables
 
-To run this project, you will need to add the create an .env file and then add the following environment variables to your .env file
+To run this project, you will need to add the create an .env file and then add the following environment variables to your `.env` file
 
 These values pertain to the PostgreSQL database you are attempting to connect to, either the local database instance or the cloud hosted database. See the [RST Database Repo](https://github.com/SRJPE/rst-database) for details on these values.
 
