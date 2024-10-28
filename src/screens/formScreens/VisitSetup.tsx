@@ -118,7 +118,7 @@ const VisitSetup = ({
     if (!tabId) {
       // if trapName, iterate through all trap names and create tabs
       if (values.trapName) {
-        values.trapName.forEach((trapName: string) => {
+        values?.trapName?.forEach((trapName: string) => {
           const newTabId = uid()
           dispatch(
             saveVisitSetup({
@@ -187,7 +187,7 @@ const VisitSetup = ({
           })
         }
 
-        values.trapName.forEach((trapName: string) => {
+        values?.trapName?.forEach((trapName: string) => {
           if (currentTabsTrapNames.includes(trapName)) {
             const tabIds = Object.keys(tabSlice.tabs)
             const tabIdToUpdate = tabIds.filter(id => {
