@@ -19,10 +19,14 @@ Please ensure these software are installed on your computer:
 - Node.js
 - Xcode for running the iOS Simulator (If you are developing from a Windows or a Linux machine, you will need a physical iOS device for testing)
   - View this page for assistance: https://docs.expo.dev/workflow/ios-simulator/
+ 
+## Install Source Code
+
+- Using your method of choice, install the source code (`git clone`, GitHub Desktop, zip file, etc)
 
 ## Environment Variables
 
-To run this project, you will need to add the following environment variables to your .env file
+To run this project, you will need to add the create an .env file and then add the following environment variables to your `.env` file
 
 These values pertain to the PostgreSQL database you are attempting to connect to, either the local database instance or the cloud hosted database. See the [RST Database Repo](https://github.com/SRJPE/rst-database) for details on these values.
 
@@ -43,7 +47,7 @@ Current Azure B2C Configuration Environmental Variables:
 ### Local Development using Expo Go and iOS Simulator
 
 - Run `npm install` to install all package dependencies. If that fails, attempt running `npm install --legacy-peer-deps`
-- Run `npm start` to initiate the development client
+- Run `npm run reset-cache` to initiate the development client
 - In the terminal, ensure the client is set to using Expo Go
   ![Terminal Screenshot](https://rstmarkdownimages.blob.core.windows.net/markdown-images/Screenshot%202024-07-03%20at%209.08.16%20AM.png)
 
