@@ -266,6 +266,10 @@ const NavButtons = ({
       navigateFlowLeftButton()
       return
     }
+    if (activePage === 'High Flows') {
+      navigateFlowLeftButton()
+      return
+    }
     if (handleSubmit) {
       // if function truthy, submit form to save to redux
       //do not submit when going back from incomplete sections page (prevents early submission errors)

@@ -184,7 +184,7 @@ const HighFlows = ({
         rpm1: startRpm1,
         rpm2: startRpm2,
         rpm3: startRpm3,
-      } = trapOperationsState[id].values
+      } = trapOperationsState?.[id]?.values || {}
 
       const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
 
@@ -198,7 +198,7 @@ const HighFlows = ({
         trapLocationId: visitSetupState[id].values.trapLocationId,
         isPaperEntry: visitSetupState[id].isPaperEntry,
         trapVisitTimeStart: null,
-        trapVisitTimeEnd: trapOperationsState[id].values.trapVisitStopTime,
+        trapVisitTimeEnd: trapOperationsState?.[id]?.values?.trapVisitStopTime,
         fishProcessed: returnNullableTableId(
           fishProcessedValues.indexOf('not recorded')
         ),
@@ -206,18 +206,18 @@ const HighFlows = ({
           whyFishNotProcessedValues.indexOf('not recorded')
         ),
         sampleGearId: null,
-        coneDepth: trapOperationsState[id].values.coneDepth
-          ? parseInt(trapOperationsState[id].values.coneDepth)
+        coneDepth: trapOperationsState?.[id]?.values?.coneDepth
+          ? parseInt(trapOperationsState?.[id]?.values?.coneDepth)
           : null,
         trapInThalweg: null,
         trapFunctioning: returnNullableTableId(
           trapFunctioningValues.indexOf(
-            trapOperationsState[id].values.trapStatus
+            trapOperationsState?.[id]?.values?.trapStatus
           )
         ),
         whyTrapNotFunctioning: returnNullableTableId(
           whyTrapNotFunctioningValues.indexOf(
-            trapOperationsState[id].values.reasonNotFunc
+            trapOperationsState?.[id]?.values?.reasonNotFunc
           )
         ),
         trapStatusAtEnd: returnNullableTableId(
@@ -229,28 +229,29 @@ const HighFlows = ({
         trapVisitEnvironmental: [
           {
             measureName: 'flow measure',
-            measureValueNumeric: trapOperationsState[id].values.flowMeasure,
+            measureValueNumeric: trapOperationsState?.[id]?.values?.flowMeasure,
             measureValueText:
-              trapOperationsState[id].values.flowMeasure?.toString(),
+              trapOperationsState?.[id]?.values?.flowMeasure?.toString(),
             measureUnit: 5,
           },
           {
             measureName: 'water temperature',
             measureValueNumeric:
-              trapOperationsState[id].values.waterTemperature,
+              trapOperationsState?.[id]?.values?.waterTemperature,
             measureValueText:
-              trapOperationsState[id].values.waterTemperature?.toString(),
+              trapOperationsState?.[id]?.values?.waterTemperature?.toString(),
             measureUnit:
-              trapOperationsState[id].values.waterTemperatureUnit === '°F'
+              trapOperationsState?.[id]?.values?.waterTemperatureUnit === '°F'
                 ? 1
                 : 2,
           },
           {
             measureName: 'water turbidity',
             measureValueNumeric:
-              trapOperationsState[id].values.waterTurbidity || null,
+              trapOperationsState?.[id]?.values?.waterTurbidity || null,
             measureValueText:
-              trapOperationsState[id].values?.waterTurbidity?.toString() || '',
+              trapOperationsState?.[id]?.values?.waterTurbidity?.toString() ||
+              '',
             measureUnit: 25,
           },
         ],
@@ -261,7 +262,9 @@ const HighFlows = ({
           projection: null,
         },
         inHalfConeConfiguration:
-          trapOperationsState[id].values.coneSetting === 'half' ? true : false,
+          trapOperationsState?.[id]?.values?.coneSetting === 'half'
+            ? true
+            : false,
         debrisVolumeGal: trapPostProcessingState?.[id]?.values?.debrisVolume
           ? parseInt(trapPostProcessingState?.[id]?.values?.debrisVolume)
           : null,
