@@ -45,6 +45,7 @@ import OptimizedInput from '../../components/Shared/OptimizedInput'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -214,6 +215,7 @@ const TrapOperations = ({
 
       if (stepCompletedCheck)
         dispatch(markStepCompleted({ propName: 'trapOperations' }))
+      showSlideAlert(dispatch)
       console.log('🚀 ~ handleSubmit ~ Status', values)
     }
   }

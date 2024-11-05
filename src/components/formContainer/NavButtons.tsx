@@ -243,7 +243,6 @@ const NavButtons = ({
     //if handleSubmit truthy, submit form to save to redux
     if (handleSubmit) {
       handleSubmit('right')
-      showSlideAlert(dispatch)
     }
 
     if (!shouldProceedToLoadingScreen) {

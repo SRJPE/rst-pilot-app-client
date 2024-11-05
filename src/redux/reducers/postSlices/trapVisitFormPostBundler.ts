@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../../api/axiosConfig'
 import { RootState } from '../../store'
-import { cloneDeep } from 'lodash'
 import { getSubstring } from '../../../utils/utils'
 import { PURGE } from 'redux-persist'
 import { showSlideAlert } from '../slideAlertSlice'
@@ -180,6 +179,12 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       }
     } catch (err) {
       console.log('error in fetchWithPostParams: ', err)
+      showSlideAlert(
+        thunkAPI.dispatch,
+        'Connection issue during trap visit submission',
+        'error',
+        5000
+      )
     } finally {
       if (payload.catchRawResponse.length || payload.trapVisitResponse.length) {
         await fetchWithPostParams(thunkAPI.dispatch, payload)
@@ -268,6 +273,12 @@ export const postQCSubmissions = createAsyncThunk(
       }
     } catch (err) {
       console.log('error in postQCSubmissions: ', err)
+      showSlideAlert(
+        thunkAPI.dispatch,
+        'Connection issue during QC submission',
+        'error',
+        5000
+      )
     }
   }
 )
@@ -332,6 +343,12 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
       }
     } catch (err) {
       console.log('errr', err)
+      showSlideAlert(
+        thunkAPI.dispatch,
+        'Error retrieving trap visits and catch raw data',
+        'error',
+        5000
+      )
       thunkAPI.rejectWithValue({
         previousTrapVisits: [],
         previousCatchRaw: [],

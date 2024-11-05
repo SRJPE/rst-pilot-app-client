@@ -89,7 +89,7 @@ const BatchCount = ({
     if (tabId) {
       dispatch(saveBatchCount({ ...batchCountStore }))
       dispatch(resetBatchCountSlice())
-      showSlideAlert(dispatch, 'Batch Count')
+      showSlideAlert(dispatch, 'Batch Count Saved')
       // @ts-ignore
       navigation.navigate('Trap Visit Form', {
         screen: 'Fish Input',
@@ -100,7 +100,7 @@ const BatchCount = ({
     dispatch(saveBatchCount({ ...batchCountStore }))
     dispatch(resetBatchCountSlice())
 
-    showSlideAlert(dispatch, 'Batch Count')
+    showSlideAlert(dispatch, 'Batch Count Saved')
     setBatchCharacteristicsModalOpen(true)
   }
 

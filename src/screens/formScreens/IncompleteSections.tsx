@@ -37,6 +37,7 @@ import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlic
 import { DeviceEventEmitter } from 'react-native'
 import { combinePlusCounts, navigateHelper } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -141,8 +142,20 @@ const IncompleteSections = ({
         connectivityState.isInternetReachable
       ) {
         dispatch(postTrapVisitFormSubmissions())
+        showSlideAlert(
+          dispatch,
+          'Trap visit submitted successfully',
+          'success',
+          5000
+        )
       } else {
         console.log('Connection issue during submission')
+        showSlideAlert(
+          dispatch,
+          'Connection issue during trap visit submission',
+          'error',
+          5000
+        )
       }
     } catch (error) {
       console.log('submit error: ', error)

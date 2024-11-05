@@ -24,6 +24,7 @@ import { resetTabsSlice } from '../../../redux/reducers/formSlices/tabSlice'
 import { flatten, uniq } from 'lodash'
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
+import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -87,6 +88,12 @@ const HighFlows = ({
         dispatch(postTrapVisitFormSubmissions())
       } else {
         console.log('Connection issue during submission')
+        showSlideAlert(
+          dispatch,
+          'Connection issue during trap visit submission',
+          'error',
+          5000
+        )
       }
     } catch (error) {
       console.log('submit error: ', error)

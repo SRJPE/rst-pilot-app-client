@@ -42,6 +42,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { StackActions } from '@react-navigation/native'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = state.tabSlice.activeTabId
@@ -255,6 +256,7 @@ const TrapPostProcessing = ({
           process: () => onSubmit(values, activeTabId),
           callback,
         })
+        showSlideAlert(dispatch)
       }, 1000)
     }
   }

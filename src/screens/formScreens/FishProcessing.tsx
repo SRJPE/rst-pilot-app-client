@@ -31,6 +31,7 @@ import {
   navigateFlowLeftButton,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const mapStateToProps = (state: RootState) => {
   const activeTabId = state.tabSlice.activeTabId
@@ -143,6 +144,7 @@ const FishProcessing = ({
           process: () => onSubmit(values, activeTabId),
           callback,
         })
+        showSlideAlert(dispatch)
       }, 1000)
     }
   }
