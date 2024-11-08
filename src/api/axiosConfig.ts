@@ -136,7 +136,7 @@ api.interceptors.request.use(
       console.log(
         '🚀 ~ file: axiosConfig.ts:135 ~ No network connection, cannot retrieve token'
       )
-      throw new Error('No network connection, cannot retrieve token')
+      throw new Error('No network connection')
     }
   },
   error => {

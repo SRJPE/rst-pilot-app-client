@@ -141,7 +141,6 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
         await trapPromise
           .then(async (response: any) => {
             let trapId = response.data.createdTrapVisitResponse.id
-
             // Save to payload
             payload.trapVisitResponse.push(response.data)
 
@@ -164,11 +163,12 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
               }
             }
           })
+
           .catch((error: any) => {
-            console.log('trap submission error: ', error)
+            showSlideAlert(thunkAPI.dispatch, error.message, 'error', 5000)
             const { response } = error
-            const errorDetail = response.data.detail
-            if (!errorDetail.includes('already exists')) {
+            const errorDetail = response?.data?.detail
+            if (!errorDetail?.includes('already exists')) {
               payload.failedTrapVisitSubmissions.push(
                 trapVisitSubmissions.find(
                   trapSubmission => trapSubmission.trapVisitUid === uuid
@@ -178,13 +178,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           })
       }
     } catch (err) {
-      console.log('error in fetchWithPostParams: ', err)
-      showSlideAlert(
-        thunkAPI.dispatch,
-        'Connection issue during trap visit submission',
-        'error',
-        5000
-      )
+      console.log('error in fetchWithPostParams: BUNDLER', err)
     } finally {
       if (payload.catchRawResponse.length || payload.trapVisitResponse.length) {
         await fetchWithPostParams(thunkAPI.dispatch, payload)
@@ -341,18 +335,21 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
         previousTrapVisits,
         previousCatchRaw,
       }
-    } catch (err) {
-      console.log('errr', err)
-      showSlideAlert(
-        thunkAPI.dispatch,
-        'Error retrieving trap visits and catch raw data',
-        'error',
-        5000
-      )
-      thunkAPI.rejectWithValue({
-        previousTrapVisits: [],
-        previousCatchRaw: [],
-      })
+    } catch (error) {
+      console.log('🚀 ~ file: trapVisitFormPostBundler.ts:349 ~ err:', error)
+      if (error instanceof Error) {
+        const connectionError = error.message.includes('network connection')
+        showSlideAlert(
+          thunkAPI.dispatch,
+          error.message,
+          connectionError ? 'warning' : 'error',
+          5000
+        )
+        thunkAPI.rejectWithValue({
+          previousTrapVisits: [],
+          previousCatchRaw: [],
+        })
+      }
     }
   }
 )
@@ -422,7 +419,10 @@ const fetchWithPostParams = async (dispatch: any, postResults: any) => {
       }
     }
   } catch (error) {
-    console.log('error in fetchWithPostParams: ', error)
+    console.log(
+      '🚀 ~ file: trapVisitFormPostBundler.ts:430 ~ fetchWithPostParams ~ error:',
+      error
+    )
   }
 }
 

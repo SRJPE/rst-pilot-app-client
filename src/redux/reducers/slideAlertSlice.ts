@@ -35,7 +35,7 @@ export const slideAlertSlice = createSlice({
 export const showSlideAlert = (
   dispatch: any,
   slideTitle?: string,
-  slideColor: 'success' | 'error' = 'success',
+  slideColor: 'success' | 'error' | 'warning' = 'success',
   slideDuration: number = 2000
 ) => {
   dispatch(setSlideAlertTitle(slideTitle))

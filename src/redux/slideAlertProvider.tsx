@@ -43,8 +43,12 @@ const SlideAlertProvider = (props: Props) => {
             {slideAlertColor === 'success' && (
               <CheckIcon size='6' color={textColorMap.success} mt='1' />
             )}
-            {slideAlertColor === 'error' && (
-              <WarningIcon size='6' color={textColorMap.error} mt='1' />
+            {slideAlertColor !== 'success' && (
+              <WarningIcon
+                size='6'
+                color={textColorMap[slideAlertColor]}
+                mt='1'
+              />
             )}
             <Text
               fontSize={16}
