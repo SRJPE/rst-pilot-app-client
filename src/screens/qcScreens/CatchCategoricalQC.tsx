@@ -813,8 +813,9 @@ function CatchCategoricalQC({
           />
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
             Edit values by selecting a point on a plot below. Red points
-            indicate records that have not been QC'd, while the gray points
-            indicate records that have been QC'd and approved.
+            indicate records that have not been QC'd, orange points indicate
+            records that have been adjusted but not saved yet, and the gray
+            points indicate records that have been QC'd and approved.
           </Text>
 
           <HStack mb={'10'}>

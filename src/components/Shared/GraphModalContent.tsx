@@ -139,7 +139,9 @@ const GraphModalContent = ({
                     fontWeight={'light'}
                   >
                     Selected Point Date:{' '}
-                    {moment(pointClicked.createdAt).format('MMMM Do, YYYY')}
+                    {moment(pointClicked.pointDateTimestamp).format(
+                      'MMMM Do, YYYY'
+                    )}
                   </Text>
                 </>
               )}

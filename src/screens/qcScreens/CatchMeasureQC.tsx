@@ -127,7 +127,8 @@ function CatchMeasureQC({
             id: catchRawResponse.createdCatchRawResponse.id,
             x: forkValue,
             y: 0,
-            createdAt: catchRawResponse.createdCatchRawResponse?.createdAt,
+            pointDateTimestamp:
+              catchRawResponse.createdCatchRawResponse?.createdAt,
             colorScale: lifeStageDefinition
               ? lifeStageMap[lifeStageDefinition]
               : 'grey',
@@ -196,7 +197,8 @@ function CatchMeasureQC({
             id: catchRawResponse.createdCatchRawResponse.id,
             x: weightValue,
             y: 0,
-            createdAt: catchRawResponse.createdCatchRawResponse?.createdAt,
+            pointDateTimestamp:
+              catchRawResponse.createdCatchRawResponse?.createdAt,
             colorScale: lifeStageDefinition
               ? lifeStageMap[lifeStageDefinition]
               : 'grey',
