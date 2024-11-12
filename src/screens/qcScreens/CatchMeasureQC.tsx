@@ -85,10 +85,12 @@ function CatchMeasureQC({
     let qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
     qcData = qcData.filter(data => {
-      let createdAt = new Date(data.createdCatchRawResponse.createdAt)
+      let trapVisitTimeEnd = new Date(
+        data.createdCatchRawResponse.trapVisitTimeEnd
+      )
       return (
-        createdAt >= selectedDateRange.startDate &&
-        createdAt <= selectedDateRange.endDate
+        trapVisitTimeEnd >= selectedDateRange.startDate &&
+        trapVisitTimeEnd <= selectedDateRange.endDate
       )
     })
 
@@ -128,7 +130,7 @@ function CatchMeasureQC({
             x: forkValue,
             y: 0,
             pointDateTimestamp:
-              catchRawResponse.createdCatchRawResponse?.createdAt,
+              catchRawResponse.createdCatchRawResponse?.trapVisitTimeEnd,
             colorScale: lifeStageDefinition
               ? lifeStageMap[lifeStageDefinition]
               : 'grey',

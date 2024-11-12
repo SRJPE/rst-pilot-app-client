@@ -182,19 +182,22 @@ function CatchCategoricalQC({
         numFishCaught,
         createdAt,
         qcCompleted,
+        trapVisitTimeEnd,
       } = catchResponse.createdCatchRawResponse
       const qcNotStarted = !qcCompleted
 
       const createdExistingMarksResponse =
         catchResponse.createdExistingMarksResponse ?? []
 
-      const date = new Date(createdAt)
+      console.log('trapVisitTimeEnd -', trapVisitTimeEnd)
+
+      const date = new Date(trapVisitTimeEnd)
       date.setHours(0)
       date.setMinutes(0)
       date.setSeconds(0)
       date.setMilliseconds(0)
       const dateTime = date.getTime()
-      const normalizedDate = normalizeDate(new Date(createdAt))
+      const normalizedDate = normalizeDate(new Date(trapVisitTimeEnd))
       // const stagedForSubmission = catchResponse.stagedForSubmission
 
       const marks = [
@@ -918,7 +921,7 @@ function CatchCategoricalQC({
             >
               {`Selected Point${modalData.length > 1 ? `s` : ''} Date: `}
               {moment(
-                modalData?.[0]?.createdCatchRawResponse?.createdAt
+                modalData?.[0]?.createdCatchRawResponse?.trapVisitTimeEnd
               ).format('MMMM Do, YYYY')}
             </Text>
             <VStack alignItems={'center'}>
