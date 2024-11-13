@@ -3,7 +3,7 @@ import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { assign, pick, cloneDeep } from 'lodash'
-import { Row, IconButton, Icon, Box } from 'native-base'
+import { Row, IconButton, Icon, Box, Text } from 'native-base'
 import { FishStoreI } from '../../redux/reducers/formSlices/fishInputSlice'
 import { Entypo } from '@expo/vector-icons'
 
@@ -74,7 +74,7 @@ const FishInputDataTable = ({
       page * numberOfItemsPerPage + numberOfItemsPerPage
     )
     const pageRowsSliced: any = {}
-    pageRowsIndexes.forEach((idx) => {
+    pageRowsIndexes.forEach(idx => {
       pageRowsSliced[Number(idx)] = fishStore[Number(idx)]
     })
 
@@ -87,7 +87,16 @@ const FishInputDataTable = ({
     if (`${obj[key]}` === 'null') {
       return '---'
     }
+    if (`${obj[key]}` === 'not recorded') {
+      return 'NR'
+    }
     if (`${obj[key]}`) {
+      console.log('isNaN(obj[key])', obj[key], isNaN(obj[key]))
+      if (typeof obj[key] === 'string' || typeof obj[key] === 'boolean') {
+        return `${`${obj[key]}`.charAt(0).toUpperCase()}${`${obj[key]}`.slice(
+          1
+        )}`
+      }
       return `${obj[key]}`
     } else {
       return '---'
@@ -98,7 +107,7 @@ const FishInputDataTable = ({
     let sortedRows: any = {}
 
     const keys = Object.keys(obj)
-    keys.forEach((key) => {
+    keys.forEach(key => {
       let dataObj: any = cloneDeep(obj[Number(key)])
       dataObj.existingMarks = dataObj.existingMarks.length
       delete dataObj.UID
@@ -106,7 +115,7 @@ const FishInputDataTable = ({
       let dataObjPadded = { ...emptyTableData, ...dataObj }
 
       const dataObjKeys = Object.keys(dataObjPadded)
-      dataObjKeys.forEach((dataObjKey) => {
+      dataObjKeys.forEach(dataObjKey => {
         if (dataObjPadded[dataObjKey] === '') {
           dataObjPadded[dataObjKey] = '---'
         }
@@ -131,7 +140,12 @@ const FishInputDataTable = ({
     <DataTable>
       <DataTable.Header>
         {headers.map((header: string, idx: number) => (
-          <DataTable.Title key={`${header}-${idx}`}>{header}</DataTable.Title>
+          <DataTable.Title
+            key={`${header}-${idx}`}
+            style={{ flex: header === 'Species' ? 2 : 1 }}
+          >
+            {header}
+          </DataTable.Title>
         ))}
       </DataTable.Header>
 
@@ -148,7 +162,10 @@ const FishInputDataTable = ({
                 .map((objKey: string | number, itemIdx: number) => {
                   if (objKey !== 'plusCountMethod' && objKey !== 'plusCount') {
                     return (
-                      <DataTable.Cell key={`${objKey}-${itemIdx}`}>
+                      <DataTable.Cell
+                        key={`${objKey}-${itemIdx}`}
+                        style={{ flex: objKey === 'species' ? 2 : 1 }}
+                      >
                         {renderCell(
                           pageRows[rowKey as keyof typeof pageRows],
                           objKey
@@ -193,6 +210,7 @@ const FishInputDataTable = ({
         onPageChange={(page: number) => setPage(page)}
         numberOfItemsPerPage={numberOfItemsPerPage}
       />
+      <Text>NR: Not Recorded</Text>
     </DataTable>
   )
 }
