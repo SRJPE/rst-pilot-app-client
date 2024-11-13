@@ -3,7 +3,7 @@ import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { assign, pick, cloneDeep } from 'lodash'
-import { Row, IconButton, Icon, Box, Text } from 'native-base'
+import { Row, IconButton, Icon, Box, Text, VStack } from 'native-base'
 import { FishStoreI } from '../../redux/reducers/formSlices/fishInputSlice'
 import { Entypo } from '@expo/vector-icons'
 
@@ -210,7 +210,10 @@ const FishInputDataTable = ({
         onPageChange={(page: number) => setPage(page)}
         numberOfItemsPerPage={numberOfItemsPerPage}
       />
-      <Text>NR: Not Recorded</Text>
+      <VStack px='4'>
+        <Text>NR: Not Recorded</Text>
+        <Text>---: Null</Text>
+      </VStack>
     </DataTable>
   )
 }
