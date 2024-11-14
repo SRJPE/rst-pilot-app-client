@@ -602,14 +602,47 @@ export const trapVisitPostBundler = createSlice({
               )
               break
             case 'Mark Type':
-              catchRawToQC.createdCatchRawResponse.markType = submission.value
+              console.log('mark type: ', submission.value)
+              // if (catchRawToQC.createdExistingMarksResponse) {
+              //   catchRawToQC.createdExistingMarksResponse[0].markTypeId =
+              //     submission.value
+              // } else {
+              //   catchRawToQC.createdExistingMarksResponse = [
+              //     {
+              //       markTypeId: submission.value,
+              //       markColorId: null,
+              //       markPositionId: null,
+              //     },
+              //   ]
+              // }
               break
             case 'Mark Color':
-              catchRawToQC.createdCatchRawResponse.markColor = submission.value
+              // if (catchRawToQC.createdExistingMarksResponse) {
+              //   catchRawToQC.createdExistingMarksResponse[0].markColorId =
+              //     submission.value
+              // } else {
+              //   catchRawToQC.createdExistingMarksResponse = [
+              //     {
+              //       markColorId: submission.value,
+              //       markTypeId: null,
+              //       markPositionId: null,
+              //     },
+              //   ]
+              // }
               break
             case 'Mark Position':
-              catchRawToQC.createdCatchRawResponse.markPosition =
-                submission.value
+              // if (catchRawToQC.createdExistingMarksResponse) {
+              //   catchRawToQC.createdExistingMarksResponse[0].markPositionId =
+              //     submission.value
+              // } else {
+              //   catchRawToQC.createdExistingMarksResponse = [
+              //     {
+              //       markPositionId: submission.value,
+              //       markTypeId: null,
+              //       markColorId: null,
+              //     },
+              //   ]
+              // }
               break
             case 'Mortality':
               catchRawToQC.createdCatchRawResponse.dead = submission.value
@@ -675,6 +708,7 @@ export const trapVisitPostBundler = createSlice({
         let qcCatchRaw: any = state.qcCatchRawSubmissions[qcCatchRawIdx]
 
         qcCatchRaw.createdCatchRawResponse.qcCompletedBy = userId
+        console.log('qcCatchRaw1', qcCatchRaw)
 
         for (const submission of submissions) {
           switch (submission.fieldName) {
@@ -692,13 +726,46 @@ export const trapVisitPostBundler = createSlice({
               qcCatchRaw.createdCatchRawResponse.forkLength = submission.value
               break
             case 'Mark Type':
-              qcCatchRaw.createdCatchRawResponse.markType = submission.value
+              // if (qcCatchRaw.createdExistingMarksResponse) {
+              //   qcCatchRaw.createdExistingMarksResponse[0].markTypeId =
+              //     submission.value
+              // } else {
+              //   qcCatchRaw.createdExistingMarksResponse = [
+              //     {
+              //       markTypeId: submission.value,
+              //       markColorId: null,
+              //       markPositionId: null,
+              //     },
+              //   ]
+              // }
               break
             case 'Mark Color':
-              qcCatchRaw.createdCatchRawResponse.markColor = submission.value
+              // if (qcCatchRaw.createdExistingMarksResponse) {
+              //   qcCatchRaw.createdExistingMarksResponse[0].markColorId =
+              //     submission.value
+              // } else {
+              //   qcCatchRaw.createdExistingMarksResponse = [
+              //     {
+              //       markColorId: submission.value,
+              //       markTypeId: null,
+              //       markPositionId: null,
+              //     },
+              //   ]
+              // }
               break
             case 'Mark Position':
-              qcCatchRaw.createdCatchRawResponse.markPosition = submission.value
+              // if (qcCatchRaw.createdExistingMarksResponse) {
+              //   qcCatchRaw.createdExistingMarksResponse[0].markPositionId =
+              //     submission.value
+              // } else {
+              //   qcCatchRaw.createdExistingMarksResponse = [
+              //     {
+              //       markPositionId: submission.value,
+              //       markTypeId: null,
+              //       markColorId: null,
+              //     },
+              //   ]
+              // }
               break
             case 'Mortality':
               qcCatchRaw.createdCatchRawResponse.dead = submission.value
@@ -744,11 +811,15 @@ export const trapVisitPostBundler = createSlice({
           }
         }
 
+        console.log('qcCatchRaw2', qcCatchRaw)
+
         state.qcCatchRawSubmissions = [
           ...state.qcCatchRawSubmissions.slice(0, qcCatchRawIdx),
           ...state.qcCatchRawSubmissions.slice(qcCatchRawIdx + 1),
         ]
         state.qcCatchRawSubmissions.push(qcCatchRaw)
+
+        console.log('end')
       }
     },
     reset: () => {

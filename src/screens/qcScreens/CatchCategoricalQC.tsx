@@ -175,144 +175,200 @@ function CatchCategoricalQC({
     const markCombos = {} as MarkCombosI
 
     qcData.forEach((catchResponse: any, idx: number) => {
-      const {
-        id,
-        adiposeClipped,
-        dead,
-        numFishCaught,
-        createdAt,
-        qcCompleted,
-        trapVisitTimeEnd,
-      } = catchResponse.createdCatchRawResponse
-      const qcNotStarted = !qcCompleted
+      try {
+        const {
+          id,
+          adiposeClipped,
+          dead,
+          numFishCaught,
+          createdAt,
+          qcCompleted,
+          trapVisitTimeEnd,
+        } = catchResponse.createdCatchRawResponse
+        const qcNotStarted = !qcCompleted
 
-      const createdExistingMarksResponse =
-        catchResponse.createdExistingMarksResponse ?? []
+        const createdExistingMarksResponse =
+          catchResponse.createdExistingMarksResponse ?? []
 
-      console.log('trapVisitTimeEnd -', trapVisitTimeEnd)
+        const date = new Date(trapVisitTimeEnd)
+        date.setHours(0)
+        date.setMinutes(0)
+        date.setSeconds(0)
+        date.setMilliseconds(0)
+        const dateTime = date.getTime()
+        const normalizedDate = normalizeDate(new Date(trapVisitTimeEnd))
+        // const stagedForSubmission = catchResponse.stagedForSubmission
 
-      const date = new Date(trapVisitTimeEnd)
-      date.setHours(0)
-      date.setMinutes(0)
-      date.setSeconds(0)
-      date.setMilliseconds(0)
-      const dateTime = date.getTime()
-      const normalizedDate = normalizeDate(new Date(trapVisitTimeEnd))
-      // const stagedForSubmission = catchResponse.stagedForSubmission
+        const marks = [
+          ...createdExistingMarksResponse,
+          // ...createdMarkAppliedResponse,
+        ].filter((mark: any) => {
+          return mark.catchRawId === id
+        })
 
-      const marks = [
-        ...createdExistingMarksResponse,
-        // ...createdMarkAppliedResponse,
-      ].filter((mark: any) => {
-        return mark.catchRawId === id
-      })
+        if (id) {
+          if (adiposeClipped != null) {
+            let adValue = adiposeClipped
 
-      if (id) {
-        if (adiposeClipped != null) {
-          let adValue = adiposeClipped
-          if (typeof adiposeClipped === 'string') {
-            adValue = adiposeClipped === 'true' ? true : false
+            if (typeof adiposeClipped === 'string') {
+              adValue = adiposeClipped === 'true' ? true : false
+            }
+
+            if (adiposeClippedByDate[normalizedDate]) {
+              if (adValue === true) {
+                adiposeClippedByDate[normalizedDate]['true'].push(id)
+                // set TRUE color scale based on qc not started
+                if (qcNotStarted) {
+                  // if not started set to red
+                  adiposeClippedByDate[normalizedDate].trueColorScale = 'red'
+                } else {
+                  // if currently grey, set to grey
+                  // if current red, keep red in case there are both gray and red
+                  // want to show red to show still remaining
+                  adiposeClippedByDate[normalizedDate].trueColorScale =
+                    adiposeClippedByDate[normalizedDate].trueColorScale ===
+                    'grey'
+                      ? 'grey'
+                      : 'red'
+                }
+              } else if (adValue === false) {
+                adiposeClippedByDate[normalizedDate]['false'].push(id)
+                // set FALSE color scale to red bc qc not started
+                if (qcNotStarted) {
+                  // if not started set to red
+                  adiposeClippedByDate[normalizedDate].falseColorScale = 'red'
+                } else {
+                  // if currently grey, set to grey
+                  // if current red, keep red in case there are both gray and red
+                  // want to show red to show still remaining
+                  adiposeClippedByDate[normalizedDate].falseColorScale =
+                    adiposeClippedByDate[normalizedDate].falseColorScale ===
+                    'grey'
+                      ? 'grey'
+                      : 'red'
+                }
+              }
+            } else {
+              if (adValue === true) {
+                // set TRUE color scale based on qc not started
+                adiposeClippedByDate[normalizedDate] = {
+                  true: [id],
+                  false: [],
+                  trueColorScale: qcNotStarted ? 'red' : 'grey',
+                  falseColorScale: 'grey',
+                }
+              } else if (adValue === false) {
+                // set FALSE color scale based on qc not started
+                adiposeClippedByDate[normalizedDate] = {
+                  true: [],
+                  false: [id],
+                  falseColorScale: qcNotStarted ? 'red' : 'grey',
+                  trueColorScale: 'grey',
+                }
+              }
+            }
           }
 
-          if (adiposeClippedByDate[normalizedDate]) {
-            if (adValue === true) {
-              adiposeClippedByDate[normalizedDate]['true'].push(id)
-              if (qcNotStarted)
-                adiposeClippedByDate[normalizedDate].colorScale = 'red'
-            } else if (adValue === false) {
-              adiposeClippedByDate[normalizedDate]['false'].push(id)
-              if (qcNotStarted)
-                adiposeClippedByDate[normalizedDate].colorScale = 'red'
-            }
-          } else {
-            if (adValue === true) {
-              adiposeClippedByDate[normalizedDate] = {
-                true: [id],
-                false: [],
-                colorScale: qcNotStarted ? 'red' : 'grey',
+          if (marks.length) {
+            marks.forEach((mark: any) => {
+              const { markTypeId, markColorId, markPositionId } = mark
+              const markType =
+                markTypeState.filter((obj: any) => {
+                  return obj.id == markTypeId
+                })[0]?.definition ?? 'NA'
+              const markColor =
+                markColorState.filter((obj: any) => {
+                  return obj.id == markColorId
+                })[0]?.definition ?? 'NA'
+              const markPosition =
+                markPositionState.filter((obj: any) => {
+                  return obj.id == markPositionId
+                })[0]?.definition ?? 'NA'
+              const markIdentifier = `${markType}-${markColor}-${markPosition}`
+
+              // if date does not exist,
+              if (!markCombos[dateTime]) {
+                //add to markCombos obj and set property to unique combo and count to 1
+                markCombos[dateTime] = {
+                  [markIdentifier]: [{ catchRawId: id, ...mark }],
+                } as any
+              } else if (markCombos[dateTime]) {
+                // if markIdentifier combo exists, increment
+                if (markCombos[dateTime][markIdentifier]) {
+                  markCombos[dateTime][markIdentifier] = [
+                    ...markCombos[dateTime][markIdentifier],
+                    { catchRawId: id, ...mark },
+                  ]
+                } else {
+                  // else set new markIdentifier count to
+                  markCombos[dateTime][markIdentifier] = [
+                    { catchRawId: id, ...mark },
+                  ]
+                }
               }
-            } else if (adValue === false) {
-              adiposeClippedByDate[normalizedDate] = {
-                true: [],
-                false: [id],
-                colorScale: qcNotStarted ? 'red' : 'grey',
+            })
+          }
+
+          if (dead != null) {
+            let deadValue = dead
+            if (typeof dead === 'string') {
+              deadValue = dead === 'true' ? true : false
+            }
+
+            if (deadDataByDate[normalizedDate]) {
+              if (deadValue === true) {
+                deadDataByDate[normalizedDate]['true'].push(id)
+                if (qcNotStarted) {
+                  // if not started set to red
+                  deadDataByDate[normalizedDate].trueColorScale = 'red'
+                } else {
+                  // if currently grey, set to grey
+                  // if current red, keep red in case there are both gray and red
+                  // want to show red to show still remaining
+                  deadDataByDate[normalizedDate].trueColorScale =
+                    deadDataByDate[normalizedDate].trueColorScale === 'grey'
+                      ? 'grey'
+                      : 'red'
+                }
+              } else if (deadValue === false) {
+                deadDataByDate[normalizedDate]['false'].push(id)
+                if (qcNotStarted) {
+                  // if not started set to red
+                  deadDataByDate[normalizedDate].falseColorScale = 'red'
+                } else {
+                  // if currently grey, set to grey
+                  // if current red, keep red in case there are both gray and red
+                  // want to show red to show still remaining
+                  deadDataByDate[normalizedDate].falseColorScale =
+                    deadDataByDate[normalizedDate].falseColorScale === 'grey'
+                      ? 'grey'
+                      : 'red'
+                }
+              }
+            } else {
+              if (deadValue === true) {
+                deadDataByDate[normalizedDate] = {
+                  true: [id],
+                  false: [],
+                  colorScale: qcNotStarted ? 'red' : 'grey',
+                  trueColorScale: qcNotStarted ? 'red' : 'grey',
+                  falseColorScale: 'grey',
+                }
+              } else if (deadValue === false) {
+                deadDataByDate[normalizedDate] = {
+                  true: [],
+                  false: [id],
+                  colorScale: qcNotStarted ? 'red' : 'grey',
+                  falseColorScale: qcNotStarted ? 'red' : 'grey',
+                  trueColorScale: 'grey',
+                }
               }
             }
           }
         }
-
-        if (marks.length) {
-          marks.forEach((mark: any) => {
-            const { markTypeId, markColorId, markPositionId } = mark
-            const markType =
-              markTypeState.filter((obj: any) => {
-                return obj.id == markTypeId
-              })[0]?.definition ?? 'NA'
-            const markColor =
-              markColorState.filter((obj: any) => {
-                return obj.id == markColorId
-              })[0]?.definition ?? 'NA'
-            const markPosition =
-              markPositionState.filter((obj: any) => {
-                return obj.id == markPositionId
-              })[0]?.definition ?? 'NA'
-            const markIdentifier = `${markType}-${markColor}-${markPosition}`
-
-            // if date does not exist,
-            if (!markCombos[dateTime]) {
-              //add to markCombos obj and set property to unique combo and count to 1
-              markCombos[dateTime] = {
-                [markIdentifier]: [{ catchRawId: id, ...mark }],
-              } as any
-            } else if (markCombos[dateTime]) {
-              // if markIdentifier combo exists, increment
-              if (markCombos[dateTime][markIdentifier]) {
-                markCombos[dateTime][markIdentifier] = [
-                  ...markCombos[dateTime][markIdentifier],
-                  { catchRawId: id, ...mark },
-                ]
-              } else {
-                // else set new markIdentifier count to
-                markCombos[dateTime][markIdentifier] = [
-                  { catchRawId: id, ...mark },
-                ]
-              }
-            }
-          })
-        }
-
-        if (dead != null) {
-          let deadValue = dead
-          if (typeof dead === 'string') {
-            deadValue = dead === 'true' ? true : false
-          }
-
-          if (deadDataByDate[normalizedDate]) {
-            if (deadValue === true) {
-              deadDataByDate[normalizedDate]['true'].push(id)
-              if (qcNotStarted)
-                deadDataByDate[normalizedDate].colorScale = 'red'
-            } else if (deadValue === false) {
-              deadDataByDate[normalizedDate]['false'].push(id)
-              if (qcNotStarted)
-                deadDataByDate[normalizedDate].colorScale = 'red'
-            }
-          } else {
-            if (deadValue === true) {
-              deadDataByDate[normalizedDate] = {
-                true: [id],
-                false: [],
-                colorScale: qcNotStarted ? 'red' : 'grey',
-              }
-            } else if (deadValue === false) {
-              deadDataByDate[normalizedDate] = {
-                true: [],
-                false: [id],
-                colorScale: qcNotStarted ? 'red' : 'grey',
-              }
-            }
-          }
-        }
+      } catch (error) {
+        console.log('error', error)
+        console.log('catchResponse', catchResponse)
       }
     })
 
@@ -323,7 +379,7 @@ function CatchCategoricalQC({
           dataId: 'Adipose Clipped',
           x: date,
           y: 2,
-          colorScale: adiposeClippedByDate[date]['colorScale'],
+          colorScale: adiposeClippedByDate[date]['trueColorScale'],
         })
       }
       if (adiposeClippedByDate[date]['false'].length) {
@@ -332,7 +388,7 @@ function CatchCategoricalQC({
           dataId: 'Adipose Clipped',
           x: date,
           y: 1,
-          colorScale: adiposeClippedByDate[date]['colorScale'],
+          colorScale: adiposeClippedByDate[date]['falseColorScale'],
         })
       }
     })
@@ -385,7 +441,7 @@ function CatchCategoricalQC({
           dataId: 'Mortalities',
           x: date,
           y: 2,
-          colorScale: deadDataByDate[date]['colorScale'],
+          colorScale: deadDataByDate[date]['trueColorScale'],
         })
       }
       if (deadDataByDate[date]['false'].length) {
@@ -394,7 +450,7 @@ function CatchCategoricalQC({
           dataId: 'Mortalities',
           x: date,
           y: 1,
-          colorScale: deadDataByDate[date]['colorScale'],
+          colorScale: deadDataByDate[date]['falseColorScale'],
         })
       }
     })
@@ -409,7 +465,6 @@ function CatchCategoricalQC({
   }, [qcCatchRawSubmissions])
 
   const handlePointClick = (datum: any) => {
-    console.log('datum', datum)
     const programId = route.params.programId
     const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
@@ -829,6 +884,7 @@ function CatchCategoricalQC({
 
           <ScrollView>
             {activeButtons.map(buttonName => {
+              console.log('graphData[buttonName]', graphData[buttonName])
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
@@ -838,7 +894,9 @@ function CatchCategoricalQC({
                   showDates
                   onPointClick={datum => handlePointClick(datum)}
                   timeBased={false}
-                  data={graphData[buttonName]}
+                  data={graphData[buttonName].sort((a, b) =>
+                    a.x.localeCompare(b.x)
+                  )}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'

@@ -91,7 +91,6 @@ const FishInputDataTable = ({
       return 'NR'
     }
     if (`${obj[key]}`) {
-      console.log('isNaN(obj[key])', obj[key], isNaN(obj[key]))
       if (typeof obj[key] === 'string' || typeof obj[key] === 'boolean') {
         return `${`${obj[key]}`.charAt(0).toUpperCase()}${`${obj[key]}`.slice(
           1
