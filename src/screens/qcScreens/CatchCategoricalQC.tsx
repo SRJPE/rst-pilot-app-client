@@ -458,9 +458,11 @@ function CatchCategoricalQC({
     setMarkIdToSymbolArr(markIdToColorBuilder)
 
     setGraphData({
-      'Adipose Clipped': adiposeClippedData,
-      Marks: marksData,
-      Mortalities: deadData,
+      'Adipose Clipped': adiposeClippedData.sort((a, b) =>
+        a.x.localeCompare(b.x)
+      ),
+      Marks: marksData.sort((a, b) => a.x.localeCompare(b.x)),
+      Mortalities: deadData.sort((a, b) => a.x.localeCompare(b.x)),
     })
   }, [qcCatchRawSubmissions])
 
@@ -894,9 +896,7 @@ function CatchCategoricalQC({
                   showDates
                   onPointClick={datum => handlePointClick(datum)}
                   timeBased={false}
-                  data={graphData[buttonName].sort((a, b) =>
-                    a.x.localeCompare(b.x)
-                  )}
+                  data={graphData[buttonName]}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'

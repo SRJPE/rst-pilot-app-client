@@ -62,7 +62,7 @@ const GraphModalContent = ({
       if (!usesDensity) {
         setPayload({
           ...payload,
-          [header]: { ...payload[header], y: 0 },
+          [header]: { ...payload[header], y: '' },
         })
       } else {
         setPayload({
@@ -84,7 +84,7 @@ const GraphModalContent = ({
           ? { ...dataAtId, y: dataFormatter(header, dataAtId) }
           : dataAtId
       } else {
-        modalDataAtPointClicked[header] = { y: 'NA' }
+        modalDataAtPointClicked[header] = { y: '' }
       }
     })
     setPayload(modalDataAtPointClicked)

@@ -205,8 +205,8 @@ export const postQCSubmissions = createAsyncThunk(
           (trapSubmission: any) => {
             let id = trapSubmission.createdTrapVisitResponse.id
             let payload = { ...trapSubmission }
-            delete payload.createdTrapVisitResponse.id
-            delete payload.stagedForSubmission
+            delete payload?.createdTrapVisitResponse.id
+            delete payload?.stagedForSubmission
 
             return api.put(`trap-visit/${id}`, {
               ...payload,
@@ -487,13 +487,16 @@ export const trapVisitPostBundler = createSlice({
           trapVisitToQC.createdTrapVisitEnvironmentalResponse.forEach(
             (envMeasure: any) => {
               if (envMeasure.measureName === 'water temperature') {
-                envMeasure.measureValueNumeric = submission['Temperature'].y
-                envMeasure.measureValueText = submission['Temperature'].y
+                envMeasure.measureValueNumeric =
+                  submission['Temperature'].y || null
+                envMeasure.measureValueText =
+                  submission['Temperature'].y || null
               }
 
               if (envMeasure.measureName === 'water turbidity') {
-                envMeasure.measureValueNumeric = submission['Turbidity'].y
-                envMeasure.measureValueText = submission['Turbidity'].y
+                envMeasure.measureValueNumeric =
+                  submission['Turbidity'].y || null
+                envMeasure.measureValueText = submission['Turbidity'].y || null
               }
             }
           )
@@ -501,14 +504,15 @@ export const trapVisitPostBundler = createSlice({
 
         if (trapVisitToQC?.createdTrapVisitResponse) {
           //trap visit record data
+          console.log(`submission['Counter'].y`, submission['Counter'].y)
           trapVisitToQC.createdTrapVisitResponse.totalRevolutions =
-            submission['Counter'].y
+            submission['Counter'].y || null
           trapVisitToQC.createdTrapVisitResponse.debrisVolumeGal =
-            submission['Debris'].y
+            submission['Debris'].y || null
           trapVisitToQC.createdTrapVisitResponse.rpmAtStart =
-            submission['RPM At Start'].y
+            submission['RPM At Start'].y || null
           trapVisitToQC.createdTrapVisitResponse.rpmAtEnd =
-            submission['RPM At End'].y
+            submission['RPM At End'].y || null
           trapVisitToQC.createdTrapVisitResponse.qcCompleted = true
           trapVisitToQC.createdTrapVisitResponse.qcCompletedAt =
             new Date().toISOString()
@@ -533,26 +537,27 @@ export const trapVisitPostBundler = createSlice({
         qcTrapVisit.createdTrapVisitEnvironmentalResponse.forEach(
           (envMeasure: any) => {
             if (envMeasure.measureName === 'water temperature') {
-              envMeasure.measureValueNumeric = submission['Temperature'].y
-              envMeasure.measureValueText = submission['Temperature'].y
+              envMeasure.measureValueNumeric =
+                submission['Temperature'].y || null
+              envMeasure.measureValueText = submission['Temperature'].y || null
             }
 
             if (envMeasure.measureName === 'water turbidity') {
-              envMeasure.measureValueNumeric = submission['Turbidity'].y
-              envMeasure.measureValueText = submission['Turbidity'].y
+              envMeasure.measureValueNumeric = submission['Turbidity'].y || null
+              envMeasure.measureValueText = submission['Turbidity'].y || null
             }
           }
         )
 
         //trap visit record data
         qcTrapVisit.createdTrapVisitResponse.totalRevolutions =
-          submission['Counter'].y
+          submission['Counter'].y || null
         qcTrapVisit.createdTrapVisitResponse.debrisVolumeGal =
-          submission['Debris'].y
+          submission['Debris'].y || null
         qcTrapVisit.createdTrapVisitResponse.rpmAtStart =
-          submission['RPM At Start'].y
+          submission['RPM At Start'].y || null
         qcTrapVisit.createdTrapVisitResponse.rpmAtEnd =
-          submission['RPM At End'].y
+          submission['RPM At End'].y || null
 
         state.qcTrapVisitSubmissions = [
           ...state.qcTrapVisitSubmissions.slice(0, qcTrapVisitIdx),
