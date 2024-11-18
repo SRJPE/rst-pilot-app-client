@@ -171,7 +171,7 @@ const NavButtons = ({
         navigateHelper('Trap Operations')
         break
       case 'Started Trapping':
-        navigation.navigate('Home')
+        navigation.navigateDeprecated('Home')
         break
       default:
         console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
@@ -254,11 +254,11 @@ const NavButtons = ({
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen
     if (activePage === 'Visit Setup') {
-      navigation.navigate('Home')
       navigation.reset({
         index: 0,
         routes: [{ name: 'Visit Setup' }],
       })
+      navigation.getParent()?.navigate('Home')
       return
     }
 

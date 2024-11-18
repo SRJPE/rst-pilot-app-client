@@ -64,21 +64,21 @@ export default function BottomNavigation({
   const { isOpen, onToggle, onClose } = useDisclose()
 
   const handlePressQCData = useCallback(() => {
-    navigation.navigate('Quality Control')
+    navigation.navigateDeprecated('Quality Control')
     onClose()
   }, [navigation])
   const handlePressTrapVisit = useCallback(() => {
-    navigation.navigate('Trap Visit Form')
+    navigation.navigateDeprecated('Trap Visit Form')
     setStaggerOpen(false)
     onClose()
   }, [navigation])
   const handlePressMarkRecapture = useCallback(() => {
-    navigation.navigate('Mark Recapture')
+    navigation.navigateDeprecated('Mark Recapture')
     setStaggerOpen(false)
     onClose()
   }, [navigation])
   const handlePressGenerateReport = useCallback(() => {
-    navigation.navigate('Generate Report')
+    navigation.navigateDeprecated('Generate Report')
     onClose()
   }, [navigation])
   const handlePressStagger = () => {

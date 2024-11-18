@@ -207,7 +207,7 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Add Fish')
+                navigation.navigateDeprecated('Add Fish')
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>
@@ -221,7 +221,7 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Batch Count')
+                navigation.navigateDeprecated('Batch Count')
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>

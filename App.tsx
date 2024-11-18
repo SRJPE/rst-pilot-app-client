@@ -1,4 +1,4 @@
-import 'react-native-gesture-handler'
+import './gesture-handler'
 import AppContainer from './src'
 import MainDrawerNavigator from './src/navigators/MainDrawerNavigator'
 

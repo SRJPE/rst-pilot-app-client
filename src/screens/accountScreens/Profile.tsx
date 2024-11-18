@@ -167,7 +167,9 @@ const Profile = ({
                   mb={15}
                   alignSelf='center'
                   bg='transparent'
-                  onPress={() => navigation.navigate('Monitoring Program')}
+                  onPress={() =>
+                    navigation.navigateDeprecated('Monitoring Program')
+                  }
                 >
                   <HStack alignItems='center'>
                     <Icon

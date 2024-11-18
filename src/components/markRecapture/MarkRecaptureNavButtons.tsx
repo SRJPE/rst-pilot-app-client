@@ -41,7 +41,7 @@ export default function MarkRecaptureNavButtons({
 
     if (activePage === 'Mark Recapture Complete') {
       clearFormValues && clearFormValues()
-      navigation.navigate('Quality Control')
+      navigation.navigateDeprecated('Quality Control')
       navigation.reset({
         index: 0,
         routes: [{ name: 'Release Trial' }],
@@ -63,7 +63,7 @@ export default function MarkRecaptureNavButtons({
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen or Mark Recapture Complete screen
     if (activePage === 'Release Trial') {
-      navigation.navigate('Home')
+      navigation.navigateDeprecated('Home')
       return
     }
     if (activePage === 'Mark Recapture Complete') {
@@ -72,7 +72,7 @@ export default function MarkRecaptureNavButtons({
         index: 0,
         routes: [{ name: 'Release Trial' }],
       })
-      navigation.navigate('Home')
+      navigation.navigateDeprecated('Home')
       dispatch(resetMarkRecapSlice())
       return
     }

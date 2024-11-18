@@ -84,10 +84,10 @@ const DrawerNavigator = ({
 
   return (
     <Drawer.Navigator
-      initialRouteName='Sign In'
-      // initialRouteName='Home'
+      // initialRouteName='Sign In'
+      initialRouteName='Home'
       screenOptions={{ drawerType: 'front' }}
-      drawerContent={props => <DrawerMenu {...props} />}
+      drawerContent={(props: any) => <DrawerMenu {...props} />}
     >
       {/*       
       UN-COMMENT THIS CODE TO REACTIVATE NAV AUTH REQUIREMENT  */}

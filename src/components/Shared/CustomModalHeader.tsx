@@ -47,7 +47,7 @@ const CustomModalHeader = ({
               onPress={() => {
                 if (navigateBack) {
                   // navigation.goBack()
-                  navigation.navigate('Trap Visit Form', {
+                  navigation.navigateDeprecated('Trap Visit Form', {
                     screen: 'Fish Input',
                   })
                 }

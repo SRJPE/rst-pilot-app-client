@@ -21,19 +21,21 @@ import { VStack } from 'native-base'
 import FishHolding from '../screens/formScreens/FishHolding'
 import TabBar from '../components/form/TabBar'
 import LoadingScreen from '../components/Shared/LoadingScreen'
+import { Alert } from 'react-native'
+import { Text, View } from 'native-base'
 
 const FormStack = createNativeStackNavigator()
 
 function FormStackNavigation() {
+  // Problematic code
   const fishInputModalOpen = useSelector(
-    (state: any) => state.fishInput.modalOpen
+    (state: any) => state?.fishInput?.modalOpen
   )
-
   return (
     <FormStack.Navigator
       initialRouteName='Visit Setup'
       screenOptions={{
-        header: (props) => (
+        header: props => (
           <VStack>
             <ProgressHeader {...props} />
             <TabBar headerProps={props} />
@@ -41,6 +43,7 @@ function FormStackNavigation() {
         ),
       }}
     >
+      <FormStack.Screen name='Visit Setup' component={VisitSetup} />
       <FormStack.Screen
         name='Loading...'
         component={LoadingScreen}
@@ -48,7 +51,6 @@ function FormStackNavigation() {
           animationTypeForReplace: 'push',
         }}
       />
-      <FormStack.Screen name='Visit Setup' component={VisitSetup} />
       <FormStack.Screen name='Trap Operations' component={TrapOperations} />
       <FormStack.Screen name='Fish Processing' component={FishProcessing} />
       <FormStack.Screen
@@ -89,7 +91,7 @@ function FormStackNavigation() {
       <FormStack.Screen name='No Fish Caught' component={NoFishCaught} />
       <FormStack.Screen name='End Trapping' component={EndTrapping} />
       <FormStack.Screen name='Started Trapping' component={StartedTrapping} />
-      <FormStack.Screen name='Paper Entry' component={PaperEntry} />
+      {/* <FormStack.Screen name='Paper Entry' component={PaperEntry} /> */}
     </FormStack.Navigator>
   )
 }

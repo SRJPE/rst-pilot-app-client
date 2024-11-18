@@ -13,7 +13,7 @@ export default function StartMarkRecapture({
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const handlePressBeginMarkRecapture = () => {
-    navigation.navigate('Mark Recapture')
+    navigation.navigateDeprecated('Mark Recapture')
   }
   const handlePressReturnToHomepage = () => {
     //temp
@@ -22,13 +22,15 @@ export default function StartMarkRecapture({
       routes: [{ name: 'Visit Setup' }],
     })
     dispatch(resetNavigationSlice())
-    navigation.navigate('Home')
+    navigation.navigateDeprecated('Home')
   }
   const handlePressQCData = () => {
-    navigation.navigate('Quality Control')
+    navigation.navigateDeprecated('Quality Control')
   }
   const handlePressReturnToTrapVisit = () => {
-    navigation.navigate('Trap Visit Form', { screen: 'Incomplete Sections' })
+    navigation.navigateDeprecated('Trap Visit Form', {
+      screen: 'Incomplete Sections',
+    })
     dispatch(updateActiveStep(7))
   }
 

@@ -91,7 +91,7 @@ const BatchCount = ({
       dispatch(resetBatchCountSlice())
       showSlideAlert(dispatch, 'Batch Count')
       // @ts-ignore
-      navigation.navigate('Trap Visit Form', {
+      navigation.navigateDeprecated('Trap Visit Form', {
         screen: 'Fish Input',
       })
     }
@@ -106,7 +106,7 @@ const BatchCount = ({
 
   const buttonNav = () => {
     // @ts-ignore
-    navigation.navigate('Trap Visit Form', {
+    navigation.navigateDeprecated('Trap Visit Form', {
       screen: 'Add Fish',
     })
   }

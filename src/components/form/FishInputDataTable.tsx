@@ -184,7 +184,7 @@ const FishInputDataTable = ({
               onPress={() => {
                 if (!rowKey.includes('empty')) {
                   if (fishStore[Number(rowKey)]) {
-                    navigation.navigate('Add Fish', {
+                    navigation.navigateDeprecated('Add Fish', {
                       editModeData: {
                         id: rowKey,
                         ...fishStore[Number(rowKey)],

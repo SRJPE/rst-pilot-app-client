@@ -25,7 +25,7 @@ const IncompleteSectionButton = ({
   const dispatch = useDispatch<AppDispatch>()
 
   const handleButtonPress = () => {
-    navigation.navigate('Trap Visit Form', {
+    navigation.navigateDeprecated('Trap Visit Form', {
       screen: name,
     })
     dispatch(updateActiveStep(step))
@@ -35,8 +35,8 @@ const IncompleteSectionButton = ({
   const [pageErrors, setPageErrors] = useState({})
 
   useEffect(() => {
-    Object.keys(tabState.tabs).forEach((tabId) => {
-      Object.keys(tabState.tabs[tabId].errorDetails).forEach((pageName) => {
+    Object.keys(tabState.tabs).forEach(tabId => {
+      Object.keys(tabState.tabs[tabId].errorDetails).forEach(pageName => {
         if (pageName === name) {
           setPageErrors(tabState.tabs[tabId].errorDetails[pageName])
         }
