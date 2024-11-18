@@ -332,6 +332,11 @@ const Profile = ({
               onPress={() => {
                 setLogoutModalOpen(false)
                 dispatch(clearUserCredentials())
+                // reset navigation
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Home' }],
+                })
               }}
               flexGrow={1}
               marginLeft={3}

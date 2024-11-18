@@ -37,17 +37,6 @@ export default function ProgressHeader(props: NativeStackHeaderProps) {
             </Text>
             <Text fontSize='xl'>{renderCurrentStepOfTotalSteps()}</Text>
           </HStack>
-          {/* <Box w='100%'>
-            <Progress
-              bg='#D1E8F0'
-              _filledTrack={{
-                bg: '#007C7C',
-              }}
-              colorScheme='primary'
-              value={(currentStep / numOfFormSteps) * 100}
-              mx='4'
-            />
-          </Box> */}
         </VStack>
       </Box>
     )
