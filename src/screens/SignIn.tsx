@@ -8,7 +8,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import React from 'react'
+import React, { useState } from 'react'
 import { ImageBackground } from 'react-native'
 
 import {
@@ -24,19 +24,26 @@ import {
   useAuthRequest,
   useAutoDiscovery,
 } from 'expo-auth-session'
-import * as SecureStore from 'expo-secure-store'
 import { connect, useDispatch } from 'react-redux'
 import api from '../api/axiosConfig'
 import AppLogo from '../components/Shared/AppLogo'
 import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState } from '../redux/store'
 import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
-import { set } from 'lodash'
-import { storeAccessTokens } from '../utils/authUtils'
+import { storeAccessTokens, refreshUserToken } from '../utils/authUtils'
+import { InitialStateI as ConnectivityState } from '../redux/reducers/connectivitySlice'
+import { InitialStateI as UserCredentialsState } from '../redux/reducers/userCredentialsSlice'
+import { showSlideAlert } from '../redux/reducers/slideAlertSlice'
 
 WebBrowser.maybeCompleteAuthSession()
 
-const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
+const SignIn = ({
+  userCredentialsStore,
+  connectivityStore,
+}: {
+  userCredentialsStore: UserCredentialsState
+  connectivityStore: ConnectivityState
+}) => {
   const dispatch = useDispatch<AppDispatch>()
 
   // Endpoint
@@ -48,6 +55,9 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
   )
   const redirectUri = 'com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect'
   const clientId = EXPO_PUBLIC_CLIENT_ID
+
+  const [signInButtonDisabled, setSignInButtonDisabled] =
+    useState<boolean>(false)
 
   // Request
   const [request, response, promptAsync] = useAuthRequest(
@@ -89,6 +99,7 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
     discoveryObj: DiscoveryDocument | null
   ) =>
     promptAsyncFn().then((codeResponse: AuthSessionResult) => {
+      setSignInButtonDisabled(true)
       if (requestObj && codeResponse?.type === 'success' && discoveryObj) {
         try {
           exchangeCodeAsync(
@@ -101,67 +112,75 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
               redirectUri,
             },
             discoveryObj
-          ).then(async res => {
-            try {
-              const {
-                accessToken,
-                refreshToken,
-                idToken,
-                issuedAt,
-                expiresIn,
-              } = res
+          )
+            .then(async res => {
+              try {
+                const {
+                  accessToken,
+                  refreshToken,
+                  idToken,
+                  issuedAt,
+                  expiresIn,
+                } = res
 
-              await storeAccessTokens({
-                accessToken,
-                refreshToken,
-                idToken,
-                expiresIn,
-                issuedAt,
-              })
+                await storeAccessTokens({
+                  accessToken,
+                  refreshToken,
+                  idToken,
+                  expiresIn,
+                  issuedAt,
+                })
 
-              const userRes = await api.get('user/current', {
-                headers: {
-                  idToken: idToken as string,
-                  ['Authorization']: `Bearer ${accessToken}`,
-                },
-              })
-
-              const personnelResponse = await api.get(
-                `personnel/azure/${userRes.data.azureUid}`,
-                {
+                const userRes = await api.get('user/current', {
                   headers: {
                     idToken: idToken as string,
                     ['Authorization']: `Bearer ${accessToken}`,
                   },
-                }
-              )
-
-              const userProgramsResponse = await api.get(
-                `program/personnel/${personnelResponse.data.id}`,
-                {
-                  headers: {
-                    authorization: `Bearer ${accessToken}` as string,
-                    idToken: idToken as string,
-                  },
-                }
-              )
-
-              dispatch(getVisitSetupDefaults(personnelResponse.data.id))
-
-              dispatch(
-                saveUserCredentials({
-                  ...userCredentialsStore,
-                  ...userRes.data,
-                  ...personnelResponse.data,
-                  userPrograms: userProgramsResponse.data,
                 })
-              )
-            } catch (error: any) {
-              console.log('error', error?.response.data.message)
-            }
-          })
+
+                console.log(
+                  '🚀 ~ file: SignIn.tsx:174 ~ promptAsyncFn ~ userRes:',
+                  userRes
+                )
+
+                const personnelResponse = await api.get(
+                  `personnel/azure/${userRes.data.azureUid}`,
+                  {
+                    headers: {
+                      idToken: idToken as string,
+                      ['Authorization']: `Bearer ${accessToken}`,
+                    },
+                  }
+                )
+
+                const userProgramsResponse = await api.get(
+                  `program/personnel/${personnelResponse.data.id}`,
+                  {
+                    headers: {
+                      authorization: `Bearer ${accessToken}` as string,
+                      idToken: idToken as string,
+                    },
+                  }
+                )
+
+                dispatch(getVisitSetupDefaults(personnelResponse.data.id))
+
+                dispatch(
+                  saveUserCredentials({
+                    ...userCredentialsStore,
+                    ...userRes.data,
+                    ...personnelResponse.data,
+                    userPrograms: userProgramsResponse.data,
+                  })
+                )
+              } catch (error: any) {
+                console.log('error', error?.response.data.message)
+              }
+            })
+            .finally(() => setSignInButtonDisabled(false))
         } catch (error) {
           console.error('Error exchanging code:', error)
+          setSignInButtonDisabled(false)
         }
       }
     })
@@ -187,8 +206,22 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
             _disabled={{
               opacity: '75',
             }}
-            disabled={!request}
-            onPress={() => handleUserAuthFlow(promptAsync, request, discovery)}
+            disabled={signInButtonDisabled}
+            onPress={() => {
+              if (
+                connectivityStore.isConnected &&
+                connectivityStore.isInternetReachable
+              ) {
+                handleUserAuthFlow(promptAsync, request, discovery)
+              } else {
+                showSlideAlert(
+                  dispatch,
+                  'No network connection. Try signing in when connection is restored',
+                  'error',
+                  5000
+                )
+              }
+            }}
           >
             <Text fontSize='xl' fontWeight='bold' color='white'>
               Sign In
@@ -223,6 +256,7 @@ const SignIn = ({ userCredentialsStore }: { userCredentialsStore: any }) => {
 const mapStateToProps = (state: RootState) => {
   return {
     userCredentialsStore: state.userCredentials,
+    connectivityStore: state.connectivity,
   }
 }
 
