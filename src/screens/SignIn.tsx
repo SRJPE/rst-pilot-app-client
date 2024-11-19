@@ -138,11 +138,6 @@ const SignIn = ({
                   },
                 })
 
-                console.log(
-                  '🚀 ~ file: SignIn.tsx:174 ~ promptAsyncFn ~ userRes:',
-                  userRes
-                )
-
                 const personnelResponse = await api.get(
                   `personnel/azure/${userRes.data.azureUid}`,
                   {
