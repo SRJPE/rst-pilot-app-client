@@ -32,24 +32,23 @@ const dateTransformer: AxiosRequestTransformer = (data: any) => {
   }
   return data
 }
+
+const controller = new AbortController()
+
 const baseURL = Constants.expoConfig?.extra?.EXPO_PUBLIC_BASE_URL
 const api = axios.create({
   baseURL,
   transformRequest: [dateTransformer].concat(
     axios.defaults.transformRequest as AxiosRequestTransformer[]
   ),
+  timeout: 30000,
+  signal: controller.signal,
 })
 
 // Axios middleware to retrieve and add authorization token
 api.interceptors.request.use(
   async (config: AxiosRequestConfig) => {
     const { isConnected, isInternetReachable } = store.getState().connectivity
-
-    console.log('🚀 ~ file: axiosConfig.ts:48 ~ isConnected:', isConnected)
-    console.log(
-      '🚀 ~ file: axiosConfig.ts:50 ~ isInternetReachable:',
-      isInternetReachable
-    )
 
     //Attempt to refresh token only if there is a network connection
     if (isConnected) {
@@ -136,7 +135,6 @@ api.interceptors.request.use(
       console.log(
         '🚀 ~ file: axiosConfig.ts:135 ~ No network connection, cannot retrieve token'
       )
-      throw new Error('No network connection')
     }
   },
   error => {
