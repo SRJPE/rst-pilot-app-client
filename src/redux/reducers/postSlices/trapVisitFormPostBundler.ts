@@ -336,15 +336,24 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
         previousCatchRaw,
       }
     } catch (error) {
-      console.log('🚀 ~ file: trapVisitFormPostBundler.ts:349 ~ err:', error)
+      console.log('🚀 ~ file: trapVisitFormPostBundler.ts:349 ~ error:', error)
+
       if (error instanceof Error) {
-        const connectionError = error.message.includes('network connection')
-        showSlideAlert(
-          thunkAPI.dispatch,
-          error.message,
-          connectionError ? 'warning' : 'error',
-          5000
-        )
+        const state = thunkAPI.getState() as RootState
+        const connectivityState = state.connectivity
+
+        const connectionError =
+          !connectivityState.isConnected &&
+          error.message.includes('network connection')
+        {
+          connectionError &&
+            showSlideAlert(
+              thunkAPI.dispatch,
+              error.message,
+              connectionError ? 'warning' : 'error',
+              5000
+            )
+        }
         thunkAPI.rejectWithValue({
           previousTrapVisits: [],
           previousCatchRaw: [],
