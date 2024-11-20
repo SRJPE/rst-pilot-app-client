@@ -15,6 +15,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import api from '../../api/axiosConfig'
 import CustomSelect from '../Shared/CustomSelect'
+import { generateErrorMessage } from '../../utils/helpers/helperFunctions'
 
 const editAccountValidationSchema = Yup.object().shape({
   firstName: Yup.string().label('First Name').required(),
@@ -70,17 +71,18 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
               agencyId,
               emailAddress,
             })
-            .catch(err => {
+            .catch(error => {
               console.log(
-                '🚀 ~ file: AddNewUserModalContent.tsx:240 ~ onSubmit={ ~ err:',
-                err
+                '🚀 ~ file: AddNewUserModalContent.tsx:76 ~ onSubmit={ ~ error:',
+                Object.entries(error)
               )
 
+              const errorMessage = generateErrorMessage(error.code)
               setSubmissionMessage({
                 success: false,
-                message:
-                  'There was an error creating the user. Please try again.',
+                message: errorMessage,
               })
+
               setSubmitting(false)
             })
 
