@@ -34,6 +34,7 @@ import { storeAccessTokens, refreshUserToken } from '../utils/authUtils'
 import { InitialStateI as ConnectivityState } from '../redux/reducers/connectivitySlice'
 import { InitialStateI as UserCredentialsState } from '../redux/reducers/userCredentialsSlice'
 import { showSlideAlert } from '../redux/reducers/slideAlertSlice'
+import { generateErrorMessage } from '../utils/helpers/helperFunctions'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -169,7 +170,8 @@ const SignIn = ({
                   })
                 )
               } catch (error: any) {
-                console.log('error', error?.response.data.message)
+                const errorMessage = generateErrorMessage(error.code)
+                showSlideAlert(dispatch, errorMessage, 'error', 5000)
               }
             })
             .finally(() => setSignInButtonDisabled(false))
