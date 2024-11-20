@@ -73,17 +73,20 @@ const EditAccountInfoModalContent = ({
               phone,
               agencyId,
             })
-            .catch(err => {
-              console.log(
-                '🚀 ~ file: AddNewUserModalContent.tsx:240 ~ onSubmit={ ~ err:',
-                err
-              )
-
-              setSubmissionMessage({
-                success: false,
-                message:
-                  'There was an error updating the user. Please try again.',
-              })
+            .catch(error => {
+              if (error.code === 'ECONNABORTED') {
+                setSubmissionMessage({
+                  success: false,
+                  message:
+                    'The server took too long to respond. Your request could not be completed at this time.',
+                })
+              } else {
+                setSubmissionMessage({
+                  success: false,
+                  message:
+                    'There was an error updating the user. Please try again.',
+                })
+              }
               setSubmitting(false)
             })
 

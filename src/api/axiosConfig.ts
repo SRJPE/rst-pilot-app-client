@@ -41,7 +41,7 @@ const api = axios.create({
   transformRequest: [dateTransformer].concat(
     axios.defaults.transformRequest as AxiosRequestTransformer[]
   ),
-  timeout: 30000,
+  timeout: 10000,
   signal: controller.signal,
 })
 
