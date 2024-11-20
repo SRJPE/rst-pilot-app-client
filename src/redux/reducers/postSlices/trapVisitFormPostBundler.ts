@@ -4,6 +4,8 @@ import { RootState } from '../../store'
 import { getSubstring } from '../../../utils/utils'
 import { PURGE } from 'redux-persist'
 import { showSlideAlert } from '../slideAlertSlice'
+import { generateErrorMessage } from '../../../utils/helpers/helperFunctions'
+import { AxiosError } from 'axios'
 
 interface InitialStateI {
   fetchStatus: 'initial-state' | 'fetch-failed' | 'fetch-successful'
@@ -163,9 +165,14 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
               }
             }
           })
-
           .catch((error: any) => {
-            showSlideAlert(thunkAPI.dispatch, error.message, 'error', 5000)
+            const errorMessage = generateErrorMessage(error.code || '')
+            console.log(
+              '🚀 ~ file: trapVisitFormPostBundler.ts:171 ~ postTrapVisitFormSubmissions :',
+              Object.entries(error)
+            )
+
+            showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
             const { response } = error
             const errorDetail = response?.data?.detail
             if (!errorDetail?.includes('already exists')) {
@@ -207,9 +214,24 @@ export const postQCSubmissions = createAsyncThunk(
             delete payload.createdTrapVisitResponse.id
             delete payload.stagedForSubmission
 
-            return api.put(`trap-visit/${id}`, {
-              ...payload,
-            })
+            return api
+              .put(`trap-visit/${id}`, {
+                ...payload,
+              })
+              .catch((error: any) => {
+                console.log(
+                  '🚀 ~ file: trapVisitFormPostBundler.ts:223 ~ error:',
+                  Object.entries(error)
+                )
+
+                console.log(
+                  '🚀 ~ file: trapVisitFormPostBundler.ts:217 ~ qcTrapVisitSubmissions:',
+                  qcTrapVisitSubmissions
+                )
+                const errorMessage = generateErrorMessage(error.code || '')
+
+                showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
+              })
           }
         )
 
@@ -336,12 +358,14 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
         previousCatchRaw,
       }
     } catch (error) {
-      console.log('🚀 ~ file: trapVisitFormPostBundler.ts:349 ~ error:', error)
-
-      if (error instanceof Error) {
+      if (error instanceof AxiosError) {
+        console.log(
+          '🚀 ~ file: trapVisitFormPostBundler.ts:349 ~ fetchPreviousTrapAndCatch error:',
+          Object.entries(error)
+        )
         const state = thunkAPI.getState() as RootState
         const connectivityState = state.connectivity
-
+        const errorMessage = generateErrorMessage(error.code || '')
         const connectionError =
           !connectivityState.isConnected &&
           error.message.includes('network connection')
@@ -349,7 +373,7 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
           connectionError &&
             showSlideAlert(
               thunkAPI.dispatch,
-              error.message,
+              errorMessage,
               connectionError ? 'warning' : 'error',
               5000
             )
