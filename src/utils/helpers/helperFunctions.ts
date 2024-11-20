@@ -2,6 +2,7 @@ export const generateErrorMessage = (errorCode: string) => {
   let errorMessage
   switch (errorCode) {
     case 'Network Error':
+    case 'ERR_NETWORK':
       errorMessage =
         'A network error occurred, unable to reach server. Please try again.'
       break
@@ -10,7 +11,7 @@ export const generateErrorMessage = (errorCode: string) => {
         'The server took too long to respond. Your request could not be completed at this time.'
       break
     default:
-      errorMessage = 'An error occurred while updating the user'
+      errorMessage = 'An unknown error occurred. Please try again.'
   }
   return errorMessage
 }
