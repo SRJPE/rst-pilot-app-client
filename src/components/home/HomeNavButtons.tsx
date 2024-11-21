@@ -16,6 +16,9 @@ import {
 import { StyleSheet } from 'react-native'
 import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { CommonActions } from '@react-navigation/native'
+import { resetNavigationSlice } from '../../redux/reducers/formSlices/navigationSlice'
+import { useDispatch } from 'react-redux'
 
 const styles = StyleSheet.create({
   button: {
@@ -62,13 +65,33 @@ export default function BottomNavigation({
   staggerOpen?: boolean
 }) {
   const { isOpen, onToggle, onClose } = useDisclose()
+  const dispatch = useDispatch()
 
   const handlePressQCData = useCallback(() => {
     navigation.navigateDeprecated('Quality Control')
     onClose()
   }, [navigation])
   const handlePressTrapVisit = useCallback(() => {
-    navigation.navigateDeprecated('Trap Visit Form')
+    dispatch(resetNavigationSlice())
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Trap Visit Form',
+            state: {
+              routes: [
+                {
+                  name: 'Visit Setup',
+                },
+              ],
+            },
+          },
+        ],
+      })
+    )
+
+    navigation.navigate('Trap Visit Form', { screen: 'Visit Setup' })
     setStaggerOpen(false)
     onClose()
   }, [navigation])

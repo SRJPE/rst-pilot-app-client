@@ -1,7 +1,10 @@
 import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  resetNavigationSlice,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
@@ -254,6 +257,7 @@ const NavButtons = ({
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen
     if (activePage === 'Visit Setup') {
+      dispatch(resetNavigationSlice())
       navigation.reset({
         index: 0,
         routes: [{ name: 'Visit Setup' }],
