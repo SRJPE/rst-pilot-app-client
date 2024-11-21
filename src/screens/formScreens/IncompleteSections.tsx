@@ -340,8 +340,8 @@ const IncompleteSections = ({
           : null,
         qcCompleted: null,
         qcCompletedAt: null,
-        comments: paperEntryState[id]
-          ? paperEntryState[id].values.comments
+        comments: trapPostProcessingState[id].values.comments
+          ? trapPostProcessingState[id].values.comments
           : null,
         createdBy: userCredentialsStore.id,
       }

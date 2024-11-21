@@ -6,7 +6,6 @@ export default function StartMarkRecapture({
 }: {
   navigation: any
 }) {
-  const navigationTest = useNavigation() as any
   const handlePressBeginMarkRecapture = () => {
     navigation.navigateDeprecated('Mark Recapture')
   }

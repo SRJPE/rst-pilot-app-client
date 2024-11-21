@@ -662,6 +662,25 @@ const TrapPostProcessing = ({
                       </VStack>
                     </FormControl>
                   )}
+                  <FormControl>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Comments
+                      </Text>
+                    </FormControl.Label>
+                    <Input
+                      height='50px'
+                      fontSize='16'
+                      placeholder='Write a comment'
+                      keyboardType='default'
+                      onChangeText={handleChange('comments')}
+                      onBlur={handleBlur('comments')}
+                      // onChangeText={newText => {
+                      //   setComments(newText)
+                      // }}
+                      value={values.comments}
+                    />
+                  </FormControl>
                 </VStack>
               </Pressable>
               {navButtons}
