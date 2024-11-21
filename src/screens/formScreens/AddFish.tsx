@@ -90,7 +90,6 @@ const AddFishContent = ({
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
   // @ts-ignore
-  const lastAddedFish = fishStore[Object.keys(fishStore).pop()]
   const [fishUID, setFishUID] = useState(uid() as string)
 
   const [validationSchema, setValidationSchema] = useState<
@@ -101,7 +100,6 @@ const AddFishContent = ({
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
     false as boolean
   )
-  const { height: screenHeight } = useWindowDimensions()
 
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -121,10 +119,6 @@ const AddFishContent = ({
   const handleGeneticSampleFormSubmit = (values: any) => {
     saveGeneticSampleData({ ...values, UID: fishUID })
   }
-
-  // useEffect(() => {
-  //   setFishUID(uid())
-  // }, [])
 
   const renderForkLengthWarning = (
     forkLengthValue: number,
@@ -551,7 +545,7 @@ const AddFishContent = ({
   return (
     <>
       <ScrollView
-        scrollEnabled={screenHeight < 1180}
+        scrollEnabled
         flex={1}
         bg='#fff'
         borderWidth='10'
@@ -696,7 +690,7 @@ const AddFishContent = ({
                       <HStack space={4} alignItems='center'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
-                            Fork Length
+                            Fork Length *
                           </Text>
                         </FormControl.Label>
                         {renderForkLengthWarning(
@@ -819,7 +813,15 @@ const AddFishContent = ({
                       <></>
                     )}
                   </HStack>
-
+                  {/*workaround for customselect first component causing gray box issue*/}
+                  <FormControl w='1/2' paddingRight='9' display='none'>
+                    <CustomSelect
+                      selectedValue={''}
+                      placeholder={''}
+                      onValueChange={null}
+                      selectOptions={[]}
+                    />
+                  </FormControl>
                   <HStack space={4} alignItems='center'>
                     {(species.value === 'Chinook salmon' ||
                       species.value === 'Steelhead / rainbow trout') && (
@@ -827,10 +829,7 @@ const AddFishContent = ({
                         <HStack space={2} alignItems='center' mb='-1.5'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
-                              Life Stage{' '}
-                              {validationSchema == 'optionalLifeStage'
-                                ? '(optional)'
-                                : ''}
+                              Life Stage *{' '}
                             </Text>
                           </FormControl.Label>
 
@@ -854,7 +853,7 @@ const AddFishContent = ({
                           >
                             <Popover.Content
                               ml='10'
-                              accessibilityLabel='Existing Mark Info'
+                              accessibilityLabel='Life Stage Info'
                               w='720'
                               h='600'
                             >
@@ -922,7 +921,7 @@ const AddFishContent = ({
                       <FormControl w='1/2' paddingRight='9'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
-                            Run
+                            Run (optional)
                           </Text>
                         </FormControl.Label>
                         <CustomSelect
@@ -1420,40 +1419,46 @@ const AddFishContent = ({
       </Box>
 
       {/* --------- Modals --------- */}
-      <CustomModal
-        isOpen={markFishModalOpen}
-        closeModal={() => setMarkFishModalOpen(false)}
-        height='3/4'
-      >
-        <MarkFishModalContent
-          handleMarkFishFormSubmit={handleMarkFishFormSubmit}
+      {markFishModalOpen && (
+        <CustomModal
+          isOpen={markFishModalOpen}
           closeModal={() => setMarkFishModalOpen(false)}
-        />
-      </CustomModal>
-      <CustomModal
-        isOpen={addGeneticModalOpen}
-        closeModal={() => setAddGeneticModalOpen(false)}
-        height='3/4'
-      >
-        <AddGeneticsModalContent
-          handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
+          height='3/4'
+        >
+          <MarkFishModalContent
+            handleMarkFishFormSubmit={handleMarkFishFormSubmit}
+            closeModal={() => setMarkFishModalOpen(false)}
+          />
+        </CustomModal>
+      )}
+      {addGeneticModalOpen && (
+        <CustomModal
+          isOpen={addGeneticModalOpen}
           closeModal={() => setAddGeneticModalOpen(false)}
-        />
-      </CustomModal>
-      <CustomModal
-        isOpen={addMarkModalOpen}
-        closeModal={() => setAddMarkModalOpen(false)}
-        height='1/2'
-      >
-        <AddAnotherMarkModalContent
-          // handleAddAnotherMarkFormSubmit={handleAddAnotherMarkFormSubmit}
+          height='3/4'
+        >
+          <AddGeneticsModalContent
+            handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
+            closeModal={() => setAddGeneticModalOpen(false)}
+          />
+        </CustomModal>
+      )}
+      {addMarkModalOpen && (
+        <CustomModal
+          isOpen={addMarkModalOpen}
           closeModal={() => setAddMarkModalOpen(false)}
-          screenName={'addIndividualFish'}
-          setExistingMarks={setExistingMarks}
-          existingMarks={existingMarks}
-          existingMarksArray={existingMarks.value}
-        />
-      </CustomModal>
+          height='1/2'
+        >
+          <AddAnotherMarkModalContent
+            // handleAddAnotherMarkFormSubmit={handleAddAnotherMarkFormSubmit}
+            closeModal={() => setAddMarkModalOpen(false)}
+            screenName={'addIndividualFish'}
+            setExistingMarks={setExistingMarks}
+            existingMarks={existingMarks}
+            existingMarksArray={existingMarks.value}
+          />
+        </CustomModal>
+      )}
     </>
   )
 }
