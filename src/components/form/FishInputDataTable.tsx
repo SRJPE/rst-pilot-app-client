@@ -209,7 +209,7 @@ const FishInputDataTable = ({
         onPageChange={(page: number) => setPage(page)}
         numberOfItemsPerPage={numberOfItemsPerPage}
       />
-      <VStack px='4'>
+      <VStack px='4' mb={10}>
         <Text>NR: Not Recorded</Text>
         <Text>---: Null</Text>
       </VStack>

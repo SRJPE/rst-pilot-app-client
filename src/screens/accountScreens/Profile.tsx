@@ -23,7 +23,7 @@ import AddNewUserModalContent from '../../components/profile/AddNewUserModalCont
 import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
 import CustomModal from '../../components/Shared/CustomModal'
 import { clearUserCredentials } from '../../redux/reducers/userCredentialsSlice'
-import { AppDispatch, RootState } from '../../redux/store'
+import { AppDispatch, RootState, persistor } from '../../redux/store'
 import { MonitoringProgram } from '../../utils/interfaces'
 
 import {
@@ -330,6 +330,9 @@ const Profile = ({
             <Button
               background='primary'
               onPress={() => {
+                // clear cache on sign out to ensure no data from previous user is cached
+                persistor.purge()
+
                 setLogoutModalOpen(false)
                 dispatch(clearUserCredentials())
                 // reset navigation

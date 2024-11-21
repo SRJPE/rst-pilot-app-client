@@ -58,6 +58,18 @@ const GraphModalContent = ({
           [header]: { ...payload[header], x: Number(value) },
         })
       }
+    } else if (value === '0') {
+      if (!usesDensity) {
+        setPayload({
+          ...payload,
+          [header]: { ...payload[header], y: 0 },
+        })
+      } else {
+        setPayload({
+          ...payload,
+          [header]: { ...payload[header], x: 0 },
+        })
+      }
     } else if (value === '') {
       if (!usesDensity) {
         setPayload({
@@ -67,7 +79,7 @@ const GraphModalContent = ({
       } else {
         setPayload({
           ...payload,
-          [header]: { ...payload[header], x: 0 },
+          [header]: { ...payload[header], x: '' },
         })
       }
     }

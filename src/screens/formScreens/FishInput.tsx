@@ -130,7 +130,7 @@ const FishInput = ({
     <>
       <ScrollView
         flex={1}
-        scrollEnabled={screenHeight < 1180}
+        scrollEnabled
         bg='#fff'
         py='0%'
         borderColor='themeGrey'
@@ -207,7 +207,7 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigateDeprecated('Add Fish')
+                navigation.navigate('Add Fish')
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>
@@ -221,7 +221,7 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigateDeprecated('Batch Count')
+                navigation.navigate('Batch Count')
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>
@@ -251,24 +251,26 @@ const FishInput = ({
           </Box>
         </VStack>
         {/* --------- Modals --------- */}
-        <CustomModal
-          isOpen={addPlusCountModalOpen}
-          closeModal={() => {
-            if (activeTabId && activeTabId != 'placeholderId') {
-              setAddPlusCountModalOpen(false)
-              dispatch(
-                markFishInputModalOpen({ tabId: activeTabId, bool: false })
-              )
-            }
-          }}
-          height='3/4'
-        >
-          <PlusCountModalContent
+        {addPlusCountModalOpen && (
+          <CustomModal
+            isOpen={addPlusCountModalOpen}
             closeModal={() => {
-              setAddPlusCountModalOpen(false)
+              if (activeTabId && activeTabId != 'placeholderId') {
+                setAddPlusCountModalOpen(false)
+                dispatch(
+                  markFishInputModalOpen({ tabId: activeTabId, bool: false })
+                )
+              }
             }}
-          />
-        </CustomModal>
+            height='3/4'
+          >
+            <PlusCountModalContent
+              closeModal={() => {
+                setAddPlusCountModalOpen(false)
+              }}
+            />
+          </CustomModal>
+        )}
       </ScrollView>
       <NavButtons
         navigation={navigation}
