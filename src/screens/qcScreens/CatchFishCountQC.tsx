@@ -148,8 +148,8 @@ function CatchFishCountQC({
       const catchRaw = catchResponse.createdCatchRawResponse
       const numFishCaught: number = catchRaw?.numFishCaught
       const plusCount: boolean = catchRaw?.plusCount
-      const createdAt = new Date(catchRaw.createdAt)
-      const normalizedDate = normalizeDate(createdAt)
+      const trapVisitTimeEnd = new Date(catchRaw.trapVisitTimeEnd)
+      const normalizedDate = normalizeDate(trapVisitTimeEnd)
       const qcCompleted = catchResponse.createdCatchRawResponse.qcCompleted
 
       if (Object.keys(datesFormatted).includes(String(normalizedDate))) {
@@ -205,8 +205,6 @@ function CatchFishCountQC({
         }
       )
       const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
-
-      console.log('datum', datum)
 
       const selectedData = qcData.filter(response => {
         const id = response.createdCatchRawResponse?.id
@@ -666,13 +664,11 @@ function CatchFishCountQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height={modalData.length > 1 ? '5/6' : '1/4'}
+          height={modalData.length ? '5/6' : '1/3'}
         >
           <>
             <CustomModalHeader
-              headerText={
-                'Click on a cell to flag data as low confidence or edit value'
-              }
+              headerText={'Edit the values for plus count points below.'}
               headerStyle={{ fontSize: 23, fontWeight: '300' }}
               showHeaderButton={false}
               closeModal={() => setModalData(null)}
@@ -695,9 +691,7 @@ function CatchFishCountQC({
               fontWeight={'light'}
             >
               {`Selected Point${modalData.length > 1 ? `s` : ''} Date: `}
-              {moment(
-                modalData?.[0]?.createdCatchRawResponse?.createdAt
-              ).format('MMMM Do, YYYY')}
+              {moment(pointClicked._x).format('MMMM Do, YYYY')}
             </Text>
             <Text
               color='black'
@@ -717,10 +711,10 @@ function CatchFishCountQC({
               fish.
             </Text>
 
-            {modalData.length > 1 && (
+            {modalData.length ? (
               <VStack alignItems={'center'}>
                 <Heading fontSize={23} mb={5}>
-                  Table of Selected Points
+                  Table of Selected Plus Count Points
                 </Heading>
                 <ScrollView
                   horizontal
@@ -1016,6 +1010,12 @@ function CatchFishCountQC({
                     </ScrollView>
                   </DataTable>
                 </ScrollView>
+              </VStack>
+            ) : (
+              <VStack alignItems={'center'} paddingBottom={10}>
+                <View>
+                  <Text fontSize='2xl'>No plus count records to edit</Text>
+                </View>
               </VStack>
             )}
           </>
