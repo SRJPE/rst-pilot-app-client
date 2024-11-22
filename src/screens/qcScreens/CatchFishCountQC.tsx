@@ -148,7 +148,9 @@ function CatchFishCountQC({
       const catchRaw = catchResponse.createdCatchRawResponse
       const numFishCaught: number = catchRaw?.numFishCaught
       const plusCount: boolean = catchRaw?.plusCount
-      const trapVisitTimeEnd = new Date(catchRaw.trapVisitTimeEnd)
+      const trapVisitTimeEnd = new Date(
+        catchRaw.trapVisitTimeEnd.replace('Z', '-08:00')
+      )
       const normalizedDate = normalizeDate(trapVisitTimeEnd)
       const qcCompleted = catchResponse.createdCatchRawResponse.qcCompleted
 
@@ -210,8 +212,6 @@ function CatchFishCountQC({
         const id = response.createdCatchRawResponse?.id
         return datum.plusCountIds.includes(id)
       })
-
-      console.log('selectedData', selectedData)
 
       setModalData(selectedData)
 
