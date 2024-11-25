@@ -137,7 +137,10 @@ function TrapQC({
             tempData.push({
               id: trapVisitId,
               x: normalizedDate,
-              y: Number(temp.measureValueNumeric),
+              y:
+                temp.measureValueNumeric !== null
+                  ? Number(temp.measureValueNumeric)
+                  : '',
               pointDateTimestamp: createdTrapVisitResponse.trapVisitTimeEnd,
               colorScale: stagedForSubmission
                 ? '#FBA72A'
@@ -157,7 +160,10 @@ function TrapQC({
             turbidityData.push({
               id: trapVisitId,
               x: normalizedDate,
-              y: Number(turbidity.measureValueNumeric),
+              y:
+                turbidity.measureValueNumeric !== null
+                  ? Number(turbidity.measureValueNumeric)
+                  : '',
               pointDateTimestamp: createdTrapVisitResponse.trapVisitTimeEnd,
               colorScale: stagedForSubmission
                 ? '#FBA72A'
@@ -171,7 +177,10 @@ function TrapQC({
             let rpmAtStart = {
               id: trapVisitId,
               x: normalizedDate,
-              y: Number(response.createdTrapVisitResponse.rpmAtStart),
+              y:
+                createdTrapVisitResponse.rpmAtStart !== null
+                  ? Number(createdTrapVisitResponse.rpmAtStart)
+                  : '',
               pointDateTimestamp: createdTrapVisitResponse.trapVisitTimeEnd,
               colorScale: stagedForSubmission
                 ? '#FBA72A'
@@ -187,7 +196,10 @@ function TrapQC({
             let rpmAtEnd = {
               id: trapVisitId,
               x: normalizedDate,
-              y: Number(createdTrapVisitResponse.rpmAtEnd),
+              y:
+                createdTrapVisitResponse.rpmAtEnd !== null
+                  ? Number(createdTrapVisitResponse.rpmAtEnd)
+                  : '',
               pointDateTimestamp: createdTrapVisitResponse.trapVisitTimeEnd,
               colorScale: stagedForSubmission
                 ? '#FBA72A'
