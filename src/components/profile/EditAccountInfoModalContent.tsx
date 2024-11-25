@@ -78,7 +78,9 @@ const EditAccountInfoModalContent = ({
                 '🚀 ~ file: EditAccountInfoModalContent.tsx:311 ~ error code',
                 error.code
               )
-              const errorMessage = generateErrorMessage(error.code)
+              const errorMessage = generateErrorMessage(
+                error.code || 'Error during request to edit user (ln 81)'
+              )
 
               setSubmissionMessage({
                 success: false,

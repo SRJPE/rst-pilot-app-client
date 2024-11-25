@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../../api/axiosConfig'
 import { RootState } from '../../store'
+import { generateErrorMessage } from '../../../utils/helpers/helperFunctions'
+import { showSlideAlert } from '../slideAlertSlice'
 
 interface InitialStateI {
   submissionStatus:
@@ -118,6 +120,11 @@ export const postMarkRecaptureSubmissions = createAsyncThunk(
         console.log('error in iterate', error)
       }
     } catch (error: any) {
+      const errorMessage = generateErrorMessage(
+        error.code ||
+          'An error occurred while posting mark recapture submissions (ln 125)'
+      )
+      showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
       console.log('mark recap error', error?.response?.data)
     }
   }
@@ -146,7 +153,11 @@ export const fetchExistingMarks = createAsyncThunk(
       return {
         allUserExistingMarks,
       }
-    } catch (err) {
+    } catch (error: any) {
+      const errorMessage = generateErrorMessage(
+        error?.code || 'An error occurred while fetching existing marks (ln 58)'
+      )
+      showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
       thunkAPI.rejectWithValue({
         allUserExistingMarks: [],
       })

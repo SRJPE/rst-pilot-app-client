@@ -77,7 +77,9 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
                 Object.entries(error)
               )
 
-              const errorMessage = generateErrorMessage(error.code)
+              const errorMessage = generateErrorMessage(
+                error.code || 'Error during request to create user (ln 88)'
+              )
               setSubmissionMessage({
                 success: false,
                 message: errorMessage,

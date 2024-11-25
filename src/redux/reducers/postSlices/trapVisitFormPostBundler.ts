@@ -166,7 +166,9 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
             }
           })
           .catch((error: any) => {
-            const errorMessage = generateErrorMessage(error.code || '')
+            const errorMessage = generateErrorMessage(
+              error.code || 'Error during catch raw submission (ln 170)'
+            )
             console.log(
               '🚀 ~ file: trapVisitFormPostBundler.ts:171 ~ postTrapVisitFormSubmissions :',
               Object.entries(error)
@@ -224,12 +226,9 @@ export const postQCSubmissions = createAsyncThunk(
                   Object.entries(error)
                 )
 
-                console.log(
-                  '🚀 ~ file: trapVisitFormPostBundler.ts:217 ~ qcTrapVisitSubmissions:',
-                  qcTrapVisitSubmissions
+                const errorMessage = generateErrorMessage(
+                  error.code || 'Error during post cq submission (ln 230)'
                 )
-                const errorMessage = generateErrorMessage(error.code || '')
-
                 showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
               })
           }
@@ -242,29 +241,28 @@ export const postQCSubmissions = createAsyncThunk(
             delete payload.createdCatchRawResponse.id
             delete payload.stagedForSubmission
 
-            return api.put(`catch-raw/${id}`, {
-              ...payload,
-            })
+            return api
+              .put(`catch-raw/${id}`, {
+                ...payload,
+              })
+              .catch(error => {
+                // console.log(
+                //   '🚀 ~ file: trapVisitFormPostBundler.ts:254 ~ catch qc submission error:',
+                //   Object.entries(error)
+                // )
+                // const errorMessage = generateErrorMessage(error.code || '')
+                // showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
+              })
           }
         )
 
-        const trapResults = await Promise.allSettled(trapPromises).catch(
-          error => {
-            console.log('trap qc submission error: ', error)
-          }
-        )
-
-        const catchResults = await Promise.allSettled(catchPromises).catch(
-          error => {
-            console.log('catch qc submission error: ', error)
-          }
-        )
-
+        const trapResults = await Promise.allSettled(trapPromises)
+        const catchResults = await Promise.allSettled(catchPromises)
         const trapVisitResponse = []
 
         for (const result of trapResults as any) {
           if (result.status === 'fulfilled') {
-            trapVisitResponse.push(result.value.data)
+            trapVisitResponse.push(result?.value?.data)
           } else {
             console.log('trap qc submission fail: ', result)
           }
@@ -274,21 +272,19 @@ export const postQCSubmissions = createAsyncThunk(
 
         for (const result of catchResults as any) {
           if (result.status === 'fulfilled') {
-            catchRawResponse.push(result.value.data)
+            catchRawResponse.push(result?.value?.data)
           } else {
             console.log('catch qc submission fail: ', result)
           }
         }
-
-        showSlideAlert(thunkAPI.dispatch, 'QC submissions')
 
         return {
           trapVisitResponse,
           catchRawResponse,
         }
       }
-    } catch (err) {
-      console.log('error in postQCSubmissions: ', err)
+    } catch (error) {
+      console.log('288 error in postQCSubmissions: ', error)
       showSlideAlert(
         thunkAPI.dispatch,
         'Connection issue during QC submission',
@@ -365,7 +361,10 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
         )
         const state = thunkAPI.getState() as RootState
         const connectivityState = state.connectivity
-        const errorMessage = generateErrorMessage(error.code || '')
+        const errorMessage = generateErrorMessage(
+          error.code ||
+            'Error fetching previous trap and catch records (ln 367)'
+        )
         const connectionError =
           !connectivityState.isConnected &&
           error.message.includes('network connection')

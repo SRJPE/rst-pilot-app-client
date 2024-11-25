@@ -10,8 +10,12 @@ export const generateErrorMessage = (errorCode: string) => {
       errorMessage =
         'The server took too long to respond. Your request could not be completed at this time.'
       break
+    case 'ERR_BAD_REQUEST':
+      errorMessage = 'Request failed with status code 400 (Bad Request)'
+
     default:
-      errorMessage = 'An unknown error occurred. Please try again.'
+      return errorCode
+    // errorMessage = 'An unknown error occurred. Please try again.'
   }
   return errorMessage
 }
