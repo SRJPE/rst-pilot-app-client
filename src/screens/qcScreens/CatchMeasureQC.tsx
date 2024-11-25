@@ -36,6 +36,7 @@ function CatchMeasureQC({
   previousCatchRawSubmissions,
   lifeStageState,
   userCredentialsStore,
+  taxonState,
 }: {
   navigation: any
   route: any
@@ -43,6 +44,7 @@ function CatchMeasureQC({
   previousCatchRawSubmissions: any[]
   lifeStageState: any[]
   userCredentialsStore: any
+  taxonState: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -107,6 +109,7 @@ function CatchMeasureQC({
         const forkValue = Number(
           catchRawResponse.createdCatchRawResponse?.forkLength
         )
+
         const lifeStageId = catchRawResponse.createdCatchRawResponse?.lifeStage
         let lifeStageDefinition = null
         if (lifeStageId) {
@@ -123,6 +126,12 @@ function CatchMeasureQC({
           }
         }
 
+        const taxonCode = catchRawResponse.createdCatchRawResponse.taxonCode
+        let species = taxonState.filter((obj: any) => {
+          return obj.code === taxonCode
+        })
+        let speciesCommonName = species[0]?.commonname
+
         if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
           forkGraphSubData.push({
             fieldClicked: 'Fork Length',
@@ -134,6 +143,8 @@ function CatchMeasureQC({
             colorScale: lifeStageDefinition
               ? lifeStageMap[lifeStageDefinition]
               : 'grey',
+            speciesCommonName,
+            lifeStageDefinition,
           })
         }
         return forkValue
@@ -465,6 +476,7 @@ function CatchMeasureQC({
 
 const mapStateToProps = (state: RootState) => {
   const lifeStage = state.dropdowns?.values?.lifeStage
+  const taxon = state.dropdowns.values.taxon
 
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
@@ -472,6 +484,7 @@ const mapStateToProps = (state: RootState) => {
       state.trapVisitFormPostBundler.previousCatchRawSubmissions,
     lifeStageState: lifeStage ?? [],
     userCredentialsStore: state.userCredentials,
+    taxonState: taxon ?? [],
   }
 }
 

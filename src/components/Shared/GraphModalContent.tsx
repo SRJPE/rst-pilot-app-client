@@ -8,12 +8,11 @@ import {
   VStack,
   FormControl,
 } from 'native-base'
-import { useEffect, useState, FC } from 'react'
+import { useEffect, useState } from 'react'
 import { DataTable } from 'react-native-paper'
-import { connect, useDispatch } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import moment from 'moment'
+import { capitalizeFirstLetterOfEachWord } from '../../utils/utils'
 
 const GraphModalContent = ({
   closeModal,
@@ -155,6 +154,29 @@ const GraphModalContent = ({
                       'MMMM Do, YYYY'
                     )}
                   </Text>
+                  {pointClicked.speciesCommonName && (
+                    <Text
+                      color='black'
+                      fontSize='2xl'
+                      marginLeft={8}
+                      fontWeight={'light'}
+                    >
+                      Species: {pointClicked.speciesCommonName}
+                    </Text>
+                  )}
+                  {pointClicked.lifeStageDefinition && (
+                    <Text
+                      color='black'
+                      fontSize='2xl'
+                      marginLeft={8}
+                      fontWeight={'light'}
+                    >
+                      Life Stage:{' '}
+                      {capitalizeFirstLetterOfEachWord(
+                        pointClicked.lifeStageDefinition
+                      )}
+                    </Text>
+                  )}
                 </>
               )}
               <DataTable.Header style={[{ paddingLeft: 0 }]}>
