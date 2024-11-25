@@ -241,18 +241,9 @@ export const postQCSubmissions = createAsyncThunk(
             delete payload.createdCatchRawResponse.id
             delete payload.stagedForSubmission
 
-            return api
-              .put(`catch-raw/${id}`, {
-                ...payload,
-              })
-              .catch(error => {
-                // console.log(
-                //   '🚀 ~ file: trapVisitFormPostBundler.ts:254 ~ catch qc submission error:',
-                //   Object.entries(error)
-                // )
-                // const errorMessage = generateErrorMessage(error.code || '')
-                // showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
-              })
+            return api.put(`catch-raw/${id}`, {
+              ...payload,
+            })
           }
         )
 
