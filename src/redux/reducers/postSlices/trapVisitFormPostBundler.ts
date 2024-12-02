@@ -166,12 +166,13 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
             }
           })
           .catch((error: any) => {
+            console.log(
+              '🚀 ~ file: trapVisitFormPostBundler.ts:169 ~ error:',
+              error
+            )
+
             const errorMessage = generateErrorMessage(
               error.code || 'Error during catch raw submission (ln 170)'
-            )
-            console.log(
-              '🚀 ~ file: trapVisitFormPostBundler.ts:171 ~ postTrapVisitFormSubmissions :',
-              Object.entries(error)
             )
 
             showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
@@ -294,55 +295,60 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
     try {
       const state = thunkAPI.getState() as RootState
       const userPrograms = state.visitSetupDefaults.programs
-      await Promise.all(
-        userPrograms.map(async program => {
-          const trapVisitResponse = await api.get(
-            `trap-visit/program/${program.programId}`
-          )
-          const catchRawResponse = await api.get(
-            `catch-raw/program/${program.programId}`
-          )
-          let trapVisits = trapVisitResponse.data
-          let catchRaws = catchRawResponse.data
+      if (
+        state.connectivity.isConnected &&
+        state.connectivity.isInternetReachable
+      ) {
+        await Promise.all(
+          userPrograms.map(async program => {
+            const trapVisitResponse = await api.get(
+              `trap-visit/program/${program.programId}`
+            )
+            const catchRawResponse = await api.get(
+              `catch-raw/program/${program.programId}`
+            )
+            let trapVisits = trapVisitResponse.data
+            let catchRaws = catchRawResponse.data
 
-          const alreadyActiveQCTrapVisitIds: number[] =
-            state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
-              trapVisit => {
-                return trapVisit.createdTrapVisitResponse.id
+            const alreadyActiveQCTrapVisitIds: number[] =
+              state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
+                trapVisit => {
+                  return trapVisit.createdTrapVisitResponse.id
+                }
+              )
+
+            const previousTrapVisitsPayload: any[] = trapVisits.filter(
+              (trapVisit: any) => {
+                return !alreadyActiveQCTrapVisitIds.includes(
+                  trapVisit.createdTrapVisitResponse.id
+                )
               }
             )
 
-          const previousTrapVisitsPayload: any[] = trapVisits.filter(
-            (trapVisit: any) => {
-              return !alreadyActiveQCTrapVisitIds.includes(
-                trapVisit.createdTrapVisitResponse.id
+            const alreadyActiveQCCatchRawIds: number[] =
+              state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
+                catchRaw => {
+                  return catchRaw.createdCatchRawResponse.id
+                }
               )
-            }
-          )
 
-          const alreadyActiveQCCatchRawIds: number[] =
-            state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
-              catchRaw => {
-                return catchRaw.createdCatchRawResponse.id
+            const previousCatchRawPayload: any[] = catchRaws.filter(
+              (catchRaw: any) => {
+                return !alreadyActiveQCCatchRawIds.includes(
+                  catchRaw?.createdCatchRawResponse?.id
+                )
               }
             )
 
-          const previousCatchRawPayload: any[] = catchRaws.filter(
-            (catchRaw: any) => {
-              return !alreadyActiveQCCatchRawIds.includes(
-                catchRaw?.createdCatchRawResponse?.id
-              )
-            }
-          )
+            previousTrapVisits.push(...previousTrapVisitsPayload)
+            previousCatchRaw.push(...previousCatchRawPayload)
+          })
+        )
 
-          previousTrapVisits.push(...previousTrapVisitsPayload)
-          previousCatchRaw.push(...previousCatchRawPayload)
-        })
-      )
-
-      return {
-        previousTrapVisits,
-        previousCatchRaw,
+        return {
+          previousTrapVisits,
+          previousCatchRaw,
+        }
       }
     } catch (error) {
       if (error instanceof AxiosError) {

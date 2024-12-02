@@ -100,17 +100,30 @@ export const postMarkRecaptureSubmissions = createAsyncThunk(
               ...payload.markRecaptureReleaseMarksResponse,
               ...createdReleaseMarksResponse,
             ]
-
+            showSlideAlert(
+              thunkAPI.dispatch,
+              'Mark Recapture Saved',
+              'success',
+              5000
+            )
             // if rejected, keep the non duplicates in the submissions for reattempts
           } else {
-            const { response } = result
+            // showSlideAlert(thunkAPI.dispatch, result, 'error', 5000)
+
+            const { response, reason } = result
             const errorDetail = response?.data?.detail
+
+            if (reason && reason.message) {
+              showSlideAlert(thunkAPI.dispatch, reason.message, 'error', 5000)
+            }
 
             if (errorDetail && !errorDetail.includes('already exists')) {
               payload.failedMarkRecaptureSubmissions.push(
                 markRecaptureSubmissions[index]
               )
+              showSlideAlert(thunkAPI.dispatch, errorDetail, 'error', 5000)
             }
+
             // what is result in this case?
           }
         }
@@ -137,23 +150,30 @@ export const fetchExistingMarks = createAsyncThunk(
     try {
       const state = thunkAPI.getState() as RootState
       const userPrograms = state.visitSetupDefaults.programs
-      await Promise.all(
-        userPrograms.map(async program => {
-          const existingMarkResponse = await api.get(
-            `existing-marks/program/${program.programId}`
-          )
+      if (
+        state.connectivity.isConnected &&
+        state.connectivity.isInternetReachable
+      ) {
+        await Promise.all(
+          userPrograms.map(async program => {
+            const existingMarkResponse = await api.get(
+              `existing-marks/program/${program.programId}`
+            )
 
-          let existingMarks = existingMarkResponse.data
-          console.log('existingMarks', existingMarks)
+            let existingMarks = existingMarkResponse.data
+            console.log('existingMarks', existingMarks)
 
-          allUserExistingMarks.push(...existingMarks)
-        })
-      )
+            allUserExistingMarks.push(...existingMarks)
+          })
+        )
 
-      return {
-        allUserExistingMarks,
+        return {
+          allUserExistingMarks,
+        }
       }
     } catch (error: any) {
+      console.log('🚀 ~ file: markRecapturePostBundler.ts:170 ~ error:', error)
+
       const errorMessage = generateErrorMessage(
         error?.code || 'An error occurred while fetching existing marks (ln 58)'
       )

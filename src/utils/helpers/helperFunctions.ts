@@ -12,7 +12,7 @@ export const generateErrorMessage = (errorCode: string) => {
       break
     case 'ERR_BAD_REQUEST':
       errorMessage = 'Request failed with status code 400 (Bad Request)'
-
+      break
     default:
       return errorCode
     // errorMessage = 'An unknown error occurred. Please try again.'
