@@ -46,20 +46,6 @@ export const showSlideAlert = (
   }, slideDuration)
 }
 
-// export const showSlideAlertWithParams = (
-//   dispatch: any,
-//   slideParams: {
-//     title: string
-//     color: 'success' | 'error' | 'warning' | 'info'
-//     open: boolean
-//   },
-//   slideDuration?: number
-// ) => {
-//   dispatch(setSlideAlertParams(slideParams))
-//   setTimeout(() => {
-//     dispatch(setSlideAlertParams({ title: '', color: 'success', open: false }))
-//   }, slideDuration || 2000)
-// }
 
 export const {
   openSlideAlert,
