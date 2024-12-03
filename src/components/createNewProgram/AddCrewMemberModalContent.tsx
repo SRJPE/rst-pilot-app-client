@@ -5,9 +5,13 @@ import {
   FormControl,
   HStack,
   Input,
+  Select,
   Radio,
   Text,
   VStack,
+  Center,
+  CheckIcon,
+  WarningOutlineIcon,
 } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -23,18 +27,23 @@ import CustomModalHeader from '../Shared/CustomModalHeader'
 import { crewMembersSchema } from '../../utils/helpers/yupValidations'
 import CustomSelect from '../Shared/CustomSelect'
 import { useEffect, useState } from 'react'
+import { set } from 'lodash'
 
 const AddCrewMemberModalContent = ({
   closeModal,
   addTrapModalContent,
+  personnelOptions,
 }: {
-  closeModal: any
+  closeModal: () => void
   addTrapModalContent?: any
+  personnelOptions: Array<IndividualCrewMemberValuesI & { id: number }>
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+  const [selectedPersonnelId, setSelectedPersonnelId] = useState('')
+  const [selectedPersonnel, setSelectedPersonnel] = useState({})
   const [modalDataTemp, setModalDataTemp] = useState({} as any)
 
   const handleAddCrewMemberSubmission = (
@@ -68,7 +77,7 @@ const AddCrewMemberModalContent = ({
         setFieldValue,
         setFieldTouched,
         setValues,
-
+        resetForm,
         touched,
         errors,
         values,
@@ -81,7 +90,11 @@ const AddCrewMemberModalContent = ({
             <CustomModalHeader
               headerText={'Add Crew Member'}
               showHeaderButton={true}
-              closeModal={closeModal}
+              closeModal={() => {
+                resetForm()
+                setSelectedPersonnelId('')
+                closeModal()
+              }}
               headerButton={
                 <Button
                   bg='primary'
@@ -111,13 +124,70 @@ const AddCrewMemberModalContent = ({
                     Search for existing User
                   </Text>
                 </FormControl.Label>
-                <Input //TODO: implement search
+                {/* <Input //TODO: implement search
                   height='50px'
                   fontSize='16'
                   placeholder='Search for existing User'
                   value={''}
-                />
+                /> */}
+                {/* <CustomSelect
+                  selectedValue={selectedPersonnel}
+                  placeholder='Search for Existing User'
+                  onValueChange={() => setSelectedPersonnel('willie')}
+                  setFieldTouched={setFieldTouched}
+                  selectOptions={personnelList}
+                /> */}
+
+                <Select
+                  height='50px'
+                  fontSize='16'
+                  minWidth='100'
+                  accessibilityLabel='Select existing user'
+                  placeholder='Select existing user'
+                  _selectedItem={{
+                    bg: 'teal.600',
+                    endIcon: <CheckIcon size={5} />,
+                  }}
+                  mt='1'
+                  selectedValue={selectedPersonnelId}
+                  onValueChange={newValue => {
+                    const newSelectedPersonnel = personnelOptions.find(
+                      personnel => personnel.id.toString() === newValue
+                    )
+
+                    const selectedPersonnelAgency =
+                      dropdownValues?.fundingAgency.find(
+                        agency => agency.id === selectedPersonnel?.agencyId
+                      )
+
+                    const formattedPersonnelObj = {
+                      firstName: newSelectedPersonnel?.firstName,
+                      lastName: newSelectedPersonnel?.lastName,
+                      phoneNumber: newSelectedPersonnel?.phone,
+                      email: newSelectedPersonnel?.email,
+                      isLead: newSelectedPersonnel?.role === 'lead',
+                      agency: selectedPersonnelAgency?.definition || '',
+                      orcidId: newSelectedPersonnel?.orcidId,
+                      uid: newSelectedPersonnel?.uid,
+                    }
+
+                    setSelectedPersonnelId(newSelectedPersonnel.id.toString())
+                    setSelectedPersonnel(newSelectedPersonnel)
+                    setValues(formattedPersonnelObj)
+                  }}
+                >
+                  {personnelOptions.map(personnel => {
+                    return (
+                      <Select.Item
+                        key={personnel.id}
+                        label={`${personnel.firstName} ${personnel.lastName}`}
+                        value={`${personnel.id}`}
+                      />
+                    )
+                  })}
+                </Select>
               </FormControl>
+
               <Divider thickness='3' my='2%' />
 
               <HStack justifyContent='space-between'>
