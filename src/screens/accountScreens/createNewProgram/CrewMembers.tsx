@@ -30,29 +30,31 @@ import { Formik } from 'formik'
 import FormInputComponent from '../../../components/Shared/FormInputComponent'
 import CustomSelect from '../../../components/Shared/CustomSelect'
 import { crewMembersLeadSchema } from '../../../utils/helpers/yupValidations'
+import { InitialStateI as UserCredentialsState } from '../../../redux/reducers/userCredentialsSlice'
 
-export const sampleTeamLead = {
-  //to be replaced when a logged in user is persisted
-  firstName: 'John',
-  lastName: 'Doe',
-  phoneNumber: '1234567890',
-  email: 'test@flowwest.com',
-}
+import { CrewMembersStoreI } from '../../../redux/reducers/createNewProgramSlices/crewMembersSlice'
+import { PersonnelInitialStateI } from '../../../redux/reducers/personnelSlice'
 
 const CrewMembers = ({
   navigation,
   crewMembersStore,
+  userCredentialsStore,
+  personnelStore,
 }: {
   navigation: any
-  crewMembersStore: any
+  crewMembersStore: CrewMembersStoreI
+  userCredentialsStore: UserCredentialsState
+  personnelStore: PersonnelInitialStateI
 }) => {
+  console.log('🚀 ~ file: CrewMembers.tsx:49 ~ personnelStore:', personnelStore)
+
   const [addCrewMemberModalOpen, setAddCrewMemberModalOpen] = useState(
     false as boolean
   )
   const [addTrapModalContent, setAddTrapModalContent] = useState(
     IndividualCrewMemberState as any
   )
-  const { firstName, lastName, phoneNumber, email } = sampleTeamLead
+  const { firstName, lastName, phone, emailAddress } = userCredentialsStore
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -60,7 +62,6 @@ const CrewMembers = ({
 
   const handleSaveTeamLeadInformation = (values: any) => {
     let payload = {
-      ...sampleTeamLead,
       ...values,
       isLead: true,
     }
@@ -135,8 +136,8 @@ const CrewMembers = ({
                   </HStack>
                   <Text>First Name: {firstName}</Text>
                   <Text>Last Name: {lastName}</Text>
-                  <Text>Phone Number: {phoneNumber}</Text>
-                  <Text>Email: {email}</Text>
+                  <Text>Phone Number: {phone || 'Not Entered'}</Text>
+                  <Text>Email: {emailAddress}</Text>
                   <HStack space={10} alignItems='center'>
                     <FormControl w='45%'>
                       <FormControl.Label>
@@ -197,6 +198,7 @@ const CrewMembers = ({
               height='70%'
             >
               <AddCrewMemberModalContent
+                personnelOptions={personnelStore.personnelOptions}
                 addTrapModalContent={addTrapModalContent}
                 closeModal={() => setAddCrewMemberModalOpen(false)}
               />
@@ -211,6 +213,8 @@ const CrewMembers = ({
 const mapStateToProps = (state: RootState) => {
   return {
     crewMembersStore: state.crewMembers.crewMembersStore,
+    userCredentialsStore: state.userCredentials,
+    personnelStore: state.personnel,
   }
 }
 
