@@ -63,7 +63,7 @@ export const connectionChanged = createAsyncThunk(
         thunkAPI.dispatch,
         'Network connection established successfully',
         'success',
-        5000
+        2000
       )
       return payload
     } catch (e) {
