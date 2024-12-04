@@ -28,6 +28,7 @@ import { crewMembersSchema } from '../../utils/helpers/yupValidations'
 import CustomSelect from '../Shared/CustomSelect'
 import { useEffect, useState } from 'react'
 import { set } from 'lodash'
+import { PersonnelObject } from '../../screens/accountScreens/createNewProgram/CrewMembers'
 
 const AddCrewMemberModalContent = ({
   closeModal,
@@ -36,20 +37,30 @@ const AddCrewMemberModalContent = ({
 }: {
   closeModal: () => void
   addTrapModalContent?: any
-  personnelOptions: Array<IndividualCrewMemberValuesI & { id: number }>
+  personnelOptions: Array<PersonnelObject>
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
   const [selectedPersonnelId, setSelectedPersonnelId] = useState('')
-  const [selectedPersonnel, setSelectedPersonnel] = useState({})
+  const [selectedPersonnel, setSelectedPersonnel] = useState<
+    Partial<PersonnelObject>
+  >({
+    firstName: '',
+    lastName: '',
+    phoneNumber: null,
+    email: '',
+    isLead: false,
+    agency: '',
+    orcidId: '',
+    uid: '',
+  })
   const [modalDataTemp, setModalDataTemp] = useState({} as any)
 
   const handleAddCrewMemberSubmission = (
     values: IndividualCrewMemberValuesI
   ) => {
-    console.log('🚀 ~ handleAddTrapSubmission ~ values:', values)
     if (values?.uid) {
       dispatch(updateIndividualCrewMember(values))
     } else {
@@ -108,6 +119,7 @@ const AddCrewMemberModalContent = ({
                   }
                   onPress={() => {
                     handleSubmit()
+                    setSelectedPersonnelId('')
                     closeModal()
                   }}
                 >
@@ -161,19 +173,21 @@ const AddCrewMemberModalContent = ({
                       )
 
                     const formattedPersonnelObj = {
-                      firstName: newSelectedPersonnel?.firstName,
-                      lastName: newSelectedPersonnel?.lastName,
-                      phoneNumber: newSelectedPersonnel?.phone,
-                      email: newSelectedPersonnel?.email,
+                      firstName: newSelectedPersonnel?.firstName || '',
+                      lastName: newSelectedPersonnel?.lastName || '',
+                      phoneNumber: newSelectedPersonnel?.phone || '',
+                      email: newSelectedPersonnel?.email || '',
                       isLead: newSelectedPersonnel?.role === 'lead',
                       agency: selectedPersonnelAgency?.definition || '',
-                      orcidId: newSelectedPersonnel?.orcidId,
-                      uid: newSelectedPersonnel?.uid,
+                      orcidId: newSelectedPersonnel?.orcidId || '',
+                      uid: newSelectedPersonnel?.uid || '',
                     }
 
-                    setSelectedPersonnelId(newSelectedPersonnel.id.toString())
-                    setSelectedPersonnel(newSelectedPersonnel)
-                    setValues(formattedPersonnelObj)
+                    if (newSelectedPersonnel) {
+                      setSelectedPersonnelId(newSelectedPersonnel.id.toString())
+                      setSelectedPersonnel(newSelectedPersonnel)
+                      setValues(formattedPersonnelObj)
+                    }
                   }}
                 >
                   {personnelOptions.map(personnel => {

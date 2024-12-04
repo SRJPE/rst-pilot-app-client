@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
+  Box,
   Button,
   Center,
   Divider,
@@ -25,6 +26,8 @@ import { AppDispatch, RootState } from '../../../redux/store'
 import {
   IndividualCrewMemberState,
   saveIndividualCrewMember,
+  removeIndividualCrewMember,
+  IndividualCrewMemberValuesI,
 } from '../../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 import { Formik } from 'formik'
 import FormInputComponent from '../../../components/Shared/FormInputComponent'
@@ -34,6 +37,13 @@ import { InitialStateI as UserCredentialsState } from '../../../redux/reducers/u
 
 import { CrewMembersStoreI } from '../../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 import { PersonnelInitialStateI } from '../../../redux/reducers/personnelSlice'
+
+export type PersonnelObject = IndividualCrewMemberValuesI & {
+  id: number
+  phone: string
+  role: string
+  agencyId: number
+}
 
 const CrewMembers = ({
   navigation,
@@ -46,8 +56,6 @@ const CrewMembers = ({
   userCredentialsStore: UserCredentialsState
   personnelStore: PersonnelInitialStateI
 }) => {
-  console.log('🚀 ~ file: CrewMembers.tsx:49 ~ personnelStore:', personnelStore)
-
   const [addCrewMemberModalOpen, setAddCrewMemberModalOpen] = useState(
     false as boolean
   )
@@ -55,24 +63,41 @@ const CrewMembers = ({
     IndividualCrewMemberState as any
   )
   const { firstName, lastName, phone, emailAddress } = userCredentialsStore
+
+  const [filteredPersonnel, setFilteredPersonnel] = useState([])
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
 
+  const personnelOptions = personnelStore.personnelOptions as PersonnelObject[]
+
+  useEffect(() => {
+    const personnelArray = Object.values(personnelStore)
+  }, [crewMembersStore])
+
   const handleSaveTeamLeadInformation = (values: any) => {
     let payload = {
+      firstName,
+      lastName,
+      phoneNumber: phone,
+      email: emailAddress,
       ...values,
       isLead: true,
     }
     dispatch(saveIndividualCrewMember(payload))
   }
+
+  const handleDeleteCrewMember = (uid: string) => {
+    dispatch(removeIndividualCrewMember(uid))
+  }
+
   const handleShowTableModal = (selectedRowData: any) => {
-    const modalDataContainer = {} as any
-    Object.keys(selectedRowData).forEach((key: string) => {
-      modalDataContainer[key] = selectedRowData[key].toString()
-    })
-    setAddTrapModalContent(modalDataContainer)
+    console.log(
+      '🚀 ~ file: CrewMembers.tsx:71 ~ handleShowTableModal ~ selectedRowData:',
+      selectedRowData
+    )
+    setAddTrapModalContent(selectedRowData)
     setAddCrewMemberModalOpen(true)
   }
 
@@ -94,117 +119,125 @@ const CrewMembers = ({
           touched,
           errors,
           values,
-        }) => (
-          <>
-            <View flex={1} bg='#fff'>
-              <Center bg='primary' py='5%'>
-                <AppLogo imageSize={200} />
-              </Center>
-              <VStack py='5%' px='10%' space={5}>
-                <Heading alignSelf='center'>Add Trapping Crew</Heading>
-                <Text fontSize='lg' color='grey'>
-                  {
-                    'Please add some additional information about yourself and add your crew \nmembers. Accounts will be created for all crew'
-                  }
-                </Text>
-              </VStack>
-              {Object.values(crewMembersStore).length === 0 ? (
-                <VStack pb='5%' px='10%' space={5}>
-                  <HStack
-                    space={5}
-                    alignItems='center'
-                    justifyContent='space-between'
-                  >
+        }) => {
+          console.log('🚀 ~ file: CrewMembers.tsx:112 ~ errors:', errors)
+
+          return (
+            <>
+              <View flex={1} bg='#fff'>
+                <Center bg='primary' py='5%'>
+                  <AppLogo imageSize={200} />
+                </Center>
+                <VStack py='5%' px='10%' space={5}>
+                  <Heading alignSelf='center'>Add Trapping Crew</Heading>
+                  <Text fontSize='lg' color='grey'>
+                    {
+                      'Please add some additional information about yourself and add your crew \nmembers. Accounts will be created for all crew'
+                    }
+                  </Text>
+                </VStack>
+                {Object.values(crewMembersStore).length === 0 ? (
+                  <VStack pb='5%' px='10%' space={5}>
                     <HStack
                       space={5}
                       alignItems='center'
                       justifyContent='space-between'
                     >
+                      <HStack
+                        space={5}
+                        alignItems='center'
+                        justifyContent='space-between'
+                      >
+                        <Icon
+                          as={Ionicons}
+                          name='person-circle'
+                          size='5xl'
+                          color='primary'
+                        />
+                        <Heading alignSelf='center'>You (Team Lead)</Heading>
+                      </HStack>
+                      <Button bg='primary' onPress={() => handleSubmit()}>
+                        <Text fontSize='xl' color='white'>
+                          Save your information
+                        </Text>
+                      </Button>
+                    </HStack>
+                    <Text>First Name: {firstName}</Text>
+                    <Text>Last Name: {lastName}</Text>
+                    <Text>Phone Number: {phone || 'Not Entered'}</Text>
+                    <Text>Email: {emailAddress}</Text>
+                    <HStack space={10} alignItems='flex-start'>
+                      <FormControl w='45%' isInvalid={Boolean(errors.agency)}>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Funding Agency
+                          </Text>
+                        </FormControl.Label>
+                        <CustomSelect
+                          selectedValue={values.agency}
+                          placeholder='Funding Agency'
+                          onValueChange={handleChange('agency')}
+                          setFieldTouched={setFieldTouched}
+                          selectOptions={dropdownValues?.fundingAgency}
+                        />
+                        <FormControl.ErrorMessage _text={{ color: 'red.500' }}>
+                          {errors.agency}*
+                        </FormControl.ErrorMessage>
+                      </FormControl>
+                      <FormInputComponent
+                        width={'45%'}
+                        label={'Orcid ID'}
+                        touched={touched}
+                        errors={errors}
+                        value={values.orcidId ? `${values.orcidId}` : ''}
+                        camelName={'orcidId'}
+                        onChangeText={handleChange('orcidId')}
+                        onBlur={handleBlur('orcidId')}
+                      />
+                    </HStack>
+                  </VStack>
+                ) : (
+                  <ScrollView h={300}>
+                    <CrewMemberDataTable
+                      handleRemoveCrewMember={handleDeleteCrewMember}
+                      handleShowTableModal={handleShowTableModal}
+                    />
+                  </ScrollView>
+                )}
+                <Divider my='1%' />
+                <VStack py='5%' px='10%' space={5}>
+                  <Pressable onPress={() => setAddCrewMemberModalOpen(true)}>
+                    <HStack alignItems='center'>
                       <Icon
                         as={Ionicons}
-                        name='person-circle'
-                        size='5xl'
+                        name={'add-circle'}
+                        size='3xl'
                         color='primary'
+                        marginRight='1'
                       />
-                      <Heading alignSelf='center'>You (Team Lead)</Heading>
-                    </HStack>
-                    <Button bg='primary' onPress={() => handleSubmit()}>
-                      <Text fontSize='xl' color='white'>
-                        Save your information
+                      <Text color='primary' fontSize='xl'>
+                        Add crew Member
                       </Text>
-                    </Button>
-                  </HStack>
-                  <Text>First Name: {firstName}</Text>
-                  <Text>Last Name: {lastName}</Text>
-                  <Text>Phone Number: {phone || 'Not Entered'}</Text>
-                  <Text>Email: {emailAddress}</Text>
-                  <HStack space={10} alignItems='center'>
-                    <FormControl w='45%'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Funding Agency
-                        </Text>
-                      </FormControl.Label>
-                      <CustomSelect
-                        selectedValue={values.agency}
-                        placeholder='Funding Agency'
-                        onValueChange={handleChange('agency')}
-                        setFieldTouched={setFieldTouched}
-                        selectOptions={dropdownValues?.fundingAgency}
-                      />
-                    </FormControl>
-                    <FormInputComponent
-                      width={'45%'}
-                      label={'Orcid ID'}
-                      touched={touched}
-                      errors={errors}
-                      value={values.orcidId ? `${values.orcidId}` : ''}
-                      camelName={'orcidId'}
-                      onChangeText={handleChange('orcidId')}
-                      onBlur={handleBlur('orcidId')}
-                    />
-                  </HStack>
+                    </HStack>
+                  </Pressable>
                 </VStack>
-              ) : (
-                <ScrollView h={300}>
-                  <CrewMemberDataTable
-                    handleShowTableModal={handleShowTableModal}
-                  />
-                </ScrollView>
-              )}
-              <Divider my='1%' />
-              <VStack py='5%' px='10%' space={5}>
-                <Pressable onPress={() => setAddCrewMemberModalOpen(true)}>
-                  <HStack alignItems='center'>
-                    <Icon
-                      as={Ionicons}
-                      name={'add-circle'}
-                      size='3xl'
-                      color='primary'
-                      marginRight='1'
-                    />
-                    <Text color='primary' fontSize='xl'>
-                      Add crew Member
-                    </Text>
-                  </HStack>
-                </Pressable>
-              </VStack>
-            </View>
-            <CreateNewProgramNavButtons navigation={navigation} />
-            {/* --------- Modals --------- */}
-            <CustomModal
-              isOpen={addCrewMemberModalOpen}
-              closeModal={() => setAddCrewMemberModalOpen(false)}
-              height='70%'
-            >
-              <AddCrewMemberModalContent
-                personnelOptions={personnelStore.personnelOptions}
-                addTrapModalContent={addTrapModalContent}
+              </View>
+              <CreateNewProgramNavButtons navigation={navigation} />
+              {/* --------- Modals --------- */}
+              <CustomModal
+                isOpen={addCrewMemberModalOpen}
                 closeModal={() => setAddCrewMemberModalOpen(false)}
-              />
-            </CustomModal>
-          </>
-        )}
+                height='70%'
+              >
+                <AddCrewMemberModalContent
+                  personnelOptions={personnelOptions}
+                  addTrapModalContent={addTrapModalContent}
+                  closeModal={() => setAddCrewMemberModalOpen(false)}
+                />
+              </CustomModal>
+            </>
+          )
+        }}
       </Formik>
     </>
   )

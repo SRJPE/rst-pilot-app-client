@@ -19,7 +19,7 @@ const initialState: PersonnelInitialStateI = {
 export interface IndividualPersonnelValuesI {
   firstName: string | null
   lastName: string | null
-  phoneNumber: number | null
+  phoneNumber: string | null
   email: string | null
   isLead: boolean
   agency: string | null
