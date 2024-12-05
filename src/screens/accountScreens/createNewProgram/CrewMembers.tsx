@@ -37,6 +37,8 @@ import { InitialStateI as UserCredentialsState } from '../../../redux/reducers/u
 
 import { CrewMembersStoreI } from '../../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 import { PersonnelInitialStateI } from '../../../redux/reducers/personnelSlice'
+import { markCreateNewProgramStepIncomplete } from '../../../redux/reducers/createNewProgramSlices/createNewProgramHomeSlice'
+import { set } from 'lodash'
 
 export type PersonnelObject = IndividualCrewMemberValuesI & {
   id: number
@@ -64,17 +66,33 @@ const CrewMembers = ({
   )
   const { firstName, lastName, phone, emailAddress } = userCredentialsStore
 
-  const [filteredPersonnel, setFilteredPersonnel] = useState([])
+  const [filteredPersonnel, setFilteredPersonnel] = useState(
+    personnelStore.personnelOptions as PersonnelObject[]
+  )
+
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
 
-  const personnelOptions = personnelStore.personnelOptions as PersonnelObject[]
+  const updatedCrewMembersStore = useSelector(
+    (state: RootState) => state.crewMembers.crewMembersStore
+  )
+
+  const updatedCrewMembersArray = Object.values(updatedCrewMembersStore)
 
   useEffect(() => {
-    const personnelArray = Object.values(personnelStore)
-  }, [crewMembersStore])
+    const crewMemberIds = updatedCrewMembersArray.map(
+      (crewMember: IndividualCrewMemberValuesI & { id: string }) =>
+        crewMember.id
+    )
+
+    if (updatedCrewMembersArray.length === 0) {
+      dispatch(markCreateNewProgramStepIncomplete('crewMembers'))
+    }
+  }, [updatedCrewMembersStore])
+
+  const personnelOptions = personnelStore.personnelOptions as PersonnelObject[]
 
   const handleSaveTeamLeadInformation = (values: any) => {
     let payload = {
@@ -93,10 +111,6 @@ const CrewMembers = ({
   }
 
   const handleShowTableModal = (selectedRowData: any) => {
-    console.log(
-      '🚀 ~ file: CrewMembers.tsx:71 ~ handleShowTableModal ~ selectedRowData:',
-      selectedRowData
-    )
     setAddTrapModalContent(selectedRowData)
     setAddCrewMemberModalOpen(true)
   }
