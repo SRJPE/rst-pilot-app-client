@@ -274,7 +274,12 @@ const TrapOperations = ({
     }
   }, [activeTabId, reduxState])
 
-  const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
+  const handleNavButtonClick = (
+    direction: 'left' | 'right',
+    values: any,
+    warningResultFlow: boolean,
+    warningResultTemp: boolean
+  ) => {
     if (activeTabId && activeTabId != 'placeholderId') {
       const destination =
         direction === 'left'
@@ -283,7 +288,11 @@ const TrapOperations = ({
               values,
               'Trap Operations',
               false,
-              navigation
+              navigation,
+              {
+                warningResultFlow,
+                warningResultTemp,
+              }
             )
       const callback = () => {
         navigateHelper(
@@ -349,7 +358,12 @@ const TrapOperations = ({
             <NavButtons
               navigation={navigation}
               handleSubmit={(buttonDirection: 'left' | 'right') => {
-                handleNavButtonClick(buttonDirection, values)
+                handleNavButtonClick(
+                  buttonDirection,
+                  values,
+                  warningResultFlow,
+                  warningResultTemp
+                )
               }}
               errors={errors}
               touched={touched}

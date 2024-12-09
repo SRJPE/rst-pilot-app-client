@@ -307,9 +307,9 @@ export const navigateFlowRightButton = (
   values: any,
   activePage: string,
   holdingForMarkRecap: boolean,
-  navigation: any
+  navigation: any,
+  warnings?: any
 ) => {
-  console.log('right', activePage)
   //this is now kind of redundant with the implementation of the loading screen
   switch (activePage) {
     case 'Visit Setup':
@@ -321,20 +321,10 @@ export const navigateFlowRightButton = (
         values?.trapStatus === 'trap not in service - restart trapping'
       ) {
         return 'Started Trapping'
-      } else if (values?.flowMeasure > 1000) {
+      } else if (warnings?.warningResultFlow) {
         return 'High Flows'
-      } else if (values?.waterTemperatureUnit === '°C') {
-        if (values?.waterTemperature > 30) {
-          return 'High Temperatures'
-        } else {
-          return 'Fish Processing'
-        }
-      } else if (values?.waterTemperatureUnit === '°F') {
-        if (values?.waterTemperature > 86) {
-          return 'High Temperatures'
-        } else {
-          return 'Fish Processing'
-        }
+      } else if (warnings?.warningResultTemp) {
+        return 'High Temperatures'
       } else {
         return 'Fish Processing'
       }

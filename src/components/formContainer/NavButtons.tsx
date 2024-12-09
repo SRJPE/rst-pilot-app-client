@@ -114,20 +114,6 @@ const NavButtons = ({
           values?.trapStatus === 'trap not in service - restart trapping'
         ) {
           navigateHelper('Started Trapping')
-        } else if (values?.flowMeasure > 1000) {
-          navigateHelper('High Flows')
-        } else if (values?.waterTemperatureUnit === '°C') {
-          if (values?.waterTemperature > 30) {
-            navigateHelper('High Temperatures')
-          } else {
-            navigateHelper('Fish Processing')
-          }
-        } else if (values?.waterTemperatureUnit === '°F') {
-          if (values?.waterTemperature > 86) {
-            navigateHelper('High Temperatures')
-          } else {
-            navigateHelper('Fish Processing')
-          }
         } else {
           navigateHelper('Fish Processing')
         }
