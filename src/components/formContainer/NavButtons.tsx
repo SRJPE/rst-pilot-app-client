@@ -167,6 +167,9 @@ const NavButtons = ({
       case 'High Temperatures':
         navigateHelper('Fish Processing')
         break
+      case 'Non Functional Trap':
+        navigateHelper('Fish Processing')
+        break
       case 'No Fish Caught':
         navigateHelper('Start Mark Recapture')
         break
@@ -299,7 +302,7 @@ const NavButtons = ({
         buttonText = 'End Trap Visit'
         break
       case 'Non Functional Trap':
-        buttonText = 'End Trap Visit'
+        buttonText = 'Move on to Fish Processing'
         break
       case 'No Fish Caught':
         buttonText = 'End Trap Visit'
@@ -325,7 +328,7 @@ const NavButtons = ({
       // if form is complete, then do not disable button
       return !isFormComplete
     } else if (activePage === 'Non Functional Trap') {
-      return true
+      return false
     } else if (activePage === 'Fish Input') {
       return !(values?.length >= 1)
     } else if (isValid) {

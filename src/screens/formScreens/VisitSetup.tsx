@@ -33,7 +33,7 @@ import {
   TabStateI,
   resetTabsSlice,
 } from '../../redux/reducers/formSlices/tabSlice'
-import { uniqBy } from 'lodash'
+import { uniqBy, sortBy } from 'lodash'
 import { DeviceEventEmitter, Alert } from 'react-native'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import CustomSelect from '../../components/Shared/CustomSelect'
@@ -350,7 +350,7 @@ const VisitSetup = ({
       const crewMemberDefaults = visitSetupDefaultsState?.crewMembers
       crewMemberDefaults.forEach((crewList: any[]) => {
         if (crewList.length && crewList[0].programId === programId) {
-          payload = crewList.map((crewMember: any) => ({
+          payload = sortBy(crewList, ['lastName']).map((crewMember: any) => ({
             label: `${crewMember?.firstName} ${crewMember?.lastName}`,
             value: `${crewMember?.firstName} ${crewMember?.lastName}`,
           }))
