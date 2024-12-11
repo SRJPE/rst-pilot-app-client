@@ -13,7 +13,10 @@ export const trapVisitSchema = yup.object().shape({
 export const trapOperationsSchema = yup.object().shape({
   trapStatus: yup.string(),
   reasonNotFunc: yup.string().when('trapStatus', {
-    is: 'trap functioning but not normally' || 'trap not functioning',
+    is: (val: string) =>
+      ['trap functioning but not normally', 'trap not functioning'].includes(
+        val
+      ),
     then: yup.string().required('Reason for not functioning required'),
   }),
   flowMeasure: yup
@@ -84,8 +87,11 @@ export const trapPostProcessingSchema = yup.object().shape({
 export const fishProcessingSchema = yup.object().shape({
   fishProcessedResult: yup.string().required('Fish Processed status required'),
   reasonForNotProcessing: yup.string().when('fishProcessedResult', {
-    is:
-      'no catch data, fish left in live box' || 'no catch data, fish released',
+    is: (val: string) =>
+      [
+        'no catch data, fish left in live box',
+        'no catch data, fish released',
+      ].includes(val),
     then: yup.string().required('Reason for not processing required'),
     otherwise: yup.string().nullable(),
   }),
@@ -331,10 +337,7 @@ export const crewMembersSchema = yup.object().shape({
   phoneNumber: yup
     .string()
     .required('Phone number required')
-    .matches(
-      /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/,
-      'Phone number is not valid'
-    ),
+    .matches(/^\d{3}-\d{3}-\d{4}$/, 'Phone number is not valid'),
   email: yup
     .string()
     .required('Email required')
