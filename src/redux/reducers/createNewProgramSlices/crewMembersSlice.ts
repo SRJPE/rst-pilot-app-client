@@ -71,22 +71,13 @@ export const crewMembersSlice = createSlice({
       console.log('🚀 ~ file: crewMembersSlice.ts:71 ~ action:', action)
 
       const crewMembersStoreCopy = cloneDeep(state.crewMembersStore)
-      console.log(
-        '🚀 ~ file: crewMembersSlice.ts:74 ~ crewMembersStoreCopy:',
-        crewMembersStoreCopy
-      )
-
       const crewMembersArray = Object.values(crewMembersStoreCopy)
 
       const newCrewMembersArray = crewMembersArray.filter(
-        (crewMember: any) => crewMember.uid !== action.payload
+        (crewMember: any) => crewMember.email !== action.payload
       )
 
       const newCrewMembersStore = Object.assign({}, newCrewMembersArray)
-      console.log(
-        '🚀 ~ file: crewMembersSlice.ts:84 ~ newCrewMembersStore:',
-        newCrewMembersStore
-      )
 
       state.crewMembersStore = newCrewMembersStore
     },
