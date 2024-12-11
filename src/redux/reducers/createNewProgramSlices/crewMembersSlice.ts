@@ -26,7 +26,7 @@ export interface IndividualCrewMemberValuesI {
 export const IndividualCrewMemberState: IndividualCrewMemberValuesI = {
   firstName: '',
   lastName: '',
-  phoneNumber: null,
+  phoneNumber: '',
   email: '',
   isLead: false,
   agency: '',
