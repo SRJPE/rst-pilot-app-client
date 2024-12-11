@@ -85,7 +85,6 @@ const CrewMemberDataTable = ({
               style={{
                 flex: 1,
                 display: 'flex',
-
                 justifyContent: 'center',
                 alignItems: 'center',
               }}
@@ -94,18 +93,8 @@ const CrewMemberDataTable = ({
                 variant='solid'
                 bg='primary'
                 colorScheme='primary'
-                size='sm'
-                marginRight={3}
-                onPress={() => handleShowTableModal(trapCrewObject)}
-              >
-                <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
-              </IconButton>
-              <IconButton
-                variant='solid'
-                bg='primary'
-                colorScheme='primary'
-                size='sm'
-                onPress={() => handleRemoveCrewMember(trapCrewObject.uid)}
+                size='md'
+                onPress={() => handleRemoveCrewMember(trapCrewObject.email!)}
               >
                 <Icon as={Entypo} size='5' name='trash' color='warmGray.50' />
               </IconButton>
