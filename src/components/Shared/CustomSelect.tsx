@@ -49,7 +49,7 @@ const CustomSelect: React.FC<CustomSelectI> = props => {
               <Select.Item
                 key={item.id ?? idx}
                 label={item.definition}
-                value={item.id.toString()}
+                value={item.definition}
               />
             )
           } else if (item.value) {
