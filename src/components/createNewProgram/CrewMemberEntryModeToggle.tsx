@@ -1,15 +1,24 @@
 import { Button, HStack, Text } from 'native-base'
 import React from 'react'
 import { CrewMemberEntryMode } from './AddCrewMemberModalContent'
+import { reset } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { FormikState } from 'formik'
+import { IndividualCrewMemberValuesI } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 
 type Props = {
   crewMemberEntryMode: CrewMemberEntryMode
   changeCrewMemberEntryMode: (mode: CrewMemberEntryMode) => void
+  resetSearch: () => void
+  resetForm: (
+    nextState?: Partial<FormikState<IndividualCrewMemberValuesI>> | undefined
+  ) => void
 }
 
 const CrewMemberEntryModeToggle = ({
   changeCrewMemberEntryMode,
   crewMemberEntryMode,
+  resetForm,
+  resetSearch,
 }: Props) => {
   return (
     <HStack justifyContent={'center'}>
@@ -19,7 +28,10 @@ const CrewMemberEntryModeToggle = ({
         borderRightRadius={'none'}
         px='10'
         bg={crewMemberEntryMode === 'search' ? 'primary' : 'transparent'}
-        onPress={() => changeCrewMemberEntryMode('search')}
+        onPress={() => {
+          changeCrewMemberEntryMode('search')
+          resetForm()
+        }}
       >
         <Text color={crewMemberEntryMode === 'search' ? 'white' : 'primary'}>
           Search
@@ -31,7 +43,10 @@ const CrewMemberEntryModeToggle = ({
         borderLeftRadius={'none'}
         px='10'
         bg={crewMemberEntryMode === 'manual' ? 'primary' : 'transparent'}
-        onPress={() => changeCrewMemberEntryMode('manual')}
+        onPress={() => {
+          changeCrewMemberEntryMode('manual')
+          resetSearch()
+        }}
       >
         <Text color={crewMemberEntryMode === 'manual' ? 'white' : 'primary'}>
           Manual

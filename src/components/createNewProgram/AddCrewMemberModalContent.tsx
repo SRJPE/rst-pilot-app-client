@@ -19,7 +19,7 @@ import {
 } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Searchbar } from 'react-native-paper'
 import { PersonnelObject } from '../../screens/accountScreens/createNewProgram/CrewMembers'
 import { crewMembersSchema } from '../../utils/helpers/yupValidations'
@@ -47,28 +47,31 @@ const AddCrewMemberModalContent = ({
   const [crewMemberEntryMode, setCrewMemberEntryMode] =
     useState<CrewMemberEntryMode>('search')
 
-  useEffect(() => {
-    setEmailSearchValue('')
-    setEmailSearchResults([])
-    setShowNoResultsMessage(false)
-  }, [crewMemberEntryMode])
-  const [selectedPersonnel, setSelectedPersonnel] = useState<
-    Partial<PersonnelObject>
-  >({
-    firstName: '',
-    lastName: '',
-    phoneNumber: null,
-    email: '',
-    isLead: false,
-    agency: '',
-    orcidId: '',
-    uid: '',
-  })
   const [modalDataTemp, setModalDataTemp] = useState({} as any)
   const [emailSearchValue, setEmailSearchValue] = useState<string>('')
   const [emailSearchResults, setEmailSearchResults] = useState<
     PersonnelObject[]
   >([])
+
+  const resetSearch = () => {
+    setEmailSearchValue('')
+    setEmailSearchResults([])
+    setShowNoResultsMessage(false)
+  }
+
+  const checkExistingEmail = useCallback(
+    (email: string | null) => {
+      const emailExists = personnelOptions.some(
+        personnel => personnel?.email?.toLowerCase() === email?.toLowerCase()
+      )
+      if (emailExists) {
+        return { email: 'Email already exists' }
+      } else {
+        return null
+      }
+    },
+    [personnelOptions]
+  )
 
   const handleAddCrewMemberSubmission = (
     values: IndividualCrewMemberValuesI
@@ -115,6 +118,16 @@ const AddCrewMemberModalContent = ({
         useEffect(() => {
           setValues(modalDataTemp)
         }, [modalDataTemp])
+
+        const emailExistsError = checkExistingEmail(values.email)
+
+        const noInputsTouched = Object.keys(touched).length === 0
+
+        const formInvalid =
+          noInputsTouched ||
+          Object.values(errors).length > 0 ||
+          Boolean(emailExistsError)
+
         return (
           <>
             <CustomModalHeader
@@ -123,9 +136,13 @@ const AddCrewMemberModalContent = ({
               closeModal={() => {
                 resetForm()
                 closeModal()
+                resetSearch()
+                changeCrewMemberEntryMode('search')
               }}
             />
             <CrewMemberEntryModeToggle
+              resetForm={resetForm}
+              resetSearch={resetSearch}
               changeCrewMemberEntryMode={changeCrewMemberEntryMode}
               crewMemberEntryMode={crewMemberEntryMode}
             />
@@ -185,7 +202,7 @@ const AddCrewMemberModalContent = ({
                     label={'First Name'}
                     touched={touched}
                     errors={errors}
-                    value={values.firstName ? `${values.firstName}` : ''}
+                    value={values.firstName || ''}
                     camelName={'firstName'}
                     width={'45%'}
                     onChangeText={handleChange('firstName')}
@@ -195,7 +212,7 @@ const AddCrewMemberModalContent = ({
                     label={'Last Name'}
                     touched={touched}
                     errors={errors}
-                    value={values.lastName ? `${values.lastName}` : ''}
+                    value={values.lastName || ''}
                     camelName={'lastName'}
                     width={'45%'}
                     onChangeText={handleChange('lastName')}
@@ -207,7 +224,7 @@ const AddCrewMemberModalContent = ({
                     label={'Phone Number'}
                     touched={touched}
                     errors={errors}
-                    value={values.phoneNumber ? `${values.phoneNumber}` : ''}
+                    value={values.phoneNumber || ''}
                     camelName={'phoneNumber'}
                     // keyboardType={'phone'} //TODO add phone styling
                     width={'45%'}
@@ -217,8 +234,8 @@ const AddCrewMemberModalContent = ({
                   <FormInputComponent
                     label={'Email'}
                     touched={touched}
-                    errors={errors}
-                    value={values.email ? `${values.email}` : ''}
+                    errors={emailExistsError || errors}
+                    value={values.email?.trim() || ''}
                     camelName={'email'}
                     width={'45%'}
                     onChangeText={handleChange('email')}
@@ -233,6 +250,7 @@ const AddCrewMemberModalContent = ({
                       </Text>
                     </FormControl.Label>
                     <CustomSelect
+                      dataType='fundingAgency'
                       selectedValue={values.agency as string}
                       placeholder='Funding Agency'
                       onValueChange={handleChange('agency')}
@@ -244,7 +262,7 @@ const AddCrewMemberModalContent = ({
                     label={'Orcid ID (optional)'}
                     touched={touched}
                     errors={errors}
-                    value={values.orcidId ? `${values.orcidId}` : ''}
+                    value={values.orcidId || ''}
                     camelName={'orcidId'}
                     width={'45%'}
                     onChangeText={handleChange('orcidId')}
@@ -293,11 +311,7 @@ const AddCrewMemberModalContent = ({
                   mx='2'
                   px='10'
                   shadow='3'
-                  isDisabled={
-                    Object.values(touched).length === 0 ||
-                    (Object.values(touched).length > 0 &&
-                      Object.values(errors).length > 0)
-                  }
+                  isDisabled={formInvalid}
                   onPress={() => {
                     handleSubmit()
                     closeModal()
