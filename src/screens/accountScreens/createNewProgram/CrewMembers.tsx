@@ -140,7 +140,7 @@ const CrewMembers = ({
                       marginRight='1'
                     />
                     <Text color='primary' fontSize='md'>
-                      Add crew Member
+                      Add Crew Member
                     </Text>
                   </HStack>
                 </Pressable>
@@ -183,7 +183,7 @@ const CrewMembers = ({
                     marginRight='1'
                   />
                   <Text color='primary' fontSize='xl'>
-                    Add crew Member
+                    Add Crew Member
                   </Text>
                 </HStack>
               </Button>
@@ -203,7 +203,7 @@ const CrewMembers = ({
       <CustomModal
         isOpen={addCrewMemberModalOpen}
         closeModal={() => setAddCrewMemberModalOpen(false)}
-        height='70%'
+        height='85%'
       >
         <AddCrewMemberModalContent
           personnelOptions={personnelOptions}

@@ -148,8 +148,8 @@ const AddCrewMemberModalContent = ({
             />
             {crewMemberEntryMode === 'search' && (
               <VStack space={3} mx='5%' my='2%'>
-                <Text color='black' fontSize='xl'>
-                  Search for existing User
+                <Text color='black' fontSize='lg'>
+                  Search for existing user
                 </Text>
                 <HStack>
                   <Searchbar
@@ -184,12 +184,14 @@ const AddCrewMemberModalContent = ({
                 </HStack>
                 <Box marginTop={5}>
                   <QuickAddCrewTable
+                    resetSearch={resetSearch}
                     emailSearchResults={emailSearchResults}
                     changeCrewMemberEntryMode={changeCrewMemberEntryMode}
                     handleAddCrewMemberSubmission={
                       handleAddCrewMemberSubmission
                     }
                     showNoResultsMessage={showNoResultsMessage}
+                    closeModal={closeModal}
                   />
                 </Box>
               </VStack>

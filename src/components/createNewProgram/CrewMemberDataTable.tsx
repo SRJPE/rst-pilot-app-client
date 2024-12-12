@@ -51,7 +51,7 @@ const CrewMemberDataTable = ({
                 marginRight='1'
               />
               <Text color='primary' fontSize='md'>
-                Add crew Member
+                Add Crew Member
               </Text>
             </HStack>
           </Pressable>

@@ -13,19 +13,21 @@ import { Ionicons } from '@expo/vector-icons'
 import { CrewMemberEntryMode } from './AddCrewMemberModalContent'
 
 type Props = {
-  resetSearchVales?: () => void
+  resetSearch: () => void
   emailSearchResults: any[]
   handleAddCrewMemberSubmission: (values: IndividualCrewMemberValuesI) => void
   showNoResultsMessage: boolean
   changeCrewMemberEntryMode: (mode: CrewMemberEntryMode) => void
+  closeModal: () => void
 }
 
 const QuickAddCrewTable = ({
-  resetSearchVales,
+  resetSearch,
   emailSearchResults,
   handleAddCrewMemberSubmission,
   showNoResultsMessage,
   changeCrewMemberEntryMode,
+  closeModal,
 }: Props) => {
   const dispatch = useDispatch<AppDispatch>()
 
@@ -44,7 +46,7 @@ const QuickAddCrewTable = ({
     })
 
   const [page, setPage] = useState(0)
-  const [numberOfItemsPerPage, onItemsPerPageChange] = useState(8)
+  const [numberOfItemsPerPage, onItemsPerPageChange] = useState(10)
   const from = page * numberOfItemsPerPage
   const to = Math.min(
     (page + 1) * numberOfItemsPerPage,
@@ -53,12 +55,6 @@ const QuickAddCrewTable = ({
   useEffect(() => {
     setPage(0)
   }, [])
-
-  // useEffect(() => {
-  //   setPage(0)
-  //   resetSearchVales()
-
-  // }, [])
 
   const handleQuickAddCrewMember = (personnel: PersonnelObject) => {
     const { id, firstName, lastName, email, phone, role, orcidId, agencyId } =
@@ -91,66 +87,98 @@ const QuickAddCrewTable = ({
   return (
     <>
       {emailSearchResults.length > 0 && (
-        <DataTable>
-          <DataTable.Header>
-            <DataTable.Title style={styles.baseCell}>First</DataTable.Title>
-            <DataTable.Title style={styles.baseCell}>Last</DataTable.Title>
-            <DataTable.Title style={styles.extendedCell}>Email</DataTable.Title>
-            <DataTable.Title style={styles.baseCell}>Actions</DataTable.Title>
-          </DataTable.Header>
-          {emailSearchResults.slice(from, to).map(personnel => {
-            const { id, firstName, lastName, email } = personnel
-
-            return (
-              <DataTable.Row style={{ display: 'flex' }} key={id}>
-                <DataTable.Cell style={styles.baseCell}>
-                  {firstName}
-                </DataTable.Cell>
-                <DataTable.Cell style={styles.baseCell}>
-                  {lastName}
-                </DataTable.Cell>
-                <DataTable.Cell style={styles.extendedCell}>
-                  {email}
-                </DataTable.Cell>
-                <DataTable.Cell>
-                  {checkIsCrewMember(personnel) ? (
-                    <Button
-                      onPress={() => {
-                        handleQuickRemoveCrewMember(personnel)
-                      }}
-                      width={100}
-                      bg='red.500'
-                      leftIcon={<Icon as={Ionicons} name='remove' size='sm' />}
-                    >
-                      Remove
-                    </Button>
-                  ) : (
-                    <Button
-                      onPress={() => {
-                        handleQuickAddCrewMember(personnel)
-                      }}
-                      bg='primary'
-                      width={100}
-                      leftIcon={<Icon as={Ionicons} name='add' size='sm' />}
-                    >
-                      Add
-                    </Button>
-                  )}
-                </DataTable.Cell>
-              </DataTable.Row>
-            )
-          })}
-          <DataTable.Pagination
-            page={page}
-            numberOfPages={Math.ceil(emailSearchResults.length / 10)}
-            onPageChange={page => setPage(page)}
-            label={`${from + 1}-${to} of ${emailSearchResults.length}`}
-            showFastPaginationControls
-            numberOfItemsPerPage={numberOfItemsPerPage}
-            onItemsPerPageChange={onItemsPerPageChange}
-            selectPageDropdownLabel={'Rows per page'}
-          />
-        </DataTable>
+        <>
+          <DataTable>
+            <DataTable.Header>
+              <DataTable.Title style={styles.baseCell}>First</DataTable.Title>
+              <DataTable.Title style={styles.baseCell}>Last</DataTable.Title>
+              <DataTable.Title style={styles.extendedCell}>
+                Email
+              </DataTable.Title>
+              <DataTable.Title style={styles.baseCell}>Actions</DataTable.Title>
+            </DataTable.Header>
+            {emailSearchResults.slice(from, to).map(personnel => {
+              const { id, firstName, lastName, email } = personnel
+              return (
+                <DataTable.Row style={{ display: 'flex' }} key={id}>
+                  <DataTable.Cell style={styles.baseCell}>
+                    {firstName}
+                  </DataTable.Cell>
+                  <DataTable.Cell style={styles.baseCell}>
+                    {lastName}
+                  </DataTable.Cell>
+                  <DataTable.Cell style={styles.extendedCell}>
+                    {email}
+                  </DataTable.Cell>
+                  <DataTable.Cell>
+                    {checkIsCrewMember(personnel) ? (
+                      <Button
+                        onPress={() => {
+                          handleQuickRemoveCrewMember(personnel)
+                        }}
+                        width={100}
+                        borderColor='red.500'
+                        borderWidth={1}
+                        bg='transparent'
+                        leftIcon={
+                          <Icon
+                            as={Ionicons}
+                            color='red.500'
+                            name='remove'
+                            size='sm'
+                          />
+                        }
+                      >
+                        <Text color='red.500'>Remove</Text>
+                      </Button>
+                    ) : (
+                      <Button
+                        onPress={() => {
+                          handleQuickAddCrewMember(personnel)
+                        }}
+                        bg='transparent'
+                        borderColor='primary'
+                        borderWidth={1}
+                        width={100}
+                        leftIcon={
+                          <Icon
+                            as={Ionicons}
+                            color='primary'
+                            name='add'
+                            size='sm'
+                          />
+                        }
+                      >
+                        <Text color='primary'>Add</Text>
+                      </Button>
+                    )}
+                  </DataTable.Cell>
+                </DataTable.Row>
+              )
+            })}
+            <DataTable.Pagination
+              page={page}
+              numberOfPages={Math.ceil(emailSearchResults.length / 10)}
+              onPageChange={page => setPage(page)}
+              label={`${from + 1}-${to} of ${emailSearchResults.length}`}
+              showFastPaginationControls
+              numberOfItemsPerPage={numberOfItemsPerPage}
+              onItemsPerPageChange={onItemsPerPageChange}
+              selectPageDropdownLabel={'Rows per page'}
+            />
+          </DataTable>
+          <Button
+            mt={5}
+            onPress={() => {
+              closeModal(), resetSearch()
+            }}
+            bg='primary'
+          >
+            <Text color='white' fontSize='lg'>
+              Close Modal
+            </Text>
+          </Button>
+        </>
       )}
       {showNoResultsMessage && (
         <Text fontSize={'lg'}>
