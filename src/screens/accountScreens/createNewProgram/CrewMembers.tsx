@@ -37,6 +37,7 @@ export type PersonnelObject = IndividualCrewMemberValuesI & {
   phone: string
   role: string
   agencyId: number
+  agencyDefinition: string
 }
 
 const CrewMembers = ({
@@ -57,19 +58,16 @@ const CrewMembers = ({
     IndividualCrewMemberState as any
   )
 
-  //TODO: Add OrcidId to the userCredentialsSlice type definition
-  //@ts-ignore
-  const { firstName, lastName, phone, emailAddress, agencyId, orcidId } =
-    userCredentialsStore
-
-  const [filteredPersonnel, setFilteredPersonnel] = useState(
-    personnelStore.personnelOptions as PersonnelObject[]
-  )
+  const {
+    firstName,
+    lastName,
+    phone,
+    emailAddress,
+    agencyDefinition,
+    orcidId,
+  } = userCredentialsStore
 
   const dispatch = useDispatch<AppDispatch>()
-  const dropdownValues = useSelector(
-    (state: RootState) => state.dropdowns.values
-  )
 
   const updatedCrewMembersStore = useSelector(
     (state: RootState) => state.crewMembers.crewMembersStore
@@ -78,11 +76,6 @@ const CrewMembers = ({
   const updatedCrewMembersArray = Object.values(updatedCrewMembersStore)
 
   useEffect(() => {
-    const crewMemberIds = updatedCrewMembersArray.map(
-      (crewMember: IndividualCrewMemberValuesI & { id: string }) =>
-        crewMember.id
-    )
-
     if (updatedCrewMembersArray.length === 0) {
       dispatch(markCreateNewProgramStepIncomplete('crewMembers'))
     }
@@ -97,7 +90,7 @@ const CrewMembers = ({
       phoneNumber: phone,
       email: emailAddress,
       orcidId,
-      agency: agencyId,
+      agency: agencyDefinition,
       isLead: true,
     }
     dispatch(saveIndividualCrewMember(payload))

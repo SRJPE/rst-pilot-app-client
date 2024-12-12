@@ -57,12 +57,16 @@ const QuickAddCrewTable = ({
   }, [])
 
   const handleQuickAddCrewMember = (personnel: PersonnelObject) => {
-    const { id, firstName, lastName, email, phone, role, orcidId, agencyId } =
-      personnel
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      role,
+      orcidId,
+      agencyDefinition,
+    } = personnel
 
-    const agencyDefinition = fundingAgencies.find(
-      agency => agency.id === agencyId
-    )?.definition
     const payload = {
       firstName,
       lastName,
@@ -76,11 +80,6 @@ const QuickAddCrewTable = ({
   }
 
   const handleQuickRemoveCrewMember = (personnel: PersonnelObject) => {
-    console.log(
-      '🚀 ~ file: AddCrewMemberModalContent.tsx:147 ~ handleQuickRemoveCrewMember ~ personnel:',
-      personnel
-    )
-
     dispatch(removeIndividualCrewMember(personnel.email))
   }
 
