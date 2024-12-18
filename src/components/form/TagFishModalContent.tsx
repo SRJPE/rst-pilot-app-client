@@ -40,7 +40,7 @@ const mapStateToProps = (state: RootState) => {
   }
 }
 
-const MarkFishModalContent = ({
+const TagFishModalContent = ({
   handleMarkFishFormSubmit,
   closeModal,
   crewMembers,
@@ -63,7 +63,7 @@ const MarkFishModalContent = ({
       <Formik
         validationSchema={addMarksOrTagsSchema}
         initialValues={initialFormValues}
-        onSubmit={(values) => handleFormSubmit(values)}
+        onSubmit={values => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -250,4 +250,4 @@ const MarkFishModalContent = ({
   )
 }
 
-export default connect(mapStateToProps)(MarkFishModalContent)
+export default connect(mapStateToProps)(TagFishModalContent)

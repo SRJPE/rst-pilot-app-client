@@ -111,6 +111,7 @@ const FishInputDataTable = ({
       dataObj.existingMarks = dataObj.existingMarks.length
       delete dataObj.UID
       delete dataObj.fishConditions
+      delete dataObj.comments
       let dataObjPadded = { ...emptyTableData, ...dataObj }
 
       const dataObjKeys = Object.keys(dataObjPadded)

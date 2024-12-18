@@ -499,7 +499,7 @@ const IncompleteSections = ({
                 )
               : null,
             isRandom: null, // Check w/ Erin
-            comments: null,
+            comments: fishValue.comments != null ? fishValue?.comments : null,
             createdBy: userCredentialsStore.id,
             qcCompleted: null,
             qcCompletedBy: null,

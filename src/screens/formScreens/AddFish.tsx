@@ -28,7 +28,7 @@ import CustomSelect from '../../components/Shared/CustomSelect'
 import CustomModalHeader, {
   AddFishModalHeaderButton,
 } from '../../components/Shared/CustomModalHeader'
-import MarkFishModalContent from '../../components/form/MarkFishModalContent'
+import TagFishModalContent from '../../components/form/TagFishModalContent'
 import AddGeneticsModalContent from '../../components/form/AddGeneticsModalContent'
 import {
   FishStoreI,
@@ -95,7 +95,7 @@ const AddFishContent = ({
   const [validationSchema, setValidationSchema] = useState<
     'default' | 'optionalLifeStage' | 'otherSpecies'
   >('default')
-  const [markFishModalOpen, setMarkFishModalOpen] = useState(false as boolean)
+  const [tagFishModalOpen, setTagFishModalOpen] = useState(false as boolean)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
     false as boolean
@@ -213,6 +213,7 @@ const AddFishContent = ({
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
     },
     whenSpeciesSteelhead: {
       species: createFormValueDefault({ value: null, required: true }),
@@ -233,6 +234,7 @@ const AddFishContent = ({
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
     },
     whenSpeciesOther: {
       species: createFormValueDefault({ value: null, required: true }),
@@ -254,6 +256,7 @@ const AddFishContent = ({
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
     },
   }
 
@@ -359,6 +362,15 @@ const AddFishContent = ({
           required: false,
         })
   )
+  const [comments, setComments] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.comments
+      : createFormValueDefault({
+          value: route.params?.editModeData.comments?.toString(),
+          touched: true,
+          required: false,
+        })
+  )
 
   useEffect(() => {
     if (forkLength.value) checkForFormError()
@@ -432,6 +444,7 @@ const AddFishContent = ({
     setFormHasError(true)
     setFishUID(uid())
     setRecentExistingMarks([])
+    setComments(stateDefaults[identifier].comments)
   }
 
   //RECENT MARKS ADDITIONS
@@ -507,6 +520,7 @@ const AddFishContent = ({
       existingMarks: [...existingMarks.value, ...recentExistingMarks],
       dead: dead.value,
       plusCountMethod: plusCountMethod.value,
+      comments: comments.value,
     }
 
     return values
@@ -682,6 +696,9 @@ const AddFishContent = ({
             {(species.value as string) !== '' && species.value !== null && (
               <>
                 <VStack space={4}>
+                  <Text color='black' fontSize='lg'>
+                    * : Required
+                  </Text>
                   <HStack space={4}>
                     <FormControl
                       w={route.params?.editModeData ? '1/3' : '1/2'}
@@ -1283,7 +1300,7 @@ const AddFishContent = ({
                           borderRadius='5'
                           maxWidth='40%'
                           marginRight='10'
-                          onPress={() => setMarkFishModalOpen(true)}
+                          onPress={() => setTagFishModalOpen(true)}
                         >
                           <Text color='primary'>Tag Fish</Text>
                         </Button>
@@ -1304,6 +1321,30 @@ const AddFishContent = ({
                       )}
                     </HStack>
                   )}
+                  <FormControl>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Comments
+                      </Text>
+                    </FormControl.Label>
+                    <Input
+                      height='50px'
+                      fontSize='16'
+                      placeholder='Write a comment'
+                      keyboardType='default'
+                      onChangeText={value => {
+                        let payload: FormValueI = {
+                          ...comments,
+                          value,
+                          touched: true,
+                          error: '',
+                        }
+
+                        setComments(payload)
+                      }}
+                      value={comments.value as string}
+                    />
+                  </FormControl>
                 </VStack>
               </>
             )}
@@ -1419,15 +1460,15 @@ const AddFishContent = ({
       </Box>
 
       {/* --------- Modals --------- */}
-      {markFishModalOpen && (
+      {tagFishModalOpen && (
         <CustomModal
-          isOpen={markFishModalOpen}
-          closeModal={() => setMarkFishModalOpen(false)}
+          isOpen={tagFishModalOpen}
+          closeModal={() => setTagFishModalOpen(false)}
           height='3/4'
         >
-          <MarkFishModalContent
+          <TagFishModalContent
             handleMarkFishFormSubmit={handleMarkFishFormSubmit}
-            closeModal={() => setMarkFishModalOpen(false)}
+            closeModal={() => setTagFishModalOpen(false)}
           />
         </CustomModal>
       )}
