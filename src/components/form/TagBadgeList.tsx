@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { updateMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
-import { startCase } from 'lodash'
+import { capitalize } from 'lodash'
 
 interface markBadgeI {
   markType: string
@@ -65,7 +65,7 @@ const TagBadgeList = ({ badgeListContent }: { badgeListContent: any }) => {
                   }
                 >
                   <Text color='white' fontWeight='500' fontSize='md'>
-                    {`${startCase(markType)} - ${markCode}`}
+                    {`${markType.replace(/\w+/g, capitalize)} - ${markCode}`}
                   </Text>
                 </Badge>
               )
