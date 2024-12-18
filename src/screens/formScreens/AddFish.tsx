@@ -29,6 +29,7 @@ import CustomModalHeader, {
   AddFishModalHeaderButton,
 } from '../../components/Shared/CustomModalHeader'
 import TagFishModalContent from '../../components/form/TagFishModalContent'
+import TagBadgeList from '../../components/form/TagBadgeList'
 import AddGeneticsModalContent from '../../components/form/AddGeneticsModalContent'
 import {
   FishStoreI,
@@ -62,6 +63,25 @@ export interface ReleaseMarkI {
   markColor: number
 }
 
+interface FormValueI {
+  value: Array<any> | string | boolean | null
+  touched: boolean
+  error: string
+  required: boolean
+}
+
+const errorMessages = {
+  species: { emptyError: 'Fish species required' },
+  forkLength: {
+    typeError: 'Input must be a number',
+    emptyError: 'Fish fork length required',
+  },
+  weight: { typeError: 'Input must be a number' },
+  lifeStage: { emptyError: 'Fish life stage required' },
+  adiposeClipped: { emptyError: 'Fish adipose clipped status required' },
+  dead: { emptyError: 'Fish mortality required' },
+}
+
 const AddFishContent = ({
   route,
   saveIndividualFish,
@@ -74,6 +94,7 @@ const AddFishContent = ({
   closeModal,
   fishStore,
   tabSlice,
+  appliedMarksState,
 }: {
   route?: any
   saveIndividualFish: any
@@ -86,6 +107,7 @@ const AddFishContent = ({
   closeModal: any
   fishStore: FishStoreI
   tabSlice: TabStateI
+  appliedMarksState: any
 }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
@@ -104,6 +126,10 @@ const AddFishContent = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+
+  useEffect(() => {
+    console.log('applyMarksState', appliedMarksState)
+  }, [appliedMarksState])
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
@@ -158,25 +184,6 @@ const AddFishContent = ({
   }
 
   // ------------------------------------------------------------------------------------------------------------------------
-
-  interface FormValueI {
-    value: Array<any> | string | boolean | null
-    touched: boolean
-    error: string
-    required: boolean
-  }
-
-  const errorMessages = {
-    species: { emptyError: 'Fish species required' },
-    forkLength: {
-      typeError: 'Input must be a number',
-      emptyError: 'Fish fork length required',
-    },
-    weight: { typeError: 'Input must be a number' },
-    lifeStage: { emptyError: 'Fish life stage required' },
-    adiposeClipped: { emptyError: 'Fish adipose clipped status required' },
-    dead: { emptyError: 'Fish mortality required' },
-  }
 
   const createFormValueDefault = ({
     value,
@@ -1321,6 +1328,14 @@ const AddFishContent = ({
                       )}
                     </HStack>
                   )}
+                  {appliedMarksState?.length > 0 && (
+                    <>
+                      <Text color='black' fontSize='xl'>
+                        Tags
+                      </Text>
+                      <TagBadgeList badgeListContent={appliedMarksState} />
+                    </>
+                  )}
                   <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
@@ -1516,6 +1531,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     fishStore: state.fishInput[activeTabId].fishStore,
     tabSlice: state.tabSlice,
+    appliedMarksState: state.addMarksOrTags.values,
   }
 }
 

@@ -199,7 +199,7 @@ const IncompleteSections = ({
         .filter(
           (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
         )
-        .map((obj: any) => obj.personnelId)
+        .map((obj: any) => Number(obj.personnelId))
     )
     //if the array contains a single string, return the string in an array
     return filteredNames
@@ -435,7 +435,7 @@ const IncompleteSections = ({
             return filteredData.map((obj: any) => {
               obj.crewMember = findCrewIdsFromSelectedCrewNames([
                 obj.crewMember,
-              ])
+              ])[0]
               return obj
             })
           }
