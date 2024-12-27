@@ -32,6 +32,8 @@ import {
 import moment from 'moment'
 import { DataTable } from 'react-native-paper'
 import { get, startCase } from 'lodash'
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { start } from 'repl'
 
 interface NestedModalDataI {
   catchRawId: number
@@ -43,7 +45,7 @@ interface NestedModalInputValueI {
   value: string | number | boolean
 }
 
-function CatchFishCountQC({
+function CatchFishCountByDateQC({
   navigation,
   route,
   qcCatchRawSubmissions,
@@ -69,11 +71,11 @@ function CatchFishCountQC({
   userCredentialsStore: any
 }) {
   const dispatch = useDispatch<AppDispatch>()
-  const [graphData, setGraphData] = useState<any[]>([])
+  const [tableData, setTableData] = useState<any[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
-  const [selectedSpecies, setSelectedSpecies] = useState<string>('')
   const [modalData, setModalData] = useState<any[] | null>(null)
+  const [selectedDate, setSelectedDate] = useState(new Date() as any)
   const [nestedModalData, setNestedModalData] =
     useState<NestedModalDataI | null>(null)
   const [nestedModalInputValue, setNestedModalInputValue] =
@@ -127,77 +129,88 @@ function CatchFishCountQC({
         return catchRaw.createdCatchRawResponse.programId === programId
       }
     )
-    const selectedSpeciesTaxon = reorderedTaxon.find(
-      taxon => taxon.commonname == selectedSpecies
-    )?.code
 
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
+    const normalizedDate = normalizeDate(selectedDate)
+    console.log('toDateString', selectedDate.toDateString())
+    console.log('normalizedDate', normalizedDate)
+    const selectedDateDateString = selectedDate.toDateString()
+
     const qcDataFiltered = qcData.filter((catchRawResponse: any) => {
       return (
-        catchRawResponse.createdCatchRawResponse.taxonCode ===
-        selectedSpeciesTaxon
+        new Date(
+          catchRawResponse?.createdCatchRawResponse?.trapVisitTimeEnd
+        ).toDateString() === selectedDateDateString
       )
     })
 
-    const totalCountByDay: any[] = []
-    const datesFormatted: any = {}
+    console.log('qcDataFiltered', qcDataFiltered)
+    setTableData(qcDataFiltered)
 
-    // Structure: datesFormatted = { date: {count, catchRawIds: [...]}, ...}
+    // const totalCountByDay: any[] = []
+    // const datesFormatted: any = {}
 
-    qcDataFiltered.forEach(catchResponse => {
-      const catchRaw = catchResponse.createdCatchRawResponse
-      const numFishCaught: number = catchRaw?.numFishCaught
-      const plusCount: boolean = catchRaw?.plusCount
-      const trapVisitTimeEnd = new Date(
-        catchRaw.trapVisitTimeEnd.replace('Z', '-08:00')
-      )
-      const normalizedDate = normalizeDate(trapVisitTimeEnd)
-      const qcCompleted = catchResponse.createdCatchRawResponse.qcCompleted
+    // // Structure: datesFormatted = { date: {count, catchRawIds: [...]}, ...}
 
-      if (Object.keys(datesFormatted).includes(String(normalizedDate))) {
-        datesFormatted[normalizedDate].count += numFishCaught
-        if (!qcCompleted) datesFormatted[normalizedDate].qcCompleted = false
+    // qcDataFiltered.forEach(catchResponse => {
+    //   const catchRaw = catchResponse.createdCatchRawResponse
+    //   const numFishCaught: number = catchRaw?.numFishCaught
+    //   const plusCount: boolean = catchRaw?.plusCount
+    //   const trapVisitTimeEnd = new Date(
+    //     catchRaw.trapVisitTimeEnd.replace('Z', '-08:00')
+    //   )
+    //   const normalizedDate = normalizeDate(trapVisitTimeEnd)
+    //   const qcCompleted = catchResponse.createdCatchRawResponse.qcCompleted
 
-        // add catchRawId to array if not already included
-        if (!datesFormatted[normalizedDate].catchRawIds.includes(catchRaw.id)) {
-          datesFormatted[normalizedDate].catchRawIds.push(catchRaw.id)
-        }
+    //   if (Object.keys(datesFormatted).includes(String(normalizedDate))) {
+    //     datesFormatted[normalizedDate].count += numFishCaught
+    //     if (!qcCompleted) datesFormatted[normalizedDate].qcCompleted = false
 
-        if (plusCount) {
-          datesFormatted[normalizedDate].plusCountIds.push(catchRaw.id)
-          datesFormatted[normalizedDate].plusCountValue += numFishCaught
-          datesFormatted[normalizedDate].firstPlusCountRecordId = catchRaw.id
-        }
-      } else {
-        datesFormatted[normalizedDate] = {
-          count: numFishCaught,
-          catchRawIds: [catchRaw.id],
-          firstPlusCountRecordId: plusCount ? catchRaw.id : null,
-          plusCountIds: plusCount ? [catchRaw.id] : [],
-          plusCountValue: plusCount ? numFishCaught : 0,
-          qcCompleted,
-        }
-      }
-    })
+    //     // add catchRawId to array if not already included
+    //     if (!datesFormatted[normalizedDate].catchRawIds.includes(catchRaw.id)) {
+    //       datesFormatted[normalizedDate].catchRawIds.push(catchRaw.id)
+    //     }
 
-    Object.keys(datesFormatted).forEach(dateString => {
-      totalCountByDay.push({
-        x: Number(dateString),
-        y: datesFormatted[dateString].count,
-        catchRawIds: datesFormatted[dateString].catchRawIds,
-        plusCountIds: datesFormatted[dateString].plusCountIds,
-        plusCountValue: datesFormatted[dateString].plusCountValue,
-        firstPlusCountRecordId:
-          datesFormatted[dateString].firstPlusCountRecordId,
-        colorScale: !datesFormatted[dateString].qcCompleted
-          ? 'rgb(255, 100, 84)'
-          : undefined,
-      })
-    })
+    //     if (plusCount) {
+    //       datesFormatted[normalizedDate].plusCountIds.push(catchRaw.id)
+    //       datesFormatted[normalizedDate].plusCountValue += numFishCaught
+    //       datesFormatted[normalizedDate].firstPlusCountRecordId = catchRaw.id
+    //     }
+    //   } else {
+    //     datesFormatted[normalizedDate] = {
+    //       count: numFishCaught,
+    //       catchRawIds: [catchRaw.id],
+    //       firstPlusCountRecordId: plusCount ? catchRaw.id : null,
+    //       plusCountIds: plusCount ? [catchRaw.id] : [],
+    //       plusCountValue: plusCount ? numFishCaught : 0,
+    //       qcCompleted,
+    //     }
+    //   }
+    // })
 
-    setGraphData(totalCountByDay)
-  }, [selectedSpecies, qcCatchRawSubmissions])
+    // Object.keys(datesFormatted).forEach(dateString => {
+    //   totalCountByDay.push({
+    //     x: Number(dateString),
+    //     y: datesFormatted[dateString].count,
+    //     catchRawIds: datesFormatted[dateString].catchRawIds,
+    //     plusCountIds: datesFormatted[dateString].plusCountIds,
+    //     plusCountValue: datesFormatted[dateString].plusCountValue,
+    //     firstPlusCountRecordId:
+    //       datesFormatted[dateString].firstPlusCountRecordId,
+    //     colorScale: !datesFormatted[dateString].qcCompleted
+    //       ? 'rgb(255, 100, 84)'
+    //       : undefined,
+    //   })
+    // })
+
+    // setGraphData(totalCountByDay)
+  }, [selectedDate, qcCatchRawSubmissions])
+
+  const onDateChange = (event: any, selectedDate: any) => {
+    const currentDate = selectedDate
+    setSelectedDate(currentDate)
+  }
 
   const handlePointClick = (datum: any) => {
     try {
@@ -465,7 +478,7 @@ function CatchFishCountQC({
             />
           </VStack>
         )
-      case 'weight':
+      case 'weighr':
         return (
           <VStack alignItems={'flex-start'}>
             <Text>Edit Weight</Text>
@@ -612,45 +625,33 @@ function CatchFishCountQC({
     <>
       <View flex={1} bg='#fff' px='5%' py='3%'>
         <VStack alignItems={'center'} flex={1}>
-          <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
-            Select a species to see total daily counts for the selected species.
-            Points represent total daily counts of measured and plus count fish.
-            Edit the plus count by selecting a point on the plot below.
+          <Text fontSize={'2xl'} fontWeight={300} mb={15} textAlign='center'>
+            Select a date to see total daily counts for the selected date.
           </Text>
-
-          <Box width='70%' marginBottom={5}>
-            <CustomSelect
-              selectedValue={selectedSpecies}
-              placeholder={'Species'}
-              style={{ width: '100%' }}
-              onValueChange={(value: string) => {
-                setSelectedSpecies(value)
-              }}
-              selectOptions={reorderedTaxon.map((taxon: any) => ({
-                label: taxon?.commonname,
-                value: taxon?.commonname,
-              }))}
-            />
+          <Box alignSelf='center'>
+            <View>
+              <Text fontSize='xl' color='black' textAlign={'center'}>
+                Selected Date
+              </Text>
+              <DateTimePicker
+                value={selectedDate}
+                mode='date'
+                onChange={onDateChange}
+                accentColor='#007C7C'
+                key={selectedDate.toISOString()}
+              />
+            </View>
           </Box>
 
-          {selectedSpecies &&
-            (graphData.length > 0 ? (
+          <Box width='70%' marginBottom={5}></Box>
+
+          {selectedDate &&
+            (tableData.length > 0 ? (
               <ScrollView>
-                <Graph
-                  xLabel={'Date'}
-                  yLabel={'Total Daily Catch'}
-                  chartType='bar'
-                  data={selectedSpecies != '' ? graphData : []}
-                  showDates={true}
-                  barColor='grey'
-                  onPointClick={datum => handlePointClick(datum)}
-                  selectedBarColor='green'
-                  height={400}
-                  width={600}
-                />
+                <Text>{tableData.length}</Text>
               </ScrollView>
             ) : (
-              <Text fontSize='xl'>No data available for this species</Text>
+              <Text fontSize='xl'>No data available for this date</Text>
             ))}
 
           <View flex={1}></View>
@@ -1250,4 +1251,4 @@ const mapStateToProps = (state: RootState) => {
   }
 }
 
-export default connect(mapStateToProps)(CatchFishCountQC)
+export default connect(mapStateToProps)(CatchFishCountByDateQC)

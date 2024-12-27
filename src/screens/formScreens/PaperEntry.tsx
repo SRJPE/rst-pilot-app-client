@@ -84,7 +84,7 @@ const PaperEntry = ({
     const tabs = tabState.tabs
     const trapSite = tabs[tabId].trapSite
 
-    Object.keys(tabs).forEach((id) => {
+    Object.keys(tabs).forEach(id => {
       if (trapSite == tabs[id].trapSite) {
         dispatch(
           savePaperEntry({
@@ -147,7 +147,7 @@ const PaperEntry = ({
               fontSize='16'
               placeholder='Write a comment'
               keyboardType='default'
-              onChangeText={(newText) => {
+              onChangeText={newText => {
                 setComments(newText)
               }}
               value={comments}
@@ -155,7 +155,11 @@ const PaperEntry = ({
           </FormControl>
         </VStack>
       </View>
-      <NavButtons navigation={navigation} handleSubmit={handleSubmit} errors={dateError}/>
+      <NavButtons
+        navigation={navigation}
+        handleSubmit={handleSubmit}
+        errors={dateError}
+      />
     </>
   )
 }
