@@ -24,6 +24,7 @@ import {
 import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import QCFishDataTable from './QCFishDataTable'
 
 const headers = [
   'Species',
@@ -219,7 +220,7 @@ function CatchFishCountByDateQC({
 
   return (
     <>
-      <View flex={1} bg='#fff' px='5%' py='3%'>
+      <View flex={1} bg='#fff'>
         <VStack alignItems={'center'} flex={1}>
           <Text fontSize={'2xl'} fontWeight={300} mb={15} textAlign='center'>
             Select a date to see total daily counts for the selected date.
@@ -242,78 +243,15 @@ function CatchFishCountByDateQC({
           {selectedDate &&
             (tableData.length > 0 ? (
               <Box width='100%' marginBottom={5}>
-                <DataTable>
-                  <DataTable.Header>
-                    {headers.map((header: string, idx: number) => (
-                      <DataTable.Title
-                        key={`${header}-${idx}`}
-                        style={{ flex: header === 'Species' ? 2 : 1 }}
-                      >
-                        {header}
-                      </DataTable.Title>
-                    ))}
-                  </DataTable.Header>
-                  {tableData.map((catchObj, idx: number) => {
-                    const rowObj = catchObj.createdCatchRawResponse
-                    console.log('Object.keys(rowObj)', Object.keys(rowObj))
-                    return (
-                      <Row key={`row-${idx}`}>
-                        <DataTable.Row key={`row-${idx}`} style={{ flex: 1 }}>
-                          {Object.keys(rowObj)
-                            .sort(
-                              (a, b) =>
-                                sortedDataByHeaders.indexOf(a) -
-                                sortedDataByHeaders.indexOf(b)
-                            )
-                            .map((objKey: string | number, itemIdx: number) => {
-                              if (
-                                objKey !== 'plusCountMethod' &&
-                                objKey !== 'plusCount'
-                              ) {
-                                return (
-                                  <DataTable.Cell
-                                    key={`${objKey}-${itemIdx}`}
-                                    style={{
-                                      flex: objKey === 'species' ? 2 : 1,
-                                    }}
-                                  >
-                                    {renderCell(rowObj, objKey)}
-                                  </DataTable.Cell>
-                                )
-                              }
-                            })}
-                        </DataTable.Row>
-                        <IconButton
-                          marginY={3}
-                          variant='solid'
-                          bg='primary'
-                          colorScheme='primary'
-                          size='sm'
-                          // isDisabled={rowObj.includes('empty')}
-                          // onPress={() => {
-                          //   if (!rowKey.includes('empty')) {
-                          //     if (fishStore[Number(rowKey)]) {
-                          //       navigation.navigate('Add Fish', {
-                          //         editModeData: {
-                          //           id: rowKey,
-                          //           ...fishStore[Number(rowKey)],
-                          //         },
-                          //       })
-                          //     }
-                          //   }
-                          // }}
-                        >
-                          <Icon
-                            as={Entypo}
-                            size='5'
-                            name='edit'
-                            color='warmGray.50'
-                          />
-                        </IconButton>
-                      </Row>
-                    )
-                  })}
-                </DataTable>
+                <QCFishDataTable
+                  tableData={tableData}
+                  taxonState={taxonState}
+                  runState={runState}
+                  lifeStageState={lifeStageState}
+                  markTypeState={markTypeState}
+                  markColorState={markColorState}
+                  markPositionState={markPositionState}
+                />
               </Box>
             ) : (
               <Text fontSize='xl'>No data available for this date</Text>
