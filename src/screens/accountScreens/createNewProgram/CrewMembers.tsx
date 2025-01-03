@@ -84,11 +84,14 @@ const CrewMembers = ({
   const personnelOptions = personnelStore.personnelOptions as PersonnelObject[]
 
   const handleSaveTeamLeadInformation = () => {
+  const handleSaveTeamLeadInformation = () => {
     let payload = {
       firstName,
       lastName,
       phoneNumber: phone,
       email: emailAddress,
+      agency: agencyDefinition,
+      orcidId,
       orcidId,
       agency: agencyDefinition,
       isLead: true,

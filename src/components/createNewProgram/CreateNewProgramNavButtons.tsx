@@ -172,16 +172,16 @@ const CreateNewProgramNavButtons = ({
 
         break
       case 'Crew Members':
-        rightButtonText = 'Save Crew Members and Exit'
+        rightButtonText = 'Save Crew Members'
         break
       case 'Hatchery Information':
         rightButtonText = 'Save and Exit'
         break
       case 'Trapping Protocols Table':
-        rightButtonText = 'Save Trapping Protocols and Exit'
+        rightButtonText = 'Save Trapping Protocols'
         break
       case 'Permitting Information Input':
-        rightButtonText = 'Save Permitting Information and Exit'
+        rightButtonText = 'Save Permitting Information'
         break
       case 'Create New Program Complete':
         rightButtonText = 'Go Home'

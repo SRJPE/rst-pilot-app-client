@@ -27,6 +27,11 @@ import {
 } from '../../../redux/reducers/createNewProgramSlices/permitInformationSlice'
 import { permittingInformationSchema } from '../../../utils/helpers/yupValidations'
 import CustomSelect from '../../../components/Shared/CustomSelect'
+import useCacheDirectory, {
+  postMonitoringProgramFilesToDB,
+} from '../../../utils/hooks/useCacheDirectory'
+import FilePreviewCard from '../../../components/Shared/FilePreviewCard'
+import PdfPreviewScreen from '../../../components/Shared/PdfPreviewScreen'
 
 const PermittingInformationInput = ({
   navigation,
@@ -83,12 +88,21 @@ const PermittingInformationInput = ({
     )
   }
 
+  const {
+    handleFileRemoval,
+    handleOpenPdfPreview,
+    handleClosePdfPreview,
+    files,
+    activeFilePreview,
+    openDocumentPicker,
+  } = useCacheDirectory('permitInformation')
+
   return (
     <>
       <Formik
         validationSchema={permittingInformationSchema}
         initialValues={permitInformationStore.values}
-        onSubmit={(values) => {
+        onSubmit={values => {
           handleAddPermittingInformationSubmission(values)
         }}
       >
@@ -96,7 +110,6 @@ const PermittingInformationInput = ({
           handleChange,
           handleBlur,
           handleSubmit,
-          setFieldValue,
           setFieldTouched,
           touched,
           errors,
@@ -230,7 +243,7 @@ const PermittingInformationInput = ({
                     </Text>
                   </HStack>
                 </Pressable>
-                <Pressable onPress={() => setChooseFileModalOpen(true)}>
+                <Pressable onPress={() => openDocumentPicker()}>
                   <HStack alignItems='center'>
                     <Icon
                       as={Ionicons}
@@ -244,6 +257,14 @@ const PermittingInformationInput = ({
                     </Text>
                   </HStack>
                 </Pressable>
+                {files.map((file, index) => (
+                  <FilePreviewCard
+                    key={index + file.name}
+                    handleFileRemoval={handleFileRemoval}
+                    handleOpenPdfPreview={handleOpenPdfPreview}
+                    file={file}
+                  />
+                ))}
               </VStack>
             </Box>
             <CreateNewProgramNavButtons
@@ -257,6 +278,12 @@ const PermittingInformationInput = ({
       </Formik>
 
       {/* --------- Modals --------- */}
+      {activeFilePreview?.uri && (
+        <PdfPreviewScreen
+          handleClosePdfPreview={handleClosePdfPreview}
+          activeFilePreview={activeFilePreview}
+        />
+      )}
       <CustomModal
         isOpen={addTakeAndMortalityModalOpen}
         closeModal={() => setAddTakeAndMortalityModalOpen(false)}
@@ -265,15 +292,6 @@ const PermittingInformationInput = ({
         <AddTakeAndMortalityModalContent
           addTakeAndMortalityModalContent={addTakeAndMortalityModalContent}
           closeModal={() => setAddTakeAndMortalityModalOpen(false)}
-        />
-      </CustomModal>
-      <CustomModal
-        isOpen={chooseFileModalOpen}
-        closeModal={() => setChooseFileModalOpen(false)}
-        height='1/3'
-      >
-        <ChooseFileModalContent
-          closeModal={() => setChooseFileModalOpen(false)}
         />
       </CustomModal>
     </>

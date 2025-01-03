@@ -11,9 +11,9 @@ export interface InitialStateI {
   lastName: string | null
   agencyId: string | number | null
   agencyDefinition: string | null
+  orcidId?: string | null
   role: 'lead' | 'non-lead' | null
   phone: string | null
-  orcidId?: string | null
 }
 const initialState: InitialStateI = {
   displayName: null,
