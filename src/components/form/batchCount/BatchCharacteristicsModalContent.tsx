@@ -22,7 +22,7 @@ import {
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { alphabeticalSort, reorderTaxon } from '../../../utils/utils'
+import { reorderTaxon, returnDefinitionArray } from '../../../utils/utils'
 import CustomModalHeader from '../../Shared/CustomModalHeader'
 import CustomSelect from '../../Shared/CustomSelect'
 import RenderErrorMessage from '../../Shared/RenderErrorMessage'
@@ -117,12 +117,6 @@ const BatchCharacteristicsModalContent = ({
         showSlideAlert(dispatch, 'Batch characteristics')
       }
     }
-  }
-
-  const returnDefinitionArray = (dropdownsArray: any[]) => {
-    return dropdownsArray.map((dropdownObj: any) => {
-      return dropdownObj.definition
-    })
   }
 
   const markTypeValues = returnDefinitionArray(dropdownValues.markType)

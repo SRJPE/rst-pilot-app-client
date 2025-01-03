@@ -169,6 +169,7 @@ export const returnDefinitionArray = (dropdownsArray: any[]) => {
     return dropdownObj.definition
   })
 }
+
 export const returnNullableTableId = (value: any) =>
   value == -1 ? null : value + 1
 

@@ -1,19 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons'
-import {
-  Button,
-  HStack,
-  View,
-  VStack,
-  Text,
-  ScrollView,
-  Box,
-  Row,
-  Icon,
-  IconButton,
-} from 'native-base'
+import { Button, HStack, View, VStack, Text, Box } from 'native-base'
 import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { Entypo } from '@expo/vector-icons'
 import { AppDispatch, RootState } from '../../redux/store'
 
 import {
@@ -21,7 +9,6 @@ import {
   postQCSubmissions,
 } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
-import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import QCFishDataTable from './QCFishDataTable'
@@ -219,79 +206,78 @@ function CatchFishCountByDateQC({
   }
 
   return (
-    <>
-      <View flex={1} bg='#fff'>
-        <VStack alignItems={'center'} flex={1}>
-          <Text fontSize={'2xl'} fontWeight={300} mb={15} textAlign='center'>
-            Select a date to see total daily counts for the selected date.
-          </Text>
-          <Box alignSelf='center'>
-            <View marginBottom={5}>
-              <Text fontSize='xl' color='black' textAlign={'center'}>
-                Selected Date
-              </Text>
-              <DateTimePicker
-                value={selectedDate}
-                mode='date'
-                onChange={onDateChange}
-                accentColor='#007C7C'
-                key={selectedDate.toISOString()}
+    <View flex={1} bg='#fff'>
+      <VStack alignItems={'center'} flex={1}>
+        <Text fontSize={'2xl'} fontWeight={300} mb={15} textAlign='center'>
+          Select a date to see total daily counts for the selected date.
+        </Text>
+        <Box alignSelf='center' alignItems={'center'}>
+          <View marginBottom={5} alignItems={'center'}>
+            <Text fontSize='xl' color='black' textAlign={'center'}>
+              Selected Date
+            </Text>
+            <DateTimePicker
+              value={selectedDate}
+              mode='date'
+              onChange={onDateChange}
+              accentColor='#007C7C'
+              key={selectedDate.toISOString()}
+            />
+          </View>
+        </Box>
+
+        {selectedDate &&
+          (tableData.length > 0 ? (
+            <Box width='100%' marginBottom={5}>
+              <QCFishDataTable
+                tableData={tableData}
+                taxonState={taxonState}
+                runState={runState}
+                lifeStageState={lifeStageState}
+                markTypeState={markTypeState}
+                markColorState={markColorState}
+                markPositionState={markPositionState}
+                navigation={navigation}
               />
-            </View>
-          </Box>
+            </Box>
+          ) : (
+            <Text fontSize='xl'>No data available for this date</Text>
+          ))}
 
-          {selectedDate &&
-            (tableData.length > 0 ? (
-              <Box width='100%' marginBottom={5}>
-                <QCFishDataTable
-                  tableData={tableData}
-                  taxonState={taxonState}
-                  runState={runState}
-                  lifeStageState={lifeStageState}
-                  markTypeState={markTypeState}
-                  markColorState={markColorState}
-                  markPositionState={markPositionState}
-                />
-              </Box>
-            ) : (
-              <Text fontSize='xl'>No data available for this date</Text>
-            ))}
+        <View flex={1}></View>
 
-          <View flex={1}></View>
-
-          <HStack width={'full'} justifyContent={'space-between'}>
-            <Button
-              marginBottom={5}
-              width='49%'
-              height='20'
-              shadow='5'
-              bg='secondary'
-              onPress={() => {
-                navigation.goBack()
-              }}
-            >
-              <Text fontSize='xl' color='primary' fontWeight={'bold'}>
-                Back
-              </Text>
-            </Button>
-            <Button
-              marginBottom={5}
-              width='49%'
-              height='20'
-              shadow='5'
-              bg='primary'
-              onPress={() => {
-                dispatch(postQCSubmissions())
-              }}
-            >
-              <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Save
-              </Text>
-            </Button>
-          </HStack>
-        </VStack>
-      </View>
-    </>
+        <HStack width={'full'} justifyContent={'space-between'}>
+          <Button
+            marginBottom={5}
+            width='49%'
+            height='20'
+            shadow='5'
+            bg='secondary'
+            onPress={() => {
+              navigation.goBack()
+            }}
+          >
+            <Text fontSize='xl' color='primary' fontWeight={'bold'}>
+              Back
+            </Text>
+          </Button>
+          <Button
+            marginBottom={5}
+            width='49%'
+            height='20'
+            shadow='5'
+            bg='primary'
+            onPress={() => {
+              dispatch(postQCSubmissions())
+            }}
+          >
+            <Text fontSize='xl' color='white' fontWeight={'bold'}>
+              Save
+            </Text>
+          </Button>
+        </HStack>
+      </VStack>
+    </View>
   )
 }
 

@@ -45,7 +45,12 @@ import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { Keyboard, useWindowDimensions } from 'react-native'
-import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
+import {
+  alphabeticalSort,
+  QARanges,
+  reorderTaxon,
+  returnDefinitionArray,
+} from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
@@ -456,12 +461,6 @@ const AddFishContent = ({
 
   //RECENT MARKS ADDITIONS
   const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
-
-  const returnDefinitionArray = (dropdownsArray: any[]) => {
-    return dropdownsArray.map((dropdownObj: any) => {
-      return dropdownObj.definition
-    })
-  }
 
   const markTypeValues = returnDefinitionArray(dropdownValues.markType)
   const markColorValues = returnDefinitionArray(dropdownValues.markColor)

@@ -54,6 +54,7 @@ const QCFishDataTable = ({
   markTypeState,
   markColorState,
   markPositionState,
+  navigation,
 }: {
   tableData: any
   taxonState: any
@@ -62,6 +63,7 @@ const QCFishDataTable = ({
   markTypeState: any
   markColorState: any
   markPositionState: any
+  navigation: any
 }) => {
   const numberOfItemsPerPage = 5
   const [page, setPage] = React.useState(0)
@@ -145,7 +147,6 @@ const QCFishDataTable = ({
         }
       })
       sortedRows[Number(key)] = dataObjPadded
-      console.log('do', dataObj)
     })
     return sortedRows
   }
@@ -177,8 +178,6 @@ const QCFishDataTable = ({
       </DataTable.Header>
 
       {Object.keys(pageRows).map((rowKey, idx: number) => {
-        console.log(Object.keys(pageRows[rowKey as keyof typeof pageRows]))
-        console.log('rowKey', rowKey)
         return (
           <Row key={`${rowKey}-${idx}`}>
             <DataTable.Row key={`${rowKey}-${idx}`} style={{ flex: 1 }}>
@@ -212,16 +211,20 @@ const QCFishDataTable = ({
               size='sm'
               isDisabled={rowKey.includes('empty')}
               onPress={() => {
-                // if (!rowKey.includes('empty')) {
-                //   if (tableData[Number(rowKey)]) {
-                //     navigation.navigate('Add Fish', {
-                //       editModeData: {
-                //         id: rowKey,
-                //         ...tableData[Number(rowKey)],
-                //       },
-                //     })
-                //   }
-                // }
+                if (!rowKey.includes('empty')) {
+                  if (tableData[Number(rowKey)]) {
+                    console.log(
+                      'tableData[Number(rowKey)',
+                      tableData[Number(rowKey)]
+                    )
+                    // navigation.navigate('Add Fish', {
+                    //   editModeData: {
+                    //     id: rowKey,
+                    //     ...tableData[Number(rowKey)],
+                    //   },
+                    // })
+                  }
+                }
               }}
             >
               <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
@@ -247,17 +250,4 @@ const QCFishDataTable = ({
   )
 }
 
-const mapStateToProps = (state: RootState) => {
-  // let activeTabId = 'placeholderId'
-  // if (
-  //   state.tabSlice.activeTabId &&
-  //   state.fishInput[state.tabSlice.activeTabId]
-  // ) {
-  //   activeTabId = state.tabSlice.activeTabId
-  // }
-  // return {
-  //   tableData: state.fishInput[activeTabId].tableData,
-  // }
-}
-
-export default connect(mapStateToProps)(QCFishDataTable)
+export default QCFishDataTable

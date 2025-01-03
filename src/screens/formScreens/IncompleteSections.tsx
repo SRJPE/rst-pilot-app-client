@@ -35,7 +35,11 @@ import {
 } from '../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { DeviceEventEmitter } from 'react-native'
-import { combinePlusCounts, navigateHelper } from '../../utils/utils'
+import {
+  combinePlusCounts,
+  navigateHelper,
+  returnDefinitionArray,
+} from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 
 const mapStateToProps = (state: RootState) => {
@@ -162,12 +166,6 @@ const IncompleteSections = ({
     dispatch(resetVisitSetupSlice())
     dispatch(resetPaperEntrySlice())
     dispatch(resetTabsSlice())
-  }
-
-  const returnDefinitionArray = (dropdownsArray: any[]) => {
-    return dropdownsArray.map((dropdownObj: any) => {
-      return dropdownObj.definition
-    })
   }
 
   const findTrapLocationIds = () => {

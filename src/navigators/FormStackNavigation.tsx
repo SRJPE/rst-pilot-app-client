@@ -14,15 +14,12 @@ import IncompleteSections from '../screens/formScreens/IncompleteSections'
 import StartMarkRecapture from '../screens/markRecaptureScreens/StartMarkRecapture'
 import TrapPostProcessing from '../screens/formScreens/TrapPostProcessing'
 import AddFish from '../screens/formScreens/AddFish'
-import PaperEntry from '../screens/formScreens/PaperEntry'
 import StartedTrapping from '../screens/formScreens/StartedTrapping'
 import BatchCount from '../screens/formScreens/BatchCount'
 import { VStack } from 'native-base'
 import FishHolding from '../screens/formScreens/FishHolding'
 import TabBar from '../components/form/TabBar'
 import LoadingScreen from '../components/Shared/LoadingScreen'
-import { Alert } from 'react-native'
-import { Text, View } from 'native-base'
 
 const FormStack = createNativeStackNavigator()
 
