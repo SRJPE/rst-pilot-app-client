@@ -70,3 +70,18 @@ export interface MonitoringProgram {
   trappingSites: TrappingSite[]
   updatedAt: string
 }
+
+export interface ReleaseMarkI {
+  id?: number
+  releaseId?: number
+  markPosition: number
+  markType: number
+  markColor: number
+}
+
+export interface FormValueI {
+  value: Array<any> | string | boolean | null
+  touched: boolean
+  error: string
+  required: boolean
+}

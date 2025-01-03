@@ -13,33 +13,6 @@ import { connect } from 'react-redux'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import QCFishDataTable from './QCFishDataTable'
 
-const headers = [
-  'Species',
-  'Count',
-  'Fork Len.',
-  'Run',
-  'Weight',
-  'Life Stage',
-  'Clipped',
-  'Marks',
-  'Dead',
-  'Recapture',
-  '',
-]
-
-const sortedDataByHeaders = [
-  'species',
-  'numFishCaught',
-  'forkLength',
-  'run',
-  'weight',
-  'lifeStage',
-  'adiposeClipped',
-  'existingMarks',
-  'dead',
-  'willBeUsedInRecapture',
-]
-
 interface NestedModalDataI {
   catchRawId: number
   fieldClicked: string
@@ -77,19 +50,7 @@ function CatchFishCountByDateQC({
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [tableData, setTableData] = useState<any[]>([])
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [pointClicked, setPointClicked] = useState<any | null>(null)
-  const [modalData, setModalData] = useState<any[] | null>(null)
   const [selectedDate, setSelectedDate] = useState(new Date() as any)
-  const [nestedModalData, setNestedModalData] =
-    useState<NestedModalDataI | null>(null)
-  const [nestedModalInputValue, setNestedModalInputValue] =
-    useState<NestedModalInputValueI>({
-      fieldClicked: '',
-      value: '',
-    })
-  const [nestedModalComment, setNestedModalComment] = useState<string>('')
-  const [programName, setProgramName] = useState('' as string)
 
   const identifierToName = {
     taxonCode: 'Species',
@@ -127,7 +88,6 @@ function CatchFishCountByDateQC({
         return program.programId === programId
       }
     )
-    setProgramName(currentProgram.programName)
     const programCatchRaw = previousCatchRawSubmissions.filter(
       (catchRaw: any) => {
         return catchRaw.createdCatchRawResponse.programId === programId
@@ -154,55 +114,33 @@ function CatchFishCountByDateQC({
     setSelectedDate(currentDate)
   }
 
-  const renderCell = (obj: any, key: any) => {
-    if (`${obj[key]}` === 'null') {
-      return '---'
-    }
-    if (`${obj[key]}` === 'not recorded') {
-      return 'NR'
-    }
-    if (`${obj[key]}`) {
-      if (typeof obj[key] === 'string' || typeof obj[key] === 'boolean') {
-        return `${`${obj[key]}`.charAt(0).toUpperCase()}${`${obj[key]}`.slice(
-          1
-        )}`
-      }
-      return `${obj[key]}`
-    } else {
-      return '---'
-    }
-  }
-
   const handleSubmit = () => {
-    if (nestedModalData && nestedModalInputValue) {
-      if (`${nestedModalData.value}` !== `${nestedModalInputValue.value}`) {
-        let submissions: any[] = []
-        let identifier = nestedModalData.fieldClicked
-
-        let submissionOne = {
-          fieldName:
-            identifierToName[identifier as keyof typeof identifierToName],
-          value: nestedModalInputValue.value,
-        }
-        submissions.push(submissionOne)
-
-        if (nestedModalComment) {
-          let submissionTwo = {
-            fieldName: 'Comments',
-            value: nestedModalComment,
-          }
-          submissions.push(submissionTwo)
-        }
-
-        dispatch(
-          catchRawQCSubmission({
-            catchRawId: nestedModalData.catchRawId,
-            userId: userCredentialsStore.id,
-            submissions,
-          })
-        )
-      }
-    }
+    // if (nestedModalData && nestedModalInputValue) {
+    //   if (`${nestedModalData.value}` !== `${nestedModalInputValue.value}`) {
+    //     let submissions: any[] = []
+    //     let identifier = nestedModalData.fieldClicked
+    //     let submissionOne = {
+    //       fieldName:
+    //         identifierToName[identifier as keyof typeof identifierToName],
+    //       value: nestedModalInputValue.value,
+    //     }
+    //     submissions.push(submissionOne)
+    //     if (nestedModalComment) {
+    //       let submissionTwo = {
+    //         fieldName: 'Comments',
+    //         value: nestedModalComment,
+    //       }
+    //       submissions.push(submissionTwo)
+    //     }
+    //     dispatch(
+    //       catchRawQCSubmission({
+    //         catchRawId: nestedModalData.catchRawId,
+    //         userId: userCredentialsStore.id,
+    //         submissions,
+    //       })
+    //     )
+    //   }
+    // }
   }
 
   return (

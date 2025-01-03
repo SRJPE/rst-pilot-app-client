@@ -44,12 +44,13 @@ import { MaterialIcons } from '@expo/vector-icons'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { Keyboard, useWindowDimensions } from 'react-native'
+import { Keyboard } from 'react-native'
 import {
   alphabeticalSort,
   QARanges,
   reorderTaxon,
   returnDefinitionArray,
+  addFishErrorMessages,
 } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
@@ -59,33 +60,7 @@ import { uid } from 'uid'
 import SpeciesDropDown from '../../components/form/SpeciesDropDown'
 import FishConditionsDropDown from '../../components/form/FishConditionsDropDown'
 import { startCase } from 'lodash'
-
-export interface ReleaseMarkI {
-  id?: number
-  releaseId?: number
-  markPosition: number
-  markType: number
-  markColor: number
-}
-
-interface FormValueI {
-  value: Array<any> | string | boolean | null
-  touched: boolean
-  error: string
-  required: boolean
-}
-
-const errorMessages = {
-  species: { emptyError: 'Fish species required' },
-  forkLength: {
-    typeError: 'Input must be a number',
-    emptyError: 'Fish fork length required',
-  },
-  weight: { typeError: 'Input must be a number' },
-  lifeStage: { emptyError: 'Fish life stage required' },
-  adiposeClipped: { emptyError: 'Fish adipose clipped status required' },
-  dead: { emptyError: 'Fish mortality required' },
-}
+import { ReleaseMarkI, FormValueI } from '../../utils/interfaces'
 
 const AddFishContent = ({
   route,
@@ -131,10 +106,6 @@ const AddFishContent = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
-
-  useEffect(() => {
-    console.log('applyMarksState', appliedMarksState)
-  }, [appliedMarksState])
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
@@ -740,9 +711,11 @@ const AddFishContent = ({
                             error: '',
                           }
                           if (value === '') {
-                            payload.error = errorMessages.forkLength.emptyError
+                            payload.error =
+                              addFishErrorMessages.forkLength.emptyError
                           } else if (!Number(value)) {
-                            payload.error = errorMessages.forkLength.typeError
+                            payload.error =
+                              addFishErrorMessages.forkLength.typeError
                           }
                           setForkLength(payload)
                         }}
@@ -796,7 +769,8 @@ const AddFishContent = ({
                           if (value === '') {
                             payload.error = ''
                           } else if (!Number(value)) {
-                            payload.error = errorMessages.weight.typeError
+                            payload.error =
+                              addFishErrorMessages.weight.typeError
                           }
                           setWeight(payload)
                         }}
@@ -919,7 +893,8 @@ const AddFishContent = ({
                           setFieldTouched={() => {
                             let payload = { ...lifeStage, touched: true }
                             if (!lifeStage.value)
-                              payload.error = errorMessages.lifeStage.emptyError
+                              payload.error =
+                                addFishErrorMessages.lifeStage.emptyError
                             setLifeStage(payload)
                           }}
                           selectOptions={alphabeticalLifeStage

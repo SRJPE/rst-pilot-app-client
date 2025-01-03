@@ -3,8 +3,10 @@ import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { assign, pick, cloneDeep } from 'lodash'
-import { Row, IconButton, Icon, Box, Text, VStack } from 'native-base'
+import { Row, IconButton, Icon, Box, Text, VStack, View } from 'native-base'
 import { Entypo } from '@expo/vector-icons'
+import CustomModal from '../../components/Shared/CustomModal'
+import QCFishModalContent from './QCFishModalContent'
 
 const headers = [
   'Species',
@@ -51,10 +53,6 @@ const QCFishDataTable = ({
   taxonState,
   runState,
   lifeStageState,
-  markTypeState,
-  markColorState,
-  markPositionState,
-  navigation,
 }: {
   tableData: any
   taxonState: any
@@ -68,6 +66,8 @@ const QCFishDataTable = ({
   const numberOfItemsPerPage = 5
   const [page, setPage] = React.useState(0)
   const [pageRows, setPageRows] = React.useState({})
+  const [qcModalOpen, setQcModalOpen] = React.useState(false)
+  const [qcFishData, setQCFishData] = React.useState({})
 
   React.useEffect(() => {
     const pageRows = generateRowsForPage()
@@ -133,6 +133,10 @@ const QCFishDataTable = ({
         (stage: any) => stage.id === dataObj.lifeStage
       )?.definition
 
+      dataObj.run = runState.find(
+        (run: any) => run.id === dataObj.captureRunClass
+      )?.definition
+
       delete dataObj.UID
       delete dataObj.fishConditions
       delete dataObj.comments
@@ -162,91 +166,104 @@ const QCFishDataTable = ({
     return objCopy
   }
 
-  return (
-    <DataTable>
-      <DataTable.Header>
-        {headers.map((header: string, idx: number) => (
-          <DataTable.Title
-            key={`${header}-${idx}`}
-            style={{
-              flex: header === 'Species' || header === 'Species' ? 2 : 1,
-            }}
-          >
-            {header}
-          </DataTable.Title>
-        ))}
-      </DataTable.Header>
+  const closeQcModal = () => {
+    setQcModalOpen(false)
+  }
 
-      {Object.keys(pageRows).map((rowKey, idx: number) => {
-        return (
-          <Row key={`${rowKey}-${idx}`}>
-            <DataTable.Row key={`${rowKey}-${idx}`} style={{ flex: 1 }}>
-              {Object.keys(pageRows[rowKey as keyof typeof pageRows])
-                .sort(
-                  (a, b) =>
-                    sortedDataByHeaders.indexOf(a) -
-                    sortedDataByHeaders.indexOf(b)
-                )
-                .map((objKey: string | number, itemIdx: number) => {
-                  if (objKey !== 'plusCountMethod' && objKey !== 'plusCount') {
-                    return (
-                      <DataTable.Cell
-                        key={`${objKey}-${itemIdx}`}
-                        style={{ flex: objKey === 'species' ? 2 : 1 }}
-                      >
-                        {renderCell(
-                          pageRows[rowKey as keyof typeof pageRows],
-                          objKey
-                        )}
-                      </DataTable.Cell>
-                    )
-                  }
-                })}
-            </DataTable.Row>
-            <IconButton
-              marginY={3}
-              variant='solid'
-              bg='primary'
-              colorScheme='primary'
-              size='sm'
-              isDisabled={rowKey.includes('empty')}
-              onPress={() => {
-                if (!rowKey.includes('empty')) {
-                  if (tableData[Number(rowKey)]) {
-                    console.log(
-                      'tableData[Number(rowKey)',
-                      tableData[Number(rowKey)]
-                    )
-                    // navigation.navigate('Add Fish', {
-                    //   editModeData: {
-                    //     id: rowKey,
-                    //     ...tableData[Number(rowKey)],
-                    //   },
-                    // })
-                  }
-                }
+  return (
+    <View>
+      <DataTable>
+        <DataTable.Header>
+          {headers.map((header: string, idx: number) => (
+            <DataTable.Title
+              key={`${header}-${idx}`}
+              style={{
+                flex: header === 'Species' || header === 'Species' ? 2 : 1,
               }}
             >
-              <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
-            </IconButton>
-          </Row>
-        )
-      })}
+              {header}
+            </DataTable.Title>
+          ))}
+        </DataTable.Header>
 
-      <DataTable.Pagination
-        page={page}
-        numberOfPages={Math.ceil(
-          Object.keys(tableData).length / numberOfItemsPerPage
-        )}
-        label={`Page ${page + 1}`}
-        onPageChange={(page: number) => setPage(page)}
-        numberOfItemsPerPage={numberOfItemsPerPage}
-      />
-      <VStack px='4' mb={10}>
-        <Text>NR: Not Recorded</Text>
-        <Text>---: Null</Text>
-      </VStack>
-    </DataTable>
+        {Object.keys(pageRows).map((rowKey, idx: number) => {
+          return (
+            <Row key={`${rowKey}-${idx}`}>
+              <DataTable.Row key={`${rowKey}-${idx}`} style={{ flex: 1 }}>
+                {Object.keys(pageRows[rowKey as keyof typeof pageRows])
+                  .sort(
+                    (a, b) =>
+                      sortedDataByHeaders.indexOf(a) -
+                      sortedDataByHeaders.indexOf(b)
+                  )
+                  .map((objKey: string | number, itemIdx: number) => {
+                    if (
+                      objKey !== 'plusCountMethod' &&
+                      objKey !== 'plusCount'
+                    ) {
+                      return (
+                        <DataTable.Cell
+                          key={`${objKey}-${itemIdx}`}
+                          style={{ flex: objKey === 'species' ? 2 : 1 }}
+                        >
+                          {renderCell(
+                            pageRows[rowKey as keyof typeof pageRows],
+                            objKey
+                          )}
+                        </DataTable.Cell>
+                      )
+                    }
+                  })}
+              </DataTable.Row>
+              <IconButton
+                marginY={3}
+                variant='solid'
+                bg='primary'
+                colorScheme='primary'
+                size='sm'
+                isDisabled={rowKey.includes('empty')}
+                onPress={() => {
+                  if (!rowKey.includes('empty')) {
+                    if (tableData[Number(rowKey)]) {
+                      setQcModalOpen(true)
+                      setQCFishData(tableData[Number(rowKey)])
+                    }
+                  }
+                }}
+              >
+                <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
+              </IconButton>
+            </Row>
+          )
+        })}
+
+        <DataTable.Pagination
+          page={page}
+          numberOfPages={Math.ceil(
+            Object.keys(tableData).length / numberOfItemsPerPage
+          )}
+          label={`Page ${page + 1}`}
+          onPageChange={(page: number) => setPage(page)}
+          numberOfItemsPerPage={numberOfItemsPerPage}
+        />
+        <VStack px='4' mb={10}>
+          <Text>NR: Not Recorded</Text>
+          <Text>---: Null</Text>
+        </VStack>
+      </DataTable>
+      {qcModalOpen && (
+        <CustomModal
+          isOpen={qcModalOpen}
+          closeModal={closeQcModal}
+          height='full'
+        >
+          <QCFishModalContent
+            closeModal={closeQcModal}
+            qcFishData={qcFishData}
+          />
+        </CustomModal>
+      )}
+    </View>
   )
 }
 
