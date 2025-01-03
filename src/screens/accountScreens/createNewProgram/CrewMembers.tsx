@@ -84,7 +84,6 @@ const CrewMembers = ({
   const personnelOptions = personnelStore.personnelOptions as PersonnelObject[]
 
   const handleSaveTeamLeadInformation = () => {
-  const handleSaveTeamLeadInformation = () => {
     let payload = {
       firstName,
       lastName,
@@ -92,8 +91,6 @@ const CrewMembers = ({
       email: emailAddress,
       agency: agencyDefinition,
       orcidId,
-      orcidId,
-      agency: agencyDefinition,
       isLead: true,
     }
     dispatch(saveIndividualCrewMember(payload))
@@ -102,11 +99,6 @@ const CrewMembers = ({
   const handleDeleteCrewMember = (uid: string) => {
     dispatch(removeIndividualCrewMember(uid))
   }
-
-  // const handleShowTableModal = (selectedRowData: any) => {
-  //   setAddTrapModalContent(selectedRowData)
-  //   setAddCrewMemberModalOpen(true)
-  // }
 
   return (
     <>
