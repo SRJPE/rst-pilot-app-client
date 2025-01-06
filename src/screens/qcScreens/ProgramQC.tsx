@@ -38,7 +38,7 @@ function ProgramQC({
       </Button>
       {/* ---------------------------------------------------------------------------------------- */}
 
-      {programs.map((program) => {
+      {programs.map(program => {
         return (
           <Button
             key={program.programName}
@@ -49,7 +49,7 @@ function ProgramQC({
             isDisabled={returnButtonDisabled(program.programId)}
             mb={5}
             onPress={() => {
-              navigation.navigate('Select Data to QC', {
+              navigation.navigateDeprecated('Select Data to QC', {
                 programId: program.programId,
               })
             }}
@@ -67,7 +67,7 @@ function ProgramQC({
         w='90%'
         bg='primary'
         onPress={() => {
-          navigation.navigate('Home')
+          navigation.navigateDeprecated('Home')
         }}
       >
         <Text fontSize='xl' color='white' fontWeight={'bold'}>

@@ -134,7 +134,7 @@ const FishInput = ({
     <>
       <ScrollView
         flex={1}
-        scrollEnabled={screenHeight < 1180}
+        scrollEnabled
         bg='#fff'
         py='0%'
         borderColor='themeGrey'
@@ -255,24 +255,26 @@ const FishInput = ({
           </Box>
         </VStack>
         {/* --------- Modals --------- */}
-        <CustomModal
-          isOpen={addPlusCountModalOpen}
-          closeModal={() => {
-            if (activeTabId && activeTabId != 'placeholderId') {
-              setAddPlusCountModalOpen(false)
-              dispatch(
-                markFishInputModalOpen({ tabId: activeTabId, bool: false })
-              )
-            }
-          }}
-          height='3/4'
-        >
-          <PlusCountModalContent
+        {addPlusCountModalOpen && (
+          <CustomModal
+            isOpen={addPlusCountModalOpen}
             closeModal={() => {
-              setAddPlusCountModalOpen(false)
+              if (activeTabId && activeTabId != 'placeholderId') {
+                setAddPlusCountModalOpen(false)
+                dispatch(
+                  markFishInputModalOpen({ tabId: activeTabId, bool: false })
+                )
+              }
             }}
-          />
-        </CustomModal>
+            height='3/4'
+          >
+            <PlusCountModalContent
+              closeModal={() => {
+                setAddPlusCountModalOpen(false)
+              }}
+            />
+          </CustomModal>
+        )}
       </ScrollView>
       <NavButtons
         navigation={navigation}

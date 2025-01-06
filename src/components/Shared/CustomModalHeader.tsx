@@ -10,7 +10,7 @@ import {
   Text,
   Divider,
 } from 'native-base'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigation } from '@react-navigation/native'
 
 const CustomModalHeader = ({
@@ -31,6 +31,7 @@ const CustomModalHeader = ({
   headerStyle?: StyleProp<TextStyle>
 }) => {
   const navigation = useNavigation() as any
+
   if (showHeaderButton) {
     return (
       <>
@@ -46,6 +47,7 @@ const CustomModalHeader = ({
               size='lg'
               onPress={() => {
                 if (navigateBack) {
+                  navigation.preload('Fish Input')
                   // navigation.goBack()
                   navigation.navigate('Trap Visit Form', {
                     screen: 'Fish Input',

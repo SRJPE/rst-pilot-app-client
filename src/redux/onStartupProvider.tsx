@@ -12,7 +12,7 @@ import { AppDispatch, RootState } from './store'
 type Props = {
   children: React.ReactNode
   isConnected: boolean
-  isInternetReachable: boolean
+  isInternetReachable?: boolean
   userCredentialsStore: any
 }
 

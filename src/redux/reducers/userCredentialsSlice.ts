@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import * as SecureStore from 'expo-secure-store'
 import { add, cloneDeep } from 'lodash'
 import api from '../../api/axiosConfig'
+import { resetNavigationSlice } from './formSlices/navigationSlice'
 
 export interface InitialStateI {
   displayName: string | null
@@ -44,6 +45,7 @@ export const userCredentialsSlice = createSlice({
           throw err
         })
       console.log('state should be empty', initialState)
+      resetNavigationSlice()
       return (state = cloneDeep(initialState))
     },
     saveUserCredentials: (state, action) => {

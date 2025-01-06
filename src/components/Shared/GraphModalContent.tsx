@@ -8,12 +8,11 @@ import {
   VStack,
   FormControl,
 } from 'native-base'
-import { useEffect, useState, FC } from 'react'
+import { useEffect, useState } from 'react'
 import { DataTable } from 'react-native-paper'
-import { connect, useDispatch } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import moment from 'moment'
+import { capitalizeFirstLetterOfEachWord } from '../../utils/utils'
 
 const GraphModalContent = ({
   closeModal,
@@ -58,7 +57,7 @@ const GraphModalContent = ({
           [header]: { ...payload[header], x: Number(value) },
         })
       }
-    } else if (value === '') {
+    } else if (value === '0') {
       if (!usesDensity) {
         setPayload({
           ...payload,
@@ -68,6 +67,18 @@ const GraphModalContent = ({
         setPayload({
           ...payload,
           [header]: { ...payload[header], x: 0 },
+        })
+      }
+    } else if (value === '') {
+      if (!usesDensity) {
+        setPayload({
+          ...payload,
+          [header]: { ...payload[header], y: '' },
+        })
+      } else {
+        setPayload({
+          ...payload,
+          [header]: { ...payload[header], x: '' },
         })
       }
     }
@@ -84,7 +95,7 @@ const GraphModalContent = ({
           ? { ...dataAtId, y: dataFormatter(header, dataAtId) }
           : dataAtId
       } else {
-        modalDataAtPointClicked[header] = { y: 'NA' }
+        modalDataAtPointClicked[header] = { y: '' }
       }
     })
     setPayload(modalDataAtPointClicked)
@@ -139,8 +150,33 @@ const GraphModalContent = ({
                     fontWeight={'light'}
                   >
                     Selected Point Date:{' '}
-                    {moment(pointClicked.createdAt).format('MMMM Do, YYYY')}
+                    {moment(pointClicked.pointDateTimestamp).format(
+                      'MMMM Do, YYYY'
+                    )}
                   </Text>
+                  {pointClicked.speciesCommonName && (
+                    <Text
+                      color='black'
+                      fontSize='2xl'
+                      marginLeft={8}
+                      fontWeight={'light'}
+                    >
+                      Species: {pointClicked.speciesCommonName}
+                    </Text>
+                  )}
+                  {pointClicked.lifeStageDefinition && (
+                    <Text
+                      color='black'
+                      fontSize='2xl'
+                      marginLeft={8}
+                      fontWeight={'light'}
+                    >
+                      Life Stage:{' '}
+                      {capitalizeFirstLetterOfEachWord(
+                        pointClicked.lifeStageDefinition
+                      )}
+                    </Text>
+                  )}
                 </>
               )}
               <DataTable.Header style={[{ paddingLeft: 0 }]}>

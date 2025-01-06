@@ -42,7 +42,7 @@ const LoadingScreen = ({ navigation }: LoadingScreenProps) => {
 
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
+    outputRange: ['0deg', '-360deg'],
   })
 
   const loader = async (process: any, callback: () => void) => {

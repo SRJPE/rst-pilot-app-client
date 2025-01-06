@@ -1,35 +1,44 @@
 import { Button, Heading, Text, View, VStack } from 'native-base'
-import { useDispatch } from 'react-redux'
-import {
-  resetNavigationSlice,
-  updateActiveStep,
-} from '../../redux/reducers/formSlices/navigationSlice'
-import { AppDispatch } from '../../redux/store'
+import { CommonActions, useNavigation } from '@react-navigation/native'
 
 export default function StartMarkRecapture({
   navigation,
 }: {
   navigation: any
 }) {
-  const dispatch = useDispatch<AppDispatch>()
   const handlePressBeginMarkRecapture = () => {
-    navigation.navigate('Mark Recapture')
+    navigation.navigateDeprecated('Mark Recapture')
   }
   const handlePressReturnToHomepage = () => {
     //temp
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Visit Setup' }],
-    })
-    dispatch(resetNavigationSlice())
-    navigation.navigate('Home')
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Visit Setup' }],
+      })
+    )
+
+    navigation.getParent().dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Trap Visit Form',
+            state: {
+              routes: [
+                {
+                  name: 'Visit Setup',
+                },
+              ],
+            },
+          },
+        ],
+      })
+    )
+    navigation.getParent().navigate('Home')
   }
   const handlePressQCData = () => {
     navigation.navigate('Quality Control')
-  }
-  const handlePressReturnToTrapVisit = () => {
-    navigation.navigate('Trap Visit Form', { screen: 'Incomplete Sections' })
-    dispatch(updateActiveStep(7))
   }
 
   return (
