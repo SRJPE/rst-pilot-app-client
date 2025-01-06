@@ -57,6 +57,20 @@ const ReleaseTrial = ({
     console.log('🚀 ~ handleSubmit ~ ReleaseTrial', values)
   }
 
+  const inputUnit = (text: string, setFieldValue?: any) => {
+    return (
+      <Text
+        color='#A1A1A1'
+        position='absolute'
+        top={50}
+        left={300}
+        fontSize={16}
+      >
+        {text}
+      </Text>
+    )
+  }
+
   return (
     <Formik
       validationSchema={releaseTrialSchema}
@@ -247,6 +261,7 @@ const ReleaseTrial = ({
                       {touched.runWeightHatchery &&
                         errors.runWeightHatchery &&
                         renderErrorMessage(errors, 'runWeightHatchery')}
+                      {inputUnit('g')}
                     </FormControl>
                     <FormControl>
                       <FormControl.Label>
@@ -267,6 +282,7 @@ const ReleaseTrial = ({
                       {touched.runForkLengthHatchery &&
                         errors.runForkLengthHatchery &&
                         renderErrorMessage(errors, 'runForkLengthHatchery')}
+                      {inputUnit('mm')}
                     </FormControl>
                     <FormControl w='1/2'>
                       <FormControl.Label>

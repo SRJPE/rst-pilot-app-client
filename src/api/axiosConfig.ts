@@ -45,12 +45,6 @@ api.interceptors.request.use(
   async (config: AxiosRequestConfig) => {
     const { isConnected, isInternetReachable } = store.getState().connectivity
 
-    console.log('🚀 ~ file: axiosConfig.ts:48 ~ isConnected:', isConnected)
-    console.log(
-      '🚀 ~ file: axiosConfig.ts:50 ~ isInternetReachable:',
-      isInternetReachable
-    )
-
     //Attempt to refresh token only if there is a network connection
     if (isConnected) {
       const accessToken = await SecureStore.getItemAsync('userAccessToken')
@@ -60,11 +54,6 @@ api.interceptors.request.use(
       )
       const tokenIsExpired = moment().isAfter(tokenExpiresAt)
       try {
-        console.log(
-          '🚀 ~ file: axiosConfig.ts:64 ~ tokenIsExpired:',
-          tokenIsExpired
-        )
-
         if (tokenIsExpired) {
           //refreshAsync to exchange for new token
           const existingRefreshToken =
@@ -96,9 +85,6 @@ api.interceptors.request.use(
               expiresIn,
               issuedAt,
             })
-            console.log(
-              '🚀 ~ file: axiosConfig.ts:90 ~ Tokens refreshed from the Axios Middleware'
-            )
 
             const newConfig = config as AxiosRequestConfig<any>
 
@@ -119,23 +105,14 @@ api.interceptors.request.use(
         }
 
         if (!tokenIsExpired) {
-          console.log(
-            '🚀 ~ file: axiosConfig.ts:121 ~ Tokens still valid, no refresh necessary'
-          )
           return config
         }
 
         throw new Error('No tokens found')
       } catch (error) {
-        console.log(
-          '🚀 ~ file: axiosConfig.ts:129 ~ There is an issue with token exchange'
-        )
         return config
       }
     } else {
-      console.log(
-        '🚀 ~ file: axiosConfig.ts:135 ~ No network connection, cannot retrieve token'
-      )
       throw new Error('No network connection, cannot retrieve token')
     }
   },

@@ -50,13 +50,13 @@ const DrawerMenu = ({
 
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {
-      navigation?.navigate(buttonTitle)
+      navigation?.navigateDeprecated(buttonTitle)
     },
     [navigation]
   )
 
   const handlePressFormButton = useCallback((buttonTitle: string) => {
-    navigation?.navigate('Trap Visit Form', { screen: buttonTitle })
+    navigation?.navigateDeprecated('Trap Visit Form', { screen: buttonTitle })
     //for each object in the steps Array
     //if the Object contain the name property that matched button title
     //assign the index top stepPayload
@@ -75,7 +75,7 @@ const DrawerMenu = ({
   }, [])
 
   const handlePressMarkRecaptureButton = useCallback((buttonTitle: string) => {
-    navigation.navigate('Mark Recapture', { screen: buttonTitle })
+    navigation.navigateDeprecated('Mark Recapture', { screen: buttonTitle })
     let stepPayload
     for (let i = 0; i < markRecaptureStepsArray.length; i++) {
       if (markRecaptureStepsArray[i].name === buttonTitle) {

@@ -45,6 +45,7 @@ import OptimizedInput from '../../components/Shared/OptimizedInput'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
+import { find } from 'lodash'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -58,10 +59,14 @@ const mapStateToProps = (state: RootState) => {
     selectedTrapName:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.trapName,
+    selectedTrapLocationId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.trapLocationId,
     activeTabId: state.tabSlice.activeTabId,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
     tabSlice: state.tabSlice,
+    visitSetupDefaults: state.visitSetupDefaults,
   }
 }
 
@@ -71,21 +76,24 @@ const TrapOperations = ({
   selectedStream,
   selectedTrapSite,
   selectedTrapName,
+  selectedTrapLocationId,
   activeTabId,
   previouslyActiveTabId,
   navigationSlice,
   tabSlice,
+  visitSetupDefaults,
 }: {
   navigation: any
   reduxState: any
   selectedStream: string
   selectedTrapSite: string
   selectedTrapName?: string
-
+  selectedTrapLocationId: number
   activeTabId: string | null
   previouslyActiveTabId: string | null
   navigationSlice: any
   tabSlice: TabStateI
+  visitSetupDefaults: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -99,6 +107,16 @@ const TrapOperations = ({
   const trapNotInServiceIdentifier = 'trap not in service - restart trapping'
   const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
   const [endTime, setEndTime] = useState(new Date() as any)
+  const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
+
+  useEffect(() => {
+    setTrapPermitInfo(
+      find(
+        visitSetupDefaults.permitInfo,
+        (permit: any) => permit.trapLocationsId === selectedTrapLocationId
+      )
+    )
+  }, [visitSetupDefaults.permitInfo, selectedTrapLocationId])
 
   const useFlowMeasureCalculationBool = (flowMeasureEntered: number) => {
     return useMemo(() => {
@@ -113,7 +131,9 @@ const TrapOperations = ({
       }
       let range
 
-      if (
+      if (trapPermitInfo) {
+        range = { max: Number(trapPermitInfo.flowThreshold), min: 50 }
+      } else if (
         !QARanges.flowMeasure?.[selectedStream.trim()]?.[
           selectedTrapSite.trim()
         ]
@@ -149,10 +169,20 @@ const TrapOperations = ({
         return false
       }
       let warningResult = false
-      const maxTemp =
-        unit === '°F'
-          ? QARanges.waterTemperature.maxF
-          : QARanges.waterTemperature.maxC
+      let maxTemp
+
+      if (trapPermitInfo) {
+        maxTemp =
+          unit === '°F'
+            ? Number(trapPermitInfo.temperatureThreshold) * 1.8 + 32
+            : Number(trapPermitInfo.temperatureThreshold)
+      } else {
+        1
+        maxTemp =
+          unit === '°F'
+            ? QARanges.waterTemperature.maxF
+            : QARanges.waterTemperature.maxC
+      }
 
       if (waterTemperatureValue > maxTemp) {
         warningResult = true
@@ -274,7 +304,12 @@ const TrapOperations = ({
     }
   }, [activeTabId, reduxState])
 
-  const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
+  const handleNavButtonClick = (
+    direction: 'left' | 'right',
+    values: any,
+    warningResultFlow: boolean,
+    warningResultTemp: boolean
+  ) => {
     if (activeTabId && activeTabId != 'placeholderId') {
       const destination =
         direction === 'left'
@@ -283,7 +318,11 @@ const TrapOperations = ({
               values,
               'Trap Operations',
               false,
-              navigation
+              navigation,
+              {
+                warningResultFlow,
+                warningResultTemp,
+              }
             )
       const callback = () => {
         navigateHelper(
@@ -349,7 +388,12 @@ const TrapOperations = ({
             <NavButtons
               navigation={navigation}
               handleSubmit={(buttonDirection: 'left' | 'right') => {
-                handleNavButtonClick(buttonDirection, values)
+                handleNavButtonClick(
+                  buttonDirection,
+                  values,
+                  warningResultFlow,
+                  warningResultTemp
+                )
               }}
               errors={errors}
               touched={touched}

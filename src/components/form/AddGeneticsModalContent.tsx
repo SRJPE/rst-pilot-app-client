@@ -10,7 +10,6 @@ import {
   Radio,
   Divider,
 } from 'native-base'
-
 import { Linking, Alert } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -58,7 +57,7 @@ const AddGeneticsModalContent = ({
       <Formik
         validationSchema={addGeneticsSampleSchema}
         initialValues={initialFormValues}
-        onSubmit={(values) => {
+        onSubmit={values => {
           console.log('🚀 ~  Genetic Sample values', values)
           handleFormSubmit(values)
         }}

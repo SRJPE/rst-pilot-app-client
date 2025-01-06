@@ -169,6 +169,7 @@ export const returnDefinitionArray = (dropdownsArray: any[]) => {
     return dropdownObj.definition
   })
 }
+
 export const returnNullableTableId = (value: any) =>
   value == -1 ? null : value + 1
 
@@ -284,7 +285,7 @@ export const navigateHelper = (
   updateActiveStep: any
 ) => {
   if (!destination) {
-    navigation.navigate('Home')
+    navigation.navigateDeprecated('Home')
     return
   }
 
@@ -307,9 +308,9 @@ export const navigateFlowRightButton = (
   values: any,
   activePage: string,
   holdingForMarkRecap: boolean,
-  navigation: any
+  navigation: any,
+  warnings?: any
 ) => {
-  console.log('right', activePage)
   //this is now kind of redundant with the implementation of the loading screen
   switch (activePage) {
     case 'Visit Setup':
@@ -321,20 +322,10 @@ export const navigateFlowRightButton = (
         values?.trapStatus === 'trap not in service - restart trapping'
       ) {
         return 'Started Trapping'
-      } else if (values?.flowMeasure > 1000) {
+      } else if (warnings?.warningResultFlow) {
         return 'High Flows'
-      } else if (values?.waterTemperatureUnit === '°C') {
-        if (values?.waterTemperature > 30) {
-          return 'High Temperatures'
-        } else {
-          return 'Fish Processing'
-        }
-      } else if (values?.waterTemperatureUnit === '°F') {
-        if (values?.waterTemperature > 86) {
-          return 'High Temperatures'
-        } else {
-          return 'Fish Processing'
-        }
+      } else if (warnings?.warningResultTemp) {
+        return 'High Temperatures'
       } else {
         return 'Fish Processing'
       }
@@ -372,11 +363,11 @@ export const navigateFlowRightButton = (
     case 'Paper Entry':
       return 'Trap Operations'
     case 'Started Trapping':
-      navigation.navigate('Home')
+      navigation.navigateDeprecated('Home')
       break
     default:
       console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
-      navigation.navigate('Home')
+      navigation.navigateDeprecated('Home')
       break
   }
 }
@@ -431,7 +422,7 @@ export const navigateFlowLeftButton = (
       }
     default:
       console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
-      navigation.navigate('Home')
+      navigation.navigateDeprecated('Home')
       break
   }
 }
@@ -535,3 +526,15 @@ export const legendColorList = [
   '#FBA72A',
   '#C0CAAD',
 ]
+
+export const addFishErrorMessages = {
+  species: { emptyError: 'Fish species required' },
+  forkLength: {
+    typeError: 'Input must be a number',
+    emptyError: 'Fish fork length required',
+  },
+  weight: { typeError: 'Input must be a number' },
+  lifeStage: { emptyError: 'Fish life stage required' },
+  adiposeClipped: { emptyError: 'Fish adipose clipped status required' },
+  dead: { emptyError: 'Fish mortality required' },
+}

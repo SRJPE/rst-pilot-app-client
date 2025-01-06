@@ -25,18 +25,18 @@ const MonitoringProgramNavButtons = ({
       case 'Monitoring Program Home':
         break
       case 'Monitoring Program Existing':
-        navigation.navigate('Monitoring Program Joined')
+        navigation.navigateDeprecated('Monitoring Program Joined')
         break
       case 'Monitoring Program Joined':
         navigation.reset({
           index: 0,
           routes: [{ name: 'Monitoring Program Home' }],
         })
-        navigation.navigate('Home')
+        navigation.navigateDeprecated('Home')
         break
       case 'Monitoring Program New':
         handleSubmit()
-        navigation.navigate('Monitoring Program', {
+        navigation.navigateDeprecated('Monitoring Program', {
           screen: 'Create New Program',
         })
         break

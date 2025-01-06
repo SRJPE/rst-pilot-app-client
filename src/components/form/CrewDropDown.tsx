@@ -68,6 +68,7 @@ export default function CrewDropDown({
       setValue={setValue}
       setItems={setList}
       multiple={true}
+      dropDownDirection='TOP'
       mode='BADGE'
       listMode='SCROLLVIEW'
       badgeDotColors={['#007C7C']}

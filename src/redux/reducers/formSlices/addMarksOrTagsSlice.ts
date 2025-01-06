@@ -30,10 +30,13 @@ export const addMarksOrTagsSlice = createSlice({
       markOrTagDataCopy.push(action.payload)
       state.values = markOrTagDataCopy
     },
+    updateMarkOrTagData: (state, action) => {
+      state.values = action.payload
+    },
   },
 })
 
-export const { resetMarksOrTagsSlice, saveMarkOrTagData } =
+export const { resetMarksOrTagsSlice, saveMarkOrTagData, updateMarkOrTagData } =
   addMarksOrTagsSlice.actions
 
 export default addMarksOrTagsSlice.reducer

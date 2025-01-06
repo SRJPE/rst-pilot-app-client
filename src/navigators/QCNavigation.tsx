@@ -1,12 +1,13 @@
-import { createStackNavigator } from "@react-navigation/stack"
-import QCMain from "../screens/qcScreens/QCMain"
-import ProgramQC from "../screens/qcScreens/ProgramQC"
-import TrapQC from "../screens/qcScreens/TrapQC"
-import CatchMeasureQC from "../screens/qcScreens/CatchMeasureQC"
-import CatchCategoricalQC from "../screens/qcScreens/CatchCategoricalQC"
-import CatchFishCountQC from "../screens/qcScreens/CatchFishCountQC"
-import PartialRecordsQC from "../screens/qcScreens/PartialRecordsQC"
-import EfficiencyQC from "../screens/qcScreens/EfficiencyQC"
+import { createStackNavigator } from '@react-navigation/stack'
+import QCMain from '../screens/qcScreens/QCMain'
+import ProgramQC from '../screens/qcScreens/ProgramQC'
+import TrapQC from '../screens/qcScreens/TrapQC'
+import CatchMeasureQC from '../screens/qcScreens/CatchMeasureQC'
+import CatchCategoricalQC from '../screens/qcScreens/CatchCategoricalQC'
+import CatchFishCountQC from '../screens/qcScreens/CatchFishCountQC'
+import PartialRecordsQC from '../screens/qcScreens/PartialRecordsQC'
+import EfficiencyQC from '../screens/qcScreens/EfficiencyQC'
+import TotalDailyCountMain from '../screens/qcScreens/TotalDailyCountMain'
 
 const DataQualityControl = createStackNavigator()
 
@@ -32,7 +33,7 @@ export default function QCNavigation() {
       />
       <DataQualityControl.Screen
         name='CatchFishCountQC'
-        component={CatchFishCountQC}
+        component={TotalDailyCountMain}
       />
       <DataQualityControl.Screen
         name='PartialRecordsQC'

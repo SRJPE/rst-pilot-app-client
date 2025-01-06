@@ -23,6 +23,7 @@ import { resetTabsSlice } from '../../../redux/reducers/formSlices/tabSlice'
 import { flatten, uniq } from 'lodash'
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
+import { returnDefinitionArray } from '../../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -106,12 +107,6 @@ const NoFishCaught = ({
     dispatch(resetVisitSetupSlice())
     dispatch(resetPaperEntrySlice())
     dispatch(resetTabsSlice())
-  }
-
-  const returnDefinitionArray = (dropdownsArray: any[]) => {
-    return dropdownsArray.map((dropdownObj: any) => {
-      return dropdownObj.definition
-    })
   }
 
   const findTrapLocationIds = () => {
