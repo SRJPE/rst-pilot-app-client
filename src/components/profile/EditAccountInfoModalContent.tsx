@@ -16,7 +16,7 @@ import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import api from '../../api/axiosConfig'
 import CustomSelect from '../Shared/CustomSelect'
-import * as SecureStore from 'expo-secure-store'
+import { generateErrorMessage } from '../../utils/helpers/helperFunctions'
 
 const editAccountValidationSchema = Yup.object().shape({
   firstName: Yup.string().label('First Name').required(),
@@ -73,17 +73,20 @@ const EditAccountInfoModalContent = ({
               phone,
               agencyId,
             })
-            .catch(err => {
+            .catch(error => {
               console.log(
-                '🚀 ~ file: AddNewUserModalContent.tsx:240 ~ onSubmit={ ~ err:',
-                err
+                '🚀 ~ file: EditAccountInfoModalContent.tsx:311 ~ error code',
+                error.code
+              )
+              const errorMessage = generateErrorMessage(
+                error.code || 'Error during request to edit user (ln 81)'
               )
 
               setSubmissionMessage({
                 success: false,
-                message:
-                  'There was an error updating the user. Please try again.',
+                message: errorMessage,
               })
+
               setSubmitting(false)
             })
 

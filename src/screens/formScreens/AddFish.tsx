@@ -1352,6 +1352,7 @@ const AddFishContent = ({
             onPress={() => {
               if (route.params?.editModeData) {
                 navigation.goBack()
+                showSlideAlert(dispatch, 'Fish Input Saved')
               } else {
                 const activeTabId = tabSlice.activeTabId
                 if (activeTabId) {
@@ -1362,6 +1363,7 @@ const AddFishContent = ({
                     UID: fishUID,
                   })
                   navigation.goBack()
+                  showSlideAlert(dispatch, 'Fish Input Saved')
                 }
               }
             }}
@@ -1411,6 +1413,7 @@ const AddFishContent = ({
                     numFishCaught: count.value,
                   })
                   navigation.goBack()
+                  showSlideAlert(dispatch, 'Fish Input Updated')
                 }
               } else {
                 const activeTabId = tabSlice.activeTabId
@@ -1419,7 +1422,7 @@ const AddFishContent = ({
                     tabId: activeTabId,
                     formValues: payload,
                   })
-                  showSlideAlert(dispatch, 'Fish')
+                  showSlideAlert(dispatch, 'Fish Input Saved')
                   if (
                     species.value &&
                     typeof species.value === 'string' &&

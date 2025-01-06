@@ -32,6 +32,7 @@ import { DeviceEventEmitter, useWindowDimensions } from 'react-native'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { StackActions } from '@react-navigation/native'
 import { navigateHelper } from '../../utils/utils'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
@@ -96,9 +97,11 @@ const FishInput = ({
     dispatch(markFishInputCompleted({ tabId: activeTabId, bool: true }))
     let stepCompletedCheck = true
 
-    if (stepCompletedCheck)
+    if (stepCompletedCheck) {
       dispatch(markStepCompleted({ propName: 'fishInput' }))
-    console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
+
+      console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
+    }
   }
 
   const submissionLoader = (direction: 'left' | 'right') => {
@@ -123,6 +126,7 @@ const FishInput = ({
         process: () => handleSubmit(),
         callback,
       })
+      showSlideAlert(dispatch)
     }, 1000)
   }
 

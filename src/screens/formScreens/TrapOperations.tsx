@@ -45,6 +45,7 @@ import OptimizedInput from '../../components/Shared/OptimizedInput'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { find } from 'lodash'
 
 const mapStateToProps = (state: RootState) => {
@@ -88,7 +89,7 @@ const TrapOperations = ({
   selectedStream: string
   selectedTrapSite: string
   selectedTrapName?: string
-  selectedTrapLocationId: number
+  selectedTrapLocationId: number | null
   activeTabId: string | null
   previouslyActiveTabId: string | null
   navigationSlice: any
@@ -244,6 +245,7 @@ const TrapOperations = ({
 
       if (stepCompletedCheck)
         dispatch(markStepCompleted({ propName: 'trapOperations' }))
+      showSlideAlert(dispatch)
       console.log('🚀 ~ handleSubmit ~ Status', values)
     }
   }

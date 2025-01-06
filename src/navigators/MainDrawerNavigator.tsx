@@ -41,7 +41,7 @@ const DrawerNavigator = ({
     connectivityStoreIsConnected && isInternetReachable !== false
 
   useEffect(() => {
-    if (!isSignInScreen && isConnected) {
+    if (isConnected) {
       refreshUserToken(dispatch).then(tokenRefreshResponse => {
         if (
           tokenRefreshResponse &&
@@ -67,10 +67,11 @@ const DrawerNavigator = ({
       })
     } else {
       console.log(
-        '🚀 ~ file: MainDrawerNavigator.tsx:71 ~ No network connection, token cannot be refreshed:'
+        '🚀 ~ file: MainDrawerNavigator.tsx:72 ~ useEffect ~ isConnected:',
+        isConnected
       )
     }
-  }, [isSignInScreen])
+  }, [isSignInScreen, isConnected])
 
   async function getValueFor(key: string) {
     let result = await SecureStore.getItemAsync(key)

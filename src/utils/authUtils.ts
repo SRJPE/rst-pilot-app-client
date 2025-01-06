@@ -15,7 +15,7 @@ type TokenResponse =
   | 'Tokens still valid'
   | 'Tokens could not be refreshed'
   | 'No refresh token found'
-  | 'No network connection, cannot retrieve token'
+  | 'No network connection'
 
 export const refreshUserToken = async (
   dispatch: AppDispatch
@@ -75,7 +75,7 @@ export const refreshUserToken = async (
       }
     }
   } else {
-    return 'No network connection, cannot retrieve token' as TokenResponse
+    return 'No network connection' as TokenResponse
   }
   return null
 }

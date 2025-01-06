@@ -32,12 +32,17 @@ const dateTransformer: AxiosRequestTransformer = (data: any) => {
   }
   return data
 }
+
+const controller = new AbortController()
+
 const baseURL = Constants.expoConfig?.extra?.EXPO_PUBLIC_BASE_URL
 const api = axios.create({
   baseURL,
   transformRequest: [dateTransformer].concat(
     axios.defaults.transformRequest as AxiosRequestTransformer[]
   ),
+  timeout: 10000,
+  signal: controller.signal,
 })
 
 // Axios middleware to retrieve and add authorization token
@@ -112,8 +117,6 @@ api.interceptors.request.use(
       } catch (error) {
         return config
       }
-    } else {
-      throw new Error('No network connection, cannot retrieve token')
     }
   },
   error => {

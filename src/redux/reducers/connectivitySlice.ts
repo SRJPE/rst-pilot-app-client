@@ -9,6 +9,7 @@ import {
   fetchExistingMarks,
 } from './postSlices/markRecapturePostBundler'
 import { postMonitoringProgramSubmissions } from './postSlices/monitoringProgramPostBundler'
+import { showSlideAlert } from './slideAlertSlice'
 
 export interface InitialStateI {
   type: string
@@ -58,6 +59,12 @@ export const connectionChanged = createAsyncThunk(
         thunkAPI.dispatch(fetchPreviousTrapAndCatch())
         thunkAPI.dispatch(fetchExistingMarks())
       }
+      showSlideAlert(
+        thunkAPI.dispatch,
+        'Network connection established successfully',
+        'success',
+        5000
+      )
       return payload
     } catch (e) {
       return payload

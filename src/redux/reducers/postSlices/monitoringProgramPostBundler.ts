@@ -3,6 +3,8 @@ import api from '../../../api/axiosConfig'
 import { RootState } from '../../store'
 import { cloneDeep } from 'lodash'
 import { MonitoringProgramSubmissionI } from '../../../screens/accountScreens/createNewProgram/CreateNewProgramHome'
+import { generateErrorMessage } from '../../../utils/helpers/helperFunctions'
+import { showSlideAlert } from '../slideAlertSlice'
 
 interface InitialStateI {
   submissionStatus:
@@ -37,27 +39,35 @@ export const postMonitoringProgramSubmissions = createAsyncThunk(
     const monitoringProgramSubmissions =
       state.monitoringProgramPostBundler.monitoringProgramSubmissions
 
-    await Promise.all(
-      monitoringProgramSubmissions.map(
-        async (monitoringProgramSubmission: MonitoringProgramSubmissionI) => {
-          const monitoringProgramSubmissionCopy = cloneDeep(
-            monitoringProgramSubmission
-          )
-          console.log(
-            '🚀 ~ hit... monitoringProgramSubmissionCopy:',
-            monitoringProgramSubmissionCopy
-          )
-          // submit monitoring Program
-          const apiResponse: APIResponseI = await api.post(
-            'program/',
-            monitoringProgramSubmissionCopy
-          )
-          // get response from server
-          // save to payload
-          payload.monitoringProgramResponse.push(apiResponse.data)
-        }
+    try {
+      await Promise.all(
+        monitoringProgramSubmissions.map(
+          async (monitoringProgramSubmission: MonitoringProgramSubmissionI) => {
+            const monitoringProgramSubmissionCopy = cloneDeep(
+              monitoringProgramSubmission
+            )
+            console.log(
+              '🚀 ~ hit... monitoringProgramSubmissionCopy:',
+              monitoringProgramSubmissionCopy
+            )
+            // submit monitoring Program
+            const apiResponse: APIResponseI = await api.post(
+              'program/',
+              monitoringProgramSubmissionCopy
+            )
+            // get response from server
+            // save to payload
+            payload.monitoringProgramResponse.push(apiResponse.data)
+          }
+        )
       )
-    )
+    } catch (error: any) {
+      const errorMessage = generateErrorMessage(
+        error?.code ||
+          'An unknown error occurred during monitoring program submission (ln 67)'
+      )
+      showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
+    }
     return payload
   }
 )

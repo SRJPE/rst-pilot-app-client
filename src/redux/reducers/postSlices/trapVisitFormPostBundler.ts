@@ -1,10 +1,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../../api/axiosConfig'
 import { RootState } from '../../store'
-import { cloneDeep } from 'lodash'
 import { getSubstring } from '../../../utils/utils'
 import { PURGE } from 'redux-persist'
 import { showSlideAlert } from '../slideAlertSlice'
+import { generateErrorMessage } from '../../../utils/helpers/helperFunctions'
+import { AxiosError } from 'axios'
 
 interface InitialStateI {
   fetchStatus: 'initial-state' | 'fetch-failed' | 'fetch-successful'
@@ -142,7 +143,6 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
         await trapPromise
           .then(async (response: any) => {
             let trapId = response.data.createdTrapVisitResponse.id
-
             // Save to payload
             payload.trapVisitResponse.push(response.data)
 
@@ -166,10 +166,19 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
             }
           })
           .catch((error: any) => {
-            console.log('trap submission error: ', error)
+            console.log(
+              '🚀 ~ file: trapVisitFormPostBundler.ts:169 ~ error:',
+              error
+            )
+
+            const errorMessage = generateErrorMessage(
+              error.code || 'Error during catch raw submission (ln 170)'
+            )
+
+            showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
             const { response } = error
-            const errorDetail = response.data.detail
-            if (!errorDetail.includes('already exists')) {
+            const errorDetail = response?.data?.detail
+            if (!errorDetail?.includes('already exists')) {
               payload.failedTrapVisitSubmissions.push(
                 trapVisitSubmissions.find(
                   trapSubmission => trapSubmission.trapVisitUid === uuid
@@ -179,7 +188,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           })
       }
     } catch (err) {
-      console.log('error in fetchWithPostParams: ', err)
+      console.log('error in fetchWithPostParams: BUNDLER', err)
     } finally {
       if (payload.catchRawResponse.length || payload.trapVisitResponse.length) {
         await fetchWithPostParams(thunkAPI.dispatch, payload)
@@ -208,9 +217,21 @@ export const postQCSubmissions = createAsyncThunk(
             delete payload?.createdTrapVisitResponse.id
             delete payload?.stagedForSubmission
 
-            return api.put(`trap-visit/${id}`, {
-              ...payload,
-            })
+            return api
+              .put(`trap-visit/${id}`, {
+                ...payload,
+              })
+              .catch((error: any) => {
+                console.log(
+                  '🚀 ~ file: trapVisitFormPostBundler.ts:223 ~ error:',
+                  Object.entries(error)
+                )
+
+                const errorMessage = generateErrorMessage(
+                  error.code || 'Error during post cq submission (ln 230)'
+                )
+                showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
+              })
           }
         )
 
@@ -227,23 +248,13 @@ export const postQCSubmissions = createAsyncThunk(
           }
         )
 
-        const trapResults = await Promise.allSettled(trapPromises).catch(
-          error => {
-            console.log('trap qc submission error: ', error)
-          }
-        )
-
-        const catchResults = await Promise.allSettled(catchPromises).catch(
-          error => {
-            console.log('catch qc submission error: ', error)
-          }
-        )
-
+        const trapResults = await Promise.allSettled(trapPromises)
+        const catchResults = await Promise.allSettled(catchPromises)
         const trapVisitResponse = []
 
         for (const result of trapResults as any) {
           if (result.status === 'fulfilled') {
-            trapVisitResponse.push(result.value.data)
+            trapVisitResponse.push(result?.value?.data)
           } else {
             console.log('trap qc submission fail: ', result)
           }
@@ -253,21 +264,25 @@ export const postQCSubmissions = createAsyncThunk(
 
         for (const result of catchResults as any) {
           if (result.status === 'fulfilled') {
-            catchRawResponse.push(result.value.data)
+            catchRawResponse.push(result?.value?.data)
           } else {
             console.log('catch qc submission fail: ', result)
           }
         }
-
-        showSlideAlert(thunkAPI.dispatch, 'QC submissions')
 
         return {
           trapVisitResponse,
           catchRawResponse,
         }
       }
-    } catch (err) {
-      console.log('error in postQCSubmissions: ', err)
+    } catch (error) {
+      console.log('288 error in postQCSubmissions: ', error)
+      showSlideAlert(
+        thunkAPI.dispatch,
+        'Connection issue during QC submission',
+        'error',
+        5000
+      )
     }
   }
 )
@@ -280,62 +295,90 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
     try {
       const state = thunkAPI.getState() as RootState
       const userPrograms = state.visitSetupDefaults.programs
-      await Promise.all(
-        userPrograms.map(async program => {
-          const trapVisitResponse = await api.get(
-            `trap-visit/program/${program.programId}`
-          )
-          const catchRawResponse = await api.get(
-            `catch-raw/program/${program.programId}`
-          )
-          let trapVisits = trapVisitResponse.data
-          let catchRaws = catchRawResponse.data
+      if (
+        state.connectivity.isConnected &&
+        state.connectivity.isInternetReachable
+      ) {
+        await Promise.all(
+          userPrograms.map(async program => {
+            const trapVisitResponse = await api.get(
+              `trap-visit/program/${program.programId}`
+            )
+            const catchRawResponse = await api.get(
+              `catch-raw/program/${program.programId}`
+            )
+            let trapVisits = trapVisitResponse.data
+            let catchRaws = catchRawResponse.data
 
-          const alreadyActiveQCTrapVisitIds: number[] =
-            state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
-              trapVisit => {
-                return trapVisit.createdTrapVisitResponse.id
+            const alreadyActiveQCTrapVisitIds: number[] =
+              state.trapVisitFormPostBundler.qcTrapVisitSubmissions.map(
+                trapVisit => {
+                  return trapVisit.createdTrapVisitResponse.id
+                }
+              )
+
+            const previousTrapVisitsPayload: any[] = trapVisits.filter(
+              (trapVisit: any) => {
+                return !alreadyActiveQCTrapVisitIds.includes(
+                  trapVisit.createdTrapVisitResponse.id
+                )
               }
             )
 
-          const previousTrapVisitsPayload: any[] = trapVisits.filter(
-            (trapVisit: any) => {
-              return !alreadyActiveQCTrapVisitIds.includes(
-                trapVisit.createdTrapVisitResponse.id
+            const alreadyActiveQCCatchRawIds: number[] =
+              state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
+                catchRaw => {
+                  return catchRaw.createdCatchRawResponse.id
+                }
               )
-            }
-          )
 
-          const alreadyActiveQCCatchRawIds: number[] =
-            state.trapVisitFormPostBundler.qcCatchRawSubmissions.map(
-              catchRaw => {
-                return catchRaw.createdCatchRawResponse.id
+            const previousCatchRawPayload: any[] = catchRaws.filter(
+              (catchRaw: any) => {
+                return !alreadyActiveQCCatchRawIds.includes(
+                  catchRaw?.createdCatchRawResponse?.id
+                )
               }
             )
 
-          const previousCatchRawPayload: any[] = catchRaws.filter(
-            (catchRaw: any) => {
-              return !alreadyActiveQCCatchRawIds.includes(
-                catchRaw?.createdCatchRawResponse?.id
-              )
-            }
-          )
+            previousTrapVisits.push(...previousTrapVisitsPayload)
+            previousCatchRaw.push(...previousCatchRawPayload)
+          })
+        )
 
-          previousTrapVisits.push(...previousTrapVisitsPayload)
-          previousCatchRaw.push(...previousCatchRawPayload)
-        })
-      )
-
-      return {
-        previousTrapVisits,
-        previousCatchRaw,
+        return {
+          previousTrapVisits,
+          previousCatchRaw,
+        }
       }
-    } catch (err) {
-      console.log('errr', err)
-      thunkAPI.rejectWithValue({
-        previousTrapVisits: [],
-        previousCatchRaw: [],
-      })
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        console.log(
+          '🚀 ~ file: trapVisitFormPostBundler.ts:349 ~ fetchPreviousTrapAndCatch error:',
+          Object.entries(error)
+        )
+        const state = thunkAPI.getState() as RootState
+        const connectivityState = state.connectivity
+        const errorMessage = generateErrorMessage(
+          error.code ||
+            'Error fetching previous trap and catch records (ln 367)'
+        )
+        const connectionError =
+          !connectivityState.isConnected &&
+          error.message.includes('network connection')
+        {
+          connectionError &&
+            showSlideAlert(
+              thunkAPI.dispatch,
+              errorMessage,
+              connectionError ? 'warning' : 'error',
+              5000
+            )
+        }
+        thunkAPI.rejectWithValue({
+          previousTrapVisits: [],
+          previousCatchRaw: [],
+        })
+      }
     }
   }
 )
@@ -405,7 +448,10 @@ const fetchWithPostParams = async (dispatch: any, postResults: any) => {
       }
     }
   } catch (error) {
-    console.log('error in fetchWithPostParams: ', error)
+    console.log(
+      '🚀 ~ file: trapVisitFormPostBundler.ts:430 ~ fetchWithPostParams ~ error:',
+      error
+    )
   }
 }
 

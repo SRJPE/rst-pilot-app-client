@@ -41,6 +41,7 @@ import { uid } from 'uid'
 import TrapNameDropDown from '../../components/form/TrapNameDropDown'
 import { navigateHelper } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -404,6 +405,7 @@ const VisitSetup = ({
               process: () => onSubmit(values, tabSlice?.activeTabId),
               callback,
             })
+            showSlideAlert(dispatch)
           }, 1000)
         }}
       >
