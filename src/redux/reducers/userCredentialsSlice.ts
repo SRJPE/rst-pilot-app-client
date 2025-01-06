@@ -11,6 +11,8 @@ export interface InitialStateI {
   firstName: string | null
   lastName: string | null
   agencyId: string | number | null
+  agencyDefinition: string | null
+  orcidId?: string | null
   role: 'lead' | 'non-lead' | null
   phone: string | null
 }
@@ -21,6 +23,7 @@ const initialState: InitialStateI = {
   firstName: null,
   lastName: null,
   agencyId: null,
+  agencyDefinition: null,
   role: null,
   phone: null,
 }

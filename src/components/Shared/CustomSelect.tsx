@@ -14,7 +14,7 @@ interface CustomSelectI {
   disabled?: boolean
 }
 
-const CustomSelect: React.FC<CustomSelectI> = (props) => {
+const CustomSelect: React.FC<CustomSelectI> = props => {
   const handleOnChange = useCallback(
     (itemValue: any) => {
       props.onValueChange(itemValue)
@@ -49,7 +49,7 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
               <Select.Item
                 key={item.id ?? idx}
                 label={item.definition}
-                value={item.id.toString()}
+                value={item.definition}
               />
             )
           } else if (item.value) {

@@ -5,6 +5,7 @@ import { cloneDeep } from 'lodash'
 import { MonitoringProgramSubmissionI } from '../../../screens/accountScreens/createNewProgram/CreateNewProgramHome'
 import { generateErrorMessage } from '../../../utils/helpers/helperFunctions'
 import { showSlideAlert } from '../slideAlertSlice'
+import { postMonitoringProgramFilesToDB } from '../../../utils/hooks/useCacheDirectory'
 
 interface InitialStateI {
   submissionStatus:
@@ -47,17 +48,32 @@ export const postMonitoringProgramSubmissions = createAsyncThunk(
               monitoringProgramSubmission
             )
             console.log(
-              '🚀 ~ hit... monitoringProgramSubmissionCopy:',
+              '🚀 ~ file: monitoringProgramPostBundler.ts:83 ~ monitoringProgramSubmissionCopy:',
               monitoringProgramSubmissionCopy
             )
+
             // submit monitoring Program
             const apiResponse: APIResponseI = await api.post(
               'program/',
               monitoringProgramSubmissionCopy
             )
             // get response from server
+
             // save to payload
             payload.monitoringProgramResponse.push(apiResponse.data)
+            const {
+              createdProgramResponse: { id: createdProgramId },
+              createdHatcheryInfoResponse: { id: createdHatcheryInfoId },
+              createdPermitInformationResponse: {
+                id: createdPermitInformationId,
+              },
+            } = apiResponse.data
+
+            postMonitoringProgramFilesToDB({
+              createdProgramId,
+              createdHatcheryInfoId,
+              createdPermitInformationId,
+            })
           }
         )
       )

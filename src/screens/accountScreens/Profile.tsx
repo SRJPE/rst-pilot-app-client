@@ -17,7 +17,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import AddNewUserModalContent from '../../components/profile/AddNewUserModalContent'
 import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
@@ -25,6 +25,7 @@ import CustomModal from '../../components/Shared/CustomModal'
 import { clearUserCredentials } from '../../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState, persistor } from '../../redux/store'
 import { MonitoringProgram } from '../../utils/interfaces'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 import {
   // @ts-ignore
@@ -34,11 +35,18 @@ import MonitoringProgramInfoModalContent from '../../components/profile/Monitori
 
 const Profile = ({
   userCredentialsStore,
+  connectivityStore,
   navigation,
 }: {
   userCredentialsStore: any
+  connectivityStore: any
   navigation: any
 }) => {
+  console.log(
+    '🚀 ~ file: Profile.tsx:44 ~ connectivityStore:',
+    connectivityStore
+  )
+
   const dispatch = useDispatch<AppDispatch>()
   const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false)
   const [selectedMonitoringProgramInfo, setSelectedMonitoringProgramInfo] =
@@ -58,6 +66,9 @@ const Profile = ({
   const userIsLead = userCredentialsStore.role === 'lead'
 
   const userPrograms = userCredentialsStore?.userPrograms || []
+
+  const deviceIsConnected =
+    connectivityStore.isConnected && connectivityStore.isInternetReachable
   //////////////////////////////////////////////
 
   const [pwResetRequest, pwResetResponse, pwResetPromptAsync] = useAuthRequest(
@@ -167,9 +178,18 @@ const Profile = ({
                   mb={15}
                   alignSelf='center'
                   bg='transparent'
-                  onPress={() =>
-                    navigation.navigateDeprecated('Monitoring Program')
-                  }
+                  onPress={() => {
+                    if (deviceIsConnected) {
+                      navigation.navigateDeprecated('Monitoring Program')
+                    } else {
+                      showSlideAlert(
+                        dispatch,
+                        'Please connect to the internet to create a new program',
+                        'error',
+                        3000
+                      )
+                    }
+                  }}
                 >
                   <HStack alignItems='center'>
                     <Icon
@@ -373,6 +393,7 @@ const Profile = ({
 const mapStateToProps = (state: RootState) => {
   return {
     userCredentialsStore: state.userCredentials,
+    connectivityStore: state.connectivity,
   }
 }
 

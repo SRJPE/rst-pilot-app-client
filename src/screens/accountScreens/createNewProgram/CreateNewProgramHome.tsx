@@ -21,6 +21,8 @@ import {
   returnNullableTableId,
 } from '../../../utils/utils'
 import { GroupTrapSiteValuesI } from '../../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
+import * as FileSystem from 'expo-file-system'
+// import { postMonitoringProgramFilesToDB } from '../../../utils/hooks/useCacheDirectory'
 
 interface ProgramMetaDataSubmissionI {
   programName: string
@@ -173,6 +175,7 @@ const CreateNewProgramHome = ({
       ) {
         console.log('CONNECTED')
         dispatch(postMonitoringProgramSubmissions())
+        // postMonitoringProgramFilesToDB()
       }
     } catch (error) {
       console.error(error)
