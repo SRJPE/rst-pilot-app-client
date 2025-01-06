@@ -312,8 +312,18 @@ export const trappingSitesSchema = yup.object().shape({
   USGSStationNumber: yup
     .number()
     // .nullable()
-    .required('Trap latitude required')
-    .typeError('Input must be a number'),
+    .required('USGS Station Number required')
+    .typeError('Input must be a number')
+    .test(
+      'length',
+      'USGS Station Number must be between 8 and 15 digits',
+      value => {
+        const safeValue = value?.toString() || 0
+        return (
+          safeValue.toString().length >= 8 && safeValue.toString().length <= 15
+        )
+      }
+    ),
   releaseSiteName: yup.string().required('Release site name required'),
   releaseSiteLatitude: yup
     .number()
