@@ -62,41 +62,22 @@ const AddTrapModalContent = ({
           <>
             <CustomModalHeader
               headerText={'Add Traps'}
-              showHeaderButton={true}
+              showHeaderButton={false}
               closeModal={closeModal}
-              headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={!isValid}
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Add Trap
-                  </Text>
-                </Button>
-              }
             />
-            <VStack mx='5%' my='2%'>
-              <HStack>
-                <FormInputComponent
-                  label={'Trap Name'}
-                  placeholder='Enter Trap Name'
-                  touched={touched}
-                  errors={errors}
-                  value={values.trapName ? `${values.trapName}` : ''}
-                  camelName={'trapName'}
-                  onChangeText={handleChange('trapName')}
-                  onBlur={handleBlur('trapName')}
-                />
-              </HStack>
+            <VStack mx='5%' my='2%' space={5}>
+              <FormInputComponent
+                label={'Trap Name'}
+                placeholder='Enter Trap Name'
+                touched={touched}
+                errors={errors}
+                value={values.trapName ? `${values.trapName}` : ''}
+                camelName={'trapName'}
+                onChangeText={handleChange('trapName')}
+                onBlur={handleBlur('trapName')}
+              />
 
-              <HStack space={5} alignItems='center'>
+              <HStack space={5}>
                 <FormInputComponent
                   label={'Trap Latitude'}
                   placeholder='00.000'
@@ -200,6 +181,21 @@ const AddTrapModalContent = ({
                   onBlur={handleBlur('releaseSiteLongitude')}
                 />
               </HStack>
+              <Button
+                bg='primary'
+                mx='2'
+                px='10'
+                shadow='3'
+                isDisabled={!isValid}
+                onPress={() => {
+                  handleSubmit()
+                  closeModal()
+                }}
+              >
+                <Text fontSize='xl' color='white'>
+                  Save Trap
+                </Text>
+              </Button>
             </VStack>
           </>
         )
