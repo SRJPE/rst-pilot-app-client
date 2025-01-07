@@ -121,7 +121,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
         {showError && (
           <RenderErrorMessage errors={errors} inputName={camelName} />
         )}
-      </Box>{' '}
+      </Box>
     </FormControl>
   )
 }

@@ -28,7 +28,6 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   value,
   camelName,
   keyboardType,
-  width,
   placeholder,
   onChangeText,
   onBlur,
@@ -39,12 +38,8 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   const showError = hasError && isTouched
 
   return (
-    <Box minH={100}>
-      <FormControl
-        width={width ? width : 'auto'}
-        flex={1}
-        isInvalid={showError}
-      >
+    <Box minH={100} flex={1}>
+      <FormControl flex={1} isInvalid={showError}>
         <FormControl.Label mb={1}>
           <Text color={showError ? 'red.700' : 'black'} fontSize='16'>
             {label}
