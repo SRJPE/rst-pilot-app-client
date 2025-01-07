@@ -34,40 +34,43 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   onBlur,
 }) => {
   const hasError = errors[camelName]
-
   const isTouched = touched[camelName]
-  if (camelName === 'trapName') {
-    console.log('🚀 ~ file: FormInputComponent.tsx:37 ~ hasError:', hasError)
-    console.log('🚀 ~ file: FormInputComponent.tsx:40 ~ isTouched:', isTouched)
-  }
+
+  const showError = hasError && isTouched
 
   return (
-    <FormControl width={width ? width : 'auto'} flex={1} isInvalid={hasError}>
-      <FormControl.Label mb={1}>
-        <Text color={errors[camelName] ? 'red.700' : 'black'} fontSize='16'>
-          {label}
-        </Text>
-      </FormControl.Label>
-
-      <Input
-        height='50px'
-        fontSize='16'
-        keyboardType={keyboardType ? keyboardType : 'default'}
-        placeholder={placeholder || 'No placeholder entered'}
-        onChangeText={onChangeText}
-        onBlur={onBlur}
-        value={value}
-        _focus={{
-          borderColor: 'muted.300',
-          _invalid: { borderColor: 'red.700' },
-        }}
-      />
-      <Box mt={2} h={25}>
-        {isTouched && hasError && (
-          <RenderErrorMessage errors={errors} inputName={camelName} />
-        )}
-      </Box>
-    </FormControl>
+    <Box minH={100}>
+      <FormControl
+        width={width ? width : 'auto'}
+        flex={1}
+        isInvalid={showError}
+      >
+        <FormControl.Label mb={1}>
+          <Text color={showError ? 'red.700' : 'black'} fontSize='16'>
+            {label}
+          </Text>
+        </FormControl.Label>
+        <Input
+          height='50px'
+          fontSize='16'
+          keyboardType={keyboardType ? keyboardType : 'default'}
+          placeholder={placeholder || 'No placeholder entered'}
+          onChangeText={onChangeText}
+          onBlur={onBlur}
+          value={value}
+          _focus={{
+            borderColor: 'muted.300',
+            _invalid: { borderColor: 'red.700' },
+          }}
+          _invalid={{ borderColor: 'red.700' }}
+        />
+        <Box mt={2} h={25}>
+          {showError && (
+            <RenderErrorMessage errors={errors} inputName={camelName} />
+          )}
+        </Box>
+      </FormControl>
+    </Box>
   )
 }
 export default FormInputComponent
