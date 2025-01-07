@@ -19,7 +19,7 @@ import {
 } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 
-import { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Searchbar } from 'react-native-paper'
 import { PersonnelObject } from '../../screens/accountScreens/createNewProgram/CrewMembers'
 import { crewMembersSchema } from '../../utils/helpers/yupValidations'
@@ -115,6 +115,21 @@ const AddCrewMemberModalContent = ({
         errors,
         values,
       }) => {
+        console.log(
+          '🚀 ~ file: AddCrewMemberModalContent.tsx:118 ~ touched:',
+          touched
+        )
+
+        console.log(
+          '🚀 ~ file: AddCrewMemberModalContent.tsx:118 ~ errors:',
+          errors
+        )
+
+        console.log(
+          '🚀 ~ file: AddCrewMemberModalContent.tsx:118 ~ values:',
+          values
+        )
+
         useEffect(() => {
           setValues(modalDataTemp)
         }, [modalDataTemp])
@@ -198,119 +213,123 @@ const AddCrewMemberModalContent = ({
             )}
 
             {crewMemberEntryMode === 'manual' && (
-              <VStack mx='5%' my='2%' space={4}>
-                <HStack justifyContent='space-between'>
+              <VStack mx='5%' my='2%' space={5}>
+                <HStack space={5}>
                   <FormInputComponent
                     label={'First Name'}
+                    placeholder='Enter First Name'
                     touched={touched}
                     errors={errors}
                     value={values.firstName || ''}
                     camelName={'firstName'}
-                    width={'45%'}
+                    width={'100%'}
                     onChangeText={handleChange('firstName')}
                     onBlur={handleBlur('firstName')}
                   />
                   <FormInputComponent
                     label={'Last Name'}
+                    placeholder='Enter Last Name'
                     touched={touched}
                     errors={errors}
                     value={values.lastName || ''}
                     camelName={'lastName'}
-                    width={'45%'}
                     onChangeText={handleChange('lastName')}
                     onBlur={handleBlur('lastName')}
                   />
                 </HStack>
-                <HStack justifyContent='space-between'>
-                  <FormInputComponent
-                    label={'Phone Number'}
-                    touched={touched}
-                    errors={errors}
-                    value={values.phoneNumber || ''}
-                    camelName={'phoneNumber'}
-                    // keyboardType={'phone'} //TODO add phone styling
-                    width={'45%'}
-                    onChangeText={handleChange('phoneNumber')}
-                    onBlur={handleBlur('phoneNumber')}
-                  />
-                  <FormInputComponent
-                    label={'Email'}
-                    touched={touched}
-                    errors={emailExistsError || errors}
-                    value={values.email?.trim() || ''}
-                    camelName={'email'}
-                    width={'45%'}
-                    onChangeText={handleChange('email')}
-                    onBlur={handleBlur('email')}
-                  />
-                </HStack>
-                <HStack justifyContent='space-between'>
-                  <FormControl w='45%'>
+
+                <FormInputComponent
+                  label={'Phone Number'}
+                  touched={touched}
+                  errors={errors}
+                  value={values.phoneNumber || ''}
+                  camelName={'phoneNumber'}
+                  placeholder='###-###-####'
+                  // keyboardType={'phone'} //TODO add phone styling
+                  width={'100%'}
+                  onChangeText={handleChange('phoneNumber')}
+                  onBlur={handleBlur('phoneNumber')}
+                />
+                <FormInputComponent
+                  label={'Email'}
+                  placeholder='example@email.com'
+                  touched={touched}
+                  errors={emailExistsError || errors}
+                  value={values.email?.trim() || ''}
+                  camelName={'email'}
+                  width={'100%'}
+                  onChangeText={handleChange('email')}
+                  onBlur={handleBlur('email')}
+                />
+
+                <CustomSelect
+                  label='Funding Agency'
+                  camelName='agency'
+                  errors={errors}
+                  touched={touched}
+                  dataType='fundingAgency'
+                  selectedValue={values.agency as string}
+                  placeholder='Select Funding Agency'
+                  onValueChange={handleChange('agency')}
+                  setFieldTouched={() => setFieldTouched('agency')}
+                  selectOptions={dropdownValues?.fundingAgency}
+                />
+
+                <FormInputComponent
+                  label={'Orcid ID (optional)'}
+                  placeholder='AABB00000000'
+                  touched={touched}
+                  errors={errors}
+                  value={values.orcidId || ''}
+                  camelName={'orcidId'}
+                  width={'100%'}
+                  onChangeText={handleChange('orcidId')}
+                  onBlur={handleBlur('orcidId')}
+                />
+
+                <Box minH={100}>
+                  <FormControl w='30%'>
                     <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Funding Agency
+                      <Text color='black' fontSize='16'>
+                        Is Lead
                       </Text>
                     </FormControl.Label>
-                    <CustomSelect
-                      dataType='fundingAgency'
-                      selectedValue={values.agency as string}
-                      placeholder='Funding Agency'
-                      onValueChange={handleChange('agency')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={dropdownValues?.fundingAgency}
-                    />
+                    <Radio.Group
+                      name='isLead'
+                      accessibilityLabel='is lead'
+                      value={`${values.isLead}`}
+                      onChange={(value: any) => {
+                        setFieldTouched('isLead', true)
+                        if (value === 'true') {
+                          setFieldValue('isLead', true)
+                        } else {
+                          setFieldValue('isLead', false)
+                        }
+                      }}
+                    >
+                      <Radio
+                        colorScheme='primary'
+                        value='false'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        No
+                      </Radio>
+                      <Radio
+                        colorScheme='primary'
+                        value='true'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        Yes
+                      </Radio>
+                    </Radio.Group>
                   </FormControl>
-                  <FormInputComponent
-                    label={'Orcid ID (optional)'}
-                    touched={touched}
-                    errors={errors}
-                    value={values.orcidId || ''}
-                    camelName={'orcidId'}
-                    width={'45%'}
-                    onChangeText={handleChange('orcidId')}
-                    onBlur={handleBlur('orcidId')}
-                  />
-                </HStack>
-                <FormControl w='30%'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Is Lead
-                    </Text>
-                  </FormControl.Label>
-                  <Radio.Group
-                    name='isLead'
-                    accessibilityLabel='is lead'
-                    value={`${values.isLead}`}
-                    onChange={(value: any) => {
-                      setFieldTouched('isLead', true)
-                      if (value === 'true') {
-                        setFieldValue('isLead', true)
-                      } else {
-                        setFieldValue('isLead', false)
-                      }
-                    }}
-                  >
-                    <Radio
-                      colorScheme='primary'
-                      value='false'
-                      my={1}
-                      _icon={{ color: 'primary' }}
-                    >
-                      No
-                    </Radio>
-                    <Radio
-                      colorScheme='primary'
-                      value='true'
-                      my={1}
-                      _icon={{ color: 'primary' }}
-                    >
-                      Yes
-                    </Radio>
-                  </Radio.Group>
-                </FormControl>
+                </Box>
                 <Button
                   bg='primary'
                   mx='2'
+                  mt={5}
                   px='10'
                   shadow='3'
                   isDisabled={formInvalid}
