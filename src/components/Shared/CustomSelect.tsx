@@ -47,7 +47,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
   const showError = hasError && isTouched
 
   return (
-    <FormControl>
+    <FormControl flex={1}>
       <FormControl.Label>
         <Text color={showError ? 'red.700' : 'black'} fontSize='md'>
           {label}
