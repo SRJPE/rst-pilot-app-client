@@ -115,21 +115,6 @@ const AddCrewMemberModalContent = ({
         errors,
         values,
       }) => {
-        console.log(
-          '🚀 ~ file: AddCrewMemberModalContent.tsx:118 ~ touched:',
-          touched
-        )
-
-        console.log(
-          '🚀 ~ file: AddCrewMemberModalContent.tsx:118 ~ errors:',
-          errors
-        )
-
-        console.log(
-          '🚀 ~ file: AddCrewMemberModalContent.tsx:118 ~ values:',
-          values
-        )
-
         useEffect(() => {
           setValues(modalDataTemp)
         }, [modalDataTemp])
