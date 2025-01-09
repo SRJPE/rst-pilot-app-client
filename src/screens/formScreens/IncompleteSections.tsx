@@ -496,11 +496,11 @@ const IncompleteSections = ({
             ),
             forkLength:
               fishValue.forkLength != null
-                ? parseInt(fishValue?.forkLength as any)
+                ? parseFloat(fishValue?.forkLength as any)
                 : null,
             weight:
               fishValue?.weight != null
-                ? parseInt(fishValue?.weight as any)
+                ? parseFloat(fishValue?.weight as any)
                 : null,
             numFishCaught: fishValue?.numFishCaught,
             plusCount: fishValue?.plusCount ? true : false,
