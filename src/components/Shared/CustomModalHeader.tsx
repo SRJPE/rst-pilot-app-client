@@ -41,7 +41,7 @@ const CustomModalHeader = ({
           space={5}
           w='100%'
         >
-          <HStack alignItems='center'>
+          <HStack alignItems='center' mx={'2%'}>
             <Button
               size='lg'
               onPress={() => {
@@ -74,6 +74,7 @@ const CustomModalHeader = ({
           justifyContent='space-between'
           alignItems='center'
           marginTop={2}
+          mx={'2%'}
         >
           <Button
             size='lg'
@@ -81,7 +82,7 @@ const CustomModalHeader = ({
               if (closeModal) closeModal()
             }}
           >
-            <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
+            <Icon as={Ionicons} name={'close'} size='3xl' color='black' />
           </Button>
           <Heading
             flex={1}
