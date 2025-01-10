@@ -1,5 +1,13 @@
 import { Formik } from 'formik'
-import { Button, Divider, FormControl, HStack, Text, VStack } from 'native-base'
+import {
+  Box,
+  Button,
+  Divider,
+  FormControl,
+  HStack,
+  Text,
+  VStack,
+} from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import { trappingProtocolsSchema } from '../../utils/helpers/yupValidations'
@@ -74,48 +82,55 @@ const AddTrappingProtocolModalContent = ({
             />
             <VStack mx='5%' my='2%' space={5}>
               <HStack justifyContent='space-around' space={5}>
-                <CustomSelect
-                  touched={touched}
-                  errors={errors}
-                  camelName='species'
-                  label='Species'
-                  selectedValue={values.species}
-                  placeholder={'Select Species'}
-                  onValueChange={(value: any) => handleChange('species')(value)}
-                  setFieldTouched={() => setFieldTouched('species')}
-                  selectOptions={reorderedTaxon.map((taxon: any) => ({
-                    label: taxon?.commonname,
-                    value: taxon?.commonname,
-                  }))}
-                />
-
-                <CustomSelect
-                  camelName='run'
-                  errors={errors}
-                  touched={touched}
-                  label='Run'
-                  selectedValue={values.run}
-                  placeholder={'Select Run'}
-                  onValueChange={(value: any) => handleChange('run')(value)}
-                  setFieldTouched={() => setFieldTouched('run')}
-                  selectOptions={dropdownValues?.run}
-                />
+                <Box flex={1}>
+                  <CustomSelect
+                    touched={touched}
+                    errors={errors}
+                    camelName='species'
+                    label='Species'
+                    selectedValue={values.species}
+                    placeholder={'Select Species'}
+                    onValueChange={(value: any) =>
+                      handleChange('species')(value)
+                    }
+                    setFieldTouched={() => setFieldTouched('species')}
+                    selectOptions={reorderedTaxon.map((taxon: any) => ({
+                      label: taxon?.commonname,
+                      value: taxon?.commonname,
+                    }))}
+                  />
+                </Box>
+                <Box flex={1}>
+                  <CustomSelect
+                    camelName='run'
+                    errors={errors}
+                    touched={touched}
+                    label='Run'
+                    selectedValue={values.run}
+                    placeholder={'Select Run'}
+                    onValueChange={(value: any) => handleChange('run')(value)}
+                    setFieldTouched={() => setFieldTouched('run')}
+                    selectOptions={dropdownValues?.run}
+                  />
+                </Box>
               </HStack>
 
               <HStack justifyContent='space-around' space={5}>
-                <CustomSelect
-                  label='Life Stage'
-                  camelName='lifeStage'
-                  errors={errors}
-                  touched={touched}
-                  selectedValue={values?.lifeStage}
-                  placeholder={'Select Life Stage'}
-                  onValueChange={(value: any) =>
-                    handleChange('lifeStage')(value)
-                  }
-                  setFieldTouched={() => setFieldTouched('lifeStage')}
-                  selectOptions={dropdownValues?.lifeStage}
-                />
+                <Box flex={1}>
+                  <CustomSelect
+                    label='Life Stage'
+                    camelName='lifeStage'
+                    errors={errors}
+                    touched={touched}
+                    selectedValue={values?.lifeStage}
+                    placeholder={'Select Life Stage'}
+                    onValueChange={(value: any) =>
+                      handleChange('lifeStage')(value)
+                    }
+                    setFieldTouched={() => setFieldTouched('lifeStage')}
+                    selectOptions={dropdownValues?.lifeStage}
+                  />
+                </Box>
 
                 <FormInputComponent
                   label={'Number Measured'}

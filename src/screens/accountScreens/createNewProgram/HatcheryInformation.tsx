@@ -156,22 +156,24 @@ const HatcheryInformation = ({
                       onChangeText={handleChange('hatchery')}
                       onBlur={handleBlur('hatchery')}
                     />
-                    <HStack space={10} alignItems='center'>
-                      <CustomSelect
-                        label='Frequency of Receiving Fish'
-                        selectedValue={values.frequencyOfReceivingFish}
-                        placeholder={'Select Frequency'}
-                        camelName='frequencyOfReceivingFish'
-                        touched={touched}
-                        errors={errors}
-                        onValueChange={(value: any) =>
-                          handleChange('frequencyOfReceivingFish')(value)
-                        }
-                        setFieldTouched={() =>
-                          setFieldTouched('frequencyOfReceivingFish')
-                        }
-                        selectOptions={dropdownValues?.frequency}
-                      />
+                    <HStack space={5}>
+                      <Box flex={1}>
+                        <CustomSelect
+                          label='Frequency of Receiving Fish'
+                          selectedValue={values.frequencyOfReceivingFish}
+                          placeholder={'Select Frequency'}
+                          camelName='frequencyOfReceivingFish'
+                          touched={touched}
+                          errors={errors}
+                          onValueChange={(value: any) =>
+                            handleChange('frequencyOfReceivingFish')(value)
+                          }
+                          setFieldTouched={() =>
+                            setFieldTouched('frequencyOfReceivingFish')
+                          }
+                          selectOptions={dropdownValues?.frequency}
+                        />
+                      </Box>
 
                       <FormInputComponent
                         label={'Expected # of Fish Received at Pickup'}

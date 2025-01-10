@@ -134,9 +134,9 @@ const PermittingInformationInput = ({
               </Text>
               <Divider mb='2' />
               <VStack px='5%' py='2' space={3}>
-                <HStack space={260}>
-                  <VStack space={2}>
-                    <Text color='black' fontSize='xl'>
+                <HStack mb={5}>
+                  <VStack space={2} flex={1}>
+                    <Text color='black' fontSize='md'>
                       Date Issued
                     </Text>
                     <Box alignSelf='flex-start' minWidth='220' ml='-95'>
@@ -148,8 +148,8 @@ const PermittingInformationInput = ({
                       />
                     </Box>
                   </VStack>
-                  <VStack space={2}>
-                    <Text color='black' fontSize='xl'>
+                  <VStack space={2} flex={1}>
+                    <Text color='black' fontSize='md'>
                       Expiration Date
                     </Text>
                     <Box alignSelf='flex-start' minWidth='220' ml='-95'>
@@ -165,9 +165,10 @@ const PermittingInformationInput = ({
                 <Text fontSize='2xl' color='grey'>
                   Trap will be stopped when:
                 </Text>
-                <HStack space={10} justifyContent='space-between'>
+                <HStack space={5}>
                   <FormInputComponent
-                    label={'Water temperature'}
+                    label={'Water Temperature (ºF)'}
+                    placeholder='0'
                     touched={touched}
                     errors={errors}
                     value={
@@ -183,6 +184,7 @@ const PermittingInformationInput = ({
                   />
                   <FormInputComponent
                     label={'Flow Threshold'}
+                    placeholder='0'
                     touched={touched}
                     errors={errors}
                     value={
@@ -198,24 +200,21 @@ const PermittingInformationInput = ({
                 <Text fontSize='2xl' color='grey'>
                   Frequency of trap checks during inclement weather
                 </Text>
-                <FormControl w='40%'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Trap Check Frequency
-                    </Text>
-                  </FormControl.Label>
-                  <CustomSelect
-                    selectedValue={values.trapCheckFrequency}
-                    placeholder={'Trap Check Frequency'}
-                    onValueChange={(value: any) =>
-                      handleChange('trapCheckFrequency')(value)
-                    }
-                    setFieldTouched={() =>
-                      setFieldTouched('trapCheckFrequency')
-                    }
-                    selectOptions={dropdownValues?.frequency}
-                  />
-                </FormControl>
+
+                <CustomSelect
+                  label='Trap Check Frequency'
+                  camelName='trapCheckFrequency'
+                  touched={touched}
+                  errors={errors}
+                  selectedValue={values.trapCheckFrequency}
+                  placeholder={'Trap Check Frequency'}
+                  onValueChange={(value: any) =>
+                    handleChange('trapCheckFrequency')(value)
+                  }
+                  setFieldTouched={() => setFieldTouched('trapCheckFrequency')}
+                  selectOptions={dropdownValues?.frequency}
+                />
+
                 <Text fontSize='2xl' color='grey'>
                   Expected take and indirect mortality for RST
                 </Text>
