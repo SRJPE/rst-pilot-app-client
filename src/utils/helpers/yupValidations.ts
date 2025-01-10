@@ -400,8 +400,20 @@ export const setUpNewProgramSchema = yup.object().shape({
   monitoringProgramName: yup.string().required('Program name required'),
   streamName: yup.string().required('Stream name required'),
   fundingAgency: yup.string().required('Funding agency required'),
-  program: yup.string(),
+  copyExistingProgram: yup
+    .string()
+    .is(['true', 'false'])
+    .required('Existing program required'),
+  program: yup
+    .string()
+    .nullable()
+    .when('copyExistingProgram', {
+      is: 'true',
+      then: yup.string().required('Program required'),
+      otherwise: yup.string().nullable(),
+    }),
 })
+
 export const groupTrapSitesSchema = yup.object().shape({
   numberOfTrapSites: yup
     .number()
