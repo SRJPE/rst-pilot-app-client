@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 import { View } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
-import { set } from 'lodash'
-
 export default function CrewDropDown({
   open,
   onOpen,
@@ -67,6 +65,7 @@ export default function CrewDropDown({
       setOpen={setOpen}
       setValue={setValue}
       setItems={setList}
+      searchable
       multiple={true}
       mode='BADGE'
       listMode='SCROLLVIEW'
