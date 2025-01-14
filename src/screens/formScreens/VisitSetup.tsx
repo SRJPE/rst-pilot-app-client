@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -33,7 +33,7 @@ import {
   TabStateI,
   resetTabsSlice,
 } from '../../redux/reducers/formSlices/tabSlice'
-import { uniqBy } from 'lodash'
+import { set, uniqBy } from 'lodash'
 import { DeviceEventEmitter } from 'react-native'
 
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
@@ -410,6 +410,7 @@ const VisitSetup = ({
         handleSubmit,
         setFieldValue,
         setFieldTouched,
+        setFieldError,
         touched,
         errors,
         values,
@@ -456,7 +457,7 @@ const VisitSetup = ({
               borderColor='themeGrey'
               borderWidth='15'
             >
-              <VStack space={4}>
+              <VStack space={5}>
                 <FormControl>
                   <HStack space={6} alignItems='center'>
                     <FormControl.Label>
@@ -475,81 +476,76 @@ const VisitSetup = ({
                 </FormControl>
                 <Divider />
                 <Heading>Which stream are you trapping on?</Heading>
-                <FormControl>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Stream
-                    </Text>
-                  </FormControl.Label>
-                  <CustomSelect
-                    selectedValue={values.stream}
-                    placeholder='Stream'
-                    onValueChange={(itemValue: string) => {
-                      setFieldValue('stream', itemValue)
-                      if (itemValue === 'Mill Creek') {
-                        setFieldValue('trapSite', 'Mill Creek RST')
-                      }
-                      if (itemValue === 'Deer Creek') {
-                        setFieldValue('trapSite', 'Deer Creek RST')
-                      }
-                      updateSelectedProgram(itemValue)
-                      setFieldValue('crew', [])
-                      setFieldTouched('crew', false)
-                    }}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={visitSetupDefaultsState?.programs?.map(
-                      (program: any) => ({
-                        label: program?.streamName,
-                        value: program?.streamName,
-                      })
-                    )}
-                  />
-                  {touched.stream &&
-                    errors.stream &&
-                    RenderErrorMessage(errors, 'stream')}
-                </FormControl>
+
+                <CustomSelect
+                  errors={errors}
+                  touched={touched}
+                  label='Stream'
+                  camelName='stream'
+                  selectedValue={values.stream}
+                  placeholder='Select Stream'
+                  onValueChange={(itemValue: string) => {
+                    handleChange('stream')(itemValue)
+                    setFieldError('stream', '')
+
+                    if (itemValue === 'Mill Creek') {
+                      setFieldValue('trapSite', 'Mill Creek RST')
+                      setFieldError('trapSite', '')
+                    }
+                    if (itemValue === 'Deer Creek') {
+                      setFieldValue('trapSite', 'Deer Creek RST')
+                      setFieldError('trapSite', '')
+                    }
+                    updateSelectedProgram(itemValue)
+                    setFieldValue('crew', [])
+                    setFieldTouched('crew', false)
+                  }}
+                  setFieldTouched={() => setFieldTouched('stream')}
+                  selectOptions={visitSetupDefaultsState?.programs?.map(
+                    (program: any) => ({
+                      label: program?.streamName,
+                      value: program?.streamName,
+                    })
+                  )}
+                />
+
                 {values.stream && (
                   <>
                     <Text fontSize='lg' fontWeight='500'>
                       Confirm the following values:
                     </Text>
-                    <FormControl>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Trap Site
-                        </Text>
-                      </FormControl.Label>
-                      <CustomSelect
-                        selectedValue={values.trapSite}
-                        placeholder='Trap Site'
-                        onValueChange={(itemValue: string) => {
-                          if (itemValue !== values.trapSite) {
-                            shouldShowTrapNameField(itemValue)
-                          }
-                          setFieldValue('trapSite', itemValue)
-                        }}
-                        setFieldTouched={setFieldTouched}
-                        selectOptions={uniqBy(
-                          visitSetupDefaultsState?.trapLocations
-                            ?.filter(
-                              (obj: any) => obj.programId === selectedProgramId
-                            )
-                            ?.map((trapLocation: any) => ({
-                              label: trapLocation?.siteName,
-                              value: trapLocation?.siteName,
-                            })),
-                          'label'
-                        )}
-                      />
-                      {touched.trapSite &&
-                        errors.trapSite &&
-                        RenderErrorMessage(errors, 'trapSite')}
-                    </FormControl>
+
+                    <CustomSelect
+                      errors={errors}
+                      touched={touched}
+                      label='Trap Site'
+                      camelName='trapSite'
+                      selectedValue={values.trapSite}
+                      placeholder='Trap Site'
+                      onValueChange={(itemValue: string) => {
+                        if (itemValue !== values.trapSite) {
+                          shouldShowTrapNameField(itemValue)
+                        }
+                        setFieldValue('trapSite', itemValue)
+                      }}
+                      setFieldTouched={() => setFieldTouched('trapSite')}
+                      selectOptions={uniqBy(
+                        visitSetupDefaultsState?.trapLocations
+                          ?.filter(
+                            (obj: any) => obj.programId === selectedProgramId
+                          )
+                          ?.map((trapLocation: any) => ({
+                            label: trapLocation?.siteName,
+                            value: trapLocation?.siteName,
+                          })),
+                        'label'
+                      )}
+                    />
 
                     {showTrapNameField && (
                       <FormControl>
                         <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
+                          <Text color='black' fontSize='md'>
                             Trap Name
                           </Text>
                         </FormControl.Label>
@@ -572,7 +568,7 @@ const VisitSetup = ({
 
                     <FormControl mt={trapDropDownOpen ? '4' : '0'} mb={10}>
                       <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
+                        <Text color='black' fontSize='md'>
                           Crew
                         </Text>
                       </FormControl.Label>
@@ -591,13 +587,13 @@ const VisitSetup = ({
                         values={values}
                       />
                     </FormControl>
-                    {touched.crew &&
+                    {/* {touched.crew &&
                       !values.crew.length &&
                       !crewDropDownOpen &&
                       RenderErrorMessage(
                         { crew: 'Must include at least one crew member' },
                         'crew'
-                      )}
+                      )} */}
                   </>
                 )}
               </VStack>
