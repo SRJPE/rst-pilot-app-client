@@ -22,7 +22,6 @@ import {
   updateIndividualTakeAndMortality,
 } from '../../redux/reducers/createNewProgramSlices/permitInformationSlice'
 import React, { useEffect, useState } from 'react'
-import { reset } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
 const AddTakeAndMortalityModalContent = ({
   closeModal,

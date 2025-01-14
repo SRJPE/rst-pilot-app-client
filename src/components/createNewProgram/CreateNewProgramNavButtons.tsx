@@ -244,8 +244,8 @@ const CreateNewProgramNavButtons = ({
         break
       case 'Permitting Information Input':
         // expand validation
-        // shouldBeDisabled =
-        //   Object.keys(touched).length === 0 || Object.keys(errors).length > 0
+        shouldBeDisabled =
+          Object.keys(touched).length === 0 || Object.keys(errors).length > 0
 
         break
       default:

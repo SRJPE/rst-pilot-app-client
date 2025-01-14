@@ -375,13 +375,18 @@ export const trappingProtocolsSchema = yup.object().shape({
 export const permittingInformationSchema = yup.object().shape({
   waterTemperatureThreshold: yup
     .number()
+    .nullable()
     .required('Temperature threshold required')
     .typeError('Input must be a number'),
   flowThreshold: yup
     .number()
+    .nullable()
     .required('Flow threshold required')
     .typeError('Input must be a number'),
-  trapCheckFrequency: yup.string().required('Trap check frequency required'),
+  trapCheckFrequency: yup
+    .string()
+    .nullable()
+    .required('Trap check frequency required'),
 })
 export const takeAndMortalitySchema = yup.object().shape({
   species: yup.string().required('Species required'),
@@ -389,10 +394,12 @@ export const takeAndMortalitySchema = yup.object().shape({
   lifeStage: yup.string().required('Species required'),
   expectedTake: yup
     .number()
+    .nullable()
     .required('Expected Take required')
     .typeError('Input must be a number'),
   indirectMortality: yup
     .number()
+    .nullable()
     .required('Indirect Mortality required')
     .typeError('Input must be a number'),
 })
