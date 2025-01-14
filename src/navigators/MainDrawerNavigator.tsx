@@ -9,6 +9,7 @@ import Home from '../screens/Home'
 import PermitInfo from '../screens/PermitInfo'
 import SignIn from '../screens/SignIn'
 import Profile from '../screens/accountScreens/Profile'
+import InputTurbidity from '../screens/miscScreens/InputTurbidity'
 import MarkRecaptureForm from './roots/MarkRecaptureFormRoot'
 import MonitoringProgram from './roots/MonitoringProgramRoot'
 import QCForm from './roots/QCFormRoot'
@@ -120,6 +121,7 @@ const DrawerNavigator = ({
             name='Monitoring Program'
             component={MonitoringProgram}
           />
+          <Drawer.Screen name='Input Turbidity' component={InputTurbidity} />
         </>
       )}
     </Drawer.Navigator>
