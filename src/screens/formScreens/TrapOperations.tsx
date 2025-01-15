@@ -63,6 +63,9 @@ const mapStateToProps = (state: RootState) => {
     selectedTrapLocationId:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.trapLocationId,
+    selectedProgramId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.programId,
     activeTabId: state.tabSlice.activeTabId,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
@@ -78,6 +81,7 @@ const TrapOperations = ({
   selectedTrapSite,
   selectedTrapName,
   selectedTrapLocationId,
+  selectedProgramId,
   activeTabId,
   previouslyActiveTabId,
   navigationSlice,
@@ -90,6 +94,7 @@ const TrapOperations = ({
   selectedTrapSite: string
   selectedTrapName?: string
   selectedTrapLocationId: number | null
+  selectedProgramId: string
   activeTabId: string | null
   previouslyActiveTabId: string | null
   navigationSlice: any
@@ -109,12 +114,26 @@ const TrapOperations = ({
   const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
   const [endTime, setEndTime] = useState(new Date() as any)
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
+  const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
 
   useEffect(() => {
+    console.log('selectedStream', selectedStream)
+    console.log('visitSetupDefaults', visitSetupDefaults)
+
+    // flow threshold on trap location
+    // temp threshold on permit info
+
     setTrapPermitInfo(
       find(
         visitSetupDefaults.permitInfo,
-        (permit: any) => permit.trapLocationsId === selectedTrapLocationId
+        (permit: any) => permit.programId === selectedProgramId
+      )
+    )
+
+    setTrapLocationInfo(
+      find(
+        visitSetupDefaults.trapLocations,
+        (permit: any) => permit.id === selectedTrapLocationId
       )
     )
   }, [visitSetupDefaults.permitInfo, selectedTrapLocationId])
@@ -132,8 +151,8 @@ const TrapOperations = ({
       }
       let range
 
-      if (trapPermitInfo) {
-        range = { max: Number(trapPermitInfo.flowThreshold), min: 50 }
+      if (trapLocationInfo) {
+        range = { max: Number(trapLocationInfo.flowThreshold), min: 50 }
       } else if (
         !QARanges.flowMeasure?.[selectedStream.trim()]?.[
           selectedTrapSite.trim()
