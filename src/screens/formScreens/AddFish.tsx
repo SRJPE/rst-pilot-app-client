@@ -154,7 +154,7 @@ const AddFishContent = ({
 
   const buttonNav = () => {
     // @ts-ignore
-    navigation.navigateDeprecated('Trap Visit Form', {
+    navigation?.navigate('Trap Visit Form', {
       screen: 'Batch Count',
     })
   }

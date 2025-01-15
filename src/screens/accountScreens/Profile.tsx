@@ -180,7 +180,7 @@ const Profile = ({
                   bg='transparent'
                   onPress={() => {
                     if (deviceIsConnected) {
-                      navigation.navigateDeprecated('Monitoring Program')
+                      navigation?.navigate('Monitoring Program')
                     } else {
                       showSlideAlert(
                         dispatch,

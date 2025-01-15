@@ -44,41 +44,41 @@ const CreateNewProgramNavButtons = ({
         navigation.goBack()
         break
       case 'Efficiency Trial Protocols':
-        navigation.navigateDeprecated('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Hatchery Information',
         })
         break
       case 'Hatchery Information':
         handleSubmit()
         dispatch(markCreateNewProgramStepCompleted('efficiencyTrialProtocols'))
-        navigation.navigateDeprecated('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Create New Program Home',
         })
         break
       case 'Trapping Protocols':
-        navigation.navigateDeprecated('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Trapping Protocols Table',
         })
         break
       case 'Trapping Protocols Table':
         dispatch(markCreateNewProgramStepCompleted('trappingProtocols'))
-        navigation.navigateDeprecated('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Create New Program Home',
         })
         break
       case 'Permit Information':
-        navigation.navigateDeprecated('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Permitting Information Input',
         })
         break
       case 'Trapping Sites':
         if (isMultipleTrapsVariant) {
-          navigation.navigateDeprecated('Create New Program', {
+          navigation?.navigate('Create New Program', {
             screen: 'Multiple Traps',
           })
         } else {
           dispatch(markCreateNewProgramStepCompleted('trappingSites'))
-          navigation.navigateDeprecated('Create New Program', {
+          navigation?.navigate('Create New Program', {
             screen: 'Create New Program Home',
           })
         }
@@ -88,14 +88,14 @@ const CreateNewProgramNavButtons = ({
         // Add dispatch function to save trap site group data to redux store
         //*****
         handleSubmit && handleSubmit()
-        navigation.navigateDeprecated('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Trapping Sites',
         })
         break
       case 'Permitting Information Input':
         handleSubmit()
         dispatch(markCreateNewProgramStepCompleted('permitInformation'))
-        navigation.navigateDeprecated('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Create New Program Home',
         })
         break
@@ -103,14 +103,14 @@ const CreateNewProgramNavButtons = ({
         //post submission
         if (POSTMonitoringProgramSubmissions) {
           POSTMonitoringProgramSubmissions()
-          navigation.navigateDeprecated('Create New Program', {
+          navigation?.navigate('Create New Program', {
             screen: 'Create New Program Complete',
           })
         }
         break
       case 'Create New Program Complete':
         clearFormValues && clearFormValues()
-        navigation.navigateDeprecated('Home')
+        navigation?.navigate('Home')
         navigation.reset({
           index: 0,
           routes: [{ name: 'Create New Program Home' }],
@@ -125,17 +125,17 @@ const CreateNewProgramNavButtons = ({
   const handleLeftButton = () => {
     switch (activePage) {
       case 'Create New Program Home':
-        navigation.navigateDeprecated('Monitoring Program', {
+        navigation?.navigate('Monitoring Program', {
           screen: 'Monitoring Program New',
         })
         break
       case 'Create New Program Complete':
-        navigation.navigateDeprecated('Monitoring Program', {
+        navigation?.navigate('Monitoring Program', {
           screen: 'Monitoring Program New',
         })
 
         clearFormValues && clearFormValues()
-        navigation.navigateDeprecated('Monitoring Program', {
+        navigation?.navigate('Monitoring Program', {
           screen: 'Monitoring Program New',
         })
         navigation.reset({
@@ -146,7 +146,7 @@ const CreateNewProgramNavButtons = ({
       case 'Trapping Sites':
         if (isMultipleTrapsVariant) {
           dispatch(markCreateNewProgramStepCompleted('trappingSites'))
-          navigation.navigateDeprecated('Create New Program', {
+          navigation?.navigate('Create New Program', {
             screen: 'Create New Program Home',
           })
         } else {

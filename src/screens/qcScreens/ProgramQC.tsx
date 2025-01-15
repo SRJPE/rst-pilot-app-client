@@ -49,7 +49,7 @@ function ProgramQC({
             isDisabled={returnButtonDisabled(program.programId)}
             mb={5}
             onPress={() => {
-              navigation.navigateDeprecated('Select Data to QC', {
+              navigation?.navigate('Select Data to QC', {
                 programId: program.programId,
               })
             }}
@@ -67,7 +67,7 @@ function ProgramQC({
         w='90%'
         bg='primary'
         onPress={() => {
-          navigation.navigateDeprecated('Home')
+          navigation?.navigate('Home')
         }}
       >
         <Text fontSize='xl' color='white' fontWeight={'bold'}>
