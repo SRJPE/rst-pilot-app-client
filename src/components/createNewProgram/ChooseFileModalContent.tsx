@@ -49,15 +49,6 @@ const ChooseFileModalContent = ({
           })
             .then(res => {
               if (!res.canceled) {
-                console.log(
-                  '🚀 ~ file: ChooseFileModalContent.tsx:68 ~ res ACTUaL FILES:',
-                  res.assets
-                )
-                // const files = res.assets?.map(asset => {
-                //   const storedFilename = asset.uri.split('/').pop()
-                //   return storedFilename || ''
-                // })
-
                 const files = res.assets
 
                 handleFileSelection({
