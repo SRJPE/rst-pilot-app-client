@@ -32,15 +32,15 @@ interface APIResponseI {
 }
 
 // // Async actions API calls
-// export const getPersonnelDefaults = createAsyncThunk('personnel', async () => {
-//   try {
-//     const response: APIResponseI = await api.get(`personnel/`)
-//     return response.data
-//   } catch (error: any) {
-//     console.log('err', error.response.data.message)
-//     throw error
-//   }
-// })
+export const getPersonnelDefaults = createAsyncThunk('personnel', async () => {
+  try {
+    const response: APIResponseI = await api.get(`personnel/`)
+    return response.data
+  } catch (error: any) {
+    console.log('err', error.response.data.message)
+    throw error
+  }
+})
 
 export const personnelSlice = createSlice({
   name: 'personnel',
@@ -52,20 +52,20 @@ export const personnelSlice = createSlice({
       return (state = { ...state, personnelOptions: [...action.payload] })
     },
   },
-  // extraReducers: {
-  //   [getPersonnelDefaults.pending.type]: (state, action) => {
-  //     state.status = pendingStatus
-  //   },
+  extraReducers: {
+    [getPersonnelDefaults.pending.type]: (state, action) => {
+      state.status = pendingStatus
+    },
 
-  //   [getPersonnelDefaults.fulfilled.type]: (state, action) => {
-  //     state.status = fulfilledStatus
-  //     state.personnel = action.payload
-  //   },
+    [getPersonnelDefaults.fulfilled.type]: (state, action) => {
+      state.status = fulfilledStatus
+      state.personnelOptions = action.payload
+    },
 
-  //   [getPersonnelDefaults.rejected.type]: (state, action) => {
-  //     state.status = rejectedStatus
-  //   },
-  // },
+    [getPersonnelDefaults.rejected.type]: (state, action) => {
+      state.status = rejectedStatus
+    },
+  },
 })
 
 export const { savePersonnel } = personnelSlice.actions
