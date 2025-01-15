@@ -499,9 +499,13 @@ const TrapOperations = ({
                     </HStack>
                     <CustomSelect
                       selectedValue={values.trapStatus}
-                      placeholder='Trap Status'
+                      label='Trap Status'
+                      placeholder='Select Trap Status'
+                      camelName='trapStatus'
                       onValueChange={handleChange('trapStatus')}
-                      setFieldTouched={setFieldTouched}
+                      touched={touched}
+                      errors={errors}
+                      setFieldTouched={() => setFieldTouched('trapStatus')}
                       selectOptions={dropdownValues.trapFunctionality.map(
                         (item: any) => {
                           if (item.definition == 'trap not in service') {
@@ -534,12 +538,6 @@ const TrapOperations = ({
                         setFieldTouched={setFieldTouched}
                         selectOptions={whyTrapNotFunctioning}
                       />
-                      {tabSlice.incompleteSectionTouched
-                        ? errors.reasonNotFunc &&
-                          RenderErrorMessage(errors, 'reasonNotFunc')
-                        : touched.reasonNotFunc &&
-                          errors.reasonNotFunc &&
-                          RenderErrorMessage(errors, 'reasonNotFunc')}
                     </FormControl>
                   )}
                   {values.trapStatus.length > 0 && (
@@ -806,12 +804,12 @@ const TrapOperations = ({
 
                           {warningResultTemp && <RenderWarningMessage />}
 
-                          {tabSlice.incompleteSectionTouched
+                          {/* {tabSlice.incompleteSectionTouched
                             ? errors.waterTemperature &&
                               RenderErrorMessage(errors, 'waterTemperature')
                             : touched.waterTemperature &&
                               errors.waterTemperature &&
-                              RenderErrorMessage(errors, 'waterTemperature')}
+                              RenderErrorMessage(errors, 'waterTemperature')} */}
                         </FormControl>
                         <FormControl w='1/4'>
                           <FormControl.Label>

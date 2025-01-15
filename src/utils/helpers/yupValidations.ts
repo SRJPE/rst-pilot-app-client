@@ -11,7 +11,7 @@ export const trapVisitSchema = yup.object().shape({
 })
 
 export const trapOperationsSchema = yup.object().shape({
-  trapStatus: yup.string(),
+  trapStatus: yup.string().required('Trap status required'),
   reasonNotFunc: yup.string().when('trapStatus', {
     is: (val: string) =>
       ['trap functioning but not normally', 'trap not functioning'].includes(
