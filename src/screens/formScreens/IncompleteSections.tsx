@@ -535,7 +535,7 @@ const IncompleteSections = ({
             geneticSamplingData: filterAndPrepareData(
               addGeneticSamplesState.values
             ),
-            appliedMarks: filterAndPrepareData(appliedMarksState.values),
+            appliedMarks: filterAndPrepareData(fishValue.appliedMarks),
           })
         })
       }

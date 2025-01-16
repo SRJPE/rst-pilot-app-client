@@ -194,21 +194,14 @@ const Home = ({
         Select the action you would like to perform.
       </Text>
       <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
-        <Text fontWeight={300} fontSize={20} marginBottom={5}>
+        {/* <Text fontWeight={300} fontSize={20} marginBottom={5}>
           Actions
-        </Text>
-        <View style={styles.recentItemsCardRow}>
-          {/* {recentTrapVisits.map((trapVisit: any) => {
-            return recentItemsCard({
-              streamName: trapVisit.streamName,
-              trapName: trapVisit.trapName,
-              date: trapVisit.date,
-            })
-          })} */}
+        </Text> */}
+        {/* <View style={styles.recentItemsCardRow}>
           {recentItemsCard({
             text: 'Input Turbidity',
           })}
-        </View>
+        </View> */}
       </View>
 
       <BottomNavigation
