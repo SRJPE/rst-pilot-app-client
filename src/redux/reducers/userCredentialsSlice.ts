@@ -15,6 +15,7 @@ export interface InitialStateI {
   orcidId?: string | null
   role: 'lead' | 'non-lead' | null
   phone: string | null
+  id: number | null
 }
 const initialState: InitialStateI = {
   displayName: null,
@@ -26,6 +27,7 @@ const initialState: InitialStateI = {
   agencyDefinition: null,
   role: null,
   phone: null,
+  id: null,
 }
 
 export const userCredentialsSlice = createSlice({

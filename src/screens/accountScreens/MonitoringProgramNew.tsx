@@ -57,7 +57,7 @@ const MonitoringProgramNew = ({
       <Formik
         validationSchema={setUpNewProgramSchema}
         initialValues={createNewProgramHomeStore.values}
-        onSubmit={(values) => {
+        onSubmit={values => {
           SubmitNewMonitoringProgramValues(values)
         }}
       >
@@ -70,86 +70,93 @@ const MonitoringProgramNew = ({
           touched,
           errors,
           values,
-        }) => (
-          <>
-            <Box overflow='hidden' flex={1} bg='#fff'>
-              <VStack py='5%' px='10%' space={5}>
-                <Heading alignSelf='center'>Set Up a new Program</Heading>
-                <FormInputComponent
-                  label={'Monitoring Program Name'}
-                  touched={touched}
-                  errors={errors}
-                  value={
-                    values.monitoringProgramName
-                      ? `${values.monitoringProgramName}`
-                      : ''
-                  }
-                  camelName={'monitoringProgramName'}
-                  onChangeText={handleChange('monitoringProgramName')}
-                  onBlur={handleBlur('monitoringProgramName')}
-                />
-                <FormInputComponent
-                  label={'Stream Name'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.streamName ? `${values.streamName}` : ''}
-                  camelName={'streamName'}
-                  onChangeText={handleChange('streamName')}
-                  onBlur={handleBlur('streamName')}
-                />
-                <FormControl>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Funding Agency
-                    </Text>
-                  </FormControl.Label>
-                  <CustomSelect
-                    selectedValue={values.fundingAgency}
-                    placeholder='Funding Agency'
-                    onValueChange={handleChange('fundingAgency')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues?.fundingAgency}
+        }) => {
+          console.log(
+            '🚀 ~ file: MonitoringProgramNew.tsx:74 ~ values:',
+            values
+          )
+
+          return (
+            <>
+              <Box overflow='hidden' flex={1} bg='#fff'>
+                <VStack py='5%' px='10%' space={5}>
+                  <Heading alignSelf='center'>Set Up a new Program</Heading>
+                  <FormInputComponent
+                    label={'Monitoring Program Name'}
+                    touched={touched}
+                    errors={errors}
+                    value={
+                      values.monitoringProgramName
+                        ? `${values.monitoringProgramName}`
+                        : ''
+                    }
+                    camelName={'monitoringProgramName'}
+                    onChangeText={handleChange('monitoringProgramName')}
+                    onBlur={handleBlur('monitoringProgramName')}
                   />
-                </FormControl>
-                <HStack alignItems='center' space={8}>
-                  <Text fontSize='2xl' color='grey'>
-                    Would you like to copy values from an existing Program?
-                  </Text>
-                  <Checkbox
-                    value={`${copyValuesChecked}`}
-                    accessibilityLabel='copy values check box'
-                    size='lg'
-                    _checked={{ bg: 'primary', borderColor: 'primary' }}
-                    isChecked={copyValuesChecked}
-                    onChange={() => setCopyValuesChecked(!copyValuesChecked)}
-                  ></Checkbox>
-                </HStack>
-                {copyValuesChecked && (
+                  <FormInputComponent
+                    label={'Stream Name'}
+                    touched={touched}
+                    errors={errors}
+                    value={values.streamName ? `${values.streamName}` : ''}
+                    camelName={'streamName'}
+                    onChangeText={handleChange('streamName')}
+                    onBlur={handleBlur('streamName')}
+                  />
                   <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
-                        Program{' '}
+                        Funding Agency
                       </Text>
                     </FormControl.Label>
                     <CustomSelect
-                      selectedValue={values.program}
-                      placeholder='Choose Program'
-                      onValueChange={handleChange('program')}
+                      selectedValue={values.fundingAgency}
+                      placeholder='Funding Agency'
+                      onValueChange={handleChange('fundingAgency')}
                       setFieldTouched={setFieldTouched}
-                      selectOptions={programsTemp}
+                      selectOptions={dropdownValues?.fundingAgency}
                     />
                   </FormControl>
-                )}
-              </VStack>
-            </Box>
-            <MonitoringProgramNavButtons
-              navigation={navigation}
-              handleSubmit={handleSubmit}
-              touched={touched}
-              errors={errors}
-            />
-          </>
-        )}
+                  <HStack alignItems='center' space={8}>
+                    <Text fontSize='2xl' color='grey'>
+                      Would you like to copy values from an existing Program?
+                    </Text>
+                    <Checkbox
+                      value={`${copyValuesChecked}`}
+                      accessibilityLabel='copy values check box'
+                      size='lg'
+                      _checked={{ bg: 'primary', borderColor: 'primary' }}
+                      isChecked={copyValuesChecked}
+                      onChange={() => setCopyValuesChecked(!copyValuesChecked)}
+                    ></Checkbox>
+                  </HStack>
+                  {copyValuesChecked && (
+                    <FormControl>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Program{' '}
+                        </Text>
+                      </FormControl.Label>
+                      <CustomSelect
+                        selectedValue={values.program}
+                        placeholder='Choose Program'
+                        onValueChange={handleChange('program')}
+                        setFieldTouched={setFieldTouched}
+                        selectOptions={programsTemp}
+                      />
+                    </FormControl>
+                  )}
+                </VStack>
+              </Box>
+              <MonitoringProgramNavButtons
+                navigation={navigation}
+                handleSubmit={handleSubmit}
+                touched={touched}
+                errors={errors}
+              />
+            </>
+          )
+        }}
       </Formik>
     </>
   )

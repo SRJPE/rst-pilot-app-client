@@ -21,7 +21,9 @@ import {
   returnNullableTableId,
 } from '../../../utils/utils'
 import { GroupTrapSiteValuesI } from '../../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
+import { InitialStateI as UserCredentialsInitialState } from '../../../redux/reducers/userCredentialsSlice'
 import * as FileSystem from 'expo-file-system'
+import { userCredentialsSlice } from '../../../redux/reducers/userCredentialsSlice'
 // import { postMonitoringProgramFilesToDB } from '../../../utils/hooks/useCacheDirectory'
 
 interface ProgramMetaDataSubmissionI {
@@ -109,6 +111,7 @@ export interface MonitoringProgramSubmissionI {
   permittingInformation: PermitInformationSubmissionI[]
 }
 const CreateNewProgramHome = ({
+  userCredentialsStore,
   createNewProgramHomeStore,
   trappingSitesStore,
   multipleTrapsStore,
@@ -120,6 +123,7 @@ const CreateNewProgramHome = ({
   connectivityState,
   dropdownsState,
 }: {
+  userCredentialsStore: UserCredentialsInitialState
   createNewProgramHomeStore: CreateNewProgramInitialStateI
   trappingSitesStore: TrappingSitesStoreI
   multipleTrapsStore: GroupTrapSiteValuesI
@@ -194,7 +198,7 @@ const CreateNewProgramHome = ({
     const programMetaDataSubmission: ProgramMetaDataSubmissionI = {
       programName: monitoringProgramName,
       streamName: streamName,
-      personnelLead: 14, //to be completed when a logged in user is persisted
+      personnelLead: userCredentialsStore.id || 14, //to be completed when a logged in user is persisted
       fundingAgency: fundingAgencyValues.indexOf(fundingAgency) + 1, //fundingAgency, //to be completed
       // efficiencyProtocolsDocumentLink: 'VARCHAR(200)', //to be completed
       // trappingProtocolsDocumentLink: 'VARCHAR(200)', //to be completed
@@ -497,6 +501,7 @@ const CreateNewProgramHome = ({
 
 const mapStateToProps = (state: RootState) => {
   return {
+    userCredentialsStore: state.userCredentials,
     createNewProgramHomeStore: state.createNewProgramHome,
     trappingSitesStore: state.trappingSites.trappingSitesStore,
     multipleTrapsStore: state.multipleTraps.groupTrapSiteValues,
