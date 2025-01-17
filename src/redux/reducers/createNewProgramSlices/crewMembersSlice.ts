@@ -22,6 +22,7 @@ export interface IndividualCrewMemberValuesI {
   agency: string | null
   orcidId: string | null
   uid: string
+  id?: number
 }
 export const IndividualCrewMemberState: IndividualCrewMemberValuesI = {
   firstName: '',
@@ -32,6 +33,7 @@ export const IndividualCrewMemberState: IndividualCrewMemberValuesI = {
   agency: '',
   orcidId: '',
   uid: '',
+  id: undefined,
 }
 
 export const crewMembersSlice = createSlice({

@@ -65,6 +65,7 @@ const CrewMembers = ({
     emailAddress,
     agencyDefinition,
     orcidId,
+    id,
   } = userCredentialsStore
 
   const dispatch = useDispatch<AppDispatch>()
@@ -92,6 +93,7 @@ const CrewMembers = ({
       agency: agencyDefinition,
       orcidId,
       isLead: true,
+      id,
     }
     dispatch(saveIndividualCrewMember(payload))
   }

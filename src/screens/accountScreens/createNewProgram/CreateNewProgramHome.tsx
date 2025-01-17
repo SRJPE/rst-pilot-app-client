@@ -179,7 +179,6 @@ const CreateNewProgramHome = ({
       ) {
         console.log('CONNECTED')
         dispatch(postMonitoringProgramSubmissions())
-        // postMonitoringProgramFilesToDB()
       }
     } catch (error) {
       console.error(error)
@@ -198,7 +197,7 @@ const CreateNewProgramHome = ({
     const programMetaDataSubmission: ProgramMetaDataSubmissionI = {
       programName: monitoringProgramName,
       streamName: streamName,
-      personnelLead: userCredentialsStore.id || 14, //to be completed when a logged in user is persisted
+      personnelLead: userCredentialsStore.id!,
       fundingAgency: fundingAgencyValues.indexOf(fundingAgency) + 1, //fundingAgency, //to be completed
       // efficiencyProtocolsDocumentLink: 'VARCHAR(200)', //to be completed
       // trappingProtocolsDocumentLink: 'VARCHAR(200)', //to be completed
@@ -281,16 +280,18 @@ const CreateNewProgramHome = ({
         isLead,
         agency,
         orcidId,
+        id,
       } = crewMemberObj
-
+      const agencyIndexOf = fundingAgencyValues.indexOf(agency)
       return {
         firstName,
         lastName,
         email,
         phone: phoneNumber,
-        agencyId: fundingAgencyValues.indexOf(agency) + 1,
+        agencyId: agencyIndexOf ? agencyIndexOf + 1 : 11,
         role: isLead ? 'lead' : 'non-lead',
         orcidId: orcidId,
+        id,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
