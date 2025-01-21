@@ -111,10 +111,6 @@ const CreateNewProgramNavButtons = ({
       case 'Create New Program Complete':
         clearFormValues && clearFormValues()
         navigation?.navigate('Home')
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Create New Program Home' }],
-        })
 
         break
 
@@ -130,17 +126,17 @@ const CreateNewProgramNavButtons = ({
         })
         break
       case 'Create New Program Complete':
-        navigation?.navigate('Monitoring Program', {
-          screen: 'Monitoring Program New',
-        })
+        // navigation?.navigate('Monitoring Program', {
+        //   screen: 'Monitoring Program New',
+        // })
 
+        // navigation?.navigate('Monitoring Program', {
+        //   screen: 'Monitoring Program New',
+        // })
         clearFormValues && clearFormValues()
-        navigation?.navigate('Monitoring Program', {
-          screen: 'Monitoring Program New',
-        })
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Create New Program Home' }],
+          routes: [{ name: 'Monitoring Program New' }],
         })
         break
       case 'Trapping Sites':
