@@ -198,7 +198,7 @@ const CreateNewProgramHome = ({
       programName: monitoringProgramName,
       streamName: streamName,
       personnelLead: userCredentialsStore.id!,
-      fundingAgency: fundingAgencyValues.indexOf(fundingAgency) + 1, //fundingAgency, //to be completed
+      fundingAgency: fundingAgencyValues.indexOf(fundingAgency) + 1,
       // efficiencyProtocolsDocumentLink: 'VARCHAR(200)', //to be completed
       // trappingProtocolsDocumentLink: 'VARCHAR(200)', //to be completed
       createdAt: new Date(),
