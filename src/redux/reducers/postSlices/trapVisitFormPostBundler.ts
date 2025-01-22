@@ -154,18 +154,17 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
             //     })
             // )
 
-            // send as one request of array of catch raw records
-            const catchPromise = api.post(
-              'catch-raw/',
-              linkedCatchRawSubmissions.map(
-                ({ uid, ...rest }: { uid: string }) => {
-                  return {
-                    ...rest,
-                    trapVisitId: trapId,
-                  }
+            const bulkSubmissions = linkedCatchRawSubmissions.map(
+              ({ uid, ...rest }: { uid: string }) => {
+                return {
+                  ...rest,
+                  trapVisitId: trapId,
                 }
-              )
+              }
             )
+
+            // send as one request of array of catch raw records
+            const catchPromise = await api.post('catch-raw/', bulkSubmissions)
 
             const catchResults = await Promise.allSettled([catchPromise])
 

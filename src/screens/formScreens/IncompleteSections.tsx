@@ -105,6 +105,7 @@ const IncompleteSections = ({
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
+    dispatch(checkIfFormIsComplete())
   }, [])
 
   const emitSubmission = () => {
