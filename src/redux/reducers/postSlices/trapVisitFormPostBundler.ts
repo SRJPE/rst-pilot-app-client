@@ -142,25 +142,40 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
 
         await trapPromise
           .then(async (response: any) => {
-            let trapId = response.data.createdTrapVisitResponse.id
+            let trapId = response?.data?.createdTrapVisitResponse?.id
             // Save to payload
             payload.trapVisitResponse.push(response.data)
 
-            const catchPromises = linkedCatchRawSubmissions.map(
-              ({ uid, ...rest }: { uid: string }) =>
-                api.post('catch-raw/', {
-                  ...rest,
-                  trapVisitId: trapId,
-                })
+            // const catchPromises = linkedCatchRawSubmissions.map(
+            //   ({ uid, ...rest }: { uid: string }) =>
+            //     api.post('catch-raw/', {
+            //       ...rest,
+            //       trapVisitId: trapId,
+            //     })
+            // )
+
+            // send as one request of array of catch raw records
+            const catchPromise = api.post(
+              'catch-raw/',
+              linkedCatchRawSubmissions.map(
+                ({ uid, ...rest }: { uid: string }) => {
+                  return {
+                    ...rest,
+                    trapVisitId: trapId,
+                  }
+                }
+              )
             )
 
-            const catchResults = await Promise.allSettled(catchPromises)
+            const catchResults = await Promise.allSettled([catchPromise])
 
             for (const result of catchResults) {
               if (result.status === 'fulfilled') {
+                console.log('server processed catch raw: ', result)
                 payload.catchRawResponse.push(result.value.data)
               } else {
                 console.log('server processed catch fail: ', result)
+                throw new Error(result.reason)
                 // handle failed catch-raw request
               }
             }
@@ -404,11 +419,11 @@ const fetchWithPostParams = async (dispatch: any, postResults: any) => {
       )
 
       const fetchedCatchRawIds = previousCatchRaw.map(
-        (catchRaw: any) => catchRaw.createdCatchRawResponse.id
+        (catchRaw: any) => catchRaw?.createdCatchRawResponse?.id
       )
 
       const postedCatchRawIds = catchRawResponse.map(
-        (catchRaw: any) => catchRaw.createdCatchRawResponse.id
+        (catchRaw: any) => catchRaw?.createdCatchRawResponse?.id
       )
 
       // check if every fetched values contain posted values
@@ -433,7 +448,7 @@ const fetchWithPostParams = async (dispatch: any, postResults: any) => {
       if (!doesFetchContainPost(fetchedCatchRawIds, postedCatchRawIds)) {
         missedCatchRawRecords = catchRawResponse.filter((response: any) => {
           return !fetchedCatchRawIds.includes(
-            response.createdCatchRawResponse.id
+            response?.createdCatchRawResponse?.id
           )
         })
       }
