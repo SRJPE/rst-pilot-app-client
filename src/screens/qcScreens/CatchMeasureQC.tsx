@@ -36,6 +36,7 @@ function CatchMeasureQC({
   previousCatchRawSubmissions,
   lifeStageState,
   userCredentialsStore,
+  taxonState,
 }: {
   navigation: any
   route: any
@@ -43,6 +44,7 @@ function CatchMeasureQC({
   previousCatchRawSubmissions: any[]
   lifeStageState: any[]
   userCredentialsStore: any
+  taxonState: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -85,10 +87,12 @@ function CatchMeasureQC({
     let qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
     qcData = qcData.filter(data => {
-      let createdAt = new Date(data.createdCatchRawResponse.createdAt)
+      let trapVisitTimeEnd = new Date(
+        data.createdCatchRawResponse.trapVisitTimeEnd
+      )
       return (
-        createdAt >= selectedDateRange.startDate &&
-        createdAt <= selectedDateRange.endDate
+        trapVisitTimeEnd >= selectedDateRange.startDate &&
+        trapVisitTimeEnd <= selectedDateRange.endDate
       )
     })
 
@@ -105,6 +109,7 @@ function CatchMeasureQC({
         const forkValue = Number(
           catchRawResponse.createdCatchRawResponse?.forkLength
         )
+
         const lifeStageId = catchRawResponse.createdCatchRawResponse?.lifeStage
         let lifeStageDefinition = null
         if (lifeStageId) {
@@ -121,16 +126,25 @@ function CatchMeasureQC({
           }
         }
 
+        const taxonCode = catchRawResponse.createdCatchRawResponse.taxonCode
+        let species = taxonState.filter((obj: any) => {
+          return obj.code === taxonCode
+        })
+        let speciesCommonName = species[0]?.commonname
+
         if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
           forkGraphSubData.push({
             fieldClicked: 'Fork Length',
             id: catchRawResponse.createdCatchRawResponse.id,
             x: forkValue,
             y: 0,
-            createdAt: catchRawResponse.createdCatchRawResponse?.createdAt,
+            pointDateTimestamp:
+              catchRawResponse.createdCatchRawResponse?.trapVisitTimeEnd,
             colorScale: lifeStageDefinition
               ? lifeStageMap[lifeStageDefinition]
               : 'grey',
+            speciesCommonName,
+            lifeStageDefinition,
           })
         }
         return forkValue
@@ -196,7 +210,8 @@ function CatchMeasureQC({
             id: catchRawResponse.createdCatchRawResponse.id,
             x: weightValue,
             y: 0,
-            createdAt: catchRawResponse.createdCatchRawResponse?.createdAt,
+            pointDateTimestamp:
+              catchRawResponse.createdCatchRawResponse?.createdAt,
             colorScale: lifeStageDefinition
               ? lifeStageMap[lifeStageDefinition]
               : 'grey',
@@ -461,6 +476,7 @@ function CatchMeasureQC({
 
 const mapStateToProps = (state: RootState) => {
   const lifeStage = state.dropdowns?.values?.lifeStage
+  const taxon = state.dropdowns.values.taxon
 
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
@@ -468,6 +484,7 @@ const mapStateToProps = (state: RootState) => {
       state.trapVisitFormPostBundler.previousCatchRawSubmissions,
     lifeStageState: lifeStage ?? [],
     userCredentialsStore: state.userCredentials,
+    taxonState: taxon ?? [],
   }
 }
 

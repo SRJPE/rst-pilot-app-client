@@ -10,7 +10,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import { useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   numOfFormSteps,

@@ -1,7 +1,10 @@
 import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
+import {
+  resetNavigationSlice,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
@@ -111,20 +114,6 @@ const NavButtons = ({
           values?.trapStatus === 'trap not in service - restart trapping'
         ) {
           navigateHelper('Started Trapping')
-        } else if (values?.flowMeasure > 1000) {
-          navigateHelper('High Flows')
-        } else if (values?.waterTemperatureUnit === '°C') {
-          if (values?.waterTemperature > 30) {
-            navigateHelper('High Temperatures')
-          } else {
-            navigateHelper('Fish Processing')
-          }
-        } else if (values?.waterTemperatureUnit === '°F') {
-          if (values?.waterTemperature > 86) {
-            navigateHelper('High Temperatures')
-          } else {
-            navigateHelper('Fish Processing')
-          }
         } else {
           navigateHelper('Fish Processing')
         }
@@ -164,6 +153,9 @@ const NavButtons = ({
       case 'High Temperatures':
         navigateHelper('Fish Processing')
         break
+      case 'Non Functional Trap':
+        navigateHelper('Fish Processing')
+        break
       case 'No Fish Caught':
         navigateHelper('Start Mark Recapture')
         break
@@ -171,7 +163,7 @@ const NavButtons = ({
         navigateHelper('Trap Operations')
         break
       case 'Started Trapping':
-        navigation.navigate('Home')
+        navigation?.navigate('Home')
         break
       default:
         console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
@@ -253,15 +245,20 @@ const NavButtons = ({
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen
     if (activePage === 'Visit Setup') {
-      navigation.navigate('Home')
+      dispatch(resetNavigationSlice())
       navigation.reset({
         index: 0,
         routes: [{ name: 'Visit Setup' }],
       })
+      navigation.getParent()?.navigate('Home')
       return
     }
 
     if (activePage === 'No Fish Caught') {
+      navigateFlowLeftButton()
+      return
+    }
+    if (activePage === 'High Flows') {
       navigateFlowLeftButton()
       return
     }
@@ -290,7 +287,7 @@ const NavButtons = ({
         buttonText = 'End Trap Visit'
         break
       case 'Non Functional Trap':
-        buttonText = 'End Trap Visit'
+        buttonText = 'Move on to Fish Processing'
         break
       case 'No Fish Caught':
         buttonText = 'End Trap Visit'
@@ -316,7 +313,7 @@ const NavButtons = ({
       // if form is complete, then do not disable button
       return !isFormComplete
     } else if (activePage === 'Non Functional Trap') {
-      return true
+      return false
     } else if (activePage === 'Fish Input') {
       return !(values?.length >= 1)
     } else if (isValid) {

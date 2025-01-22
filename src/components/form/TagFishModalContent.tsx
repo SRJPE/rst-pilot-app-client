@@ -20,7 +20,6 @@ import { QARanges } from '../../utils/utils'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
-import RenderWarningMessage from '../Shared/RenderWarningMessage'
 
 const initialFormValues = {
   markType: '',
@@ -40,7 +39,7 @@ const mapStateToProps = (state: RootState) => {
   }
 }
 
-const MarkFishModalContent = ({
+const TagFishModalContent = ({
   handleMarkFishFormSubmit,
   closeModal,
   crewMembers,
@@ -58,12 +57,22 @@ const MarkFishModalContent = ({
     (state: RootState) => state.dropdowns.values
   )
 
+  // sort markType dropdown values array where not recorded is last and everything else is alpha
+  const sortedMarkTypeValues = [...dropdownValues.markType].sort(
+    (a: any, b: any) => {
+      if (a.definition === 'not recorded') return 1
+      if (b.definition === 'not recorded') return -1
+      return a.definition.localeCompare(b.definition) // Sort alphabetically
+      return 0
+    }
+  )
+
   return (
     <ScrollView>
       <Formik
         validationSchema={addMarksOrTagsSchema}
         initialValues={initialFormValues}
-        onSubmit={(values) => handleFormSubmit(values)}
+        onSubmit={values => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -119,7 +128,7 @@ const MarkFishModalContent = ({
                     placeholder={'Type'}
                     onValueChange={handleChange('markType')}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues.markType.map((item: any) => ({
+                    selectOptions={sortedMarkTypeValues.map((item: any) => ({
                       label: item.definition,
                       value: item.definition,
                     }))}
@@ -250,4 +259,4 @@ const MarkFishModalContent = ({
   )
 }
 
-export default connect(mapStateToProps)(MarkFishModalContent)
+export default connect(mapStateToProps)(TagFishModalContent)

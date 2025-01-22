@@ -8,7 +8,7 @@ import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
 import { getTrapVisitDropdownValues } from '../redux/reducers/dropdownsSlice'
 import { fetchPreviousTrapAndCatch } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { RootState, AppDispatch } from '../redux/store'
-import { connect, useDispatch } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import api from '../api/axiosConfig'
 import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
 
@@ -59,12 +59,14 @@ const Home = ({
   const [opacity, setOpacity] = useState(1 as number)
   const dispatch = useDispatch<AppDispatch>()
 
+  const connectivityState = useSelector((state: any) => state.connectivity)
+
   useEffect(() => {
     staggerOpen ? setOpacity(0.25) : setOpacity(1)
   }, [staggerOpen])
 
   useEffect(() => {
-    if (userCredentialsStore?.id) {
+    if (userCredentialsStore?.id && connectivityState.isConnected) {
       try {
         dispatch(getVisitSetupDefaults(userCredentialsStore.id))
         dispatch(getTrapVisitDropdownValues())
@@ -73,7 +75,7 @@ const Home = ({
         console.log('error from home screen: ', error)
       }
     }
-  }, [userCredentialsStore])
+  }, [userCredentialsStore, connectivityState])
 
   useEffect(() => {
     ;(async () => {

@@ -180,7 +180,7 @@ const BatchCount = ({
         borderWidth='10'
         borderColor='themeGrey'
       >
-        <View style={{ paddingBottom: screenHeight < 1180 ? 100 : 0 }}>
+        <View style={{ paddingBottom: 100 }}>
           <Pressable onPress={Keyboard.dismiss}>
             <HStack space={10}>
               <CustomModalHeader
@@ -494,21 +494,25 @@ const BatchCount = ({
         </View>
       </ScrollView>
       {/* --------- Modals --------- */}
-      <CustomModal
-        isOpen={batchCharacteristicsModalOpen}
-        closeModal={() => setBatchCharacteristicsModalOpen(false)}
-        height='2/3'
-      >
-        <BatchCharacteristicsModalContent
+      {batchCharacteristicsModalOpen && (
+        <CustomModal
+          isOpen={batchCharacteristicsModalOpen}
           closeModal={() => setBatchCharacteristicsModalOpen(false)}
-        />
-      </CustomModal>
+          height='2/3'
+        >
+          <BatchCharacteristicsModalContent
+            closeModal={() => setBatchCharacteristicsModalOpen(false)}
+          />
+        </CustomModal>
+      )}
 
-      <BatchCountTableModal
-        showTableModal={showTableModal}
-        setShowTableModal={setShowTableModal}
-        modalInitialData={modalInitialData}
-      />
+      {showTableModal && (
+        <BatchCountTableModal
+          showTableModal={showTableModal}
+          setShowTableModal={setShowTableModal}
+          modalInitialData={modalInitialData}
+        />
+      )}
     </>
   )
 }

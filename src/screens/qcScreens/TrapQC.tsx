@@ -121,8 +121,10 @@ function TrapQC({
 
         const trapVisitId = createdTrapVisitResponse.id
         const qcCompleted = createdTrapVisitResponse.qcCompleted
-        const createdAt = new Date(createdTrapVisitResponse.createdAt)
-        const normalizedDate = normalizeDate(createdAt)
+        const trapVisitTimeEnd = new Date(
+          createdTrapVisitResponse.trapVisitTimeEnd
+        )
+        const normalizedDate = normalizeDate(trapVisitTimeEnd)
 
         if (trapVisitId) {
           let temp = createdTrapVisitEnvironmentalResponse
@@ -135,7 +137,11 @@ function TrapQC({
             tempData.push({
               id: trapVisitId,
               x: normalizedDate,
-              y: Number(temp.measureValueNumeric),
+              y:
+                temp.measureValueNumeric !== null
+                  ? Number(temp.measureValueNumeric)
+                  : '',
+              pointDateTimestamp: createdTrapVisitResponse.trapVisitTimeEnd,
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
@@ -154,7 +160,11 @@ function TrapQC({
             turbidityData.push({
               id: trapVisitId,
               x: normalizedDate,
-              y: Number(turbidity.measureValueNumeric),
+              y:
+                turbidity.measureValueNumeric !== null
+                  ? Number(turbidity.measureValueNumeric)
+                  : '',
+              pointDateTimestamp: createdTrapVisitResponse.trapVisitTimeEnd,
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
@@ -167,7 +177,11 @@ function TrapQC({
             let rpmAtStart = {
               id: trapVisitId,
               x: normalizedDate,
-              y: Number(response.createdTrapVisitResponse.rpmAtStart),
+              y:
+                createdTrapVisitResponse.rpmAtStart !== null
+                  ? Number(createdTrapVisitResponse.rpmAtStart)
+                  : '',
+              pointDateTimestamp: createdTrapVisitResponse.trapVisitTimeEnd,
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
@@ -182,7 +196,11 @@ function TrapQC({
             let rpmAtEnd = {
               id: trapVisitId,
               x: normalizedDate,
-              y: Number(createdTrapVisitResponse.rpmAtEnd),
+              y:
+                createdTrapVisitResponse.rpmAtEnd !== null
+                  ? Number(createdTrapVisitResponse.rpmAtEnd)
+                  : '',
+              pointDateTimestamp: createdTrapVisitResponse.trapVisitTimeEnd,
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
@@ -197,6 +215,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.totalRevolutions,
+              pointDateTimestamp: createdTrapVisitResponse.trapVisitTimeEnd,
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
@@ -211,6 +230,7 @@ function TrapQC({
               id: trapVisitId,
               x: normalizedDate,
               y: createdTrapVisitResponse.debrisVolumeGal,
+              pointDateTimestamp: createdTrapVisitResponse.trapVisitTimeEnd,
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
@@ -311,8 +331,9 @@ function TrapQC({
           />
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
             Edit values by selecting a point on a plot below. Red points
-            indicate records that have not been QC'd, while the gray points
-            indicate records that have been QC'd and approved.
+            indicate records that have not been QC'd, orange points indicate
+            records that have been adjusted but not saved yet, and the gray
+            points indicate records that have been QC'd and approved.
           </Text>
 
           <HStack w={'full'} justifyContent='space-evenly' mb={'10'}>

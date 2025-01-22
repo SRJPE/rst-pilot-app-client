@@ -35,7 +35,11 @@ import {
 } from '../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { DeviceEventEmitter } from 'react-native'
-import { combinePlusCounts, navigateHelper } from '../../utils/utils'
+import {
+  combinePlusCounts,
+  navigateHelper,
+  returnDefinitionArray,
+} from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
@@ -177,12 +181,6 @@ const IncompleteSections = ({
     dispatch(resetTabsSlice())
   }
 
-  const returnDefinitionArray = (dropdownsArray: any[]) => {
-    return dropdownsArray.map((dropdownObj: any) => {
-      return dropdownObj.definition
-    })
-  }
-
   const findTrapLocationIds = () => {
     let container = [] as any
     for (let tabId in visitSetupState) {
@@ -212,7 +210,7 @@ const IncompleteSections = ({
         .filter(
           (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
         )
-        .map((obj: any) => obj.personnelId)
+        .map((obj: any) => Number(obj.personnelId))
     )
     //if the array contains a single string, return the string in an array
     return filteredNames
@@ -353,8 +351,8 @@ const IncompleteSections = ({
           : null,
         qcCompleted: null,
         qcCompletedAt: null,
-        comments: paperEntryState[id]
-          ? paperEntryState[id].values.comments
+        comments: trapPostProcessingState[id].values.comments
+          ? trapPostProcessingState[id].values.comments
           : null,
         createdBy: userCredentialsStore.id,
       }
@@ -448,7 +446,7 @@ const IncompleteSections = ({
             return filteredData.map((obj: any) => {
               obj.crewMember = findCrewIdsFromSelectedCrewNames([
                 obj.crewMember,
-              ])
+              ])[0]
               return obj
             })
           }
@@ -512,7 +510,7 @@ const IncompleteSections = ({
                 )
               : null,
             isRandom: null, // Check w/ Erin
-            comments: null,
+            comments: fishValue.comments != null ? fishValue?.comments : null,
             createdBy: userCredentialsStore.id,
             qcCompleted: null,
             qcCompletedBy: null,

@@ -16,7 +16,7 @@ export default function AppContainer(props: Props) {
   return (
     <ReduxProvider store={store}>
       <PersistGate persistor={persistor}>
-        <NavigationContainer>
+        <NavigationContainer navigationInChildEnabled>
           <NativeBaseProvider theme={theme}>
             <PaperProvider>
               <SlideAlertProvider>

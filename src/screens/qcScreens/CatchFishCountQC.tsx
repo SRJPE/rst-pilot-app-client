@@ -12,7 +12,7 @@ import {
   Heading,
   Radio,
 } from 'native-base'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import CustomModal from '../../components/Shared/CustomModal'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
@@ -111,6 +111,7 @@ function CatchFishCountQC({
     dead: 'createdCatchRawResponse.dead',
     adiposeClipped: 'createdCatchRawResponse.adiposeClipped',
     numFishCaught: 'createdCatchRawResponse.numFishCaught',
+    weight: 'createdCatchRawResponse.weight',
   }
 
   useEffect(() => {
@@ -148,8 +149,10 @@ function CatchFishCountQC({
       const catchRaw = catchResponse.createdCatchRawResponse
       const numFishCaught: number = catchRaw?.numFishCaught
       const plusCount: boolean = catchRaw?.plusCount
-      const createdAt = new Date(catchRaw.createdAt)
-      const normalizedDate = normalizeDate(createdAt)
+      const trapVisitTimeEnd = new Date(
+        catchRaw.trapVisitTimeEnd.replace('Z', '-08:00')
+      )
+      const normalizedDate = normalizeDate(trapVisitTimeEnd)
       const qcCompleted = catchResponse.createdCatchRawResponse.qcCompleted
 
       if (Object.keys(datesFormatted).includes(String(normalizedDate))) {
@@ -206,14 +209,15 @@ function CatchFishCountQC({
       )
       const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
-      console.log('datum', datum)
-
-      const selectedData = qcData.filter(response => {
-        const id = response.createdCatchRawResponse?.id
-        return datum.plusCountIds.includes(id)
-      })
-
-      console.log('selectedData', selectedData)
+      const selectedData = qcData
+        .filter(response => {
+          const id = response.createdCatchRawResponse?.id
+          return datum.catchRawIds.includes(id)
+        })
+        .sort(
+          (a, b) =>
+            a.createdCatchRawResponse?.id - b.createdCatchRawResponse?.id
+        )
 
       setModalData(selectedData)
 
@@ -336,6 +340,16 @@ function CatchFishCountQC({
     }
   }
 
+  const onChangeTextCallback = useCallback(
+    ({ value, fieldClicked }: { value: string; fieldClicked: string }) => {
+      setNestedModalInputValue({
+        fieldClicked,
+        value,
+      })
+    },
+    []
+  )
+
   const CustomNestedModalInput = ({
     fieldClicked,
     data,
@@ -441,7 +455,31 @@ function CatchFishCountQC({
               placeholder='fork length...'
               keyboardType='numeric'
               onChangeText={value => {
-                setNestedModalInputValue({ fieldClicked: 'forkLength', value })
+                onChangeTextCallback({
+                  fieldClicked: 'forkLength',
+                  value,
+                })
+              }}
+              // onBlur={handleBlur('comments')}
+              value={nestedModalInputValue.value as string}
+            />
+          </VStack>
+        )
+      case 'weight':
+        return (
+          <VStack alignItems={'flex-start'}>
+            <Text>Edit Weight</Text>
+            <Input
+              height='50px'
+              width='350px'
+              fontSize='16'
+              placeholder='weight...'
+              keyboardType='numeric'
+              onChangeText={value => {
+                onChangeTextCallback({
+                  fieldClicked: 'weight',
+                  value,
+                })
               }}
               // onBlur={handleBlur('comments')}
               value={nestedModalInputValue.value as string}
@@ -456,7 +494,7 @@ function CatchFishCountQC({
               selectedValue={nestedModalInputValue.value as string}
               placeholder={'Mark Type'}
               onValueChange={(value: string) =>
-                setNestedModalInputValue({ fieldClicked: 'markType', value })
+                onChangeTextCallback({ fieldClicked: 'markType', value })
               }
               selectOptions={markTypeState.map((markType: any) => ({
                 label: markType?.definition,
@@ -572,20 +610,8 @@ function CatchFishCountQC({
 
   return (
     <>
-      <View
-        flex={1}
-        bg='#fff'
-        px='5%'
-        py='3%'
-        borderColor='themeGrey'
-        borderWidth='15'
-      >
+      <View flex={1} bg='#fff' px='5%' py='3%'>
         <VStack alignItems={'center'} flex={1}>
-          <CustomModalHeader
-            headerText={'QC Total Daily Count'}
-            showHeaderButton={false}
-            closeModal={() => navigation.goBack()}
-          />
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
             Select a species to see total daily counts for the selected species.
             Points represent total daily counts of measured and plus count fish.
@@ -666,13 +692,11 @@ function CatchFishCountQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height={modalData.length > 1 ? '5/6' : '1/4'}
+          height={modalData.length ? '5/6' : '1/3'}
         >
           <>
             <CustomModalHeader
-              headerText={
-                'Click on a cell to flag data as low confidence or edit value'
-              }
+              headerText={'Edit the values for plus count points below.'}
               headerStyle={{ fontSize: 23, fontWeight: '300' }}
               showHeaderButton={false}
               closeModal={() => setModalData(null)}
@@ -695,9 +719,7 @@ function CatchFishCountQC({
               fontWeight={'light'}
             >
               {`Selected Point${modalData.length > 1 ? `s` : ''} Date: `}
-              {moment(
-                modalData?.[0]?.createdCatchRawResponse?.createdAt
-              ).format('MMMM Do, YYYY')}
+              {moment(pointClicked._x).format('MMMM Do, YYYY')}
             </Text>
             <Text
               color='black'
@@ -717,10 +739,10 @@ function CatchFishCountQC({
               fish.
             </Text>
 
-            {modalData.length > 1 && (
+            {modalData.length ? (
               <VStack alignItems={'center'}>
                 <Heading fontSize={23} mb={5}>
-                  Table of Selected Points
+                  Table of Selected Fish Points
                 </Heading>
                 <ScrollView
                   horizontal
@@ -790,6 +812,77 @@ function CatchFishCountQC({
                                     )}...`
                                   : 'NA'}
                               </Text>
+                            </DataTable.Cell>
+                          )
+                        })}
+                      </DataTable.Row>
+                      <DataTable.Row
+                        style={[{ justifyContent: 'center', width: '100%' }]}
+                      >
+                        <DataTable.Cell
+                          style={{
+                            minWidth: 120,
+                            minHeight: 70,
+                            width: '100%',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Text>Fork Length</Text>
+                        </DataTable.Cell>
+                        {modalData.map((data, idx) => {
+                          let forkLength =
+                            data.createdCatchRawResponse.forkLength
+
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`forklength-${idx}`}
+                              disabled={!forkLength}
+                              onPress={() =>
+                                handleModalCellPressed('forkLength', data)
+                              }
+                            >
+                              <Text>{forkLength ?? 'NA'}</Text>
+                            </DataTable.Cell>
+                          )
+                        })}
+                      </DataTable.Row>
+                      <DataTable.Row
+                        style={[{ justifyContent: 'center', width: '100%' }]}
+                      >
+                        <DataTable.Cell
+                          style={{
+                            minWidth: 120,
+                            minHeight: 70,
+                            width: '100%',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Text>Weight</Text>
+                        </DataTable.Cell>
+                        {modalData.map((data, idx) => {
+                          let weight = data.createdCatchRawResponse.weight
+
+                          return (
+                            <DataTable.Cell
+                              style={{
+                                minWidth: 120,
+                                minHeight: 70,
+                                width: '100%',
+                                justifyContent: 'center',
+                              }}
+                              key={`weight-${idx}`}
+                              disabled={!weight}
+                              onPress={() =>
+                                handleModalCellPressed('weight', data)
+                              }
+                            >
+                              <Text>{weight ?? 'NA'}</Text>
                             </DataTable.Cell>
                           )
                         })}
@@ -898,7 +991,7 @@ function CatchFishCountQC({
                             justifyContent: 'center',
                           }}
                         >
-                          <Text>Plus Count</Text>
+                          <Text>Count</Text>
                         </DataTable.Cell>
                         {modalData.map((data, idx) => {
                           let numFishCaught =
@@ -1016,6 +1109,12 @@ function CatchFishCountQC({
                     </ScrollView>
                   </DataTable>
                 </ScrollView>
+              </VStack>
+            ) : (
+              <VStack alignItems={'center'} paddingBottom={10}>
+                <View>
+                  <Text fontSize='2xl'>No plus count records to edit</Text>
+                </View>
               </VStack>
             )}
           </>

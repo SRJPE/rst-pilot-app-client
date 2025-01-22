@@ -28,7 +28,8 @@ import CustomSelect from '../../components/Shared/CustomSelect'
 import CustomModalHeader, {
   AddFishModalHeaderButton,
 } from '../../components/Shared/CustomModalHeader'
-import MarkFishModalContent from '../../components/form/MarkFishModalContent'
+import TagFishModalContent from '../../components/form/TagFishModalContent'
+import TagBadgeList from '../../components/form/TagBadgeList'
 import AddGeneticsModalContent from '../../components/form/AddGeneticsModalContent'
 import {
   FishStoreI,
@@ -43,8 +44,14 @@ import { MaterialIcons } from '@expo/vector-icons'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { Keyboard, useWindowDimensions } from 'react-native'
-import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
+import { Keyboard } from 'react-native'
+import {
+  alphabeticalSort,
+  QARanges,
+  reorderTaxon,
+  returnDefinitionArray,
+  addFishErrorMessages,
+} from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
@@ -53,14 +60,7 @@ import { uid } from 'uid'
 import SpeciesDropDown from '../../components/form/SpeciesDropDown'
 import FishConditionsDropDown from '../../components/form/FishConditionsDropDown'
 import { startCase } from 'lodash'
-
-export interface ReleaseMarkI {
-  id?: number
-  releaseId?: number
-  markPosition: number
-  markType: number
-  markColor: number
-}
+import { ReleaseMarkI, FormValueI } from '../../utils/interfaces'
 
 const AddFishContent = ({
   route,
@@ -74,6 +74,7 @@ const AddFishContent = ({
   closeModal,
   fishStore,
   tabSlice,
+  appliedMarksState,
 }: {
   route?: any
   saveIndividualFish: any
@@ -86,22 +87,21 @@ const AddFishContent = ({
   closeModal: any
   fishStore: FishStoreI
   tabSlice: TabStateI
+  appliedMarksState: any
 }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
   // @ts-ignore
-  const lastAddedFish = fishStore[Object.keys(fishStore).pop()]
   const [fishUID, setFishUID] = useState(uid() as string)
 
   const [validationSchema, setValidationSchema] = useState<
     'default' | 'optionalLifeStage' | 'otherSpecies'
   >('default')
-  const [markFishModalOpen, setMarkFishModalOpen] = useState(false as boolean)
+  const [tagFishModalOpen, setTagFishModalOpen] = useState(false as boolean)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
     false as boolean
   )
-  const { height: screenHeight } = useWindowDimensions()
 
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -121,10 +121,6 @@ const AddFishContent = ({
   const handleGeneticSampleFormSubmit = (values: any) => {
     saveGeneticSampleData({ ...values, UID: fishUID })
   }
-
-  // useEffect(() => {
-  //   setFishUID(uid())
-  // }, [])
 
   const renderForkLengthWarning = (
     forkLengthValue: number,
@@ -158,31 +154,12 @@ const AddFishContent = ({
 
   const buttonNav = () => {
     // @ts-ignore
-    navigation.navigate('Trap Visit Form', {
+    navigation?.navigate('Trap Visit Form', {
       screen: 'Batch Count',
     })
   }
 
   // ------------------------------------------------------------------------------------------------------------------------
-
-  interface FormValueI {
-    value: Array<any> | string | boolean | null
-    touched: boolean
-    error: string
-    required: boolean
-  }
-
-  const errorMessages = {
-    species: { emptyError: 'Fish species required' },
-    forkLength: {
-      typeError: 'Input must be a number',
-      emptyError: 'Fish fork length required',
-    },
-    weight: { typeError: 'Input must be a number' },
-    lifeStage: { emptyError: 'Fish life stage required' },
-    adiposeClipped: { emptyError: 'Fish adipose clipped status required' },
-    dead: { emptyError: 'Fish mortality required' },
-  }
 
   const createFormValueDefault = ({
     value,
@@ -219,6 +196,7 @@ const AddFishContent = ({
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
     },
     whenSpeciesSteelhead: {
       species: createFormValueDefault({ value: null, required: true }),
@@ -239,6 +217,7 @@ const AddFishContent = ({
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
     },
     whenSpeciesOther: {
       species: createFormValueDefault({ value: null, required: true }),
@@ -260,6 +239,7 @@ const AddFishContent = ({
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
     },
   }
 
@@ -365,6 +345,15 @@ const AddFishContent = ({
           required: false,
         })
   )
+  const [comments, setComments] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.comments
+      : createFormValueDefault({
+          value: route.params?.editModeData.comments?.toString(),
+          touched: true,
+          required: false,
+        })
+  )
 
   useEffect(() => {
     if (forkLength.value) checkForFormError()
@@ -438,16 +427,11 @@ const AddFishContent = ({
     setFormHasError(true)
     setFishUID(uid())
     setRecentExistingMarks([])
+    setComments(stateDefaults[identifier].comments)
   }
 
   //RECENT MARKS ADDITIONS
   const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
-
-  const returnDefinitionArray = (dropdownsArray: any[]) => {
-    return dropdownsArray.map((dropdownObj: any) => {
-      return dropdownObj.definition
-    })
-  }
 
   const markTypeValues = returnDefinitionArray(dropdownValues.markType)
   const markColorValues = returnDefinitionArray(dropdownValues.markColor)
@@ -513,6 +497,7 @@ const AddFishContent = ({
       existingMarks: [...existingMarks.value, ...recentExistingMarks],
       dead: dead.value,
       plusCountMethod: plusCountMethod.value,
+      comments: comments.value,
     }
 
     return values
@@ -551,7 +536,7 @@ const AddFishContent = ({
   return (
     <>
       <ScrollView
-        scrollEnabled={screenHeight < 1180}
+        scrollEnabled
         flex={1}
         bg='#fff'
         borderWidth='10'
@@ -688,6 +673,9 @@ const AddFishContent = ({
             {(species.value as string) !== '' && species.value !== null && (
               <>
                 <VStack space={4}>
+                  <Text color='black' fontSize='lg'>
+                    * : Required
+                  </Text>
                   <HStack space={4}>
                     <FormControl
                       w={route.params?.editModeData ? '1/3' : '1/2'}
@@ -696,7 +684,7 @@ const AddFishContent = ({
                       <HStack space={4} alignItems='center'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
-                            Fork Length
+                            Fork Length *
                           </Text>
                         </FormControl.Label>
                         {renderForkLengthWarning(
@@ -723,9 +711,11 @@ const AddFishContent = ({
                             error: '',
                           }
                           if (value === '') {
-                            payload.error = errorMessages.forkLength.emptyError
+                            payload.error =
+                              addFishErrorMessages.forkLength.emptyError
                           } else if (!Number(value)) {
-                            payload.error = errorMessages.forkLength.typeError
+                            payload.error =
+                              addFishErrorMessages.forkLength.typeError
                           }
                           setForkLength(payload)
                         }}
@@ -779,7 +769,8 @@ const AddFishContent = ({
                           if (value === '') {
                             payload.error = ''
                           } else if (!Number(value)) {
-                            payload.error = errorMessages.weight.typeError
+                            payload.error =
+                              addFishErrorMessages.weight.typeError
                           }
                           setWeight(payload)
                         }}
@@ -819,7 +810,15 @@ const AddFishContent = ({
                       <></>
                     )}
                   </HStack>
-
+                  {/*workaround for customselect first component causing gray box issue*/}
+                  <FormControl w='1/2' paddingRight='9' display='none'>
+                    <CustomSelect
+                      selectedValue={''}
+                      placeholder={''}
+                      onValueChange={null}
+                      selectOptions={[]}
+                    />
+                  </FormControl>
                   <HStack space={4} alignItems='center'>
                     {(species.value === 'Chinook salmon' ||
                       species.value === 'Steelhead / rainbow trout') && (
@@ -827,10 +826,7 @@ const AddFishContent = ({
                         <HStack space={2} alignItems='center' mb='-1.5'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
-                              Life Stage{' '}
-                              {validationSchema == 'optionalLifeStage'
-                                ? '(optional)'
-                                : ''}
+                              Life Stage *{' '}
                             </Text>
                           </FormControl.Label>
 
@@ -854,7 +850,7 @@ const AddFishContent = ({
                           >
                             <Popover.Content
                               ml='10'
-                              accessibilityLabel='Existing Mark Info'
+                              accessibilityLabel='Life Stage Info'
                               w='720'
                               h='600'
                             >
@@ -897,7 +893,8 @@ const AddFishContent = ({
                           setFieldTouched={() => {
                             let payload = { ...lifeStage, touched: true }
                             if (!lifeStage.value)
-                              payload.error = errorMessages.lifeStage.emptyError
+                              payload.error =
+                                addFishErrorMessages.lifeStage.emptyError
                             setLifeStage(payload)
                           }}
                           selectOptions={alphabeticalLifeStage
@@ -922,7 +919,7 @@ const AddFishContent = ({
                       <FormControl w='1/2' paddingRight='9'>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
-                            Run
+                            Run (optional)
                           </Text>
                         </FormControl.Label>
                         <CustomSelect
@@ -1284,7 +1281,7 @@ const AddFishContent = ({
                           borderRadius='5'
                           maxWidth='40%'
                           marginRight='10'
-                          onPress={() => setMarkFishModalOpen(true)}
+                          onPress={() => setTagFishModalOpen(true)}
                         >
                           <Text color='primary'>Tag Fish</Text>
                         </Button>
@@ -1305,6 +1302,38 @@ const AddFishContent = ({
                       )}
                     </HStack>
                   )}
+                  {appliedMarksState?.length > 0 && (
+                    <>
+                      <Text color='black' fontSize='xl'>
+                        Tags
+                      </Text>
+                      <TagBadgeList badgeListContent={appliedMarksState} />
+                    </>
+                  )}
+                  <FormControl>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Comments
+                      </Text>
+                    </FormControl.Label>
+                    <Input
+                      height='50px'
+                      fontSize='16'
+                      placeholder='Write a comment'
+                      keyboardType='default'
+                      onChangeText={value => {
+                        let payload: FormValueI = {
+                          ...comments,
+                          value,
+                          touched: true,
+                          error: '',
+                        }
+
+                        setComments(payload)
+                      }}
+                      value={comments.value as string}
+                    />
+                  </FormControl>
                 </VStack>
               </>
             )}
@@ -1423,40 +1452,46 @@ const AddFishContent = ({
       </Box>
 
       {/* --------- Modals --------- */}
-      <CustomModal
-        isOpen={markFishModalOpen}
-        closeModal={() => setMarkFishModalOpen(false)}
-        height='3/4'
-      >
-        <MarkFishModalContent
-          handleMarkFishFormSubmit={handleMarkFishFormSubmit}
-          closeModal={() => setMarkFishModalOpen(false)}
-        />
-      </CustomModal>
-      <CustomModal
-        isOpen={addGeneticModalOpen}
-        closeModal={() => setAddGeneticModalOpen(false)}
-        height='3/4'
-      >
-        <AddGeneticsModalContent
-          handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
+      {tagFishModalOpen && (
+        <CustomModal
+          isOpen={tagFishModalOpen}
+          closeModal={() => setTagFishModalOpen(false)}
+          height='3/4'
+        >
+          <TagFishModalContent
+            handleMarkFishFormSubmit={handleMarkFishFormSubmit}
+            closeModal={() => setTagFishModalOpen(false)}
+          />
+        </CustomModal>
+      )}
+      {addGeneticModalOpen && (
+        <CustomModal
+          isOpen={addGeneticModalOpen}
           closeModal={() => setAddGeneticModalOpen(false)}
-        />
-      </CustomModal>
-      <CustomModal
-        isOpen={addMarkModalOpen}
-        closeModal={() => setAddMarkModalOpen(false)}
-        height='1/2'
-      >
-        <AddAnotherMarkModalContent
-          // handleAddAnotherMarkFormSubmit={handleAddAnotherMarkFormSubmit}
+          height='3/4'
+        >
+          <AddGeneticsModalContent
+            handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
+            closeModal={() => setAddGeneticModalOpen(false)}
+          />
+        </CustomModal>
+      )}
+      {addMarkModalOpen && (
+        <CustomModal
+          isOpen={addMarkModalOpen}
           closeModal={() => setAddMarkModalOpen(false)}
-          screenName={'addIndividualFish'}
-          setExistingMarks={setExistingMarks}
-          existingMarks={existingMarks}
-          existingMarksArray={existingMarks.value}
-        />
-      </CustomModal>
+          height='1/2'
+        >
+          <AddAnotherMarkModalContent
+            // handleAddAnotherMarkFormSubmit={handleAddAnotherMarkFormSubmit}
+            closeModal={() => setAddMarkModalOpen(false)}
+            screenName={'addIndividualFish'}
+            setExistingMarks={setExistingMarks}
+            existingMarks={existingMarks}
+            existingMarksArray={existingMarks.value}
+          />
+        </CustomModal>
+      )}
     </>
   )
 }
@@ -1473,6 +1508,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     fishStore: state.fishInput[activeTabId].fishStore,
     tabSlice: state.tabSlice,
+    appliedMarksState: state.addMarksOrTags.values,
   }
 }
 
