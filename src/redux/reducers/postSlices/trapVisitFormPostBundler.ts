@@ -242,7 +242,7 @@ export const postQCSubmissions = createAsyncThunk(
                 )
 
                 const errorMessage = generateErrorMessage(
-                  error.code || 'Error during post cq submission (ln 230)'
+                  error.code || 'Error during post qc submission (ln 230)'
                 )
                 showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
               })

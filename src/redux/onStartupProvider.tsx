@@ -21,59 +21,68 @@ const OnStartupProvider = (props: Props) => {
   const { forcedLogoutModalOpen } = useSelector(
     (state: RootState) => state.userAuth
   )
-  const { isConnected, isInternetReachable, userCredentialsStore } = props
 
   let unsubscribe: NetInfoSubscription
 
   useEffect(() => {
-    ;(async () => {
-      unsubscribe = NetInfo.addEventListener(async connectionState => {
-        if (
-          isConnected != connectionState.isConnected ||
-          isInternetReachable != connectionState.isInternetReachable
-        ) {
-          dispatch(connectionChanged(connectionState as any))
-        } else {
-          const userOnStart = userCredentialsStore.azureUid
-          if (userOnStart) {
-            const tokenRefreshResponse = await refreshUserToken(dispatch)
+    const unsubscribe = NetInfo.addEventListener(async connectionState => {
+      const { isConnected, isInternetReachable, userCredentialsStore } = props
+      if (
+        isConnected != connectionState.isConnected ||
+        isInternetReachable != connectionState.isInternetReachable
+      ) {
+        dispatch(connectionChanged(connectionState as any))
+      } else {
+        const userOnStart = userCredentialsStore.azureUid
+        if (userOnStart) {
+          const tokenRefreshResponse = await refreshUserToken(dispatch)
 
-            if (
-              tokenRefreshResponse &&
-              [
-                'No refresh token found',
-                'Tokens could not be refreshed',
-              ].includes(tokenRefreshResponse) &&
-              isConnected
-            ) {
-              dispatch(setForcedLogoutModalOpen(true))
-              return
-            }
-
-            if (tokenRefreshResponse === 'Tokens refreshed') {
-              console.log(
-                '🚀 ~ file: onStartupProvider.tsx:47 ~ Tokens refreshed on application launch'
-              )
-              return
-            }
-
-            console.log(
-              '🚀 ~ file: onStartupProvider.tsx:54 ~ Tokens still valid on application launch'
-            )
+          if (
+            tokenRefreshResponse &&
+            [
+              'No refresh token found',
+              'Tokens could not be refreshed',
+            ].includes(tokenRefreshResponse) &&
+            isConnected
+          ) {
+            dispatch(setForcedLogoutModalOpen(true))
+            return
           }
-        }
-      })
-    })()
-  }, [props.isConnected])
 
-  useEffect(
-    () => () => {
+          if (tokenRefreshResponse === 'Tokens refreshed') {
+            console.log(
+              '🚀 ~ file: onStartupProvider.tsx:47 ~ Tokens refreshed on application launch'
+            )
+            return
+          }
+
+          console.log(
+            '🚀 ~ file: onStartupProvider.tsx:54 ~ Tokens still valid on application launch'
+          )
+        }
+      }
+    })
+
+    return () => {
       if (unsubscribe) {
         unsubscribe()
       }
-    },
-    []
-  )
+    }
+  }, [
+    props.isConnected,
+    props.isInternetReachable,
+    props.userCredentialsStore,
+    dispatch,
+  ])
+
+  // useEffect(
+  //   () => () => {
+  //     if (unsubscribe) {
+  //       unsubscribe()
+  //     }
+  //   },
+  //   []
+  // )
 
   const cancelRef = useRef(null)
 
