@@ -171,7 +171,10 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
             for (const result of catchResults) {
               if (result.status === 'fulfilled') {
                 console.log('server processed catch raw: ', result)
-                payload.catchRawResponse.push(result.value.data)
+                payload.catchRawResponse = [
+                  ...payload.catchRawResponse,
+                  ...result.value.data,
+                ]
               } else {
                 console.log('server processed catch fail: ', result)
                 throw new Error(result.reason)
@@ -205,6 +208,12 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       console.log('error in fetchWithPostParams: BUNDLER', err)
     } finally {
       if (payload.catchRawResponse.length || payload.trapVisitResponse.length) {
+        showSlideAlert(
+          thunkAPI.dispatch,
+          `${payload.trapVisitResponse.length} trap visit and ${payload.catchRawResponse.length} catch raw submissions saved`,
+          'success',
+          5000
+        )
         await fetchWithPostParams(thunkAPI.dispatch, payload)
       }
     }

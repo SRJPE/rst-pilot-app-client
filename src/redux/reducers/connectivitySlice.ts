@@ -58,13 +58,23 @@ export const connectionChanged = createAsyncThunk(
         thunkAPI.dispatch(postMonitoringProgramSubmissions())
         thunkAPI.dispatch(fetchPreviousTrapAndCatch())
         thunkAPI.dispatch(fetchExistingMarks())
+        showSlideAlert(
+          thunkAPI.dispatch,
+          'Network connection established successfully',
+          'success',
+          5000
+        )
+      } else if (
+        !connectionState.isConnected &&
+        !connectionState.isInternetReachable
+      ) {
+        showSlideAlert(
+          thunkAPI.dispatch,
+          'No network connection. Operating in offline mode',
+          'error',
+          5000
+        )
       }
-      showSlideAlert(
-        thunkAPI.dispatch,
-        'Network connection established successfully',
-        'success',
-        5000
-      )
       return payload
     } catch (e) {
       return payload

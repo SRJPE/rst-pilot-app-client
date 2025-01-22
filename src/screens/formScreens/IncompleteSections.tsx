@@ -147,17 +147,11 @@ const IncompleteSections = ({
         connectivityState.isInternetReachable
       ) {
         dispatch(postTrapVisitFormSubmissions())
-        showSlideAlert(
-          dispatch,
-          'Trap visit submitted successfully',
-          'success',
-          5000
-        )
       } else {
         console.log('Connection issue during submission')
         showSlideAlert(
           dispatch,
-          'Connection issue during trap visit submission',
+          'Connection issue during trap visit submission. Application will save data locally and attempt to submit later when connected.',
           'error',
           5000
         )
