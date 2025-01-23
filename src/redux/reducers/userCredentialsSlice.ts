@@ -16,6 +16,7 @@ export interface InitialStateI {
   role: 'lead' | 'non-lead' | null
   phone: string | null
   id: number | null
+  userPrograms: any[]
 }
 const initialState: InitialStateI = {
   displayName: null,
@@ -28,6 +29,7 @@ const initialState: InitialStateI = {
   role: null,
   phone: null,
   id: null,
+  userPrograms: [],
 }
 
 export const userCredentialsSlice = createSlice({
@@ -57,6 +59,10 @@ export const userCredentialsSlice = createSlice({
       console.log('PAYLOAD: ', action.payload)
       // state.storedCredentials = action.payload
       return (state = { ...action.payload })
+    },
+    updateUserPrograms: (state, action) => {
+      state.userPrograms = action.payload
+      return state
     },
     editProfile: (state, action) => {
       api.patch(`user/${state.azureUid}`, { ...action.payload }).catch(err => {
@@ -94,6 +100,7 @@ export const {
   clearUserCredentials,
   changePassword,
   editProfile,
+  updateUserPrograms,
 } = userCredentialsSlice.actions
 
 export default userCredentialsSlice.reducer
