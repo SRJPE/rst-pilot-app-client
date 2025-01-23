@@ -10,7 +10,7 @@ export interface PermitInformationInitialStateI {
     dateExpired: Date
     waterTemperatureThreshold: number | null
     flowThreshold: number | null
-    trapCheckFrequency: number | null
+    trapCheckFrequency: any | null
   }
   takeAndMortalityValues: TakeAndMortalityValuesI
 }
