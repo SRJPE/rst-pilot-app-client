@@ -1,30 +1,26 @@
+import { startCase } from 'lodash'
+import { Button, Heading, HStack, Icon, Text, View, VStack } from 'native-base'
 import React, { useCallback, useEffect, useState } from 'react'
-import { Text, Heading, View, VStack, HStack, Button } from 'native-base'
+import { connect, useDispatch } from 'react-redux'
 import CreateNewProgramButton from '../../../components/createNewProgram/CreateNewProgramButton'
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
-import { connect, useDispatch } from 'react-redux'
-import { AppDispatch, RootState } from '../../../redux/store'
-import { startCase } from 'lodash'
-import { PermitInformationInitialStateI } from '../../../redux/reducers/createNewProgramSlices/permitInformationSlice'
-import { TrappingProtocolsInitialStateI } from '../../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
-import { EfficiencyTrialProtocolsInitialStateI } from '../../../redux/reducers/createNewProgramSlices/efficiencyTrialProtocolsSlice'
 import { CreateNewProgramInitialStateI } from '../../../redux/reducers/createNewProgramSlices/createNewProgramHomeSlice'
-import { TrappingSitesStoreI } from '../../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 import { CrewMembersStoreI } from '../../../redux/reducers/createNewProgramSlices/crewMembersSlice'
+import { EfficiencyTrialProtocolsInitialStateI } from '../../../redux/reducers/createNewProgramSlices/efficiencyTrialProtocolsSlice'
+import { GroupTrapSiteValuesI } from '../../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
+import { PermitInformationInitialStateI } from '../../../redux/reducers/createNewProgramSlices/permitInformationSlice'
 import { TrappingProtocolsStoreI } from '../../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
+import { TrappingSitesStoreI } from '../../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 import {
   postMonitoringProgramSubmissions,
   saveMonitoringProgramSubmission,
 } from '../../../redux/reducers/postSlices/monitoringProgramPostBundler'
-import {
-  returnDefinitionArray,
-  returnNullableTableId,
-} from '../../../utils/utils'
-import { GroupTrapSiteValuesI } from '../../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
 import { InitialStateI as UserCredentialsInitialState } from '../../../redux/reducers/userCredentialsSlice'
-import * as FileSystem from 'expo-file-system'
-import { userCredentialsSlice } from '../../../redux/reducers/userCredentialsSlice'
+import { AppDispatch, RootState } from '../../../redux/store'
+import { returnDefinitionArray } from '../../../utils/utils'
 // import { postMonitoringProgramFilesToDB } from '../../../utils/hooks/useCacheDirectory'
+import { Entypo } from '@expo/vector-icons'
+import { Pressable } from 'react-native'
 
 interface ProgramMetaDataSubmissionI {
   programName: string
@@ -450,27 +446,36 @@ const CreateNewProgramHome = ({
                 TEST SAVE
               </Button>
             </HStack>
-            <VStack
-              space={2}
+            <HStack
               w='80%'
               padding='2'
               bg='secondary'
               borderWidth={2}
               borderRadius='5'
               borderColor='primary'
+              justifyContent='space-between'
             >
-              <Text fontSize='lg' fontWeight='500'>
-                {`Program Name: ${monitoringProgramName}`}
-              </Text>
-              <Text
-                fontSize='lg'
-                fontWeight='500'
-              >{`Stream Name: ${streamName}`}</Text>
-              <Text
-                fontSize='lg'
-                fontWeight='500'
-              >{`Funding Agency: ${fundingAgency}`}</Text>
-            </VStack>
+              <VStack space={2}>
+                <Text fontSize='lg' fontWeight='500'>
+                  {`Program Name: ${monitoringProgramName}`}
+                </Text>
+                <Text
+                  fontSize='lg'
+                  fontWeight='500'
+                >{`Stream Name: ${streamName}`}</Text>
+                <Text
+                  fontSize='lg'
+                  fontWeight='500'
+                >{`Funding Agency: ${fundingAgency}`}</Text>
+              </VStack>
+              <Pressable
+                onPress={() => {
+                  navigation.navigate('Monitoring Program New')
+                }}
+              >
+                <Icon as={Entypo} name='edit' size='md' color='primary' />
+              </Pressable>
+            </HStack>
             <Text fontSize='lg' color='grey' mb='-4'>
               {
                 'Please fill in some important program information before you can \nbegin trapping.'
