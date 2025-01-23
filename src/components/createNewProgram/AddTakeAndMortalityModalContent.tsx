@@ -170,6 +170,7 @@ const AddTakeAndMortalityModalContent = ({
                 bg='primary'
                 mx='2'
                 px='10'
+                mt={3}
                 shadow='3'
                 isDisabled={
                   Object.values(touched).length === 0 ||
