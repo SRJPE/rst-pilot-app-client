@@ -78,6 +78,7 @@ export const postMonitoringProgramSubmissions = createAsyncThunk(
         )
       )
     } catch (error: any) {
+      console.log('errr', error)
       const errorMessage = generateErrorMessage(
         error?.code ||
           'An unknown error occurred during monitoring program submission (ln 67)'

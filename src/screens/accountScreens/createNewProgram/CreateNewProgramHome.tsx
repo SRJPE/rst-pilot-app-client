@@ -16,12 +16,11 @@ import {
   postMonitoringProgramSubmissions,
   saveMonitoringProgramSubmission,
 } from '../../../redux/reducers/postSlices/monitoringProgramPostBundler'
-import {
-  returnDefinitionArray,
-  returnNullableTableId,
-} from '../../../utils/utils'
 import { GroupTrapSiteValuesI } from '../../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
-import { InitialStateI as UserCredentialsInitialState } from '../../../redux/reducers/userCredentialsSlice'
+import {
+  InitialStateI as UserCredentialsInitialState,
+  getUserPrograms,
+} from '../../../redux/reducers/userCredentialsSlice'
 // import { postMonitoringProgramFilesToDB } from '../../../utils/hooks/useCacheDirectory'
 
 interface ProgramMetaDataSubmissionI {
@@ -152,7 +151,7 @@ const CreateNewProgramHome = ({
     }
   }, [createNewProgramHomeStore])
 
-  const POSTMonitoringProgramSubmissions = () => {
+  const POSTMonitoringProgramSubmissionsHandler = async () => {
     try {
       const metaData = handleSaveProgramMetaData()
       const trappingSites = handleSaveTrappingSites()
@@ -176,7 +175,11 @@ const CreateNewProgramHome = ({
         connectivityState.isInternetReachable
       ) {
         console.log('CONNECTED')
-        dispatch(postMonitoringProgramSubmissions())
+        await dispatch(postMonitoringProgramSubmissions())
+
+        if (userCredentialsStore.id) {
+          dispatch(getUserPrograms(userCredentialsStore.id))
+        }
       }
     } catch (error) {
       console.error(error)
@@ -415,7 +418,7 @@ const CreateNewProgramHome = ({
                 w='40'
                 h='10'
                 onPress={() => {
-                  POSTMonitoringProgramSubmissions()
+                  POSTMonitoringProgramSubmissionsHandler()
                 }}
               >
                 TEST SAVE
@@ -465,7 +468,9 @@ const CreateNewProgramHome = ({
       <CreateNewProgramNavButtons
         navigation={navigation}
         formIsCompleteAndValid={formIsCompleteAndValid}
-        POSTMonitoringProgramSubmissions={POSTMonitoringProgramSubmissions}
+        POSTMonitoringProgramSubmissionsHandler={
+          POSTMonitoringProgramSubmissionsHandler
+        }
       />
     </>
   )
