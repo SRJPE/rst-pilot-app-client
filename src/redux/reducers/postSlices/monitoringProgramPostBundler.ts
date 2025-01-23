@@ -6,6 +6,7 @@ import { MonitoringProgramSubmissionI } from '../../../screens/accountScreens/cr
 import { generateErrorMessage } from '../../../utils/helpers/helperFunctions'
 import { showSlideAlert } from '../slideAlertSlice'
 import { postMonitoringProgramFilesToDB } from '../../../utils/hooks/useCacheDirectory'
+import { updateUserPrograms } from '../userCredentialsSlice'
 
 interface InitialStateI {
   submissionStatus:
@@ -58,26 +59,41 @@ export const postMonitoringProgramSubmissions = createAsyncThunk(
               monitoringProgramSubmissionCopy
             )
             // get response from server
+            const userProgramResponse = await api.get(
+              `program/personnel/${monitoringProgramSubmissionCopy.metaData.personnelLead}`
+            )
 
             // save to payload
             payload.monitoringProgramResponse.push(apiResponse.data)
             const {
-              createdProgramResponse: { id: createdProgramId },
-              createdHatcheryInfoResponse: { id: createdHatcheryInfoId },
+              createdProgramResponse: { id: createdProgramId } = {},
+              createdHatcheryInfoResponse: { id: createdHatcheryInfoId } = {},
               createdPermitInformationResponse: {
                 id: createdPermitInformationId,
-              },
-            } = apiResponse.data
+              } = {},
+            } = apiResponse.data || {}
+            const isNonTestSave =
+              createdPermitInformationId &&
+              createdProgramId &&
+              createdHatcheryInfoId
 
-            postMonitoringProgramFilesToDB({
-              createdProgramId,
-              createdHatcheryInfoId,
-              createdPermitInformationId,
-            })
+            if (isNonTestSave)
+              postMonitoringProgramFilesToDB({
+                createdProgramId,
+                createdHatcheryInfoId,
+                createdPermitInformationId,
+              })
+
+            thunkAPI.dispatch(updateUserPrograms(userProgramResponse.data))
           }
         )
       )
     } catch (error: any) {
+      console.log(
+        '🚀 ~ file: monitoringProgramPostBundler.ts:102 ~ error:',
+        error
+      )
+
       const errorMessage = generateErrorMessage(
         error?.code ||
           'An unknown error occurred during monitoring program submission (ln 67)'
