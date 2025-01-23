@@ -103,6 +103,7 @@ const CreateNewProgramNavButtons = ({
         //post submission
         if (POSTMonitoringProgramSubmissions) {
           POSTMonitoringProgramSubmissions()
+
           navigation?.navigate('Create New Program', {
             screen: 'Create New Program Complete',
           })
@@ -110,7 +111,11 @@ const CreateNewProgramNavButtons = ({
         break
       case 'Create New Program Complete':
         clearFormValues && clearFormValues()
-        navigation?.navigate('Home')
+        navigation?.reset({
+          index: 0,
+          routes: [{ name: 'Create New Program Home' }],
+        })
+        navigation?.navigate('Profile')
 
         break
 
