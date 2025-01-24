@@ -67,6 +67,9 @@ const mapStateToProps = (state: RootState) => {
     selectedTrapLocationId:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.trapLocationId,
+    selectedProgramId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.programId,
     activeTabId: state.tabSlice.activeTabId,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
@@ -82,6 +85,7 @@ const TrapOperations = ({
   selectedTrapSite,
   selectedTrapName,
   selectedTrapLocationId,
+  selectedProgramId,
   activeTabId,
   previouslyActiveTabId,
   navigationSlice,
@@ -94,6 +98,7 @@ const TrapOperations = ({
   selectedTrapSite: string
   selectedTrapName?: string
   selectedTrapLocationId: number | null
+  selectedProgramId: string
   activeTabId: string | null
   previouslyActiveTabId: string | null
   navigationSlice: any
@@ -114,12 +119,23 @@ const TrapOperations = ({
   const [endTime, setEndTime] = useState(new Date() as any)
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
   const [waterTempUnitC, setWaterTempUnitC] = useState<boolean>(true)
+  const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
 
   useEffect(() => {
+    // flow threshold on trap location
+    // TO DO: temp threshold WILL permit info (Needs to be refactored in db and monitoring program setup)
+
     setTrapPermitInfo(
       find(
         visitSetupDefaults.permitInfo,
-        (permit: any) => permit.trapLocationsId === selectedTrapLocationId
+        (permit: any) => permit.programId === selectedProgramId
+      )
+    )
+
+    setTrapLocationInfo(
+      find(
+        visitSetupDefaults.trapLocations,
+        (permit: any) => permit.id === selectedTrapLocationId
       )
     )
   }, [visitSetupDefaults.permitInfo, selectedTrapLocationId])
@@ -136,6 +152,8 @@ const TrapOperations = ({
         activeTabName = tabSlice.tabs[activeTabId].name
       }
       let range
+
+      console.log('trapPermitInfo', trapPermitInfo)
 
       if (trapPermitInfo) {
         range = { max: Number(trapPermitInfo.flowThreshold), min: 50 }
