@@ -151,8 +151,6 @@ const TrapOperations = ({
       }
       let range
 
-      console.log('trapPermitInfo', trapPermitInfo)
-
       if (trapPermitInfo) {
         range = { max: Number(trapPermitInfo.flowThreshold), min: 50 }
       } else if (
