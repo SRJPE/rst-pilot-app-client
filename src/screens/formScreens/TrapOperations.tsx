@@ -19,6 +19,7 @@ import {
   KeyboardAvoidingView,
   Switch,
   Box,
+  Button,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
@@ -47,6 +48,9 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { find } from 'lodash'
+import FormInputComponent, {
+  TextInputAdornment,
+} from '../../components/Shared/FormInputComponent'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -109,6 +113,7 @@ const TrapOperations = ({
   const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
   const [endTime, setEndTime] = useState(new Date() as any)
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
+  const [waterTempUnitC, setWaterTempUnitC] = useState<boolean>(true)
 
   useEffect(() => {
     setTrapPermitInfo(
@@ -569,20 +574,17 @@ const TrapOperations = ({
                   </FormControl>
                   {(values.trapStatus === 'trap functioning but not normally' ||
                     values.trapStatus === 'trap not functioning') && (
-                    <FormControl>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Reason For Trap Not Functioning
-                        </Text>
-                      </FormControl.Label>
-                      <CustomSelect
-                        selectedValue={values.reasonNotFunc}
-                        placeholder='Reason'
-                        onValueChange={handleChange('reasonNotFunc')}
-                        setFieldTouched={setFieldTouched}
-                        selectOptions={whyTrapNotFunctioning}
-                      />
-                    </FormControl>
+                    <CustomSelect
+                      selectedValue={values.reasonNotFunc}
+                      placeholder='Select Reason for Trap Malfunction'
+                      camelName='reasonNotFunc'
+                      label='Select Reason for Trap Malfunction'
+                      errors={errors}
+                      touched={touched}
+                      onValueChange={handleChange('reasonNotFunc')}
+                      setFieldTouched={() => setFieldTouched('reasonNotFunc')}
+                      selectOptions={whyTrapNotFunctioning}
+                    />
                   )}
                   {values.trapStatus.length > 0 && (
                     <>
@@ -664,7 +666,7 @@ const TrapOperations = ({
                               </Popover.Header>
                             </Popover.Content>
                           </Popover>
-                          {tabSlice.incompleteSectionTouched
+                          {/* {tabSlice.incompleteSectionTouched
                             ? (errors.rpm1 || errors.rpm2 || errors.rpm3) && (
                                 <HStack space={1}>
                                   <Icon
@@ -695,10 +697,46 @@ const TrapOperations = ({
                                     At least one measurement is required
                                   </Text>
                                 </HStack>
-                              )}
+                              )} */}
                         </HStack>
                         <HStack space={8} justifyContent='space-between'>
-                          <FormControl w='30%'>
+                          <Box flex={1}>
+                            <FormInputComponent
+                              label={'Measure 1'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.rpm1 ? `${values.rpm1}` : ''}
+                              camelName={'rpm1'}
+                              onChangeText={handleChange('rpm1')}
+                              onBlur={handleBlur('rpm1')}
+                            />
+                          </Box>
+                          <Box flex={1}>
+                            <FormInputComponent
+                              label={'Measure 2 (optional)'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.rpm2 ? `${values.rpm2}` : ''}
+                              camelName={'rpm2'}
+                              onChangeText={handleChange('rpm2')}
+                              onBlur={handleBlur('rpm2')}
+                            />
+                          </Box>
+                          <Box flex={1}>
+                            <FormInputComponent
+                              label={'Measure 3 (optional)'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.rpm3 ? `${values.rpm3}` : ''}
+                              camelName={'rpm3'}
+                              onChangeText={handleChange('rpm3')}
+                              onBlur={handleBlur('rpm3')}
+                            />
+                          </Box>
+                          {/* <FormControl w='30%'>
                             <VStack>
                               <OptimizedInput
                                 height='50px'
@@ -715,8 +753,8 @@ const TrapOperations = ({
                                 <></>
                               )}
                             </VStack>
-                          </FormControl>
-                          <FormControl w='30%'>
+                          </FormControl> */}
+                          {/* <FormControl w='30%'>
                             <VStack>
                               <OptimizedInput
                                 height='50px'
@@ -733,8 +771,8 @@ const TrapOperations = ({
                                 <></>
                               )}
                             </VStack>
-                          </FormControl>
-                          <FormControl w='30%'>
+                          </FormControl> */}
+                          {/* <FormControl w='30%'>
                             <VStack>
                               <OptimizedInput
                                 height='50px'
@@ -751,7 +789,7 @@ const TrapOperations = ({
                                 <></>
                               )}
                             </VStack>
-                          </FormControl>
+                          </FormControl> */}
                         </HStack>
                         <Text color='grey' mt='5' fontSize='17'>
                           Please take 3 separate measures of cone rotations per
@@ -799,7 +837,44 @@ const TrapOperations = ({
                       </HStack>
 
                       <HStack space={5} width='125%'>
-                        <FormControl w='1/4'>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            label={'Flow Measure'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.flowMeasure || null}
+                            camelName={'flowMeasure'}
+                            onChangeText={handleChange('flowMeasure')}
+                            onBlur={handleBlur('flowMeasure')}
+                            RightElement={<TextInputAdornment text='cfs' />}
+                          />
+                        </Box>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            label={'Water Temperature'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.waterTemperature || null}
+                            camelName={'waterTemperature'}
+                            onChangeText={handleChange('waterTemperature')}
+                            onBlur={handleBlur('waterTemperature')}
+                            RightElement={
+                              <Button
+                                bg='warmGray.200'
+                                h={'full'}
+                                w={50}
+                                onPress={() =>
+                                  setWaterTempUnitC(!waterTempUnitC)
+                                }
+                              >
+                                <Text>{waterTempUnitC ? 'ºC' : 'ºF'}</Text>
+                              </Button>
+                            }
+                          />
+                        </Box>
+                        {/* <FormControl w='1/4'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
                               Flow Measure
@@ -824,7 +899,7 @@ const TrapOperations = ({
                             : touched.flowMeasure &&
                               errors.flowMeasure &&
                               RenderErrorMessage(errors, 'flowMeasure')}
-                        </FormControl>
+                        </FormControl> */}
                         <FormControl w='1/4'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>

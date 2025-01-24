@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from 'react'
+import React, { ChangeEvent, memo } from 'react'
 import { Box, FormControl, HStack, Input, Text } from 'native-base'
 
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
@@ -19,6 +19,15 @@ interface FormInputComponentI {
   onChangeText: (e: string | ChangeEvent<any>) => void
   onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void
   placeholder?: string
+  RightElement?: JSX.Element
+}
+
+export const TextInputAdornment = ({ text }: { text: string }) => {
+  return (
+    <Text px={5} color='warmGray.400'>
+      {text}
+    </Text>
+  )
 }
 
 const FormInputComponent: React.FC<FormInputComponentI> = ({
@@ -31,6 +40,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   placeholder,
   onChangeText,
   onBlur,
+  RightElement = undefined,
 }) => {
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
@@ -58,6 +68,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
             _invalid: { borderColor: 'red.700' },
           }}
           _invalid={{ borderColor: 'red.700' }}
+          rightElement={RightElement}
         />
         <Box mt={2} h={25}>
           {showError && (
@@ -68,4 +79,4 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
     </Box>
   )
 }
-export default FormInputComponent
+export default memo(FormInputComponent)

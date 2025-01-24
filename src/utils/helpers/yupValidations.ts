@@ -6,7 +6,10 @@ import * as yup from 'yup'
 
 export const trapVisitSchema = yup.object().shape({
   stream: yup.string().required('Stream required'),
-  trapSite: yup.string().required('Trap site required'),
+  trapSite: yup.string().when('stream', {
+    is: (val: string) => val !== '',
+    then: yup.string().required('Trap site required'),
+  }),
   // crew: yup.array().min(1).required('Crew cannot be blank.'),
 })
 
@@ -17,16 +20,20 @@ export const trapOperationsSchema = yup.object().shape({
       ['trap functioning but not normally', 'trap not functioning'].includes(
         val
       ),
-    then: yup.string().required('Reason for not functioning required'),
+    then: yup.string().required('Reason for trap malfunction required'),
   }),
   flowMeasure: yup
     .number()
+    .positive()
     // .required('Flow Measure Required')
     .nullable()
     .typeError('Input must be a number'),
   flowMeasureUnit: yup.string(),
   waterTemperature: yup
     .number()
+    .max(30, 'Temperature must be ≤ 30')
+    .min(10, 'Temperature must be ≥ 10')
+
     .typeError('Input must be a number')
     .required('Water Temperature Required'),
   waterTemperatureUnit: yup.string(),
@@ -38,15 +45,22 @@ export const trapOperationsSchema = yup.object().shape({
   waterTurbidityUnit: yup.string(),
   rpm1: yup
     .number()
+    .positive('Measurement must be > 0')
+    .nullable()
+    .max(30, 'Measurement must be ≤ 30')
     .typeError('Input must be a number')
-    .required('Measurement 1 required'),
+    .required('Enter at least one measurement'),
   rpm2: yup
     .number()
+    .positive('Measurement must be > 0')
+    .max(30, 'Measurement must be ≤ 30')
     .nullable()
     // .required('Measurement 2 required')
     .typeError('Input must be a number'),
   rpm3: yup
     .number()
+    .positive('Measurement must be > 0')
+    .max(30, 'Measurement must be ≤ 30')
     .nullable()
     // .required('Measurement 3 required')
     .typeError('Input must be a number'),
