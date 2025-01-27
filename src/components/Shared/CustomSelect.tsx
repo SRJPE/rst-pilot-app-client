@@ -14,13 +14,25 @@ interface CustomSelectI {
   disabled?: boolean
 }
 
-const CustomSelect: React.FC<CustomSelectI> = (props) => {
+const CustomSelect: React.FC<CustomSelectI> = props => {
   const handleOnChange = useCallback(
     (itemValue: any) => {
       props.onValueChange(itemValue)
     },
     [props.selectedValue]
   )
+
+  const labelModifier = (label: string, props: CustomSelectI) => {
+    if (props.placeholder === 'Species') {
+      return label
+    } else if (
+      props.placeholder === 'Funding Agency' &&
+      label !== 'not recorded'
+    ) {
+      return label.toLocaleUpperCase()
+    }
+    return label.replace(/\w+/g, capitalize)
+  }
 
   return (
     <Select
@@ -48,19 +60,15 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
             return (
               <Select.Item
                 key={item.id ?? idx}
-                label={item.definition}
-                value={item.id.toString()}
+                label={labelModifier(item.definition, props)}
+                value={item.definition}
               />
             )
           } else if (item.value) {
             return (
               <Select.Item
                 key={item.id ?? idx}
-                label={
-                  props.placeholder === 'Species'
-                    ? item.label
-                    : item.label.replace(/\w+/g, capitalize)
-                }
+                label={labelModifier(item.label, props)}
                 value={item.value}
               />
             )
@@ -68,11 +76,7 @@ const CustomSelect: React.FC<CustomSelectI> = (props) => {
             return (
               <Select.Item
                 key={item.id}
-                label={
-                  props.placeholder === 'Species'
-                    ? item.definition
-                    : item.definition.replace(/\w+/g, capitalize)
-                }
+                label={labelModifier(item.definition, props)}
                 value={item.definition}
               />
             )

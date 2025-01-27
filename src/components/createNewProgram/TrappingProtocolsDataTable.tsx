@@ -36,13 +36,13 @@ const TrappingProtocolsDataTable = ({
         ))}
       </DataTable.Header>
       {processedData.map((trappingProtocolObject: any, idx: number) => {
+        const cellValues = { ...trappingProtocolObject } as any
+        delete cellValues?.uid
         return (
           <DataTable.Row style={[{ height: 55 }]} key={idx}>
-            {Object.values(trappingProtocolObject).map(
-              (callValue: any, idx: number) => (
-                <DataTable.Cell key={idx}>{callValue}</DataTable.Cell>
-              )
-            )}
+            {Object.values(cellValues).map((cellValue: any, idx: number) => (
+              <DataTable.Cell key={idx}>{cellValue}</DataTable.Cell>
+            ))}
             <IconButton
               marginY={3}
               variant='solid'

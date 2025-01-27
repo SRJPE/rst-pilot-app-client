@@ -75,15 +75,6 @@ const OnStartupProvider = (props: Props) => {
     dispatch,
   ])
 
-  // useEffect(
-  //   () => () => {
-  //     if (unsubscribe) {
-  //       unsubscribe()
-  //     }
-  //   },
-  //   []
-  // )
-
   const cancelRef = useRef(null)
 
   const forceLogoutModelOnClose = () => {

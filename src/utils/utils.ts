@@ -285,7 +285,7 @@ export const navigateHelper = (
   updateActiveStep: any
 ) => {
   if (!destination) {
-    navigation.navigateDeprecated('Home')
+    navigation?.navigate('Home')
     return
   }
 
@@ -363,11 +363,11 @@ export const navigateFlowRightButton = (
     case 'Paper Entry':
       return 'Trap Operations'
     case 'Started Trapping':
-      navigation.navigateDeprecated('Home')
+      navigation?.navigate('Home')
       break
     default:
       console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
-      navigation.navigateDeprecated('Home')
+      navigation?.navigate('Home')
       break
   }
 }
@@ -422,7 +422,7 @@ export const navigateFlowLeftButton = (
       }
     default:
       console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
-      navigation.navigateDeprecated('Home')
+      navigation?.navigate('Home')
       break
   }
 }

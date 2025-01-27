@@ -171,7 +171,7 @@ const NavButtons = ({
         navigateHelper('Trap Operations')
         break
       case 'Started Trapping':
-        navigation.navigateDeprecated('Home')
+        navigation?.navigate('Home')
         break
       default:
         console.log('HIT DEFAULT, SHOULD NOT HAPPEN')

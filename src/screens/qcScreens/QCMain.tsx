@@ -58,7 +58,7 @@ function QCMain({
         bg={activeButton === 'trapBtn' ? 'themeOrange' : 'primary'}
         onPress={() => {
           setActiveButton('trapBtn')
-          navigation.navigateDeprecated('Trap QC', {
+          navigation?.navigate('Trap QC', {
             programId: route.params.programId,
           })
         }}
@@ -104,7 +104,7 @@ function QCMain({
               setActiveCatchOption(
                 'Measured Variables and Associated Categories'
               )
-              navigation.navigateDeprecated('CatchMeasureQC', {
+              navigation?.navigate('CatchMeasureQC', {
                 programId: route.params.programId,
               })
             }}
@@ -130,7 +130,7 @@ function QCMain({
             alignItems='center'
             onPress={() => {
               setActiveCatchOption('Categorical Observations')
-              navigation.navigateDeprecated('CatchCategoricalQC', {
+              navigation?.navigate('CatchCategoricalQC', {
                 programId: route.params.programId,
               })
             }}
@@ -156,7 +156,7 @@ function QCMain({
             alignItems='center'
             onPress={() => {
               setActiveCatchOption('Total Fish Counts')
-              navigation.navigateDeprecated('CatchFishCountQC', {
+              navigation?.navigate('CatchFishCountQC', {
                 programId: route.params.programId,
               })
             }}
@@ -182,7 +182,7 @@ function QCMain({
             alignItems='center'
             onPress={() => {
               setActiveCatchOption('Partial Records')
-              navigation.navigateDeprecated('PartialRecordsQC', {
+              navigation?.navigate('PartialRecordsQC', {
                 programId: route.params.programId,
               })
             }}
@@ -205,7 +205,7 @@ function QCMain({
         bg={activeButton === 'efficiencyBtn' ? 'themeOrange' : 'primary'}
         onPress={() => {
           setActiveButton('efficiencyBtn')
-          navigation.navigateDeprecated('EfficiencyQC', {
+          navigation?.navigate('EfficiencyQC', {
             programId: route.params.programId,
           })
         }}

@@ -7,7 +7,7 @@ export default function StartMarkRecapture({
   navigation: any
 }) {
   const handlePressBeginMarkRecapture = () => {
-    navigation.navigateDeprecated('Mark Recapture')
+    navigation?.navigate('Mark Recapture')
   }
   const handlePressReturnToHomepage = () => {
     //temp

@@ -17,7 +17,7 @@ const CreateNewProgramButton = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const handleButtonPress = () => {
-    navigation.navigateDeprecated('Create New Program', { screen: name })
+    navigation?.navigate('Create New Program', { screen: name })
   }
 
   return (

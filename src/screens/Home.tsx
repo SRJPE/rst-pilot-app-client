@@ -17,9 +17,8 @@ import { getTrapVisitDropdownValues } from '../redux/reducers/dropdownsSlice'
 import { fetchPreviousTrapAndCatch } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { RootState, AppDispatch } from '../redux/store'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import api from '../api/axiosConfig'
-import { saveUserCredentials } from '../redux/reducers/userCredentialsSlice'
 import { find } from 'lodash'
+import { getUserPrograms } from '../redux/reducers/userCredentialsSlice'
 
 const styles = StyleSheet.create({
   recentItemsContainer: {
@@ -121,7 +120,11 @@ const Home = ({
         console.log('error from home screen: ', error)
       }
     }
-  }, [userCredentialsStore, connectivityState])
+  }, [
+    userCredentialsStore.id,
+    connectivityState.isConnected,
+    userCredentialsStore?.userPrograms?.length,
+  ])
 
   useEffect(() => {
     ;(async () => {
@@ -130,16 +133,7 @@ const Home = ({
           dispatch(getVisitSetupDefaults(userCredentialsStore.id))
           dispatch(getTrapVisitDropdownValues())
 
-          const userProgramsResponse = await api.get(
-            `program/personnel/${userCredentialsStore.id}`
-          )
-
-          dispatch(
-            saveUserCredentials({
-              ...userCredentialsStore,
-              userPrograms: userProgramsResponse.data,
-            })
-          )
+          dispatch(getUserPrograms(userCredentialsStore?.id))
         } catch (error) {
           console.log('error from home screen: ', error)
         }

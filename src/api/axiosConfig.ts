@@ -20,7 +20,9 @@ import { storeAccessTokens } from '../utils/authUtils'
 const dateTransformer: AxiosRequestTransformer = (data: any) => {
   if (data instanceof Date) {
     // do your specific formatting here
-    return data.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })
+    return data
+      .toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })
+      .replace(/\u202F/g, ' ')
   }
   if (Array.isArray(data)) {
     return data.map(val => dateTransformer(val))

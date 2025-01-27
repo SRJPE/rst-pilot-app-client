@@ -10,7 +10,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import { useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   numOfFormSteps,
@@ -50,13 +50,13 @@ const DrawerMenu = ({
 
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {
-      navigation?.navigateDeprecated(buttonTitle)
+      navigation?.navigate(buttonTitle)
     },
     [navigation]
   )
 
   const handlePressFormButton = useCallback((buttonTitle: string) => {
-    navigation?.navigateDeprecated('Trap Visit Form', { screen: buttonTitle })
+    navigation?.navigate('Trap Visit Form', { screen: buttonTitle })
     //for each object in the steps Array
     //if the Object contain the name property that matched button title
     //assign the index top stepPayload
@@ -75,7 +75,7 @@ const DrawerMenu = ({
   }, [])
 
   const handlePressMarkRecaptureButton = useCallback((buttonTitle: string) => {
-    navigation.navigateDeprecated('Mark Recapture', { screen: buttonTitle })
+    navigation.navigate('Mark Recapture', { screen: buttonTitle })
     let stepPayload
     for (let i = 0; i < markRecaptureStepsArray.length; i++) {
       if (markRecaptureStepsArray[i].name === buttonTitle) {

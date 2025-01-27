@@ -19,3 +19,7 @@ export const generateErrorMessage = (errorCode: string) => {
   }
   return errorMessage
 }
+
+export const convertBytesToKB = (bytes: number): string => {
+  return Math.round(bytes / 1000).toFixed(0) + ' KB' // Convert bytes to KB and format to 2 decimal places
+}

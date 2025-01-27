@@ -68,7 +68,7 @@ export default function BottomNavigation({
   const dispatch = useDispatch()
 
   const handlePressQCData = useCallback(() => {
-    navigation.navigateDeprecated('Quality Control')
+    navigation?.navigate('Quality Control')
     onClose()
   }, [navigation])
   const handlePressTrapVisit = useCallback(() => {
@@ -96,12 +96,12 @@ export default function BottomNavigation({
     onClose()
   }, [navigation])
   const handlePressMarkRecapture = useCallback(() => {
-    navigation.navigateDeprecated('Mark Recapture')
+    navigation?.navigate('Mark Recapture')
     setStaggerOpen(false)
     onClose()
   }, [navigation])
   const handlePressGenerateReport = useCallback(() => {
-    navigation.navigateDeprecated('Generate Report')
+    navigation?.navigate('Generate Report')
     onClose()
   }, [navigation])
   const handlePressStagger = () => {

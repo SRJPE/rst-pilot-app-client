@@ -25,7 +25,7 @@ const IncompleteSectionButton = ({
   const dispatch = useDispatch<AppDispatch>()
 
   const handleButtonPress = () => {
-    navigation.navigateDeprecated('Trap Visit Form', {
+    navigation?.navigate('Trap Visit Form', {
       screen: name,
     })
     dispatch(updateActiveStep(step))
