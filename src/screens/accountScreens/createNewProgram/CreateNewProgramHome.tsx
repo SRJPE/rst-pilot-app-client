@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { Text, Heading, View, VStack, HStack, Button } from 'native-base'
 import CreateNewProgramButton from '../../../components/createNewProgram/CreateNewProgramButton'
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { startCase } from 'lodash'
+import { startCase, find, get } from 'lodash'
 import { PermitInformationInitialStateI } from '../../../redux/reducers/createNewProgramSlices/permitInformationSlice'
 import { TrappingProtocolsInitialStateI } from '../../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
 import { EfficiencyTrialProtocolsInitialStateI } from '../../../redux/reducers/createNewProgramSlices/efficiencyTrialProtocolsSlice'
@@ -16,11 +16,12 @@ import {
   postMonitoringProgramSubmissions,
   saveMonitoringProgramSubmission,
 } from '../../../redux/reducers/postSlices/monitoringProgramPostBundler'
-import {
-  returnDefinitionArray,
-  returnNullableTableId,
-} from '../../../utils/utils'
 import { GroupTrapSiteValuesI } from '../../../redux/reducers/createNewProgramSlices/multipleTrapsSlice'
+import {
+  InitialStateI as UserCredentialsInitialState,
+  getUserPrograms,
+} from '../../../redux/reducers/userCredentialsSlice'
+// import { postMonitoringProgramFilesToDB } from '../../../utils/hooks/useCacheDirectory'
 
 interface ProgramMetaDataSubmissionI {
   programName: string
@@ -107,6 +108,7 @@ export interface MonitoringProgramSubmissionI {
   permittingInformation: PermitInformationSubmissionI[]
 }
 const CreateNewProgramHome = ({
+  userCredentialsStore,
   createNewProgramHomeStore,
   trappingSitesStore,
   multipleTrapsStore,
@@ -118,6 +120,7 @@ const CreateNewProgramHome = ({
   connectivityState,
   dropdownsState,
 }: {
+  userCredentialsStore: UserCredentialsInitialState
   createNewProgramHomeStore: CreateNewProgramInitialStateI
   trappingSitesStore: TrappingSitesStoreI
   multipleTrapsStore: GroupTrapSiteValuesI
@@ -148,7 +151,7 @@ const CreateNewProgramHome = ({
     }
   }, [createNewProgramHomeStore])
 
-  const POSTMonitoringProgramSubmissions = () => {
+  const POSTMonitoringProgramSubmissionsHandler = async () => {
     try {
       const metaData = handleSaveProgramMetaData()
       const trappingSites = handleSaveTrappingSites()
@@ -172,11 +175,23 @@ const CreateNewProgramHome = ({
         connectivityState.isInternetReachable
       ) {
         console.log('CONNECTED')
-        dispatch(postMonitoringProgramSubmissions())
+        await dispatch(postMonitoringProgramSubmissions())
+
+        if (userCredentialsStore.id) {
+          dispatch(getUserPrograms(userCredentialsStore.id))
+        }
       }
     } catch (error) {
       console.error(error)
     }
+  }
+
+  const getDropdownId = (dropdownName: string, value: string) => {
+    console.log('value', value)
+    return (
+      find(dropdownsState.values[dropdownName], { definition: value })?.id ||
+      null
+    )
   }
 
   // Program Meta Data
@@ -184,15 +199,11 @@ const CreateNewProgramHome = ({
     const { fundingAgency, monitoringProgramName, streamName } =
       createNewProgramHomeStore.values
 
-    const fundingAgencyValues = returnDefinitionArray(
-      dropdownsState.values.fundingAgency
-    )
-
     const programMetaDataSubmission: ProgramMetaDataSubmissionI = {
       programName: monitoringProgramName,
       streamName: streamName,
-      personnelLead: 14, //to be completed when a logged in user is persisted
-      fundingAgency: fundingAgencyValues.indexOf(fundingAgency) + 1, //fundingAgency, //to be completed
+      personnelLead: userCredentialsStore.id!,
+      fundingAgency: getDropdownId('fundingAgency', fundingAgency),
       // efficiencyProtocolsDocumentLink: 'VARCHAR(200)', //to be completed
       // trappingProtocolsDocumentLink: 'VARCHAR(200)', //to be completed
       createdAt: new Date(),
@@ -204,9 +215,6 @@ const CreateNewProgramHome = ({
 
   // Trapping Sites
   const handleSaveTrappingSites = useCallback(() => {
-    const fundingAgencyValues = returnDefinitionArray(
-      dropdownsState.values.fundingAgency
-    )
     const trappingSitesSubmission: Array<TrappingSitesSubmissionI> =
       Object.values(trappingSitesStore).map((trapSiteObj: any) => {
         const {
@@ -229,11 +237,8 @@ const CreateNewProgramHome = ({
 
         return {
           trapName,
-          dataRecorderId: 14, //to be completed when a logged in user is persisted
-          dataRecorderAgencyId:
-            fundingAgencyValues.indexOf(
-              createNewProgramHomeStore.values.fundingAgency
-            ) + 1,
+          dataRecorderId: userCredentialsStore.id!,
+          dataRecorderAgencyId: getDropdownId('fundingAgency', fundingAgency),
           siteName: groupSiteName,
           coneSizeFt: Number(coneSize),
           xCoord: Number(trapLatitude),
@@ -245,10 +250,7 @@ const CreateNewProgramHome = ({
           // projection: 'VARCHAR(100)', //ignore for now - release_site_projection
           // datum: 'VARCHAR(100)', //ignore for now - release_site_datum
           gageNumber: Number(USGSStationNumber),
-          gageAgency:
-            fundingAgencyValues.indexOf(
-              createNewProgramHomeStore.values.fundingAgency
-            ) + 1,
+          gageAgency: getDropdownId('fundingAgency', 'USGS'),
           // comments: 'VARCHAR(500)', //to be completed
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -260,9 +262,6 @@ const CreateNewProgramHome = ({
 
   // Crew Members / Personnel / Program Personnel
   const handleSaveCrewMembers = useCallback(() => {
-    const fundingAgencyValues = returnDefinitionArray(
-      dropdownsState.values.fundingAgency
-    )
     const crewMembersSubmission: Array<CrewMembersSubmissionI> = Object.values(
       crewMembersStore
     ).map((crewMemberObj: any) => {
@@ -274,16 +273,17 @@ const CreateNewProgramHome = ({
         isLead,
         agency,
         orcidId,
+        id,
       } = crewMemberObj
-
       return {
         firstName,
         lastName,
         email,
         phone: phoneNumber,
-        agencyId: fundingAgencyValues.indexOf(agency) + 1,
+        agencyId: getDropdownId('fundingAgency', agency || 'not recorded'),
         role: isLead ? 'lead' : 'non-lead',
         orcidId: orcidId,
+        id,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -303,9 +303,6 @@ const CreateNewProgramHome = ({
       renewalDate,
     } = efficiencyTrialProtocolsStore.values
 
-    const frequencyOfReceivingFishValues = returnDefinitionArray(
-      dropdownsState.values.frequency
-    )
     if (hatchery === '') {
       return []
     } else {
@@ -317,10 +314,10 @@ const CreateNewProgramHome = ({
           agreementStartDate: agreementStartDate,
           agreementEndDate: agreementEndDate,
           renewalDate: renewalDate,
-          frequencyOfFishCollection: frequencyOfReceivingFishValues
-            ? frequencyOfReceivingFishValues.indexOf(frequencyOfReceivingFish) +
-              1
-            : null,
+          frequencyOfFishCollection: getDropdownId(
+            'frequency',
+            frequencyOfReceivingFish
+          ),
           quantityOfFish: Number(expectedNumberOfFishReceivedAtEachPickup),
           // hatcheryFileLink: 'VARCHAR(200)', //to be completed
         }
@@ -346,19 +343,14 @@ const CreateNewProgramHome = ({
 
   // Trapping Protocols
   const handleSaveTrappingProtocols = useCallback(() => {
-    const lifeStageValues = returnDefinitionArray(
-      dropdownsState.values.lifeStage
-    )
-    const runValues = returnDefinitionArray(dropdownsState.values.run)
-
     const saveTrappingProtocolsSubmission: Array<TrappingProtocolsSubmissionI> =
       Object.values(trappingProtocolsStore).map((trappingProtocolObj: any) => {
         const { species, run, lifeStage, numberMeasured } = trappingProtocolObj
 
         return {
           species: returnTaxonCode(species),
-          lifeStage: lifeStageValues.indexOf(lifeStage) + 1,
-          run: runValues.indexOf(run) + 1,
+          lifeStage: getDropdownId('lifeStage', lifeStage),
+          run: getDropdownId('run', run),
           numberMeasured: Number(numberMeasured),
         }
       })
@@ -376,17 +368,6 @@ const CreateNewProgramHome = ({
       waterTemperatureThreshold,
     } = permitInformationStore.values
 
-    const frequencyOfReceivingFishValues = returnDefinitionArray(
-      dropdownsState.values.frequency
-    )
-    const lifeStageValues = returnDefinitionArray(
-      dropdownsState.values.lifeStage
-    )
-    const listingUnitOrStockValues = returnDefinitionArray(
-      dropdownsState.values.listingUnit
-    )
-    const runValues = returnDefinitionArray(dropdownsState.values.run)
-
     if (flowThreshold === null) {
       return []
     } else {
@@ -397,8 +378,10 @@ const CreateNewProgramHome = ({
         permitEndDate: dateExpired,
         flowThreshold: Number(flowThreshold),
         temperatureThreshold: Number(waterTemperatureThreshold),
-        frequencySamplingInclementWeather:
-          frequencyOfReceivingFishValues.indexOf(trapCheckFrequency) + 1,
+        frequencySamplingInclementWeather: getDropdownId(
+          'frequency',
+          trapCheckFrequency
+        ),
         expectedTakeAndMortality: Object.values(
           permitInformationStore.takeAndMortalityValues
         ).map((takeAndMortalityObj: any) => {
@@ -411,9 +394,8 @@ const CreateNewProgramHome = ({
           } = takeAndMortalityObj
           return {
             species: returnTaxonCode(species),
-            listingUnit:
-              listingUnitOrStockValues.indexOf(listingUnitOrStock) + 1,
-            fishLifeStage: lifeStageValues.indexOf(lifeStage) + 1,
+            listingUnit: getDropdownId('listingUnit', listingUnitOrStock),
+            fishLifeStage: getDropdownId('lifeStage', lifeStage),
             allowedExpectedTake: Number(expectedTake),
             allowedMortalityCount: Number(indirectMortality),
           }
@@ -436,7 +418,7 @@ const CreateNewProgramHome = ({
                 w='40'
                 h='10'
                 onPress={() => {
-                  POSTMonitoringProgramSubmissions()
+                  POSTMonitoringProgramSubmissionsHandler()
                 }}
               >
                 TEST SAVE
@@ -486,7 +468,9 @@ const CreateNewProgramHome = ({
       <CreateNewProgramNavButtons
         navigation={navigation}
         formIsCompleteAndValid={formIsCompleteAndValid}
-        POSTMonitoringProgramSubmissions={POSTMonitoringProgramSubmissions}
+        POSTMonitoringProgramSubmissionsHandler={
+          POSTMonitoringProgramSubmissionsHandler
+        }
       />
     </>
   )
@@ -494,6 +478,7 @@ const CreateNewProgramHome = ({
 
 const mapStateToProps = (state: RootState) => {
   return {
+    userCredentialsStore: state.userCredentials,
     createNewProgramHomeStore: state.createNewProgramHome,
     trappingSitesStore: state.trappingSites.trappingSitesStore,
     multipleTrapsStore: state.multipleTraps.groupTrapSiteValues,

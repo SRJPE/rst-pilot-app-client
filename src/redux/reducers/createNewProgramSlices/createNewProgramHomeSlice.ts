@@ -46,8 +46,15 @@ export const createNewProgramHomeSlice = createSlice({
     markCreateNewProgramStepCompleted: (state, action) => {
       const stepName = action.payload
       const stepsCopy = cloneDeep(state.steps)
-      const stepIndex = stepsCopy.findIndex((step) => step.name === stepName)
+      const stepIndex = stepsCopy.findIndex(step => step.name === stepName)
       stepsCopy[stepIndex].completed = true
+      state.steps = stepsCopy
+    },
+    markCreateNewProgramStepIncomplete: (state, action) => {
+      const stepName = action.payload
+      const stepsCopy = cloneDeep(state.steps)
+      const stepIndex = stepsCopy.findIndex(step => step.name === stepName)
+      stepsCopy[stepIndex].completed = false
       state.steps = stepsCopy
     },
   },
@@ -57,6 +64,7 @@ export const {
   resetCreateNewProgramHomeSlice,
   saveNewProgramValues,
   markCreateNewProgramStepCompleted,
+  markCreateNewProgramStepIncomplete,
 } = createNewProgramHomeSlice.actions
 
 export default createNewProgramHomeSlice.reducer

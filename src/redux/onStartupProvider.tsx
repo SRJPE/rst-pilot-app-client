@@ -8,6 +8,8 @@ import { connectionChanged } from './reducers/connectivitySlice'
 import { setForcedLogoutModalOpen } from './reducers/userAuthSlice'
 import { clearUserCredentials } from './reducers/userCredentialsSlice'
 import { AppDispatch, RootState } from './store'
+import { savePersonnel } from './reducers/personnelSlice'
+import api from '../api/axiosConfig'
 
 type Props = {
   children: React.ReactNode
@@ -49,6 +51,9 @@ const OnStartupProvider = (props: Props) => {
               dispatch(setForcedLogoutModalOpen(true))
               return
             }
+
+            const allPersonnelResponse = await api.get('personnel')
+            dispatch(savePersonnel(allPersonnelResponse.data))
 
             if (tokenRefreshResponse === 'Tokens refreshed') {
               console.log(
