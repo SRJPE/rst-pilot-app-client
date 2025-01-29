@@ -20,6 +20,7 @@ interface FormInputComponentI {
   onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void
   placeholder?: string
   RightElement?: JSX.Element
+  isDisabled?: boolean
 }
 
 export const TextInputAdornment = ({ text }: { text: string }) => {
@@ -41,6 +42,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   onChangeText,
   onBlur,
   RightElement = undefined,
+  isDisabled = false,
 }) => {
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
@@ -49,13 +51,17 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
 
   return (
     <Box minH={100} flex={1}>
-      <FormControl flex={1} isInvalid={showError}>
+      <FormControl flex={1} isInvalid={showError} isDisabled={isDisabled}>
         <FormControl.Label>
-          <Text color={showError ? 'red.700' : 'black'} fontSize='16'>
+          <Text
+            color={showError ? 'red.700' : isDisabled ? 'gray.400' : 'black'}
+            fontSize='16'
+          >
             {label}
           </Text>
         </FormControl.Label>
         <Input
+          readOnly={isDisabled}
           height='50px'
           fontSize='16'
           keyboardType={keyboardType ? keyboardType : 'default'}
