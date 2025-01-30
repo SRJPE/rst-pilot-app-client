@@ -111,7 +111,11 @@ const Home = ({
   }, [previousTrapVisits, visitSetupDefaultState])
 
   useEffect(() => {
-    if (userCredentialsStore?.id && connectivityState.isConnected) {
+    if (
+      userCredentialsStore?.id &&
+      connectivityState.isConnected &&
+      connectivityState.isInternetReachable
+    ) {
       try {
         dispatch(getVisitSetupDefaults(userCredentialsStore.id))
         dispatch(getTrapVisitDropdownValues())
@@ -123,6 +127,7 @@ const Home = ({
   }, [
     userCredentialsStore.id,
     connectivityState.isConnected,
+    connectivityState.isInternetReachable,
     userCredentialsStore?.userPrograms?.length,
   ])
 
