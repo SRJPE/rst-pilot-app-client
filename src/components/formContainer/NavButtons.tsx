@@ -11,7 +11,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { isEqual } from 'lodash'
 import { StackActions } from '@react-navigation/native'
-
+import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
 const NavButtons = ({
   navigation,
   handleSubmit,
@@ -309,14 +309,21 @@ const NavButtons = ({
   }
 
   const rightDisabledBool = useMemo(() => {
-    if (activePage === 'Incomplete Sections') {
-      // if form is complete, then do not disable button
-      return !isFormComplete
-    } else if (activePage === 'Non Functional Trap') {
-      return false
-    } else if (activePage === 'Fish Input') {
-      return !(values?.length >= 1)
-    } else if (isValid) {
+    switch (activePage) {
+      case 'Incomplete Sections':
+        return !isFormComplete
+      case 'Non Functional Trap':
+        return false
+      case 'Fish Input':
+        return !(values?.length >= 1)
+
+      case 'Fish Processing':
+        return !fishProcessingSchema.isValidSync(values)
+      default:
+        break
+    }
+
+    if (isValid) {
       return !isValid
     } else {
       return (
@@ -343,9 +350,7 @@ const NavButtons = ({
           leftIcon={
             activePage === 'Visit Setup' ? (
               <Icon as={Ionicons} name='home' size='lg' color='primary' />
-            ) : (
-              <></>
-            )
+            ) : undefined
           }
           onPress={handleLeftButton}
         >
