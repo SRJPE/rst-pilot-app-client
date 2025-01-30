@@ -8,7 +8,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "build-production": "EXPO_PUBLIC_BASE_URL=\"https://jpe-app-server-production.azurewebsites.net\" eas update --branch milldeer",
-    "build-testing": "EXPO_PUBLIC_BASE_URL=\"https://jpe-app-server.azurewebsites.net\" eas update --branch testing"
+    "build-testing": "EXPO_PUBLIC_BASE_URL=\"https://jpe-app-server.azurewebsites.net\" eas update --branch testing",
+    "build-dev": "EXPO_PUBLIC_BASE_URL=\"https://jpe-app-server.azurewebsites.net\" eas update --branch dev"
   },
   "dependencies": {
     "@expo/metro-config": "~0.19.0",

@@ -32,10 +32,10 @@ export default function MonitoringProgramStackNavigator() {
         name='Monitoring Program Joined'
         component={MonitoringProgramJoined}
       />
-      <MonitoringProgram.Screen
+      {/* <MonitoringProgram.Screen
         name='Create New Program'
         component={CreateNewProgram}
-      />
+      /> */}
     </MonitoringProgram.Navigator>
   )
 }
