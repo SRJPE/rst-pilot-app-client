@@ -97,13 +97,13 @@ const Home = ({
       return {
         date: new Date(
           trapVisit.createdTrapVisitResponse.trapVisitTimeEnd
-        ).toLocaleDateString('en-US'),
+        )?.toLocaleDateString('en-US'),
         streamName: find(visitSetupDefaultState.programs, {
           id: trapVisit.createdTrapVisitResponse.programId,
-        }).streamName,
+        })?.streamName,
         trapName: find(visitSetupDefaultState.trapLocations, {
           id: trapVisit.createdTrapVisitResponse.trapLocationId,
-        }).trapName,
+        })?.trapName,
       }
     })
 
