@@ -51,6 +51,7 @@ import { find } from 'lodash'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
+import * as Yup from 'yup'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -98,7 +99,7 @@ const TrapOperations = ({
   selectedTrapSite: string
   selectedTrapName?: string
   selectedTrapLocationId: number | null
-  selectedProgramId: string
+  selectedProgramId: number | null
   activeTabId: string | null
   previouslyActiveTabId: string | null
   navigationSlice: any
@@ -121,23 +122,52 @@ const TrapOperations = ({
   const [waterTempUnitC, setWaterTempUnitC] = useState<boolean>(true)
   const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
 
+  const convertCtoF = (celsius: number) => (celsius * 9) / 5 + 32
+  const permitFlowThreshold = trapPermitInfo?.flowThreshold || 2000
+  const permitTempThreshold = waterTempUnitC
+    ? trapPermitInfo?.temperatureThreshold
+    : convertCtoF(trapPermitInfo?.temperatureThreshold)
+
+  const trapThresholdSchema = Yup.object().shape({
+    flowMeasure: Yup.number()
+      .nullable()
+      .max(permitFlowThreshold, `Flow measure must be ≤ ${permitFlowThreshold}`)
+      .required('Flow measure is required')
+      .typeError('Value must be a number'),
+    waterTemperature: Yup.number()
+      .nullable()
+      .when('waterTemperatureUnit', {
+        is: '°F',
+        then: Yup.number()
+          .nullable()
+          .max(
+            convertCtoF(permitTempThreshold),
+            `Temperature must be ≤ ${convertCtoF(permitTempThreshold)} ºF`
+          ),
+        otherwise: Yup.number().max(
+          permitTempThreshold,
+          `Temperature must be ≤ ${permitTempThreshold} ºC`
+        ),
+      })
+      .typeError('Value must be a number')
+      .required('Water temperature is required'),
+  })
+
   useEffect(() => {
     // flow threshold on trap location
     // TO DO: temp threshold WILL permit info (Needs to be refactored in db and monitoring program setup)
-
-    setTrapPermitInfo(
-      find(
-        visitSetupDefaults.permitInfo,
-        (permit: any) => permit.programId === selectedProgramId
-      )
+    const currentTrapPermitInfo = find(
+      visitSetupDefaults.permitInfo,
+      (permit: any) => permit.programId === selectedProgramId
     )
 
-    setTrapLocationInfo(
-      find(
-        visitSetupDefaults.trapLocations,
-        (permit: any) => permit.id === selectedTrapLocationId
-      )
+    const currentTrapLocationInfo = find(
+      visitSetupDefaults.trapLocations,
+      (permit: any) => permit.id === selectedTrapLocationId
     )
+    setTrapPermitInfo(currentTrapPermitInfo)
+
+    setTrapLocationInfo(currentTrapLocationInfo)
   }, [visitSetupDefaults.permitInfo, selectedTrapLocationId])
 
   const useFlowMeasureCalculationBool = (flowMeasureEntered: number) => {
@@ -284,8 +314,10 @@ const TrapOperations = ({
         onPress={() => {
           if (setFieldValue) {
             if (text === '°C') {
+              setWaterTempUnitC(true)
               setFieldValue('waterTemperatureUnit', '°F')
             } else {
+              setWaterTempUnitC(false)
               setFieldValue('waterTemperatureUnit', '°C')
             }
           }
@@ -372,7 +404,10 @@ const TrapOperations = ({
 
   return (
     <Formik
-      validationSchema={trapOperationsSchema}
+      validationSchema={Yup.object().shape({
+        ...trapOperationsSchema.fields,
+        ...trapThresholdSchema.fields,
+      })}
       enableReinitialize={true}
       initialValues={
         activeTabId
@@ -401,6 +436,10 @@ const TrapOperations = ({
         resetForm,
         isValid,
       }) => {
+        console.log('🚀 ~ file: TrapOperations.tsx:438 ~ values:', values)
+
+        console.log('🚀 ~ file: TrapOperations.tsx:438 ~ errors:', errors)
+
         const warningResultFlow = useFlowMeasureCalculationBool(
           Number(values.flowMeasure)
         )
@@ -647,7 +686,7 @@ const TrapOperations = ({
                           </Radio.Group>
                         </HStack>
                       </FormControl>
-                      <FormControl>
+                      {/* <FormControl>
                         <HStack space={4} alignItems='center'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
@@ -679,43 +718,12 @@ const TrapOperations = ({
                             >
                               <Popover.Arrow />
                               <Popover.Header>
-                                Take one or more measure of cone rotations. We
-                                will save the average in our database.
+                                Take up to three measurements of cone rotations.
+                                The averages of the entered values will be saved
+                                to the database.
                               </Popover.Header>
                             </Popover.Content>
                           </Popover>
-                          {/* {tabSlice.incompleteSectionTouched
-                            ? (errors.rpm1 || errors.rpm2 || errors.rpm3) && (
-                                <HStack space={1}>
-                                  <Icon
-                                    marginTop={'.5'}
-                                    as={Ionicons}
-                                    name='alert-circle-outline'
-                                    color='error'
-                                  />
-                                  <Text
-                                    style={{ fontSize: 14, color: '#b71c1c' }}
-                                  >
-                                    At least one measurement is required
-                                  </Text>
-                                </HStack>
-                              )
-                            : (touched.rpm1 || touched.rpm2 || touched.rpm3) &&
-                              (errors.rpm1 || errors.rpm2 || errors.rpm3) && (
-                                <HStack space={1}>
-                                  <Icon
-                                    marginTop={'.5'}
-                                    as={Ionicons}
-                                    name='alert-circle-outline'
-                                    color='error'
-                                  />
-                                  <Text
-                                    style={{ fontSize: 14, color: '#b71c1c' }}
-                                  >
-                                    At least one measurement is required
-                                  </Text>
-                                </HStack>
-                              )} */}
                         </HStack>
                         <HStack space={8} justifyContent='space-between'>
                           <Box flex={1}>
@@ -726,24 +734,39 @@ const TrapOperations = ({
                               errors={errors}
                               value={values.rpm1 ? `${values.rpm1}` : ''}
                               camelName={'rpm1'}
-                              onChangeText={handleChange('rpm1')}
+                              onChangeText={newValue => {
+                                setFieldValue('rpm1', newValue)
+                                if (!newValue) {
+                                  setFieldValue('rpm2', null)
+                                  setFieldValue('rpm3', null)
+                                }
+                              }}
                               onBlur={handleBlur('rpm1')}
                             />
                           </Box>
                           <Box flex={1}>
                             <FormInputComponent
+                              isDisabled={values.rpm1 ? false : true}
                               label={'Measure 2 (optional)'}
                               placeholder='0'
                               touched={touched}
                               errors={errors}
                               value={values.rpm2 ? `${values.rpm2}` : ''}
                               camelName={'rpm2'}
-                              onChangeText={handleChange('rpm2')}
+                              onChangeText={newValue => {
+                                setFieldValue('rpm2', newValue)
+                                if (!newValue) {
+                                  setFieldValue('rpm3', null)
+                                }
+                              }}
                               onBlur={handleBlur('rpm2')}
                             />
                           </Box>
                           <Box flex={1}>
                             <FormInputComponent
+                              isDisabled={
+                                values.rpm1 && values.rpm2 ? false : true
+                              }
                               label={'Measure 3 (optional)'}
                               placeholder='0'
                               touched={touched}
@@ -754,66 +777,8 @@ const TrapOperations = ({
                               onBlur={handleBlur('rpm3')}
                             />
                           </Box>
-                          {/* <FormControl w='30%'>
-                            <VStack>
-                              <OptimizedInput
-                                height='50px'
-                                fontSize='16'
-                                placeholder='Numeric Value'
-                                keyboardType='numeric'
-                                onChangeText={handleChange('rpm1')}
-                                onBlur={handleBlur('rpm1')}
-                                value={values.rpm1}
-                              />
-                              {Number(values.rpm1) > QARanges.RPM.max ? (
-                                <RenderWarningMessage />
-                              ) : (
-                                <></>
-                              )}
-                            </VStack>
-                          </FormControl> */}
-                          {/* <FormControl w='30%'>
-                            <VStack>
-                              <OptimizedInput
-                                height='50px'
-                                fontSize='16'
-                                placeholder='Numeric Value (optional)'
-                                keyboardType='numeric'
-                                onChangeText={handleChange('rpm2')}
-                                onBlur={handleBlur('rpm2')}
-                                value={values.rpm2}
-                              />
-                              {Number(values.rpm2) > QARanges.RPM.max ? (
-                                <RenderWarningMessage />
-                              ) : (
-                                <></>
-                              )}
-                            </VStack>
-                          </FormControl> */}
-                          {/* <FormControl w='30%'>
-                            <VStack>
-                              <OptimizedInput
-                                height='50px'
-                                fontSize='16'
-                                placeholder='Numeric Value (optional)'
-                                keyboardType='numeric'
-                                onChangeText={handleChange('rpm3')}
-                                onBlur={handleBlur('rpm3')}
-                                value={values.rpm3}
-                              />
-                              {Number(values.rpm3) > QARanges.RPM.max ? (
-                                <RenderWarningMessage />
-                              ) : (
-                                <></>
-                              )}
-                            </VStack>
-                          </FormControl> */}
                         </HStack>
-                        <Text color='grey' mt='5' fontSize='17'>
-                          Please take 3 separate measures of cone rotations per
-                          minute before cleaning the trap.
-                        </Text>
-                      </FormControl>
+                      </FormControl> */}
 
                       <HStack
                         space={5}
@@ -854,7 +819,7 @@ const TrapOperations = ({
                         </FormControl>
                       </HStack>
 
-                      <HStack space={5} width='125%'>
+                      <HStack space={5}>
                         <Box flex={1}>
                           <FormInputComponent
                             label={'Flow Measure'}
@@ -883,72 +848,34 @@ const TrapOperations = ({
                                 bg='warmGray.200'
                                 h={'full'}
                                 w={50}
-                                onPress={() =>
-                                  setWaterTempUnitC(!waterTempUnitC)
-                                }
+                                onPress={() => {
+                                  if (values.waterTemperatureUnit === '°C') {
+                                    setFieldValue('waterTemperatureUnit', '°F')
+                                  } else {
+                                    setFieldValue('waterTemperatureUnit', '°C')
+                                  }
+                                }}
                               >
-                                <Text>{waterTempUnitC ? 'ºC' : 'ºF'}</Text>
+                                <Text>{values.waterTemperatureUnit}</Text>
                               </Button>
                             }
                           />
                         </Box>
+
+                        <Box flex={1}>
+                          <FormInputComponent
+                            label={'Water Turbidity (via CDEC)'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.waterTurbidity}
+                            camelName={'waterTurbidity'}
+                            onChangeText={handleChange('waterTurbidity')}
+                            onBlur={handleBlur('waterTurbidity')}
+                            RightElement={<TextInputAdornment text='ntu' />}
+                          />
+                        </Box>
                         {/* <FormControl w='1/4'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Flow Measure
-                            </Text>
-                          </FormControl.Label>
-                          <OptimizedInput
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Populated from CDEC'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('flowMeasure')}
-                            onBlur={handleBlur('flowMeasure')}
-                            value={values.flowMeasure}
-                          />
-                          {inputUnit(values.flowMeasureUnit)}
-
-                          {warningResultFlow && <RenderWarningMessage />}
-
-                          {tabSlice.incompleteSectionTouched
-                            ? errors.flowMeasure &&
-                              RenderErrorMessage(errors, 'flowMeasure')
-                            : touched.flowMeasure &&
-                              errors.flowMeasure &&
-                              RenderErrorMessage(errors, 'flowMeasure')}
-                        </FormControl> */}
-                        <FormControl w='1/4'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Water Temperature
-                            </Text>
-                          </FormControl.Label>
-                          <OptimizedInput
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('waterTemperature')}
-                            onBlur={handleBlur('waterTemperature')}
-                            value={values.waterTemperature}
-                          />
-
-                          {inputUnit(
-                            values.waterTemperatureUnit,
-                            setFieldValue
-                          )}
-
-                          {warningResultTemp && <RenderWarningMessage />}
-
-                          {/* {tabSlice.incompleteSectionTouched
-                            ? errors.waterTemperature &&
-                              RenderErrorMessage(errors, 'waterTemperature')
-                            : touched.waterTemperature &&
-                              errors.waterTemperature &&
-                              RenderErrorMessage(errors, 'waterTemperature')} */}
-                        </FormControl>
-                        <FormControl w='1/4'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
                               Water Turbidity
@@ -976,7 +903,7 @@ const TrapOperations = ({
                             : touched.totalRevolutions &&
                               errors.totalRevolutions &&
                               RenderErrorMessage(errors, 'waterTurbidity')}
-                        </FormControl>
+                        </FormControl> */}
                       </HStack>
                       <Text
                         color='black'

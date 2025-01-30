@@ -1,3 +1,4 @@
+import React from 'react'
 import { Formik, yupToFormErrors } from 'formik'
 import {
   FormControl,
@@ -172,17 +173,28 @@ const FishProcessing = ({
         handleSubmit,
         setFieldTouched,
         setFieldValue,
+        setFieldError,
         touched,
         errors,
         values,
         resetForm,
       }) => {
+        console.log('🚀 ~ file: FishProcessing.tsx:182 ~ touched:', touched)
+
+        console.log('🚀 ~ file: FishProcessing.tsx:182 ~ errors:', errors)
+
+        console.log('🚀 ~ file: FishProcessing.tsx:182 ~ values:', values)
+
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 3) {
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }
         }, [previouslyActiveTabId])
+        const noCatchData = [
+          'no catch data, fish left in live box',
+          'no catch data, fish released',
+        ].includes(values.fishProcessedResult)
         const navButtons = useMemo(
           () => (
             <NavButtons
@@ -210,50 +222,42 @@ const FishProcessing = ({
             >
               <VStack space={8}>
                 <Heading>Will you be processing fish today?</Heading>
-                <FormControl>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Fish Processed
-                    </Text>
-                  </FormControl.Label>
+
+                <CustomSelect
+                  label='Fish Processed Result'
+                  camelName='fishProcessedResult'
+                  errors={errors}
+                  touched={touched}
+                  selectedValue={values.fishProcessedResult}
+                  placeholder='Select Result'
+                  onValueChange={(newValue: string) => {
+                    setFieldTouched('fishProcessedResult')
+                    setFieldValue('fishProcessedResult', newValue)
+
+                    if (noCatchData) {
+                      setFieldValue('reasonForNotProcessing', '')
+                      setFieldTouched('reasonForNotProcessing', false)
+                      setFieldError('reasonForNotProcessing', undefined)
+                    }
+                  }}
+                  setFieldTouched={() => setFieldTouched('fishProcessedResult')}
+                  selectOptions={fishProcessedDropdowns}
+                />
+
+                {noCatchData && (
                   <CustomSelect
-                    selectedValue={values.fishProcessedResult}
-                    placeholder='Fish Processed'
-                    onValueChange={handleChange('fishProcessedResult')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={fishProcessedDropdowns}
+                    label='Reason For Not Processing'
+                    camelName='reasonForNotProcessing'
+                    errors={errors}
+                    touched={touched}
+                    selectedValue={values.reasonForNotProcessing}
+                    placeholder='Select Reason'
+                    onValueChange={handleChange('reasonForNotProcessing')}
+                    setFieldTouched={() =>
+                      setFieldTouched('reasonForNotProcessing')
+                    }
+                    selectOptions={whyFishNotProcessedDropdowns}
                   />
-                  {tabSlice.incompleteSectionTouched
-                    ? errors.fishProcessed &&
-                      RenderErrorMessage(errors, 'fishProcessed')
-                    : touched.reasonNotFunc &&
-                      errors.fishProcessed &&
-                      RenderErrorMessage(errors, 'fishProcessed')}
-                </FormControl>
-                {(values.fishProcessedResult ===
-                  'no catch data, fish left in live box' ||
-                  values.fishProcessedResult ===
-                    'no catch data, fish released') && (
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Reason For Not Processing
-                      </Text>
-                    </FormControl.Label>
-                    <CustomSelect
-                      selectedValue={values.reasonForNotProcessing}
-                      placeholder='Reason'
-                      onValueChange={handleChange('reasonForNotProcessing')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={whyFishNotProcessedDropdowns}
-                    />
-                    {tabSlice.incompleteSectionTouched
-                      ? errors.reasonForNotProcessing &&
-                        RenderErrorMessage(errors, 'reasonForNotProcessing')
-                      : touched.reasonNotFunc &&
-                        errors.reasonForNotProcessing &&
-                        RenderErrorMessage(errors, 'reasonForNotProcessing')}
-                  </FormControl>
                 )}
 
                 {values.fishProcessedResult === 'processed fish' && (

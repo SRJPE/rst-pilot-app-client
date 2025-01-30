@@ -1,3 +1,4 @@
+import React from 'react'
 import { Formik, useFormikContext } from 'formik'
 import { FormControl, View, VStack, Text, Button, Divider } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
@@ -87,12 +88,50 @@ const AddAnotherMarkModalContent = ({
         <>
           <CustomModalHeader
             headerText={'Add Mark'}
-            showHeaderButton={true}
+            showHeaderButton={false}
             closeModal={closeModal}
-            headerButton={
+          />
+          <View>
+            <VStack space={6} paddingX='10' paddingTop='7' paddingBottom='3'>
+              <CustomSelect
+                selectedValue={values.markType}
+                placeholder='Select Mark Type'
+                onValueChange={handleChange('markType')}
+                setFieldTouched={() => setFieldTouched('markType')}
+                selectOptions={sortedDropdownValues}
+                errors={errors}
+                touched={touched}
+                camelName='markType'
+                label='Mark Type'
+              />
+
+              <CustomSelect
+                selectedValue={values.markColor}
+                placeholder='Color'
+                onValueChange={handleChange('markColor')}
+                setFieldTouched={() => setFieldTouched('markColor')}
+                selectOptions={markColor}
+                errors={errors}
+                touched={touched}
+                camelName='markColor'
+                label='Mark Color'
+              />
+
+              <CustomSelect
+                selectedValue={values.markPosition}
+                placeholder='Position'
+                onValueChange={handleChange('markPosition')}
+                setFieldTouched={() => setFieldTouched('markPosition')}
+                selectOptions={bodyPart}
+                errors={errors}
+                touched={touched}
+                camelName='markPosition'
+                label='Mark Position'
+              />
               <Button
                 bg='primary'
                 mx='2'
+                mt={5}
                 px='10'
                 shadow='3'
                 isDisabled={Object.keys(errors).length > 0}
@@ -105,62 +144,6 @@ const AddAnotherMarkModalContent = ({
                   Save
                 </Text>
               </Button>
-            }
-          />
-          <View>
-            <VStack space={6} paddingX='10' paddingTop='7' paddingBottom='3'>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Mark Type
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={values.markType}
-                  placeholder='Type'
-                  onValueChange={handleChange('markType')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={sortedDropdownValues}
-                />
-                {touched.markType &&
-                  errors.markType &&
-                  RenderErrorMessage(errors, 'markType')}
-              </FormControl>
-
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Mark Color
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={values.markColor}
-                  placeholder='Color'
-                  onValueChange={handleChange('markColor')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={markColor}
-                />
-                {touched.markColor &&
-                  errors.markColor &&
-                  RenderErrorMessage(errors, 'markColor')}
-              </FormControl>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Mark Position
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={values.markPosition}
-                  placeholder='Position'
-                  onValueChange={handleChange('markPosition')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={bodyPart}
-                />
-                {touched.markPosition &&
-                  errors.markPosition &&
-                  RenderErrorMessage(errors, 'markPosition')}
-              </FormControl>
             </VStack>
           </View>
         </>
