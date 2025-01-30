@@ -31,10 +31,10 @@ export const trapOperationsSchema = yup.object().shape({
   flowMeasureUnit: yup.string(),
   waterTemperature: yup
     .number()
-    .max(30, 'Temperature must be ≤ 30')
-    .min(10, 'Temperature must be ≥ 10')
+    // .max(30, 'Temperature must be ≤ 30')
+    // .min(10, 'Temperature must be ≥ 10')
 
-    .typeError('Input must be a number')
+    .typeError('Value must be a number')
     .required('Water Temperature Required'),
   waterTemperatureUnit: yup.string(),
   waterTurbidity: yup
@@ -43,59 +43,77 @@ export const trapOperationsSchema = yup.object().shape({
     // .required('Water Turbidity Required')
     .typeError('Input must be a number'),
   waterTurbidityUnit: yup.string(),
+  // rpm1: yup
+  //   .number()
+  //   .positive('Measurement must be > 0')
+  //   .nullable()
+  //   .max(30, 'Measurement must be ≤ 30')
+  //   .typeError('Input must be a number')
+  //   .required('Enter at least one measurement'),
+  // rpm2: yup
+  //   .number()
+  //   .positive('Measurement must be > 0')
+  //   .max(30, 'Measurement must be ≤ 30')
+  //   .nullable()
+  //   .typeError('Input must be a number'),
+  // rpm3: yup
+  //   .number()
+  //   .positive('Measurement must be > 0')
+  //   .max(30, 'Measurement must be ≤ 30')
+  //   .nullable()
+  //   .typeError('Input must be a number'),
+})
+
+export const trapPostProcessingSchema = yup.object().shape({
+  debrisVolume: yup
+    .number()
+    .nullable()
+    .typeError('Value must be a number')
+    .required('Debris volume required'),
+  totalRevolutions: yup
+    .number()
+    .nullable()
+    .typeError('Value must be a number')
+    .required('Total revolutions required'),
+  isWaterTurbidityPresent: yup.boolean(),
+  waterTurbidity: yup.number().when('isWaterTurbidityPresent', {
+    is: true,
+    then: yup
+      .number()
+      .typeError('Value must be a number')
+      .required('Water Turbidity Required'),
+    otherwise: yup.number().nullable(),
+  }),
+  comments: yup.string().required('Comments required'),
   rpm1: yup
     .number()
     .positive('Measurement must be > 0')
     .nullable()
     .max(30, 'Measurement must be ≤ 30')
-    .typeError('Input must be a number')
+    .typeError('Value must be a number')
     .required('Enter at least one measurement'),
   rpm2: yup
     .number()
     .positive('Measurement must be > 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
-    // .required('Measurement 2 required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   rpm3: yup
     .number()
     .positive('Measurement must be > 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
-    // .required('Measurement 3 required')
-    .typeError('Input must be a number'),
-})
-
-export const trapPostProcessingSchema = yup.object().shape({
-  debrisVolume: yup
-    .number()
-    .typeError('Input must be a number')
-    .required('Debris volume required'),
-  totalRevolutions: yup.number().nullable().typeError('Input must be a number'),
-  isWaterTurbidityPresent: yup.boolean(),
-  waterTurbidity: yup.number().when('isWaterTurbidityPresent', {
-    is: true,
-    then: yup
-      .number()
-      .typeError('Input must be a number')
-      .required('Water Turbidity Required'),
-    otherwise: yup.number().nullable(),
-  }),
-
-  rpm1: yup
-    .number()
-    .typeError('Input must be a number')
-    .required('Measurement 1 required'),
-  rpm2: yup
+    .typeError('Value must be a number'),
+  trapLongitude: yup
     .number()
     .nullable()
-    // .required('Measurement 2 required')
-    .typeError('Input must be a number'),
-  rpm3: yup
+    .required('Latitude is required')
+    .typeError('Value must be a number'),
+  trapLatitude: yup
     .number()
     .nullable()
-    // .required('Measurement 3 required'),
-    .typeError('Input must be a number'),
+    .required('Longitude is required')
+    .typeError('Value must be a number'),
 })
 
 export const fishProcessingSchema = yup.object().shape({
@@ -106,8 +124,8 @@ export const fishProcessingSchema = yup.object().shape({
         'no catch data, fish left in live box',
         'no catch data, fish released',
       ].includes(val),
-    then: yup.string().required('Reason for not processing required'),
-    otherwise: yup.string().nullable(),
+    then: schema => schema.required('Reason for not processing required'),
+    otherwise: schema => schema.optional(),
   }),
   // willBeHoldingFishForMarkRecapture:
 })
