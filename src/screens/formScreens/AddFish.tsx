@@ -263,7 +263,7 @@ const AddFishContent = ({
     !route.params?.editModeData
       ? stateDefaults.whenSpeciesChinook.forkLength
       : createFormValueDefault({
-          value: route.params?.editModeData.forkLength.toString(),
+          value: route.params?.editModeData.forkLength?.toString(),
           touched: true,
           required: false,
         })
