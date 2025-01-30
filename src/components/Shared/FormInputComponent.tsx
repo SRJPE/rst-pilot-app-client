@@ -21,6 +21,7 @@ interface FormInputComponentI {
   placeholder?: string
   RightElement?: JSX.Element
   isDisabled?: boolean
+  multiline?: boolean
 }
 
 export const TextInputAdornment = ({ text }: { text: string }) => {
@@ -43,6 +44,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   onBlur,
   RightElement = undefined,
   isDisabled = false,
+  multiline = false,
 }) => {
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
@@ -61,8 +63,9 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
           </Text>
         </FormControl.Label>
         <Input
+          multiline={multiline}
           readOnly={isDisabled}
-          height='50px'
+          height={multiline ? 100 : 50}
           fontSize='16'
           keyboardType={keyboardType ? keyboardType : 'default'}
           placeholder={placeholder || 'No placeholder entered'}
