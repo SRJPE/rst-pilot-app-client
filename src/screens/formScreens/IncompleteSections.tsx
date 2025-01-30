@@ -105,6 +105,7 @@ const IncompleteSections = ({
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
+    dispatch(checkIfFormIsComplete())
   }, [])
 
   const emitSubmission = () => {
@@ -146,17 +147,11 @@ const IncompleteSections = ({
         connectivityState.isInternetReachable
       ) {
         dispatch(postTrapVisitFormSubmissions())
-        showSlideAlert(
-          dispatch,
-          'Trap visit submitted successfully',
-          'success',
-          5000
-        )
       } else {
         console.log('Connection issue during submission')
         showSlideAlert(
           dispatch,
-          'Connection issue during trap visit submission',
+          'Connection issue during trap visit submission. Application will save data locally and attempt to submit later when connected.',
           'error',
           5000
         )
@@ -496,11 +491,11 @@ const IncompleteSections = ({
             ),
             forkLength:
               fishValue.forkLength != null
-                ? parseInt(fishValue?.forkLength as any)
+                ? parseFloat(fishValue?.forkLength as any)
                 : null,
             weight:
               fishValue?.weight != null
-                ? parseInt(fishValue?.weight as any)
+                ? parseFloat(fishValue?.weight as any)
                 : null,
             numFishCaught: fishValue?.numFishCaught,
             plusCount: fishValue?.plusCount ? true : false,
@@ -535,7 +530,7 @@ const IncompleteSections = ({
             geneticSamplingData: filterAndPrepareData(
               addGeneticSamplesState.values
             ),
-            appliedMarks: filterAndPrepareData(appliedMarksState.values),
+            appliedMarks: filterAndPrepareData(fishValue?.appliedMarks || []),
           })
         })
       }

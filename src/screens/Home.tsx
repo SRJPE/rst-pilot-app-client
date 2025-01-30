@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { Text, VStack, Heading, View, IconButton } from 'native-base'
+import {
+  Text,
+  VStack,
+  Heading,
+  View,
+  IconButton,
+  Box,
+  Pressable,
+} from 'native-base'
 import BottomNavigation from '../components/home/HomeNavButtons'
 import { StyleSheet } from 'react-native'
 import AppLogo from '../components/Shared/AppLogo'
@@ -9,6 +17,7 @@ import { getTrapVisitDropdownValues } from '../redux/reducers/dropdownsSlice'
 import { fetchPreviousTrapAndCatch } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { RootState, AppDispatch } from '../redux/store'
 import { connect, useDispatch, useSelector } from 'react-redux'
+import { find } from 'lodash'
 import { getUserPrograms } from '../redux/reducers/userCredentialsSlice'
 
 const styles = StyleSheet.create({
@@ -27,7 +36,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   recentItemsCard: {
-    height: 200,
+    height: 150,
     width: 200,
     borderWidth: 1,
     borderColor: '#A29C9C',
@@ -39,7 +48,7 @@ const styles = StyleSheet.create({
     flex: 3,
   },
   recentItemsCardTextContainer: {
-    flex: 2,
+    flex: 1,
     paddingHorizontal: 10,
     paddingVertical: 8,
     display: 'flex',
@@ -50,12 +59,17 @@ const styles = StyleSheet.create({
 const Home = ({
   navigation,
   userCredentialsStore,
+  previousTrapVisits,
+  visitSetupDefaultState,
 }: {
   navigation: any
   userCredentialsStore: any
+  previousTrapVisits: any
+  visitSetupDefaultState: any
 }) => {
   const [staggerOpen, setStaggerOpen] = useState(false as boolean)
   const [opacity, setOpacity] = useState(1 as number)
+  const [recentTrapVisits, setRecentTrapVisits] = useState([] as Array<any>)
   const dispatch = useDispatch<AppDispatch>()
 
   const connectivityState = useSelector((state: any) => state.connectivity)
@@ -63,6 +77,38 @@ const Home = ({
   useEffect(() => {
     staggerOpen ? setOpacity(0.25) : setOpacity(1)
   }, [staggerOpen])
+
+  useEffect(() => {
+    let filteredTrapVisits = previousTrapVisits?.filter((trapVisit: any) =>
+      trapVisit.createdTrapVisitEnvironmentalResponse?.some(
+        (response: any) =>
+          response.measureName === 'water turbidity' &&
+          response.measureValueNumeric === null
+      )
+    )
+    console.log('filteredTrapVisits', filteredTrapVisits)
+    let sortedTrapVisits = filteredTrapVisits
+    sortedTrapVisits.sort(
+      (a: any, b: any) =>
+        new Date(b.createdTrapVisitResponse.trapVisitTimeEnd).getTime() -
+        new Date(a.createdTrapVisitResponse.trapVisitTimeEnd).getTime()
+    )
+    sortedTrapVisits = sortedTrapVisits.map((trapVisit: any) => {
+      return {
+        date: new Date(
+          trapVisit.createdTrapVisitResponse.trapVisitTimeEnd
+        ).toLocaleDateString('en-US'),
+        streamName: find(visitSetupDefaultState.programs, {
+          id: trapVisit.createdTrapVisitResponse.programId,
+        }).streamName,
+        trapName: find(visitSetupDefaultState.trapLocations, {
+          id: trapVisit.createdTrapVisitResponse.trapLocationId,
+        }).trapName,
+      }
+    })
+
+    setRecentTrapVisits(sortedTrapVisits.slice(0, 3))
+  }, [previousTrapVisits, visitSetupDefaultState])
 
   useEffect(() => {
     if (userCredentialsStore?.id && connectivityState.isConnected) {
@@ -95,23 +141,22 @@ const Home = ({
     })()
   }, [userCredentialsStore.userPrograms])
 
-  const recentItemsCard = ({
-    title,
-    date,
-  }: {
-    title: string
-    date: string
-  }) => {
+  const recentItemsCard = ({ text }: { text: string }) => {
     return (
-      <View style={styles.recentItemsCard}>
-        <View style={styles.recentItemsCardPreviewContainer}></View>
-        <View style={styles.recentItemsCardTextContainer}>
-          <Text fontSize={19} maxWidth={150}>
-            {title}
-          </Text>
-          <Text color='#A1A1A1'>{date}</Text>
-        </View>
-      </View>
+      <Pressable onPress={() => navigation.navigate('Input Turbidity')}>
+        <Box>
+          <View style={styles.recentItemsCard}>
+            <View style={styles.recentItemsCardTextContainer}>
+              <Text fontSize={30} textAlign={'center'}>
+                {text}
+              </Text>
+              {/* <Text color='#A1A1A1' fontSize={20}>
+            {date}
+          </Text> */}
+            </View>
+          </View>
+        </Box>
+      </Pressable>
     )
   }
 
@@ -142,16 +187,16 @@ const Home = ({
       <Text fontWeight={300} fontSize={23}>
         Select the action you would like to perform.
       </Text>
-      {/* <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
-        <Text fontWeight={300} fontSize={20} marginBottom={5}>
-          Recent Items
-        </Text>
-        <View style={styles.recentItemsCardRow}>
-          {recentItemsCard({ title: 'Trap Visit Data Entry', date: '7/21/22' })}
-          {recentItemsCard({ title: 'Report', date: '7/22/22' })}
-          {recentItemsCard({ title: 'Quality Control', date: '7/24/22' })}
-        </View>
-      </View> */}
+      <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
+        {/* <Text fontWeight={300} fontSize={20} marginBottom={5}>
+          Actions
+        </Text> */}
+        {/* <View style={styles.recentItemsCardRow}>
+          {recentItemsCard({
+            text: 'Input Turbidity',
+          })}
+        </View> */}
+      </View>
 
       <BottomNavigation
         navigation={navigation}
@@ -165,6 +210,9 @@ const Home = ({
 const mapStateToProps = (state: RootState) => {
   return {
     userCredentialsStore: state.userCredentials,
+    visitSetupDefaultState: state.visitSetupDefaults,
+    previousTrapVisits:
+      state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
   }
 }
 

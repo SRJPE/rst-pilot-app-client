@@ -1,6 +1,5 @@
 import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
-
 import MonitoringProgramHome from '../screens/accountScreens/MonitoringProgramHome'
 import CreateNewProgram from './roots/CreateNewProgramRoot'
 import MonitoringProgramExisting from '../screens/accountScreens/MonitoringProgramExisting'
