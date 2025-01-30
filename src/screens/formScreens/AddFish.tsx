@@ -633,9 +633,9 @@ const AddFishContent = ({
                     </Popover.Content>
                   </Popover>
 
-                  {species.touched &&
+                  {/* {species.touched &&
                     species.error &&
-                    RenderErrorMessage(species.error, 'species')}
+                    RenderErrorMessage(species.error, 'species')} */}
                 </HStack>
                 <SpeciesDropDown
                   editModeValue={route.params?.editModeData?.species}
@@ -691,12 +691,12 @@ const AddFishContent = ({
                           Number(forkLength.value),
                           lifeStage.value as string
                         )}
-                        {forkLength.touched &&
+                        {/* {forkLength.touched &&
                           forkLength.error &&
                           RenderErrorMessage(
                             { forkLength: forkLength.error },
                             'forkLength'
-                          )}
+                          )} */}
                       </HStack>
                       <Input
                         height='50px'
@@ -747,12 +747,12 @@ const AddFishContent = ({
                           Number(weight.value),
                           weight.value as string
                         )}
-                        {weight.touched &&
+                        {/* {weight.touched &&
                           weight.error &&
                           RenderErrorMessage(
                             { weight: weight.error },
                             'weight'
-                          )}
+                          )} */}
                       </HStack>
                       <Input
                         height='50px'
