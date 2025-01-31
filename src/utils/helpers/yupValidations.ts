@@ -24,44 +24,43 @@ export const trapOperationsSchema = yup.object().shape({
   }),
   flowMeasure: yup
     .number()
-    .positive()
-    // .required('Flow Measure Required')
     .nullable()
-    .typeError('Input must be a number'),
-  flowMeasureUnit: yup.string(),
+
+    .required('Flow measure is required')
+    .typeError('Value must be a number'),
   waterTemperature: yup
     .number()
-    // .max(30, 'Temperature must be ≤ 30')
-    // .min(10, 'Temperature must be ≥ 10')
-
+    .nullable()
     .typeError('Value must be a number')
-    .required('Water Temperature Required'),
+    .required('Water temperature is required'),
+
+  flowMeasureUnit: yup.string(),
   waterTemperatureUnit: yup.string(),
   waterTurbidity: yup
     .number()
     .nullable()
     // .required('Water Turbidity Required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   waterTurbidityUnit: yup.string(),
-  // rpm1: yup
-  //   .number()
-  //   .positive('Measurement must be > 0')
-  //   .nullable()
-  //   .max(30, 'Measurement must be ≤ 30')
-  //   .typeError('Input must be a number')
-  //   .required('Enter at least one measurement'),
-  // rpm2: yup
-  //   .number()
-  //   .positive('Measurement must be > 0')
-  //   .max(30, 'Measurement must be ≤ 30')
-  //   .nullable()
-  //   .typeError('Input must be a number'),
-  // rpm3: yup
-  //   .number()
-  //   .positive('Measurement must be > 0')
-  //   .max(30, 'Measurement must be ≤ 30')
-  //   .nullable()
-  //   .typeError('Input must be a number'),
+  rpm1: yup
+    .number()
+    .positive('Measurement must be > 0')
+    .nullable()
+    .max(30, 'Measurement must be ≤ 30')
+    .typeError('Value must be a number'),
+  // .required('Enter at least one measurement'),
+  rpm2: yup
+    .number()
+    .positive('Measurement must be > 0')
+    .max(30, 'Measurement must be ≤ 30')
+    .nullable()
+    .typeError('Value must be a number'),
+  rpm3: yup
+    .number()
+    .positive('Measurement must be > 0')
+    .max(30, 'Measurement must be ≤ 30')
+    .nullable()
+    .typeError('Value must be a number'),
 })
 
 export const trapPostProcessingSchema = yup.object().shape({
@@ -84,7 +83,7 @@ export const trapPostProcessingSchema = yup.object().shape({
       .required('Water Turbidity Required'),
     otherwise: yup.number().nullable(),
   }),
-  comments: yup.string().required('Comments required'),
+  comments: yup.string(),
   rpm1: yup
     .number()
     .positive('Measurement must be > 0')
@@ -104,16 +103,8 @@ export const trapPostProcessingSchema = yup.object().shape({
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
     .typeError('Value must be a number'),
-  trapLongitude: yup
-    .number()
-    .nullable()
-    .required('Latitude is required')
-    .typeError('Value must be a number'),
-  trapLatitude: yup
-    .number()
-    .nullable()
-    .required('Longitude is required')
-    .typeError('Value must be a number'),
+  trapLongitude: yup.number().nullable().typeError('Value must be a number'),
+  trapLatitude: yup.number().nullable().typeError('Value must be a number'),
 })
 
 export const fishProcessingSchema = yup.object().shape({
@@ -135,13 +126,13 @@ export const addIndividualFishSchema = yup.object().shape({
   forkLength: yup
     .number()
     .required('Fish fork length required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   run: yup
     .string()
     // .required('Run required')
     .nullable()
-    .typeError('Input must be a number'),
-  weight: yup.number().nullable().typeError('Input must be a number'),
+    .typeError('Value must be a number'),
+  weight: yup.number().nullable().typeError('Value must be a number'),
   lifeStage: yup.string().required('Fish life stage required'),
   adiposeClipped: yup
     .boolean()
@@ -158,13 +149,13 @@ export const addIndividualFishSchemaOptionalLifeStage = yup.object().shape({
   forkLength: yup
     .number()
     .required('Fish fork length required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   run: yup
     .string()
     // .required('Run required')
     .nullable()
-    .typeError('Input must be a number'),
-  weight: yup.number().nullable().typeError('Input must be a number'),
+    .typeError('Value must be a number'),
+  weight: yup.number().nullable().typeError('Value must be a number'),
   lifeStage: yup.string(),
   adiposeClipped: yup
     .boolean()
@@ -181,13 +172,13 @@ export const addIndividualFishSchemaOtherSpecies = yup.object().shape({
   forkLength: yup
     .number()
     .required('Fish fork length required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   run: yup
     .string()
     // .required('Run required')
     .nullable()
-    .typeError('Input must be a number'),
-  weight: yup.number().nullable().typeError('Input must be a number'),
+    .typeError('Value must be a number'),
+  weight: yup.number().nullable().typeError('Value must be a number'),
   lifeStage: yup.string(),
   adiposeClipped: yup.boolean(),
   existingMark: yup.string(),
@@ -218,7 +209,7 @@ export const addPlusCountsSchema = yup.object().shape({
   count: yup
     .number()
     .required('Count is required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   plusCountMethod: yup.string().required('Plus count method required'),
   dead: yup.boolean().required('Fish mortality required'),
 })
@@ -231,22 +222,22 @@ export const releaseTrialSchema = yup.object().shape({
   wildCount: yup
     .number()
     .required('Wild count is required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   deadWildCount: yup
     .number()
     .required('Dead wild count is required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   willSupplement: yup.boolean().required('Field required'),
   hatcheryCount: yup.number().when('willSupplement', {
     is: true,
     then: yup
       .number()
       .required('Hatchery count is required')
-      .typeError('Input must be a number'),
+      .typeError('Value must be a number'),
     otherwise: yup
       .number()
       .transform(value => (isNaN(value) ? 0 : value))
-      .typeError('Input must be a number')
+      .typeError('Value must be a number')
       .notRequired(),
   }),
   runIDHatchery: yup.string().when('willSupplement', {
@@ -259,11 +250,11 @@ export const releaseTrialSchema = yup.object().shape({
       .number()
 
       .nullable()
-      .typeError('Input must be a number'),
+      .typeError('Value must be a number'),
     otherwise: yup
       .number()
       .transform(value => (isNaN(value) ? 0 : value))
-      .typeError('Input must be a number')
+      .typeError('Value must be a number')
       .notRequired(),
   }),
   runForkLengthHatchery: yup.number().when('willSupplement', {
@@ -272,11 +263,11 @@ export const releaseTrialSchema = yup.object().shape({
       .number()
 
       .nullable()
-      .typeError('Input must be a number'),
+      .typeError('Value must be a number'),
     otherwise: yup
       .number()
       .transform(value => (isNaN(value) ? 0 : value))
-      .typeError('Input must be a number')
+      .typeError('Value must be a number')
       .notRequired(),
   }),
   deadHatcheryCount: yup.number().when('willSupplement', {
@@ -284,11 +275,11 @@ export const releaseTrialSchema = yup.object().shape({
     then: yup
       .number()
       .required('Hatchery dead count is required')
-      .typeError('Input must be a number'),
+      .typeError('Value must be a number'),
     otherwise: yup
       .number()
       .transform(value => (isNaN(value) ? 0 : value))
-      .typeError('Input must be a number')
+      .typeError('Value must be a number')
       .notRequired(),
   }),
 })
@@ -330,22 +321,22 @@ export const trappingSitesSchema = yup.object().shape({
     .number()
     // .nullable()
     .required('Trap latitude required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   trapLongitude: yup
     .number()
     // .nullable()
     .required('Trap Longitude required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   coneSize: yup
     .number()
     // .nullable()
     .required('Cone Size required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   USGSStationNumber: yup
     .number()
     // .nullable()
     .required('USGS Station Number required')
-    .typeError('Input must be a number')
+    .typeError('Value must be a number')
     .test(
       'length',
       'USGS Station Number must be between 8 and 15 digits',
@@ -361,12 +352,12 @@ export const trappingSitesSchema = yup.object().shape({
     .number()
     // .nullable()
     .required('Trap latitude required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   releaseSiteLongitude: yup
     .number()
     // .nullable()
     .required('Trap latitude required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
 })
 
 export const crewMembersLeadSchema = yup.object().shape({
@@ -393,7 +384,7 @@ export const hatcheryInformationSchema = yup.object().shape({
   expectedNumberOfFishReceivedAtEachPickup: yup
     .number()
     .required('Number of fish required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
 })
 export const trappingProtocolsSchema = yup.object().shape({
   species: yup.string().required('Species required'),
@@ -402,19 +393,19 @@ export const trappingProtocolsSchema = yup.object().shape({
   numberMeasured: yup
     .number()
     .required('Number Measured required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
 })
 export const permittingInformationSchema = yup.object().shape({
   waterTemperatureThreshold: yup
     .number()
     .nullable()
     .required('Temperature threshold required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   flowThreshold: yup
     .number()
     .nullable()
     .required('Flow threshold required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   trapCheckFrequency: yup
     .string()
     .nullable()
@@ -428,12 +419,12 @@ export const takeAndMortalitySchema = yup.object().shape({
     .number()
     .nullable()
     .required('Expected Take required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
   indirectMortality: yup
     .number()
     .nullable()
     .required('Indirect Mortality required')
-    .typeError('Input must be a number'),
+    .typeError('Value must be a number'),
 })
 export const setUpNewProgramSchema = yup.object().shape({
   monitoringProgramName: yup.string().required('Program name required'),
