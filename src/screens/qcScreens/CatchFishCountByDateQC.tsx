@@ -101,7 +101,10 @@ function CatchFishCountByDateQC({
     const qcDataFiltered = qcData.filter((catchRawResponse: any) => {
       return (
         new Date(
-          catchRawResponse?.createdCatchRawResponse?.trapVisitTimeEnd
+          catchRawResponse?.createdCatchRawResponse?.trapVisitTimeEnd?.replace(
+            'Z',
+            '-08:00'
+          )
         ).toDateString() === selectedDateDateString
       )
     })

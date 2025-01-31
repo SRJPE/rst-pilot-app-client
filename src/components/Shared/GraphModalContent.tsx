@@ -150,9 +150,9 @@ const GraphModalContent = ({
                     fontWeight={'light'}
                   >
                     Selected Point Date:{' '}
-                    {moment(pointClicked.pointDateTimestamp).format(
-                      'MMMM Do, YYYY'
-                    )}
+                    {moment(
+                      pointClicked.pointDateTimestamp.replace('Z', '-08:00')
+                    ).format('MMMM Do, YYYY')}
                   </Text>
                   {pointClicked.speciesCommonName && (
                     <Text

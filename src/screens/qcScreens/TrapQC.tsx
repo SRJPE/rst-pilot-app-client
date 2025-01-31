@@ -20,11 +20,7 @@ import {
   postQCSubmissions,
   trapVisitQCSubmission,
 } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import {
-  handleQCChartButtonClick,
-  normalizeDate,
-  parsePacificTime,
-} from '../../utils/utils'
+import { handleQCChartButtonClick, normalizeDate } from '../../utils/utils'
 
 interface GraphDataI {
   Temperature: any[]

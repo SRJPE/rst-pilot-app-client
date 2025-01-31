@@ -981,7 +981,10 @@ function CatchCategoricalQC({
             >
               {`Selected Point${modalData.length > 1 ? `s` : ''} Date: `}
               {moment(
-                modalData?.[0]?.createdCatchRawResponse?.trapVisitTimeEnd
+                modalData?.[0]?.createdCatchRawResponse?.trapVisitTimeEnd?.replace(
+                  'Z',
+                  '-08:00'
+                )
               ).format('MMMM Do, YYYY')}
             </Text>
             <VStack alignItems={'center'}>
