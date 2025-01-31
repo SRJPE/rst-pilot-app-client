@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Button,
   HStack,
@@ -196,7 +196,9 @@ function CatchCategoricalQC({
         date.setSeconds(0)
         date.setMilliseconds(0)
         const dateTime = date.getTime()
-        const normalizedDate = normalizeDate(new Date(trapVisitTimeEnd))
+        const normalizedDate = normalizeDate(
+          new Date(trapVisitTimeEnd.replace('Z', '-08:00'))
+        )
         // const stagedForSubmission = catchResponse.stagedForSubmission
 
         const marks = [

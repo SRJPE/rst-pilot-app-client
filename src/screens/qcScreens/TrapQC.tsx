@@ -20,7 +20,11 @@ import {
   postQCSubmissions,
   trapVisitQCSubmission,
 } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import { handleQCChartButtonClick, normalizeDate } from '../../utils/utils'
+import {
+  handleQCChartButtonClick,
+  normalizeDate,
+  parsePacificTime,
+} from '../../utils/utils'
 
 interface GraphDataI {
   Temperature: any[]
@@ -121,12 +125,19 @@ function TrapQC({
 
         const trapVisitId = createdTrapVisitResponse.id
         const qcCompleted = createdTrapVisitResponse.qcCompleted
+        // account for pacific time zone
         const trapVisitTimeEnd = new Date(
-          createdTrapVisitResponse.trapVisitTimeEnd
+          createdTrapVisitResponse.trapVisitTimeEnd.replace('Z', '-08:00')
         )
+
+        // const pacificDate = parsePacificTime(
+        //   createdTrapVisitResponse.trapVisitTimeEnd
+        // )
         const normalizedDate = normalizeDate(trapVisitTimeEnd)
 
         if (trapVisitId) {
+          console.log('trapVisitTimeEnd', createdTrapVisitResponse)
+          console.log('normalizedDate', normalizedDate)
           let temp = createdTrapVisitEnvironmentalResponse
             ? createdTrapVisitEnvironmentalResponse.filter((item: any) => {
                 return item.measureName === 'water temperature'
