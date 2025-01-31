@@ -22,6 +22,7 @@ interface FormInputComponentI {
   RightElement?: JSX.Element
   isDisabled?: boolean
   multiline?: boolean
+  showWarning?: boolean
 }
 
 export const TextInputAdornment = ({ text }: { text: string }) => {
@@ -45,6 +46,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   RightElement = undefined,
   isDisabled = false,
   multiline = false,
+  showWarning = false,
 }) => {
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
@@ -56,7 +58,15 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
       <FormControl flex={1} isInvalid={showError} isDisabled={isDisabled}>
         <FormControl.Label>
           <Text
-            color={showError ? 'red.700' : isDisabled ? 'gray.400' : 'black'}
+            color={
+              showWarning
+                ? 'amber.700'
+                : showError
+                ? 'red.700'
+                : isDisabled
+                ? 'gray.400'
+                : 'black'
+            }
             fontSize='16'
           >
             {label}
@@ -73,15 +83,22 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
           onBlur={onBlur}
           value={value}
           _focus={{
-            borderColor: 'muted.300',
+            borderColor: showWarning ? 'amber.700' : 'muted.300',
             _invalid: { borderColor: 'red.700' },
           }}
+          borderColor={showWarning ? 'amber.700' : 'muted.300'}
           _invalid={{ borderColor: 'red.700' }}
           rightElement={RightElement}
         />
         <Box mt={2} h={25}>
           {showError && (
             <RenderErrorMessage errors={errors} inputName={camelName} />
+          )}
+
+          {showWarning && (
+            <Text fontSize={14} color='amber.700'>
+              Value is out of range
+            </Text>
           )}
         </Box>
       </FormControl>

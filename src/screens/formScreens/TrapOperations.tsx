@@ -128,31 +128,6 @@ const TrapOperations = ({
     ? trapPermitInfo?.temperatureThreshold
     : convertCtoF(trapPermitInfo?.temperatureThreshold)
 
-  const trapThresholdSchema = Yup.object().shape({
-    flowMeasure: Yup.number()
-      .nullable()
-      .max(permitFlowThreshold, `Flow measure must be ≤ ${permitFlowThreshold}`)
-      .required('Flow measure is required')
-      .typeError('Value must be a number'),
-    waterTemperature: Yup.number()
-      .nullable()
-      .when('waterTemperatureUnit', {
-        is: '°F',
-        then: Yup.number()
-          .nullable()
-          .max(
-            convertCtoF(permitTempThreshold),
-            `Temperature must be ≤ ${convertCtoF(permitTempThreshold)} ºF`
-          ),
-        otherwise: Yup.number().max(
-          permitTempThreshold,
-          `Temperature must be ≤ ${permitTempThreshold} ºC`
-        ),
-      })
-      .typeError('Value must be a number')
-      .required('Water temperature is required'),
-  })
-
   useEffect(() => {
     // flow threshold on trap location
     // TO DO: temp threshold WILL permit info (Needs to be refactored in db and monitoring program setup)
@@ -170,9 +145,10 @@ const TrapOperations = ({
     setTrapLocationInfo(currentTrapLocationInfo)
   }, [visitSetupDefaults.permitInfo, selectedTrapLocationId])
 
-  const useFlowMeasureCalculationBool = (flowMeasureEntered: number) => {
+  const useFlowMeasureCalculationBool = (flowMeasureEntered: number | null) => {
     return useMemo(() => {
       if (!flowMeasureEntered || !QARanges) {
+        console.log('not logging zero')
         return false
       }
       let warningResult = false
@@ -182,8 +158,6 @@ const TrapOperations = ({
         activeTabName = tabSlice.tabs[activeTabId].name
       }
       let range
-
-      console.log('trapPermitInfo', trapPermitInfo)
 
       if (trapPermitInfo) {
         range = { max: Number(trapPermitInfo.flowThreshold), min: 50 }
@@ -404,10 +378,7 @@ const TrapOperations = ({
 
   return (
     <Formik
-      validationSchema={Yup.object().shape({
-        ...trapOperationsSchema.fields,
-        ...trapThresholdSchema.fields,
-      })}
+      validationSchema={trapOperationsSchema}
       enableReinitialize={true}
       initialValues={
         activeTabId
@@ -436,12 +407,8 @@ const TrapOperations = ({
         resetForm,
         isValid,
       }) => {
-        console.log('🚀 ~ file: TrapOperations.tsx:438 ~ values:', values)
-
-        console.log('🚀 ~ file: TrapOperations.tsx:438 ~ errors:', errors)
-
         const warningResultFlow = useFlowMeasureCalculationBool(
-          Number(values.flowMeasure)
+          values.flowMeasure
         )
         const warningResultTemp = useWaterTempCalculationBool(
           Number(values.waterTemperature),
@@ -686,7 +653,7 @@ const TrapOperations = ({
                           </Radio.Group>
                         </HStack>
                       </FormControl>
-                      {/* <FormControl>
+                      <FormControl>
                         <HStack space={4} alignItems='center'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
@@ -778,7 +745,7 @@ const TrapOperations = ({
                             />
                           </Box>
                         </HStack>
-                      </FormControl> */}
+                      </FormControl>
 
                       <HStack
                         space={5}
@@ -822,6 +789,7 @@ const TrapOperations = ({
                       <HStack space={5}>
                         <Box flex={1}>
                           <FormInputComponent
+                            showWarning={warningResultFlow}
                             label={'Flow Measure'}
                             placeholder='0'
                             touched={touched}
@@ -835,6 +803,7 @@ const TrapOperations = ({
                         </Box>
                         <Box flex={1}>
                           <FormInputComponent
+                            showWarning={warningResultTemp}
                             label={'Water Temperature'}
                             placeholder='0'
                             touched={touched}
