@@ -1,17 +1,7 @@
 import { Formik } from 'formik'
-import {
-  Box,
-  Button,
-  Divider,
-  FormControl,
-  HStack,
-  Text,
-  VStack,
-} from 'native-base'
+import { Box, Button, HStack, Text, VStack } from 'native-base'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
-import { trappingProtocolsSchema } from '../../utils/helpers/yupValidations'
-import CustomModalHeader from '../Shared/CustomModalHeader'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
 import {
   IndividualTrappingProtocolState,
@@ -19,9 +9,11 @@ import {
   saveIndividualTrappingProtocol,
   updateIndividualTrappingProtocol,
 } from '../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
-import CustomSelect from '../Shared/CustomSelect'
+import { AppDispatch, RootState } from '../../redux/store'
+import { trappingProtocolsSchema } from '../../utils/helpers/yupValidations'
 import { reorderTaxon } from '../../utils/utils'
-import React, { useEffect, useState } from 'react'
+import CustomModalHeader from '../Shared/CustomModalHeader'
+import CustomSelect from '../Shared/CustomSelect'
 
 const AddTrappingProtocolModalContent = ({
   closeModal,
@@ -152,11 +144,7 @@ const AddTrappingProtocolModalContent = ({
                 mx='2'
                 px='10'
                 shadow='3'
-                isDisabled={
-                  Object.values(touched).length === 0 ||
-                  (Object.values(touched).length > 0 &&
-                    Object.values(errors).length > 0)
-                }
+                isDisabled={!trappingProtocolsSchema.isValidSync(values)}
                 onPress={() => {
                   handleSubmit()
                   closeModal()
