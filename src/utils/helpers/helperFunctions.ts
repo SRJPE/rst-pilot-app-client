@@ -23,3 +23,17 @@ export const generateErrorMessage = (errorCode: string) => {
 export const convertBytesToKB = (bytes: number): string => {
   return Math.round(bytes / 1000).toFixed(0) + ' KB' // Convert bytes to KB and format to 2 decimal places
 }
+
+export const generatePaginationRecordsLabel = (
+  pageNumber: number,
+  pageSize: number,
+  totalRecords: number
+) => {
+  if (totalRecords <= pageSize) {
+    return `Page 1 (${totalRecords} Records)`
+  }
+  const startRecord = (pageNumber - 1) * pageSize + 1
+  const endRecord = Math.min(pageNumber * pageSize, totalRecords)
+
+  return `Page ${pageNumber} (Records ${startRecord} - ${endRecord} of ${totalRecords})`
+}
