@@ -53,11 +53,13 @@ const QCFishDataTable = ({
   taxonState,
   runState,
   lifeStageState,
+  userCredentialsStore,
 }: {
   tableData: any
   taxonState: any
   runState: any
   lifeStageState: any
+  userCredentialsStore: any
   markTypeState: any
   markColorState: any
   markPositionState: any
@@ -260,6 +262,7 @@ const QCFishDataTable = ({
           <QCFishModalContent
             closeModal={closeQcModal}
             qcFishData={qcFishData}
+            userCredentialsStore={userCredentialsStore}
           />
         </CustomModal>
       )}

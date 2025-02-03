@@ -20,9 +20,11 @@ import {
   alphabeticalSort,
 } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../redux/store'
+import { useSelector, useDispatch } from 'react-redux'
+import { RootState, AppDispatch } from '../../redux/store'
 import CustomSelect from '../../components/Shared/CustomSelect'
+import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { close } from 'fs'
 
 const createFormValueDefault = ({
   value,
@@ -41,10 +43,13 @@ const createFormValueDefault = ({
 const QCFishModalContent = ({
   closeModal,
   qcFishData,
+  userCredentialsStore,
 }: {
   closeModal: () => void
   qcFishData: any
+  userCredentialsStore: any
 }) => {
+  const dispatch = useDispatch<AppDispatch>()
   const { createdCatchRawResponse } = qcFishData
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -173,9 +178,38 @@ const QCFishModalContent = ({
     }
   }
 
-  useEffect(() => {
-    console.log('species', species)
-  }, [species])
+  const handleSave = () => {
+    try {
+      const updatedCatchRawResponse = {
+        taxonCode: species?.value,
+        forkLength: forkLength?.value,
+        weight: weight?.value,
+        numFishCaught: count?.value,
+        lifeStage: lifeStage?.value,
+        captureRunClass: run?.value,
+        dead: dead?.value,
+        adiposeClipped: adiposeClipped?.value,
+      }
+
+      console.log('updatedCatchRawResponse', updatedCatchRawResponse)
+
+      dispatch(
+        catchRawQCSubmission({
+          catchRawId: createdCatchRawResponse.id,
+          userId: userCredentialsStore.id,
+          submissions: [
+            {
+              isFullObject: true,
+              value: updatedCatchRawResponse,
+            },
+          ],
+        })
+      )
+      closeModal()
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
 
   return (
     <>
@@ -564,9 +598,7 @@ const QCFishModalContent = ({
             _disabled={{
               opacity: '75',
             }}
-            onPress={() => {
-              closeModal()
-            }}
+            onPress={handleSave}
           >
             <Text fontSize='lg' fontWeight='bold' color='white'>
               Save

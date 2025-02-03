@@ -1,13 +1,8 @@
-import { MaterialIcons } from '@expo/vector-icons'
 import { Button, HStack, View, VStack, Text, Box } from 'native-base'
 import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-
-import {
-  catchRawQCSubmission,
-  postQCSubmissions,
-} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { postQCSubmissions } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
 import { connect } from 'react-redux'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -117,35 +112,6 @@ function CatchFishCountByDateQC({
     setSelectedDate(currentDate)
   }
 
-  const handleSubmit = () => {
-    // if (nestedModalData && nestedModalInputValue) {
-    //   if (`${nestedModalData.value}` !== `${nestedModalInputValue.value}`) {
-    //     let submissions: any[] = []
-    //     let identifier = nestedModalData.fieldClicked
-    //     let submissionOne = {
-    //       fieldName:
-    //         identifierToName[identifier as keyof typeof identifierToName],
-    //       value: nestedModalInputValue.value,
-    //     }
-    //     submissions.push(submissionOne)
-    //     if (nestedModalComment) {
-    //       let submissionTwo = {
-    //         fieldName: 'Comments',
-    //         value: nestedModalComment,
-    //       }
-    //       submissions.push(submissionTwo)
-    //     }
-    //     dispatch(
-    //       catchRawQCSubmission({
-    //         catchRawId: nestedModalData.catchRawId,
-    //         userId: userCredentialsStore.id,
-    //         submissions,
-    //       })
-    //     )
-    //   }
-    // }
-  }
-
   return (
     <View flex={1} bg='#fff'>
       <VStack alignItems={'center'} flex={1}>
@@ -179,6 +145,7 @@ function CatchFishCountByDateQC({
                 markColorState={markColorState}
                 markPositionState={markPositionState}
                 navigation={navigation}
+                userCredentialsStore={userCredentialsStore}
               />
             </Box>
           ) : (
