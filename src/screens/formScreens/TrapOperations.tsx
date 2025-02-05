@@ -404,7 +404,7 @@ const TrapOperations = ({
               isValid={isValid}
             />
           ),
-          [navigation, handleSubmit, errors, touched, values, isValid]
+          [navigation, handleSubmit, errors, touched, values, isValid, endTime]
         )
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
