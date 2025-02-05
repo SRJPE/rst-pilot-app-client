@@ -196,9 +196,7 @@ function CatchCategoricalQC({
         date.setSeconds(0)
         date.setMilliseconds(0)
         const dateTime = date.getTime()
-        const normalizedDate = normalizeDate(
-          new Date(trapVisitTimeEnd.replace('Z', '-08:00'))
-        )
+        const normalizedDate = normalizeDate(new Date(trapVisitTimeEnd))
         // const stagedForSubmission = catchResponse.stagedForSubmission
 
         const marks = [

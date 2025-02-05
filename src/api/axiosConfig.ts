@@ -20,9 +20,7 @@ import { storeAccessTokens } from '../utils/authUtils'
 const dateTransformer: AxiosRequestTransformer = (data: any) => {
   if (data instanceof Date) {
     // do your specific formatting here
-    return data
-      .toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })
-      .replace(/\u202F/g, ' ')
+    return data.toISOString()
   }
   if (Array.isArray(data)) {
     return data.map(val => dateTransformer(val))
@@ -30,6 +28,51 @@ const dateTransformer: AxiosRequestTransformer = (data: any) => {
   if (typeof data === 'object' && data !== null) {
     return Object.fromEntries(
       Object.entries(data).map(([key, val]) => [key, dateTransformer(val)])
+    )
+  }
+  return data
+}
+
+// const responseDateTransformer: AxiosRequestTransformer = (data: any) => {
+//   if (data instanceof Date) {
+//     console.log('data: ', data)
+//     // do your specific formatting here
+//     const test = moment.utc(data).local().format()
+//     console.log('test', test)
+//     return test
+//   }
+//   if (Array.isArray(data)) {
+//     return data.map(val => responseDateTransformer(val))
+//   }
+//   if (typeof data === 'object' && data !== null) {
+//     return Object.fromEntries(
+//       Object.entries(data).map(([key, val]) => [
+//         key,
+//         responseDateTransformer(val),
+//       ])
+//     )
+//   }
+//   return data
+// }
+
+// Function to convert UTC date strings to local Date objects
+const convertUTCToLocal: any = (data: any) => {
+  if (
+    typeof data === 'string' &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(data)
+  ) {
+    // Convert to local time
+    return moment.utc(data).local().format()
+  } else if (Array.isArray(data)) {
+    // Recursively process each item in an array
+    return data.map(convertUTCToLocal)
+  } else if (typeof data === 'object' && data !== null) {
+    // Recursively process each property of an object
+    return Object.fromEntries(
+      Object.entries(data).map(([key, value]) => [
+        key,
+        convertUTCToLocal(value),
+      ])
     )
   }
   return data
@@ -43,9 +86,22 @@ const api = axios.create({
   transformRequest: [dateTransformer].concat(
     axios.defaults.transformRequest as AxiosRequestTransformer[]
   ),
+  // transformResponse: [responseDateTransformer],
+  transformResponse: [
+    data => {
+      try {
+        let parsed = JSON.parse(data)
+        return convertUTCToLocal(parsed)
+      } catch (e) {
+        return data // Return as-is if it's not valid JSON
+      }
+    },
+  ],
   timeout: 10000,
   signal: controller.signal,
 })
+
+;('2025-01-22T05:31:57-06:00')
 
 // Axios middleware to retrieve and add authorization token
 api.interceptors.request.use(

@@ -37,3 +37,8 @@ export const generatePaginationRecordsLabel = (
 
   return `Page ${pageNumber} (Records ${startRecord} - ${endRecord} of ${totalRecords})`
 }
+
+export const convertUTCToLocalTime = (utcTime: string) => {
+  const date = new Date(utcTime)
+  return date.toLocaleString()
+}

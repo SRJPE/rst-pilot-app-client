@@ -20,6 +20,7 @@ interface InitialStateI {
   previousCatchRawSubmissions: CatchRawSubmissionI[]
   qcTrapVisitSubmissions: any[]
   qcCatchRawSubmissions: any[]
+  qcCatchRawDeletions: any[]
 }
 
 interface TrapVisitSubmissionI {
@@ -92,6 +93,7 @@ const initialState: InitialStateI = {
   previousCatchRawSubmissions: [],
   qcTrapVisitSubmissions: [],
   qcCatchRawSubmissions: [],
+  qcCatchRawDeletions: [],
 }
 
 // Async actions API calls
@@ -231,6 +233,7 @@ export const postQCSubmissions = createAsyncThunk(
         state.trapVisitFormPostBundler.qcTrapVisitSubmissions
       const qcCatchRawSubmissions =
         state.trapVisitFormPostBundler.qcCatchRawSubmissions
+      console.log('state', state.trapVisitFormPostBundler.qcCatchRawDeletions)
 
       if (qcTrapVisitSubmissions.length || qcCatchRawSubmissions.length) {
         const trapPromises = qcTrapVisitSubmissions.map(
@@ -904,6 +907,11 @@ export const trapVisitPostBundler = createSlice({
         state.qcCatchRawSubmissions.push(qcCatchRaw)
       }
     },
+    catchRawQCDeletion: (state, action) => {
+      let { catchRawId } = action.payload
+
+      state.qcCatchRawDeletions.push(catchRawId)
+    },
     reset: () => {
       return initialState
     },
@@ -1034,6 +1042,7 @@ export const {
   clearPendingTrapVisitSubs,
   clearPendingCatchRawSubs,
   addMissingFetchedRecords,
+  catchRawQCDeletion,
   // addMissingFetchedTrapVisitSubs,
   // addMissingFetchedCatchRawSubs,
 } = trapVisitPostBundler.actions

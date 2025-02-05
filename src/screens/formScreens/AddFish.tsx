@@ -1378,6 +1378,7 @@ const AddFishContent = ({
                 const activeTabId = tabSlice.activeTabId
                 if (activeTabId) {
                   let payload = returnFormValues()
+                  console.log('payload', payload)
                   saveIndividualFish({
                     tabId: activeTabId,
                     formValues: payload,

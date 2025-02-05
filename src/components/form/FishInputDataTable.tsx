@@ -138,8 +138,6 @@ const FishInputDataTable = ({
     return objCopy
   }
 
-  console.log('Object.keys(fishStore)', Object.keys(fishStore))
-
   return (
     <DataTable>
       <DataTable.Header>

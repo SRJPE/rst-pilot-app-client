@@ -111,6 +111,12 @@ const Home = ({
   }, [previousTrapVisits, visitSetupDefaultState])
 
   useEffect(() => {
+    console.log(
+      userCredentialsStore.id,
+      connectivityState.isConnected,
+      connectivityState.isInternetReachable,
+      userCredentialsStore?.userPrograms?.length
+    )
     if (
       userCredentialsStore?.id &&
       connectivityState.isConnected &&

@@ -121,14 +121,10 @@ function TrapQC({
 
         const trapVisitId = createdTrapVisitResponse.id
         const qcCompleted = createdTrapVisitResponse.qcCompleted
-        // account for pacific time zone
         const trapVisitTimeEnd = new Date(
-          createdTrapVisitResponse.trapVisitTimeEnd.replace('Z', '-08:00')
+          createdTrapVisitResponse.trapVisitTimeEnd
         )
 
-        // const pacificDate = parsePacificTime(
-        //   createdTrapVisitResponse.trapVisitTimeEnd
-        // )
         const normalizedDate = normalizeDate(trapVisitTimeEnd)
 
         if (trapVisitId) {

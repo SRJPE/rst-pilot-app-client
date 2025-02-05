@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -434,11 +434,7 @@ const IncompleteSections = ({
               })
             }
 
-            const filteredData = dataCopy.filter((obj: any) => {
-              return obj.UID === fishValue.UID
-            })
-
-            return filteredData.map((obj: any) => {
+            return dataCopy.map((obj: any) => {
               obj.crewMember = findCrewIdsFromSelectedCrewNames([
                 obj.crewMember,
               ])[0]
