@@ -407,7 +407,7 @@ const IncompleteSections = ({
         fishStoreKeys.forEach(key => {
           const fishValue = fishInputState[tabId].fishStore[key]
 
-          const filterAndPrepareData = (data: Array<any>) => {
+          const filterAndPrepareData = (data: Array<any>, hasUid: boolean) => {
             let dataCopy = cloneDeep(data)
             //before I filter the data I need to prepare the appliedMarks Array
             //if the data is NOT from genetic sample:
@@ -434,7 +434,15 @@ const IncompleteSections = ({
               })
             }
 
-            return dataCopy.map((obj: any) => {
+            let filteredData = dataCopy
+
+            if (hasUid) {
+              filteredData = dataCopy.filter((obj: any) => {
+                return obj.UID === fishValue.UID
+              })
+            }
+
+            return filteredData.map((obj: any) => {
               obj.crewMember = findCrewIdsFromSelectedCrewNames([
                 obj.crewMember,
               ])[0]
@@ -524,9 +532,13 @@ const IncompleteSections = ({
               }
             }),
             geneticSamplingData: filterAndPrepareData(
-              addGeneticSamplesState.values
+              addGeneticSamplesState.values,
+              true
             ),
-            appliedMarks: filterAndPrepareData(fishValue?.appliedMarks || []),
+            appliedMarks: filterAndPrepareData(
+              fishValue?.appliedMarks || [],
+              false
+            ),
           })
         })
       }
