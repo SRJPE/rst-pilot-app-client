@@ -65,11 +65,13 @@ export const userCredentialsSlice = createSlice({
       return state
     },
     editProfile: (state, action) => {
+      const { agency_definition, ...payload } = action.payload
+
       api.patch(`user/${state.azureUid}`, { ...action.payload }).catch(err => {
         throw err
       })
       api.put(`/personnel/${state.azureUid}`, {
-        ...action.payload,
+        ...payload,
       })
       return (state = {
         ...state,
@@ -79,7 +81,8 @@ export const userCredentialsSlice = createSlice({
         firstName: action.payload.first_name,
         lastName: action.payload.last_name,
         phone: action.payload.phone,
-        agencyId: action.payload.agencyId,
+        agencyId: action.payload.agency_id,
+        agencyDefinition: agency_definition,
         role: action.payload.role,
       })
     },
