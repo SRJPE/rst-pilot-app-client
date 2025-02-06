@@ -38,11 +38,11 @@ const QuickAddCrewTable = ({
     (state: RootState) => state.dropdowns.values.fundingAgency
   )
 
-  const crewMembers = Object.values(crewMembersStore)
+  const crewMembers = Object.values(crewMembersStore) as PersonnelObject[]
 
   const checkIsCrewMember = (personnel: PersonnelObject) =>
     crewMembers.find(crewMember => {
-      return crewMember.email === personnel.email
+      return crewMember.email?.toLowerCase() === personnel.email?.toLowerCase()
     })
 
   const [page, setPage] = useState(0)
