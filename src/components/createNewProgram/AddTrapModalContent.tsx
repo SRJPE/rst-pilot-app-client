@@ -53,7 +53,6 @@ const AddTrapModalContent = ({
         touched,
         errors,
         values,
-        isValid,
       }) => {
         useEffect(() => {
           setValues(modalDataTemp)
@@ -186,7 +185,7 @@ const AddTrapModalContent = ({
                 mx='2'
                 px='10'
                 shadow='3'
-                isDisabled={!isValid}
+                isDisabled={!trappingSitesSchema.isValidSync(values)}
                 onPress={() => {
                   handleSubmit()
                   closeModal()
