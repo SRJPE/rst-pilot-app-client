@@ -42,11 +42,6 @@ const Profile = ({
   connectivityStore: any
   navigation: any
 }) => {
-  console.log(
-    '🚀 ~ file: Profile.tsx:44 ~ connectivityStore:',
-    connectivityStore
-  )
-
   const dispatch = useDispatch<AppDispatch>()
   const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false)
   const [selectedMonitoringProgramInfo, setSelectedMonitoringProgramInfo] =
@@ -136,7 +131,19 @@ const Profile = ({
   return (
     <>
       <Box overflow='hidden'>
-        <VStack alignItems='center' marginTop='16' marginBottom='8'>
+        <HStack justifyContent='flex-end' margin={5}>
+          <Button onPress={() => navigation.navigate('Home')}>
+            <Icon
+              as={Ionicons}
+              name={'home'}
+              size={'xl'}
+              opacity={0.75}
+              color={'primary'}
+              mr='1'
+            />
+          </Button>
+        </HStack>
+        <VStack alignItems='center' marginBottom='8'>
           <Text fontSize={'3xl'}>{userCredentialsStore.displayName}</Text>
           <Text fontSize={'lg'}>{userCredentialsStore.emailAddress}</Text>
           <Text fontSize={'xl'} mb={5}>
