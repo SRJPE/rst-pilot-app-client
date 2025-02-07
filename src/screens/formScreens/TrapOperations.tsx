@@ -306,6 +306,8 @@ const TrapOperations = ({
     }
   }, [activeTabId, reduxState])
 
+  useEffect(() => {}, [endTime])
+
   const handleNavButtonClick = (
     direction: 'left' | 'right',
     values: any,

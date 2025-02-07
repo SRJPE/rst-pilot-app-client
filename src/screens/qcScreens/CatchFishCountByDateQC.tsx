@@ -1,13 +1,16 @@
-import { MaterialIcons } from '@expo/vector-icons'
-import { Button, HStack, View, VStack, Text, Box } from 'native-base'
-import { useEffect, useState } from 'react'
+import {
+  Button,
+  HStack,
+  View,
+  VStack,
+  Text,
+  Box,
+  ScrollView,
+} from 'native-base'
+import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-
-import {
-  catchRawQCSubmission,
-  postQCSubmissions,
-} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { postQCSubmissions } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
 import { connect } from 'react-redux'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -106,6 +109,10 @@ function CatchFishCountByDateQC({
       )
     })
 
+    qcDataFiltered.sort(
+      (a, b) => a.createdCatchRawResponse.id - b.createdCatchRawResponse.id
+    )
+
     setTableData(qcDataFiltered)
   }, [selectedDate, qcCatchRawSubmissions])
 
@@ -114,37 +121,8 @@ function CatchFishCountByDateQC({
     setSelectedDate(currentDate)
   }
 
-  const handleSubmit = () => {
-    // if (nestedModalData && nestedModalInputValue) {
-    //   if (`${nestedModalData.value}` !== `${nestedModalInputValue.value}`) {
-    //     let submissions: any[] = []
-    //     let identifier = nestedModalData.fieldClicked
-    //     let submissionOne = {
-    //       fieldName:
-    //         identifierToName[identifier as keyof typeof identifierToName],
-    //       value: nestedModalInputValue.value,
-    //     }
-    //     submissions.push(submissionOne)
-    //     if (nestedModalComment) {
-    //       let submissionTwo = {
-    //         fieldName: 'Comments',
-    //         value: nestedModalComment,
-    //       }
-    //       submissions.push(submissionTwo)
-    //     }
-    //     dispatch(
-    //       catchRawQCSubmission({
-    //         catchRawId: nestedModalData.catchRawId,
-    //         userId: userCredentialsStore.id,
-    //         submissions,
-    //       })
-    //     )
-    //   }
-    // }
-  }
-
   return (
-    <View flex={1} bg='#fff'>
+    <ScrollView flex={1} bg='#fff'>
       <VStack alignItems={'center'} flex={1}>
         <Text fontSize={'2xl'} fontWeight={300} mb={15} textAlign='center'>
           Select a date to see total daily counts for the selected date.
@@ -166,56 +144,58 @@ function CatchFishCountByDateQC({
 
         {selectedDate &&
           (tableData.length > 0 ? (
-            <Box width='100%' marginBottom={5}>
-              <QCFishDataTable
-                tableData={tableData}
-                taxonState={taxonState}
-                runState={runState}
-                lifeStageState={lifeStageState}
-                markTypeState={markTypeState}
-                markColorState={markColorState}
-                markPositionState={markPositionState}
-                navigation={navigation}
-              />
-            </Box>
+            <>
+              <Box width='100%' marginBottom={5}>
+                <QCFishDataTable
+                  tableData={tableData}
+                  taxonState={taxonState}
+                  runState={runState}
+                  lifeStageState={lifeStageState}
+                  markTypeState={markTypeState}
+                  markColorState={markColorState}
+                  markPositionState={markPositionState}
+                  navigation={navigation}
+                  userCredentialsStore={userCredentialsStore}
+                />
+              </Box>
+              <View flex={1}></View>
+
+              <HStack width={'full'} justifyContent={'space-between'}>
+                <Button
+                  marginBottom={5}
+                  width='49%'
+                  height='20'
+                  shadow='5'
+                  bg='secondary'
+                  onPress={() => {
+                    navigation.goBack()
+                  }}
+                >
+                  <Text fontSize='xl' color='primary' fontWeight={'bold'}>
+                    Back
+                  </Text>
+                </Button>
+                <Button
+                  marginBottom={5}
+                  width='49%'
+                  height='20'
+                  shadow='5'
+                  bg='primary'
+                  onPress={() => {
+                    dispatch(postQCSubmissions())
+                  }}
+                >
+                  <Text fontSize='xl' color='white' fontWeight={'bold'}>
+                    Save
+                  </Text>
+                </Button>
+              </HStack>
+            </>
           ) : (
             <Text fontSize='xl'>No data available for this date</Text>
           ))}
-
-        <View flex={1}></View>
-
-        <HStack width={'full'} justifyContent={'space-between'}>
-          <Button
-            marginBottom={5}
-            width='49%'
-            height='20'
-            shadow='5'
-            bg='secondary'
-            onPress={() => {
-              navigation.goBack()
-            }}
-          >
-            <Text fontSize='xl' color='primary' fontWeight={'bold'}>
-              Back
-            </Text>
-          </Button>
-          <Button
-            marginBottom={5}
-            width='49%'
-            height='20'
-            shadow='5'
-            bg='primary'
-            onPress={() => {
-              dispatch(postQCSubmissions())
-            }}
-          >
-            <Text fontSize='xl' color='white' fontWeight={'bold'}>
-              Save
-            </Text>
-          </Button>
-        </HStack>
       </VStack>
-    </View>
+    </ScrollView>
   )
 }
 

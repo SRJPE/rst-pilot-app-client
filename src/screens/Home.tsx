@@ -97,13 +97,13 @@ const Home = ({
       return {
         date: new Date(
           trapVisit.createdTrapVisitResponse.trapVisitTimeEnd
-        ).toLocaleDateString('en-US'),
+        )?.toLocaleDateString('en-US'),
         streamName: find(visitSetupDefaultState.programs, {
           id: trapVisit.createdTrapVisitResponse.programId,
-        }).streamName,
+        })?.streamName,
         trapName: find(visitSetupDefaultState.trapLocations, {
           id: trapVisit.createdTrapVisitResponse.trapLocationId,
-        }).trapName,
+        })?.trapName,
       }
     })
 
@@ -111,7 +111,11 @@ const Home = ({
   }, [previousTrapVisits, visitSetupDefaultState])
 
   useEffect(() => {
-    if (userCredentialsStore?.id && connectivityState.isConnected) {
+    if (
+      userCredentialsStore?.id &&
+      connectivityState.isConnected &&
+      connectivityState.isInternetReachable
+    ) {
       try {
         dispatch(getVisitSetupDefaults(userCredentialsStore.id))
         dispatch(getTrapVisitDropdownValues())
@@ -123,6 +127,7 @@ const Home = ({
   }, [
     userCredentialsStore.id,
     connectivityState.isConnected,
+    connectivityState.isInternetReachable,
     userCredentialsStore?.userPrograms?.length,
   ])
 

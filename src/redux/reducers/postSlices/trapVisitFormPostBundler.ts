@@ -20,6 +20,7 @@ interface InitialStateI {
   previousCatchRawSubmissions: CatchRawSubmissionI[]
   qcTrapVisitSubmissions: any[]
   qcCatchRawSubmissions: any[]
+  qcCatchRawDeletions: any[]
 }
 
 interface TrapVisitSubmissionI {
@@ -92,6 +93,7 @@ const initialState: InitialStateI = {
   previousCatchRawSubmissions: [],
   qcTrapVisitSubmissions: [],
   qcCatchRawSubmissions: [],
+  qcCatchRawDeletions: [],
 }
 
 // Async actions API calls
@@ -659,7 +661,7 @@ export const trapVisitPostBundler = createSlice({
         let catchRawToQC: any = state.previousCatchRawSubmissions[catchRawIdx]
 
         for (const submission of submissions) {
-          switch (submission.fieldName) {
+          switch (submission?.fieldName) {
             case 'Species':
               catchRawToQC.createdCatchRawResponse.taxonCode = submission.value
               break
@@ -763,6 +765,13 @@ export const trapVisitPostBundler = createSlice({
             default:
               break
           }
+
+          if (submission?.isFullObject) {
+            catchRawToQC.createdCatchRawResponse = {
+              ...catchRawToQC.createdCatchRawResponse,
+              ...submission.value,
+            }
+          }
         }
 
         catchRawToQC.createdCatchRawResponse.qcCompleted = true
@@ -782,10 +791,9 @@ export const trapVisitPostBundler = createSlice({
         let qcCatchRaw: any = state.qcCatchRawSubmissions[qcCatchRawIdx]
 
         qcCatchRaw.createdCatchRawResponse.qcCompletedBy = userId
-        console.log('qcCatchRaw1', qcCatchRaw)
 
         for (const submission of submissions) {
-          switch (submission.fieldName) {
+          switch (submission?.fieldName) {
             case 'Species':
               qcCatchRaw.createdCatchRawResponse.taxonCode = submission.value
               break
@@ -883,18 +891,25 @@ export const trapVisitPostBundler = createSlice({
             default:
               break
           }
+          if (submission?.isFullObject) {
+            qcCatchRaw.createdCatchRawResponse = {
+              ...qcCatchRaw.createdCatchRawResponse,
+              ...submission.value,
+            }
+          }
         }
-
-        console.log('qcCatchRaw2', qcCatchRaw)
 
         state.qcCatchRawSubmissions = [
           ...state.qcCatchRawSubmissions.slice(0, qcCatchRawIdx),
           ...state.qcCatchRawSubmissions.slice(qcCatchRawIdx + 1),
         ]
         state.qcCatchRawSubmissions.push(qcCatchRaw)
-
-        console.log('end')
       }
+    },
+    catchRawQCDeletion: (state, action) => {
+      let { catchRawId } = action.payload
+
+      state.qcCatchRawDeletions.push(catchRawId)
     },
     reset: () => {
       return initialState
@@ -1026,6 +1041,7 @@ export const {
   clearPendingTrapVisitSubs,
   clearPendingCatchRawSubs,
   addMissingFetchedRecords,
+  catchRawQCDeletion,
   // addMissingFetchedTrapVisitSubs,
   // addMissingFetchedCatchRawSubs,
 } = trapVisitPostBundler.actions

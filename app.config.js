@@ -12,6 +12,14 @@ export default ({ config }) => {
     ios: {
       bundleIdentifier: 'com.flowwest.datatackle',
       supportsTablet: true,
+      infoPlist: {
+        NSLocationWhenInUseUsageDescription:
+          'This app requires access to your location while using the app.',
+        NSLocationAlwaysUsageDescription:
+          'This app requires access to your location even when the app is in the background.',
+        NSLocationAlwaysAndWhenInUseUsageDescription:
+          'This app needs access to your location both when using the app and in the background to provide a better experience.',
+      },
     },
     android: {
       package: 'com.flowwest.datatackle',
