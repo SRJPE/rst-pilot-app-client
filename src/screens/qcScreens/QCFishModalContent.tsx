@@ -200,8 +200,6 @@ const QCFishModalContent = ({
         adiposeClipped: adiposeClipped?.value,
       }
 
-      console.log('updatedCatchRawResponse', updatedCatchRawResponse)
-
       dispatch(
         catchRawQCSubmission({
           catchRawId: createdCatchRawResponse.id,

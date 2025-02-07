@@ -211,7 +211,6 @@ const TrapOperations = ({
       if (values.recordTurbidityInPostProcessing) {
         values.waterTurbidity = null
       }
-      console.log('endTime', endTime.toISOString())
       dispatch(
         saveTrapOperations({
           tabId,
@@ -293,7 +292,6 @@ const TrapOperations = ({
 
   const onEndTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
-    console.log('selectedDate', selectedDate.toISOString())
     setEndTime(currentDate)
   }
 
@@ -303,15 +301,12 @@ const TrapOperations = ({
         reduxState[activeTabId]?.values?.trapVisitStopTime &&
         reduxState[activeTabId]?.values?.trapVisitStopTime !== 'Invalid Date'
       ) {
-        console.log('wtf')
         setEndTime(reduxState[activeTabId]?.values?.trapVisitStopTime)
       }
     }
   }, [activeTabId, reduxState])
 
-  useEffect(() => {
-    console.log('et', endTime.toISOString())
-  }, [endTime])
+  useEffect(() => {}, [endTime])
 
   const handleNavButtonClick = (
     direction: 'left' | 'right',

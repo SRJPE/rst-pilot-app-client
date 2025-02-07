@@ -128,8 +128,6 @@ function TrapQC({
         const normalizedDate = normalizeDate(trapVisitTimeEnd)
 
         if (trapVisitId) {
-          console.log('trapVisitTimeEnd', createdTrapVisitResponse)
-          console.log('normalizedDate', normalizedDate)
           let temp = createdTrapVisitEnvironmentalResponse
             ? createdTrapVisitEnvironmentalResponse.filter((item: any) => {
                 return item.measureName === 'water temperature'

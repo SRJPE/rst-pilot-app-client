@@ -233,7 +233,6 @@ export const postQCSubmissions = createAsyncThunk(
         state.trapVisitFormPostBundler.qcTrapVisitSubmissions
       const qcCatchRawSubmissions =
         state.trapVisitFormPostBundler.qcCatchRawSubmissions
-      console.log('state', state.trapVisitFormPostBundler.qcCatchRawDeletions)
 
       if (qcTrapVisitSubmissions.length || qcCatchRawSubmissions.length) {
         const trapPromises = qcTrapVisitSubmissions.map(

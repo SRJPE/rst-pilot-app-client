@@ -33,28 +33,6 @@ const dateTransformer: AxiosRequestTransformer = (data: any) => {
   return data
 }
 
-// const responseDateTransformer: AxiosRequestTransformer = (data: any) => {
-//   if (data instanceof Date) {
-//     console.log('data: ', data)
-//     // do your specific formatting here
-//     const test = moment.utc(data).local().format()
-//     console.log('test', test)
-//     return test
-//   }
-//   if (Array.isArray(data)) {
-//     return data.map(val => responseDateTransformer(val))
-//   }
-//   if (typeof data === 'object' && data !== null) {
-//     return Object.fromEntries(
-//       Object.entries(data).map(([key, val]) => [
-//         key,
-//         responseDateTransformer(val),
-//       ])
-//     )
-//   }
-//   return data
-// }
-
 // Function to convert UTC date strings to local Date objects
 const convertUTCToLocal: any = (data: any) => {
   if (
@@ -100,8 +78,6 @@ const api = axios.create({
   timeout: 10000,
   signal: controller.signal,
 })
-
-;('2025-01-22T05:31:57-06:00')
 
 // Axios middleware to retrieve and add authorization token
 api.interceptors.request.use(
