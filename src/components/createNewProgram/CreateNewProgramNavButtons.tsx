@@ -131,13 +131,6 @@ const CreateNewProgramNavButtons = ({
         })
         break
       case 'Create New Program Complete':
-        // navigation?.navigate('Monitoring Program', {
-        //   screen: 'Monitoring Program New',
-        // })
-
-        // navigation?.navigate('Monitoring Program', {
-        //   screen: 'Monitoring Program New',
-        // })
         clearFormValues && clearFormValues()
         navigation.reset({
           index: 0,
@@ -185,7 +178,7 @@ const CreateNewProgramNavButtons = ({
         rightButtonText = 'Save Permitting Information'
         break
       case 'Create New Program Complete':
-        rightButtonText = 'Go Home'
+        rightButtonText = 'Return to Profile'
         break
 
       default:
