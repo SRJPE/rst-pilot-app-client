@@ -1,3 +1,4 @@
+import React from 'react'
 import { Formik } from 'formik'
 import {
   Box,
@@ -377,31 +378,27 @@ const ReleaseDataEntry = ({
               </Pressable>
 
               <Divider bg='black' />
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Confirm Release Location
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={
-                    values.releaseLocation?.releaseSiteName ||
-                    values.releaseLocation
-                  }
-                  placeholder='Location'
-                  onValueChange={handleChange('releaseLocation')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={preparedReleaseSites?.map(
-                    (releaseSite: any) => ({
-                      label: releaseSite?.releaseSiteName,
-                      value: releaseSite?.releaseSiteName,
-                    })
-                  )}
-                />
-                {touched.releaseLocation &&
-                  errors.releaseLocation &&
-                  RenderErrorMessage(errors, 'releaseLocation')}
-              </FormControl>
+
+              <CustomSelect
+                label='Confirm Release Location'
+                camelName='releaseLocation'
+                selectedValue={
+                  values.releaseLocation?.releaseSiteName ||
+                  values.releaseLocation
+                }
+                touched={touched}
+                errors={errors}
+                placeholder='Select Location'
+                onValueChange={handleChange('releaseLocation')}
+                setFieldTouched={() => setFieldTouched('releaseLocation')}
+                selectOptions={preparedReleaseSites?.map(
+                  (releaseSite: any) => ({
+                    label: releaseSite?.releaseSiteName,
+                    value: releaseSite?.releaseSiteName,
+                  })
+                )}
+              />
+
               <VStack space={2}>
                 <Text color='black' fontSize='xl'>
                   Confirm Marked Date and Time:
