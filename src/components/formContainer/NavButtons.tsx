@@ -12,6 +12,7 @@ import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { isEqual } from 'lodash'
 import { StackActions } from '@react-navigation/native'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
+import { FormikState } from 'formik'
 const NavButtons = ({
   navigation,
   handleSubmit,
@@ -26,6 +27,7 @@ const NavButtons = ({
   reduxState,
   shouldProceedToLoadingScreen = false,
   isValid,
+  resetForm,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -40,6 +42,7 @@ const NavButtons = ({
   reduxState: RootState
   shouldProceedToLoadingScreen?: boolean
   isValid?: boolean
+  resetForm?: (nextState?: Partial<FormikState<any>> | undefined) => void
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -245,6 +248,8 @@ const NavButtons = ({
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen
     if (activePage === 'Visit Setup') {
+      //If the left button the form is being reset to clear errors and input styles
+      if (resetForm) resetForm()
       dispatch(resetNavigationSlice())
       navigation.reset({
         index: 0,
