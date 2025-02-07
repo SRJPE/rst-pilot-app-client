@@ -64,7 +64,6 @@ const api = axios.create({
   transformRequest: [dateTransformer].concat(
     axios.defaults.transformRequest as AxiosRequestTransformer[]
   ),
-  // transformResponse: [responseDateTransformer],
   transformResponse: [
     data => {
       try {
