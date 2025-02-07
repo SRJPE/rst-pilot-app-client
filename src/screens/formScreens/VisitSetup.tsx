@@ -34,8 +34,7 @@ import {
   resetTabsSlice,
 } from '../../redux/reducers/formSlices/tabSlice'
 import { uniqBy, sortBy } from 'lodash'
-import { DeviceEventEmitter, Alert } from 'react-native'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
+import { DeviceEventEmitter, TouchableWithoutFeedback } from 'react-native'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import { uid } from 'uid'
 import TrapNameDropDown from '../../components/form/TrapNameDropDown'
@@ -282,7 +281,6 @@ const VisitSetup = ({
       }
     }
     dispatch(markStepCompleted({ propName: 'visitSetup' }))
-    console.log('🚀 ~ handleSubmit ~ Visit', payload)
   }
 
   const updateSelectedProgram = (streamName: string) => {
@@ -363,6 +361,7 @@ const VisitSetup = ({
     setTrapNameList(
       visitSetupDefaultsState?.trapLocations
         ?.filter((obj: any) => obj.siteName === trapSite)
+
         ?.map((trapLocation: any) => ({
           label: trapLocation?.trapName,
           value: trapLocation?.trapName,
@@ -395,9 +394,7 @@ const VisitSetup = ({
             updateActiveStep
           )
         }
-
         navigation.dispatch(StackActions.replace('Loading...'))
-
         setTimeout(() => {
           DeviceEventEmitter.emit('event.load', {
             process: () => onSubmit(values, tabSlice?.activeTabId),
@@ -415,6 +412,7 @@ const VisitSetup = ({
         touched,
         errors,
         values,
+        resetForm,
       }) => {
         useEffect(() => {
           if (
@@ -425,133 +423,112 @@ const VisitSetup = ({
           }
         }, [tabSlice.previouslyActiveTabId])
 
-        // const navButtons = useMemo(
-        //   () => (
-        //     <NavButtons
-        //       navigation={navigation}
-        //       handleSubmit={handleSubmit}
-        //       errors={
-        //         values.crew.length
-        //           ? errors
-        //           : { ...errors, crew: Boolean(values.crew.length) }
-        //       }
-        //       touched={touched}
-        //       isPaperEntry={isPaperEntry}
-        //       shouldProceedToLoadingScreen={true}
-        //     />
-        //   ),
-        //   [
-        //     navigation,
-        //     handleSubmit,
-        //     errors,
-        //     touched,
-        //     isPaperEntry,
-        //     values.crew.length,
-        //   ]
-        // )
         return (
-          <>
-            <View
-              flex={1}
-              bg='#fff'
-              px='5%'
-              py='3%'
-              borderColor='themeGrey'
-              borderWidth='15'
-            >
-              <VStack space={4}>
-                <FormControl>
-                  <HStack space={6} alignItems='center'>
-                    <FormControl.Label>
-                      <Heading>Will you be importing a paper entry?</Heading>
-                    </FormControl.Label>
-                    <Switch
-                      shadow='3'
-                      offTrackColor='secondary'
-                      onTrackColor='primary'
-                      size='lg'
-                      value={isPaperEntry}
-                      accessibilityLabel='Is the entry a paper entry?'
-                      onToggle={() => setIsPaperEntry(!isPaperEntry)}
-                    />
-                  </HStack>
-                </FormControl>
-                <Divider />
-                <Heading>Which stream are you trapping on?</Heading>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              if (crewDropDownOpen) {
+                setFieldTouched('crew', true)
+                setCrewDropDownOpen(false)
+              }
 
-                <CustomSelect
-                  label='Stream'
-                  camelName='stream'
-                  errors={errors}
-                  touched={touched}
-                  selectedValue={values.stream}
-                  placeholder='Select Stream'
-                  onValueChange={(itemValue: string) => {
-                    setFieldValue('stream', itemValue)
-                    setFieldTouched('stream', true)
-                    setFieldError('stream', undefined)
+              if (trapDropDownOpen) {
+                setFieldTouched('trapName', true)
+                setTrapDropDownOpen(false)
+              }
+            }}
+          >
+            <View flex={1} bg='#fff'>
+              <View
+                flex={1}
+                bg='#fff'
+                px='5%'
+                py='3%'
+                borderColor='themeGrey'
+                borderWidth='15'
+              >
+                <VStack space={4}>
+                  <FormControl>
+                    <HStack space={6} alignItems='center'>
+                      <FormControl.Label>
+                        <Heading>Will you be importing a paper entry?</Heading>
+                      </FormControl.Label>
+                      <Switch
+                        shadow='3'
+                        offTrackColor='secondary'
+                        onTrackColor='primary'
+                        size='lg'
+                        value={isPaperEntry}
+                        accessibilityLabel='Is the entry a paper entry?'
+                        onToggle={() => setIsPaperEntry(!isPaperEntry)}
+                      />
+                    </HStack>
+                  </FormControl>
+                  <Divider />
+                  <Heading>Which stream are you trapping on?</Heading>
+                  <CustomSelect
+                    label='Stream'
+                    camelName='stream'
+                    errors={errors}
+                    touched={touched}
+                    selectedValue={values.stream}
+                    placeholder='Select Stream'
+                    onValueChange={(itemValue: string) => {
+                      setFieldValue('stream', itemValue)
+                      setFieldTouched('stream', true)
+                      setFieldError('stream', undefined)
 
-                    if (itemValue === 'Mill Creek') {
-                      setFieldValue('trapSite', 'Mill Creek RST')
-                      setFieldTouched('trapSite', true)
-                    }
-                    if (itemValue === 'Deer Creek') {
-                      setFieldValue('trapSite', 'Deer Creek RST')
-                      setFieldTouched('trapSite', true)
-                    }
-                    updateSelectedProgram(itemValue)
-                    setFieldValue('crew', [])
-                    setFieldTouched('crew', false)
-                  }}
-                  setFieldTouched={() => setFieldTouched('stream')}
-                  selectOptions={visitSetupDefaultsState?.programs?.map(
-                    (program: any) => ({
-                      label: program?.streamName,
-                      value: program?.streamName,
-                    })
-                  )}
-                />
-
-                {values.stream && (
-                  <>
-                    <Text fontSize='lg' fontWeight='500' mt={5}>
-                      Confirm the following values:
-                    </Text>
-
-                    <CustomSelect
-                      label='Trap Site'
-                      camelName='trapSite'
-                      errors={errors}
-                      touched={touched}
-                      selectedValue={values.trapSite}
-                      placeholder='Select Trap Site'
-                      onValueChange={(itemValue: string) => {
-                        if (itemValue !== values.trapSite) {
-                          shouldShowTrapNameField(itemValue)
-                        }
-                        setFieldValue('trapSite', itemValue)
-                      }}
-                      setFieldTouched={() => setFieldTouched('trapSite')}
-                      selectOptions={uniqBy(
-                        visitSetupDefaultsState?.trapLocations
-                          ?.filter(
-                            (obj: any) => obj.programId === selectedProgramId
-                          )
-                          ?.map((trapLocation: any) => ({
-                            label: trapLocation?.siteName,
-                            value: trapLocation?.siteName,
-                          })),
-                        'label'
-                      )}
-                    />
-
-                    {showTrapNameField && (
-                      <FormControl>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Trap Name
-                          </Text>
-                        </FormControl.Label>
+                      if (itemValue === 'Mill Creek') {
+                        setFieldValue('trapSite', 'Mill Creek RST')
+                        setFieldTouched('trapSite', true)
+                      }
+                      if (itemValue === 'Deer Creek') {
+                        setFieldValue('trapSite', 'Deer Creek RST')
+                        setFieldTouched('trapSite', true)
+                      }
+                      updateSelectedProgram(itemValue)
+                      setFieldValue('crew', [])
+                      setFieldTouched('crew', false)
+                    }}
+                    setFieldTouched={() => setFieldTouched('stream')}
+                    selectOptions={visitSetupDefaultsState?.programs?.map(
+                      (program: any) => ({
+                        label: program?.streamName,
+                        value: program?.streamName,
+                      })
+                    )}
+                  />
+                  {values.stream && (
+                    <>
+                      <Text fontSize='lg' fontWeight='500' mt={5}>
+                        Confirm the following values:
+                      </Text>
+                      <CustomSelect
+                        label='Trap Site'
+                        camelName='trapSite'
+                        errors={errors}
+                        touched={touched}
+                        selectedValue={values.trapSite}
+                        placeholder='Select Trap Site'
+                        onValueChange={(itemValue: string) => {
+                          if (itemValue !== values.trapSite) {
+                            shouldShowTrapNameField(itemValue)
+                          }
+                          setFieldValue('trapSite', itemValue)
+                        }}
+                        setFieldTouched={() => setFieldTouched('trapSite')}
+                        selectOptions={uniqBy(
+                          visitSetupDefaultsState?.trapLocations
+                            ?.filter(
+                              (obj: any) => obj.programId === selectedProgramId
+                            )
+                            ?.map((trapLocation: any) => ({
+                              label: trapLocation?.siteName,
+                              value: trapLocation?.siteName,
+                            })),
+                          'label'
+                        )}
+                      />
+                      {showTrapNameField && (
                         <TrapNameDropDown
                           open={trapDropDownOpen}
                           onOpen={onTrapOpen}
@@ -563,15 +540,7 @@ const VisitSetup = ({
                           visitSetupState={visitSetupState}
                           tabSlice={tabSlice}
                         />
-                      </FormControl>
-                    )}
-
-                    <FormControl mt={trapDropDownOpen ? '4' : '0'} mb={10}>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Crew
-                        </Text>
-                      </FormControl.Label>
+                      )}
 
                       <CrewDropDown
                         open={crewDropDownOpen}
@@ -586,25 +555,25 @@ const VisitSetup = ({
                         tabId={tabSlice?.activeTabId}
                         values={values}
                       />
-                    </FormControl>
-                  </>
-                )}
-              </VStack>
+                    </>
+                  )}
+                </VStack>
+              </View>
+              <NavButtons
+                resetForm={resetForm}
+                navigation={navigation}
+                handleSubmit={handleSubmit}
+                errors={
+                  values.crew.length
+                    ? errors
+                    : { ...errors, crew: Boolean(values.crew.length) }
+                }
+                touched={touched}
+                isPaperEntry={isPaperEntry}
+                shouldProceedToLoadingScreen={true}
+              />
             </View>
-            {/* {navButtons} */}
-            <NavButtons
-              navigation={navigation}
-              handleSubmit={handleSubmit}
-              errors={
-                values.crew.length
-                  ? errors
-                  : { ...errors, crew: Boolean(values.crew.length) }
-              }
-              touched={touched}
-              isPaperEntry={isPaperEntry}
-              shouldProceedToLoadingScreen={true}
-            />
-          </>
+          </TouchableWithoutFeedback>
         )
       }}
     </Formik>
