@@ -23,6 +23,7 @@ interface FormInputComponentI {
   isDisabled?: boolean
   multiline?: boolean
   showWarning?: boolean
+  warningMessage?: string
 }
 
 export const TextInputAdornment = ({ text }: { text: string }) => {
@@ -47,6 +48,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   isDisabled = false,
   multiline = false,
   showWarning = false,
+  warningMessage = 'Value is out of range',
 }) => {
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
@@ -97,7 +99,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
 
           {showWarning && (
             <Text fontSize={14} color='amber.700'>
-              Value is out of range
+              {warningMessage}
             </Text>
           )}
         </Box>
