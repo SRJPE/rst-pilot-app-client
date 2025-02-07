@@ -7,10 +7,11 @@ import * as yup from 'yup'
 export const trapVisitSchema = yup.object().shape({
   stream: yup.string().required('Stream required'),
   trapSite: yup.string().when('stream', {
-    is: (val: string) => val !== '',
+    is: (val: string) => val !== null,
     then: yup.string().required('Trap site required'),
   }),
-  // crew: yup.array().min(1).required('Crew cannot be blank.'),
+  crew: yup.array().min(1, 'At least 1 crew member is required').required(),
+  trapName: yup.array().min(1, 'At least 1 trap name is required').required(),
 })
 
 export const trapOperationsSchema = yup.object().shape({
