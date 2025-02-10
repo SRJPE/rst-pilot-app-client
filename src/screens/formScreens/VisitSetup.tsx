@@ -182,7 +182,7 @@ const VisitSetup = ({
         // if trapNames, iterate through all trap names and create / overwrite / delete tabs
         if (values.trapName) {
           // remove any tabs that are not in values.trapName
-          if (values.trapName.length < currentTabsTrapNames.length) {
+          if (values?.trapName?.length < currentTabsTrapNames?.length) {
             Object.keys(tabSlice.tabs).forEach(tabId => {
               const tabTrapName = tabSlice.tabs[tabId].name
 

@@ -140,11 +140,11 @@ const FishInput = ({
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <Heading mb={showError ? '0' : '5'} px='5%'>
-          Which species were captured?
+        <Heading mt={5} mb={showError ? '0' : '5'} px='4'>
+          Enter Catch
         </Heading>
         <VStack space={6}>
-          <FormControl>
+          {/* <FormControl>
             {showError && (
               <HStack space={1}>
                 <Icon
@@ -201,9 +201,9 @@ const FishInput = ({
                 Other
               </Checkbox>
             </Checkbox.Group>
-          </FormControl>
+          </FormControl> */}
 
-          <HStack space={10} px='5%'>
+          <HStack space={10} px='4'>
             <Button
               bg='primary'
               p='3'
