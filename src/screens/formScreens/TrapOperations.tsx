@@ -318,16 +318,16 @@ const TrapOperations = ({
       const destination =
         direction === 'left'
           ? navigateFlowLeftButton('Trap Operations', false, navigation)
-          : navigateFlowRightButton(
+          : navigateFlowRightButton({
               values,
-              'Trap Operations',
-              false,
+              activePage: 'Trap Operations',
+              holdingForMarkRecap: false,
               navigation,
-              {
+              warnings: {
                 warningResultFlow,
                 warningResultTemp,
-              }
-            )
+              },
+            })
       const callback = () => {
         navigateHelper(
           destination,

@@ -23,7 +23,7 @@ import {
 } from '../../redux/reducers/formSlices/navigationSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { DeviceEventEmitter } from 'react-native'
 import {
   navigateHelper,
@@ -117,16 +117,25 @@ const FishProcessing = ({
   }
 
   const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
+    const tabValues = Object.keys(tabSlice.tabs).map((tabId: any) => {
+      if (tabId === activeTabId) {
+        return values
+      } else {
+        return reduxState[tabId]?.values
+      }
+    })
+
     if (activeTabId && activeTabId != 'placeholderId') {
       const destination =
         direction === 'left'
           ? navigateFlowLeftButton('Fish Processing', false, navigation)
-          : navigateFlowRightButton(
+          : navigateFlowRightButton({
               values,
-              'Fish Processing',
-              false,
-              navigation
-            )
+              activePage: 'Fish Processing',
+              holdingForMarkRecap: false,
+              navigation,
+              tabValues,
+            })
       const callback = () => {
         navigateHelper(
           destination,
@@ -196,7 +205,16 @@ const FishProcessing = ({
               shouldProceedToLoadingScreen={true}
             />
           ),
-          [navigation, handleSubmit, errors, touched, values, activePage]
+          [
+            navigation,
+            handleSubmit,
+            errors,
+            touched,
+            values,
+            activePage,
+            reduxState,
+            tabSlice,
+          ]
         )
         return (
           <>
