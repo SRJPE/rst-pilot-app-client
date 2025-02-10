@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Formik } from 'formik'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -118,7 +118,7 @@ const VisitSetup = ({
       // if no current tabs, create all new tabs
       if (!tabId) {
         // if trapName, iterate through all trap names and create tabs
-        if (values.trapName) {
+        if (values.trapName && values.trapName.length) {
           values?.trapName?.forEach((trapName: string) => {
             const newTabId = uid()
             dispatch(
