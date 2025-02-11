@@ -231,12 +231,12 @@ const CreateNewProgramHome = ({
 
         return {
           trapName,
-          dataRecorderId: 14, //to be completed when a logged in user is persisted
+          dataRecorderId: userCredentialsStore.id!,
           dataRecorderAgencyId:
             fundingAgencyValues.indexOf(
               createNewProgramHomeStore.values.fundingAgency
             ) + 1,
-          siteName: groupSiteName,
+          siteName: groupSiteName || trapName,
           coneSizeFt: Number(coneSize),
           xCoord: Number(trapLatitude),
           yCoord: Number(trapLongitude),
