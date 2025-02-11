@@ -1,19 +1,18 @@
-import { Box, HStack, Text, Button, Icon } from 'native-base'
-import { useSelector, useDispatch, connect } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
+import { Ionicons } from '@expo/vector-icons'
+import { StackActions } from '@react-navigation/native'
+import { FormikState } from 'formik'
+import { isEqual } from 'lodash'
+import { Box, Button, HStack, Icon, Text } from 'native-base'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   checkIfFormIsComplete,
   resetNavigationSlice,
   updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
-import { Ionicons } from '@expo/vector-icons'
-import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import { isEqual } from 'lodash'
-import { StackActions } from '@react-navigation/native'
+import { AppDispatch, RootState } from '../../redux/store'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
-import { FormikState } from 'formik'
 const NavButtons = ({
   navigation,
   handleSubmit,
@@ -25,6 +24,7 @@ const NavButtons = ({
   tabSlice,
   visitSetupSlice,
   fishProcessingSlice,
+  // fishInput,
   reduxState,
   shouldProceedToLoadingScreen = false,
   isValid,
@@ -39,6 +39,7 @@ const NavButtons = ({
   isPaperEntry?: boolean
   tabSlice: TabStateI
   visitSetupSlice: any
+  fishInput: any
   fishProcessingSlice: any
   reduxState: RootState
   shouldProceedToLoadingScreen?: boolean
@@ -52,6 +53,8 @@ const NavButtons = ({
   const previousPage = navigationState.steps[activeStep - 1]?.name
   const [isPaperEntryStore, setIsPaperEntryStore] = useState(false)
 
+  const fishInput = useSelector((state: RootState) => state.fishInput)
+  const fishProcessing = useSelector((state: RootState) => state.fishProcessing)
   useEffect(() => {
     setIsPaperEntryStore(checkIsPaperEntryStore())
     dispatch(checkIfFormIsComplete())
@@ -81,6 +84,7 @@ const NavButtons = ({
       ref.current = value
     }
 
+    console.log('ref', ref.current)
     return ref.current
   }
 
@@ -328,7 +332,23 @@ const NavButtons = ({
       case 'Non Functional Trap':
         return false
       case 'Fish Input':
-        return !(values?.length >= 1)
+        const allTabProcessingResults = Object.entries(fishProcessing).map(
+          resultEntry => ({
+            tabId: resultEntry[0],
+            fishProcessingResult: resultEntry[1].values.fishProcessedResult,
+          })
+        )
+        const fishInputTabValidity = allTabProcessingResults.map(result => {
+          if (result.fishProcessingResult === 'processed fish') {
+            return (
+              Object.values(fishInput[result.tabId]?.fishStore || {}).length > 0
+            )
+          }
+
+          return null
+        })
+
+        return fishInputTabValidity.includes(false)
 
       case 'Fish Processing':
         return !fishProcessingSchema.isValidSync(values)
@@ -347,8 +367,10 @@ const NavButtons = ({
   }, [
     useDeepCompareMemoize(touched),
     useDeepCompareMemoize(errors),
+    useDeepCompareMemoize(values),
     isValid,
     activePage,
+    fishInput,
   ])
 
   return (
@@ -396,6 +418,7 @@ const mapStateToProps = (state: RootState) => {
     visitSetupSlice: state.visitSetup,
     fishProcessingSlice: state.fishProcessing,
     reduxState: state,
+    fishInput: state.fishInput,
   }
 }
 
