@@ -118,31 +118,32 @@ const VisitSetup = ({
     if (!tabId) {
       // if trapName, iterate through all trap names and create tabs
       if (values.trapName) {
-        values?.trapName?.forEach((trapName: string) => {
-          const newTabId = uid()
-          dispatch(
-            saveVisitSetup({
-              tabId: newTabId,
-              values: {
-                ...payload,
-                trapName,
-                trapLocationId: getTrapLocationId({ trapName }),
-              },
-              isPaperEntry,
-            })
-          )
-          dispatch(
-            createTab({
-              tabId: newTabId,
-              tabName: trapName ?? values.trapSite,
-              trapSite: values.trapSite,
-            })
-          )
-          dispatch(
-            markVisitSetupCompleted({ tabId: newTabId, completed: true })
-          )
-          dispatch(markTrapVisitPaperEntry({ tabId: newTabId, isPaperEntry }))
-        })
+        Array.isArray(values?.trapName) &&
+          values.trapName.forEach((trapName: string) => {
+            const newTabId = uid()
+            dispatch(
+              saveVisitSetup({
+                tabId: newTabId,
+                values: {
+                  ...payload,
+                  trapName,
+                  trapLocationId: getTrapLocationId({ trapName }),
+                },
+                isPaperEntry,
+              })
+            )
+            dispatch(
+              createTab({
+                tabId: newTabId,
+                tabName: trapName ?? values.trapSite,
+                trapSite: values.trapSite,
+              })
+            )
+            dispatch(
+              markVisitSetupCompleted({ tabId: newTabId, completed: true })
+            )
+            dispatch(markTrapVisitPaperEntry({ tabId: newTabId, isPaperEntry }))
+          })
       }
       // if not trapName, create single tab from trapSite
       else {
