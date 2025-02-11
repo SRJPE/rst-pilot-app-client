@@ -11,7 +11,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "locationAlwaysAndWhenInUsePermission": "Allow DataTackle to use your location."
         }
       ],
       [
@@ -45,9 +45,11 @@
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "This app requires access to your location while using the app.",
-        "NSLocationAlwaysUsageDescription": "This app requires access to your location even when the app is in the background.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location both when using the app and in the background to provide a better experience."
+        "UIBackgroundModes": ["location", "fetch", "remote-notification"],
+        "NSLocationWhenInUseUsageDescription": "This app requires access to your location when open.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app requires access to your location even when closed.",
+        "NSLocationAlwaysUsageDescription": "This app requires access to your location when open.",
+        "deploymentTarget": "14"
       }
     },
     "android": {
