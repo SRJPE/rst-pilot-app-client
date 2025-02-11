@@ -187,12 +187,6 @@ const FishProcessing = ({
         values,
         resetForm,
       }) => {
-        console.log('🚀 ~ file: FishProcessing.tsx:182 ~ touched:', touched)
-
-        console.log('🚀 ~ file: FishProcessing.tsx:182 ~ errors:', errors)
-
-        console.log('🚀 ~ file: FishProcessing.tsx:182 ~ values:', values)
-
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 3) {
             onSubmit(values, previouslyActiveTabId)
