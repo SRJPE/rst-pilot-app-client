@@ -9,13 +9,14 @@ import Home from '../screens/Home'
 import PermitInfo from '../screens/PermitInfo'
 import SignIn from '../screens/SignIn'
 import Profile from '../screens/accountScreens/Profile'
+import InputTurbidity from '../screens/miscScreens/InputTurbidity'
 import MarkRecaptureForm from './roots/MarkRecaptureFormRoot'
 import MonitoringProgram from './roots/MonitoringProgramRoot'
 import QCForm from './roots/QCFormRoot'
 import TrapVisitForm from './roots/TrapVisitFormRoot'
 import InspectorWindow from '../screens/InspectorWindow'
 import { refreshUserToken } from '../utils/authUtils'
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
 import type { InitialStateI as UserCredentialStopeProps } from '../redux/reducers/userCredentialsSlice'
 import type { InitialStateI as ConnectivityStoreProps } from '../redux/reducers/connectivitySlice'
@@ -120,6 +121,7 @@ const DrawerNavigator = ({
             name='Monitoring Program'
             component={MonitoringProgram}
           />
+          <Drawer.Screen name='Input Turbidity' component={InputTurbidity} />
         </>
       )}
     </Drawer.Navigator>

@@ -2,6 +2,7 @@ import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
+  checkIfFormIsComplete,
   resetNavigationSlice,
   updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
@@ -53,7 +54,14 @@ const NavButtons = ({
 
   useEffect(() => {
     setIsPaperEntryStore(checkIsPaperEntryStore())
+    dispatch(checkIfFormIsComplete())
   }, [tabSlice.activeTabId])
+
+  useEffect(() => {
+    if (activePage === 'Incomplete Sections') {
+      dispatch(checkIfFormIsComplete())
+    }
+  }, [activePage])
 
   const checkIsPaperEntryStore = () => {
     if (isPaperEntry != null) return isPaperEntry

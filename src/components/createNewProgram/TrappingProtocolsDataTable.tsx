@@ -33,6 +33,8 @@ const TrappingProtocolsDataTable = ({
         <DataTable.Title style={{ flex: 1, padding: 3 }}>{''}</DataTable.Title>
       </DataTable.Header>
       {processedData.map((trappingProtocolObject: any, idx: number) => {
+        const cellValues = { ...trappingProtocolObject } as any
+        delete cellValues?.uid
         return (
           <DataTable.Row style={[{ height: 55, display: 'flex' }]} key={idx}>
             {Object.values(trappingProtocolObject).map(

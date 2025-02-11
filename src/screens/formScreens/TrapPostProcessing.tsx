@@ -43,7 +43,7 @@ import {
   navigateFlowRightButton,
   navigateFlowLeftButton,
 } from '../../utils/utils'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { StackActions } from '@react-navigation/native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -241,12 +241,12 @@ const TrapPostProcessing = ({
               navigation,
               values
             )
-          : navigateFlowRightButton(
+          : navigateFlowRightButton({
               values,
               activePage,
-              willBeHoldingFishForMarkRecapture,
-              navigation
-            )
+              holdingForMarkRecap: willBeHoldingFishForMarkRecapture,
+              navigation,
+            })
       const callback = () => {
         navigateHelper(
           destination,

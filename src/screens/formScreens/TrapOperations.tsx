@@ -335,6 +335,8 @@ const TrapOperations = ({
     }
   }, [activeTabId, reduxState])
 
+  useEffect(() => {}, [endTime])
+
   const handleNavButtonClick = (
     direction: 'left' | 'right',
     values: any,
@@ -345,16 +347,16 @@ const TrapOperations = ({
       const destination =
         direction === 'left'
           ? navigateFlowLeftButton('Trap Operations', false, navigation)
-          : navigateFlowRightButton(
+          : navigateFlowRightButton({
               values,
-              'Trap Operations',
-              false,
+              activePage: 'Trap Operations',
+              holdingForMarkRecap: false,
               navigation,
-              {
+              warnings: {
                 warningResultFlow,
                 warningResultTemp,
-              }
-            )
+              },
+            })
       const callback = () => {
         navigateHelper(
           destination,
@@ -433,7 +435,7 @@ const TrapOperations = ({
               isValid={isValid}
             />
           ),
-          [navigation, handleSubmit, errors, touched, values, isValid]
+          [navigation, handleSubmit, errors, touched, values, isValid, endTime]
         )
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {

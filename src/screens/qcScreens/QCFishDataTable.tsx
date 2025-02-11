@@ -7,6 +7,7 @@ import { Row, IconButton, Icon, Box, Text, VStack, View } from 'native-base'
 import { Entypo } from '@expo/vector-icons'
 import CustomModal from '../../components/Shared/CustomModal'
 import QCFishModalContent from './QCFishModalContent'
+import { generatePaginationRecordsLabel } from '../../utils/helpers/helperFunctions'
 
 const headers = [
   'Species',
@@ -53,17 +54,19 @@ const QCFishDataTable = ({
   taxonState,
   runState,
   lifeStageState,
+  userCredentialsStore,
 }: {
   tableData: any
   taxonState: any
   runState: any
   lifeStageState: any
+  userCredentialsStore: any
   markTypeState: any
   markColorState: any
   markPositionState: any
   navigation: any
 }) => {
-  const numberOfItemsPerPage = 5
+  const numberOfItemsPerPage = 10
   const [page, setPage] = React.useState(0)
   const [pageRows, setPageRows] = React.useState({})
   const [qcModalOpen, setQcModalOpen] = React.useState(false)
@@ -239,14 +242,16 @@ const QCFishDataTable = ({
 
         <DataTable.Pagination
           page={page}
-          numberOfPages={Math.ceil(
-            Object.keys(tableData).length / numberOfItemsPerPage
+          numberOfPages={Math.ceil(tableData.length / numberOfItemsPerPage)}
+          label={generatePaginationRecordsLabel(
+            page + 1,
+            numberOfItemsPerPage,
+            tableData.length
           )}
-          label={`Page ${page + 1}`}
           onPageChange={(page: number) => setPage(page)}
           numberOfItemsPerPage={numberOfItemsPerPage}
         />
-        <VStack px='4' mb={10}>
+        <VStack px='4' mb={3}>
           <Text>NR: Not Recorded</Text>
           <Text>---: Null</Text>
         </VStack>
@@ -260,6 +265,7 @@ const QCFishDataTable = ({
           <QCFishModalContent
             closeModal={closeQcModal}
             qcFishData={qcFishData}
+            userCredentialsStore={userCredentialsStore}
           />
         </CustomModal>
       )}

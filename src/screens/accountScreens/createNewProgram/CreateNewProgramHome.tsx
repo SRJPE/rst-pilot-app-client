@@ -1,4 +1,4 @@
-import { startCase } from 'lodash'
+import { find, startCase } from 'lodash'
 import { Button, Heading, HStack, Icon, Text, View, VStack } from 'native-base'
 import React, { useCallback, useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
@@ -15,7 +15,10 @@ import {
   postMonitoringProgramSubmissions,
   saveMonitoringProgramSubmission,
 } from '../../../redux/reducers/postSlices/monitoringProgramPostBundler'
-import { InitialStateI as UserCredentialsInitialState } from '../../../redux/reducers/userCredentialsSlice'
+import {
+  getUserPrograms,
+  InitialStateI as UserCredentialsInitialState,
+} from '../../../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
 import { returnDefinitionArray } from '../../../utils/utils'
 // import { postMonitoringProgramFilesToDB } from '../../../utils/hooks/useCacheDirectory'
@@ -150,7 +153,7 @@ const CreateNewProgramHome = ({
     }
   }, [createNewProgramHomeStore])
 
-  const POSTMonitoringProgramSubmissions = () => {
+  const POSTMonitoringProgramSubmissionsHandler = async () => {
     try {
       const metaData = handleSaveProgramMetaData()
       const trappingSites = handleSaveTrappingSites()
@@ -174,11 +177,23 @@ const CreateNewProgramHome = ({
         connectivityState.isInternetReachable
       ) {
         console.log('CONNECTED')
-        dispatch(postMonitoringProgramSubmissions())
+        await dispatch(postMonitoringProgramSubmissions())
+
+        if (userCredentialsStore.id) {
+          dispatch(getUserPrograms(userCredentialsStore.id))
+        }
       }
     } catch (error) {
       console.error(error)
     }
+  }
+
+  const getDropdownId = (dropdownName: string, value: string) => {
+    console.log('value', value)
+    return (
+      find(dropdownsState.values[dropdownName], { definition: value })?.id ||
+      null
+    )
   }
 
   // Program Meta Data
@@ -186,15 +201,11 @@ const CreateNewProgramHome = ({
     const { fundingAgency, monitoringProgramName, streamName } =
       createNewProgramHomeStore.values
 
-    const fundingAgencyValues = returnDefinitionArray(
-      dropdownsState.values.fundingAgency
-    )
-
     const programMetaDataSubmission: ProgramMetaDataSubmissionI = {
       programName: monitoringProgramName,
       streamName: streamName,
       personnelLead: userCredentialsStore.id!,
-      fundingAgency: fundingAgencyValues.indexOf(fundingAgency) + 1,
+      fundingAgency: getDropdownId('fundingAgency', fundingAgency),
       // efficiencyProtocolsDocumentLink: 'VARCHAR(200)', //to be completed
       // trappingProtocolsDocumentLink: 'VARCHAR(200)', //to be completed
       createdAt: new Date(),
@@ -206,9 +217,6 @@ const CreateNewProgramHome = ({
 
   // Trapping Sites
   const handleSaveTrappingSites = useCallback(() => {
-    const fundingAgencyValues = returnDefinitionArray(
-      dropdownsState.values.fundingAgency
-    )
     const trappingSitesSubmission: Array<TrappingSitesSubmissionI> =
       Object.values(trappingSitesStore).map((trapSiteObj: any) => {
         const {
@@ -232,11 +240,10 @@ const CreateNewProgramHome = ({
         return {
           trapName,
           dataRecorderId: userCredentialsStore.id!,
-          dataRecorderAgencyId:
-            fundingAgencyValues.indexOf(
-              createNewProgramHomeStore.values.fundingAgency
-            ) + 1,
+
           siteName: groupSiteName || trapName,
+          dataRecorderAgencyId: getDropdownId('fundingAgency', fundingAgency),
+
           coneSizeFt: Number(coneSize),
           xCoord: Number(trapLatitude),
           yCoord: Number(trapLongitude),
@@ -247,10 +254,7 @@ const CreateNewProgramHome = ({
           // projection: 'VARCHAR(100)', //ignore for now - release_site_projection
           // datum: 'VARCHAR(100)', //ignore for now - release_site_datum
           gageNumber: Number(USGSStationNumber),
-          gageAgency:
-            fundingAgencyValues.indexOf(
-              createNewProgramHomeStore.values.fundingAgency
-            ) + 1,
+          gageAgency: getDropdownId('fundingAgency', 'USGS'),
           // comments: 'VARCHAR(500)', //to be completed
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -262,9 +266,6 @@ const CreateNewProgramHome = ({
 
   // Crew Members / Personnel / Program Personnel
   const handleSaveCrewMembers = useCallback(() => {
-    const fundingAgencyValues = returnDefinitionArray(
-      dropdownsState.values.fundingAgency
-    )
     const crewMembersSubmission: Array<CrewMembersSubmissionI> = Object.values(
       crewMembersStore
     ).map((crewMemberObj: any) => {
@@ -278,13 +279,12 @@ const CreateNewProgramHome = ({
         orcidId,
         id,
       } = crewMemberObj
-      const agencyIndexOf = fundingAgencyValues.indexOf(agency)
       return {
         firstName,
         lastName,
         email,
         phone: phoneNumber,
-        agencyId: agencyIndexOf ? agencyIndexOf + 1 : 11,
+        agencyId: getDropdownId('fundingAgency', agency || 'not recorded'),
         role: isLead ? 'lead' : 'non-lead',
         orcidId: orcidId,
         id,
@@ -307,9 +307,6 @@ const CreateNewProgramHome = ({
       renewalDate,
     } = efficiencyTrialProtocolsStore.values
 
-    const frequencyOfReceivingFishValues = returnDefinitionArray(
-      dropdownsState.values.frequency
-    )
     if (hatchery === '') {
       return []
     } else {
@@ -321,10 +318,10 @@ const CreateNewProgramHome = ({
           agreementStartDate: agreementStartDate,
           agreementEndDate: agreementEndDate,
           renewalDate: renewalDate,
-          frequencyOfFishCollection: frequencyOfReceivingFishValues
-            ? frequencyOfReceivingFishValues.indexOf(frequencyOfReceivingFish) +
-              1
-            : null,
+          frequencyOfFishCollection: getDropdownId(
+            'frequency',
+            frequencyOfReceivingFish
+          ),
           quantityOfFish: Number(expectedNumberOfFishReceivedAtEachPickup),
           // hatcheryFileLink: 'VARCHAR(200)', //to be completed
         }
@@ -350,19 +347,14 @@ const CreateNewProgramHome = ({
 
   // Trapping Protocols
   const handleSaveTrappingProtocols = useCallback(() => {
-    const lifeStageValues = returnDefinitionArray(
-      dropdownsState.values.lifeStage
-    )
-    const runValues = returnDefinitionArray(dropdownsState.values.run)
-
     const saveTrappingProtocolsSubmission: Array<TrappingProtocolsSubmissionI> =
       Object.values(trappingProtocolsStore).map((trappingProtocolObj: any) => {
         const { species, run, lifeStage, numberMeasured } = trappingProtocolObj
 
         return {
           species: returnTaxonCode(species),
-          lifeStage: lifeStageValues.indexOf(lifeStage) + 1,
-          run: runValues.indexOf(run) + 1,
+          lifeStage: getDropdownId('lifeStage', lifeStage),
+          run: getDropdownId('run', run),
           numberMeasured: Number(numberMeasured),
         }
       })
@@ -380,17 +372,6 @@ const CreateNewProgramHome = ({
       waterTemperatureThreshold,
     } = permitInformationStore.values
 
-    const frequencyOfReceivingFishValues = returnDefinitionArray(
-      dropdownsState.values.frequency
-    )
-    const lifeStageValues = returnDefinitionArray(
-      dropdownsState.values.lifeStage
-    )
-    const listingUnitOrStockValues = returnDefinitionArray(
-      dropdownsState.values.listingUnit
-    )
-    const runValues = returnDefinitionArray(dropdownsState.values.run)
-
     if (flowThreshold === null) {
       return []
     } else {
@@ -401,8 +382,10 @@ const CreateNewProgramHome = ({
         permitEndDate: dateExpired,
         flowThreshold: Number(flowThreshold),
         temperatureThreshold: Number(waterTemperatureThreshold),
-        frequencySamplingInclementWeather:
-          frequencyOfReceivingFishValues.indexOf(trapCheckFrequency) + 1,
+        frequencySamplingInclementWeather: getDropdownId(
+          'frequency',
+          trapCheckFrequency
+        ),
         expectedTakeAndMortality: Object.values(
           permitInformationStore.takeAndMortalityValues
         ).map((takeAndMortalityObj: any) => {
@@ -415,9 +398,8 @@ const CreateNewProgramHome = ({
           } = takeAndMortalityObj
           return {
             species: returnTaxonCode(species),
-            listingUnit:
-              listingUnitOrStockValues.indexOf(listingUnitOrStock) + 1,
-            fishLifeStage: lifeStageValues.indexOf(lifeStage) + 1,
+            listingUnit: getDropdownId('listingUnit', listingUnitOrStock),
+            fishLifeStage: getDropdownId('lifeStage', lifeStage),
             allowedExpectedTake: Number(expectedTake),
             allowedMortalityCount: Number(indirectMortality),
           }
@@ -440,7 +422,7 @@ const CreateNewProgramHome = ({
                 w='40'
                 h='10'
                 onPress={() => {
-                  POSTMonitoringProgramSubmissions()
+                  POSTMonitoringProgramSubmissionsHandler()
                 }}
               >
                 TEST SAVE
@@ -499,7 +481,9 @@ const CreateNewProgramHome = ({
       <CreateNewProgramNavButtons
         navigation={navigation}
         formIsCompleteAndValid={formIsCompleteAndValid}
-        POSTMonitoringProgramSubmissions={POSTMonitoringProgramSubmissions}
+        POSTMonitoringProgramSubmissionsHandler={
+          POSTMonitoringProgramSubmissionsHandler
+        }
       />
     </>
   )

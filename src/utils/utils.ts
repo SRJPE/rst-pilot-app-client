@@ -1,6 +1,6 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
-import { sortBy } from 'lodash'
+import { every, some, sortBy } from 'lodash'
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   //returns an alphabetically sorted copy of the original array
@@ -304,13 +304,21 @@ export const navigateHelper = (
   })
 }
 
-export const navigateFlowRightButton = (
-  values: any,
-  activePage: string,
-  holdingForMarkRecap: boolean,
-  navigation: any,
+export const navigateFlowRightButton = ({
+  values,
+  activePage,
+  holdingForMarkRecap,
+  navigation,
+  warnings,
+  tabValues,
+}: {
+  values: any
+  activePage: string
+  holdingForMarkRecap: boolean
+  navigation: any
   warnings?: any
-) => {
+  tabValues?: any
+}) => {
   //this is now kind of redundant with the implementation of the loading screen
   switch (activePage) {
     case 'Visit Setup':
@@ -330,6 +338,18 @@ export const navigateFlowRightButton = (
         return 'Fish Processing'
       }
     case 'Fish Processing':
+      if (tabValues?.length) {
+        if (some(tabValues, { fishProcessedResult: 'processed fish' })) {
+          return 'Fish Input'
+        } else if (
+          every(tabValues, { fishProcessedResult: 'no fish caught' })
+        ) {
+          return 'No Fish Caught'
+        } else {
+          return 'Trap Post-Processing'
+        }
+      }
+
       if (values?.fishProcessedResult === 'no fish caught') {
         return 'No Fish Caught'
       } else if (

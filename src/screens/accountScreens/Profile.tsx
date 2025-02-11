@@ -17,7 +17,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import AddNewUserModalContent from '../../components/profile/AddNewUserModalContent'
 import EditAccountInfoModalContent from '../../components/profile/EditAccountInfoModalContent'
@@ -52,6 +52,8 @@ const Profile = ({
     useState<boolean>(false)
   const [addNewUserModalOpen, setAddNewUserModalOpen] = useState<boolean>(false)
 
+  const [userPrograms, setUserPrograms] = useState<any>([])
+
   const redirectUri = 'com.onmicrosoft.rstb2c.rsttabletapp://oauth/redirect'
   const clientId = EXPO_PUBLIC_CLIENT_ID
 
@@ -60,7 +62,11 @@ const Profile = ({
   )
   const userIsLead = userCredentialsStore.role === 'lead'
 
-  const userPrograms = userCredentialsStore?.userPrograms || []
+  useEffect(() => {
+    if (userCredentialsStore.userPrograms) {
+      setUserPrograms(userCredentialsStore.userPrograms)
+    }
+  }, [userCredentialsStore.userPrograms])
 
   const deviceIsConnected =
     connectivityStore.isConnected && connectivityStore.isInternetReachable

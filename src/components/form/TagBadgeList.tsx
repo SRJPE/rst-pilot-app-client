@@ -14,7 +14,15 @@ interface markBadgeI {
   bodyPart?: string
 }
 
-const TagBadgeList = ({ badgeListContent }: { badgeListContent: any }) => {
+const TagBadgeList = ({
+  badgeListContent,
+  setAppliedMarks,
+  appliedMarks,
+}: {
+  badgeListContent: any
+  setAppliedMarks: any
+  appliedMarks: any
+}) => {
   const dispatch = useDispatch<AppDispatch>()
 
   //sets the field value to be the current badgeListContent and updates on change
@@ -31,8 +39,10 @@ const TagBadgeList = ({ badgeListContent }: { badgeListContent: any }) => {
     //find selected badge in the list and remove it.
     badgeListCopy.splice(index, 1)
 
-    console.log('badgeListCopy', badgeListCopy)
-    dispatch(updateMarkOrTagData(badgeListCopy))
+    setAppliedMarks({
+      ...appliedMarks,
+      value: badgeListCopy.splice(index, 1),
+    })
   }
 
   return (

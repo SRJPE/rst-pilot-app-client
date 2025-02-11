@@ -140,70 +140,15 @@ const FishInput = ({
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <Heading mb={showError ? '0' : '5'} px='5%'>
-          Which species were captured?
+        <Heading mt={5} mb={showError ? '0' : '5'} px='4'>
+          Enter Catch
         </Heading>
+        <Text fontSize='lg' px='4' mb={5}>
+          Record catch data using the individual fish input, the batch entry, or
+          plus count.
+        </Text>
         <VStack space={6}>
-          <FormControl>
-            {showError && (
-              <HStack space={1}>
-                <Icon
-                  marginTop={'.5'}
-                  as={Ionicons}
-                  name='alert-circle-outline'
-                  color='error'
-                />
-                <Text style={{ fontSize: 14, color: '#b71c1c' }}>
-                  {'Species required' as string}
-                </Text>
-              </HStack>
-            )}
-            <Checkbox.Group //https://github.com/GeekyAnts/NativeBase/issues/5073
-              colorScheme='green'
-              px='10%'
-              defaultValue={checkboxGroupValue}
-              accessibilityLabel='Select the species captured'
-              onChange={(values: any) => setCheckboxGroupValue(values)}
-            >
-              <Checkbox
-                value='YOY Chinook'
-                my='1'
-                _checked={{ bg: 'primary', borderColor: 'primary' }}
-              >
-                YOY Chinook
-              </Checkbox>
-              <Checkbox
-                value='Yearling Chinook'
-                my='1'
-                _checked={{ bg: 'primary', borderColor: 'primary' }}
-              >
-                Yearling Chinook
-              </Checkbox>
-              <Checkbox
-                value='Recaptured Chinook'
-                my='1'
-                _checked={{ bg: 'primary', borderColor: 'primary' }}
-              >
-                Recaptured Chinook
-              </Checkbox>
-              <Checkbox
-                value='Steelhead'
-                my='1'
-                _checked={{ bg: 'primary', borderColor: 'primary' }}
-              >
-                Steelhead
-              </Checkbox>
-              <Checkbox
-                value='Other'
-                my='1'
-                _checked={{ bg: 'primary', borderColor: 'primary' }}
-              >
-                Other
-              </Checkbox>
-            </Checkbox.Group>
-          </FormControl>
-
-          <HStack space={10} px='5%'>
+          <HStack space={10} px='4'>
             <Button
               bg='primary'
               p='3'

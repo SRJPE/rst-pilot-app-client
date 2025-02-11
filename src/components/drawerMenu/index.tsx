@@ -234,6 +234,12 @@ const DrawerMenu = ({
             })}
           </>
         )}
+        <MenuButton
+          active={false}
+          onPress={() => handlePressMainNavButton('Input Turbidity')}
+          icon='add-circle'
+          title='Input Turbidity'
+        />
       </VStack>
     </>
   )

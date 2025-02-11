@@ -33,7 +33,6 @@ import TagBadgeList from '../../components/form/TagBadgeList'
 import AddGeneticsModalContent from '../../components/form/AddGeneticsModalContent'
 import {
   FishStoreI,
-  individualFishInitialState,
   saveIndividualFish,
   updateFishEntry,
   deleteFishEntry,
@@ -74,7 +73,6 @@ const AddFishContent = ({
   closeModal,
   fishStore,
   tabSlice,
-  appliedMarksState,
 }: {
   route?: any
   saveIndividualFish: any
@@ -87,7 +85,6 @@ const AddFishContent = ({
   closeModal: any
   fishStore: FishStoreI
   tabSlice: TabStateI
-  appliedMarksState: any
 }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
@@ -113,10 +110,6 @@ const AddFishContent = ({
     dropdownValues.lifeStage,
     'definition'
   )
-
-  const handleMarkFishFormSubmit = (values: any) => {
-    saveMarkOrTagData({ ...values, UID: fishUID })
-  }
 
   const handleGeneticSampleFormSubmit = (values: any) => {
     saveGeneticSampleData({ ...values, UID: fishUID })
@@ -189,6 +182,7 @@ const AddFishContent = ({
         required: true,
       }),
       existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
       dead: createFormValueDefault({
         value: false,
         touched: true,
@@ -210,6 +204,7 @@ const AddFishContent = ({
         touched: true,
       }),
       existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
       dead: createFormValueDefault({
         value: false,
         touched: true,
@@ -232,6 +227,7 @@ const AddFishContent = ({
         required: false,
       }),
       existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
       dead: createFormValueDefault({
         value: false,
         touched: true,
@@ -267,7 +263,7 @@ const AddFishContent = ({
     !route.params?.editModeData
       ? stateDefaults.whenSpeciesChinook.forkLength
       : createFormValueDefault({
-          value: route.params?.editModeData.forkLength.toString(),
+          value: route.params?.editModeData.forkLength?.toString(),
           touched: true,
           required: false,
         })
@@ -322,6 +318,15 @@ const AddFishContent = ({
       ? stateDefaults.whenSpeciesChinook.existingMarks
       : createFormValueDefault({
           value: route.params?.editModeData.existingMarks,
+          touched: true,
+          required: false,
+        })
+  )
+  const [appliedMarks, setAppliedMarks] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.appliedMarks
+      : createFormValueDefault({
+          value: route.params?.editModeData.appliedMarks,
           touched: true,
           required: false,
         })
@@ -428,6 +433,16 @@ const AddFishContent = ({
     setFishUID(uid())
     setRecentExistingMarks([])
     setComments(stateDefaults[identifier].comments)
+    setAppliedMarks(stateDefaults[identifier].appliedMarks)
+  }
+
+  const handleMarkFishFormSubmit = (values: any) => {
+    setAppliedMarks({
+      ...appliedMarks,
+      value: Array.isArray(appliedMarks.value)
+        ? [...appliedMarks.value, values]
+        : [values],
+    })
   }
 
   //RECENT MARKS ADDITIONS
@@ -498,6 +513,7 @@ const AddFishContent = ({
       dead: dead.value,
       plusCountMethod: plusCountMethod.value,
       comments: comments.value,
+      appliedMarks: [...appliedMarks.value],
     }
 
     return values
@@ -1302,14 +1318,19 @@ const AddFishContent = ({
                       )}
                     </HStack>
                   )}
-                  {appliedMarksState?.length > 0 && (
-                    <>
-                      <Text color='black' fontSize='xl'>
-                        Tags
-                      </Text>
-                      <TagBadgeList badgeListContent={appliedMarksState} />
-                    </>
-                  )}
+                  {Array.isArray(appliedMarks?.value) &&
+                    appliedMarks.value.length > 0 && (
+                      <>
+                        <Text color='black' fontSize='xl'>
+                          Tags
+                        </Text>
+                        <TagBadgeList
+                          badgeListContent={appliedMarks.value}
+                          setAppliedMarks={setAppliedMarks}
+                          appliedMarks={appliedMarks}
+                        />
+                      </>
+                    )}
                   <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
@@ -1508,7 +1529,6 @@ const mapStateToProps = (state: RootState) => {
   return {
     fishStore: state.fishInput[activeTabId].fishStore,
     tabSlice: state.tabSlice,
-    appliedMarksState: state.addMarksOrTags.values,
   }
 }
 

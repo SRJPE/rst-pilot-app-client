@@ -20,6 +20,7 @@ interface InitialStateI {
   previousCatchRawSubmissions: CatchRawSubmissionI[]
   qcTrapVisitSubmissions: any[]
   qcCatchRawSubmissions: any[]
+  qcCatchRawDeletions: any[]
 }
 
 interface TrapVisitSubmissionI {
@@ -92,6 +93,7 @@ const initialState: InitialStateI = {
   previousCatchRawSubmissions: [],
   qcTrapVisitSubmissions: [],
   qcCatchRawSubmissions: [],
+  qcCatchRawDeletions: [],
 }
 
 // Async actions API calls
@@ -142,25 +144,42 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
 
         await trapPromise
           .then(async (response: any) => {
-            let trapId = response.data.createdTrapVisitResponse.id
+            let trapId = response?.data?.createdTrapVisitResponse?.id
             // Save to payload
             payload.trapVisitResponse.push(response.data)
 
-            const catchPromises = linkedCatchRawSubmissions.map(
-              ({ uid, ...rest }: { uid: string }) =>
-                api.post('catch-raw/', {
+            // const catchPromises = linkedCatchRawSubmissions.map(
+            //   ({ uid, ...rest }: { uid: string }) =>
+            //     api.post('catch-raw/', {
+            //       ...rest,
+            //       trapVisitId: trapId,
+            //     })
+            // )
+
+            const bulkSubmissions = linkedCatchRawSubmissions.map(
+              ({ uid, ...rest }: { uid: string }) => {
+                return {
                   ...rest,
                   trapVisitId: trapId,
-                })
+                }
+              }
             )
 
-            const catchResults = await Promise.allSettled(catchPromises)
+            // send as one request of array of catch raw records
+            const catchPromise = await api.post('catch-raw/', bulkSubmissions)
+
+            const catchResults = await Promise.allSettled([catchPromise])
 
             for (const result of catchResults) {
               if (result.status === 'fulfilled') {
-                payload.catchRawResponse.push(result.value.data)
+                console.log('server processed catch raw: ', result)
+                payload.catchRawResponse = [
+                  ...payload.catchRawResponse,
+                  ...result.value.data,
+                ]
               } else {
                 console.log('server processed catch fail: ', result)
+                throw new Error(result.reason)
                 // handle failed catch-raw request
               }
             }
@@ -191,6 +210,12 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
       console.log('error in fetchWithPostParams: BUNDLER', err)
     } finally {
       if (payload.catchRawResponse.length || payload.trapVisitResponse.length) {
+        showSlideAlert(
+          thunkAPI.dispatch,
+          `${payload.trapVisitResponse.length} trap visit and ${payload.catchRawResponse.length} catch raw submissions saved`,
+          'success',
+          5000
+        )
         await fetchWithPostParams(thunkAPI.dispatch, payload)
       }
     }
@@ -228,7 +253,7 @@ export const postQCSubmissions = createAsyncThunk(
                 )
 
                 const errorMessage = generateErrorMessage(
-                  error.code || 'Error during post cq submission (ln 230)'
+                  error.code || 'Error during post qc submission (ln 230)'
                 )
                 showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
               })
@@ -404,11 +429,11 @@ const fetchWithPostParams = async (dispatch: any, postResults: any) => {
       )
 
       const fetchedCatchRawIds = previousCatchRaw.map(
-        (catchRaw: any) => catchRaw.createdCatchRawResponse.id
+        (catchRaw: any) => catchRaw?.createdCatchRawResponse?.id
       )
 
       const postedCatchRawIds = catchRawResponse.map(
-        (catchRaw: any) => catchRaw.createdCatchRawResponse.id
+        (catchRaw: any) => catchRaw?.createdCatchRawResponse?.id
       )
 
       // check if every fetched values contain posted values
@@ -433,7 +458,7 @@ const fetchWithPostParams = async (dispatch: any, postResults: any) => {
       if (!doesFetchContainPost(fetchedCatchRawIds, postedCatchRawIds)) {
         missedCatchRawRecords = catchRawResponse.filter((response: any) => {
           return !fetchedCatchRawIds.includes(
-            response.createdCatchRawResponse.id
+            response?.createdCatchRawResponse?.id
           )
         })
       }
@@ -636,7 +661,7 @@ export const trapVisitPostBundler = createSlice({
         let catchRawToQC: any = state.previousCatchRawSubmissions[catchRawIdx]
 
         for (const submission of submissions) {
-          switch (submission.fieldName) {
+          switch (submission?.fieldName) {
             case 'Species':
               catchRawToQC.createdCatchRawResponse.taxonCode = submission.value
               break
@@ -740,6 +765,13 @@ export const trapVisitPostBundler = createSlice({
             default:
               break
           }
+
+          if (submission?.isFullObject) {
+            catchRawToQC.createdCatchRawResponse = {
+              ...catchRawToQC.createdCatchRawResponse,
+              ...submission.value,
+            }
+          }
         }
 
         catchRawToQC.createdCatchRawResponse.qcCompleted = true
@@ -759,10 +791,9 @@ export const trapVisitPostBundler = createSlice({
         let qcCatchRaw: any = state.qcCatchRawSubmissions[qcCatchRawIdx]
 
         qcCatchRaw.createdCatchRawResponse.qcCompletedBy = userId
-        console.log('qcCatchRaw1', qcCatchRaw)
 
         for (const submission of submissions) {
-          switch (submission.fieldName) {
+          switch (submission?.fieldName) {
             case 'Species':
               qcCatchRaw.createdCatchRawResponse.taxonCode = submission.value
               break
@@ -860,18 +891,25 @@ export const trapVisitPostBundler = createSlice({
             default:
               break
           }
+          if (submission?.isFullObject) {
+            qcCatchRaw.createdCatchRawResponse = {
+              ...qcCatchRaw.createdCatchRawResponse,
+              ...submission.value,
+            }
+          }
         }
-
-        console.log('qcCatchRaw2', qcCatchRaw)
 
         state.qcCatchRawSubmissions = [
           ...state.qcCatchRawSubmissions.slice(0, qcCatchRawIdx),
           ...state.qcCatchRawSubmissions.slice(qcCatchRawIdx + 1),
         ]
         state.qcCatchRawSubmissions.push(qcCatchRaw)
-
-        console.log('end')
       }
+    },
+    catchRawQCDeletion: (state, action) => {
+      let { catchRawId } = action.payload
+
+      state.qcCatchRawDeletions.push(catchRawId)
     },
     reset: () => {
       return initialState
@@ -1003,6 +1041,7 @@ export const {
   clearPendingTrapVisitSubs,
   clearPendingCatchRawSubs,
   addMissingFetchedRecords,
+  catchRawQCDeletion,
   // addMissingFetchedTrapVisitSubs,
   // addMissingFetchedCatchRawSubs,
 } = trapVisitPostBundler.actions
