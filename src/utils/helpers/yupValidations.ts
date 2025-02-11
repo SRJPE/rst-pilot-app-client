@@ -48,8 +48,8 @@ export const trapOperationsSchema = yup.object().shape({
     .positive('Measurement must be > 0')
     .nullable()
     .max(30, 'Measurement must be ≤ 30')
-    .typeError('Value must be a number'),
-  // .required('Enter at least one measurement'),
+    .typeError('Value must be a number')
+    .required('Enter at least one measurement'),
   rpm2: yup
     .number()
     .positive('Measurement must be > 0')
