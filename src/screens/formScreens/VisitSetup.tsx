@@ -332,8 +332,10 @@ const VisitSetup = ({
     if (trapNameValues.length > 1) {
       setShowTrapNameField(true)
       updateTrapNameValues(trapSite)
+      return true
     } else {
       setShowTrapNameField(false)
+      return false
     }
   }
 
@@ -368,6 +370,8 @@ const VisitSetup = ({
         }))
     )
   }
+
+  console.log('trapNameList', trapNameList)
 
   return (
     <Formik
@@ -414,6 +418,12 @@ const VisitSetup = ({
         values,
         resetForm,
       }) => {
+        console.log('🚀 ~ touched:', touched)
+
+        console.log('🚀 ~ errors:', errors)
+
+        console.log('🚀 ~ values VISIT SETUP:', values)
+
         useEffect(() => {
           if (
             tabSlice.previouslyActiveTabId &&
@@ -510,10 +520,17 @@ const VisitSetup = ({
                         selectedValue={values.trapSite}
                         placeholder='Select Trap Site'
                         onValueChange={(itemValue: string) => {
-                          if (itemValue !== values.trapSite) {
+                          dispatch(resetTabsSlice())
+                          const showTrapName =
                             shouldShowTrapNameField(itemValue)
-                          }
                           setFieldValue('trapSite', itemValue)
+
+                          if (showTrapName) {
+                            setFieldValue('trapName', [])
+                            setFieldTouched('trapName', true)
+                          } else {
+                            setFieldValue('trapName', [itemValue])
+                          }
                         }}
                         setFieldTouched={() => setFieldTouched('trapSite')}
                         selectOptions={uniqBy(
@@ -578,13 +595,6 @@ const VisitSetup = ({
       }}
     </Formik>
   )
-  // } catch (error: any) {
-  //   return (
-  //     <View flex={1} justifyContent='center' alignItems='center'>
-  //       <Text fontSize='lg'>Error</Text>
-  //     </View>
-  //   )
-  // }
 }
 
 export default connect(mapStateToProps)(VisitSetup)
