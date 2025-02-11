@@ -50,7 +50,6 @@ export default function TrapNameDropDown({
 
   useEffect(() => {
     setFieldValue('trapName', [...value])
-    setFieldTouched('trapName', true)
   }, [value])
 
   const generateMarginBottom = () => {
