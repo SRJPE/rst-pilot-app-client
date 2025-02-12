@@ -98,12 +98,11 @@ const TabBar = ({
 
       // ensure if disabling tabs that entire trap visit values are still being saved correctly on form save
 
-      const isDisabledPage = ['Fish Input', 'Trap Post-Processing'].includes(
-        activePage
+      const isDisabledPage = ['Fish Input'].includes(activePage)
+
+      const isNoFishCaught = ['not recorded', 'no fish caught'].includes(
+        fishProcessingSlice[tabSlice?.activeTabId]?.values?.fishProcessedResult
       )
-      const isNoFishCaught =
-        fishProcessingSlice[tabSlice?.activeTabId]?.values
-          ?.fishProcessedResult !== 'processed fish'
 
       const disableTabOnFishInput = isDisabledPage && isNoFishCaught
 
@@ -149,15 +148,15 @@ const TabBar = ({
             >
               {Object.keys(tabSlice.tabs).map(tabId => {
                 //if activepage is Fish Input and and fishProcessingSlice[tabSlice.activeTabId].values.fishProcessedResult is "no fish caught" disable button
-                const isDisabledPage = [
-                  'Fish Input',
-                  'Trap Post-Processing',
-                ].includes(activePage)
-                const isNoFishCaught =
-                  fishProcessingSlice[tabId]?.values?.fishProcessedResult ===
-                  'no fish caught'
-                const disableTabOnFishInput = isDisabledPage && isNoFishCaught
+                const isDisabledPage = ['Fish Input'].includes(activePage)
 
+                const isNoFishCaught = [
+                  'not recorded',
+                  'no fish caught',
+                ].includes(
+                  fishProcessingSlice[tabId]?.values?.fishProcessedResult
+                )
+                const disableTabOnActivePage = isDisabledPage && isNoFishCaught
                 // setDefaultActiveTab(disableTabOnFishInput)
 
                 return (
@@ -166,7 +165,7 @@ const TabBar = ({
                       size={'lg'}
                       height={'16'}
                       bg={
-                        disableTabOnFishInput
+                        disableTabOnActivePage
                           ? 'gray.300'
                           : tabId == tabSlice.activeTabId
                           ? 'primary'
@@ -174,7 +173,7 @@ const TabBar = ({
                       }
                       onPress={() => dispatch(setActiveTab(tabId))}
                       mr={5}
-                      disabled={disableTabOnFishInput}
+                      disabled={disableTabOnActivePage}
                     >
                       <HStack
                         alignItems={'center'}
@@ -183,7 +182,7 @@ const TabBar = ({
                         <Text
                           fontSize='lg'
                           color={
-                            disableTabOnFishInput
+                            disableTabOnActivePage
                               ? 'gray.800'
                               : tabId == tabSlice.activeTabId
                               ? 'white'

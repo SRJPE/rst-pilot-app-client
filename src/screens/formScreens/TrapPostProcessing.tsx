@@ -311,7 +311,31 @@ const TrapPostProcessing = ({
           resetForm,
           isValid,
         }) => {
-          console.log('🚀 ~ file: TrapPostProcessing.tsx:291 ~ values:', values)
+          const checkOtherTabForms = () => {
+            const tabIds = Object.keys(tabSlice.tabs)
+            const fishProcessingOtherTabsValidity = tabIds.map(tabId => {
+              if (tabId !== activeTabId) {
+                const tabFormValues = reduxState[tabId]?.values
+                const formIsValid =
+                  trapPostProcessingSchema.isValidSync(tabFormValues)
+
+                return formIsValid
+              }
+
+              return
+            })
+
+            const tabIncomplete = fishProcessingOtherTabsValidity.some(
+              result => result === false
+            )
+
+            if (tabIncomplete) return false
+
+            return true
+          }
+
+          const otherTabFormsValid = checkOtherTabForms()
+
           useEffect(() => {
             if (previouslyActiveTabId && navigationSlice.activeStep === 5) {
               onSubmit(values, previouslyActiveTabId)
@@ -328,7 +352,7 @@ const TrapPostProcessing = ({
                 errors={errors}
                 touched={touched}
                 shouldProceedToLoadingScreen={true}
-                isValid={isValid}
+                isValid={isValid && otherTabFormsValid}
               />
             ),
             [
