@@ -53,7 +53,6 @@ const TrappingProtocolsDataTable = ({
               // colorScheme='primary'
               size='sm'
               onPress={() => {
-                console.log('TRAP OBJECT ROW DATA: ', trappingProtocolObject)
                 handleShowTableModal(trappingProtocolObject)
               }}
             >

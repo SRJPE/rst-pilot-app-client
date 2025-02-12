@@ -372,8 +372,6 @@ const VisitSetup = ({
     )
   }
 
-  console.log('trapNameList', trapNameList)
-
   return (
     <Formik
       validationSchema={trapVisitSchema}

@@ -149,7 +149,6 @@ const TrapOperations = ({
   const useFlowMeasureCalculationBool = (flowMeasureEntered: number | null) => {
     return useMemo(() => {
       if (!flowMeasureEntered || !QARanges) {
-        console.log('not logging zero')
         return false
       }
       let warningResult = false
