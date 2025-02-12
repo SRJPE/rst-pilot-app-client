@@ -13,6 +13,8 @@ import {
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
+import { getAllTabProcessingResults } from '../../redux/reducers/formSlices/fishProcessingSlice'
+
 const NavButtons = ({
   navigation,
   handleSubmit,
@@ -332,12 +334,8 @@ const NavButtons = ({
       case 'Non Functional Trap':
         return false
       case 'Fish Input':
-        const allTabProcessingResults = Object.entries(fishProcessing).map(
-          resultEntry => ({
-            tabId: resultEntry[0],
-            fishProcessingResult: resultEntry[1].values.fishProcessedResult,
-          })
-        )
+        const allTabProcessingResults =
+          getAllTabProcessingResults(fishProcessing)
         const fishInputTabValidity = allTabProcessingResults.map(result => {
           if (result.fishProcessingResult === 'processed fish') {
             return (
@@ -349,20 +347,18 @@ const NavButtons = ({
         })
 
         return fishInputTabValidity.includes(false)
-
+      case 'Trap Operations':
+        break
       case 'Fish Processing':
-        return !fishProcessingSchema.isValidSync(values)
+        break
+      // return !fishProcessingSchema.isValidSync(values)
       default:
         break
     }
 
-    if (isValid) {
+    console.log(typeof isValid, isValid)
+    if (typeof isValid === 'boolean') {
       return !isValid
-    } else {
-      return (
-        (touched && Object.keys(touched).length === 0) ||
-        (errors && Object.keys(errors).length > 0)
-      )
     }
   }, [
     useDeepCompareMemoize(touched),
