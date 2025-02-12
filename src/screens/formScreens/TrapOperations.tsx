@@ -52,6 +52,7 @@ import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
 import * as Yup from 'yup'
+import { getAllTabProcessingResults } from '../../redux/reducers/formSlices/fishProcessingSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -416,8 +417,34 @@ const TrapOperations = ({
           Number(values.waterTemperature),
           values.waterTemperatureUnit
         )
-        const navButtons = useMemo(
-          () => (
+
+        const checkOtherTabForms = () => {
+          const tabIds = Object.keys(tabSlice.tabs)
+
+          const trapOperationsOtherTabsValidity = tabIds.map(tabId => {
+            if (tabId !== activeTabId) {
+              const tabFormValues = reduxState[tabId]?.values
+              const formIsValid =
+                trapOperationsSchema.isValidSync(tabFormValues)
+              return formIsValid
+            }
+
+            return
+          })
+
+          const tabIncomplete = trapOperationsOtherTabsValidity.some(
+            result => result === false
+          )
+
+          if (tabIncomplete) return false
+
+          return true
+        }
+
+        const otherTabFormsValid = checkOtherTabForms()
+
+        const navButtons = useMemo(() => {
+          return (
             <NavButtons
               navigation={navigation}
               handleSubmit={(buttonDirection: 'left' | 'right') => {
@@ -432,11 +459,18 @@ const TrapOperations = ({
               touched={touched}
               values={values}
               shouldProceedToLoadingScreen={true}
-              isValid={isValid}
+              isValid={isValid && otherTabFormsValid}
             />
-          ),
-          [navigation, handleSubmit, errors, touched, values, isValid, endTime]
-        )
+          )
+        }, [
+          navigation,
+          handleSubmit,
+          errors,
+          touched,
+          values,
+          isValid,
+          endTime,
+        ])
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
             onSubmit(values, previouslyActiveTabId)
