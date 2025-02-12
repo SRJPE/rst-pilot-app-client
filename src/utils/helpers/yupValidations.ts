@@ -70,11 +70,8 @@ export const trapPostProcessingSchema = yup.object().shape({
     .nullable()
     .typeError('Value must be a number')
     .required('Debris volume required'),
-  totalRevolutions: yup
-    .number()
-    .nullable()
-    .typeError('Value must be a number')
-    .required('Total revolutions required'),
+  totalRevolutions: yup.number().nullable().typeError('Value must be a number'),
+  // .required('Total revolutions required'),
   isWaterTurbidityPresent: yup.boolean(),
   waterTurbidity: yup.number().when('isWaterTurbidityPresent', {
     is: true,

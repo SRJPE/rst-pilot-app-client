@@ -86,7 +86,6 @@ const NavButtons = ({
       ref.current = value
     }
 
-    console.log('ref', ref.current)
     return ref.current
   }
 
@@ -356,7 +355,6 @@ const NavButtons = ({
         break
     }
 
-    console.log(typeof isValid, isValid)
     if (typeof isValid === 'boolean') {
       return !isValid
     }

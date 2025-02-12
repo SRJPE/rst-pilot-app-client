@@ -419,12 +419,6 @@ const VisitSetup = ({
         values,
         resetForm,
       }) => {
-        console.log('🚀 ~ touched:', touched)
-
-        console.log('🚀 ~ errors:', errors)
-
-        console.log('🚀 ~ values VISIT SETUP:', values)
-
         useEffect(() => {
           if (
             tabSlice.previouslyActiveTabId &&

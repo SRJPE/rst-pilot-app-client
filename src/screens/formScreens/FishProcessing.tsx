@@ -94,6 +94,9 @@ const FishProcessing = ({
       dispatch(saveFishProcessing({ tabId, values, errors }))
       dispatch(markFishProcessingCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
+
+      // if skipping over fish input, set to completed
+      let setFishInputCompleted = true
       const allTabIds: string[] = Object.keys(tabSlice.tabs)
       allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
@@ -108,10 +111,17 @@ const FishProcessing = ({
             stepCompletedCheck = false
           }
         }
+        // if any of tabs is processed fish, set fish input to not completed
+        if (
+          reduxState[allTabId]?.values?.fishProcessedResult === 'processed fish'
+        ) {
+          setFishInputCompleted = false
+        }
       })
 
       if (stepCompletedCheck)
         dispatch(markStepCompleted({ propName: 'fishProcessing' }))
+      dispatch(markStepCompleted({ propName: 'fishInput' }))
       console.log('🚀 ~ handleSubmit~ FishProcessing', values)
     }
   }

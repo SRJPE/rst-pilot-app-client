@@ -71,7 +71,6 @@ export default function CrewDropDown({
       </Text>
       <DropDownPicker
         onClose={() => {
-          console.log('touched should be true')
           setFieldTouched('crew', true)
         }}
         open={open}
@@ -83,7 +82,7 @@ export default function CrewDropDown({
         setItems={setList}
         searchable
         multiple={true}
-        dropDownDirection='BOTTOM'
+        dropDownDirection='TOP'
         mode='BADGE'
         listMode='SCROLLVIEW'
         badgeDotColors={['#007C7C']}

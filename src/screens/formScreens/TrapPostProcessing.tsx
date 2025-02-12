@@ -231,7 +231,6 @@ const TrapPostProcessing = ({
 
   const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
     if (activeTabId && activeTabId != 'placeholderId') {
-      console.log('values', values)
       const destination =
         direction === 'left'
           ? navigateFlowLeftButton(
