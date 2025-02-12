@@ -186,6 +186,7 @@ const FishProcessing = ({
         errors,
         values,
         resetForm,
+        isValid,
       }) => {
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 3) {
@@ -193,6 +194,32 @@ const FishProcessing = ({
             resetForm()
           }
         }, [previouslyActiveTabId])
+
+        const checkOtherTabForms = () => {
+          const tabIds = Object.keys(tabSlice.tabs)
+
+          const fishProcessingOtherTabsValidity = tabIds.map(tabId => {
+            if (tabId !== activeTabId) {
+              const tabFormValues = reduxState[tabId]?.values
+              const formIsValid =
+                fishProcessingSchema.isValidSync(tabFormValues)
+              return formIsValid
+            }
+
+            return
+          })
+
+          const tabIncomplete = fishProcessingOtherTabsValidity.some(
+            result => result === false
+          )
+
+          if (tabIncomplete) return false
+
+          return true
+        }
+
+        const otherTabFormsValid = checkOtherTabForms()
+
         const noCatchData = [
           'no catch data, fish left in live box',
           'no catch data, fish released',
@@ -208,6 +235,7 @@ const FishProcessing = ({
               touched={touched}
               values={values}
               shouldProceedToLoadingScreen={true}
+              isValid={isValid && otherTabFormsValid}
             />
           ),
           [
