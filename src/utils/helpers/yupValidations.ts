@@ -346,7 +346,7 @@ export const crewMembersSchema = yup.object().shape({
   lastName: yup.string().required('Last name required'),
   phoneNumber: yup
     .string()
-    .required('Phone number required')
+    // .required('Phone number required')
     .matches(/^\d{3}-\d{3}-\d{4}$/, 'Phone number is not valid'),
   email: yup
     .string()

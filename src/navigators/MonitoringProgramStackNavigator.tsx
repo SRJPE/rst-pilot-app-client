@@ -1,6 +1,5 @@
 import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
-
 import MonitoringProgramHome from '../screens/accountScreens/MonitoringProgramHome'
 import CreateNewProgram from './roots/CreateNewProgramRoot'
 import MonitoringProgramExisting from '../screens/accountScreens/MonitoringProgramExisting'
@@ -32,10 +31,10 @@ export default function MonitoringProgramStackNavigator() {
         name='Monitoring Program Joined'
         component={MonitoringProgramJoined}
       />
-      <MonitoringProgram.Screen
+      {/* <MonitoringProgram.Screen
         name='Create New Program'
         component={CreateNewProgram}
-      />
+      /> */}
     </MonitoringProgram.Navigator>
   )
 }

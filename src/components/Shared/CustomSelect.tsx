@@ -40,6 +40,14 @@ const CustomSelect: React.FC<CustomSelectI> = ({
     },
     [selectedValue]
   )
+  const labelModifier = (label: string) => {
+    if (placeholder === 'Species') {
+      return label
+    } else if (placeholder === 'Funding Agency' && label !== 'not recorded') {
+      return label.toLocaleUpperCase()
+    }
+    return label.replace(/\w+/g, capitalize)
+  }
 
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
@@ -80,7 +88,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                 return (
                   <Select.Item
                     key={item.id ?? idx}
-                    label={item.definition}
+                    label={labelModifier(item.definition)}
                     value={item.definition}
                   />
                 )
@@ -88,11 +96,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                 return (
                   <Select.Item
                     key={item.id ?? idx}
-                    label={
-                      placeholder === 'Species'
-                        ? item.label
-                        : item.label.replace(/\w+/g, capitalize)
-                    }
+                    label={labelModifier(item.label)}
                     value={item.value}
                   />
                 )
@@ -100,11 +104,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                 return (
                   <Select.Item
                     key={item.id}
-                    label={
-                      placeholder === 'Species'
-                        ? item.definition
-                        : item.definition.replace(/\w+/g, capitalize)
-                    }
+                    label={labelModifier(item.definition)}
                     value={item.definition}
                   />
                 )

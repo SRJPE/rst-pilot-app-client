@@ -8,8 +8,9 @@ import {
   View,
   Radio,
   Spacer,
+  AlertDialog,
 } from 'native-base'
-import React, { useEffect, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import { FormValueI } from '../../utils/interfaces'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
@@ -20,9 +21,14 @@ import {
   alphabeticalSort,
 } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import { useSelector } from 'react-redux'
-import { RootState } from '../../redux/store'
+import { useSelector, useDispatch } from 'react-redux'
+import { RootState, AppDispatch } from '../../redux/store'
 import CustomSelect from '../../components/Shared/CustomSelect'
+import {
+  catchRawQCDeletion,
+  catchRawQCSubmission,
+} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { convertUTCToLocalTime } from '../../utils/helpers/helperFunctions'
 
 const createFormValueDefault = ({
   value,
@@ -41,11 +47,19 @@ const createFormValueDefault = ({
 const QCFishModalContent = ({
   closeModal,
   qcFishData,
+  userCredentialsStore,
 }: {
   closeModal: () => void
   qcFishData: any
+  userCredentialsStore: any
 }) => {
+  const dispatch = useDispatch<AppDispatch>()
+  const [deleteConfirmIsOpen, setDeleteConfirmIsOpen] = useState(false)
+  const onDeleteConfirmClose = () => setDeleteConfirmIsOpen(false)
+  const cancelRef = React.useRef(null)
+
   const { createdCatchRawResponse } = qcFishData
+
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
@@ -173,14 +187,57 @@ const QCFishModalContent = ({
     }
   }
 
-  useEffect(() => {
-    console.log('species', species)
-  }, [species])
+  const handleSave = () => {
+    try {
+      const updatedCatchRawResponse = {
+        taxonCode: species?.value,
+        forkLength: forkLength?.value,
+        weight: weight?.value,
+        numFishCaught: count?.value,
+        lifeStage: lifeStage?.value,
+        captureRunClass: run?.value,
+        dead: dead?.value,
+        adiposeClipped: adiposeClipped?.value,
+      }
+
+      dispatch(
+        catchRawQCSubmission({
+          catchRawId: createdCatchRawResponse.id,
+          userId: userCredentialsStore.id,
+          submissions: [
+            {
+              isFullObject: true,
+              value: updatedCatchRawResponse,
+            },
+          ],
+        })
+      )
+      closeModal()
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
+
+  const handleDelete = () => {
+    try {
+      dispatch(
+        catchRawQCDeletion({
+          catchRawId: createdCatchRawResponse.id,
+          userId: userCredentialsStore.id,
+        })
+      )
+      closeModal()
+    } catch (error) {
+      console.log('error', error)
+    }
+  }
 
   return (
     <>
       <CustomModalHeader
-        headerText={'QC Fish Entry'}
+        headerText={`QC Fish Edit - ${new Date(
+          createdCatchRawResponse.trapVisitTimeEnd
+        ).toLocaleDateString()}`}
         showHeaderButton={true}
         closeModal={closeModal}
       />
@@ -545,9 +602,7 @@ const QCFishModalContent = ({
             _disabled={{
               opacity: '75',
             }}
-            onPress={() => {
-              closeModal()
-            }}
+            onPress={() => setDeleteConfirmIsOpen(true)}
           >
             <Text fontSize='lg' fontWeight='bold' color='white'>
               Delete
@@ -564,9 +619,7 @@ const QCFishModalContent = ({
             _disabled={{
               opacity: '75',
             }}
-            onPress={() => {
-              closeModal()
-            }}
+            onPress={handleSave}
           >
             <Text fontSize='lg' fontWeight='bold' color='white'>
               Save
@@ -574,6 +627,38 @@ const QCFishModalContent = ({
           </Button>
         </HStack>
       </View>
+
+      {deleteConfirmIsOpen && (
+        <AlertDialog
+          leastDestructiveRef={cancelRef}
+          isOpen={deleteConfirmIsOpen}
+          onClose={onDeleteConfirmClose}
+        >
+          <AlertDialog.Content>
+            <AlertDialog.CloseButton />
+            <AlertDialog.Header>Delete Confirmation</AlertDialog.Header>
+            <AlertDialog.Body>
+              Are you sure you want to delete this fish record? This action
+              cannot be undone.
+            </AlertDialog.Body>
+            <AlertDialog.Footer>
+              <Button.Group space={2}>
+                <Button
+                  variant='unstyled'
+                  colorScheme='coolGray'
+                  onPress={onDeleteConfirmClose}
+                  ref={cancelRef}
+                >
+                  Cancel
+                </Button>
+                <Button colorScheme='danger' onPress={handleDelete}>
+                  Delete
+                </Button>
+              </Button.Group>
+            </AlertDialog.Footer>
+          </AlertDialog.Content>
+        </AlertDialog>
+      )}
     </>
   )
 }

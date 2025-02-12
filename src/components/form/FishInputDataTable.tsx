@@ -6,6 +6,7 @@ import { assign, pick, cloneDeep } from 'lodash'
 import { Row, IconButton, Icon, Box, Text, VStack } from 'native-base'
 import { FishStoreI } from '../../redux/reducers/formSlices/fishInputSlice'
 import { Entypo } from '@expo/vector-icons'
+import { generatePaginationRecordsLabel } from '../../utils/helpers/helperFunctions'
 
 const headers = [
   'Species',
@@ -112,6 +113,7 @@ const FishInputDataTable = ({
       delete dataObj.UID
       delete dataObj.fishConditions
       delete dataObj.comments
+      delete dataObj.appliedMarks
       let dataObjPadded = { ...emptyTableData, ...dataObj }
 
       const dataObjKeys = Object.keys(dataObjPadded)
@@ -206,7 +208,11 @@ const FishInputDataTable = ({
         numberOfPages={Math.ceil(
           Object.keys(fishStore).length / numberOfItemsPerPage
         )}
-        label={`Page ${page + 1}`}
+        label={generatePaginationRecordsLabel(
+          page + 1,
+          numberOfItemsPerPage,
+          Object.keys(fishStore).length
+        )}
         onPageChange={(page: number) => setPage(page)}
         numberOfItemsPerPage={numberOfItemsPerPage}
       />

@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import * as SecureStore from 'expo-secure-store'
 import { add, cloneDeep } from 'lodash'
 import api from '../../api/axiosConfig'
@@ -16,7 +16,7 @@ export interface InitialStateI {
   role: 'lead' | 'non-lead' | null
   phone: string | null
   id: number | null
-  userPrograms: any[]
+  userPrograms?: any | null | undefined
 }
 const initialState: InitialStateI = {
   displayName: null,
@@ -31,6 +31,20 @@ const initialState: InitialStateI = {
   id: null,
   userPrograms: [],
 }
+
+// Async actions API calls
+export const getUserPrograms = createAsyncThunk(
+  'userCredentials/getUserPrograms',
+  async (personnelId: number) => {
+    try {
+      const response: any = await api.get(`program/personnel/${personnelId}`)
+      return response.data
+    } catch (error: any) {
+      console.log('err', error)
+      throw error
+    }
+  }
+)
 
 export const userCredentialsSlice = createSlice({
   name: 'userCredentials',
@@ -91,6 +105,12 @@ export const userCredentialsSlice = createSlice({
             `Request Status: (${response.status}) ${response.statusText}`
           )
         )
+    },
+  },
+  extraReducers: {
+    // Add async and additional action types here, and handle loading state as needed
+    [getUserPrograms.fulfilled.type]: (state, action) => {
+      state.userPrograms = action.payload
     },
   },
 })

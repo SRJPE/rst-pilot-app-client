@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -124,6 +124,7 @@ function TrapQC({
         const trapVisitTimeEnd = new Date(
           createdTrapVisitResponse.trapVisitTimeEnd
         )
+
         const normalizedDate = normalizeDate(trapVisitTimeEnd)
 
         if (trapVisitId) {

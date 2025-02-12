@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -105,6 +105,7 @@ const IncompleteSections = ({
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
+    dispatch(checkIfFormIsComplete())
   }, [])
 
   const emitSubmission = () => {
@@ -146,17 +147,11 @@ const IncompleteSections = ({
         connectivityState.isInternetReachable
       ) {
         dispatch(postTrapVisitFormSubmissions())
-        showSlideAlert(
-          dispatch,
-          'Trap visit submitted successfully',
-          'success',
-          5000
-        )
       } else {
         console.log('Connection issue during submission')
         showSlideAlert(
           dispatch,
-          'Connection issue during trap visit submission',
+          'Connection issue during trap visit submission. Application will save data locally and attempt to submit later when connected.',
           'error',
           5000
         )
@@ -237,7 +232,7 @@ const IncompleteSections = ({
       if (!validRpms.length) {
         return null
       }
-      const numericRpms = validRpms.map((str: any) => parseInt(str))
+      const numericRpms = validRpms.map((str: any) => parseFloat(str))
       let counter = 0
       numericRpms.forEach((num: number) => {
         counter += num
@@ -283,7 +278,7 @@ const IncompleteSections = ({
         ),
         sampleGearId: null,
         coneDepth: trapOperationsState[id].values.coneDepth
-          ? parseInt(trapOperationsState[id].values.coneDepth)
+          ? parseFloat(trapOperationsState[id].values.coneDepth)
           : null,
         trapInThalweg: null,
         trapFunctioning: returnNullableTableId(
@@ -302,7 +297,7 @@ const IncompleteSections = ({
           )
         ),
         totalRevolutions: trapPostProcessingState[id].values.totalRevolutions
-          ? parseInt(trapPostProcessingState[id].values.totalRevolutions)
+          ? parseFloat(trapPostProcessingState[id].values.totalRevolutions)
           : null,
         rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
         rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
@@ -347,7 +342,7 @@ const IncompleteSections = ({
         inHalfConeConfiguration:
           trapOperationsState[id].values.coneSetting === 'half' ? true : false,
         debrisVolumeGal: trapPostProcessingState[id].values.debrisVolume
-          ? parseInt(trapPostProcessingState[id].values.debrisVolume)
+          ? parseFloat(trapPostProcessingState[id].values.debrisVolume)
           : null,
         qcCompleted: null,
         qcCompletedAt: null,
@@ -412,7 +407,7 @@ const IncompleteSections = ({
         fishStoreKeys.forEach(key => {
           const fishValue = fishInputState[tabId].fishStore[key]
 
-          const filterAndPrepareData = (data: Array<any>) => {
+          const filterAndPrepareData = (data: Array<any>, hasUid: boolean) => {
             let dataCopy = cloneDeep(data)
             //before I filter the data I need to prepare the appliedMarks Array
             //if the data is NOT from genetic sample:
@@ -439,9 +434,13 @@ const IncompleteSections = ({
               })
             }
 
-            const filteredData = dataCopy.filter((obj: any) => {
-              return obj.UID === fishValue.UID
-            })
+            let filteredData = dataCopy
+
+            if (hasUid) {
+              filteredData = dataCopy.filter((obj: any) => {
+                return obj.UID === fishValue.UID
+              })
+            }
 
             return filteredData.map((obj: any) => {
               obj.crewMember = findCrewIdsFromSelectedCrewNames([
@@ -496,11 +495,11 @@ const IncompleteSections = ({
             ),
             forkLength:
               fishValue.forkLength != null
-                ? parseInt(fishValue?.forkLength as any)
+                ? parseFloat(fishValue?.forkLength as any)
                 : null,
             weight:
               fishValue?.weight != null
-                ? parseInt(fishValue?.weight as any)
+                ? parseFloat(fishValue?.weight as any)
                 : null,
             numFishCaught: fishValue?.numFishCaught,
             plusCount: fishValue?.plusCount ? true : false,
@@ -533,9 +532,13 @@ const IncompleteSections = ({
               }
             }),
             geneticSamplingData: filterAndPrepareData(
-              addGeneticSamplesState.values
+              addGeneticSamplesState.values,
+              true
             ),
-            appliedMarks: filterAndPrepareData(appliedMarksState.values),
+            appliedMarks: filterAndPrepareData(
+              fishValue?.appliedMarks || [],
+              false
+            ),
           })
         })
       }

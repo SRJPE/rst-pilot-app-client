@@ -12,7 +12,7 @@ import {
   Heading,
   Radio,
 } from 'native-base'
-import { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import CustomModal from '../../components/Shared/CustomModal'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
@@ -149,9 +149,7 @@ function CatchFishCountQC({
       const catchRaw = catchResponse.createdCatchRawResponse
       const numFishCaught: number = catchRaw?.numFishCaught
       const plusCount: boolean = catchRaw?.plusCount
-      const trapVisitTimeEnd = new Date(
-        catchRaw.trapVisitTimeEnd.replace('Z', '-08:00')
-      )
+      const trapVisitTimeEnd = new Date(catchRaw.trapVisitTimeEnd)
       const normalizedDate = normalizeDate(trapVisitTimeEnd)
       const qcCompleted = catchResponse.createdCatchRawResponse.qcCompleted
 

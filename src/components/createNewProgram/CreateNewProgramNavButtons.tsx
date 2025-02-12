@@ -17,7 +17,7 @@ const CreateNewProgramNavButtons = ({
   variant,
   disableRightButtonBool,
   formIsCompleteAndValid,
-  POSTMonitoringProgramSubmissions,
+  POSTMonitoringProgramSubmissionsHandler,
   clearFormValues,
 }: {
   crewMembersStore: CrewMembersStoreI
@@ -29,7 +29,7 @@ const CreateNewProgramNavButtons = ({
   variant?: string
   disableRightButtonBool?: boolean
   formIsCompleteAndValid?: boolean
-  POSTMonitoringProgramSubmissions?: Function
+  POSTMonitoringProgramSubmissionsHandler?: Function
   clearFormValues?: Function
 }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -101,9 +101,8 @@ const CreateNewProgramNavButtons = ({
         break
       case 'Create New Program Home':
         //post submission
-        if (POSTMonitoringProgramSubmissions) {
-          POSTMonitoringProgramSubmissions()
-
+        if (POSTMonitoringProgramSubmissionsHandler) {
+          POSTMonitoringProgramSubmissionsHandler()
           navigation?.navigate('Create New Program', {
             screen: 'Create New Program Complete',
           })

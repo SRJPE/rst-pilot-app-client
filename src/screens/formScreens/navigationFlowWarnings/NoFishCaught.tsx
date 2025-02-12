@@ -178,7 +178,7 @@ const NoFishCaught = ({
       if (!validRpms.length) {
         return null
       }
-      const numericRpms = validRpms.map((str: any) => parseInt(str))
+      const numericRpms = validRpms.map((str: any) => parseFloat(str))
       let counter = 0
       numericRpms.forEach((num: number) => {
         counter += num
@@ -219,7 +219,7 @@ const NoFishCaught = ({
         ),
         sampleGearId: null,
         coneDepth: trapOperationsState[id].values.coneDepth
-          ? parseInt(trapOperationsState[id].values.coneDepth)
+          ? parseFloat(trapOperationsState[id].values.coneDepth)
           : null,
         trapInThalweg: null,
         trapFunctioning: returnNullableTableId(
@@ -275,7 +275,7 @@ const NoFishCaught = ({
         inHalfConeConfiguration:
           trapOperationsState[id].values.coneSetting === 'half' ? true : false,
         debrisVolumeGal: trapPostProcessingState?.[id]?.values?.debrisVolume
-          ? parseInt(trapPostProcessingState?.[id]?.values?.debrisVolume)
+          ? parseFloat(trapPostProcessingState?.[id]?.values?.debrisVolume)
           : null,
         qcCompleted: null,
         qcCompletedAt: null,
