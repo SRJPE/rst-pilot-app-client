@@ -336,8 +336,6 @@ const TrapOperations = ({
     }
   }, [activeTabId, reduxState])
 
-  useEffect(() => {}, [endTime])
-
   const handleNavButtonClick = (
     direction: 'left' | 'right',
     values: any,
@@ -476,7 +474,7 @@ const TrapOperations = ({
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }
-        }, [previouslyActiveTabId])
+        }, [previouslyActiveTabId, activeTabId])
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
