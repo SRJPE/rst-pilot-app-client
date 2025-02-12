@@ -1,9 +1,19 @@
 import React, { useCallback, memo } from 'react'
-import { Box, CheckIcon, FormControl, Select, Text } from 'native-base'
+import {
+  Box,
+  CheckIcon,
+  FormControl,
+  Icon,
+  IconButton,
+  Popover,
+  Select,
+  Text,
+} from 'native-base'
 import { capitalize } from 'lodash'
 import { StyleProp, ViewStyle } from 'react-native'
 import RenderErrorMessage from './RenderErrorMessage'
 import { FormikErrors, FormikTouched } from 'formik'
+import { MaterialIcons } from '@expo/vector-icons'
 
 interface CustomSelectI {
   selectedValue: string
@@ -18,6 +28,7 @@ interface CustomSelectI {
   label?: string
   camelName?: string
   touched?: FormikTouched<any>
+  tooltip?: React.ReactNode
 }
 
 const CustomSelect: React.FC<CustomSelectI> = ({
@@ -33,6 +44,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
   camelName = '',
   touched = {},
   label = 'No label provided',
+  tooltip,
 }) => {
   const handleOnChange = useCallback(
     (itemValue: any) => {
@@ -49,10 +61,49 @@ const CustomSelect: React.FC<CustomSelectI> = ({
   return (
     <Box minH={100}>
       <FormControl flex={1}>
-        <FormControl.Label>
+        <FormControl.Label
+          style={{
+            flexDirection: 'row',
+            display: 'flex',
+            alignContent: 'center',
+            gap: 5,
+          }}
+        >
           <Text color={showError ? 'red.700' : 'black'} fontSize='md'>
             {label}
           </Text>
+          {tooltip && (
+            <Popover
+              placement='bottom right'
+              trigger={triggerProps => {
+                return (
+                  <IconButton
+                    p={0}
+                    {...triggerProps}
+                    icon={
+                      <Icon
+                        as={MaterialIcons}
+                        color='black'
+                        name='info-outline'
+                        size='lg'
+                      />
+                    }
+                  ></IconButton>
+                )
+              }}
+            >
+              <Popover.Content
+                ml='10'
+                accessibilityLabel='Life Stage Info'
+                w='720'
+                h='600'
+              >
+                <Popover.Arrow />
+                <Popover.CloseButton />
+                <Popover.Body p={0}>{tooltip}</Popover.Body>
+              </Popover.Content>
+            </Popover>
+          )}
         </FormControl.Label>
         <Select
           borderColor={showError ? 'red.700' : 'muted.300'}
