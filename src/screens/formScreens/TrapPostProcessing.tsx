@@ -341,6 +341,7 @@ const TrapPostProcessing = ({
               resetForm()
             }
           }, [previouslyActiveTabId])
+
           const navButtons = useMemo(
             () => (
               <NavButtons
@@ -568,7 +569,7 @@ const TrapPostProcessing = ({
                         placeholder='0.00'
                         touched={touched}
                         errors={errors}
-                        value={values.trapLatitude}
+                        value={values?.trapLatitude?.toString() || ''}
                         camelName={'trapLatitude'}
                         onChangeText={handleChange('trapLatitude')}
                         onBlur={handleBlur('trapLatitude')}
@@ -580,7 +581,7 @@ const TrapPostProcessing = ({
                         placeholder='0.00'
                         touched={touched}
                         errors={errors}
-                        value={values.trapLongitude}
+                        value={values?.trapLongitude?.toString() || ''}
                         camelName={'trapLongitude'}
                         onChangeText={handleChange('trapLongitude')}
                         onBlur={handleBlur('trapLongitude')}
