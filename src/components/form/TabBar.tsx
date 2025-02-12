@@ -91,9 +91,28 @@ const TabBar = ({
     })
   }
 
-  //TODO: set default active tab
-  //Currently receiving error if this function runs:
-  //hit load error,  [Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.]
+  useEffect(() => {
+    if (tabSlice.activeTabId) {
+      // no fish caught - the form ends
+      // 'no catch data, fish left in live box' || 'no catch data, fish released' still goes to Trap Post-Processing'
+
+      // ensure if disabling tabs that entire trap visit values are still being saved correctly on form save
+
+      const isDisabledPage = ['Fish Input', 'Trap Post-Processing'].includes(
+        activePage
+      )
+      const isNoFishCaught =
+        fishProcessingSlice[tabSlice?.activeTabId]?.values
+          ?.fishProcessedResult !== 'processed fish'
+
+      const disableTabOnFishInput = isDisabledPage && isNoFishCaught
+
+      if (disableTabOnFishInput) {
+        setDefaultActiveTab(disableTabOnFishInput)
+      }
+    }
+  }, [tabSlice.activeTabId, activePage])
+
   const setDefaultActiveTab = (defaultTabDisabled: boolean) => {
     if (!defaultTabDisabled) {
       return
@@ -111,7 +130,7 @@ const TabBar = ({
       result => result.fishProcessingResult === 'processed fish'
     )
 
-    dispatch(setActiveTab(fishInputDefaultTabId))
+    dispatch(setActiveTab(fishInputDefaultTabId?.tabId))
   }
 
   if (
@@ -130,11 +149,14 @@ const TabBar = ({
             >
               {Object.keys(tabSlice.tabs).map(tabId => {
                 //if activepage is Fish Input and and fishProcessingSlice[tabSlice.activeTabId].values.fishProcessedResult is "no fish caught" disable button
-                const isFishInputPage = activePage === 'Fish Input'
+                const isDisabledPage = [
+                  'Fish Input',
+                  'Trap Post-Processing',
+                ].includes(activePage)
                 const isNoFishCaught =
                   fishProcessingSlice[tabId]?.values?.fishProcessedResult ===
                   'no fish caught'
-                const disableTabOnFishInput = isFishInputPage && isNoFishCaught
+                const disableTabOnFishInput = isDisabledPage && isNoFishCaught
 
                 // setDefaultActiveTab(disableTabOnFishInput)
 
