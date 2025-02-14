@@ -42,3 +42,39 @@ export const convertUTCToLocalTime = (utcTime: string) => {
   const date = new Date(utcTime)
   return date.toLocaleString()
 }
+
+export const findLengthAtDateRun = (array: Array<any>, targetDate: Date) => {
+  return array.find(item => {
+    const ladDate = new Date(item.ladDate)
+    return (
+      ladDate.getMonth() === targetDate.getMonth() &&
+      ladDate.getDate() === targetDate.getDate()
+    )
+  })
+}
+
+export const findRunDefinition = (ladObj: any, number: number) => {
+  const buckets = [
+    { definition: 'fall', min: ladObj.fallMin1, max: ladObj.fallMax1 },
+    { definition: 'fall', min: ladObj.fallMin2, max: ladObj.fallMax2 },
+    { definition: 'spring', min: ladObj.springMin1, max: ladObj.springMax1 },
+    { definition: 'spring', min: ladObj.springMin2, max: ladObj.springMax2 },
+    { definition: 'winter', min: ladObj.winterMin1, max: ladObj.winterMax1 },
+    { definition: 'winter', min: ladObj.winterMin2, max: ladObj.winterMax2 },
+    {
+      definition: 'late fall',
+      min: ladObj.lateFallMin1,
+      max: ladObj.lateFallMax1,
+    },
+    {
+      definition: 'late fall',
+      min: ladObj.lateFallMin2,
+      max: ladObj.lateFallMax2,
+    },
+  ]
+
+  return (
+    buckets.find(bucket => number >= bucket.min && number <= bucket.max)
+      ?.definition || 'not recorded'
+  )
+}

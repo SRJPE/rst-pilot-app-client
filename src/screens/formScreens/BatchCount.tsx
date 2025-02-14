@@ -15,7 +15,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Keyboard, useWindowDimensions } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
 import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
@@ -43,9 +43,13 @@ import { Entypo, FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 const BatchCount = ({
   tabSlice,
   batchCountStore,
+  trapOperationsStore,
+  dropdownsStore,
 }: {
   tabSlice: TabStateI
   batchCountStore: any
+  trapOperationsStore: any
+  dropdownsStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
@@ -390,6 +394,10 @@ const BatchCount = ({
                       )
                       .filter(condition => condition !== null)}
                     handleToggles={handleToggles}
+                    trapOperationsStore={trapOperationsStore}
+                    dropdownsStore={dropdownsStore}
+                    activeTabId={tabSlice.activeTabId}
+                    species={species}
                   />
                   {species !== 'Chinook salmon' && <View mb='65'></View>}
                 </>
@@ -521,6 +529,8 @@ const mapStateToProps = (state: RootState) => {
   return {
     tabSlice: state.tabSlice,
     batchCountStore: state.batchCount,
+    trapOperationsStore: state.trapOperations,
+    dropdownsStore: state.dropdowns,
   }
 }
 export default connect(mapStateToProps)(BatchCount)

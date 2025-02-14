@@ -197,11 +197,6 @@ const BatchCharacteristicsModalContent = ({
                       Species
                     </Text>
                   </FormControl.Label>
-
-                  {touched.species &&
-                    errors.species &&
-                    RenderErrorMessage(errors, 'species')}
-
                   <SpeciesDropDown
                     open={speciesDropDownOpen}
                     onOpen={onSpeciesOpen}
@@ -222,11 +217,6 @@ const BatchCharacteristicsModalContent = ({
                       Fish Condition
                     </Text>
                   </FormControl.Label>
-
-                  {touched.fishConditions &&
-                    errors.fishConditions &&
-                    RenderErrorMessage(errors, 'fishConditions')}
-
                   <FishConditionsDropDown
                     open={fishConditionDropdownOpen}
                     onOpen={onFishConditionOpen}

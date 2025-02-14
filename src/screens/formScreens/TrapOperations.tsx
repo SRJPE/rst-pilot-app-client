@@ -159,7 +159,7 @@ const TrapOperations = ({
       }
       let range
 
-      if (trapPermitInfo) {
+      if (trapPermitInfo && trapPermitInfo?.flowThreshold) {
         range = { max: Number(trapPermitInfo.flowThreshold), min: 50 }
       } else if (
         !QARanges.flowMeasure?.[selectedStream.trim()]?.[

@@ -894,7 +894,7 @@ const AddFishContent = ({
                     {species.value == 'Chinook salmon' && (
                       <Box flex={1}>
                         <CustomSelect
-                          label='Ren (optional)'
+                          label='Run (optional)'
                           selectedValue={run.value as string}
                           placeholder={'Run'}
                           onValueChange={(value: string) =>
