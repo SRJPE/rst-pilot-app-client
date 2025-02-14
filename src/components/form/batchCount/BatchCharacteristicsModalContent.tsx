@@ -25,7 +25,6 @@ import { AppDispatch, RootState } from '../../../redux/store'
 import { reorderTaxon, returnDefinitionArray } from '../../../utils/utils'
 import CustomModalHeader from '../../Shared/CustomModalHeader'
 import CustomSelect from '../../Shared/CustomSelect'
-import RenderErrorMessage from '../../Shared/RenderErrorMessage'
 import MarkBadgeList from '../../markRecapture/MarkBadgeList'
 import CustomModal from '../../Shared/CustomModal'
 import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
@@ -160,30 +159,8 @@ const BatchCharacteristicsModalContent = ({
           <>
             <CustomModalHeader
               headerText={'Batch Characteristics'}
-              showHeaderButton={true}
+              showHeaderButton={false}
               closeModal={closeModal}
-              headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    (touched && Object.keys(touched).length === 0) ||
-                    (errors && Object.keys(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    setFishConditionDropdownOpen(false)
-
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Save
-                  </Text>
-                </Button>
-              }
             />
             <VStack px='5%' space={4}>
               <Text justifyContent='center' fontSize='lg'>
@@ -191,17 +168,15 @@ const BatchCharacteristicsModalContent = ({
                 marking or sampling a fish.
               </Text>
               <VStack space={4}>
-                <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 180 : 0}>
+                <FormControl pr='5' mb={speciesDropDownOpen ? 180 : 0}>
                   <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
+                    <Text color='black' fontSize='md'>
                       Species
                     </Text>
                   </FormControl.Label>
 
-                  {touched.species &&
-                    errors.species &&
-                    RenderErrorMessage(errors, 'species')}
-
+                  {/* //TODO: Add error logic for custom species dropdown */}
+                  {/* //TODO: Replace with Custom Select component */}
                   <SpeciesDropDown
                     open={speciesDropDownOpen}
                     onOpen={onSpeciesOpen}
@@ -218,15 +193,12 @@ const BatchCharacteristicsModalContent = ({
                   mb={fishConditionDropdownOpen ? 160 : 0}
                 >
                   <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
+                    <Text color='black' fontSize='md'>
                       Fish Condition
                     </Text>
                   </FormControl.Label>
 
-                  {touched.fishConditions &&
-                    errors.fishConditions &&
-                    RenderErrorMessage(errors, 'fishConditions')}
-
+                  {/* //TODO: Add error logic for custom fish conditions dropdown */}
                   <FishConditionsDropDown
                     open={fishConditionDropdownOpen}
                     onOpen={onFishConditionOpen}
@@ -239,134 +211,152 @@ const BatchCharacteristicsModalContent = ({
                 </FormControl>
               </VStack>
 
-              <HStack space={10}>
-                <VStack space={4} w={'20%'}>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Adipose Clipped
-                      </Text>
-                    </FormControl.Label>
-                    <Radio.Group
-                      name='adiposeClipped'
-                      accessibilityLabel='adipose clipped'
-                      value={`${values.adiposeClipped}`}
-                      onChange={(value: any) => {
-                        if (value === 'true') {
-                          setFieldValue('adiposeClipped', true)
-                        } else {
-                          setFieldValue('adiposeClipped', false)
-                        }
-                      }}
+              <VStack space={4} w={'20%'}>
+                <FormControl>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Adipose Clipped
+                    </Text>
+                  </FormControl.Label>
+                  <Radio.Group
+                    name='adiposeClipped'
+                    accessibilityLabel='adipose clipped'
+                    value={`${values.adiposeClipped}`}
+                    onChange={(value: any) => {
+                      if (value === 'true') {
+                        setFieldValue('adiposeClipped', true)
+                      } else {
+                        setFieldValue('adiposeClipped', false)
+                      }
+                    }}
+                  >
+                    <Radio
+                      colorScheme='primary'
+                      value='true'
+                      my={1}
+                      _icon={{ color: 'primary' }}
                     >
-                      <Radio
-                        colorScheme='primary'
-                        value='true'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        True
-                      </Radio>
-                      <Radio
-                        colorScheme='primary'
-                        value='false'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        False
-                      </Radio>
-                    </Radio.Group>
-                  </FormControl>
-                </VStack>
+                      True
+                    </Radio>
+                    <Radio
+                      colorScheme='primary'
+                      value='false'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
+                      False
+                    </Radio>
+                  </Radio.Group>
+                </FormControl>
+              </VStack>
 
-                <VStack space={4} w={'80%'}>
-                  <Text color='black' fontSize='xl'>
-                    Add Existing Mark
-                  </Text>
-                  {batchCountStore.batchCharacteristics.existingMarks.length <
-                    1 && (
-                    <VStack space={5}>
-                      {dropdownValues.twoMostRecentReleaseMarks.length > 0 &&
-                        decodedRecentReleaseMarks(
-                          dropdownValues.twoMostRecentReleaseMarks
-                        ).map((recentReleaseMark: any, index: number) => {
-                          const { id, markType, markColor, markPosition } =
-                            recentReleaseMark
-                          return (
-                            <Button
-                              key={index}
-                              bg={
+              <VStack space={4} w={'80%'}>
+                <Text color='black' fontSize='xl'>
+                  Add Existing Mark
+                </Text>
+                {batchCountStore.batchCharacteristics.existingMarks.length <
+                  1 && (
+                  <VStack space={5}>
+                    {dropdownValues.twoMostRecentReleaseMarks.length > 0 &&
+                      decodedRecentReleaseMarks(
+                        dropdownValues.twoMostRecentReleaseMarks
+                      ).map((recentReleaseMark: any, index: number) => {
+                        const { id, markType, markColor, markPosition } =
+                          recentReleaseMark
+                        return (
+                          <Button
+                            key={index}
+                            bg={
+                              recentExistingMarks.some(
+                                (mark: ReleaseMarkI) => mark.id === id
+                              )
+                                ? 'primary'
+                                : 'secondary'
+                            }
+                            shadow='3'
+                            borderRadius='5'
+                            w='90%'
+                            onPress={() => {
+                              handlePressRecentExistingMarkButton(
+                                recentReleaseMark
+                              )
+                            }}
+                          >
+                            <Text
+                              color={
                                 recentExistingMarks.some(
                                   (mark: ReleaseMarkI) => mark.id === id
                                 )
-                                  ? 'primary'
-                                  : 'secondary'
+                                  ? 'white'
+                                  : 'primary'
                               }
-                              shadow='3'
-                              borderRadius='5'
-                              w='90%'
-                              onPress={() => {
-                                handlePressRecentExistingMarkButton(
-                                  recentReleaseMark
-                                )
-                              }}
+                              fontWeight='500'
+                              fontSize='md'
                             >
-                              <Text
-                                color={
-                                  recentExistingMarks.some(
-                                    (mark: ReleaseMarkI) => mark.id === id
-                                  )
-                                    ? 'white'
-                                    : 'primary'
-                                }
-                                fontWeight='500'
-                                fontSize='md'
-                              >
-                                {`${markType}${
-                                  markColor ? `- ${markColor}` : ''
-                                } ${markPosition ? `- ${markPosition}` : ''}`}
-                              </Text>
-                            </Button>
-                          )
-                        })}
-                    </VStack>
-                  )}
-                  <MarkBadgeList
-                    badgeListContent={
+                              {`${markType}${
+                                markColor ? `- ${markColor}` : ''
+                              } ${markPosition ? `- ${markPosition}` : ''}`}
+                            </Text>
+                          </Button>
+                        )
+                      })}
+                  </VStack>
+                )}
+                <MarkBadgeList
+                  badgeListContent={
+                    batchCountStore.batchCharacteristics.existingMarks
+                  }
+                  setFieldValue={setFieldValue}
+                  setFieldTouched={setFieldTouched}
+                  field='batchCountExistingMarks'
+                />
+                {batchCountStore.batchCharacteristics.existingMarks.length <
+                  1 && (
+                  <Pressable
+                    isDisabled={
                       batchCountStore.batchCharacteristics.existingMarks
+                        .length > 0
                     }
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                    field='batchCountExistingMarks'
-                  />
-                  {batchCountStore.batchCharacteristics.existingMarks.length <
-                    1 && (
-                    <Pressable
-                      isDisabled={
-                        batchCountStore.batchCharacteristics.existingMarks
-                          .length > 0
-                      }
-                      onPress={() => {
-                        setRecentExistingMarks([])
-                        setAddMarkModalOpen(true)
-                      }}
-                    >
-                      <HStack alignItems='center'>
-                        <Icon
-                          as={Ionicons}
-                          name={'add-circle'}
-                          size='3xl'
-                          color='primary'
-                          marginRight='1'
-                        />
-                        <Text color='primary' fontSize='lg'>
-                          Add Mark
-                        </Text>
-                      </HStack>
-                    </Pressable>
-                  )}
-                </VStack>
-              </HStack>
+                    onPress={() => {
+                      setRecentExistingMarks([])
+                      setAddMarkModalOpen(true)
+                    }}
+                  >
+                    <HStack alignItems='center'>
+                      <Icon
+                        as={Ionicons}
+                        name={'add-circle'}
+                        size='3xl'
+                        color='primary'
+                        marginRight='1'
+                      />
+                      <Text color='primary' fontSize='lg'>
+                        Add Mark
+                      </Text>
+                    </HStack>
+                  </Pressable>
+                )}
+              </VStack>
+              <Button
+                bg='primary'
+                mx='2'
+                px='10'
+                shadow='3'
+                isDisabled={
+                  (touched && Object.keys(touched).length === 0) ||
+                  (errors && Object.keys(errors).length > 0)
+                }
+                onPress={() => {
+                  handleSubmit()
+                  setFishConditionDropdownOpen(false)
+
+                  closeModal()
+                }}
+              >
+                <Text fontSize='xl' color='white'>
+                  Save
+                </Text>
+              </Button>
             </VStack>
             {/* --------- Modals --------- */}
 

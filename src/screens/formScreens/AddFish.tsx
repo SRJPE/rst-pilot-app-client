@@ -588,6 +588,7 @@ const AddFishContent = ({
           <VStack paddingX='10' paddingBottom='3' space={3}>
             <HStack alignItems='center'>
               <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 180 : 0}>
+                {/* //TODO: Form is being managed manually, refactor logic and form to properly show error messages */}
                 <HStack space={4} alignItems='center'>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
@@ -1433,7 +1434,7 @@ const AddFishContent = ({
         <CustomModal
           isOpen={tagFishModalOpen}
           closeModal={() => setTagFishModalOpen(false)}
-          height='3/4'
+          height='80%'
         >
           <TagFishModalContent
             handleMarkFishFormSubmit={handleMarkFishFormSubmit}

@@ -10,8 +10,6 @@ import { addAnotherMarkSchema } from '../../utils/helpers/yupValidations'
 import { QARanges } from '../../utils/utils'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
-import RenderErrorMessage from '../Shared/RenderErrorMessage'
-import RenderWarningMessage from '../Shared/RenderWarningMessage'
 import { ReleaseMarkI } from '../../redux/reducers/addAnotherMarkSlice'
 
 const mapStateToProps = (state: RootState) => {

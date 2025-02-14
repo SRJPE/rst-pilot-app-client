@@ -23,7 +23,6 @@ import {
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import {
   markStepCompleted,
   updateActiveStep,
@@ -877,35 +876,6 @@ const TrapOperations = ({
                             RightElement={<TextInputAdornment text='ntu' />}
                           />
                         </Box>
-                        {/* <FormControl w='1/4'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Water Turbidity
-                            </Text>
-                          </FormControl.Label>
-
-                          <OptimizedInput
-                            isReadOnly={turbidityToggle}
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('waterTurbidity')}
-                            onBlur={handleBlur('waterTurbidity')}
-                            value={values.waterTurbidity}
-                          />
-                          {inputUnit(values.waterTurbidityUnit)}
-                          {Number(values.waterTurbidity) >
-                            QARanges.waterTurbidity.max && (
-                            <RenderWarningMessage />
-                          )}
-                          {tabSlice.incompleteSectionTouched
-                            ? errors.totalRevolutions &&
-                              RenderErrorMessage(errors, 'waterTurbidity')
-                            : touched.totalRevolutions &&
-                              errors.totalRevolutions &&
-                              RenderErrorMessage(errors, 'waterTurbidity')}
-                        </FormControl> */}
                       </HStack>
                       <Text
                         color='black'

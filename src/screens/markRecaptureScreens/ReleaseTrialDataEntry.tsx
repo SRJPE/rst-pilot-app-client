@@ -16,7 +16,6 @@ import {
 import { connect, useDispatch, useSelector } from 'react-redux'
 import MarkRecaptureNavButtons from '../../components/markRecapture/MarkRecaptureNavButtons'
 import CustomSelect from '../../components/Shared/CustomSelect'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { AppDispatch, RootState } from '../../redux/store'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useState, useEffect } from 'react'
