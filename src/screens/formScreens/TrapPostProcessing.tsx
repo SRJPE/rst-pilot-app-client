@@ -20,7 +20,6 @@ import {
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
 import { DeviceEventEmitter, Keyboard } from 'react-native'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
@@ -401,32 +400,7 @@ const TrapPostProcessing = ({
                       onBlur={() => setFieldTouched('totalRevolutions')}
                       value={values.totalRevolutions}
                     />
-                    {/* <FormControl w='30%'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Total Revolutions
-                        </Text>
-                      </FormControl.Label>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('totalRevolutions')}
-                        onBlur={handleBlur('totalRevolutions')}
-                        value={values.totalRevolutions}
-                      />
-                      {Number(values.totalRevolutions) >
-                        QARanges.totalRevolutions.max && (
-                        <RenderWarningMessage />
-                      )}
-                      {/* {tabSlice.incompleteSectionTouched
-                        ? errors.totalRevolutions &&
-                          RenderErrorMessage(errors, 'totalRevolutions')
-                        : touched.totalRevolutions &&
-                          errors.totalRevolutions &&
-                          RenderErrorMessage(errors, 'totalRevolutions')} */}
-                    {/* </FormControl> */}
+
                     {recordTurbidityInPostProcessing && (
                       <FormControl w='30%'>
                         <FormControl.Label>
@@ -458,12 +432,6 @@ const TrapPostProcessing = ({
                           QARanges.waterTurbidity.max && (
                           <RenderWarningMessage />
                         )}
-                        {/* {tabSlice.incompleteSectionTouched
-                          ? errors.waterTurbidity &&
-                            RenderErrorMessage(errors, 'waterTurbidity')
-                          : touched.waterTurbidity &&
-                            errors.waterTurbidity &&
-                            RenderErrorMessage(errors, 'waterTurbidity')} */}
                       </FormControl>
                     )}
                   </HStack>

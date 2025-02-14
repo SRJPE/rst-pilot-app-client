@@ -19,7 +19,7 @@ import { saveNewProgramValues } from '../../redux/reducers/createNewProgramSlice
 import MonitoringProgramNavButtons from '../../components/monitoringProgram/MonitoringProgramNavButtons'
 import { setUpNewProgramSchema } from '../../utils/helpers/yupValidations'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
+
 import { ScrollView } from 'react-native'
 
 const streamNamesTemp = [
