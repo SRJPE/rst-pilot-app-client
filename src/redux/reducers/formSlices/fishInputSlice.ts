@@ -147,8 +147,6 @@ export const saveFishSlice = createSlice({
 
       const organizedFishEntriesResult = organizeFishEntries(forkLengths)
 
-      console.log('forkLengths', forkLengths)
-
       for (const value of Object.values(organizedFishEntriesResult)) {
         const {
           forkLength,
@@ -159,14 +157,14 @@ export const saveFishSlice = createSlice({
           runDefinition,
         } = value.fishEntryData
 
-        console.log('crc', runDefinition)
-
         let run = null
         let captureRunClassMethod = null
         if (species === 'Chinook salmon') {
           run = runDefinition || 'not recorded'
           // river model length at date
-          captureRunClassMethod = 'river model length at date'
+          captureRunClassMethod = runDefinition
+            ? 'river model length at date'
+            : 'not recorded'
         }
 
         const batchCountEntry = {
