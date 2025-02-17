@@ -6,7 +6,7 @@ import { Entypo } from '@expo/vector-icons'
 import { RootState } from '../../redux/store'
 import { IndividualTrappingSiteValuesI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 
-const headers = ['Species', 'Run', 'Life Stage', 'Number Measured', '']
+const headers = ['Species', 'Run', 'Life Stage', 'Number Measured', 'UID']
 
 const TrappingProtocolsDataTable = ({
   trappingProtocolsStore,
@@ -24,37 +24,39 @@ const TrappingProtocolsDataTable = ({
   }, [trappingProtocolsStore])
   return (
     <DataTable>
-      <DataTable.Header style={[{}]}>
+      <DataTable.Header style={{ display: 'flex' }}>
         {headers.map((header: string, idx: number) => (
-          <DataTable.Title
-            key={idx}
-            numeric
-            style={[{ justifyContent: 'center', flexWrap: 'wrap' }]}
-          >
+          <DataTable.Title key={idx} style={{ flex: 3 }}>
             {header}
           </DataTable.Title>
         ))}
+        <DataTable.Title style={{ flex: 1, padding: 3 }}>{''}</DataTable.Title>
       </DataTable.Header>
       {processedData.map((trappingProtocolObject: any, idx: number) => {
         const cellValues = { ...trappingProtocolObject } as any
         delete cellValues?.uid
         return (
-          <DataTable.Row style={[{ height: 55 }]} key={idx}>
-            {Object.values(cellValues).map((cellValue: any, idx: number) => (
-              <DataTable.Cell key={idx}>{cellValue}</DataTable.Cell>
-            ))}
+          <DataTable.Row style={[{ height: 55, display: 'flex' }]} key={idx}>
+            {Object.values(trappingProtocolObject).map(
+              (callValue: any, idx: number) => (
+                <DataTable.Cell style={{ flex: 3 }} key={idx}>
+                  {callValue}
+                </DataTable.Cell>
+              )
+            )}
             <IconButton
-              marginY={3}
+              flex={1}
+              // margin={2}
+              p={1}
               variant='solid'
-              bg='primary'
-              colorScheme='primary'
+              bg='transparent'
+              // colorScheme='primary'
               size='sm'
               onPress={() => {
-                console.log('TRAP OBJECT ROW DATA: ', trappingProtocolObject)
                 handleShowTableModal(trappingProtocolObject)
               }}
             >
-              <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
+              <Icon as={Entypo} size='5' name='edit' color='primary' />
             </IconButton>
           </DataTable.Row>
         )

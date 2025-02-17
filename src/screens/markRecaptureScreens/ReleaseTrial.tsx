@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Box,
   Button,
@@ -21,10 +22,11 @@ import {
   markReleaseTrialCompleted,
   saveReleaseTrial,
 } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
-import renderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { markActiveMarkRecaptureStepCompleted } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
 import CustomSelect from '../../components/Shared/CustomSelect'
-import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
+import FormInputComponent, {
+  TextInputAdornment,
+} from '../../components/Shared/FormInputComponent'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -43,11 +45,8 @@ const ReleaseTrial = ({
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const { run } = dropdownValues.values
 
-  const compareFishHoldingToWildCount = (wildCount: string) => {
-    const message = `This value does not match the \npreviously confirmed value.`
-    if (releaseTrialStore.totalFishHolding !== Number(wildCount)) {
-      return <RenderWarningMessage messageToRender={message} />
-    }
+  const fishHoldingEqualsWildCount = (wildCount: string) => {
+    return releaseTrialStore.totalFishHolding === Number(wildCount)
   }
 
   const handleSubmit = (values: any) => {
@@ -57,24 +56,13 @@ const ReleaseTrial = ({
     console.log('🚀 ~ handleSubmit ~ ReleaseTrial', values)
   }
 
-  const inputUnit = (text: string, setFieldValue?: any) => {
-    return (
-      <Text
-        color='#A1A1A1'
-        position='absolute'
-        top={50}
-        left={300}
-        fontSize={16}
-      >
-        {text}
-      </Text>
-    )
-  }
-
   return (
     <Formik
       validationSchema={releaseTrialSchema}
-      initialValues={releaseTrialStore.values}
+      initialValues={{
+        ...releaseTrialStore.values,
+        wildCount: releaseTrialStore?.totalFishHolding?.toString(),
+      }}
       validateOnMount={false}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       initialTouched={{
@@ -115,49 +103,29 @@ const ReleaseTrial = ({
                   RELEASE TRIAL - WILD
                 </Center>
                 <VStack py='2%' px='4%' space={4}>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Confirm number of wild fish used in release trial
-                      </Text>
-                    </FormControl.Label>
-                    <HStack space={4}>
-                      <Input
-                        w='1/2'
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('wildCount')}
-                        onBlur={handleBlur('wildCount')}
-                        value={`${values.wildCount}`}
-                      />
-                      {touched.wildCount &&
-                        compareFishHoldingToWildCount(values.wildCount)}
-                    </HStack>
-                    {touched.wildCount &&
-                      errors.wildCount &&
-                      renderErrorMessage(errors, 'wildCount')}
-                  </FormControl>
-                  <FormControl w='1/2'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Dead Count (wild)
-                      </Text>
-                    </FormControl.Label>
-                    <Input
-                      height='50px'
-                      fontSize='16'
-                      placeholder='Numeric Value'
-                      keyboardType='numeric'
-                      onChangeText={handleChange('deadWildCount')}
-                      onBlur={handleBlur('deadWildCount')}
-                      value={`${values.deadWildCount}`}
-                    />
-                    {touched.deadWildCount &&
-                      errors.deadWildCount &&
-                      renderErrorMessage(errors, 'deadWildCount')}
-                  </FormControl>
+                  <FormInputComponent
+                    label='# of wild fish used in release trial'
+                    onChangeText={handleChange('wildCount')}
+                    onBlur={handleBlur('wildCount')}
+                    value={values.wildCount}
+                    placeholder='0'
+                    touched={touched}
+                    errors={errors}
+                    camelName='wildCount'
+                    showWarning={!fishHoldingEqualsWildCount(values.wildCount)}
+                    warningMessage='This value does not match the previously confirmed value.'
+                  />
+                  <FormInputComponent
+                    label='Dead Count (wild)'
+                    onChangeText={handleChange('deadWildCount')}
+                    onBlur={handleBlur('deadWildCount')}
+                    value={values.deadWildCount}
+                    placeholder='0'
+                    touched={touched}
+                    errors={errors}
+                    camelName='deadWildCount'
+                  />
+
                   <HStack space={4}>
                     <FormControl>
                       <FormControl.Label>
@@ -205,104 +173,62 @@ const ReleaseTrial = ({
                     RELEASE TRIAL - HATCHERY
                   </Center>
                   <VStack py='2%' px='4%' space={4}>
-                    <FormControl>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Number of Hatchery Fish
-                        </Text>
-                      </FormControl.Label>
-                      <Input
-                        w='1/2'
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('hatcheryCount')}
-                        onBlur={handleBlur('hatcheryCount')}
-                        value={values.hatcheryCount}
-                      />
-                      {touched.hatcheryCount &&
-                        errors.hatcheryCount &&
-                        renderErrorMessage(errors, 'hatcheryCount')}
-                    </FormControl>
-                    <FormControl>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Run ID of Hatchery Fish
-                        </Text>
-                      </FormControl.Label>
-                      <CustomSelect
-                        selectedValue={values.runIDHatchery}
-                        placeholder='Run ID'
-                        onValueChange={handleChange('runIDHatchery')}
-                        setFieldTouched={setFieldTouched}
-                        selectOptions={run}
-                      />
-                      {touched.runIDHatchery &&
-                        errors.runIDHatchery &&
-                        renderErrorMessage(errors, 'runIDHatchery')}
-                    </FormControl>
-                    <FormControl>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Run Weight Count (provided by hatchery)
-                        </Text>
-                      </FormControl.Label>
-                      <Input
-                        w='1/2'
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('runWeightHatchery')}
-                        onBlur={handleBlur('runWeightHatchery')}
-                        value={values.runWeightHatchery}
-                      />
-                      {touched.runWeightHatchery &&
-                        errors.runWeightHatchery &&
-                        renderErrorMessage(errors, 'runWeightHatchery')}
-                      {inputUnit('g')}
-                    </FormControl>
-                    <FormControl>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Run Average Fork Length (provided by hatchery)
-                        </Text>
-                      </FormControl.Label>
-                      <Input
-                        w='1/2'
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('runForkLengthHatchery')}
-                        onBlur={handleBlur('runForkLengthHatchery')}
-                        value={values.runForkLengthHatchery}
-                      />
-                      {touched.runForkLengthHatchery &&
-                        errors.runForkLengthHatchery &&
-                        renderErrorMessage(errors, 'runForkLengthHatchery')}
-                      {inputUnit('mm')}
-                    </FormControl>
-                    <FormControl w='1/2'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Dead Count (hatchery)
-                        </Text>
-                      </FormControl.Label>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('deadHatcheryCount')}
-                        onBlur={handleBlur('deadHatcheryCount')}
-                        value={values.deadHatcheryCount}
-                      />
-                      {touched.deadHatcheryCount &&
-                        errors.deadHatcheryCount &&
-                        renderErrorMessage(errors, 'deadHatcheryCount')}
-                    </FormControl>
+                    <FormInputComponent
+                      label='# of Hatchery Fish'
+                      onChangeText={handleChange('hatcheryCount')}
+                      onBlur={handleBlur('hatcheryCount')}
+                      value={values.hatcheryCount}
+                      placeholder='0'
+                      touched={touched}
+                      errors={errors}
+                      camelName='hatcheryCount'
+                    />
+
+                    <CustomSelect
+                      label='Run ID of Hatchery Fish'
+                      camelName='runIDHatchery'
+                      selectedValue={values.runIDHatchery}
+                      placeholder='Select Run ID'
+                      onValueChange={handleChange('runIDHatchery')}
+                      setFieldTouched={() =>
+                        setFieldTouched('runIDHatchery', true)
+                      }
+                      selectOptions={run}
+                      touched={touched}
+                      errors={errors}
+                    />
+                    <FormInputComponent
+                      label=' Run Weight Count (provided by hatchery)'
+                      onChangeText={handleChange('runWeightHatchery')}
+                      onBlur={handleBlur('runWeightHatchery')}
+                      value={values.runWeightHatchery}
+                      placeholder='0'
+                      touched={touched}
+                      errors={errors}
+                      camelName='runWeightHatchery'
+                      RightElement={<TextInputAdornment text='g' />}
+                    />
+                    <FormInputComponent
+                      label='Run Average Fork Length (provided by hatchery)'
+                      onChangeText={handleChange('runForkLengthHatchery')}
+                      onBlur={handleBlur('runForkLengthHatchery')}
+                      value={values.runForkLengthHatchery}
+                      placeholder='0'
+                      touched={touched}
+                      errors={errors}
+                      camelName='runForkLengthHatchery'
+                      RightElement={<TextInputAdornment text='mm' />}
+                    />
+                    <FormInputComponent
+                      label='Dead Count (hatchery)'
+                      onChangeText={handleChange('deadHatcheryCount')}
+                      onBlur={handleBlur('deadHatcheryCount')}
+                      value={values.deadHatcheryCount}
+                      placeholder='0'
+                      touched={touched}
+                      errors={errors}
+                      camelName='deadHatcheryCount'
+                    />
                   </VStack>
                 </Box>
               )}

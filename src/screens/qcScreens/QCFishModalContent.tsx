@@ -13,7 +13,7 @@ import {
 import React, { useMemo, useState } from 'react'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import { FormValueI } from '../../utils/interfaces'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
+
 import {
   addFishErrorMessages,
   QARanges,
@@ -241,6 +241,7 @@ const QCFishModalContent = ({
         showHeaderButton={true}
         closeModal={closeModal}
       />
+      {/* //TODO: Form state is being managed manually, need to refactor to ge error messages for form */}
       <View
         flex={1}
         bg='#fff'
@@ -251,8 +252,8 @@ const QCFishModalContent = ({
         <VStack paddingX='10' paddingBottom='3' space={3}>
           <HStack alignItems='center'>
             <View width={'100%'} mt={10}>
-              <Text fontSize='xl'>Species</Text>
               <CustomSelect
+                label='Species'
                 // set selectedValue to using nestedModalInputValue.value as taxonCode to find commonname
                 selectedValue={createdCatchRawResponse.taxonCode as string}
                 placeholder={'Species'}
@@ -283,20 +284,14 @@ const QCFishModalContent = ({
             <FormControl w={'1/3'} pr='5'>
               <HStack space={4} alignItems='center'>
                 <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Fork Length *
+                  <Text color='black' fontSize='md'>
+                    Fork Length
                   </Text>
                 </FormControl.Label>
-                {renderForkLengthWarning(
+                {/* {renderForkLengthWarning(
                   Number(forkLength.value),
                   lifeStage.value as string
-                )}
-                {forkLength.touched &&
-                  forkLength.error &&
-                  RenderErrorMessage(
-                    { forkLength: forkLength.error },
-                    'forkLength'
-                  )}
+                )} */}
               </HStack>
               <Input
                 height='50px'
@@ -321,6 +316,7 @@ const QCFishModalContent = ({
                 // onBlur={handleBlur('forkLength')}
                 value={forkLength.value as string}
               />
+              {/* //TODO: Need to refactor to properly render error and warning message */}
               <Text
                 color='#A1A1A1'
                 position='absolute'
@@ -334,17 +330,10 @@ const QCFishModalContent = ({
             <FormControl w={'1/3'} paddingRight='9'>
               <HStack space={4} alignItems='center'>
                 <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
+                  <Text color='black' fontSize='md'>
                     Weight (optional)
                   </Text>
                 </FormControl.Label>
-                {renderWeightWarning(
-                  Number(weight.value),
-                  weight.value as string
-                )}
-                {weight.touched &&
-                  weight.error &&
-                  RenderErrorMessage({ weight: weight.error }, 'weight')}
               </HStack>
               <Input
                 height='50px'
@@ -382,7 +371,7 @@ const QCFishModalContent = ({
 
             <FormControl w='1/3' pr='5'>
               <FormControl.Label>
-                <Text color='black' fontSize='xl'>
+                <Text color='black' fontSize='md'>
                   Count
                 </Text>
               </FormControl.Label>
@@ -403,22 +392,8 @@ const QCFishModalContent = ({
             {/*chinook or steelhead*/}
             {(species.value === '161980' || species.value === '161989') && (
               <FormControl w='1/2' paddingRight='5'>
-                <HStack space={2} alignItems='center' mb='-1.5'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Life Stage *{' '}
-                    </Text>
-                  </FormControl.Label>
-
-                  {lifeStage.touched &&
-                    lifeStage.error &&
-                    RenderErrorMessage(
-                      { lifeStage: lifeStage.error },
-                      'lifeStage'
-                    )}
-                </HStack>
-
                 <CustomSelect
+                  label='Life Stage'
                   selectedValue={lifeStage.value as string}
                   placeholder={'Life Stage'}
                   onValueChange={(value: string) => {
@@ -456,14 +431,9 @@ const QCFishModalContent = ({
             )}
             {species.value === '161980' && (
               <FormControl w='1/2' paddingRight='9'>
-                <HStack space={2} alignItems='center' mb='-1.5'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Run (optional)
-                    </Text>
-                  </FormControl.Label>
-                </HStack>
                 <CustomSelect
+                  label='Run'
+                  errors={{ run: run.error }}
                   selectedValue={run.value as string}
                   placeholder={'Run'}
                   onValueChange={(value: string) => setRun({ ...run, value })}
@@ -627,7 +597,6 @@ const QCFishModalContent = ({
           </Button>
         </HStack>
       </View>
-
       {deleteConfirmIsOpen && (
         <AlertDialog
           leastDestructiveRef={cancelRef}

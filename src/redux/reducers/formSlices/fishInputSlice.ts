@@ -14,6 +14,20 @@ interface FishInputStateI {
   fishStore: FishStoreI
 }
 
+interface FishEntry {
+  forkLength: number
+  lifeStage: string
+  dead: boolean
+  existingMark: boolean
+  fishConditions: string[]
+  runDefinition?: string
+}
+
+interface PreparedFishEntry {
+  count: number
+  fishEntryData: FishEntry
+}
+
 export interface FishStoreI {
   [id: number]: IndividualFishValuesI
 }
@@ -81,6 +95,33 @@ const getLifeStage = (species: string, lifeStageValue: any) => {
   }
 }
 
+function organizeFishEntries(
+  inputData: Record<string, FishEntry>
+): PreparedFishEntry[] {
+  const preparedFishEntries: PreparedFishEntry[] = []
+
+  for (const value of Object.values(inputData)) {
+    let foundMatch = false
+
+    for (const entry of preparedFishEntries) {
+      if (isEqual(entry.fishEntryData, value)) {
+        entry.count++
+        foundMatch = true
+        break
+      }
+    }
+
+    if (!foundMatch) {
+      preparedFishEntries.push({
+        count: 1,
+        fishEntryData: cloneDeep(value),
+      })
+    }
+  }
+
+  return preparedFishEntries
+}
+
 export const saveFishSlice = createSlice({
   name: 'fishInput',
   initialState: initialState,
@@ -104,55 +145,34 @@ export const saveFishSlice = createSlice({
         state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
       )
 
-      interface FishEntry {
-        forkLength: number
-        lifeStage: string
-        dead: boolean
-        existingMark: boolean
-        fishConditions: string[]
-      }
-
-      interface PreparedFishEntry {
-        count: number
-        fishEntryData: FishEntry
-      }
-
-      function organizeFishEntries(
-        inputData: Record<string, FishEntry>
-      ): PreparedFishEntry[] {
-        const preparedFishEntries: PreparedFishEntry[] = []
-
-        for (const value of Object.values(inputData)) {
-          let foundMatch = false
-
-          for (const entry of preparedFishEntries) {
-            if (isEqual(entry.fishEntryData, value)) {
-              entry.count++
-              foundMatch = true
-              break
-            }
-          }
-
-          if (!foundMatch) {
-            preparedFishEntries.push({
-              count: 1,
-              fishEntryData: cloneDeep(value),
-            })
-          }
-        }
-
-        return preparedFishEntries
-      }
       const organizedFishEntriesResult = organizeFishEntries(forkLengths)
 
       for (const value of Object.values(organizedFishEntriesResult)) {
-        const { forkLength, lifeStage, dead, existingMark, fishConditions } =
-          value.fishEntryData
+        const {
+          forkLength,
+          lifeStage,
+          dead,
+          existingMark,
+          fishConditions,
+          runDefinition,
+        } = value.fishEntryData
+
+        let run = null
+        let captureRunClassMethod = null
+        if (species === 'Chinook salmon') {
+          run = runDefinition || 'not recorded'
+          // river model length at date
+          captureRunClassMethod = runDefinition
+            ? 'river model length at date'
+            : 'not recorded'
+        }
+
         const batchCountEntry = {
           species: species,
           numFishCaught: value.count,
           forkLength: forkLength,
-          run: species === 'Chinook salmon' ? 'not recorded' : null, //updated
+          run,
+          captureRunClassMethod,
           weight: null,
           lifeStage: getLifeStage(species, lifeStage),
           adiposeClipped: adiposeClipped,

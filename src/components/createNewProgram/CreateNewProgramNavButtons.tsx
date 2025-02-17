@@ -110,7 +110,11 @@ const CreateNewProgramNavButtons = ({
         break
       case 'Create New Program Complete':
         clearFormValues && clearFormValues()
-        navigation?.navigate('Home')
+        navigation?.reset({
+          index: 0,
+          routes: [{ name: 'Create New Program Home' }],
+        })
+        navigation?.navigate('Profile')
 
         break
 
@@ -126,13 +130,6 @@ const CreateNewProgramNavButtons = ({
         })
         break
       case 'Create New Program Complete':
-        // navigation?.navigate('Monitoring Program', {
-        //   screen: 'Monitoring Program New',
-        // })
-
-        // navigation?.navigate('Monitoring Program', {
-        //   screen: 'Monitoring Program New',
-        // })
         clearFormValues && clearFormValues()
         navigation.reset({
           index: 0,
@@ -180,7 +177,7 @@ const CreateNewProgramNavButtons = ({
         rightButtonText = 'Save Permitting Information'
         break
       case 'Create New Program Complete':
-        rightButtonText = 'Go Home'
+        rightButtonText = 'Return to Profile'
         break
 
       default:
@@ -229,7 +226,8 @@ const CreateNewProgramNavButtons = ({
         break
       case 'Hatchery Information':
         shouldBeDisabled =
-          Object.keys(touched).length === 0 || Object.keys(errors).length > 0
+          // Object.keys(touched).length === 0 || Object.keys(errors).length > 0
+          Object.keys(errors).length > 0
 
         break
       case 'Trapping Protocols Table':
@@ -239,8 +237,8 @@ const CreateNewProgramNavButtons = ({
         break
       case 'Permitting Information Input':
         // expand validation
-        // shouldBeDisabled =
-        //   Object.keys(touched).length === 0 || Object.keys(errors).length > 0
+        shouldBeDisabled =
+          Object.keys(touched).length === 0 || Object.keys(errors).length > 0
 
         break
       default:

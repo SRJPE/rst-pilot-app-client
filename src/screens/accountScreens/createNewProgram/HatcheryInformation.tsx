@@ -104,10 +104,11 @@ const HatcheryInformation = ({
                   <Heading alignSelf='center'>Hatchery Information</Heading>
                   <HStack space={10}>
                     <VStack space={2}>
-                      <Text color='black' fontSize='xl'>
+                      <Text color='black' fontSize='md'>
                         Agreement Start Date
                       </Text>
-                      <Box alignSelf='flex-start' minWidth='220' ml='-95'>
+
+                      <Box alignSelf='flex-start'>
                         <DateTimePicker
                           value={agreementStartDate}
                           mode='date'
@@ -117,10 +118,11 @@ const HatcheryInformation = ({
                       </Box>
                     </VStack>
                     <VStack space={2}>
-                      <Text color='black' fontSize='xl'>
+                      <Text color='black' fontSize='md'>
                         Agreement Start Date
                       </Text>
-                      <Box alignSelf='flex-start' minWidth='220' ml='-95'>
+
+                      <Box alignSelf='flex-start'>
                         <DateTimePicker
                           value={agreementEndDate}
                           mode='date'
@@ -130,10 +132,10 @@ const HatcheryInformation = ({
                       </Box>
                     </VStack>
                     <VStack space={2}>
-                      <Text color='black' fontSize='xl'>
+                      <Text color='black' fontSize='md'>
                         Agreement Renewal Date
                       </Text>
-                      <Box alignSelf='flex-start' minWidth='220' ml='-95'>
+                      <Box alignSelf='flex-start'>
                         <DateTimePicker
                           value={renewalDate}
                           mode='date'
@@ -146,6 +148,7 @@ const HatcheryInformation = ({
                   <VStack space={4}>
                     <FormInputComponent
                       label={'Hatchery'}
+                      placeholder='Enter Hatchery Name'
                       touched={touched}
                       errors={errors}
                       value={values.hatchery ? `${values.hatchery}` : ''}
@@ -153,16 +156,15 @@ const HatcheryInformation = ({
                       onChangeText={handleChange('hatchery')}
                       onBlur={handleBlur('hatchery')}
                     />
-                    <HStack space={10} alignItems='center'>
-                      <FormControl width={'45%'}>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Frequency of receiving fish{' '}
-                          </Text>
-                        </FormControl.Label>
+                    <HStack space={5}>
+                      <Box flex={1}>
                         <CustomSelect
+                          label='Frequency of Receiving Fish'
                           selectedValue={values.frequencyOfReceivingFish}
-                          placeholder={'Frequency'}
+                          placeholder={'Select Frequency'}
+                          camelName='frequencyOfReceivingFish'
+                          touched={touched}
+                          errors={errors}
                           onValueChange={(value: any) =>
                             handleChange('frequencyOfReceivingFish')(value)
                           }
@@ -171,12 +173,11 @@ const HatcheryInformation = ({
                           }
                           selectOptions={dropdownValues?.frequency}
                         />
-                      </FormControl>
+                      </Box>
+
                       <FormInputComponent
-                        width={'45%'}
-                        label={
-                          'Expected number of fish received at each pickup'
-                        }
+                        label={'Expected # of Fish Received at Pickup'}
+                        placeholder='0'
                         touched={touched}
                         errors={errors}
                         value={

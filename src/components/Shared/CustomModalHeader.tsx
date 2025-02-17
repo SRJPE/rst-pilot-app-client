@@ -1,17 +1,18 @@
 import { Ionicons } from '@expo/vector-icons'
-import { StyleProp, StyleSheet, TextStyle } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { useFormikContext } from 'formik'
 import {
   Box,
   Button,
+  Divider,
   Heading,
   HStack,
   Icon,
-  View,
   Text,
-  Divider,
+  View,
 } from 'native-base'
-import React, { useEffect } from 'react'
-import { useNavigation } from '@react-navigation/native'
+import React from 'react'
+import { Keyboard, StyleProp, StyleSheet, TextStyle } from 'react-native'
 
 const CustomModalHeader = ({
   headerText,
@@ -31,6 +32,8 @@ const CustomModalHeader = ({
   headerStyle?: StyleProp<TextStyle>
 }) => {
   const navigation = useNavigation() as any
+  const formikContext = useFormikContext()
+  const resetForm = formikContext?.resetForm
 
   if (showHeaderButton) {
     return (
@@ -42,7 +45,7 @@ const CustomModalHeader = ({
           space={5}
           w='100%'
         >
-          <HStack alignItems='center'>
+          <HStack alignItems='center' mx={'2%'}>
             <Button
               size='lg'
               onPress={() => {
@@ -53,9 +56,9 @@ const CustomModalHeader = ({
                     screen: 'Fish Input',
                   })
                 }
-                if (closeModal) {
-                  closeModal()
-                }
+                if (closeModal) closeModal()
+
+                if (resetForm) resetForm()
               }}
             >
               <Icon as={Ionicons} name={'close'} size='3xl' color='black' />
@@ -76,14 +79,19 @@ const CustomModalHeader = ({
           justifyContent='space-between'
           alignItems='center'
           marginTop={2}
+          mx={'2%'}
         >
           <Button
             size='lg'
             onPress={() => {
+              Keyboard.dismiss()
               if (closeModal) closeModal()
+              setTimeout(() => {
+                if (resetForm) resetForm()
+              }, 500)
             }}
           >
-            <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
+            <Icon as={Ionicons} name={'close'} size='3xl' color='black' />
           </Button>
           <Heading
             flex={1}

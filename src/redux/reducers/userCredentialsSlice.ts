@@ -16,7 +16,7 @@ export interface InitialStateI {
   role: 'lead' | 'non-lead' | null
   phone: string | null
   id: number | null
-  userPrograms?: any | null | undefined
+  userPrograms: any[]
 }
 const initialState: InitialStateI = {
   displayName: null,
@@ -29,6 +29,7 @@ const initialState: InitialStateI = {
   role: null,
   phone: null,
   id: null,
+  userPrograms: [],
 }
 
 // Async actions API calls
@@ -73,12 +74,18 @@ export const userCredentialsSlice = createSlice({
       // state.storedCredentials = action.payload
       return (state = { ...action.payload })
     },
+    updateUserPrograms: (state, action) => {
+      state.userPrograms = action.payload
+      return state
+    },
     editProfile: (state, action) => {
+      const { agency_definition, ...payload } = action.payload
+
       api.patch(`user/${state.azureUid}`, { ...action.payload }).catch(err => {
         throw err
       })
       api.put(`/personnel/${state.azureUid}`, {
-        ...action.payload,
+        ...payload,
       })
       return (state = {
         ...state,
@@ -88,7 +95,8 @@ export const userCredentialsSlice = createSlice({
         firstName: action.payload.first_name,
         lastName: action.payload.last_name,
         phone: action.payload.phone,
-        agencyId: action.payload.agencyId,
+        agencyId: action.payload.agency_id,
+        agencyDefinition: agency_definition,
         role: action.payload.role,
       })
     },
@@ -115,6 +123,7 @@ export const {
   clearUserCredentials,
   changePassword,
   editProfile,
+  updateUserPrograms,
 } = userCredentialsSlice.actions
 
 export default userCredentialsSlice.reducer

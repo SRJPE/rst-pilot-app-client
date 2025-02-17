@@ -193,7 +193,7 @@ const CrewMembers = ({
       <CustomModal
         isOpen={addCrewMemberModalOpen}
         closeModal={() => setAddCrewMemberModalOpen(false)}
-        height='85%'
+        height='100%'
       >
         <AddCrewMemberModalContent
           personnelOptions={personnelOptions}

@@ -19,10 +19,10 @@ import {
   KeyboardAvoidingView,
   Switch,
   Box,
+  Button,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import {
   markStepCompleted,
   updateActiveStep,
@@ -47,6 +47,11 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { find } from 'lodash'
+import FormInputComponent, {
+  TextInputAdornment,
+} from '../../components/Shared/FormInputComponent'
+import * as Yup from 'yup'
+import { getAllTabProcessingResults } from '../../redux/reducers/formSlices/fishProcessingSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -63,6 +68,9 @@ const mapStateToProps = (state: RootState) => {
     selectedTrapLocationId:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.trapLocationId,
+    selectedProgramId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.programId,
     activeTabId: state.tabSlice.activeTabId,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
@@ -78,6 +86,7 @@ const TrapOperations = ({
   selectedTrapSite,
   selectedTrapName,
   selectedTrapLocationId,
+  selectedProgramId,
   activeTabId,
   previouslyActiveTabId,
   navigationSlice,
@@ -90,6 +99,7 @@ const TrapOperations = ({
   selectedTrapSite: string
   selectedTrapName?: string
   selectedTrapLocationId: number | null
+  selectedProgramId: number | null
   activeTabId: string | null
   previouslyActiveTabId: string | null
   navigationSlice: any
@@ -109,17 +119,33 @@ const TrapOperations = ({
   const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
   const [endTime, setEndTime] = useState(new Date() as any)
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
+  const [waterTempUnitC, setWaterTempUnitC] = useState<boolean>(true)
+  const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
+
+  const convertCtoF = (celsius: number) => (celsius * 9) / 5 + 32
+  const permitFlowThreshold = trapPermitInfo?.flowThreshold || 2000
+  const permitTempThreshold = waterTempUnitC
+    ? trapPermitInfo?.temperatureThreshold
+    : convertCtoF(trapPermitInfo?.temperatureThreshold)
 
   useEffect(() => {
-    setTrapPermitInfo(
-      find(
-        visitSetupDefaults.permitInfo,
-        (permit: any) => permit.trapLocationsId === selectedTrapLocationId
-      )
+    // flow threshold on trap location
+    // TO DO: temp threshold WILL permit info (Needs to be refactored in db and monitoring program setup)
+    const currentTrapPermitInfo = find(
+      visitSetupDefaults.permitInfo,
+      (permit: any) => permit.programId === selectedProgramId
     )
+
+    const currentTrapLocationInfo = find(
+      visitSetupDefaults.trapLocations,
+      (permit: any) => permit.id === selectedTrapLocationId
+    )
+    setTrapPermitInfo(currentTrapPermitInfo)
+
+    setTrapLocationInfo(currentTrapLocationInfo)
   }, [visitSetupDefaults.permitInfo, selectedTrapLocationId])
 
-  const useFlowMeasureCalculationBool = (flowMeasureEntered: number) => {
+  const useFlowMeasureCalculationBool = (flowMeasureEntered: number | null) => {
     return useMemo(() => {
       if (!flowMeasureEntered || !QARanges) {
         return false
@@ -132,7 +158,7 @@ const TrapOperations = ({
       }
       let range
 
-      if (trapPermitInfo) {
+      if (trapPermitInfo && trapPermitInfo?.flowThreshold) {
         range = { max: Number(trapPermitInfo.flowThreshold), min: 50 }
       } else if (
         !QARanges.flowMeasure?.[selectedStream.trim()]?.[
@@ -261,8 +287,10 @@ const TrapOperations = ({
         onPress={() => {
           if (setFieldValue) {
             if (text === '°C') {
+              setWaterTempUnitC(true)
               setFieldValue('waterTemperatureUnit', '°F')
             } else {
+              setWaterTempUnitC(false)
               setFieldValue('waterTemperatureUnit', '°C')
             }
           }
@@ -379,14 +407,40 @@ const TrapOperations = ({
         isValid,
       }) => {
         const warningResultFlow = useFlowMeasureCalculationBool(
-          Number(values.flowMeasure)
+          values.flowMeasure
         )
         const warningResultTemp = useWaterTempCalculationBool(
           Number(values.waterTemperature),
           values.waterTemperatureUnit
         )
-        const navButtons = useMemo(
-          () => (
+
+        const checkOtherTabForms = () => {
+          const tabIds = Object.keys(tabSlice.tabs)
+
+          const trapOperationsOtherTabsValidity = tabIds.map(tabId => {
+            if (tabId !== activeTabId) {
+              const tabFormValues = reduxState[tabId]?.values
+              const formIsValid =
+                trapOperationsSchema.isValidSync(tabFormValues)
+              return formIsValid
+            }
+
+            return
+          })
+
+          const tabIncomplete = trapOperationsOtherTabsValidity.some(
+            result => result === false
+          )
+
+          if (tabIncomplete) return false
+
+          return true
+        }
+
+        const otherTabFormsValid = checkOtherTabForms()
+
+        const navButtons = useMemo(() => {
+          return (
             <NavButtons
               navigation={navigation}
               handleSubmit={(buttonDirection: 'left' | 'right') => {
@@ -401,11 +455,18 @@ const TrapOperations = ({
               touched={touched}
               values={values}
               shouldProceedToLoadingScreen={true}
-              isValid={isValid}
+              isValid={isValid && otherTabFormsValid}
             />
-          ),
-          [navigation, handleSubmit, errors, touched, values, isValid, endTime]
-        )
+          )
+        }, [
+          navigation,
+          handleSubmit,
+          errors,
+          touched,
+          values,
+          isValid,
+          endTime,
+        ])
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
             onSubmit(values, previouslyActiveTabId)
@@ -543,9 +604,13 @@ const TrapOperations = ({
                     </HStack>
                     <CustomSelect
                       selectedValue={values.trapStatus}
-                      placeholder='Trap Status'
+                      label='Trap Status'
+                      placeholder='Select Trap Status'
+                      camelName='trapStatus'
                       onValueChange={handleChange('trapStatus')}
-                      setFieldTouched={setFieldTouched}
+                      touched={touched}
+                      errors={errors}
+                      setFieldTouched={() => setFieldTouched('trapStatus')}
                       selectOptions={dropdownValues.trapFunctionality.map(
                         (item: any) => {
                           if (item.definition == 'trap not in service') {
@@ -565,26 +630,17 @@ const TrapOperations = ({
                   </FormControl>
                   {(values.trapStatus === 'trap functioning but not normally' ||
                     values.trapStatus === 'trap not functioning') && (
-                    <FormControl>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Reason For Trap Not Functioning
-                        </Text>
-                      </FormControl.Label>
-                      <CustomSelect
-                        selectedValue={values.reasonNotFunc}
-                        placeholder='Reason'
-                        onValueChange={handleChange('reasonNotFunc')}
-                        setFieldTouched={setFieldTouched}
-                        selectOptions={whyTrapNotFunctioning}
-                      />
-                      {tabSlice.incompleteSectionTouched
-                        ? errors.reasonNotFunc &&
-                          RenderErrorMessage(errors, 'reasonNotFunc')
-                        : touched.reasonNotFunc &&
-                          errors.reasonNotFunc &&
-                          RenderErrorMessage(errors, 'reasonNotFunc')}
-                    </FormControl>
+                    <CustomSelect
+                      selectedValue={values.reasonNotFunc}
+                      placeholder='Select Reason for Trap Malfunction'
+                      camelName='reasonNotFunc'
+                      label='Select Reason for Trap Malfunction'
+                      errors={errors}
+                      touched={touched}
+                      onValueChange={handleChange('reasonNotFunc')}
+                      setFieldTouched={() => setFieldTouched('reasonNotFunc')}
+                      selectOptions={whyTrapNotFunctioning}
+                    />
                   )}
                   {values.trapStatus.length > 0 && (
                     <>
@@ -661,104 +717,66 @@ const TrapOperations = ({
                             >
                               <Popover.Arrow />
                               <Popover.Header>
-                                Take one or more measure of cone rotations. We
-                                will save the average in our database.
+                                Take up to three measurements of cone rotations.
+                                The averages of the entered values will be saved
+                                to the database.
                               </Popover.Header>
                             </Popover.Content>
                           </Popover>
-                          {tabSlice.incompleteSectionTouched
-                            ? (errors.rpm1 || errors.rpm2 || errors.rpm3) && (
-                                <HStack space={1}>
-                                  <Icon
-                                    marginTop={'.5'}
-                                    as={Ionicons}
-                                    name='alert-circle-outline'
-                                    color='error'
-                                  />
-                                  <Text
-                                    style={{ fontSize: 14, color: '#b71c1c' }}
-                                  >
-                                    At least one measurement is required
-                                  </Text>
-                                </HStack>
-                              )
-                            : (touched.rpm1 || touched.rpm2 || touched.rpm3) &&
-                              (errors.rpm1 || errors.rpm2 || errors.rpm3) && (
-                                <HStack space={1}>
-                                  <Icon
-                                    marginTop={'.5'}
-                                    as={Ionicons}
-                                    name='alert-circle-outline'
-                                    color='error'
-                                  />
-                                  <Text
-                                    style={{ fontSize: 14, color: '#b71c1c' }}
-                                  >
-                                    At least one measurement is required
-                                  </Text>
-                                </HStack>
-                              )}
                         </HStack>
                         <HStack space={8} justifyContent='space-between'>
-                          <FormControl w='30%'>
-                            <VStack>
-                              <OptimizedInput
-                                height='50px'
-                                fontSize='16'
-                                placeholder='Numeric Value'
-                                keyboardType='numeric'
-                                onChangeText={handleChange('rpm1')}
-                                onBlur={handleBlur('rpm1')}
-                                value={values.rpm1}
-                              />
-                              {Number(values.rpm1) > QARanges.RPM.max ? (
-                                <RenderWarningMessage />
-                              ) : (
-                                <></>
-                              )}
-                            </VStack>
-                          </FormControl>
-                          <FormControl w='30%'>
-                            <VStack>
-                              <OptimizedInput
-                                height='50px'
-                                fontSize='16'
-                                placeholder='Numeric Value (optional)'
-                                keyboardType='numeric'
-                                onChangeText={handleChange('rpm2')}
-                                onBlur={handleBlur('rpm2')}
-                                value={values.rpm2}
-                              />
-                              {Number(values.rpm2) > QARanges.RPM.max ? (
-                                <RenderWarningMessage />
-                              ) : (
-                                <></>
-                              )}
-                            </VStack>
-                          </FormControl>
-                          <FormControl w='30%'>
-                            <VStack>
-                              <OptimizedInput
-                                height='50px'
-                                fontSize='16'
-                                placeholder='Numeric Value (optional)'
-                                keyboardType='numeric'
-                                onChangeText={handleChange('rpm3')}
-                                onBlur={handleBlur('rpm3')}
-                                value={values.rpm3}
-                              />
-                              {Number(values.rpm3) > QARanges.RPM.max ? (
-                                <RenderWarningMessage />
-                              ) : (
-                                <></>
-                              )}
-                            </VStack>
-                          </FormControl>
+                          <Box flex={1}>
+                            <FormInputComponent
+                              label={'Measure 1'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.rpm1 ? `${values.rpm1}` : ''}
+                              camelName={'rpm1'}
+                              onChangeText={newValue => {
+                                setFieldValue('rpm1', newValue)
+                                if (!newValue) {
+                                  setFieldValue('rpm2', null)
+                                  setFieldValue('rpm3', null)
+                                }
+                              }}
+                              onBlur={handleBlur('rpm1')}
+                            />
+                          </Box>
+                          <Box flex={1}>
+                            <FormInputComponent
+                              isDisabled={values.rpm1 ? false : true}
+                              label={'Measure 2 (optional)'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.rpm2 ? `${values.rpm2}` : ''}
+                              camelName={'rpm2'}
+                              onChangeText={newValue => {
+                                setFieldValue('rpm2', newValue)
+                                if (!newValue) {
+                                  setFieldValue('rpm3', null)
+                                }
+                              }}
+                              onBlur={handleBlur('rpm2')}
+                            />
+                          </Box>
+                          <Box flex={1}>
+                            <FormInputComponent
+                              isDisabled={
+                                values.rpm1 && values.rpm2 ? false : true
+                              }
+                              label={'Measure 3 (optional)'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.rpm3 ? `${values.rpm3}` : ''}
+                              camelName={'rpm3'}
+                              onChangeText={handleChange('rpm3')}
+                              onBlur={handleBlur('rpm3')}
+                            />
+                          </Box>
                         </HStack>
-                        <Text color='grey' mt='5' fontSize='17'>
-                          Please take 3 separate measures of cone rotations per
-                          minute before cleaning the trap.
-                        </Text>
                       </FormControl>
 
                       <HStack
@@ -800,92 +818,64 @@ const TrapOperations = ({
                         </FormControl>
                       </HStack>
 
-                      <HStack space={5} width='125%'>
-                        <FormControl w='1/4'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Flow Measure
-                            </Text>
-                          </FormControl.Label>
-                          <OptimizedInput
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Populated from CDEC'
-                            keyboardType='numeric'
+                      <HStack space={5}>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            showWarning={warningResultFlow}
+                            label={'Flow Measure'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.flowMeasure || null}
+                            camelName={'flowMeasure'}
                             onChangeText={handleChange('flowMeasure')}
                             onBlur={handleBlur('flowMeasure')}
-                            value={values.flowMeasure}
+                            RightElement={<TextInputAdornment text='cfs' />}
                           />
-                          {inputUnit(values.flowMeasureUnit)}
-
-                          {warningResultFlow && <RenderWarningMessage />}
-
-                          {tabSlice.incompleteSectionTouched
-                            ? errors.flowMeasure &&
-                              RenderErrorMessage(errors, 'flowMeasure')
-                            : touched.flowMeasure &&
-                              errors.flowMeasure &&
-                              RenderErrorMessage(errors, 'flowMeasure')}
-                        </FormControl>
-                        <FormControl w='1/4'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Water Temperature
-                            </Text>
-                          </FormControl.Label>
-                          <OptimizedInput
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
+                        </Box>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            showWarning={warningResultTemp}
+                            label={'Water Temperature'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.waterTemperature || null}
+                            camelName={'waterTemperature'}
                             onChangeText={handleChange('waterTemperature')}
                             onBlur={handleBlur('waterTemperature')}
-                            value={values.waterTemperature}
+                            RightElement={
+                              <Button
+                                bg='warmGray.200'
+                                h={'full'}
+                                w={50}
+                                onPress={() => {
+                                  if (values.waterTemperatureUnit === '°C') {
+                                    setFieldValue('waterTemperatureUnit', '°F')
+                                  } else {
+                                    setFieldValue('waterTemperatureUnit', '°C')
+                                  }
+                                }}
+                              >
+                                <Text>{values.waterTemperatureUnit}</Text>
+                              </Button>
+                            }
                           />
+                        </Box>
 
-                          {inputUnit(
-                            values.waterTemperatureUnit,
-                            setFieldValue
-                          )}
-
-                          {warningResultTemp && <RenderWarningMessage />}
-
-                          {tabSlice.incompleteSectionTouched
-                            ? errors.waterTemperature &&
-                              RenderErrorMessage(errors, 'waterTemperature')
-                            : touched.waterTemperature &&
-                              errors.waterTemperature &&
-                              RenderErrorMessage(errors, 'waterTemperature')}
-                        </FormControl>
-                        <FormControl w='1/4'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Water Turbidity
-                            </Text>
-                          </FormControl.Label>
-
-                          <OptimizedInput
-                            isReadOnly={turbidityToggle}
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
+                        <Box flex={1}>
+                          <FormInputComponent
+                            label={'Water Turbidity (via CDEC)'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.waterTurbidity}
+                            camelName={'waterTurbidity'}
                             onChangeText={handleChange('waterTurbidity')}
                             onBlur={handleBlur('waterTurbidity')}
-                            value={values.waterTurbidity}
+                            RightElement={<TextInputAdornment text='ntu' />}
                           />
-                          {inputUnit(values.waterTurbidityUnit)}
-                          {Number(values.waterTurbidity) >
-                            QARanges.waterTurbidity.max && (
-                            <RenderWarningMessage />
-                          )}
-                          {tabSlice.incompleteSectionTouched
-                            ? errors.totalRevolutions &&
-                              RenderErrorMessage(errors, 'waterTurbidity')
-                            : touched.totalRevolutions &&
-                              errors.totalRevolutions &&
-                              RenderErrorMessage(errors, 'waterTurbidity')}
-                        </FormControl>
+                        </Box>
                       </HStack>
                       <Text
                         color='black'

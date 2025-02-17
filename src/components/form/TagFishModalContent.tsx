@@ -19,7 +19,7 @@ import { addMarksOrTagsSchema } from '../../utils/helpers/yupValidations'
 import { QARanges } from '../../utils/utils'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
-import RenderErrorMessage from '../Shared/RenderErrorMessage'
+import FormInputComponent from '../Shared/FormInputComponent'
 
 const initialFormValues = {
   markType: '',
@@ -87,9 +87,99 @@ const TagFishModalContent = ({
           <>
             <CustomModalHeader
               headerText={'Mark or Tag a Fish'}
-              showHeaderButton={true}
+              showHeaderButton={false}
               closeModal={closeModal}
-              headerButton={
+            />
+            <>
+              <VStack paddingX='10' paddingTop='7' paddingBottom='3'>
+                <CustomSelect
+                  label='Mark Type'
+                  camelName='markType'
+                  touched={touched}
+                  errors={errors}
+                  selectedValue={values.markType}
+                  placeholder={'Select Mark Type'}
+                  onValueChange={handleChange('markType')}
+                  setFieldTouched={() => setFieldTouched('markType')}
+                  selectOptions={sortedMarkTypeValues.map((item: any) => ({
+                    label: item.definition,
+                    value: item.definition,
+                  }))}
+                />
+                <FormInputComponent
+                  label='Mark Code'
+                  camelName='markCode'
+                  placeholder='Enter Mark Code'
+                  touched={touched}
+                  errors={errors}
+                  onChangeText={handleChange('markCode')}
+                  onBlur={handleBlur('markCode')}
+                  value={values.markCode}
+                />
+
+                <CustomSelect
+                  touched={touched}
+                  errors={errors}
+                  label='Mark Position (optional)'
+                  camelName='markPosition'
+                  selectedValue={values.markPosition}
+                  placeholder={'Select Mark Position'}
+                  onValueChange={handleChange('markPosition')}
+                  setFieldTouched={() => setFieldTouched('markPosition')}
+                  selectOptions={
+                    dropdownValues.bodyPart
+                      ? dropdownValues.bodyPart.map((item: any) => ({
+                          label: item.definition,
+                          value: item.definition,
+                        }))
+                      : []
+                  }
+                />
+
+                <CustomSelect
+                  label='Mark Color (optional)'
+                  errors={errors}
+                  touched={touched}
+                  camelName='markColor'
+                  selectedValue={values.markColor}
+                  placeholder={'Mark Color'}
+                  onValueChange={handleChange('markColor')}
+                  setFieldTouched={() => setFieldTouched('markColor')}
+                  selectOptions={
+                    dropdownValues.markColor
+                      ? dropdownValues.markColor.map((item: any) => ({
+                          label: item.definition,
+                          value: item.definition,
+                        }))
+                      : []
+                  }
+                />
+
+                <CustomSelect
+                  label='Crew Member'
+                  camelName='crewMember'
+                  touched={touched}
+                  errors={errors}
+                  selectedValue={values.crewMember}
+                  placeholder={'Select Crew Member'}
+                  onValueChange={handleChange('crewMember')}
+                  setFieldTouched={() => setFieldTouched('crewMember')}
+                  selectOptions={crewMembers.map((item: any) => ({
+                    label: item,
+                    value: item,
+                  }))}
+                />
+                <FormInputComponent
+                  label={'Comments (optional)'}
+                  multiline={true}
+                  touched={touched}
+                  errors={errors}
+                  value={values.comments}
+                  camelName={'comments'}
+                  placeholder={'Write a comment'}
+                  onChangeText={handleChange('comments')}
+                  onBlur={handleBlur('comments')}
+                />
                 <Button
                   bg='primary'
                   mx='2'
@@ -108,148 +198,6 @@ const TagFishModalContent = ({
                     Save
                   </Text>
                 </Button>
-              }
-            />
-            <>
-              <VStack space={5} paddingX='10' paddingTop='7' paddingBottom='3'>
-                <FormControl>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Type
-                      </Text>
-                    </FormControl.Label>
-                    {touched.markType &&
-                      errors.markType &&
-                      RenderErrorMessage(errors, 'markType')}
-                  </HStack>
-                  <CustomSelect
-                    selectedValue={values.markType}
-                    placeholder={'Type'}
-                    onValueChange={handleChange('markType')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={sortedMarkTypeValues.map((item: any) => ({
-                      label: item.definition,
-                      value: item.definition,
-                    }))}
-                  />
-                </FormControl>
-
-                <FormControl>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Code
-                      </Text>
-                    </FormControl.Label>
-                    {touched.markCode &&
-                      errors.markCode &&
-                      RenderErrorMessage(errors, 'markCode')}
-                  </HStack>
-                  <Input
-                    height='50px'
-                    fontSize='16'
-                    placeholder='Mark Code'
-                    keyboardType='numeric'
-                    onChangeText={handleChange('markCode')}
-                    onBlur={handleBlur('markCode')}
-                    value={values.markCode}
-                  />
-                </FormControl>
-
-                <FormControl>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Position
-                      </Text>
-                    </FormControl.Label>
-                    {touched.markPosition &&
-                      errors.markPosition &&
-                      RenderErrorMessage(errors, 'markPosition')}
-                  </HStack>
-                  <CustomSelect
-                    selectedValue={values.markPosition}
-                    placeholder={'Mark Position'}
-                    onValueChange={handleChange('markPosition')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={
-                      dropdownValues.bodyPart
-                        ? dropdownValues.bodyPart.map((item: any) => ({
-                            label: item.definition,
-                            value: item.definition,
-                          }))
-                        : []
-                    }
-                  />
-                </FormControl>
-
-                <FormControl>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Color (optional)
-                      </Text>
-                    </FormControl.Label>
-                    {touched.markColor &&
-                      errors.markColor &&
-                      RenderErrorMessage(errors, 'markColor')}
-                  </HStack>
-                  <CustomSelect
-                    selectedValue={values.markColor}
-                    placeholder={'Mark Color'}
-                    onValueChange={handleChange('markColor')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={
-                      dropdownValues.markColor
-                        ? dropdownValues.markColor.map((item: any) => ({
-                            label: item.definition,
-                            value: item.definition,
-                          }))
-                        : []
-                    }
-                  />
-                </FormControl>
-
-                <FormControl>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Crew Member Tagging
-                      </Text>
-                    </FormControl.Label>
-                    {touched.crewMember &&
-                      errors.crewMember &&
-                      RenderErrorMessage(errors, 'crewMember')}
-                  </HStack>
-                  <CustomSelect
-                    selectedValue={values.crewMember}
-                    placeholder={'Crew Member'}
-                    onValueChange={handleChange('crewMember')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={crewMembers.map((item: any) => ({
-                      label: item,
-                      value: item,
-                    }))}
-                  />
-                </FormControl>
-
-                <FormControl>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Comments
-                    </Text>
-                  </FormControl.Label>
-                  <Input
-                    height='50px'
-                    fontSize='16'
-                    placeholder='Write a comment'
-                    keyboardType='default'
-                    onChangeText={handleChange('comments')}
-                    onBlur={handleBlur('comments')}
-                    value={values.comments}
-                  />
-                </FormControl>
               </VStack>
             </>
           </>

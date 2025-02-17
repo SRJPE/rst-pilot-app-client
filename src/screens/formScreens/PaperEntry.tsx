@@ -19,8 +19,7 @@ import {
 } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
-
+import React from 'react'
 const mapStateToProps = (state: RootState) => {
   return {
     historicalDataStore: state.paperEntry,
@@ -134,7 +133,7 @@ const PaperEntry = ({
             </Box>
           </HStack>
 
-          {dateError ? RenderErrorMessage({ dateError }, 'dateError') : <></>}
+          {/* //TODO: Refactor to add actual error message for dateError */}
 
           <FormControl>
             <FormControl.Label>

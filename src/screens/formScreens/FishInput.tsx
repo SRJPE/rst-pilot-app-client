@@ -81,7 +81,6 @@ const FishInput = ({
       ? ([...speciesCaptured] as Array<string>)
       : (['YOY Chinook'] as Array<string>)
   )
-  const { height: screenHeight } = useWindowDimensions()
 
   useEffect(() => {
     checkboxGroupValue.length < 1 ? setShowError(true) : setShowError(false)
@@ -99,13 +98,10 @@ const FishInput = ({
 
     if (stepCompletedCheck) {
       dispatch(markStepCompleted({ propName: 'fishInput' }))
-
-      console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
     }
   }
 
   const submissionLoader = (direction: 'left' | 'right') => {
-    console.log('submissionLoader', activeTabId, activeTabId)
     const destination =
       direction === 'left' ? 'Fish Processing' : 'Trap Post-Processing'
 

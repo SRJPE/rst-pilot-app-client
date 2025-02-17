@@ -1,17 +1,19 @@
-import { Box, HStack, Text, Button, Icon } from 'native-base'
-import { useSelector, useDispatch, connect } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
+import { Ionicons } from '@expo/vector-icons'
+import { StackActions } from '@react-navigation/native'
+import { FormikState } from 'formik'
+import { isEqual } from 'lodash'
+import { Box, Button, HStack, Icon, Text } from 'native-base'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   checkIfFormIsComplete,
   resetNavigationSlice,
   updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
-import { Ionicons } from '@expo/vector-icons'
-import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import { isEqual } from 'lodash'
-import { StackActions } from '@react-navigation/native'
+import { AppDispatch, RootState } from '../../redux/store'
+import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
+import { getAllTabProcessingResults } from '../../redux/reducers/formSlices/fishProcessingSlice'
 
 const NavButtons = ({
   navigation,
@@ -24,9 +26,11 @@ const NavButtons = ({
   tabSlice,
   visitSetupSlice,
   fishProcessingSlice,
+  // fishInput,
   reduxState,
   shouldProceedToLoadingScreen = false,
   isValid,
+  resetForm,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -37,10 +41,12 @@ const NavButtons = ({
   isPaperEntry?: boolean
   tabSlice: TabStateI
   visitSetupSlice: any
+  fishInput: any
   fishProcessingSlice: any
   reduxState: RootState
   shouldProceedToLoadingScreen?: boolean
   isValid?: boolean
+  resetForm?: (nextState?: Partial<FormikState<any>> | undefined) => void
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -49,6 +55,8 @@ const NavButtons = ({
   const previousPage = navigationState.steps[activeStep - 1]?.name
   const [isPaperEntryStore, setIsPaperEntryStore] = useState(false)
 
+  const fishInput = useSelector((state: RootState) => state.fishInput)
+  const fishProcessing = useSelector((state: RootState) => state.fishProcessing)
   useEffect(() => {
     setIsPaperEntryStore(checkIsPaperEntryStore())
     dispatch(checkIfFormIsComplete())
@@ -253,6 +261,8 @@ const NavButtons = ({
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen
     if (activePage === 'Visit Setup') {
+      //If the left button the form is being reset to clear errors and input styles
+      if (resetForm) resetForm()
       dispatch(resetNavigationSlice())
       navigation.reset({
         index: 0,
@@ -317,26 +327,44 @@ const NavButtons = ({
   }
 
   const rightDisabledBool = useMemo(() => {
-    if (activePage === 'Incomplete Sections') {
-      // if form is complete, then do not disable button
-      return !isFormComplete
-    } else if (activePage === 'Non Functional Trap') {
-      return false
-    } else if (activePage === 'Fish Input') {
-      return !(values?.length >= 1)
-    } else if (isValid) {
+    switch (activePage) {
+      case 'Incomplete Sections':
+        return !isFormComplete
+      case 'Non Functional Trap':
+        return false
+      case 'Fish Input':
+        const allTabProcessingResults =
+          getAllTabProcessingResults(fishProcessing)
+        const fishInputTabValidity = allTabProcessingResults.map(result => {
+          if (result.fishProcessingResult === 'processed fish') {
+            return (
+              Object.values(fishInput[result.tabId]?.fishStore || {}).length > 0
+            )
+          }
+
+          return null
+        })
+
+        return fishInputTabValidity.includes(false)
+      case 'Trap Operations':
+        break
+      case 'Fish Processing':
+        break
+      // return !fishProcessingSchema.isValidSync(values)
+      default:
+        break
+    }
+
+    if (typeof isValid === 'boolean') {
       return !isValid
-    } else {
-      return (
-        (touched && Object.keys(touched).length === 0) ||
-        (errors && Object.keys(errors).length > 0)
-      )
     }
   }, [
     useDeepCompareMemoize(touched),
     useDeepCompareMemoize(errors),
+    useDeepCompareMemoize(values),
     isValid,
     activePage,
+    fishInput,
   ])
 
   return (
@@ -351,9 +379,7 @@ const NavButtons = ({
           leftIcon={
             activePage === 'Visit Setup' ? (
               <Icon as={Ionicons} name='home' size='lg' color='primary' />
-            ) : (
-              <></>
-            )
+            ) : undefined
           }
           onPress={handleLeftButton}
         >
@@ -386,6 +412,7 @@ const mapStateToProps = (state: RootState) => {
     visitSetupSlice: state.visitSetup,
     fishProcessingSlice: state.fishProcessing,
     reduxState: state,
+    fishInput: state.fishInput,
   }
 }
 

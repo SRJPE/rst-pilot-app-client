@@ -550,10 +550,10 @@ export const legendColorList = [
 export const addFishErrorMessages = {
   species: { emptyError: 'Fish species required' },
   forkLength: {
-    typeError: 'Input must be a number',
+    typeError: 'Value must be a number',
     emptyError: 'Fish fork length required',
   },
-  weight: { typeError: 'Input must be a number' },
+  weight: { typeError: 'Value must be a number' },
   lifeStage: { emptyError: 'Fish life stage required' },
   adiposeClipped: { emptyError: 'Fish adipose clipped status required' },
   dead: { emptyError: 'Fish mortality required' },

@@ -588,6 +588,7 @@ const AddFishContent = ({
           <VStack paddingX='10' paddingBottom='3' space={3}>
             <HStack alignItems='center'>
               <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 180 : 0}>
+                {/* //TODO: Form is being managed manually, refactor logic and form to properly show error messages */}
                 <HStack space={4} alignItems='center'>
                   <FormControl.Label>
                     <Text color='black' fontSize='xl'>
@@ -649,9 +650,9 @@ const AddFishContent = ({
                     </Popover.Content>
                   </Popover>
 
-                  {species.touched &&
+                  {/* {species.touched &&
                     species.error &&
-                    RenderErrorMessage(species.error, 'species')}
+                    RenderErrorMessage(species.error, 'species')} */}
                 </HStack>
                 <SpeciesDropDown
                   editModeValue={route.params?.editModeData?.species}
@@ -694,12 +695,13 @@ const AddFishContent = ({
                   </Text>
                   <HStack space={4}>
                     <FormControl
-                      w={route.params?.editModeData ? '1/3' : '1/2'}
-                      pr='5'
+                      flex={1}
+                      // w={route.params?.editModeData ? '1/3' : '1/2'}
+                      // pr='5'
                     >
                       <HStack space={4} alignItems='center'>
                         <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
+                          <Text color='black' fontSize='md'>
                             Fork Length *
                           </Text>
                         </FormControl.Label>
@@ -707,12 +709,12 @@ const AddFishContent = ({
                           Number(forkLength.value),
                           lifeStage.value as string
                         )}
-                        {forkLength.touched &&
+                        {/* {forkLength.touched &&
                           forkLength.error &&
                           RenderErrorMessage(
                             { forkLength: forkLength.error },
                             'forkLength'
-                          )}
+                          )} */}
                       </HStack>
                       <Input
                         height='50px'
@@ -750,12 +752,13 @@ const AddFishContent = ({
                       </Text>
                     </FormControl>
                     <FormControl
-                      w={route.params?.editModeData ? '1/3' : '1/2'}
-                      paddingRight='9'
+                      flex={1}
+                      // w={route.params?.editModeData ? '1/3' : '1/2'}
+                      // paddingRight='9'
                     >
                       <HStack space={4} alignItems='center'>
                         <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
+                          <Text color='black' fontSize='md'>
                             Weight (optional)
                           </Text>
                         </FormControl.Label>
@@ -763,12 +766,12 @@ const AddFishContent = ({
                           Number(weight.value),
                           weight.value as string
                         )}
-                        {weight.touched &&
+                        {/* {weight.touched &&
                           weight.error &&
                           RenderErrorMessage(
                             { weight: weight.error },
                             'weight'
-                          )}
+                          )} */}
                       </HStack>
                       <Input
                         height='50px'
@@ -805,9 +808,9 @@ const AddFishContent = ({
                       </Text>
                     </FormControl>
                     {route.params?.editModeData ? (
-                      <FormControl w='1/3' pr='5'>
+                      <FormControl flex={1}>
                         <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
+                          <Text color='black' fontSize='md'>
                             Count
                           </Text>
                         </FormControl.Label>
@@ -838,64 +841,9 @@ const AddFishContent = ({
                   <HStack space={4} alignItems='center'>
                     {(species.value === 'Chinook salmon' ||
                       species.value === 'Steelhead / rainbow trout') && (
-                      <FormControl w='1/2' paddingRight='5'>
-                        <HStack space={2} alignItems='center' mb='-1.5'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Life Stage *{' '}
-                            </Text>
-                          </FormControl.Label>
-
-                          <Popover
-                            placement='bottom right'
-                            trigger={triggerProps => {
-                              return (
-                                <IconButton
-                                  {...triggerProps}
-                                  icon={
-                                    <Icon
-                                      as={MaterialIcons}
-                                      color='black'
-                                      name='info-outline'
-                                      size='xl'
-                                    />
-                                  }
-                                ></IconButton>
-                              )
-                            }}
-                          >
-                            <Popover.Content
-                              ml='10'
-                              accessibilityLabel='Life Stage Info'
-                              w='720'
-                              h='600'
-                            >
-                              <Popover.Arrow />
-                              <Popover.CloseButton />
-                              <Popover.Body p={0}>
-                                <ScrollView>
-                                  <Image
-                                    source={require('../../../assets/life_stage_image.png')}
-                                    alt='Life Stage Image'
-                                    width='720'
-                                  />
-                                  <Image
-                                    source={require('../../../assets/life_stage_table.png')}
-                                    alt='Life Stage Image'
-                                  />
-                                </ScrollView>
-                              </Popover.Body>
-                            </Popover.Content>
-                          </Popover>
-                          {lifeStage.touched &&
-                            lifeStage.error &&
-                            RenderErrorMessage(
-                              { lifeStage: lifeStage.error },
-                              'lifeStage'
-                            )}
-                        </HStack>
-
+                      <Box flex={1}>
                         <CustomSelect
+                          label='Life Stage'
                           selectedValue={lifeStage.value as string}
                           placeholder={'Life Stage'}
                           onValueChange={(value: string) => {
@@ -928,17 +876,26 @@ const AddFishContent = ({
                               label: item?.definition,
                               value: item?.definition,
                             }))}
+                          tooltip={
+                            <ScrollView>
+                              <Image
+                                source={require('../../../assets/life_stage_image.png')}
+                                alt='Life Stage Image'
+                                width='720'
+                              />
+                              <Image
+                                source={require('../../../assets/life_stage_table.png')}
+                                alt='Life Stage Image'
+                              />
+                            </ScrollView>
+                          }
                         />
-                      </FormControl>
+                      </Box>
                     )}
                     {species.value == 'Chinook salmon' && (
-                      <FormControl w='1/2' paddingRight='9'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Run (optional)
-                          </Text>
-                        </FormControl.Label>
+                      <Box flex={1}>
                         <CustomSelect
+                          label='Run (optional)'
                           selectedValue={run.value as string}
                           placeholder={'Run'}
                           onValueChange={(value: string) =>
@@ -949,7 +906,7 @@ const AddFishContent = ({
                           }
                           selectOptions={dropdownValues?.run}
                         />
-                      </FormControl>
+                      </Box>
                     )}
                   </HStack>
 
@@ -959,7 +916,7 @@ const AddFishContent = ({
                     mb={fishConditionsDropdownOpen ? 160 : 0}
                   >
                     <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
+                      <Text color='black' fontSize='md'>
                         Fish Conditions
                       </Text>
                     </FormControl.Label>
@@ -1477,7 +1434,7 @@ const AddFishContent = ({
         <CustomModal
           isOpen={tagFishModalOpen}
           closeModal={() => setTagFishModalOpen(false)}
-          height='3/4'
+          height='80%'
         >
           <TagFishModalContent
             handleMarkFishFormSubmit={handleMarkFishFormSubmit}

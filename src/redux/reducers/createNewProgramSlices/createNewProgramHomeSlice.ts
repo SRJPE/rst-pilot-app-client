@@ -7,6 +7,7 @@ export interface CreateNewProgramInitialStateI {
     streamName: string
     fundingAgency: string
     program?: string
+    copyExistingProgram: 'true' | 'false'
   }
   steps: Array<{ name: string; completed: boolean }>
 }
@@ -15,6 +16,7 @@ export const initialState: CreateNewProgramInitialStateI = {
     monitoringProgramName: '',
     streamName: '',
     fundingAgency: '',
+    copyExistingProgram: 'false',
     program: '',
   },
   steps: [

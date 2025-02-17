@@ -17,12 +17,14 @@ import CustomModalHeader from '../Shared/CustomModalHeader'
 import api from '../../api/axiosConfig'
 import CustomSelect from '../Shared/CustomSelect'
 import { generateErrorMessage } from '../../utils/helpers/helperFunctions'
+import FormInputComponent from '../Shared/FormInputComponent'
+import { update } from 'lodash'
 
 const editAccountValidationSchema = Yup.object().shape({
   firstName: Yup.string().label('First Name').required(),
   lastName: Yup.string().label('Last Name').required(),
   phone: Yup.string().label('Job Title'),
-  agencyId: Yup.string().label('Agency').required(),
+  agencyDefinition: Yup.string().label('Agency').required(),
   emailAddress: Yup.string().label('Email').email().required(),
   role: Yup.string().label('Role').required(),
 })
@@ -49,7 +51,7 @@ const EditAccountInfoModalContent = ({
     <>
       <CustomModalHeader
         headerText={'Edit Account Info'}
-        showHeaderButton={true}
+        showHeaderButton={false}
         closeModal={closeModal}
       />
       <Formik
@@ -58,20 +60,30 @@ const EditAccountInfoModalContent = ({
           firstName: user.firstName || '',
           lastName: user.lastName || '',
           phone: user.phone || '',
-          agencyId: user.agencyId || '',
+          agencyDefinition: user.agencyDefinition || '',
           emailAddress: user.emailAddress || '',
           role: user.role || '',
         }}
         onSubmit={async (values, { setSubmitting }) => {
-          const { firstName, lastName, phone, agencyId, emailAddress, role } =
-            values
+          const {
+            firstName,
+            lastName,
+            phone,
+            agencyDefinition,
+            emailAddress,
+            role,
+          } = values
+
+          const selectedAgency = dropdownValues.find(
+            agencyOption => agencyOption.definition === agencyDefinition
+          )
 
           const editedUserResponse = await api
             .patch(`user/${user.azureUid}/edit`, {
               firstName,
               lastName,
               phone,
-              agencyId,
+              agencyId: selectedAgency?.id,
             })
             .catch(error => {
               console.log(
@@ -96,8 +108,10 @@ const EditAccountInfoModalContent = ({
                 first_name: firstName,
                 last_name: lastName,
                 phone: phone,
-                agencyId,
+                agency_id: selectedAgency?.id,
+                agency_definition: selectedAgency?.definition,
                 role,
+                updated_at: new Date().toISOString(),
               })
             )
             setSubmissionMessage({
@@ -121,133 +135,82 @@ const EditAccountInfoModalContent = ({
           setFieldTouched,
         }) => {
           return (
-            <VStack justifyContent={'space-between'} h={800} m='5%'>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Email
-                  </Text>
-                </FormControl.Label>
-                <Input
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Email'
-                  value={values.emailAddress}
-                  isDisabled={true}
-                />
-                {errors.emailAddress && touched.emailAddress ? (
-                  <Text mt='2' color='red.800'>
-                    {errors.emailAddress as string}
-                  </Text>
-                ) : null}
-              </FormControl>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    First Name
-                  </Text>
-                </FormControl.Label>
+            <VStack space={5} p={5}>
+              <FormInputComponent
+                touched={touched}
+                errors={errors}
+                placeholder='Enter Email Address'
+                isDisabled={true}
+                value={values.emailAddress}
+                label='Email'
+                camelName='emailAddress'
+                onChangeText={() => null}
+              />
+              <FormInputComponent
+                touched={touched}
+                errors={errors}
+                placeholder='Enter First Name'
+                value={values.firstName}
+                label='First Name'
+                camelName='firstName'
+                onChangeText={handleChange('firstName')}
+                onBlur={() => setFieldTouched('firstName')}
+                isDisabled={isSubmitting}
+              />
+              <FormInputComponent
+                touched={touched}
+                errors={errors}
+                placeholder='Enter Last Name'
+                value={values.lastName}
+                label='Last Name'
+                camelName='lastName'
+                onChangeText={handleChange('lastName')}
+                onBlur={() => setFieldTouched('lastName')}
+                isDisabled={isSubmitting}
+              />
+              <FormInputComponent
+                touched={touched}
+                errors={errors}
+                placeholder='###-###-#### (Optional)'
+                value={values.phone}
+                label='Phone Number'
+                camelName='phone'
+                onChangeText={handleChange('phone')}
+                onBlur={() => setFieldTouched('phone')}
+                isDisabled={isSubmitting}
+              />
 
-                <Input
-                  isDisabled={isSubmitting}
-                  height='50px'
-                  fontSize='16'
-                  placeholder='First Name'
-                  keyboardType='default'
-                  onChangeText={handleChange('firstName')}
-                  onBlur={handleBlur('firstName')}
-                  value={values.firstName}
-                />
-                {errors.firstName && touched.firstName ? (
-                  <Text mt='2' color='red.800'>
-                    {errors.firstName as string}
-                  </Text>
-                ) : null}
-              </FormControl>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Last Name
-                  </Text>
-                </FormControl.Label>
-                <Input
-                  isDisabled={isSubmitting}
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Last Name'
-                  keyboardType='default'
-                  onChangeText={handleChange('lastName')}
-                  onBlur={handleBlur('lastName')}
-                  value={values.lastName}
-                />
-                {errors.lastName && touched.lastName ? (
-                  <Text mt='2' color='red.800'>
-                    {errors.lastName as string}
-                  </Text>
-                ) : null}
-              </FormControl>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Phone Number
-                  </Text>
-                </FormControl.Label>
-                <Input
-                  isDisabled={isSubmitting}
-                  height='50px'
-                  fontSize='16'
-                  placeholder='###-###-#### (Optional)'
-                  keyboardType='default'
-                  onChangeText={handleChange('phone')}
-                  onBlur={handleBlur('phone')}
-                  value={values.phone}
-                />
-              </FormControl>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Funding Agency
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={values.agencyId.toString()}
-                  placeholder='Funding Agency'
-                  onValueChange={handleChange('agencyId')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={dropdownValues}
-                  dataType='fundingAgency'
-                  disabled={isSubmitting}
-                />
-                {errors.agencyId && touched.agencyId ? (
-                  <Text mt='2' color='red.800'>
-                    {errors.agencyId as string}
-                  </Text>
-                ) : null}
-              </FormControl>
-
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Role
-                  </Text>
-                </FormControl.Label>
-                <Select
-                  selectedValue={values.role as string}
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Select a role'
-                  onValueChange={handleChange('role')}
-                  isDisabled={isSubmitting}
-                >
-                  <Select.Item label='Lead' value='lead' />
-                  <Select.Item label='Non-Lead' value='non-lead' />
-                </Select>
-                {errors.role && touched.role ? (
-                  <Text mt='2' color='red.800'>
-                    {errors.role as string}
-                  </Text>
-                ) : null}
-              </FormControl>
+              <CustomSelect
+                errors={errors}
+                touched={touched}
+                label='Funding Agency'
+                // selectedValue={dropdownValues.find(
+                //   agencyOption => agencyOption.id === values.agencyId
+                // )}
+                selectedValue={values.agencyDefinition}
+                placeholder='Funding Agency'
+                onValueChange={handleChange('agencyDefinition')}
+                camelName='agencyDefinition'
+                setFieldTouched={() => setFieldTouched('agencyDefinition')}
+                selectOptions={dropdownValues}
+                dataType='fundingAgency'
+                disabled={isSubmitting}
+              />
+              <CustomSelect
+                errors={errors}
+                touched={touched}
+                label='Role'
+                selectedValue={values.role}
+                placeholder='Select a Role'
+                onValueChange={handleChange('role')}
+                camelName='role'
+                setFieldTouched={() => setFieldTouched('role')}
+                selectOptions={[
+                  { label: 'Lead', value: 'lead' },
+                  { label: 'Non-Lead', value: 'non-lead' },
+                ]}
+                disabled={isSubmitting}
+              />
 
               {submissionMessage.message && (
                 <Text

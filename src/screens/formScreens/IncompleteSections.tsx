@@ -373,6 +373,9 @@ const IncompleteSections = ({
       dropdownsState.values.plusCountMethodology
     )
     const runValues = returnDefinitionArray(dropdownsState.values.run)
+    const runCodeMethodValues = returnDefinitionArray(
+      dropdownsState.values.runCodeMethods
+    )
     const markTypeValues = returnDefinitionArray(dropdownsState.values.markType)
     const markColorValues = returnDefinitionArray(
       dropdownsState.values.markColor
@@ -452,7 +455,18 @@ const IncompleteSections = ({
 
           const getRunClassMethod = (fishValue: any) => {
             if (fishValue.species === 'Chinook salmon') {
-              return fishValue.run === 'not recorded' ? 5 : 6
+              if (fishValue.captureRunClassMethod) {
+                return returnNullableTableId(
+                  runCodeMethodValues.indexOf(fishValue.captureRunClassMethod)
+                )
+              }
+              return fishValue.run === 'not recorded'
+                ? returnNullableTableId(
+                    runCodeMethodValues.indexOf('not recorded')
+                  )
+                : returnNullableTableId(
+                    runCodeMethodValues.indexOf('expert judgement')
+                  )
             } else {
               return null
             }

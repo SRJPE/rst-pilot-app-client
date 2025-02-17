@@ -76,7 +76,8 @@ export const crewMembersSlice = createSlice({
       const crewMembersArray = Object.values(crewMembersStoreCopy)
 
       const newCrewMembersArray = crewMembersArray.filter(
-        (crewMember: any) => crewMember.email !== action.payload
+        (crewMember: any) =>
+          crewMember.email.toLowerCase() !== action.payload.toLowerCase()
       )
 
       const newCrewMembersStore = Object.assign({}, newCrewMembersArray)

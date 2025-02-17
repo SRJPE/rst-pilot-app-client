@@ -68,6 +68,7 @@ export const batchCountSlice = createSlice({
         dead: action.payload.dead,
         existingMark: action.payload.existingMark,
         fishConditions: action.payload.fishConditions,
+        runDefinition: action.payload.runDefinition,
       } as any
       let id = null
       if (Object.keys(forkLengthsCopy).length) {
@@ -81,7 +82,7 @@ export const batchCountSlice = createSlice({
       state.forkLengths = forkLengthsCopy
     },
 
-    removeLastForkLengthEntered: (state) => {
+    removeLastForkLengthEntered: state => {
       const forkLengthsCopy = cloneDeep(state.forkLengths) as any
       if (Object.keys(forkLengthsCopy).length) {
         // @ts-ignore
