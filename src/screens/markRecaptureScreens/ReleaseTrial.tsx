@@ -45,6 +45,8 @@ const ReleaseTrial = ({
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const { run } = dropdownValues.values
 
+  console.log('🚀 ~ ReleaseTrial', releaseTrialStore)
+
   const compareFishHoldingToWildCount = (wildCount: string) => {
     // const message = `This value does not match the \npreviously confirmed value.`
     if (releaseTrialStore.totalFishHolding !== Number(wildCount)) {
@@ -62,24 +64,13 @@ const ReleaseTrial = ({
     console.log('🚀 ~ handleSubmit ~ ReleaseTrial', values)
   }
 
-  const inputUnit = (text: string, setFieldValue?: any) => {
-    return (
-      <Text
-        color='#A1A1A1'
-        position='absolute'
-        top={50}
-        left={300}
-        fontSize={16}
-      >
-        {text}
-      </Text>
-    )
-  }
-
   return (
     <Formik
       validationSchema={releaseTrialSchema}
-      initialValues={releaseTrialStore.values}
+      initialValues={{
+        ...releaseTrialStore.values,
+        wildCount: releaseTrialStore?.totalFishHolding?.toString(),
+      }}
       validateOnMount={false}
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
       initialTouched={{

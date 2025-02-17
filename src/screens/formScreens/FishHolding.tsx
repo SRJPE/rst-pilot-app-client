@@ -1,11 +1,8 @@
 import { useNavigation } from '@react-navigation/native'
 import { HStack, VStack, Text, Button, Heading, View } from 'native-base'
-import { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
-import {
-  FishStoreI,
-  updateFishEntry,
-} from '../../redux/reducers/formSlices/fishInputSlice'
+import { updateFishEntry } from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveTotalFishHolding } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import FishHoldingCard from '../../components/form/FishHoldingCard'
