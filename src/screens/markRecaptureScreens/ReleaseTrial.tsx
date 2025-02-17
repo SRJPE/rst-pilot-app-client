@@ -45,14 +45,8 @@ const ReleaseTrial = ({
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const { run } = dropdownValues.values
 
-  const compareFishHoldingToWildCount = (wildCount: string) => {
-    // const message = `This value does not match the \npreviously confirmed value.`
-    if (releaseTrialStore.totalFishHolding !== Number(wildCount)) {
-      // return <RenderWarningMessage messageToRender={message} />
-      return false
-    }
-
-    return true
+  const fishHoldingEqualsWildCount = (wildCount: string) => {
+    return releaseTrialStore.totalFishHolding === Number(wildCount)
   }
 
   const handleSubmit = (values: any) => {
@@ -118,9 +112,7 @@ const ReleaseTrial = ({
                     touched={touched}
                     errors={errors}
                     camelName='wildCount'
-                    showWarning={
-                      compareFishHoldingToWildCount(values.wildCount) === false
-                    }
+                    showWarning={!fishHoldingEqualsWildCount(values.wildCount)}
                     warningMessage='This value does not match the previously confirmed value.'
                   />
                   <FormInputComponent
