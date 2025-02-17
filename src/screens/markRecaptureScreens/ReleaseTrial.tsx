@@ -45,8 +45,6 @@ const ReleaseTrial = ({
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const { run } = dropdownValues.values
 
-  console.log('🚀 ~ ReleaseTrial', releaseTrialStore)
-
   const compareFishHoldingToWildCount = (wildCount: string) => {
     // const message = `This value does not match the \npreviously confirmed value.`
     if (releaseTrialStore.totalFishHolding !== Number(wildCount)) {

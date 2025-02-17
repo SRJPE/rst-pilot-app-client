@@ -37,8 +37,6 @@ const EditAccountInfoModalContent = ({
   closeModal: () => void
   user: any
 }) => {
-  console.log('🚀 ~ user:', user)
-
   const dispatch = useDispatch<AppDispatch>()
   const [submissionMessage, setSubmissionMessage] = useState({
     success: false,

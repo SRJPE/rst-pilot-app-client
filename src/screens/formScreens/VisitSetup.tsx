@@ -451,15 +451,17 @@ const VisitSetup = ({
               >
                 <VStack space={4}>
                   <FormControl>
-                    <HStack space={6} alignItems='center'>
+                    <HStack space={3} alignItems='center'>
                       <FormControl.Label>
-                        <Heading>Will you be importing a paper entry?</Heading>
+                        <Heading>
+                          Is this a paper entry from a previous trap visit?
+                        </Heading>
                       </FormControl.Label>
                       <Switch
                         shadow='3'
                         offTrackColor='secondary'
                         onTrackColor='primary'
-                        size='lg'
+                        size='md'
                         value={isPaperEntry}
                         accessibilityLabel='Is the entry a paper entry?'
                         onToggle={() => setIsPaperEntry(!isPaperEntry)}
