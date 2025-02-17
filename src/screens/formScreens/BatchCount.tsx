@@ -178,7 +178,7 @@ const BatchCount = ({
   return (
     <>
       <ScrollView
-        scrollEnabled={screenHeight < 1180}
+        scrollEnabled
         flex={1}
         bg='#fff'
         borderWidth='10'

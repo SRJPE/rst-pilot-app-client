@@ -453,7 +453,7 @@ const VisitSetup = ({
                   <FormControl>
                     <HStack space={3} alignItems='center'>
                       <FormControl.Label>
-                        <Heading>
+                        <Heading size='md' fontSize={25}>
                           Is this a paper entry from a previous trap visit?
                         </Heading>
                       </FormControl.Label>
@@ -469,7 +469,9 @@ const VisitSetup = ({
                     </HStack>
                   </FormControl>
                   <Divider />
-                  <Heading>Which stream are you trapping on?</Heading>
+                  <Heading size='md' fontSize={25}>
+                    Which stream are you trapping on?
+                  </Heading>
                   <CustomSelect
                     label='Stream'
                     camelName='stream'

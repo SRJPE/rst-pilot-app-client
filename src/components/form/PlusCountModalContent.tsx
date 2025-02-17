@@ -7,6 +7,7 @@ import {
   Text,
   View,
   VStack,
+  ScrollView,
 } from 'native-base'
 import React, { useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
@@ -80,7 +81,7 @@ const PlusCountModalContent = ({
   }
 
   return (
-    <View>
+    <ScrollView scrollEnabled>
       <Formik
         validationSchema={addPlusCountsSchema}
         enableReinitialize
@@ -257,7 +258,7 @@ const PlusCountModalContent = ({
           </>
         )}
       </Formik>
-    </View>
+    </ScrollView>
   )
 }
 const mapStateToProps = (state: RootState) => {

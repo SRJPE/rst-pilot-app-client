@@ -140,7 +140,7 @@ const BatchCharacteristicsModalContent = ({
   }
 
   return (
-    <View>
+    <ScrollView>
       <Formik
         validationSchema={batchCharacteristicsSchema}
         initialValues={batchCountStore.batchCharacteristics}
@@ -373,7 +373,7 @@ const BatchCharacteristicsModalContent = ({
           </>
         )}
       </Formik>
-    </View>
+    </ScrollView>
   )
 }
 

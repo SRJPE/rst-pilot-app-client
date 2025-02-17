@@ -170,11 +170,13 @@ const CustomSelect: React.FC<CustomSelectI> = ({
             />
           )}
         </Select>
-        <Box mt={2} h={25}>
-          {showError && (
-            <RenderErrorMessage errors={errors} inputName={camelName} />
-          )}
-        </Box>
+        {showError && (
+          <Box mt={2} h={25}>
+            {showError && (
+              <RenderErrorMessage errors={errors} inputName={camelName} />
+            )}
+          </Box>
+        )}
       </FormControl>
     </Box>
   )
