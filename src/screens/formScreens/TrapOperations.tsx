@@ -52,6 +52,7 @@ import FormInputComponent, {
 } from '../../components/Shared/FormInputComponent'
 import * as Yup from 'yup'
 import { getAllTabProcessingResults } from '../../redux/reducers/formSlices/fishProcessingSlice'
+import WaterQuality from '../../components/form/WaterQuality'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -121,6 +122,7 @@ const TrapOperations = ({
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
   const [waterTempUnitC, setWaterTempUnitC] = useState<boolean>(true)
   const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
+  const [showWaterQuality, setShowWaterQuality] = useState<boolean>(true)
 
   const convertCtoF = (celsius: number) => (celsius * 9) / 5 + 32
   const permitFlowThreshold = trapPermitInfo?.flowThreshold || 2000
@@ -877,6 +879,7 @@ const TrapOperations = ({
                           />
                         </Box>
                       </HStack>
+                      {showWaterQuality && <WaterQuality />}
                       <Text
                         color='black'
                         fontSize='xl'
