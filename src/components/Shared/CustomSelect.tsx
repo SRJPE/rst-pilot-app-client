@@ -63,8 +63,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
       return label
     } else if (placeholder === 'Funding Agency' && label !== 'not recorded') {
       return label.toLocaleUpperCase()
-    }
-    return label.replace(/\w+/g, capitalize)
+    } else return label.replace(/\w+/g, capitalize)
   }
 
   return (
@@ -158,6 +157,14 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                     key={item.id}
                     label={itemLabelModifier(item.definition)}
                     value={item.definition}
+                  />
+                )
+              } else if (item.code) {
+                return (
+                  <Select.Item
+                    key={item.id}
+                    label={`${item.code.toUpperCase()} - ${item.description}`}
+                    value={item.code}
                   />
                 )
               }

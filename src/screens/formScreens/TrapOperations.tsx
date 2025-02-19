@@ -278,31 +278,6 @@ const TrapOperations = ({
     }
   }
 
-  const inputUnit = (text: string, setFieldValue?: any) => {
-    return (
-      <Text
-        color='#A1A1A1'
-        position='absolute'
-        top={50}
-        right={4}
-        fontSize={16}
-        onPress={() => {
-          if (setFieldValue) {
-            if (text === '°C') {
-              setWaterTempUnitC(true)
-              setFieldValue('waterTemperatureUnit', '°F')
-            } else {
-              setWaterTempUnitC(false)
-              setFieldValue('waterTemperatureUnit', '°C')
-            }
-          }
-        }}
-      >
-        {text}
-      </Text>
-    )
-  }
-
   const popoverTrigger = (triggerProps: any) => {
     return (
       <IconButton
@@ -879,7 +854,18 @@ const TrapOperations = ({
                           />
                         </Box>
                       </HStack>
-                      {showWaterQuality && <WaterQuality />}
+
+                      {showWaterQuality && (
+                        <WaterQuality
+                          touched={touched}
+                          errors={errors}
+                          values={values}
+                          handleChange={handleChange}
+                          handleBlur={handleBlur}
+                          setFieldTouched={setFieldTouched}
+                          dropdownValues={dropdownValues}
+                        />
+                      )}
                       <Text
                         color='black'
                         fontSize='xl'
