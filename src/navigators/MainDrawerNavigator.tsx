@@ -1,68 +1,137 @@
 import { createDrawerNavigator } from '@react-navigation/drawer'
+import { useNavigationState } from '@react-navigation/native'
+import * as SecureStore from 'expo-secure-store'
+import { connect, useDispatch } from 'react-redux'
 import DrawerMenu from '../components/drawerMenu'
 import Home from '../screens/Home'
 import TrapVisitForm from './roots/TrapVisitFormRoot'
 import MarkRecaptureForm from './roots/MarkRecaptureFormRoot'
 import Profile from '../screens/accountScreens/Profile'
+import { AppDispatch, RootState } from '../redux/store'
 import PermitInfo from '../screens/PermitInfo'
 import SignIn from '../screens/SignIn'
-import { connect } from 'react-redux'
-import { RootState } from '../redux/store'
-import QCForm from './roots/QCFormRoot'
+import InputTurbidity from '../screens/miscScreens/InputTurbidity'
 import MonitoringProgram from './roots/MonitoringProgramRoot'
 import GenerateReport from './roots/GenerateReportRoot'
+import QCForm from './roots/QCFormRoot'
 import InspectorWindow from '../screens/InspectorWindow'
-
+import { refreshUserToken } from '../utils/authUtils'
+import React, { useEffect } from 'react'
+import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
+import type { InitialStateI as UserCredentialStopeProps } from '../redux/reducers/userCredentialsSlice'
+import type { InitialStateI as ConnectivityStoreProps } from '../redux/reducers/connectivitySlice'
 const Drawer = createDrawerNavigator()
 
 const DrawerNavigator = ({
-  storedCredentialsStore,
+  userCredentialsStore,
+  connectivityStore,
 }: {
-  storedCredentialsStore: any
+  userCredentialsStore: UserCredentialStopeProps
+  connectivityStore: ConnectivityStoreProps
 }) => {
+  const dispatch = useDispatch<AppDispatch>()
+
+  const currentRouteIndex = useNavigationState(state => state?.index)
+
+  const isSignInScreen = currentRouteIndex === 0
+
+  const { isConnected: connectivityStoreIsConnected, isInternetReachable } =
+    connectivityStore
+
+  const isConnected =
+    connectivityStoreIsConnected && isInternetReachable !== false
+
+  useEffect(() => {
+    if (isConnected) {
+      refreshUserToken(dispatch).then(tokenRefreshResponse => {
+        if (
+          tokenRefreshResponse &&
+          ['No refresh token found', 'Tokens could not be refreshed'].includes(
+            tokenRefreshResponse
+          )
+        ) {
+          dispatch(setForcedLogoutModalOpen(true))
+        }
+
+        if (tokenRefreshResponse === 'Tokens refreshed') {
+          console.log(
+            '🚀 ~ file: MainDrawerNavigator.tsx:42 ~ Tokens refreshed from main drawer navigation provider'
+          )
+          return
+        }
+
+        if (tokenRefreshResponse === 'Tokens still valid') {
+          console.log(
+            '🚀 ~ file: MainDrawerNavigator.tsx:49 ~ Tokens still valid from main drawer navigation provider'
+          )
+        }
+      })
+    } else {
+      console.log(
+        '🚀 ~ file: MainDrawerNavigator.tsx:72 ~ useEffect ~ isConnected:',
+        isConnected
+      )
+    }
+  }, [isSignInScreen, isConnected])
+
+  async function getValueFor(key: string) {
+    let result = await SecureStore.getItemAsync(key)
+    if (result) {
+      return result
+    } else {
+      console.log('No values stored under that key.')
+      return null
+    }
+  }
+
   return (
     <Drawer.Navigator
       // initialRouteName='Sign In'
-      initialRouteName='Home'
+      // initialRouteName='Home'
       screenOptions={{ drawerType: 'front' }}
-      drawerContent={(props) => <DrawerMenu {...props} />}
+      drawerContent={(props: any) => <DrawerMenu {...props} />}
     >
-      {/* {storedCredentialsStore === null ? ( */}
-      <Drawer.Screen
-        name='Sign In'
-        component={SignIn}
-        options={{
-          headerShown: false,
-          // swipeEnabled: false,
-        }}
-      />
-      {/* ) : ( */}
-      <>
+      {/*       
+      UN-COMMENT THIS CODE TO REACTIVATE NAV AUTH REQUIREMENT  */}
+
+      {!userCredentialsStore.azureUid ? (
         <Drawer.Screen
-          name='Home'
-          component={Home}
-          options={{ headerShown: false }}
+          name='Sign In'
+          component={SignIn}
+          options={{
+            headerShown: false,
+            swipeEnabled: false,
+          }}
         />
-        <Drawer.Screen name='Profile' component={Profile} />
-        <Drawer.Screen name='Permit Info' component={PermitInfo} />
-        <Drawer.Screen name='Generate Report' component={GenerateReport} />
-        <Drawer.Screen name='Quality Control' component={QCForm} />
-        <Drawer.Screen name='Inspector' component={InspectorWindow} />
-        <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
-        <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
-        <Drawer.Screen
-          name='Monitoring Program'
-          component={MonitoringProgram}
-        />
-      </>
-      {/* )} */}
+      ) : (
+        <>
+          <Drawer.Screen
+            name='Home'
+            component={Home}
+            options={{ headerShown: false, swipeEnabled: true }}
+          />
+          <Drawer.Screen name='Profile' component={Profile} />
+          <Drawer.Screen name='Permit Info' component={PermitInfo} />
+          <Drawer.Screen name='Generate Report' component={GenerateReport} />
+          <Drawer.Screen name='Quality Control' component={QCForm} />
+          <Drawer.Screen name='Inspector' component={InspectorWindow} />
+          <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
+          <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
+          <Drawer.Screen
+            name='Monitoring Program'
+            component={MonitoringProgram}
+          />
+          <Drawer.Screen name='Input Turbidity' component={InputTurbidity} />
+        </>
+      )}
     </Drawer.Navigator>
   )
 }
 
 const mapStateToProps = (state: RootState) => {
   return {
-    storedCredentialsStore: state.userCredentials.storedCredentials,
+    userCredentialsStore: state.userCredentials,
+    connectivityStore: state.connectivity,
   }
 }
 export default connect(mapStateToProps)(DrawerNavigator)

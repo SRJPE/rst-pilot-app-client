@@ -1,16 +1,9 @@
-import { MaterialIcons } from '@expo/vector-icons'
 import { Formik } from 'formik'
-import {
-  Button,
-  Divider,
-  HStack,
-  Icon,
-  Pressable,
-  Text,
-  VStack,
-} from 'native-base'
+import { Button, HStack, Text, VStack } from 'native-base'
 
+import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import FormInputComponent from '../../components/Shared/FormInputComponent'
 import {
   individualTrappingSiteState,
   IndividualTrappingSiteValuesI,
@@ -20,8 +13,6 @@ import {
 import { AppDispatch } from '../../redux/store'
 import { trappingSitesSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
-import FormInputComponent from '../../components/Shared/FormInputComponent'
-import { useEffect, useState } from 'react'
 
 const AddTrapModalContent = ({
   closeModal,
@@ -30,12 +21,10 @@ const AddTrapModalContent = ({
   closeModal: any
   addTrapModalContent?: any
 }) => {
-  console.log('🚀 ~ addTrapModalContent:', addTrapModalContent)
   const dispatch = useDispatch<AppDispatch>()
   const [modalDataTemp, setModalDataTemp] = useState({} as any)
 
   const handleAddTrapSubmission = (values: IndividualTrappingSiteValuesI) => {
-    console.log('🚀 ~ handleAddTrapSubmission ~ values:', values?.uid)
     if (values?.uid) {
       dispatch(updateIndividualTrapSite(values))
     } else {
@@ -72,33 +61,13 @@ const AddTrapModalContent = ({
           <>
             <CustomModalHeader
               headerText={'Add Traps'}
-              showHeaderButton={true}
+              showHeaderButton={false}
               closeModal={closeModal}
-              headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  // isDisabled={
-                  //   (Object.values(touched).length > 0 &&
-                  //   Object.values(errors).length > 0)
-                  // }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Add Trap
-                  </Text>
-                </Button>
-              }
             />
-            <Divider my='1%' thickness='3' />
-            <VStack mx='5%' my='2%' space={6}>
+            <VStack mx='5%' my='2%' space={5}>
               <FormInputComponent
                 label={'Trap Name'}
+                placeholder='Enter Trap Name'
                 touched={touched}
                 errors={errors}
                 value={values.trapName ? `${values.trapName}` : ''}
@@ -107,42 +76,35 @@ const AddTrapModalContent = ({
                 onBlur={handleBlur('trapName')}
               />
 
-              <HStack space={10} alignItems='center'>
+              <HStack space={5}>
                 <FormInputComponent
                   label={'Trap Latitude'}
+                  placeholder='00.000'
                   touched={touched}
                   errors={errors}
                   value={values.trapLatitude ? `${values.trapLatitude}` : ''}
                   camelName={'trapLatitude'}
                   keyboardType={'numeric'}
-                  width={'40%'}
                   onChangeText={handleChange('trapLatitude')}
                   onBlur={handleBlur('trapLatitude')}
                 />
                 <FormInputComponent
                   label={'Trap Longitude'}
+                  placeholder='00.000'
                   touched={touched}
                   errors={errors}
                   value={values.trapLongitude ? `${values.trapLongitude}` : ''}
                   camelName={'trapLongitude'}
                   keyboardType={'numeric'}
-                  width={'40%'}
                   onChangeText={handleChange('trapLongitude')}
                   onBlur={handleBlur('trapLongitude')}
                 />
-                <Pressable alignSelf='flex-end'>
-                  <Icon
-                    as={MaterialIcons}
-                    name={'add-location-alt'}
-                    size='16'
-                    color='primary'
-                  />
-                </Pressable>
               </HStack>
 
-              <HStack space={10}>
+              <HStack space={5}>
                 <FormInputComponent
                   label={'Cone Size'}
+                  placeholder='0'
                   touched={touched}
                   errors={errors}
                   value={values.coneSize ? `${values.coneSize}` : ''}
@@ -154,7 +116,8 @@ const AddTrapModalContent = ({
                 />
 
                 <FormInputComponent
-                  label={'USGS station number'}
+                  label={'USGS Station Number'}
+                  placeholder='00000000'
                   touched={touched}
                   errors={errors}
                   value={
@@ -169,21 +132,25 @@ const AddTrapModalContent = ({
                   onBlur={handleBlur('USGSStationNumber')}
                 />
               </HStack>
-              <FormInputComponent
-                label={'Release Site Name'}
-                touched={touched}
-                errors={errors}
-                value={
-                  values.releaseSiteName ? `${values.releaseSiteName}` : ''
-                }
-                camelName={'releaseSiteName'}
-                onChangeText={handleChange('releaseSiteName')}
-                onBlur={handleBlur('releaseSiteName')}
-              />
+              <HStack>
+                <FormInputComponent
+                  label={'Release Site Name'}
+                  placeholder='Enter Release Site Name'
+                  touched={touched}
+                  errors={errors}
+                  value={
+                    values.releaseSiteName ? `${values.releaseSiteName}` : ''
+                  }
+                  camelName={'releaseSiteName'}
+                  onChangeText={handleChange('releaseSiteName')}
+                  onBlur={handleBlur('releaseSiteName')}
+                />
+              </HStack>
 
-              <HStack space={10} alignItems='center'>
+              <HStack space={5} alignItems='center'>
                 <FormInputComponent
                   label={'Release Site Latitude'}
+                  placeholder='00.000'
                   touched={touched}
                   errors={errors}
                   value={
@@ -200,6 +167,7 @@ const AddTrapModalContent = ({
                 <FormInputComponent
                   label={'Release Site Longitude'}
                   touched={touched}
+                  placeholder='00.000'
                   errors={errors}
                   value={
                     values.releaseSiteLongitude
@@ -208,19 +176,25 @@ const AddTrapModalContent = ({
                   }
                   camelName={'releaseSiteLongitude'}
                   keyboardType={'numeric'}
-                  width={'40%'}
                   onChangeText={handleChange('releaseSiteLongitude')}
                   onBlur={handleBlur('releaseSiteLongitude')}
                 />
-                <Pressable alignSelf='flex-end'>
-                  <Icon
-                    as={MaterialIcons}
-                    name={'add-location-alt'}
-                    size='16'
-                    color='primary'
-                  />
-                </Pressable>
               </HStack>
+              <Button
+                bg='primary'
+                mx='2'
+                px='10'
+                shadow='3'
+                isDisabled={!trappingSitesSchema.isValidSync(values)}
+                onPress={() => {
+                  handleSubmit()
+                  closeModal()
+                }}
+              >
+                <Text fontSize='xl' color='white'>
+                  Save Trap
+                </Text>
+              </Button>
             </VStack>
           </>
         )

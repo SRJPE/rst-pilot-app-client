@@ -21,6 +21,7 @@ export interface trapPostProcessingValuesI {
   trapLongitude: number | null
   endingTrapStatus: string
   trapVisitStartTime: Date | null
+  comments: string | null
 }
 
 const initialState: InitialStateI = {
@@ -37,6 +38,7 @@ const initialState: InitialStateI = {
       trapLongitude: null,
       endingTrapStatus: 'Restart Trap',
       trapVisitStartTime: null,
+      comments: '',
     },
     errors: {},
   },
@@ -49,13 +51,12 @@ export const trapPostProcessingSlice = createSlice({
     resetTrapPostProcessingSlice: () => initialState,
     saveTrapPostProcessing: (state, action) => {
       const { tabId, values, errors } = action.payload
+
       state[tabId] = {
         completed: true,
         values: {
           ...values,
-          trapVisitStartTime: state[tabId]
-            ? state[tabId].values.trapVisitStartTime
-            : values.trapVisitStartTime,
+          trapVisitStartTime: values.trapVisitStartTime,
         },
         errors,
       }

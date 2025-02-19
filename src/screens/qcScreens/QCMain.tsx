@@ -38,10 +38,10 @@ function QCMain({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programsTrapVisits = previousTrapVisits.filter((trapVisit) => {
+    const programsTrapVisits = previousTrapVisits.filter(trapVisit => {
       return trapVisit.createdTrapVisitResponse.programId === programId
     })
-    const programsCatchRaw = previousCatchRaw.filter((catchRaw) => {
+    const programsCatchRaw = previousCatchRaw.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
 
@@ -49,8 +49,6 @@ function QCMain({
       previousTrapVisits: programsTrapVisits ?? [],
       previousCatchRaw: programsCatchRaw ?? [],
     })
-
-    console.log('QCData', qcData)
   }, [route.params.programId])
 
   return (
@@ -60,7 +58,7 @@ function QCMain({
         bg={activeButton === 'trapBtn' ? 'themeOrange' : 'primary'}
         onPress={() => {
           setActiveButton('trapBtn')
-          navigation.navigate('Trap QC', {
+          navigation?.navigate('Trap QC', {
             programId: route.params.programId,
           })
         }}
@@ -106,7 +104,7 @@ function QCMain({
               setActiveCatchOption(
                 'Measured Variables and Associated Categories'
               )
-              navigation.navigate('CatchMeasureQC', {
+              navigation?.navigate('CatchMeasureQC', {
                 programId: route.params.programId,
               })
             }}
@@ -132,7 +130,7 @@ function QCMain({
             alignItems='center'
             onPress={() => {
               setActiveCatchOption('Categorical Observations')
-              navigation.navigate('CatchCategoricalQC', {
+              navigation?.navigate('CatchCategoricalQC', {
                 programId: route.params.programId,
               })
             }}
@@ -158,7 +156,7 @@ function QCMain({
             alignItems='center'
             onPress={() => {
               setActiveCatchOption('Total Fish Counts')
-              navigation.navigate('CatchFishCountQC', {
+              navigation?.navigate('CatchFishCountQC', {
                 programId: route.params.programId,
               })
             }}
@@ -184,7 +182,7 @@ function QCMain({
             alignItems='center'
             onPress={() => {
               setActiveCatchOption('Partial Records')
-              navigation.navigate('PartialRecordsQC', {
+              navigation?.navigate('PartialRecordsQC', {
                 programId: route.params.programId,
               })
             }}
@@ -207,7 +205,7 @@ function QCMain({
         bg={activeButton === 'efficiencyBtn' ? 'themeOrange' : 'primary'}
         onPress={() => {
           setActiveButton('efficiencyBtn')
-          navigation.navigate('EfficiencyQC', {
+          navigation?.navigate('EfficiencyQC', {
             programId: route.params.programId,
           })
         }}
@@ -267,7 +265,7 @@ const Accordion = ({
   }, [activeButton])
 
   const toggleOpen = () => {
-    setIsOpen((value) => !value)
+    setIsOpen(value => !value)
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
   }
 

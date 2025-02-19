@@ -1,24 +1,22 @@
 import { Formik } from 'formik'
 import {
+  Button,
   FormControl,
   HStack,
-  Input,
-  ScrollView,
-  VStack,
-  Text,
-  Button,
   Radio,
-  Divider,
+  ScrollView,
+  Text,
+  VStack,
 } from 'native-base'
-
-import { Linking, Alert } from 'react-native'
+import React from 'react'
+import { Alert, Linking } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addGeneticsSampleSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
-import RenderErrorMessage from '../Shared/RenderErrorMessage'
+import FormInputComponent from '../Shared/FormInputComponent'
 
 const initialFormValues = {
   sampleId: '',
@@ -58,7 +56,7 @@ const AddGeneticsModalContent = ({
       <Formik
         validationSchema={addGeneticsSampleSchema}
         initialValues={initialFormValues}
-        onSubmit={(values) => {
+        onSubmit={values => {
           console.log('🚀 ~  Genetic Sample values', values)
           handleFormSubmit(values)
         }}
@@ -76,28 +74,8 @@ const AddGeneticsModalContent = ({
           <>
             <CustomModalHeader
               headerText={'Collect a genetic sample'}
-              showHeaderButton={true}
+              showHeaderButton={false}
               closeModal={closeModal}
-              headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    (touched && Object.keys(touched).length === 0) ||
-                    (errors && Object.keys(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Save
-                  </Text>
-                </Button>
-              }
             />
             <>
               <VStack paddingX='10' paddingTop='3' paddingBottom='10'>
@@ -135,32 +113,20 @@ const AddGeneticsModalContent = ({
 
                 <HStack>
                   <VStack space={4} w='1/2' paddingRight='5'>
-                    <FormControl>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Sample ID Number:
-                          </Text>
-                        </FormControl.Label>
-
-                        {touched.sampleId &&
-                          errors.sampleId &&
-                          RenderErrorMessage(errors, 'sampleId')}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Write a comment'
-                        keyboardType='default'
-                        onChangeText={handleChange('sampleId')}
-                        onBlur={handleBlur('sampleId')}
-                        value={values.sampleId}
-                      />
-                    </FormControl>
+                    <FormInputComponent
+                      camelName='sampleId'
+                      value={values.sampleId}
+                      touched={touched}
+                      errors={errors}
+                      placeholder='00000000'
+                      label='Sample ID Number'
+                      onChangeText={handleChange('sampleId')}
+                      onBlur={handleBlur('sampleId')}
+                    />
 
                     <FormControl>
                       <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
+                        <Text color='black' fontSize='md'>
                           Confirm Mucus Swab Collected
                         </Text>
                       </FormControl.Label>
@@ -197,7 +163,7 @@ const AddGeneticsModalContent = ({
 
                     <FormControl>
                       <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
+                        <Text color='black' fontSize='md'>
                           Fin Clip Collected
                         </Text>
                       </FormControl.Label>
@@ -232,38 +198,29 @@ const AddGeneticsModalContent = ({
                       </Radio.Group>
                     </FormControl>
 
-                    <FormControl>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Crew Member Collecting Samples
-                          </Text>
-                        </FormControl.Label>
-
-                        {touched.crewMember &&
-                          errors.crewMember &&
-                          RenderErrorMessage(errors, 'crewMember')}
-                      </HStack>
-                      <CustomSelect
-                        selectedValue={values.crewMember}
-                        placeholder={'Crew Member'}
-                        onValueChange={handleChange('crewMember')}
-                        setFieldTouched={setFieldTouched}
-                        selectOptions={
-                          crewMembers.length
-                            ? crewMembers.map((item: any) => ({
-                                label: item,
-                                value: item,
-                              }))
-                            : [
-                                {
-                                  label: 'No crew members found',
-                                  value: 'null',
-                                },
-                              ]
-                        }
-                      />
-                    </FormControl>
+                    <CustomSelect
+                      label='Crew Member'
+                      camelName='crewMember'
+                      touched={touched}
+                      errors={errors}
+                      selectedValue={values.crewMember}
+                      placeholder={'Select Crew Member'}
+                      onValueChange={handleChange('crewMember')}
+                      setFieldTouched={() => setFieldTouched('crewMember')}
+                      selectOptions={
+                        crewMembers.length
+                          ? crewMembers.map((item: any) => ({
+                              label: item,
+                              value: item,
+                            }))
+                          : [
+                              {
+                                label: 'No crew members found',
+                                value: 'null',
+                              },
+                            ]
+                      }
+                    />
                   </VStack>
 
                   {/* <View w='1/2' h='full' paddingLeft='5'>
@@ -277,23 +234,35 @@ const AddGeneticsModalContent = ({
                     </Box>
                   </View> */}
                 </HStack>
-
-                <FormControl mt='2'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Comments
-                    </Text>
-                  </FormControl.Label>
-                  <Input
-                    height='50px'
-                    fontSize='16'
-                    placeholder='Write a comment'
-                    keyboardType='default'
-                    onChangeText={handleChange('comments')}
-                    onBlur={handleBlur('comments')}
-                    value={values.comments}
-                  />
-                </FormControl>
+                <FormInputComponent
+                  camelName='comments'
+                  value={values.comments}
+                  touched={touched}
+                  errors={errors}
+                  placeholder='Write a comment'
+                  label='Comments (optional)'
+                  multiline={true}
+                  onChangeText={handleChange('comments')}
+                  onBlur={handleBlur('comments')}
+                />
+                <Button
+                  bg='primary'
+                  mx='2'
+                  px='10'
+                  shadow='3'
+                  isDisabled={
+                    (touched && Object.keys(touched).length === 0) ||
+                    (errors && Object.keys(errors).length > 0)
+                  }
+                  onPress={() => {
+                    handleSubmit()
+                    closeModal()
+                  }}
+                >
+                  <Text fontSize='xl' color='white'>
+                    Save
+                  </Text>
+                </Button>
               </VStack>
             </>
           </>

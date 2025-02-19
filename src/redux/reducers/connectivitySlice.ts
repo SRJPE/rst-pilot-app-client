@@ -1,12 +1,17 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import {
   fetchPreviousTrapAndCatch,
+  postQCSubmissions,
   postTrapVisitFormSubmissions,
 } from './postSlices/trapVisitFormPostBundler'
-import { postMarkRecaptureSubmissions } from './postSlices/markRecapturePostBundler'
+import {
+  postMarkRecaptureSubmissions,
+  fetchExistingMarks,
+} from './postSlices/markRecapturePostBundler'
 import { postMonitoringProgramSubmissions } from './postSlices/monitoringProgramPostBundler'
+import { showSlideAlert } from './slideAlertSlice'
 
-interface InitialStateI {
+export interface InitialStateI {
   type: string
   isConnected: boolean
   isInternetReachable: boolean
@@ -47,10 +52,28 @@ export const connectionChanged = createAsyncThunk(
     console.log('connection changed...', connectionState)
     try {
       if (connectionState.isConnected && connectionState.isInternetReachable) {
-        thunkAPI.dispatch(fetchPreviousTrapAndCatch())
         thunkAPI.dispatch(postTrapVisitFormSubmissions())
+        thunkAPI.dispatch(postQCSubmissions())
         thunkAPI.dispatch(postMarkRecaptureSubmissions())
         thunkAPI.dispatch(postMonitoringProgramSubmissions())
+        thunkAPI.dispatch(fetchPreviousTrapAndCatch())
+        thunkAPI.dispatch(fetchExistingMarks())
+        showSlideAlert(
+          thunkAPI.dispatch,
+          'Network connection established successfully',
+          'success',
+          5000
+        )
+      } else if (
+        !connectionState.isConnected &&
+        !connectionState.isInternetReachable
+      ) {
+        showSlideAlert(
+          thunkAPI.dispatch,
+          'No network connection. Operating in offline mode',
+          'error',
+          5000
+        )
       }
       return payload
     } catch (e) {

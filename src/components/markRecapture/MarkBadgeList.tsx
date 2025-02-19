@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { Badge, IconButton, ScrollView, Text, VStack } from 'native-base'
-import { markBadgeLookup } from '../../utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
@@ -34,7 +33,7 @@ const MarkBadgeList = ({
   //sets the field value to be the current badgeListContent and updates on change
   useEffect(() => {
     if (setFieldValue && setFieldTouched) {
-      setFieldValue(field, badgeListContent)
+      setFieldValue(field, badgeListContent, true)
       setFieldTouched(field)
     }
   }, [badgeListContent])

@@ -1,9 +1,7 @@
 import { Formik } from 'formik'
-import { Button, Divider, FormControl, HStack, Text, VStack } from 'native-base'
+import { Box, Button, HStack, Text, VStack } from 'native-base'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
-import { trappingProtocolsSchema } from '../../utils/helpers/yupValidations'
-import CustomModalHeader from '../Shared/CustomModalHeader'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
 import {
   IndividualTrappingProtocolState,
@@ -11,9 +9,11 @@ import {
   saveIndividualTrappingProtocol,
   updateIndividualTrappingProtocol,
 } from '../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
-import CustomSelect from '../Shared/CustomSelect'
+import { AppDispatch, RootState } from '../../redux/store'
+import { trappingProtocolsSchema } from '../../utils/helpers/yupValidations'
 import { reorderTaxon } from '../../utils/utils'
-import { useEffect, useState } from 'react'
+import CustomModalHeader from '../Shared/CustomModalHeader'
+import CustomSelect from '../Shared/CustomSelect'
 
 const AddTrappingProtocolModalContent = ({
   closeModal,
@@ -69,84 +69,60 @@ const AddTrappingProtocolModalContent = ({
           <>
             <CustomModalHeader
               headerText={'Species Measured'}
-              showHeaderButton={true}
+              showHeaderButton={false}
               closeModal={closeModal}
-              headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    Object.values(touched).length === 0 ||
-                    (Object.values(touched).length > 0 &&
-                      Object.values(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Add Protocol
-                  </Text>
-                </Button>
-              }
             />
-            <VStack mx='5%' my='2%' space={6}>
-              <HStack justifyContent='space-around'>
-                <FormControl w='45%'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Species
-                    </Text>
-                  </FormControl.Label>
+            <VStack mx='5%' my='2%' space={5}>
+              <HStack justifyContent='space-around' space={5}>
+                <Box flex={1}>
                   <CustomSelect
+                    touched={touched}
+                    errors={errors}
+                    camelName='species'
+                    label='Species'
                     selectedValue={values.species}
-                    placeholder={'Species'}
+                    placeholder={'Select Species'}
                     onValueChange={(value: any) =>
                       handleChange('species')(value)
                     }
-                    setFieldTouched={setFieldTouched}
+                    setFieldTouched={() => setFieldTouched('species')}
                     selectOptions={reorderedTaxon.map((taxon: any) => ({
                       label: taxon?.commonname,
                       value: taxon?.commonname,
                     }))}
                   />
-                </FormControl>
-                <FormControl w='45%'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Run
-                    </Text>
-                  </FormControl.Label>
+                </Box>
+                <Box flex={1}>
                   <CustomSelect
+                    camelName='run'
+                    errors={errors}
+                    touched={touched}
+                    label='Run'
                     selectedValue={values.run}
-                    placeholder={'Run'}
+                    placeholder={'Select Run'}
                     onValueChange={(value: any) => handleChange('run')(value)}
-                    setFieldTouched={setFieldTouched}
+                    setFieldTouched={() => setFieldTouched('run')}
                     selectOptions={dropdownValues?.run}
                   />
-                </FormControl>
+                </Box>
               </HStack>
 
-              <HStack justifyContent='space-around'>
-                <FormControl w='45%'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Life Stage
-                    </Text>
-                  </FormControl.Label>
+              <HStack justifyContent='space-around' space={5}>
+                <Box flex={1}>
                   <CustomSelect
+                    label='Life Stage'
+                    camelName='lifeStage'
+                    errors={errors}
+                    touched={touched}
                     selectedValue={values?.lifeStage}
-                    placeholder={'Life Stage'}
+                    placeholder={'Select Life Stage'}
                     onValueChange={(value: any) =>
                       handleChange('lifeStage')(value)
                     }
-                    setFieldTouched={setFieldTouched}
+                    setFieldTouched={() => setFieldTouched('lifeStage')}
                     selectOptions={dropdownValues?.lifeStage}
                   />
-                </FormControl>
+                </Box>
 
                 <FormInputComponent
                   label={'Number Measured'}
@@ -155,6 +131,7 @@ const AddTrappingProtocolModalContent = ({
                   value={
                     values.numberMeasured ? `${values.numberMeasured}` : ''
                   }
+                  placeholder='0'
                   camelName={'numberMeasured'}
                   keyboardType={'numeric'}
                   width={'45%'}
@@ -162,6 +139,21 @@ const AddTrappingProtocolModalContent = ({
                   onBlur={handleBlur('numberMeasured')}
                 />
               </HStack>
+              <Button
+                bg='primary'
+                mx='2'
+                px='10'
+                shadow='3'
+                isDisabled={!trappingProtocolsSchema.isValidSync(values)}
+                onPress={() => {
+                  handleSubmit()
+                  closeModal()
+                }}
+              >
+                <Text fontSize='xl' color='white'>
+                  Add Protocol
+                </Text>
+              </Button>
             </VStack>
           </>
         )

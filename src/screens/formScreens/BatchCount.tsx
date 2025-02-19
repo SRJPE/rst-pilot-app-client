@@ -15,7 +15,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Keyboard, useWindowDimensions } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
 import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
@@ -43,9 +43,13 @@ import { Entypo, FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 const BatchCount = ({
   tabSlice,
   batchCountStore,
+  trapOperationsStore,
+  dropdownsStore,
 }: {
   tabSlice: TabStateI
   batchCountStore: any
+  trapOperationsStore: any
+  dropdownsStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
@@ -58,7 +62,7 @@ const BatchCount = ({
   const [showTable, setShowTable] = useState(false as boolean)
   const [lifeStageRadioValue, setLifeStageRadioValue] = useState('' as string)
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
-    useState(false as boolean)
+    useState(true as boolean)
   const [modalInitialData, setModalInitialData] = useState({
     forkLength: '',
     count: '',
@@ -67,21 +71,19 @@ const BatchCount = ({
   const [deadIsLocked, setDeadIsLocked] = useState(false as boolean)
   const [deadToggle, setDeadToggle] = useState(false as boolean)
   const [markToggle, setMarkToggle] = useState(false as boolean)
-  const [conditionToggle, setConditionToggle] = useState(false as boolean)
-  const {
-    tabId,
-    species,
-    adiposeClipped,
-    fishCondition,
-    existingMarks,
-    forkLengths,
-  } = batchCountStore
+  const [FC1Toggle, setFC1Toggle] = useState(false as boolean)
+  const [FC2Toggle, setFC2Toggle] = useState(false as boolean)
+  const [FC3Toggle, setFC3Toggle] = useState(false as boolean)
 
-  useEffect(() => {
-    if (species === '') {
-      setBatchCharacteristicsModalOpen(true)
-    }
-  }, [])
+  const { tabId, batchCharacteristics, forkLengths } = batchCountStore
+  const { species, adiposeClipped, fishConditions, existingMarks } =
+    batchCharacteristics
+
+  // useEffect(() => {
+  //   if (species === '') {
+  //     setBatchCharacteristicsModalOpen(true)
+  //   }
+  // }, [])
 
   const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())
@@ -91,7 +93,7 @@ const BatchCount = ({
     if (tabId) {
       dispatch(saveBatchCount({ ...batchCountStore }))
       dispatch(resetBatchCountSlice())
-      showSlideAlert(dispatch, 'Batch Count')
+      showSlideAlert(dispatch, 'Batch Count Saved')
       // @ts-ignore
       navigation.navigate('Trap Visit Form', {
         screen: 'Fish Input',
@@ -102,7 +104,7 @@ const BatchCount = ({
     dispatch(saveBatchCount({ ...batchCountStore }))
     dispatch(resetBatchCountSlice())
 
-    showSlideAlert(dispatch, 'Batch Count')
+    showSlideAlert(dispatch, 'Batch Count Saved')
     setBatchCharacteristicsModalOpen(true)
   }
 
@@ -147,13 +149,21 @@ const BatchCount = ({
       case 'mark':
         setMarkToggle(!markToggle)
         break
-      case 'condition':
-        setConditionToggle(!conditionToggle)
+      case 'FC1':
+        setFC1Toggle(!FC1Toggle)
+        break
+      case 'FC2':
+        setFC2Toggle(!FC2Toggle)
+        break
+      case 'FC3':
+        setFC3Toggle(!FC3Toggle)
         break
 
       default:
         setMarkToggle(false)
-        setConditionToggle(false)
+        setFC1Toggle(false)
+        setFC2Toggle(false)
+        setFC3Toggle(false)
         if (deadIsLocked) return
         setDeadToggle(false)
         break
@@ -168,13 +178,13 @@ const BatchCount = ({
   return (
     <>
       <ScrollView
-        scrollEnabled={screenHeight < 1180}
+        scrollEnabled
         flex={1}
         bg='#fff'
         borderWidth='10'
         borderColor='themeGrey'
       >
-        <View style={{ paddingBottom: screenHeight < 1180 ? 100 : 0 }}>
+        <View style={{ paddingBottom: 100 }}>
           <Pressable onPress={Keyboard.dismiss}>
             <HStack space={10}>
               <CustomModalHeader
@@ -204,15 +214,12 @@ const BatchCount = ({
                     <Text>
                       Species: <Text bold>{capitalize(species)}</Text>
                     </Text>
-                    <Text>
-                      Fish Condition:{' '}
-                      <Text bold>{capitalize(fishCondition)}</Text>
-                    </Text>
-                  </HStack>
-                  <HStack space={6} ml='100'>
+
+                    {/* </HStack>
+                  <HStack space={6} ml='100'> */}
                     <Text>
                       Adipose Clipped:{' '}
-                      <Text bold>{adiposeClipped ? 'Yes' : 'No'}</Text>
+                      <Text bold>{adiposeClipped ? 'True' : 'False'}</Text>
                     </Text>
                     <Text>
                       Mark:{' '}
@@ -228,6 +235,14 @@ const BatchCount = ({
                       </Text>
                     </Text>
                   </HStack>
+                  <Text>
+                    Fish Condition(s):{' '}
+                    {fishConditions.map((condition: string, index: number) => (
+                      <Text bold key={index}>
+                        {`${index + 1}. ${capitalize(condition)} `}
+                      </Text>
+                    ))}
+                  </Text>
                 </VStack>
               </HStack>
               <HStack space={4}>
@@ -373,8 +388,16 @@ const BatchCount = ({
                     ignoreLifeStage={species !== 'Chinook salmon'}
                     deadToggle={deadToggle}
                     markToggle={markToggle}
-                    conditionToggle={conditionToggle}
+                    fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
+                      .map((toggle, index) =>
+                        toggle ? fishConditions[index] : null
+                      )
+                      .filter(condition => condition !== null)}
                     handleToggles={handleToggles}
+                    trapOperationsStore={trapOperationsStore}
+                    dropdownsStore={dropdownsStore}
+                    activeTabId={tabSlice.activeTabId}
+                    species={species}
                   />
                   {species !== 'Chinook salmon' && <View mb='65'></View>}
                 </>
@@ -442,19 +465,26 @@ const BatchCount = ({
                     />
                   </VStack>
                 )}
-                {fishCondition !== 'none' && (
-                  <VStack alignItems='center' space={4} mt='2'>
-                    <Text fontSize='16'>Condition</Text>
-                    <Switch
-                      shadow='3'
-                      offTrackColor='secondary'
-                      onTrackColor='primary'
-                      size='md'
-                      isChecked={conditionToggle}
-                      onToggle={() => handleToggles('condition')}
-                    />
-                  </VStack>
-                )}
+                {fishConditions.length > 0 &&
+                  fishConditions.map((condition: string, index: number) => (
+                    <VStack alignItems='center' space={4} mt='2' key={index}>
+                      <Text fontSize='16'>{`FC${index + 1}`}</Text>
+                      <Switch
+                        shadow='3'
+                        offTrackColor='secondary'
+                        onTrackColor='primary'
+                        size='md'
+                        isChecked={
+                          index + 1 === 1
+                            ? FC1Toggle
+                            : index + 1 === 2
+                            ? FC2Toggle
+                            : FC3Toggle
+                        }
+                        onToggle={() => handleToggles(`FC${index + 1}`)}
+                      />
+                    </VStack>
+                  ))}
                 <VStack space={4}>
                   <Heading size='md'>
                     Last Fork length Entered: {calculateLastFish()}
@@ -472,21 +502,25 @@ const BatchCount = ({
         </View>
       </ScrollView>
       {/* --------- Modals --------- */}
-      <CustomModal
-        isOpen={batchCharacteristicsModalOpen}
-        closeModal={() => setBatchCharacteristicsModalOpen(false)}
-        height='1/2'
-      >
-        <BatchCharacteristicsModalContent
+      {batchCharacteristicsModalOpen && (
+        <CustomModal
+          isOpen={batchCharacteristicsModalOpen}
           closeModal={() => setBatchCharacteristicsModalOpen(false)}
-        />
-      </CustomModal>
+          height='2/3'
+        >
+          <BatchCharacteristicsModalContent
+            closeModal={() => setBatchCharacteristicsModalOpen(false)}
+          />
+        </CustomModal>
+      )}
 
-      <BatchCountTableModal
-        showTableModal={showTableModal}
-        setShowTableModal={setShowTableModal}
-        modalInitialData={modalInitialData}
-      />
+      {showTableModal && (
+        <BatchCountTableModal
+          showTableModal={showTableModal}
+          setShowTableModal={setShowTableModal}
+          modalInitialData={modalInitialData}
+        />
+      )}
     </>
   )
 }
@@ -495,6 +529,8 @@ const mapStateToProps = (state: RootState) => {
   return {
     tabSlice: state.tabSlice,
     batchCountStore: state.batchCount,
+    trapOperationsStore: state.trapOperations,
+    dropdownsStore: state.dropdowns,
   }
 }
 export default connect(mapStateToProps)(BatchCount)

@@ -1,52 +1,94 @@
 import { Formik } from 'formik'
 import {
+  Box,
   Button,
-  Divider,
   FormControl,
   HStack,
-  Input,
   Radio,
   Text,
   VStack,
 } from 'native-base'
+
 import { useDispatch, useSelector } from 'react-redux'
+import FormInputComponent from '../../components/Shared/FormInputComponent'
 import {
-  IndividualCrewMemberValuesI,
   IndividualCrewMemberState,
+  IndividualCrewMemberValuesI,
   saveIndividualCrewMember,
   updateIndividualCrewMember,
 } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import FormInputComponent from '../../components/Shared/FormInputComponent'
 
-import CustomModalHeader from '../Shared/CustomModalHeader'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Searchbar } from 'react-native-paper'
+import { PersonnelObject } from '../../screens/accountScreens/createNewProgram/CrewMembers'
 import { crewMembersSchema } from '../../utils/helpers/yupValidations'
+import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
-import { useEffect, useState } from 'react'
+import CrewMemberEntryModeToggle from './CrewMemberEntryModeToggle'
+import QuickAddCrewTable from './QuickAddCrewTable'
+
+export type CrewMemberEntryMode = 'search' | 'manual'
 
 const AddCrewMemberModalContent = ({
   closeModal,
   addTrapModalContent,
+  personnelOptions,
 }: {
-  closeModal: any
+  closeModal: () => void
   addTrapModalContent?: any
+  personnelOptions: Array<PersonnelObject>
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+
+  const [crewMemberEntryMode, setCrewMemberEntryMode] =
+    useState<CrewMemberEntryMode>('search')
+
   const [modalDataTemp, setModalDataTemp] = useState({} as any)
+  const [emailSearchValue, setEmailSearchValue] = useState<string>('')
+  const [emailSearchResults, setEmailSearchResults] = useState<
+    PersonnelObject[]
+  >([])
+
+  const resetSearch = () => {
+    setEmailSearchValue('')
+    setEmailSearchResults([])
+    setShowNoResultsMessage(false)
+  }
+
+  const checkExistingEmail = useCallback(
+    (email: string | null) => {
+      const emailExists = personnelOptions.some(
+        personnel => personnel?.email?.toLowerCase() === email?.toLowerCase()
+      )
+      if (emailExists) {
+        return { email: 'Email already exists' }
+      } else {
+        return null
+      }
+    },
+    [personnelOptions]
+  )
 
   const handleAddCrewMemberSubmission = (
     values: IndividualCrewMemberValuesI
   ) => {
-    console.log('🚀 ~ handleAddTrapSubmission ~ values:', values)
     if (values?.uid) {
       dispatch(updateIndividualCrewMember(values))
     } else {
       dispatch(saveIndividualCrewMember(values))
     }
   }
+
+  const changeCrewMemberEntryMode = (mode: CrewMemberEntryMode) => {
+    setCrewMemberEntryMode(mode)
+  }
+
+  const [showNoResultsMessage, setShowNoResultsMessage] =
+    useState<boolean>(false)
 
   useEffect(() => {
     setModalDataTemp(addTrapModalContent)
@@ -68,7 +110,7 @@ const AddCrewMemberModalContent = ({
         setFieldValue,
         setFieldTouched,
         setValues,
-
+        resetForm,
         touched,
         errors,
         values,
@@ -76,23 +118,206 @@ const AddCrewMemberModalContent = ({
         useEffect(() => {
           setValues(modalDataTemp)
         }, [modalDataTemp])
+
+        const emailExistsError = checkExistingEmail(values.email)
+
+        const noInputsTouched = Object.keys(touched).length === 0
+
+        const formInvalid =
+          noInputsTouched ||
+          Object.values(errors).length > 0 ||
+          Boolean(emailExistsError)
+
         return (
           <>
             <CustomModalHeader
               headerText={'Add Crew Member'}
-              showHeaderButton={true}
-              closeModal={closeModal}
-              headerButton={
+              showHeaderButton={false}
+              closeModal={() => {
+                resetForm()
+                closeModal()
+                resetSearch()
+                changeCrewMemberEntryMode('search')
+              }}
+            />
+            <CrewMemberEntryModeToggle
+              resetForm={resetForm}
+              resetSearch={resetSearch}
+              changeCrewMemberEntryMode={changeCrewMemberEntryMode}
+              crewMemberEntryMode={crewMemberEntryMode}
+            />
+            {crewMemberEntryMode === 'search' && (
+              <VStack space={3} mx='5%' my='2%'>
+                <Text color='black' fontSize='lg'>
+                  Search for existing user
+                </Text>
+                <HStack>
+                  <Searchbar
+                    placeholder='Enter email address to search for user'
+                    value={emailSearchValue}
+                    onChangeText={e => setEmailSearchValue(e.trim())}
+                    style={{ flexGrow: 1 }}
+                  />
+                  <Button
+                    bg='primary'
+                    mx='2'
+                    px='10'
+                    shadow='3'
+                    isDisabled={emailSearchValue.length === 0}
+                    onPress={() => {
+                      setShowNoResultsMessage(false)
+                      const searchResults = personnelOptions.filter(personnel =>
+                        personnel.email
+                          ?.toLowerCase()
+                          .includes(emailSearchValue.toLowerCase())
+                      )
+                      setEmailSearchResults(searchResults)
+                      if (searchResults.length === 0) {
+                        setShowNoResultsMessage(true)
+                      }
+                    }}
+                  >
+                    <Text fontSize='xl' color='white'>
+                      Search
+                    </Text>
+                  </Button>
+                </HStack>
+                <Box marginTop={5}>
+                  <QuickAddCrewTable
+                    resetSearch={resetSearch}
+                    emailSearchResults={emailSearchResults}
+                    changeCrewMemberEntryMode={changeCrewMemberEntryMode}
+                    handleAddCrewMemberSubmission={
+                      handleAddCrewMemberSubmission
+                    }
+                    showNoResultsMessage={showNoResultsMessage}
+                    closeModal={closeModal}
+                  />
+                </Box>
+              </VStack>
+            )}
+
+            {crewMemberEntryMode === 'manual' && (
+              <VStack mx='5%' my='2%' space={5}>
+                <HStack space={5}>
+                  <FormInputComponent
+                    label={'First Name'}
+                    placeholder='Enter First Name'
+                    touched={touched}
+                    errors={errors}
+                    value={values.firstName || ''}
+                    camelName={'firstName'}
+                    width={'100%'}
+                    onChangeText={handleChange('firstName')}
+                    onBlur={handleBlur('firstName')}
+                  />
+                  <FormInputComponent
+                    label={'Last Name'}
+                    placeholder='Enter Last Name'
+                    touched={touched}
+                    errors={errors}
+                    value={values.lastName || ''}
+                    camelName={'lastName'}
+                    onChangeText={handleChange('lastName')}
+                    onBlur={handleBlur('lastName')}
+                  />
+                </HStack>
+
+                <FormInputComponent
+                  label={'Phone Number'}
+                  touched={touched}
+                  errors={errors}
+                  value={values.phoneNumber || ''}
+                  camelName={'phoneNumber'}
+                  placeholder='###-###-####'
+                  // keyboardType={'phone'} //TODO add phone styling
+                  width={'100%'}
+                  onChangeText={handleChange('phoneNumber')}
+                  onBlur={handleBlur('phoneNumber')}
+                />
+                <FormInputComponent
+                  label={'Email'}
+                  placeholder='example@email.com'
+                  touched={touched}
+                  errors={emailExistsError || errors}
+                  value={values.email?.trim() || ''}
+                  camelName={'email'}
+                  width={'100%'}
+                  onChangeText={handleChange('email')}
+                  onBlur={handleBlur('email')}
+                />
+
+                <CustomSelect
+                  label='Funding Agency'
+                  camelName='agency'
+                  errors={errors}
+                  touched={touched}
+                  dataType='fundingAgency'
+                  selectedValue={values.agency as string}
+                  placeholder='Select Funding Agency'
+                  onValueChange={handleChange('agency')}
+                  setFieldTouched={() => setFieldTouched('agency')}
+                  selectOptions={dropdownValues?.fundingAgency}
+                />
+
+                <FormInputComponent
+                  label={'Orcid ID (optional)'}
+                  placeholder='AABB00000000'
+                  touched={touched}
+                  errors={errors}
+                  value={values.orcidId || ''}
+                  camelName={'orcidId'}
+                  width={'100%'}
+                  onChangeText={handleChange('orcidId')}
+                  onBlur={handleBlur('orcidId')}
+                />
+
+                <Box minH={100}>
+                  <FormControl w='30%'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='16'>
+                        Is Lead
+                      </Text>
+                    </FormControl.Label>
+                    <Radio.Group
+                      name='isLead'
+                      accessibilityLabel='is lead'
+                      value={`${values.isLead}`}
+                      onChange={(value: any) => {
+                        setFieldTouched('isLead', true)
+                        if (value === 'true') {
+                          setFieldValue('isLead', true)
+                        } else {
+                          setFieldValue('isLead', false)
+                        }
+                      }}
+                    >
+                      <Radio
+                        colorScheme='primary'
+                        value='false'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        No
+                      </Radio>
+                      <Radio
+                        colorScheme='primary'
+                        value='true'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        Yes
+                      </Radio>
+                    </Radio.Group>
+                  </FormControl>
+                </Box>
                 <Button
                   bg='primary'
                   mx='2'
+                  mt={5}
                   px='10'
                   shadow='3'
-                  isDisabled={
-                    Object.values(touched).length === 0 ||
-                    (Object.values(touched).length > 0 &&
-                      Object.values(errors).length > 0)
-                  }
+                  isDisabled={formInvalid}
                   onPress={() => {
                     handleSubmit()
                     closeModal()
@@ -102,136 +327,8 @@ const AddCrewMemberModalContent = ({
                     Save
                   </Text>
                 </Button>
-              }
-            />
-            <VStack mx='5%' my='2%' space={4}>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Search for existing User
-                  </Text>
-                </FormControl.Label>
-                <Input //TODO: implement search
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Search for existing User'
-                  value={''}
-                />
-              </FormControl>
-              <Divider thickness='3' my='2%' />
-
-              <HStack justifyContent='space-between'>
-                <FormInputComponent
-                  label={'First Name'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.firstName ? `${values.firstName}` : ''}
-                  camelName={'firstName'}
-                  width={'45%'}
-                  onChangeText={handleChange('firstName')}
-                  onBlur={handleBlur('firstName')}
-                />
-                <FormInputComponent
-                  label={'Last Name'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.lastName ? `${values.lastName}` : ''}
-                  camelName={'lastName'}
-                  width={'45%'}
-                  onChangeText={handleChange('lastName')}
-                  onBlur={handleBlur('lastName')}
-                />
-              </HStack>
-
-              <HStack justifyContent='space-between'>
-                <FormInputComponent
-                  label={'Phone Number'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.phoneNumber ? `${values.phoneNumber}` : ''}
-                  camelName={'phoneNumber'}
-                  // keyboardType={'phone'} //TODO add phone styling
-                  width={'45%'}
-                  onChangeText={handleChange('phoneNumber')}
-                  onBlur={handleBlur('phoneNumber')}
-                />
-                <FormInputComponent
-                  label={'Email'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.email ? `${values.email}` : ''}
-                  camelName={'email'}
-                  width={'45%'}
-                  onChangeText={handleChange('email')}
-                  onBlur={handleBlur('email')}
-                />
-              </HStack>
-
-              <HStack justifyContent='space-between'>
-                <FormControl w='45%'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Funding Agency
-                    </Text>
-                  </FormControl.Label>
-                  <CustomSelect
-                    selectedValue={values.agency as string}
-                    placeholder='Funding Agency'
-                    onValueChange={handleChange('agency')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues?.fundingAgency}
-                  />
-                </FormControl>
-                <FormInputComponent
-                  label={'Orcid ID (optional)'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.orcidId ? `${values.orcidId}` : ''}
-                  camelName={'orcidId'}
-                  width={'45%'}
-                  onChangeText={handleChange('orcidId')}
-                  onBlur={handleBlur('orcidId')}
-                />
-              </HStack>
-
-              <FormControl w='30%'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Is Lead
-                  </Text>
-                </FormControl.Label>
-                <Radio.Group
-                  name='isLead'
-                  accessibilityLabel='is lead'
-                  value={`${values.isLead}`}
-                  onChange={(value: any) => {
-                    setFieldTouched('isLead', true)
-                    if (value === 'true') {
-                      setFieldValue('isLead', true)
-                    } else {
-                      setFieldValue('isLead', false)
-                    }
-                  }}
-                >
-                  <Radio
-                    colorScheme='primary'
-                    value='false'
-                    my={1}
-                    _icon={{ color: 'primary' }}
-                  >
-                    No
-                  </Radio>
-                  <Radio
-                    colorScheme='primary'
-                    value='true'
-                    my={1}
-                    _icon={{ color: 'primary' }}
-                  >
-                    Yes
-                  </Radio>
-                </Radio.Group>
-              </FormControl>
-            </VStack>
+              </VStack>
+            )}
           </>
         )
       }}

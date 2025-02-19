@@ -63,13 +63,12 @@ export const trapOperationsSlice = createSlice({
         completed: true,
         values: {
           ...values,
-          trapVisitStartTime: state[tabId]
-            ? state[tabId].values.trapVisitStartTime
-            : action.payload.values.trapVisitStartTime,
-
-          trapVisitStopTime: state[tabId]
-            ? state[tabId].values.trapVisitStopTime
-            : action.payload.values.trapVisitStopTime,
+          trapVisitStartTime: action?.payload?.values?.trapVisitStartTime
+            ? action.payload.values.trapVisitStartTime
+            : state?.[tabId]?.values?.trapVisitStartTime,
+          trapVisitStopTime: action?.payload?.values?.trapVisitStopTime
+            ? action.payload.values.trapVisitStopTime
+            : state?.[tabId]?.values?.trapVisitStopTime,
         },
         errors,
       }

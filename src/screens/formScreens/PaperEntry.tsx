@@ -19,8 +19,7 @@ import {
 } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
-
+import React from 'react'
 const mapStateToProps = (state: RootState) => {
   return {
     historicalDataStore: state.paperEntry,
@@ -84,7 +83,7 @@ const PaperEntry = ({
     const tabs = tabState.tabs
     const trapSite = tabs[tabId].trapSite
 
-    Object.keys(tabs).forEach((id) => {
+    Object.keys(tabs).forEach(id => {
       if (trapSite == tabs[id].trapSite) {
         dispatch(
           savePaperEntry({
@@ -134,7 +133,7 @@ const PaperEntry = ({
             </Box>
           </HStack>
 
-          {dateError ? RenderErrorMessage({ dateError }, 'dateError') : <></>}
+          {/* //TODO: Refactor to add actual error message for dateError */}
 
           <FormControl>
             <FormControl.Label>
@@ -147,7 +146,7 @@ const PaperEntry = ({
               fontSize='16'
               placeholder='Write a comment'
               keyboardType='default'
-              onChangeText={(newText) => {
+              onChangeText={newText => {
                 setComments(newText)
               }}
               value={comments}
@@ -155,7 +154,11 @@ const PaperEntry = ({
           </FormControl>
         </VStack>
       </View>
-      <NavButtons navigation={navigation} handleSubmit={handleSubmit} errors={dateError}/>
+      <NavButtons
+        navigation={navigation}
+        handleSubmit={handleSubmit}
+        errors={dateError}
+      />
     </>
   )
 }

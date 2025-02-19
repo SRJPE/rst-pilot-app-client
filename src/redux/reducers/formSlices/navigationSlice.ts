@@ -44,8 +44,10 @@ export const navigationSlice = createSlice({
   name: 'navigation',
   initialState: initialState,
   reducers: {
-    resetNavigationSlice: () => initialState,
-    togglePreviousPageWasIncompleteSections: (state) => {
+    resetNavigationSlice: () => {
+      return initialState
+    },
+    togglePreviousPageWasIncompleteSections: state => {
       state.previousPageWasIncompleteSections =
         !state.previousPageWasIncompleteSections
     },
@@ -53,15 +55,15 @@ export const navigationSlice = createSlice({
       state.activeStep = action.payload
     },
     markStepCompleted: (state, action) => {
-      let steps = {...state.steps}
-      Object.keys(steps).forEach((key) => {
+      let steps = { ...state.steps }
+      Object.keys(steps).forEach(key => {
         if (steps[key].propName === action.payload.propName) {
           steps[key] = { ...steps[key], completed: true }
         }
       })
       state.steps = steps
     },
-    checkIfFormIsComplete: (state) => {
+    checkIfFormIsComplete: state => {
       //iterate over the first 6 step and check if all steps are completed
       const stepsArray = Object.values(state.steps).slice(0, 6) as Array<any>
       const incompleteSteps = [] as Array<any>

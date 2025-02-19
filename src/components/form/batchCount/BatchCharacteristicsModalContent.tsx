@@ -11,8 +11,9 @@ import {
   ScrollView,
   Text,
   VStack,
+  View,
 } from 'native-base'
-import React, { memo, useState } from 'react'
+import React, { memo, useCallback, useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   addMarkToBatchCountExistingMarks,
@@ -21,21 +22,17 @@ import {
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { alphabeticalSort, reorderTaxon } from '../../../utils/utils'
+import { reorderTaxon, returnDefinitionArray } from '../../../utils/utils'
 import CustomModalHeader from '../../Shared/CustomModalHeader'
 import CustomSelect from '../../Shared/CustomSelect'
-import RenderErrorMessage from '../../Shared/RenderErrorMessage'
 import MarkBadgeList from '../../markRecapture/MarkBadgeList'
 import CustomModal from '../../Shared/CustomModal'
 import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
 import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
-import { ReleaseMarkI } from '../../../screens/formScreens/AddFish'
-
-const initialFormValues = {
-  species: '',
-  adiposeClipped: false,
-  fishCondition: 'none',
-}
+import { ReleaseMarkI } from '../../../utils/interfaces'
+import SpeciesDropDown from '../SpeciesDropDown'
+import FishConditionsDropDown from '../FishConditionsDropDown'
+import { startCase } from 'lodash'
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -56,12 +53,39 @@ const BatchCharacteristicsModalContent = ({
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
-  const alphabeticalLifeStage = alphabeticalSort(
-    dropdownValues.lifeStage,
-    'definition'
+  const [fishConditionDropdownOpen, setFishConditionDropdownOpen] = useState(
+    false as boolean
+  )
+  const [fishConditionList, setFishConditionList] = useState<
+    { label: string; value: string }[]
+  >(
+    dropdownValues.fishCondition.map((condition: any) => ({
+      label: startCase(condition?.definition),
+      value: condition?.definition,
+    }))
   )
 
+  const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
+    false as boolean
+  )
+  const [speciesList, setSpeciesList] = useState<
+    { label: string; value: string }[]
+  >(
+    reorderedTaxon.map((taxon: any) => ({
+      label: taxon?.commonname,
+      value: taxon?.commonname,
+    }))
+  )
+  const onSpeciesOpen = useCallback(() => {
+    setFishConditionDropdownOpen(false)
+  }, [])
+  const onFishConditionOpen = useCallback(() => {
+    setSpeciesDropDownOpen(false)
+  }, [])
+
   const handleFormSubmit = (values: any) => {
+    delete values.existingMarks
+    delete values.batchCountExistingMarks
     let activeTabId = tabSlice.activeTabId
     if (activeTabId) {
       if (recentExistingMarks.length === 1) {
@@ -94,12 +118,6 @@ const BatchCharacteristicsModalContent = ({
     }
   }
 
-  const returnDefinitionArray = (dropdownsArray: any[]) => {
-    return dropdownsArray.map((dropdownObj: any) => {
-      return dropdownObj.definition
-    })
-  }
-
   const markTypeValues = returnDefinitionArray(dropdownValues.markType)
   const markColorValues = returnDefinitionArray(dropdownValues.markColor)
   const bodyPartValues = returnDefinitionArray(dropdownValues.bodyPart)
@@ -110,7 +128,7 @@ const BatchCharacteristicsModalContent = ({
         ...mark,
         markType: markTypeValues[mark.markType - 1],
         markColor: markColorValues[mark.markColor - 1],
-        bodyPart: bodyPartValues[mark.bodyPart - 1],
+        markPosition: bodyPartValues[mark.markPosition - 1],
       }
     })
   }
@@ -125,8 +143,8 @@ const BatchCharacteristicsModalContent = ({
     <ScrollView>
       <Formik
         validationSchema={batchCharacteristicsSchema}
-        initialValues={initialFormValues}
-        onSubmit={(values) => handleFormSubmit(values)}
+        initialValues={batchCountStore.batchCharacteristics}
+        onSubmit={values => handleFormSubmit(values)}
       >
         {({
           handleChange,
@@ -141,206 +159,204 @@ const BatchCharacteristicsModalContent = ({
           <>
             <CustomModalHeader
               headerText={'Batch Characteristics'}
-              showHeaderButton={true}
+              showHeaderButton={false}
               closeModal={closeModal}
-              headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    (touched && Object.keys(touched).length === 0) ||
-                    (errors && Object.keys(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Save
-                  </Text>
-                </Button>
-              }
             />
             <VStack px='5%' space={4}>
               <Text justifyContent='center' fontSize='lg'>
                 Please return to the individual fish input if you plan on
                 marking or sampling a fish.
               </Text>
-              <HStack>
-                <FormControl w='1/2' pr='5'>
+              <VStack space={4}>
+                <FormControl pr='5' mb={speciesDropDownOpen ? 180 : 0}>
                   <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
+                    <Text color='black' fontSize='md'>
                       Species
                     </Text>
                   </FormControl.Label>
 
-                  {touched.species &&
-                    errors.species &&
-                    RenderErrorMessage(errors, 'species')}
-
-                  <CustomSelect
-                    selectedValue={values.species}
-                    placeholder={'Species'}
-                    onValueChange={(value: any) =>
-                      handleChange('species')(value)
-                    }
+                  {/* //TODO: Add error logic for custom species dropdown */}
+                  {/* //TODO: Replace with Custom Select component */}
+                  <SpeciesDropDown
+                    open={speciesDropDownOpen}
+                    onOpen={onSpeciesOpen}
+                    setOpen={setSpeciesDropDownOpen}
+                    list={speciesList}
+                    setList={setSpeciesList}
+                    setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={reorderedTaxon.map((taxon: any) => ({
-                      label: taxon?.commonname,
-                      value: taxon?.commonname,
-                    }))}
                   />
                 </FormControl>
-                <FormControl w='1/2' pr='5'>
+                <FormControl
+                  w='100%'
+                  pr='5'
+                  mb={fishConditionDropdownOpen ? 160 : 0}
+                >
                   <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
+                    <Text color='black' fontSize='md'>
                       Fish Condition
                     </Text>
                   </FormControl.Label>
 
-                  {touched.fishCondition &&
-                    errors.fishCondition &&
-                    RenderErrorMessage(errors, 'fishCondition')}
-
-                  <CustomSelect
-                    selectedValue={values.fishCondition}
-                    placeholder={'Fish Condition'}
-                    onValueChange={(value: any) =>
-                      handleChange('fishCondition')(value)
-                    }
+                  {/* //TODO: Add error logic for custom fish conditions dropdown */}
+                  <FishConditionsDropDown
+                    open={fishConditionDropdownOpen}
+                    onOpen={onFishConditionOpen}
+                    setOpen={setFishConditionDropdownOpen}
+                    list={fishConditionList}
+                    setList={setFishConditionList}
+                    setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues.fishCondition.map(
-                      (condition: any) => ({
-                        label: condition?.definition,
-                        value: condition?.definition,
-                      })
-                    )}
                   />
                 </FormControl>
-              </HStack>
+              </VStack>
 
-              <HStack space={10}>
-                <VStack space={4} w={'20%'}>
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Adipose Clipped
-                      </Text>
-                    </FormControl.Label>
-                    <Radio.Group
-                      name='adiposeClipped'
-                      accessibilityLabel='adipose clipped'
-                      value={`${values.adiposeClipped}`}
-                      onChange={(value: any) => {
-                        if (value === 'true') {
-                          setFieldValue('adiposeClipped', true)
-                        } else {
-                          setFieldValue('adiposeClipped', false)
-                        }
-                      }}
+              <VStack space={4} w={'20%'}>
+                <FormControl>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Adipose Clipped
+                    </Text>
+                  </FormControl.Label>
+                  <Radio.Group
+                    name='adiposeClipped'
+                    accessibilityLabel='adipose clipped'
+                    value={`${values.adiposeClipped}`}
+                    onChange={(value: any) => {
+                      if (value === 'true') {
+                        setFieldValue('adiposeClipped', true)
+                      } else {
+                        setFieldValue('adiposeClipped', false)
+                      }
+                    }}
+                  >
+                    <Radio
+                      colorScheme='primary'
+                      value='true'
+                      my={1}
+                      _icon={{ color: 'primary' }}
                     >
-                      <Radio
-                        colorScheme='primary'
-                        value='true'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        Yes
-                      </Radio>
-                      <Radio
-                        colorScheme='primary'
-                        value='false'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        No
-                      </Radio>
-                    </Radio.Group>
-                  </FormControl>
-                </VStack>
+                      True
+                    </Radio>
+                    <Radio
+                      colorScheme='primary'
+                      value='false'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
+                      False
+                    </Radio>
+                  </Radio.Group>
+                </FormControl>
+              </VStack>
 
-                <VStack space={4} w={'80%'}>
-                  <Text color='black' fontSize='xl'>
-                    Add Existing Mark
-                  </Text>
-                  {batchCountStore.existingMarks.length < 1 && (
-                    <VStack space={5}>
-                      {dropdownValues.twoMostRecentReleaseMarks.length > 0 &&
-                        decodedRecentReleaseMarks(
-                          dropdownValues.twoMostRecentReleaseMarks
-                        ).map((recentReleaseMark: any, index: number) => {
-                          const { id, markType, markColor, bodyPart } =
-                            recentReleaseMark
-                          return (
-                            <Button
-                              key={index}
-                              bg={
+              <VStack space={4} w={'80%'}>
+                <Text color='black' fontSize='xl'>
+                  Add Existing Mark
+                </Text>
+                {batchCountStore.batchCharacteristics.existingMarks.length <
+                  1 && (
+                  <VStack space={5}>
+                    {dropdownValues.twoMostRecentReleaseMarks.length > 0 &&
+                      decodedRecentReleaseMarks(
+                        dropdownValues.twoMostRecentReleaseMarks
+                      ).map((recentReleaseMark: any, index: number) => {
+                        const { id, markType, markColor, markPosition } =
+                          recentReleaseMark
+                        return (
+                          <Button
+                            key={index}
+                            bg={
+                              recentExistingMarks.some(
+                                (mark: ReleaseMarkI) => mark.id === id
+                              )
+                                ? 'primary'
+                                : 'secondary'
+                            }
+                            shadow='3'
+                            borderRadius='5'
+                            w='90%'
+                            onPress={() => {
+                              handlePressRecentExistingMarkButton(
+                                recentReleaseMark
+                              )
+                            }}
+                          >
+                            <Text
+                              color={
                                 recentExistingMarks.some(
                                   (mark: ReleaseMarkI) => mark.id === id
                                 )
-                                  ? 'primary'
-                                  : 'secondary'
+                                  ? 'white'
+                                  : 'primary'
                               }
-                              shadow='3'
-                              borderRadius='5'
-                              w='90%'
-                              onPress={() => {
-                                handlePressRecentExistingMarkButton(
-                                  recentReleaseMark
-                                )
-                              }}
+                              fontWeight='500'
+                              fontSize='md'
                             >
-                              <Text
-                                color={
-                                  recentExistingMarks.some(
-                                    (mark: ReleaseMarkI) => mark.id === id
-                                  )
-                                    ? 'white'
-                                    : 'primary'
-                                }
-                                fontWeight='500'
-                                fontSize='md'
-                              >
-                                {`${markType} - ${markColor} - ${bodyPart}`}
-                              </Text>
-                            </Button>
-                          )
-                        })}
-                    </VStack>
-                  )}
-                  <MarkBadgeList
-                    badgeListContent={batchCountStore.existingMarks}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                    field='batchCountExistingMarks'
-                  />
-                  {batchCountStore.existingMarks.length < 1 && (
-                    <Pressable
-                      isDisabled={batchCountStore.existingMarks.length > 0}
-                      onPress={() => {
-                        setRecentExistingMarks([])
-                        setAddMarkModalOpen(true)
-                      }}
-                    >
-                      <HStack alignItems='center'>
-                        <Icon
-                          as={Ionicons}
-                          name={'add-circle'}
-                          size='3xl'
-                          color='primary'
-                          marginRight='1'
-                        />
-                        <Text color='primary' fontSize='lg'>
-                          Add Mark
-                        </Text>
-                      </HStack>
-                    </Pressable>
-                  )}
-                </VStack>
-              </HStack>
+                              {`${markType}${
+                                markColor ? `- ${markColor}` : ''
+                              } ${markPosition ? `- ${markPosition}` : ''}`}
+                            </Text>
+                          </Button>
+                        )
+                      })}
+                  </VStack>
+                )}
+                <MarkBadgeList
+                  badgeListContent={
+                    batchCountStore.batchCharacteristics.existingMarks
+                  }
+                  setFieldValue={setFieldValue}
+                  setFieldTouched={setFieldTouched}
+                  field='batchCountExistingMarks'
+                />
+                {batchCountStore.batchCharacteristics.existingMarks.length <
+                  1 && (
+                  <Pressable
+                    isDisabled={
+                      batchCountStore.batchCharacteristics.existingMarks
+                        .length > 0
+                    }
+                    onPress={() => {
+                      setRecentExistingMarks([])
+                      setAddMarkModalOpen(true)
+                    }}
+                  >
+                    <HStack alignItems='center'>
+                      <Icon
+                        as={Ionicons}
+                        name={'add-circle'}
+                        size='3xl'
+                        color='primary'
+                        marginRight='1'
+                      />
+                      <Text color='primary' fontSize='lg'>
+                        Add Mark
+                      </Text>
+                    </HStack>
+                  </Pressable>
+                )}
+              </VStack>
+              <Button
+                bg='primary'
+                mx='2'
+                px='10'
+                shadow='3'
+                isDisabled={
+                  (touched && Object.keys(touched).length === 0) ||
+                  (errors && Object.keys(errors).length > 0)
+                }
+                onPress={() => {
+                  handleSubmit()
+                  setFishConditionDropdownOpen(false)
+
+                  closeModal()
+                }}
+              >
+                <Text fontSize='xl' color='white'>
+                  Save
+                </Text>
+              </Button>
             </VStack>
             {/* --------- Modals --------- */}
 

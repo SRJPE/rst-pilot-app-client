@@ -1,4 +1,6 @@
+import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
+import { every, some, sortBy } from 'lodash'
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   //returns an alphabetically sorted copy of the original array
@@ -78,7 +80,7 @@ export const buttonLookup: any = {
     additionalButtons: 29,
     lifeStage: 'Silvery Parr',
   },
-  '90-105': { firstButton: 90, additionalButtons: 15, lifeStage: 'Smolt' },
+  '90-120': { firstButton: 90, additionalButtons: 30, lifeStage: 'Smolt' },
 }
 
 export const calculateLifeStage = (forkLength: number) => {
@@ -167,6 +169,7 @@ export const returnDefinitionArray = (dropdownsArray: any[]) => {
     return dropdownObj.definition
   })
 }
+
 export const returnNullableTableId = (value: any) =>
   value == -1 ? null : value + 1
 
@@ -275,12 +278,17 @@ export const useDebounce = <T>(value: T, delay = 500) => {
 }
 
 export const navigateHelper = (
-  destination: string,
+  destination: string | undefined,
   navigationState: any,
   navigation: any,
   dispatch: any,
   updateActiveStep: any
 ) => {
+  if (!destination) {
+    navigation?.navigate('Home')
+    return
+  }
+
   const formSteps = Object.values(navigationState?.steps) as any
   let payload = null
   for (let i = 0; i < formSteps.length; i++) {
@@ -289,11 +297,154 @@ export const navigateHelper = (
     }
   }
 
-  navigation.navigate('Trap Visit Form', { screen: destination })
+  navigation.dispatch(StackActions.replace(destination))
   dispatch({
     type: updateActiveStep,
     payload: payload,
   })
+}
+
+export const navigateFlowRightButton = ({
+  values,
+  activePage,
+  holdingForMarkRecap,
+  navigation,
+  warnings,
+  tabValues,
+}: {
+  values: any
+  activePage: string
+  holdingForMarkRecap: boolean
+  navigation: any
+  warnings?: any
+  tabValues?: any
+}) => {
+  //this is now kind of redundant with the implementation of the loading screen
+  switch (activePage) {
+    case 'Visit Setup':
+      return 'Trap Operations'
+    case 'Trap Operations':
+      if (values?.trapStatus === 'trap not functioning') {
+        return 'Non Functional Trap'
+      } else if (
+        values?.trapStatus === 'trap not in service - restart trapping'
+      ) {
+        return 'Started Trapping'
+      } else if (warnings?.warningResultFlow) {
+        return 'High Flows'
+      } else if (warnings?.warningResultTemp) {
+        return 'High Temperatures'
+      } else {
+        return 'Fish Processing'
+      }
+    case 'Fish Processing':
+      if (tabValues?.length) {
+        if (some(tabValues, { fishProcessedResult: 'processed fish' })) {
+          return 'Fish Input'
+        } else if (
+          every(tabValues, { fishProcessedResult: 'no fish caught' })
+        ) {
+          return 'No Fish Caught'
+        } else {
+          return 'Trap Post-Processing'
+        }
+      }
+
+      if (values?.fishProcessedResult === 'no fish caught') {
+        return 'No Fish Caught'
+      } else if (
+        values?.fishProcessedResult ===
+          'no catch data, fish left in live box' ||
+        values?.fishProcessedResult === 'no catch data, fish released'
+      ) {
+        return 'Trap Post-Processing'
+      } else {
+        return 'Fish Input'
+      }
+    case 'Fish Input':
+      return 'Trap Post-Processing'
+    case 'Trap Post-Processing':
+      if (holdingForMarkRecap) {
+        return 'Fish Holding'
+      } else {
+        return 'Incomplete Sections'
+      }
+    case 'Fish Holding':
+      return 'Incomplete Sections'
+    case 'Incomplete Sections':
+      console.log('🚀 INCOMPLETE SECTIONS CASE HIT')
+      return 'Start Mark Recapture'
+    case 'High Flows':
+      return 'End Trapping'
+    case 'High Temperatures':
+      return 'Fish Processing'
+    case 'No Fish Caught':
+      return 'Trap Post-Processing'
+    case 'Paper Entry':
+      return 'Trap Operations'
+    case 'Started Trapping':
+      navigation?.navigate('Home')
+      break
+    default:
+      console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
+      navigation?.navigate('Home')
+      break
+  }
+}
+
+export const navigateFlowLeftButton = (
+  activePage: string,
+  holdingForMarkRecap: boolean,
+  navigation: any,
+  values?: any
+) => {
+  switch (activePage) {
+    case 'Trap Operations':
+      // if (isPaperEntryStore) navigateHelper('Paper Entry')
+      return 'Visit Setup'
+    case 'High Flows':
+      return 'Trap Operations'
+    case 'High Temperatures':
+      return 'Trap Operations'
+    case 'Non Functional Trap':
+      return 'Trap Operations'
+    case 'Fish Processing':
+      return 'Trap Operations'
+    case 'No Fish Caught':
+      return 'Fish Processing'
+    case 'Fish Input':
+      return 'Fish Processing'
+    case 'Paper Entry':
+      return 'Visit Setup'
+    case 'Started Trapping':
+      return 'Trap Operations'
+    case 'Trap Post-Processing':
+      if (values?.fishProcessedResult === 'no fish caught') {
+        return 'Fish Processing'
+      } else if (
+        values?.fishProcessedResult ===
+          'no catch data, fish left in live box' ||
+        values?.fishProcessedResult === 'no catch data, fish released'
+      ) {
+        return 'Fish Processing'
+      } else {
+        return 'Fish Input'
+      }
+      break
+      return 'Fish Input'
+    case 'Fish Holding':
+      return 'Trap Post-Processing'
+    case 'Incomplete Sections':
+      if (holdingForMarkRecap) {
+        return 'Fish Holding'
+      } else {
+        return 'Trap Post-Processing'
+      }
+    default:
+      console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
+      navigation?.navigate('Home')
+      break
+  }
 }
 
 export const getRandomColor = () => {
@@ -314,14 +465,15 @@ export const getRandomColor = () => {
 }
 
 export const capitalizeFirstLetterOfEachWord = (sentence: string) => {
-  if (!sentence) return sentence // Check if the sentence is not empty
+  if (sentence === null || typeof sentence !== 'string') return `${sentence}` // Check if the sentence is not empty
   return sentence
     .split(' ') // Split the sentence into words
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
     .join(' ') // Join the words back into a sentence
 }
 
 export const truncateAndTrimString = (str: string, length: number) => {
+  if (!(str.length > 10)) return str
   return str.length > length ? str.substring(0, length).trim() : str
 }
 
@@ -339,4 +491,77 @@ export const getTwoWeeksPriorDate = () => {
   const twoWeeksPriorDate = new Date(currentDate)
   twoWeeksPriorDate.setDate(currentDate.getDate() - 14)
   return twoWeeksPriorDate.toLocaleDateString()
+}
+
+export const groupArrayItems = (array: any, size: number) => {
+  const groupedItems = []
+  for (let i = 0; i < array.length; i += size) {
+    groupedItems.push(array.slice(i, i + size))
+  }
+  return groupedItems
+}
+export const handleQCChartButtonClick = (
+  allButtons: Array<string>,
+  activeButtons: Array<string>,
+  buttonName: string
+) => {
+  let activeButtonsCopy = [...activeButtons]
+  if (activeButtons.includes(buttonName)) {
+    activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
+  } else {
+    activeButtonsCopy.push(buttonName)
+    activeButtonsCopy = sortBy(activeButtonsCopy, button => {
+      return allButtons.indexOf(button)
+    })
+  }
+  return activeButtonsCopy
+}
+
+export const combinePlusCounts = (arr: Array<any>) => {
+  const map = new Map()
+  const result = [] as Array<any>
+
+  arr.forEach(item => {
+    if (item.plusCount) {
+      const key = `${item.taxonCode}_${item.lifeStage}_${item.captureRunClass}`
+      if (!map.has(key)) {
+        map.set(key, {
+          ...item,
+          numFishCaught: Number(item.numFishCaught),
+        })
+      } else {
+        const existing = map.get(key)
+        existing.numFishCaught += Number(item.numFishCaught)
+      }
+    } else {
+      result.push({ ...item, numFishCaught: Number(item.numFishCaught) })
+    }
+  })
+
+  return [...result, ...Array.from(map.values())]
+}
+
+export const legendColorList = [
+  '#007C7C',
+  '#F9A38C',
+  '#D1E8F0',
+  '#011936',
+  '#564e58',
+  '#846075',
+  '#2b3a67',
+  '#772E25',
+  '#FBA72A',
+  '#C0CAAD',
+]
+
+export const addFishErrorMessages = {
+  species: { emptyError: 'Fish species required' },
+  forkLength: {
+    typeError: 'Value must be a number',
+    emptyError: 'Fish fork length required',
+  },
+  weight: { typeError: 'Value must be a number' },
+  lifeStage: { emptyError: 'Fish life stage required' },
+  adiposeClipped: { emptyError: 'Fish adipose clipped status required' },
+  dead: { emptyError: 'Fish mortality required' },
 }

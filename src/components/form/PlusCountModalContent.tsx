@@ -1,27 +1,26 @@
 import { Formik } from 'formik'
 import {
-  FormControl,
-  Input,
-  ScrollView,
-  VStack,
-  Text,
   Button,
-  Heading,
+  FormControl,
   HStack,
   Radio,
+  Text,
+  View,
+  VStack,
+  ScrollView,
 } from 'native-base'
-import React from 'react'
+import React, { useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
-import { alphabeticalSort, QARanges, reorderTaxon } from '../../utils/utils'
+import { alphabeticalSort, reorderTaxon } from '../../utils/utils'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
-import RenderErrorMessage from '../Shared/RenderErrorMessage'
-import RenderWarningMessage from '../Shared/RenderWarningMessage'
+import FormInputComponent from '../Shared/FormInputComponent'
+import SpeciesDropDown from './SpeciesDropDown'
 
 const initialFormValues = {
   species: '',
@@ -46,6 +45,27 @@ const PlusCountModalContent = ({
   const reorderedTaxon = reorderTaxon(taxon)
   const alphabeticalLifeStage = alphabeticalSort(lifeStage, 'definition')
 
+  const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
+    false as boolean
+  )
+  const [speciesList, setSpeciesList] = useState<
+    { label: string; value: string }[]
+  >(
+    reorderedTaxon.map((taxon: any) => ({
+      label: taxon?.commonname,
+      value: taxon?.commonname,
+    }))
+  )
+  const [lifeStageDropDownOpen, setLifeStageDropDownOpen] = useState(
+    false as boolean
+  )
+  const [lifeStageList, setLifeStageList] = useState<
+    { label: string; value: string }[]
+  >([
+    { label: 'adult', value: 'adult' },
+    { label: 'juvenile', value: 'juvenile' },
+  ])
+
   const handleFormSubmit = (values: any) => {
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
@@ -61,11 +81,15 @@ const PlusCountModalContent = ({
   }
 
   return (
-    <ScrollView>
+    <ScrollView scrollEnabled>
       <Formik
         validationSchema={addPlusCountsSchema}
+        enableReinitialize
         initialValues={{ ...initialFormValues, plusCountMethod: 'none' }}
-        onSubmit={values => handleFormSubmit(values)}
+        onSubmit={(values, { resetForm }) => {
+          handleFormSubmit(values)
+          resetForm()
+        }}
       >
         {({
           handleChange,
@@ -81,207 +105,155 @@ const PlusCountModalContent = ({
           <>
             <CustomModalHeader
               headerText={`Enter Plus Count`}
-              showHeaderButton={true}
+              showHeaderButton={false}
               closeModal={closeModal}
-              headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    (touched && Object.keys(touched).length === 0) ||
-                    (errors && Object.keys(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Save
-                  </Text>
-                </Button>
-              }
             />
             <VStack space={5} paddingX='20' paddingTop='7' paddingBottom='3'>
-              <HStack space={6}>
-                <FormControl w='31%'>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Species
-                      </Text>
-                    </FormControl.Label>
-
-                    {touched.species &&
-                      errors.species &&
-                      RenderErrorMessage(errors, 'species')}
-                  </HStack>
-                  <CustomSelect
-                    selectedValue={values.species}
-                    placeholder={'Species'}
-                    onValueChange={handleChange('species')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={reorderedTaxon.map((item: any) => ({
-                      label: item.commonname,
-                      value: item.commonname,
-                    }))}
-                  />
-                </FormControl>
-                {(values.species === 'Chinook salmon' ||
-                  values.species === 'Steelhead / rainbow trout' ||
-                  !values.species) && (
-                  <FormControl w='31%'>
-                    <HStack space={4} alignItems='center'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Life Stage
-                        </Text>
-                      </FormControl.Label>
-
-                      {touched.lifeStage &&
-                        errors.lifeStage &&
-                        RenderErrorMessage(errors, 'lifeStage')}
-                    </HStack>
-                    <CustomSelect
-                      selectedValue={values.lifeStage}
-                      placeholder={'Life stage'}
-                      onValueChange={handleChange('lifeStage')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={
-                        values.species === 'Chinook salmon'
-                          ? alphabeticalLifeStage.map((item: any) => ({
-                              label: item.definition,
-                              value: item.definition,
-                            }))
-                          : [
-                              { label: 'adult', value: 'adult' },
-                              { label: 'juvenile', value: 'juvenile' },
-                            ]
-                      }
-                    />
-                  </FormControl>
-                )}
-
-                {(values.species === 'Chinook salmon' || !values.species) && (
-                  <FormControl w='31%'>
-                    <HStack space={4} alignItems='center'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Run
-                        </Text>
-                      </FormControl.Label>
-
-                      {touched.run &&
-                        errors.run &&
-                        RenderErrorMessage(errors, 'run')}
-                    </HStack>
-
-                    <CustomSelect
-                      selectedValue={values.run}
-                      placeholder={'Run'}
-                      onValueChange={handleChange('run')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={run.map((item: any) => ({
-                        label: item.definition,
-                        value: item.definition,
-                      }))}
-                    />
-                  </FormControl>
-                )}
-              </HStack>
-              <HStack space={6}>
-                <FormControl w='48.5%'>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Count
-                      </Text>
-                    </FormControl.Label>
-                    {touched.count &&
-                      errors.count &&
-                      RenderErrorMessage(errors, 'count')}
-                  </HStack>
-                  <Input
-                    height='50px'
-                    fontSize='16'
-                    placeholder='Enter count'
-                    keyboardType='numeric'
-                    onChangeText={handleChange('count')}
-                    onBlur={handleBlur('count')}
-                    value={values.count}
-                  />
-                </FormControl>
-                <FormControl w='48.5%' paddingLeft='5'>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Dead
-                      </Text>
-                    </FormControl.Label>
-                    {touched.dead &&
-                      errors.dead &&
-                      RenderErrorMessage(errors, 'dead')}
-                  </HStack>
-                  <Radio.Group
-                    name='dead'
-                    accessibilityLabel='dead'
-                    value={`${values.dead}`}
-                    onChange={(value: any) => {
-                      setFieldTouched('dead', true)
-                      if (value === 'true') {
-                        setFieldValue('dead', true)
-                      } else {
-                        setFieldValue('dead', false)
-                      }
-                    }}
-                  >
-                    <HStack space={4}>
-                      <Radio
-                        colorScheme='primary'
-                        value='true'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        Yes
-                      </Radio>
-                      <Radio
-                        colorScheme='primary'
-                        value='false'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        No
-                      </Radio>
-                    </HStack>
-                  </Radio.Group>
-                </FormControl>
-              </HStack>
-
-              <FormControl>
+              <FormControl mb={speciesDropDownOpen ? 250 : 0}>
                 <HStack space={4} alignItems='center'>
                   <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Plus Count Method
+                    <Text color='black' fontSize='md'>
+                      Species
                     </Text>
                   </FormControl.Label>
 
-                  {touched.plusCountMethod &&
-                    errors.plusCountMethod &&
-                    RenderErrorMessage(errors, 'plusCountMethod')}
+                  {/* //TODO: set error messge for this custom dropdown */}
                 </HStack>
-                <CustomSelect
-                  selectedValue={values.plusCountMethod}
-                  placeholder={'Method'}
-                  onValueChange={handleChange('plusCountMethod')}
+                <SpeciesDropDown
+                  open={speciesDropDownOpen}
+                  setOpen={setSpeciesDropDownOpen}
+                  list={speciesList}
+                  setList={setSpeciesList}
+                  setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
-                  selectOptions={plusCountMethodology.map((item: any) => ({
+                />
+              </FormControl>
+              {(values.species === 'Chinook salmon' ||
+                values.species === 'Steelhead / rainbow trout' ||
+                !values.species) && (
+                <CustomSelect
+                  label='Life Stage (optional)'
+                  camelName='lifeStage'
+                  errors={errors}
+                  touched={touched}
+                  selectedValue={values.lifeStage}
+                  placeholder={'Select Life stage'}
+                  onValueChange={handleChange('lifeStage')}
+                  setFieldTouched={() => setFieldTouched('lifeStage')}
+                  selectOptions={
+                    values.species === 'Chinook salmon'
+                      ? alphabeticalLifeStage.map((item: any) => ({
+                          label: item.definition,
+                          value: item.definition,
+                        }))
+                      : [
+                          { label: 'adult', value: 'adult' },
+                          { label: 'juvenile', value: 'juvenile' },
+                        ]
+                  }
+                />
+              )}
+
+              {(values.species === 'Chinook salmon' || !values.species) && (
+                <CustomSelect
+                  label='Run (optional)'
+                  camelName='run'
+                  errors={errors}
+                  touched={touched}
+                  selectedValue={values.run}
+                  placeholder={'Run'}
+                  onValueChange={handleChange('run')}
+                  setFieldTouched={() => setFieldTouched('run')}
+                  selectOptions={run.map((item: any) => ({
                     label: item.definition,
                     value: item.definition,
                   }))}
                 />
+              )}
+              <FormInputComponent
+                label='Count'
+                placeholder='0'
+                touched={touched}
+                errors={errors}
+                camelName='count'
+                onBlur={handleBlur('count')}
+                value={values.count}
+                onChangeText={handleChange('count')}
+              />
+              {/* //TODO: Fix bug where input won't blur unless dropdown is clicked ^ */}
+              <FormControl w='48.5%'>
+                <HStack space={4} alignItems='center'>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Dead
+                    </Text>
+                  </FormControl.Label>
+                </HStack>
+                <Radio.Group
+                  name='dead'
+                  accessibilityLabel='dead'
+                  value={`${values.dead}`}
+                  onChange={(value: any) => {
+                    setFieldTouched('dead', true)
+                    if (value === 'true') {
+                      setFieldValue('dead', true)
+                    } else {
+                      setFieldValue('dead', false)
+                    }
+                  }}
+                >
+                  <HStack space={4}>
+                    <Radio
+                      colorScheme='primary'
+                      value='true'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
+                      True
+                    </Radio>
+                    <Radio
+                      colorScheme='primary'
+                      value='false'
+                      my={1}
+                      _icon={{ color: 'primary' }}
+                    >
+                      False
+                    </Radio>
+                  </HStack>
+                </Radio.Group>
               </FormControl>
+
+              <CustomSelect
+                label='Plus Count Method'
+                camelName='plusCountMethod'
+                errors={errors}
+                touched={touched}
+                selectedValue={values.plusCountMethod}
+                placeholder={'Method'}
+                onValueChange={handleChange('plusCountMethod')}
+                setFieldTouched={() => setFieldTouched('plusCountMethod')}
+                selectOptions={plusCountMethodology.map((item: any) => ({
+                  label: item.definition,
+                  value: item.definition,
+                }))}
+              />
+              <Button
+                bg='primary'
+                px='10'
+                shadow='3'
+                isDisabled={
+                  (touched && Object.keys(touched).length === 0) ||
+                  (errors && Object.keys(errors).length > 0)
+                }
+                onPress={() => {
+                  handleSubmit()
+                  closeModal()
+                }}
+              >
+                <Text fontSize='xl' color='white'>
+                  Save
+                </Text>
+              </Button>
             </VStack>
           </>
         )}

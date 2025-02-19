@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Heading, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -35,7 +35,13 @@ import {
 } from '../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { DeviceEventEmitter } from 'react-native'
-import { navigateHelper } from '../../utils/utils'
+import {
+  combinePlusCounts,
+  navigateHelper,
+  returnDefinitionArray,
+} from '../../utils/utils'
+import { StackActions } from '@react-navigation/native'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -52,6 +58,7 @@ const mapStateToProps = (state: RootState) => {
     tabState: state.tabSlice,
     addGeneticSamplesState: state.addGeneticSamples,
     appliedMarksState: state.addMarksOrTags,
+    userCredentialsStore: state.userCredentials,
   }
 }
 
@@ -70,6 +77,7 @@ const IncompleteSections = ({
   tabState,
   addGeneticSamplesState,
   appliedMarksState,
+  userCredentialsStore,
 }: {
   navigation: any
   navigationState: any
@@ -85,6 +93,7 @@ const IncompleteSections = ({
   tabState: TabStateI
   addGeneticSamplesState: any
   appliedMarksState: any
+  userCredentialsStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
@@ -96,6 +105,7 @@ const IncompleteSections = ({
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
+    dispatch(checkIfFormIsComplete())
   }, [])
 
   const emitSubmission = () => {
@@ -113,7 +123,7 @@ const IncompleteSections = ({
       setIsSubmitting(false) // Reset submitting state after navigation
     }
 
-    navigation.push('Loading...')
+    navigation.dispatch(StackActions.replace('Loading...'))
 
     setTimeout(() => {
       DeviceEventEmitter.emit('event.load', {
@@ -139,6 +149,12 @@ const IncompleteSections = ({
         dispatch(postTrapVisitFormSubmissions())
       } else {
         console.log('Connection issue during submission')
+        showSlideAlert(
+          dispatch,
+          'Connection issue during trap visit submission. Application will save data locally and attempt to submit later when connected.',
+          'error',
+          5000
+        )
       }
     } catch (error) {
       console.log('submit error: ', error)
@@ -158,12 +174,6 @@ const IncompleteSections = ({
     dispatch(resetVisitSetupSlice())
     dispatch(resetPaperEntrySlice())
     dispatch(resetTabsSlice())
-  }
-
-  const returnDefinitionArray = (dropdownsArray: any[]) => {
-    return dropdownsArray.map((dropdownObj: any) => {
-      return dropdownObj.definition
-    })
   }
 
   const findTrapLocationIds = () => {
@@ -195,7 +205,7 @@ const IncompleteSections = ({
         .filter(
           (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
         )
-        .map((obj: any) => obj.personnelId)
+        .map((obj: any) => Number(obj.personnelId))
     )
     //if the array contains a single string, return the string in an array
     return filteredNames
@@ -222,7 +232,7 @@ const IncompleteSections = ({
       if (!validRpms.length) {
         return null
       }
-      const numericRpms = validRpms.map((str: any) => parseInt(str))
+      const numericRpms = validRpms.map((str: any) => parseFloat(str))
       let counter = 0
       numericRpms.forEach((num: number) => {
         counter += num
@@ -253,12 +263,9 @@ const IncompleteSections = ({
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
         isPaperEntry: visitSetupState[id].isPaperEntry,
-        trapVisitTimeStart: visitSetupState[id].isPaperEntry
-          ? paperEntryState[id].values.startDate
-          : trapPostProcessingState[id].values.trapVisitStartTime,
-        trapVisitTimeEnd: visitSetupState[id].isPaperEntry
-          ? paperEntryState[id].values.endDate
-          : trapOperationsState[id].values.trapVisitStopTime,
+        trapVisitTimeStart:
+          trapPostProcessingState[id].values.trapVisitStartTime,
+        trapVisitTimeEnd: trapOperationsState[id].values.trapVisitStopTime,
         fishProcessed: returnNullableTableId(
           fishProcessedValues.indexOf(
             fishProcessingState[id].values.fishProcessedResult
@@ -271,7 +278,7 @@ const IncompleteSections = ({
         ),
         sampleGearId: null,
         coneDepth: trapOperationsState[id].values.coneDepth
-          ? parseInt(trapOperationsState[id].values.coneDepth)
+          ? parseFloat(trapOperationsState[id].values.coneDepth)
           : null,
         trapInThalweg: null,
         trapFunctioning: returnNullableTableId(
@@ -290,7 +297,7 @@ const IncompleteSections = ({
           )
         ),
         totalRevolutions: trapPostProcessingState[id].values.totalRevolutions
-          ? parseInt(trapPostProcessingState[id].values.totalRevolutions)
+          ? parseFloat(trapPostProcessingState[id].values.totalRevolutions)
           : null,
         rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
         rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
@@ -334,14 +341,15 @@ const IncompleteSections = ({
         },
         inHalfConeConfiguration:
           trapOperationsState[id].values.coneSetting === 'half' ? true : false,
-        debrisVolumeLiters: trapPostProcessingState[id].values.debrisVolume
-          ? parseInt(trapPostProcessingState[id].values.debrisVolume)
+        debrisVolumeGal: trapPostProcessingState[id].values.debrisVolume
+          ? parseFloat(trapPostProcessingState[id].values.debrisVolume)
           : null,
         qcCompleted: null,
         qcCompletedAt: null,
-        comments: paperEntryState[id]
-          ? paperEntryState[id].values.comments
+        comments: trapPostProcessingState[id].values.comments
+          ? trapPostProcessingState[id].values.comments
           : null,
+        createdBy: userCredentialsStore.id,
       }
 
       dispatch(saveTrapVisitSubmission(trapVisitSubmission))
@@ -365,11 +373,17 @@ const IncompleteSections = ({
       dropdownsState.values.plusCountMethodology
     )
     const runValues = returnDefinitionArray(dropdownsState.values.run)
+    const runCodeMethodValues = returnDefinitionArray(
+      dropdownsState.values.runCodeMethods
+    )
     const markTypeValues = returnDefinitionArray(dropdownsState.values.markType)
     const markColorValues = returnDefinitionArray(
       dropdownsState.values.markColor
     )
     const bodyPartValues = returnDefinitionArray(dropdownsState.values.bodyPart)
+    const fishConditionValues = returnDefinitionArray(
+      dropdownsState.values.fishCondition
+    )
     const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
       let code = null
       dropdownsState.values.taxon.forEach((taxonValue: any) => {
@@ -396,7 +410,7 @@ const IncompleteSections = ({
         fishStoreKeys.forEach(key => {
           const fishValue = fishInputState[tabId].fishStore[key]
 
-          const filterAndPrepareData = (data: Array<any>) => {
+          const filterAndPrepareData = (data: Array<any>, hasUid: boolean) => {
             let dataCopy = cloneDeep(data)
             //before I filter the data I need to prepare the appliedMarks Array
             //if the data is NOT from genetic sample:
@@ -423,34 +437,53 @@ const IncompleteSections = ({
               })
             }
 
-            const filteredData = dataCopy.filter((obj: any) => {
-              return obj.UID === fishValue.UID
-            })
+            let filteredData = dataCopy
+
+            if (hasUid) {
+              filteredData = dataCopy.filter((obj: any) => {
+                return obj.UID === fishValue.UID
+              })
+            }
 
             return filteredData.map((obj: any) => {
               obj.crewMember = findCrewIdsFromSelectedCrewNames([
                 obj.crewMember,
-              ])
+              ])[0]
               return obj
             })
           }
 
-          const findReleaseIdFromExistingMarks = () => {
-            let releaseId = null
-            fishValue.existingMarks.forEach((existingMark: any) => {
-              if (existingMark.releaseId) {
-                releaseId = existingMark.releaseId
-              } else {
-              }
-            })
-            return releaseId
-          }
-
           const getRunClassMethod = (fishValue: any) => {
             if (fishValue.species === 'Chinook salmon') {
-              return fishValue.run === 'not recorded' ? 5 : 6
+              if (fishValue.captureRunClassMethod) {
+                return returnNullableTableId(
+                  runCodeMethodValues.indexOf(fishValue.captureRunClassMethod)
+                )
+              }
+              return fishValue.run === 'not recorded'
+                ? returnNullableTableId(
+                    runCodeMethodValues.indexOf('not recorded')
+                  )
+                : returnNullableTableId(
+                    runCodeMethodValues.indexOf('expert judgement')
+                  )
             } else {
               return null
+            }
+          }
+          const getCatchFishConditions = (fishConditionArray: string[]) => {
+            if (Array.isArray(fishConditionArray)) {
+              return fishConditionArray.map((fishCondition: string) => {
+                return returnNullableTableId(
+                  fishConditionValues.indexOf(fishCondition)
+                )
+              })
+            } else {
+              return [
+                returnNullableTableId(
+                  fishConditionValues.indexOf(fishConditionArray)
+                ),
+              ]
             }
           }
 
@@ -465,20 +498,22 @@ const IncompleteSections = ({
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
             captureRunClassMethod: getRunClassMethod(fishValue),
             // defaults to "none" (id: 1) if not selected
-            markType: 1, // Check w/ Erin
+            // markType: 1, // Check w/ Erin
             markedForRelease: fishValue.willBeUsedInRecapture,
             adiposeClipped: fishValue.adiposeClipped ? true : false,
             dead: fishValue.dead ? true : false,
+
+            fishCondition: getCatchFishConditions(fishValue.fishCondition),
             lifeStage: returnNullableTableId(
               lifeStageValues.indexOf(fishValue.lifeStage)
             ),
             forkLength:
               fishValue.forkLength != null
-                ? parseInt(fishValue?.forkLength as any)
+                ? parseFloat(fishValue?.forkLength as any)
                 : null,
             weight:
               fishValue?.weight != null
-                ? parseInt(fishValue?.weight as any)
+                ? parseFloat(fishValue?.weight as any)
                 : null,
             numFishCaught: fishValue?.numFishCaught,
             plusCount: fishValue?.plusCount ? true : false,
@@ -488,14 +523,14 @@ const IncompleteSections = ({
                 )
               : null,
             isRandom: null, // Check w/ Erin
-            releaseId: findReleaseIdFromExistingMarks(),
-            comments: null,
-            createdBy: null,
+            comments: fishValue.comments != null ? fishValue?.comments : null,
+            createdBy: userCredentialsStore.id,
             qcCompleted: null,
             qcCompletedBy: null,
             qcTime: null,
             qcComments: null,
             existingMarks: fishValue.existingMarks.map((markObj: any) => {
+              //need to pick between body part and mark position, we go back and forth and its causing problems
               return {
                 releaseId:
                   markObj.releaseId !== undefined ? markObj.releaseId : null,
@@ -511,16 +546,21 @@ const IncompleteSections = ({
               }
             }),
             geneticSamplingData: filterAndPrepareData(
-              addGeneticSamplesState.values
+              addGeneticSamplesState.values,
+              true
             ),
-            appliedMarks: filterAndPrepareData(appliedMarksState.values),
+            appliedMarks: filterAndPrepareData(
+              fishValue?.appliedMarks || [],
+              false
+            ),
           })
         })
       }
     })
 
     if (catchRawSubmissions.length) {
-      dispatch(saveCatchRawSubmissions(catchRawSubmissions))
+      const catchRawPlusCountCombined = combinePlusCounts(catchRawSubmissions)
+      dispatch(saveCatchRawSubmissions(catchRawPlusCountCombined))
     }
   }
 

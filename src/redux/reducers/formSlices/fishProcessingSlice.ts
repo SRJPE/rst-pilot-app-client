@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-interface InitialStateI {
+export interface InitialStateI {
   [tabId: string]: FishProcessingStateI
 }
 
@@ -24,7 +24,7 @@ const initialState: InitialStateI = {
       reasonForNotProcessing: '',
       willBeHoldingFishForMarkRecapture: false,
     },
-    errors: {}
+    errors: {},
   },
 }
 
@@ -51,3 +51,15 @@ export const {
 } = fishProcessingSlice.actions
 
 export default fishProcessingSlice.reducer
+
+type FishProcessingResult = {
+  tabId: string
+  fishProcessingResult: any // Replace 'any' with the actual type if known
+}
+export const getAllTabProcessingResults = (
+  fishProcessingSlice: InitialStateI
+): FishProcessingResult[] =>
+  Object.entries(fishProcessingSlice).map(resultEntry => ({
+    tabId: resultEntry[0],
+    fishProcessingResult: resultEntry[1]?.values?.fishProcessedResult,
+  }))

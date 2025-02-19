@@ -1,9 +1,13 @@
 import { Box, Pressable, Text } from 'native-base'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useDispatch } from 'react-redux'
 import { addForkLengthToBatchStore } from '../../../redux/reducers/formSlices/batchCountSlice'
 import { AppDispatch } from '../../../redux/store'
 import { createArray } from '../../../utils/utils'
+import {
+  findLengthAtDateRun,
+  findRunDefinition,
+} from '../../../utils/helpers/helperFunctions'
 
 const BatchCountButtonGrid = ({
   firstButton,
@@ -12,8 +16,12 @@ const BatchCountButtonGrid = ({
   ignoreLifeStage,
   deadToggle,
   markToggle,
-  conditionToggle,
+  fishConditions,
   handleToggles,
+  trapOperationsStore,
+  dropdownsStore,
+  activeTabId,
+  species,
 }: {
   firstButton: number
   numberOfAdditionalButtons: number
@@ -21,24 +29,43 @@ const BatchCountButtonGrid = ({
   ignoreLifeStage?: boolean
   deadToggle: boolean
   markToggle: boolean
-  conditionToggle: boolean
+  fishConditions: string[]
   handleToggles: any
+  trapOperationsStore: any
+  dropdownsStore: any
+  activeTabId: string | null
+  species: string
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
+  const [lengthAtDate, setLengthAtDate] = useState([] as number[])
   const dispatch = useDispatch<AppDispatch>()
+
+  useEffect(() => {
+    setLengthAtDate(dropdownsStore.values.lengthAtDate)
+  }, [dropdownsStore.values])
 
   useEffect(() => {
     setNumArray(createArray(firstButton, numberOfAdditionalButtons))
   }, [firstButton])
 
   const handlePress = (num: number) => {
+    let runDefinition = null as string | null
+    if (species === 'Chinook salmon' && activeTabId) {
+      const ladObj = findLengthAtDateRun(
+        lengthAtDate,
+        trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
+      )
+
+      runDefinition = findRunDefinition(ladObj, num)
+    }
     dispatch(
       addForkLengthToBatchStore({
         forkLength: num,
         lifeStage: ignoreLifeStage ? null : selectedLifeStage,
         dead: deadToggle,
         existingMark: markToggle,
-        fishCondition: conditionToggle,
+        fishConditions,
+        runDefinition: runDefinition,
       })
     )
     handleToggles('reset')

@@ -10,7 +10,7 @@ export interface PermitInformationInitialStateI {
     dateExpired: Date
     waterTemperatureThreshold: number | null
     flowThreshold: number | null
-    trapCheckFrequency: number | null
+    trapCheckFrequency: any | null
   }
   takeAndMortalityValues: TakeAndMortalityValuesI
 }
@@ -91,6 +91,28 @@ export const permitInformationSlice = createSlice({
         }
       }
     },
+    removeIndividualTakeAndMortality: (state, action) => {
+      const uid = action.payload
+      let takeAndMortalityValuesStoreCopy = cloneDeep(
+        state.takeAndMortalityValues
+      )
+
+      const takeAndMoralityArray = Object.values(
+        takeAndMortalityValuesStoreCopy
+      )
+
+      const updatedTakeAndMoralityArray = takeAndMoralityArray.filter(
+        item => item.uid !== uid
+      )
+
+      const updatedTakeAndMoralityObject: TakeAndMortalityValuesI =
+        updatedTakeAndMoralityArray.reduce(
+          (obj, item, index) => Object.assign(obj, { [index]: item }),
+          {}
+        )
+
+      state.takeAndMortalityValues = updatedTakeAndMoralityObject
+    },
   },
 })
 
@@ -99,6 +121,7 @@ export const {
   savePermitInformationValues,
   saveIndividualTakeAndMortality,
   updateIndividualTakeAndMortality,
+  removeIndividualTakeAndMortality,
 } = permitInformationSlice.actions
 
 export default permitInformationSlice.reducer

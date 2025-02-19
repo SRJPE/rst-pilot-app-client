@@ -1,17 +1,29 @@
 {
   "expo": {
-    "name": "rst-pilot-app",
+    "name": "DataTackle",
     "slug": "rst-pilot-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/three_fish_app_icon.png",
     "userInterfaceStyle": "light",
-    "jsEngine": "jsc",
+    "jsEngine": "hermes",
     "plugins": [
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "locationAlwaysAndWhenInUsePermission": "Allow DataTackle to use your location."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
         }
       ]
     ],
@@ -31,6 +43,13 @@
       },
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "UIBackgroundModes": ["location", "fetch", "remote-notification"],
+        "NSLocationWhenInUseUsageDescription": "This app requires access to your location when open.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app requires access to your location even when closed.",
+        "NSLocationAlwaysUsageDescription": "This app requires access to your location when open.",
+        "deploymentTarget": "14"
       }
     },
     "android": {

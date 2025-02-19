@@ -9,9 +9,7 @@ import {
   HStack,
   Radio,
 } from 'native-base'
-import { connect, useDispatch } from 'react-redux'
-import { useSelector } from 'react-redux'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import NavButtons from '../../components/formContainer/NavButtons'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
@@ -24,9 +22,15 @@ import {
 } from '../../redux/reducers/formSlices/navigationSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
-import { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { DeviceEventEmitter } from 'react-native'
-import { navigateHelper } from '../../utils/utils'
+import {
+  navigateHelper,
+  navigateFlowRightButton,
+  navigateFlowLeftButton,
+} from '../../utils/utils'
+import { StackActions } from '@react-navigation/native'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const mapStateToProps = (state: RootState) => {
   const activeTabId = state.tabSlice.activeTabId
@@ -62,6 +66,9 @@ const FishProcessing = ({
   navigationSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const navigationState = useSelector((state: any) => state.navigation)
+  const activeStep = navigationState.activeStep
+  const activePage = navigationState.steps[activeStep]?.name
   const dropdownValues = useSelector((state: any) => state.dropdowns)
   const {
     fishProcessed: fishProcessedDropdowns,
@@ -86,8 +93,11 @@ const FishProcessing = ({
       dispatch(saveFishProcessing({ tabId, values, errors }))
       dispatch(markFishProcessingCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
+
+      // if skipping over fish input, set to completed
+      let setFishInputCompleted = true
       const allTabIds: string[] = Object.keys(tabSlice.tabs)
-      allTabIds.forEach((allTabId) => {
+      allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
             stepCompletedCheck = false
@@ -100,11 +110,60 @@ const FishProcessing = ({
             stepCompletedCheck = false
           }
         }
+        // if any of tabs is processed fish, set fish input to not completed
+        if (
+          reduxState[allTabId]?.values?.fishProcessedResult === 'processed fish'
+        ) {
+          setFishInputCompleted = false
+        }
       })
 
       if (stepCompletedCheck)
         dispatch(markStepCompleted({ propName: 'fishProcessing' }))
+      dispatch(markStepCompleted({ propName: 'fishInput' }))
       console.log('🚀 ~ handleSubmit~ FishProcessing', values)
+    }
+  }
+
+  const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
+    const tabValues = Object.keys(tabSlice.tabs).map((tabId: any) => {
+      if (tabId === activeTabId) {
+        return values
+      } else {
+        return reduxState[tabId]?.values
+      }
+    })
+
+    if (activeTabId && activeTabId != 'placeholderId') {
+      const destination =
+        direction === 'left'
+          ? navigateFlowLeftButton('Fish Processing', false, navigation)
+          : navigateFlowRightButton({
+              values,
+              activePage: 'Fish Processing',
+              holdingForMarkRecap: false,
+              navigation,
+              tabValues,
+            })
+      const callback = () => {
+        navigateHelper(
+          destination,
+          navigationSlice,
+          navigation,
+          dispatch,
+          updateActiveStep
+        )
+      }
+
+      navigation.dispatch(StackActions.replace('Loading...'))
+
+      setTimeout(() => {
+        DeviceEventEmitter.emit('event.load', {
+          process: () => onSubmit(values, activeTabId),
+          callback,
+        })
+        showSlideAlert(dispatch)
+      }, 1000)
     }
   }
 
@@ -124,70 +183,19 @@ const FishProcessing = ({
           ? reduxState[activeTabId].errors
           : { fishProcessedResult: '' }
       }
-      onSubmit={(values) => {
-        if (activeTabId && activeTabId != 'placeholderId') {
-          const callback = () => {
-            if (!isPaperEntryStore) {
-              if (values?.fishProcessedResult === 'no fish caught') {
-                navigateHelper(
-                  'No Fish Caught',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              } else if (
-                values?.fishProcessedResult ===
-                  'no catch data, fish left in live box' ||
-                values?.fishProcessedResult === 'no catch data, fish released'
-              ) {
-                navigateHelper(
-                  'Trap Post-Processing',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              } else {
-                navigateHelper(
-                  'Fish Input',
-                  navigationSlice,
-                  navigation,
-                  dispatch,
-                  updateActiveStep
-                )
-              }
-            } else {
-              navigateHelper(
-                'Trap Post-Processing',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            }
-          }
-
-          navigation.push('Loading...')
-
-          setTimeout(() => {
-            DeviceEventEmitter.emit('event.load', {
-              process: () => onSubmit(values, activeTabId),
-              callback,
-            })
-          }, 2000)
-        }
-      }}
+      onSubmit={() => {}}
     >
       {({
         handleChange,
         handleSubmit,
         setFieldTouched,
         setFieldValue,
+        setFieldError,
         touched,
         errors,
         values,
         resetForm,
+        isValid,
       }) => {
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 3) {
@@ -195,18 +203,60 @@ const FishProcessing = ({
             resetForm()
           }
         }, [previouslyActiveTabId])
+
+        const checkOtherTabForms = () => {
+          const tabIds = Object.keys(tabSlice.tabs)
+
+          const fishProcessingOtherTabsValidity = tabIds.map(tabId => {
+            if (tabId !== activeTabId) {
+              const tabFormValues = reduxState[tabId]?.values
+              const formIsValid =
+                fishProcessingSchema.isValidSync(tabFormValues)
+              return formIsValid
+            }
+
+            return
+          })
+
+          const tabIncomplete = fishProcessingOtherTabsValidity.some(
+            result => result === false
+          )
+
+          if (tabIncomplete) return false
+
+          return true
+        }
+
+        const otherTabFormsValid = checkOtherTabForms()
+
+        const noCatchData = [
+          'no catch data, fish left in live box',
+          'no catch data, fish released',
+        ].includes(values.fishProcessedResult)
         const navButtons = useMemo(
           () => (
             <NavButtons
               navigation={navigation}
-              handleSubmit={handleSubmit}
+              handleSubmit={(buttonDirection: 'left' | 'right') => {
+                handleNavButtonClick(buttonDirection, values)
+              }}
               errors={errors}
               touched={touched}
               values={values}
               shouldProceedToLoadingScreen={true}
+              isValid={isValid && otherTabFormsValid}
             />
           ),
-          [navigation, handleSubmit, errors, touched, values]
+          [
+            navigation,
+            handleSubmit,
+            errors,
+            touched,
+            values,
+            activePage,
+            reduxState,
+            tabSlice,
+          ]
         )
         return (
           <>
@@ -220,50 +270,42 @@ const FishProcessing = ({
             >
               <VStack space={8}>
                 <Heading>Will you be processing fish today?</Heading>
-                <FormControl>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Fish Processed
-                    </Text>
-                  </FormControl.Label>
+
+                <CustomSelect
+                  label='Fish Processed Result'
+                  camelName='fishProcessedResult'
+                  errors={errors}
+                  touched={touched}
+                  selectedValue={values.fishProcessedResult}
+                  placeholder='Select Result'
+                  onValueChange={(newValue: string) => {
+                    setFieldTouched('fishProcessedResult')
+                    setFieldValue('fishProcessedResult', newValue)
+
+                    if (noCatchData) {
+                      setFieldValue('reasonForNotProcessing', '')
+                      setFieldTouched('reasonForNotProcessing', false)
+                      setFieldError('reasonForNotProcessing', undefined)
+                    }
+                  }}
+                  setFieldTouched={() => setFieldTouched('fishProcessedResult')}
+                  selectOptions={fishProcessedDropdowns}
+                />
+
+                {noCatchData && (
                   <CustomSelect
-                    selectedValue={values.fishProcessedResult}
-                    placeholder='Fish Processed'
-                    onValueChange={handleChange('fishProcessedResult')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={fishProcessedDropdowns}
+                    label='Reason For Not Processing'
+                    camelName='reasonForNotProcessing'
+                    errors={errors}
+                    touched={touched}
+                    selectedValue={values.reasonForNotProcessing}
+                    placeholder='Select Reason'
+                    onValueChange={handleChange('reasonForNotProcessing')}
+                    setFieldTouched={() =>
+                      setFieldTouched('reasonForNotProcessing')
+                    }
+                    selectOptions={whyFishNotProcessedDropdowns}
                   />
-                  {tabSlice.incompleteSectionTouched
-                    ? errors.fishProcessed &&
-                      RenderErrorMessage(errors, 'fishProcessed')
-                    : touched.reasonNotFunc &&
-                      errors.fishProcessed &&
-                      RenderErrorMessage(errors, 'fishProcessed')}
-                </FormControl>
-                {(values.fishProcessedResult ===
-                  'no catch data, fish left in live box' ||
-                  values.fishProcessedResult ===
-                    'no catch data, fish released') && (
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Reason For Not Processing
-                      </Text>
-                    </FormControl.Label>
-                    <CustomSelect
-                      selectedValue={values.reasonForNotProcessing}
-                      placeholder='Reason'
-                      onValueChange={handleChange('reasonForNotProcessing')}
-                      setFieldTouched={setFieldTouched}
-                      selectOptions={whyFishNotProcessedDropdowns}
-                    />
-                    {tabSlice.incompleteSectionTouched
-                      ? errors.reasonForNotProcessing &&
-                        RenderErrorMessage(errors, 'reasonForNotProcessing')
-                      : touched.reasonNotFunc &&
-                        errors.reasonForNotProcessing &&
-                        RenderErrorMessage(errors, 'reasonForNotProcessing')}
-                  </FormControl>
                 )}
 
                 {values.fishProcessedResult === 'processed fish' && (
