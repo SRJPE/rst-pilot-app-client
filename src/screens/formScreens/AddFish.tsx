@@ -86,6 +86,9 @@ const AddFishContent = ({
   fishStore: FishStoreI
   tabSlice: TabStateI
 }) => {
+  const lastFishEntry = Object.values(fishStore).findLast(
+    fishEntry => !fishEntry.plusCount
+  )
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
   // @ts-ignore
@@ -586,6 +589,34 @@ const AddFishContent = ({
           </HStack>
           <Divider mb='1' />
           <VStack paddingX='10' paddingBottom='3' space={3}>
+            {lastFishEntry && (
+              <Box
+                p={3}
+                w={'full'}
+                borderWidth={1}
+                borderColor={'primary'}
+                borderRadius={5}
+                bg='coolGray.100'
+              >
+                <Text bold mb={2} fontSize={'lg'} textAlign={'center'}>
+                  Previously Saved Fish
+                </Text>
+                <HStack space={5} justifyContent={'center'}>
+                  <Text fontSize={'lg'}>
+                    <Text bold>Species: </Text>
+                    {lastFishEntry.species}
+                  </Text>
+                  <Text fontSize={'lg'}>
+                    <Text bold>Fork Length: </Text>
+                    {lastFishEntry.forkLength}
+                  </Text>
+                  <Text fontSize={'lg'}>
+                    <Text bold>Life Stage: </Text>
+                    {lastFishEntry.lifeStage || 'N/A'}
+                  </Text>
+                </HStack>
+              </Box>
+            )}
             <HStack alignItems='center'>
               <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 180 : 0}>
                 {/* //TODO: Form is being managed manually, refactor logic and form to properly show error messages */}
