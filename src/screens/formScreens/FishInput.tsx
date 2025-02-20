@@ -82,7 +82,9 @@ const FishInput = ({
       : (['YOY Chinook'] as Array<string>)
   )
   const errorMessage =
-    tabSlice.tabs[activeTabId]?.errorDetails['Fish Input']?.fishStore
+    tabSlice.tabs[tabSlice.activeTabId || activeTabId]?.errorDetails[
+      'Fish Input'
+    ]?.fishStore
 
   useEffect(() => {
     checkboxGroupValue.length < 1 ? setShowError(true) : setShowError(false)

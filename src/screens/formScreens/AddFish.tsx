@@ -552,6 +552,8 @@ const AddFishContent = ({
     setSpeciesDropDownOpen(false)
   }, [])
 
+  const showLifeStage = ['Chinook salmon', 'Steelhead / rainbow trout']
+
   return (
     <>
       <ScrollView
@@ -589,7 +591,7 @@ const AddFishContent = ({
           </HStack>
           <Divider mb='1' />
           <VStack paddingX='10' paddingBottom='3' space={3}>
-            {lastFishEntry && (
+            {!route.params?.editModeData && lastFishEntry && (
               <Box
                 p={3}
                 w={'full'}
@@ -610,10 +612,12 @@ const AddFishContent = ({
                     <Text bold>Fork Length: </Text>
                     {lastFishEntry.forkLength}
                   </Text>
-                  <Text fontSize={'lg'}>
-                    <Text bold>Life Stage: </Text>
-                    {lastFishEntry.lifeStage || 'N/A'}
-                  </Text>
+                  {showLifeStage.includes(lastFishEntry.species) && (
+                    <Text fontSize={'lg'}>
+                      <Text bold>Life Stage: </Text>
+                      {lastFishEntry.lifeStage}
+                    </Text>
+                  )}
                 </HStack>
               </Box>
             )}
