@@ -81,6 +81,8 @@ const FishInput = ({
       ? ([...speciesCaptured] as Array<string>)
       : (['YOY Chinook'] as Array<string>)
   )
+  const errorMessage =
+    tabSlice.tabs[activeTabId]?.errorDetails['Fish Input']?.fishStore
 
   useEffect(() => {
     checkboxGroupValue.length < 1 ? setShowError(true) : setShowError(false)
@@ -188,6 +190,11 @@ const FishInput = ({
                 Add Plus Counts
               </Text>
             </Button>
+          </HStack>
+          <HStack>
+            <Text style={{ color: 'red', paddingHorizontal: 20 }}>
+              {errorMessage}
+            </Text>
           </HStack>
 
           <Box px='4'>
