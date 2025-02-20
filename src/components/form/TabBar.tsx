@@ -97,7 +97,7 @@ const TabBar = ({
               console.log('inside if')
               tabsErrorDetails[tabId][formSliceId] = {
                 fishStore:
-                  'Add at least 1 fish fish or select different fish processed result on previous screen ',
+                  'Add at least 1 fish or select different fish processed result on previous screen ',
               }
               tabsErrorCount[tabId] +=
                 Object.keys(formSlice?.tabId?.fishStore || {}).length === 0
