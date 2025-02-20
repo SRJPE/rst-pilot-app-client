@@ -33,6 +33,7 @@ import { ReleaseMarkI } from '../../../utils/interfaces'
 import SpeciesDropDown from '../SpeciesDropDown'
 import FishConditionsDropDown from '../FishConditionsDropDown'
 import { startCase } from 'lodash'
+import { useNavigation } from '@react-navigation/native'
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -82,6 +83,8 @@ const BatchCharacteristicsModalContent = ({
   const onFishConditionOpen = useCallback(() => {
     setSpeciesDropDownOpen(false)
   }, [])
+
+  const navigation = useNavigation() as any
 
   const handleFormSubmit = (values: any) => {
     delete values.existingMarks
@@ -160,7 +163,19 @@ const BatchCharacteristicsModalContent = ({
             <CustomModalHeader
               headerText={'Batch Characteristics'}
               showHeaderButton={false}
-              closeModal={closeModal}
+              closeModal={() => {
+                closeModal()
+
+                if (
+                  !values.species &&
+                  !batchCountStore.batchCharacteristics.species
+                ) {
+                  navigation.preload('Fish Input')
+                  navigation.navigate('Trap Visit Form', {
+                    screen: 'Fish Input',
+                  })
+                }
+              }}
             />
             <VStack px='5%' space={4}>
               <Text justifyContent='center' fontSize='lg'>
