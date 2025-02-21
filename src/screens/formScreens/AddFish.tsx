@@ -593,32 +593,24 @@ const AddFishContent = ({
           <VStack paddingX='10' paddingBottom='3' space={3}>
             {!route.params?.editModeData && lastFishEntry && (
               <Box
-                p={3}
+                py={3}
+                px={5}
                 w={'full'}
                 borderWidth={1}
                 borderColor={'primary'}
                 borderRadius={5}
                 bg='coolGray.100'
               >
-                <Text bold mb={2} fontSize={'lg'} textAlign={'center'}>
-                  Previously Saved Fish
-                </Text>
-                <HStack space={5} justifyContent={'center'}>
+                <VStack space={1}>
                   <Text fontSize={'lg'}>
-                    <Text bold>Species: </Text>
-                    {lastFishEntry.species}
+                    <Text bold>Last Entry: </Text>
+                    {`${lastFishEntry.species} (${lastFishEntry.lifeStage}) - Fork Length: ${lastFishEntry.forkLength}mm`}
                   </Text>
                   <Text fontSize={'lg'}>
-                    <Text bold>Fork Length: </Text>
-                    {lastFishEntry.forkLength}
+                    <Text bold>Total Catch Count Entered: </Text>
+                    {Object.values(fishStore).length}
                   </Text>
-                  {showLifeStage.includes(lastFishEntry.species) && (
-                    <Text fontSize={'lg'}>
-                      <Text bold>Life Stage: </Text>
-                      {lastFishEntry.lifeStage}
-                    </Text>
-                  )}
-                </HStack>
+                </VStack>
               </Box>
             )}
             <HStack alignItems='center'>
