@@ -45,6 +45,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { StackActions } from '@react-navigation/native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = state.tabSlice.activeTabId
@@ -90,6 +91,9 @@ const TrapPostProcessing = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
   const recordTurbidityInPostProcessing = useSelector(
@@ -526,6 +530,16 @@ const TrapPostProcessing = ({
                       </Box>
                     </HStack>
                   </FormControl>
+                  <ConditionalTrapVisitFields
+                    touched={touched}
+                    errors={errors}
+                    values={values}
+                    handleChange={handleChange}
+                    handleBlur={handleBlur}
+                    setFieldTouched={setFieldTouched}
+                    dropdownValues={dropdownValues}
+                    activePage={activePage}
+                  />
                   <HStack
                     space={5}
                     justifyContent='space-between'
@@ -582,136 +596,6 @@ const TrapPostProcessing = ({
                       </Box>
                     )}
                   </HStack>
-                  {/* <FormControl>
-                    <HStack space={4} alignItems='center'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          RPM After Cleaning
-                        </Text>
-                      </FormControl.Label>
-                      {((touched.rpm1 && errors.rpm1) ||
-                        (touched.rpm2 && errors.rpm2) ||
-                        (touched.rpm3 && errors.rpm3)) && (
-                        <HStack space={1}>
-                          <Icon
-                            marginTop={'.5'}
-                            as={Ionicons}
-                            name='alert-circle-outline'
-                            color='error'
-                          />
-                          <Text style={{ fontSize: 16, color: '#b71c1c' }}>
-                            At least one measurement is required
-                          </Text>
-                        </HStack>
-                      )}
-                    </HStack>
-
-                    <HStack space={8} justifyContent='space-between'>
-                      <FormControl w='30%'>
-                        <VStack>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm1')}
-                            onBlur={handleBlur('rpm1')}
-                            value={values.rpm1}
-                          />
-                          {Number(values.rpm1) > QARanges.RPM.max ? (
-                            <RenderWarningMessage />
-                          ) : (
-                            <></>
-                          )}
-                        </VStack>
-                      </FormControl>
-                      <FormControl w='30%'>
-                        <VStack>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value (optional)'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm2')}
-                            onBlur={handleBlur('rpm2')}
-                            value={values.rpm2}
-                          />
-                          {Number(values.rpm2) > QARanges.RPM.max ? (
-                            <RenderWarningMessage />
-                          ) : (
-                            <></>
-                          )}
-                        </VStack>
-                      </FormControl>
-
-                      <FormControl w='30%'>
-                        <VStack>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value (optional)'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm3')}
-                            onBlur={handleBlur('rpm3')}
-                            value={values.rpm3}
-                          />
-                          {Number(values.rpm3) > QARanges.RPM.max ? (
-                            <RenderWarningMessage />
-                          ) : (
-                            <></>
-                          )}
-                        </VStack>
-                      </FormControl>
-                    </HStack>
-                    <Text color='grey' my='5' fontSize='17'>
-                      Take one or more measure of cone rotations. We will save
-                      the average in our database.
-                    </Text>
-                    {/* if user programs is not F/Y, okay to show drop pin */}
-                  {/* {!userPrograms.some((element: string) =>
-                    [
-                      'Feather RST Monitoring',
-                      'Yuba River RST Monitoring',
-                    ].includes(element)
-                  ) && (
-                    <HStack space={3} mt='5'>
-                      <Button
-                        w='1/2'
-                        // h='12%'
-                        bg='primary'
-                        px='10'
-                        isLoading={locationClicked}
-                        spinnerPlacement='end'
-                        isLoadingText='Drop Pin at Current Location'
-                        _loading={{
-                          _text: {
-                            fontSize: 'xl',
-                          },
-                        }}
-                        onPress={() => {
-                          setLocationClicked(true)
-                          getCurrentLocation(setFieldTouched, setFieldValue)
-                        }}
-                      >
-                        <Text fontSize='xl' color='white'>
-                          Drop Pin at Current Location
-                        </Text>
-                      </Button>
-                      <VStack space={3} alignSelf='center'>
-                        <Text fontSize='xl' color='black'>
-                          {values.trapLatitude
-                            ? `Lat:  ${values.trapLatitude}`
-                            : 'Lat:'}
-                        </Text>
-                        <Text fontSize='xl' color='black'>
-                          {values.trapLongitude
-                            ? `Long:  ${values.trapLongitude}`
-                            : 'Long:'}
-                        </Text>
-                      </VStack>
-                    </HStack>
-                  )} */}
-                  {/* </FormControl>  */}
                   <FormControl w='30%'>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>

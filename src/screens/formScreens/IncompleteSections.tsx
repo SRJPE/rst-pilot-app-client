@@ -27,7 +27,7 @@ import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOp
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
-import { cloneDeep, flatten, uniq } from 'lodash'
+import { cloneDeep, flatten, uniq, values } from 'lodash'
 import { uid } from 'uid'
 import {
   setIncompleteSectionTouched,
@@ -211,6 +211,20 @@ const IncompleteSections = ({
     return filteredNames
   }
 
+  const formatTrapVisitEnvironmentalValues = (values: any) => {
+    const environmentalFields = [
+      'flowMeasure',
+      'waterTemperature',
+      'waterTurbidity',
+      'dissolvedOxygen',
+      'electricalConductivity',
+      'specificConductivity',
+      'secchi',
+      'ph',
+    ]
+    console.log('trap visiit env values', values)
+  }
+
   const saveTrapVisits = () => {
     const trapFunctioningValues = returnDefinitionArray(
       dropdownsState.values.trapFunctionality
@@ -351,6 +365,8 @@ const IncompleteSections = ({
           : null,
         createdBy: userCredentialsStore.id,
       }
+
+      formatTrapVisitEnvironmentalValues(trapOperationsState[id].values)
 
       dispatch(saveTrapVisitSubmission(trapVisitSubmission))
 

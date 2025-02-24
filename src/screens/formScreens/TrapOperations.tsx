@@ -32,7 +32,7 @@ import {
   markTrapOperationsCompleted,
   saveTrapOperations,
 } from '../../redux/reducers/formSlices/trapOperationsSlice'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { MaterialIcons } from '@expo/vector-icons'
 import { DeviceEventEmitter, Keyboard } from 'react-native'
 import {
   QARanges,
@@ -52,7 +52,7 @@ import FormInputComponent, {
 } from '../../components/Shared/FormInputComponent'
 import * as Yup from 'yup'
 import { getAllTabProcessingResults } from '../../redux/reducers/formSlices/fishProcessingSlice'
-import WaterQuality from '../../components/form/WaterQuality'
+import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -120,15 +120,10 @@ const TrapOperations = ({
   const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
   const [endTime, setEndTime] = useState(new Date() as any)
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
-  const [waterTempUnitC, setWaterTempUnitC] = useState<boolean>(true)
   const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
-  const [showWaterQuality, setShowWaterQuality] = useState<boolean>(true)
+  const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
 
-  const convertCtoF = (celsius: number) => (celsius * 9) / 5 + 32
-  const permitFlowThreshold = trapPermitInfo?.flowThreshold || 2000
-  const permitTempThreshold = waterTempUnitC
-    ? trapPermitInfo?.temperatureThreshold
-    : convertCtoF(trapPermitInfo?.temperatureThreshold)
+  console.log('visitSetupDefaults', visitSetupDefaults)
 
   useEffect(() => {
     // flow threshold on trap location
@@ -145,7 +140,18 @@ const TrapOperations = ({
     setTrapPermitInfo(currentTrapPermitInfo)
 
     setTrapLocationInfo(currentTrapLocationInfo)
-  }, [visitSetupDefaults.permitInfo, selectedTrapLocationId])
+
+    const currentProgramInfo = find(
+      visitSetupDefaults.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+
+    setSelectedProgramObj(currentProgramInfo)
+  }, [
+    visitSetupDefaults.permitInfo,
+    selectedTrapLocationId,
+    visitSetupDefaults.programs,
+  ])
 
   const useFlowMeasureCalculationBool = (flowMeasureEntered: number | null) => {
     return useMemo(() => {
@@ -234,6 +240,7 @@ const TrapOperations = ({
   }
 
   const onSubmit = (values: any, tabId: string | null) => {
+    console.log('values', values)
     if (tabId) {
       const errors = checkForErrors(values)
       if (values.recordTurbidityInPostProcessing) {
@@ -621,7 +628,7 @@ const TrapOperations = ({
                   )}
                   {values.trapStatus.length > 0 && (
                     <>
-                      <FormControl w='30%'>
+                      {/* <FormControl w='30%'>
                         <HStack space={4} alignItems='center'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
@@ -661,7 +668,7 @@ const TrapOperations = ({
                             </HStack>
                           </Radio.Group>
                         </HStack>
-                      </FormControl>
+                      </FormControl> */}
                       <FormControl>
                         <HStack space={4} alignItems='center'>
                           <FormControl.Label>
@@ -701,8 +708,12 @@ const TrapOperations = ({
                             </Popover.Content>
                           </Popover>
                         </HStack>
-                        <HStack space={8} justifyContent='space-between'>
-                          <Box flex={1}>
+                        <HStack space={8} flexWrap={'wrap'}>
+                          <Box
+                            flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                            minWidth='30%' // Prevents shrinking too much
+                            maxWidth='30%' // Prevents growing beyond this size
+                          >
                             <FormInputComponent
                               label={'Measure 1'}
                               placeholder='0'
@@ -720,7 +731,11 @@ const TrapOperations = ({
                               onBlur={handleBlur('rpm1')}
                             />
                           </Box>
-                          <Box flex={1}>
+                          <Box
+                            flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                            minWidth='30%' // Prevents shrinking too much
+                            maxWidth='30%' // Prevents growing beyond this size
+                          >
                             <FormInputComponent
                               isDisabled={values.rpm1 ? false : true}
                               label={'Measure 2 (optional)'}
@@ -738,7 +753,11 @@ const TrapOperations = ({
                               onBlur={handleBlur('rpm2')}
                             />
                           </Box>
-                          <Box flex={1}>
+                          <Box
+                            flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                            minWidth='30%' // Prevents shrinking too much
+                            maxWidth='30%' // Prevents growing beyond this size
+                          >
                             <FormInputComponent
                               isDisabled={
                                 values.rpm1 && values.rpm2 ? false : true
@@ -795,8 +814,12 @@ const TrapOperations = ({
                         </FormControl>
                       </HStack>
 
-                      <HStack space={5}>
-                        <Box flex={1}>
+                      <HStack space={8} flexWrap={'wrap'}>
+                        <Box
+                          flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                          minWidth='30%' // Prevents shrinking too much
+                          maxWidth='30%' // Prevents growing beyond this size
+                        >
                           <FormInputComponent
                             showWarning={warningResultFlow}
                             label={'Flow Measure'}
@@ -810,7 +833,11 @@ const TrapOperations = ({
                             RightElement={<TextInputAdornment text='cfs' />}
                           />
                         </Box>
-                        <Box flex={1}>
+                        <Box
+                          flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                          minWidth='30%' // Prevents shrinking too much
+                          maxWidth='30%' // Prevents growing beyond this size
+                        >
                           <FormInputComponent
                             showWarning={warningResultTemp}
                             label={'Water Temperature'}
@@ -840,7 +867,11 @@ const TrapOperations = ({
                           />
                         </Box>
 
-                        <Box flex={1}>
+                        <Box
+                          flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                          minWidth='30%' // Prevents shrinking too much
+                          maxWidth='30%' // Prevents growing beyond this size
+                        >
                           <FormInputComponent
                             label={'Water Turbidity (via CDEC)'}
                             placeholder='0'
@@ -855,17 +886,18 @@ const TrapOperations = ({
                         </Box>
                       </HStack>
 
-                      {showWaterQuality && (
-                        <WaterQuality
-                          touched={touched}
-                          errors={errors}
-                          values={values}
-                          handleChange={handleChange}
-                          handleBlur={handleBlur}
-                          setFieldTouched={setFieldTouched}
-                          dropdownValues={dropdownValues}
-                        />
-                      )}
+                      <ConditionalTrapVisitFields
+                        touched={touched}
+                        errors={errors}
+                        values={values}
+                        handleChange={handleChange}
+                        handleBlur={handleBlur}
+                        setFieldTouched={setFieldTouched}
+                        dropdownValues={dropdownValues}
+                        activePage={activePage}
+                        formFields={selectedProgramObj?.programFormFields}
+                        setFieldValue={setFieldValue}
+                      />
                       <Text
                         color='black'
                         fontSize='xl'
