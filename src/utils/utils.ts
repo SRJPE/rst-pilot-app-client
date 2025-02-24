@@ -1,6 +1,7 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
 import { every, some, sortBy } from 'lodash'
+import { ReleaseMarkI } from './interfaces'
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   //returns an alphabetically sorted copy of the original array
@@ -557,4 +558,26 @@ export const addFishErrorMessages = {
   lifeStage: { emptyError: 'Fish life stage required' },
   adiposeClipped: { emptyError: 'Fish adipose clipped status required' },
   dead: { emptyError: 'Fish mortality required' },
+}
+
+export const decodedRecentReleaseMarks = (
+  dropdownValues: any,
+  programId: number
+) => {
+  const releaseMarks = dropdownValues.releaseMarks
+  const markTypeValues = returnDefinitionArray(dropdownValues.markType)
+  const markColorValues = returnDefinitionArray(dropdownValues.markColor)
+  const bodyPartValues = returnDefinitionArray(dropdownValues.bodyPart)
+
+  return releaseMarks
+    .filter((mark: ReleaseMarkI) => mark.programId === programId)
+    .slice(0, 2)
+    .map((mark: ReleaseMarkI) => {
+      return {
+        ...mark,
+        markType: markTypeValues[mark.markType - 1],
+        markColor: markColorValues[mark.markColor - 1],
+        markPosition: bodyPartValues[mark.markPosition - 1],
+      }
+    })
 }

@@ -77,6 +77,7 @@ export interface ReleaseMarkI {
   markPosition: number
   markType: number
   markColor: number
+  programId?: number
 }
 
 export interface FormValueI {
