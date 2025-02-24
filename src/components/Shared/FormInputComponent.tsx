@@ -6,6 +6,8 @@ import {
   NativeSyntheticEvent,
   TextInputFocusEventData,
 } from 'react-native'
+import { FastField } from 'formik'
+import { on } from 'events'
 
 interface FormInputComponentI {
   label: string
@@ -30,6 +32,54 @@ export const TextInputAdornment = ({ text }: { text: string }) => {
     <Text px={5} color='warmGray.400'>
       {text}
     </Text>
+  )
+}
+
+const FastInput = ({
+  field,
+  form,
+  value,
+  keyboardType,
+  placeholder,
+  onChangeText,
+  onBlur,
+  RightElement = undefined,
+  isDisabled = false,
+  multiline = false,
+  showWarning = false,
+}: {
+  field: any
+  form: any
+  value: any
+  keyboardType: any
+  placeholder: any
+  onChangeText: any
+  onBlur: any
+  RightElement: any
+  isDisabled: any
+  multiline: any
+  showWarning: any
+}) => {
+  return (
+    <Input
+      {...field} // Includes value and onChangeText automatically
+      multiline={multiline}
+      readOnly={isDisabled}
+      height={multiline ? 100 : 50}
+      fontSize='16'
+      keyboardType={keyboardType ? keyboardType : 'default'}
+      placeholder={placeholder || 'No placeholder entered'}
+      onChangeText={(text: any) => form.setFieldValue(field.name, text)} // Update correctly
+      onBlur={onBlur}
+      value={field.value}
+      _focus={{
+        borderColor: showWarning ? 'amber.700' : 'muted.300',
+        _invalid: { borderColor: 'red.700' },
+      }}
+      borderColor={showWarning ? 'amber.700' : 'muted.300'}
+      _invalid={{ borderColor: 'red.700' }}
+      rightElement={RightElement}
+    />
   )
 }
 
@@ -73,23 +123,18 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
             {label}
           </Text>
         </FormControl.Label>
-        <Input
-          multiline={multiline}
-          readOnly={isDisabled}
-          height={multiline ? 100 : 50}
-          fontSize='16'
-          keyboardType={keyboardType ? keyboardType : 'default'}
-          placeholder={placeholder || 'No placeholder entered'}
+        <FastField
+          name={camelName}
+          component={FastInput}
+          value={value}
+          keyboardType={keyboardType}
+          placeholder={placeholder}
           onChangeText={onChangeText}
           onBlur={onBlur}
-          value={value}
-          _focus={{
-            borderColor: showWarning ? 'amber.700' : 'muted.300',
-            _invalid: { borderColor: 'red.700' },
-          }}
-          borderColor={showWarning ? 'amber.700' : 'muted.300'}
-          _invalid={{ borderColor: 'red.700' }}
-          rightElement={RightElement}
+          RightElement={RightElement}
+          isDisabled={isDisabled}
+          multiline={multiline}
+          showWarning={showWarning}
         />
         <Box mt={2} h={25}>
           {showError && (

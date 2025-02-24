@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, memo, useCallback } from 'react'
 import {
   View,
   Text,
@@ -16,9 +16,6 @@ import { MaterialIcons } from '@expo/vector-icons'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../Shared/FormInputComponent'
-import DropDownPicker from 'react-native-dropdown-picker'
-import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import { useFormikContext } from 'formik'
 import CustomSelect from '../Shared/CustomSelect'
 
 interface FieldInterface {
@@ -32,9 +29,10 @@ interface FieldInterface {
   unitDefinition: string | null
   fieldType: string
   formSection: string
+  orderIndex: number
 }
 
-export default function ConditionalTrapVisitFields({
+const ConditionalTrapVisitFields = ({
   touched,
   errors,
   values,
@@ -56,23 +54,35 @@ export default function ConditionalTrapVisitFields({
   activePage: string
   formFields: Array<FieldInterface>
   setFieldValue: any
-}) {
+}) => {
+  const [sortedFormFields, setSortedFormFields] = useState<
+    Array<FieldInterface>
+  >([])
+
+  useEffect(() => {
+    if (formFields) {
+      const sortedFields = [...formFields].sort(
+        (a, b) => a.orderIndex - b.orderIndex
+      )
+      setSortedFormFields(sortedFields)
+    }
+  }, [formFields])
+
   const renderFieldComponent = (item: FieldInterface, index: number) => {
     if (item.formSection !== activePage) {
       return undefined
     }
 
     const { fieldName, displayName, unitDefinition, fieldType } = item
-    const isLastInRow = (index + 1) % 3 === 0 // Every 3rd item in a row
     if (fieldType === 'input') {
       const unitAbbrev = unitDefinition?.match(/\(([^)]+)\)/)?.[1] || undefined
       return (
         <Box
           key={index} // Always add a key when mapping
-          flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-          minWidth='30%' // Prevents shrinking too much
-          // maxWidth='30%' // Prevents growing beyond this size>
-          mr={isLastInRow ? 0 : 8} // Removes right margin from every 3rd item
+          flexBasis='25%' // Ensures 3 items per row (adjust for spacing)
+          minWidth='25%' // Prevents shrinking too much
+          maxWidth='25%' // Prevents growing beyond this size>
+          mr={8} // Removes right margin from every 3rd item
         >
           <FormInputComponent
             label={displayName}
@@ -118,28 +128,24 @@ export default function ConditionalTrapVisitFields({
   }
 
   const calcMeanFNU = useMemo(() => {
-    let valueCounter = 0
-    let dividedCounter = 0
-    if (values.turbidity1) {
-      valueCounter += parseFloat(values.turbidity1)
-      dividedCounter++
-    }
-    if (values.turbidity2) {
-      valueCounter += parseFloat(values.turbidity2)
-      dividedCounter++
-    }
-    if (values.turbidity3) {
-      valueCounter += parseFloat(values.turbidity3)
-      dividedCounter++
-    }
-    if (dividedCounter === 0) {
-      return 0
-    }
-    return (valueCounter / dividedCounter).toFixed(2)
+    if (values.turbidity1 && values.turbidity2 && values.turbidity3) {
+      const sum =
+        Number(values.turbidity1) +
+        Number(values.turbidity2) +
+        Number(values.turbidity3)
+      return (sum / 3).toFixed(2)
+    } else return undefined
   }, [values.turbidity1, values.turbidity2, values.turbidity3])
 
   return (
     <>
+      {formFields?.length > 0 && (
+        <HStack flexWrap={'wrap'}>
+          {sortedFormFields.map((item, index) =>
+            renderFieldComponent(item, index)
+          )}
+        </HStack>
+      )}
       <FormControl>
         <HStack space={4} alignItems='center'>
           <FormControl.Label>
@@ -241,11 +247,8 @@ export default function ConditionalTrapVisitFields({
           </Box>
         </HStack>
       </FormControl>
-      {formFields?.length > 0 && (
-        <HStack flexWrap={'wrap'}>
-          {formFields.map((item, index) => renderFieldComponent(item, index))}
-        </HStack>
-      )}
     </>
   )
 }
+
+export default ConditionalTrapVisitFields

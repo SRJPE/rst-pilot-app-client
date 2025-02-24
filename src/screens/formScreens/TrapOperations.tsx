@@ -123,8 +123,6 @@ const TrapOperations = ({
   const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
 
-  console.log('visitSetupDefaults', visitSetupDefaults)
-
   useEffect(() => {
     // flow threshold on trap location
     // TO DO: temp threshold WILL permit info (Needs to be refactored in db and monitoring program setup)
@@ -867,7 +865,7 @@ const TrapOperations = ({
                           />
                         </Box>
 
-                        <Box
+                        {/* <Box
                           flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
                           minWidth='30%' // Prevents shrinking too much
                           maxWidth='30%' // Prevents growing beyond this size
@@ -883,10 +881,10 @@ const TrapOperations = ({
                             onBlur={handleBlur('waterTurbidity')}
                             RightElement={<TextInputAdornment text='ntu' />}
                           />
-                        </Box>
+                        </Box> */}
                       </HStack>
 
-                      <ConditionalTrapVisitFields
+                      {/* <ConditionalTrapVisitFields
                         touched={touched}
                         errors={errors}
                         values={values}
@@ -897,7 +895,7 @@ const TrapOperations = ({
                         activePage={activePage}
                         formFields={selectedProgramObj?.programFormFields}
                         setFieldValue={setFieldValue}
-                      />
+                      /> */}
                       <Text
                         color='black'
                         fontSize='xl'

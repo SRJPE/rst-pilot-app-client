@@ -46,6 +46,7 @@ import { StackActions } from '@react-navigation/native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
+import { find } from 'lodash'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = state.tabSlice.activeTabId
@@ -67,6 +68,10 @@ const mapStateToProps = (state: RootState) => {
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
     userCredentialsStore: state.userCredentials,
+    visitSetupDefaults: state.visitSetupDefaults,
+    selectedProgramId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.programId,
   }
 }
 
@@ -79,6 +84,8 @@ const TrapPostProcessing = ({
   previouslyActiveTabId,
   navigationSlice,
   userCredentialsStore,
+  visitSetupDefaults,
+  selectedProgramId,
 }: {
   navigation: any
   reduxState: any
@@ -88,6 +95,8 @@ const TrapPostProcessing = ({
   previouslyActiveTabId: string | null
   navigationSlice: any
   userCredentialsStore: any
+  visitSetupDefaults: any
+  selectedProgramId: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -104,6 +113,7 @@ const TrapPostProcessing = ({
 
   const [locationClicked, setLocationClicked] = useState(false as boolean)
   const [startTime, setStartTime] = useState(new Date() as any)
+  const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
 
   const userPrograms = userCredentialsStore?.userPrograms || []
   const programNames = userPrograms.map((program: any) => program.programName)
@@ -112,6 +122,15 @@ const TrapPostProcessing = ({
     const currentDate = selectedDate
     setStartTime(currentDate)
   }
+
+  useEffect(() => {
+    const currentProgramInfo = find(
+      visitSetupDefaults.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+
+    setSelectedProgramObj(currentProgramInfo)
+  }, [visitSetupDefaults.programs])
 
   useEffect(() => {
     if (activeTabId) {
@@ -530,7 +549,7 @@ const TrapPostProcessing = ({
                       </Box>
                     </HStack>
                   </FormControl>
-                  <ConditionalTrapVisitFields
+                  {/* <ConditionalTrapVisitFields
                     touched={touched}
                     errors={errors}
                     values={values}
@@ -539,7 +558,9 @@ const TrapPostProcessing = ({
                     setFieldTouched={setFieldTouched}
                     dropdownValues={dropdownValues}
                     activePage={activePage}
-                  />
+                    formFields={selectedProgramObj?.programFormFields}
+                    setFieldValue={setFieldValue}
+                  /> */}
                   <HStack
                     space={5}
                     justifyContent='space-between'
