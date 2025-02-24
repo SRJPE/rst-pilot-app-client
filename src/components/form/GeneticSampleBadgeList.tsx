@@ -37,7 +37,7 @@ const GeneticSampleBadgeList = ({
                   bg='primary'
                   shadow='3'
                   borderRadius='5'
-                  w='30%'
+                  w='40%'
                   marginBottom={5}
                   endIcon={
                     <IconButton
