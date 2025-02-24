@@ -37,8 +37,6 @@ import {
   updateFishEntry,
   deleteFishEntry,
 } from '../../redux/reducers/formSlices/fishInputSlice'
-import { saveGeneticSampleData } from '../../redux/reducers/formSlices/addGeneticSamplesSlice'
-import { saveMarkOrTagData } from '../../redux/reducers/formSlices/addMarksOrTagsSlice'
 import { MaterialIcons } from '@expo/vector-icons'
 import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
 import { useNavigation } from '@react-navigation/native'
@@ -60,12 +58,11 @@ import SpeciesDropDown from '../../components/form/SpeciesDropDown'
 import FishConditionsDropDown from '../../components/form/FishConditionsDropDown'
 import { startCase } from 'lodash'
 import { ReleaseMarkI, FormValueI } from '../../utils/interfaces'
+import GeneticSampleBadgeList from '../../components/form/GeneticSampleBadgeList'
 
 const AddFishContent = ({
   route,
   saveIndividualFish,
-  saveMarkOrTagData,
-  saveGeneticSampleData,
   updateFishEntry,
   deleteFishEntry,
   activeTab,
@@ -77,7 +74,6 @@ const AddFishContent = ({
   route?: any
   saveIndividualFish: any
   saveMarkOrTagData: any
-  saveGeneticSampleData: any
   updateFishEntry: any
   deleteFishEntry: any
   activeTab: any
@@ -91,9 +87,6 @@ const AddFishContent = ({
   // @ts-ignore
   const [fishUID, setFishUID] = useState(uid() as string)
 
-  const [validationSchema, setValidationSchema] = useState<
-    'default' | 'optionalLifeStage' | 'otherSpecies'
-  >('default')
   const [tagFishModalOpen, setTagFishModalOpen] = useState(false as boolean)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
@@ -110,10 +103,6 @@ const AddFishContent = ({
     dropdownValues.lifeStage,
     'definition'
   )
-
-  const handleGeneticSampleFormSubmit = (values: any) => {
-    saveGeneticSampleData({ ...values, UID: fishUID })
-  }
 
   const renderForkLengthWarning = (
     forkLengthValue: number,
@@ -183,6 +172,7 @@ const AddFishContent = ({
       }),
       existingMarks: createFormValueDefault({ value: [] }),
       appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
       dead: createFormValueDefault({
         value: false,
         touched: true,
@@ -205,6 +195,7 @@ const AddFishContent = ({
       }),
       existingMarks: createFormValueDefault({ value: [] }),
       appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
       dead: createFormValueDefault({
         value: false,
         touched: true,
@@ -228,6 +219,7 @@ const AddFishContent = ({
       }),
       existingMarks: createFormValueDefault({ value: [] }),
       appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
       dead: createFormValueDefault({
         value: false,
         touched: true,
@@ -327,6 +319,15 @@ const AddFishContent = ({
       ? stateDefaults.whenSpeciesChinook.appliedMarks
       : createFormValueDefault({
           value: route.params?.editModeData.appliedMarks,
+          touched: true,
+          required: false,
+        })
+  )
+  const [geneticSamples, setGeneticSamples] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.geneticSamples
+      : createFormValueDefault({
+          value: route.params?.editModeData.geneticSamples,
           touched: true,
           required: false,
         })
@@ -434,6 +435,7 @@ const AddFishContent = ({
     setRecentExistingMarks([])
     setComments(stateDefaults[identifier].comments)
     setAppliedMarks(stateDefaults[identifier].appliedMarks)
+    setGeneticSamples(stateDefaults[identifier].geneticSamples)
   }
 
   const handleMarkFishFormSubmit = (values: any) => {
@@ -441,6 +443,15 @@ const AddFishContent = ({
       ...appliedMarks,
       value: Array.isArray(appliedMarks.value)
         ? [...appliedMarks.value, values]
+        : [values],
+    })
+  }
+
+  const handleGeneticSamplesFormSubmit = (values: any) => {
+    setGeneticSamples({
+      ...geneticSamples,
+      value: Array.isArray(geneticSamples.value)
+        ? [...geneticSamples.value, values]
         : [values],
     })
   }
@@ -514,6 +525,7 @@ const AddFishContent = ({
       plusCountMethod: plusCountMethod.value,
       comments: comments.value,
       appliedMarks: [...appliedMarks.value],
+      geneticSamples: [...geneticSamples.value],
     }
 
     return values
@@ -709,12 +721,12 @@ const AddFishContent = ({
                           Number(forkLength.value),
                           lifeStage.value as string
                         )}
-                        {/* {forkLength.touched &&
-                          forkLength.error &&
-                          RenderErrorMessage(
-                            { forkLength: forkLength.error },
-                            'forkLength'
-                          )} */}
+                        {forkLength.touched && forkLength.error && (
+                          <RenderErrorMessage
+                            errors={{ forkLength: forkLength.error }}
+                            inputName={'forkLength'}
+                          />
+                        )}
                       </HStack>
                       <Input
                         height='50px'
@@ -766,12 +778,12 @@ const AddFishContent = ({
                           Number(weight.value),
                           weight.value as string
                         )}
-                        {/* {weight.touched &&
-                          weight.error &&
-                          RenderErrorMessage(
-                            { weight: weight.error },
-                            'weight'
-                          )} */}
+                        {weight.touched && weight.error && (
+                          <RenderErrorMessage
+                            errors={{ weight: weight.error }}
+                            inputName={'weight'}
+                          />
+                        )}
                       </HStack>
                       <Input
                         height='50px'
@@ -1288,6 +1300,19 @@ const AddFishContent = ({
                         />
                       </>
                     )}
+                  {Array.isArray(geneticSamples?.value) &&
+                    geneticSamples.value.length > 0 && (
+                      <>
+                        <Text color='black' fontSize='xl'>
+                          Genetic Samples
+                        </Text>
+                        <GeneticSampleBadgeList
+                          badgeListContent={geneticSamples.value}
+                          setGeneticSamples={setGeneticSamples}
+                          geneticSamples={geneticSamples}
+                        />
+                      </>
+                    )}
                   <FormControl>
                     <FormControl.Label>
                       <Text color='black' fontSize='xl'>
@@ -1449,7 +1474,7 @@ const AddFishContent = ({
           height='3/4'
         >
           <AddGeneticsModalContent
-            handleGeneticSampleFormSubmit={handleGeneticSampleFormSubmit}
+            handleGeneticSampleFormSubmit={handleGeneticSamplesFormSubmit}
             closeModal={() => setAddGeneticModalOpen(false)}
           />
         </CustomModal>
@@ -1491,8 +1516,6 @@ const mapStateToProps = (state: RootState) => {
 
 export default connect(mapStateToProps, {
   saveIndividualFish,
-  saveMarkOrTagData,
-  saveGeneticSampleData,
   updateFishEntry,
   deleteFishEntry,
 })(AddFishContent)
