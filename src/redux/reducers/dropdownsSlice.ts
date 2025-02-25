@@ -30,7 +30,7 @@ interface ValuesI {
   visitType: any[]
   lightCondition: any[]
   plusCountMethodology: any[]
-  twoMostRecentReleaseMarks: any[]
+  releaseMarks: any[]
   fundingAgency: any[]
   listingUnit: any[]
   frequency: any[]
@@ -61,7 +61,7 @@ const initialState: InitialStateI = {
     visitType: [],
     lightCondition: [],
     plusCountMethodology: [],
-    twoMostRecentReleaseMarks: [],
+    releaseMarks: [],
     fundingAgency: [],
     listingUnit: [],
     frequency: [],

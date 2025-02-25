@@ -166,8 +166,8 @@ const ReleaseDataEntry = ({
     setSelectedRecentReleaseMarks(updatedMarks)
   }
 
-  const decodedRecentReleaseMarks = (twoMostRecentReleaseMarks: any) => {
-    return twoMostRecentReleaseMarks.map((mark: any) => {
+  const decodedRecentReleaseMarks = (releaseMarks: any) => {
+    return releaseMarks.map((mark: any) => {
       return {
         ...mark,
         markType: markTypeValues[mark.markType - 1],
@@ -309,9 +309,9 @@ const ReleaseDataEntry = ({
             <VStack space={6}>
               <Heading>Describe marks applied for efficiency trial:</Heading>
               <VStack space={5}>
-                {dropdownValues.twoMostRecentReleaseMarks.length > 0 &&
+                {/* {dropdownValues.releaseMarks.length > 0 &&
                   decodedRecentReleaseMarks(
-                    dropdownValues.twoMostRecentReleaseMarks
+                    dropdownValues.releaseMarks
                   ).map((recentReleaseMark: any, index: number) => {
                     const { id, markType, markColor, markPosition } =
                       recentReleaseMark
@@ -350,7 +350,7 @@ const ReleaseDataEntry = ({
                         </Text>
                       </Button>
                     )
-                  })}
+                  })} */}
               </VStack>
               <MarkBadgeList
                 badgeListContent={

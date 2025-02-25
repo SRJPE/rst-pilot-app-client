@@ -22,7 +22,11 @@ import {
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { reorderTaxon, returnDefinitionArray } from '../../../utils/utils'
+import {
+  reorderTaxon,
+  returnDefinitionArray,
+  decodedRecentReleaseMarks,
+} from '../../../utils/utils'
 import CustomModalHeader from '../../Shared/CustomModalHeader'
 import CustomSelect from '../../Shared/CustomSelect'
 import MarkBadgeList from '../../markRecapture/MarkBadgeList'
@@ -39,10 +43,12 @@ const BatchCharacteristicsModalContent = ({
   closeModal,
   tabSlice,
   batchCountStore,
+  visitSetupState,
 }: {
   closeModal: any
   tabSlice: TabStateI
   batchCountStore: any
+  visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
@@ -119,21 +125,6 @@ const BatchCharacteristicsModalContent = ({
         showSlideAlert(dispatch, 'Batch characteristics')
       }
     }
-  }
-
-  const markTypeValues = returnDefinitionArray(dropdownValues.markType)
-  const markColorValues = returnDefinitionArray(dropdownValues.markColor)
-  const bodyPartValues = returnDefinitionArray(dropdownValues.bodyPart)
-
-  const decodedRecentReleaseMarks = (twoMostRecentReleaseMarks: any) => {
-    return twoMostRecentReleaseMarks.map((mark: ReleaseMarkI) => {
-      return {
-        ...mark,
-        markType: markTypeValues[mark.markType - 1],
-        markColor: markColorValues[mark.markColor - 1],
-        markPosition: bodyPartValues[mark.markPosition - 1],
-      }
-    })
   }
 
   const handlePressRecentExistingMarkButton = (
@@ -272,9 +263,13 @@ const BatchCharacteristicsModalContent = ({
                 {batchCountStore.batchCharacteristics.existingMarks.length <
                   1 && (
                   <VStack space={5}>
-                    {dropdownValues.twoMostRecentReleaseMarks.length > 0 &&
+                    {dropdownValues?.releaseMarks?.length > 0 &&
                       decodedRecentReleaseMarks(
-                        dropdownValues.twoMostRecentReleaseMarks
+                        dropdownValues,
+                        tabSlice?.activeTabId
+                          ? visitSetupState?.[tabSlice.activeTabId]?.values
+                              ?.programId
+                          : null
                       ).map((recentReleaseMark: any, index: number) => {
                         const { id, markType, markColor, markPosition } =
                           recentReleaseMark
@@ -396,6 +391,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     tabSlice: state.tabSlice,
     batchCountStore: state.batchCount,
+    visitSetupState: state.visitSetup,
   }
 }
 
