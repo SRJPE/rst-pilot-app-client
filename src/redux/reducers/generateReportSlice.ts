@@ -54,7 +54,7 @@ const initialState: any = {
   emailValues: {
     emailSubject: 'testSubject',
     emailBody: 'test body',
-    emailRecipients: ['bpintel@gmail.com'],
+    emailRecipients: ['jhoang@flowwest.com'],
     // emailAttachments: [],
   },
   values: {
@@ -113,10 +113,10 @@ export const generateReportsSlice = createSlice({
       state.mostRecentReportFilePath = action.payload
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
       //get cases
-      .addCase(getBiWeeklyPassageSummary.pending.type, (state) => {
+      .addCase(getBiWeeklyPassageSummary.pending.type, state => {
         state.status = pendingStatus
       })
       .addCase(
@@ -132,11 +132,11 @@ export const generateReportsSlice = createSlice({
           state.values.releaseBiWeekly = action.payload.releaseBiWeekly
         }
       )
-      .addCase(getBiWeeklyPassageSummary.rejected.type, (state) => {
+      .addCase(getBiWeeklyPassageSummary.rejected.type, state => {
         state.status = rejectedStatus
       })
       //post cases
-      .addCase(postBiWeeklyPassageSummaryEmail.pending.type, (state) => {
+      .addCase(postBiWeeklyPassageSummaryEmail.pending.type, state => {
         state.submissionStatus = 'submitting...'
       })
       .addCase(
@@ -150,7 +150,7 @@ export const generateReportsSlice = createSlice({
           ]
         }
       )
-      .addCase(postBiWeeklyPassageSummaryEmail.rejected.type, (state) => {
+      .addCase(postBiWeeklyPassageSummaryEmail.rejected.type, state => {
         state.submissionStatus = 'submission-failed'
       })
   },

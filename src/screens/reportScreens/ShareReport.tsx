@@ -10,7 +10,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { AppDispatch, RootState } from '../../redux/store'
 import { connect, useDispatch, useSelector } from 'react-redux'
@@ -20,7 +20,13 @@ import { Formik } from 'formik'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import CustomModal from '../../components/Shared/CustomModal'
 import EditAccountInfoModalContent from '../../components/generateReport/ReportPreviewModalContent'
-import { postBiWeeklyPassageSummaryEmail } from '../../redux/reducers/generateReportSlice'
+import {
+  postBiWeeklyPassageSummaryEmail,
+  updateMostRecentReportFilePath,
+  getBiWeeklyPassageSummary,
+} from '../../redux/reducers/generateReportSlice'
+import { generateWordDocument } from '../../components/generateReport/ReportGenerator'
+import DocumentViewer from '../../components/Shared/DocumentViewer'
 
 const ShareReport = ({
   navigation,
@@ -30,6 +36,33 @@ const ShareReport = ({
   dropdownsState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const biWeeklyPassageSummaryStore = useSelector(
+    (state: RootState) => state.generateReports
+  )
+  const [filePath, setFilePath] = useState<string | null>(null)
+
+  const handleGenerateDocument = async (documentData: any) => {
+    const path = await generateWordDocument(documentData)
+    setFilePath(path)
+    dispatch(updateMostRecentReportFilePath(path))
+  }
+
+  // once store has been updated
+  // this use effect runs to generate document
+  useEffect(() => {
+    if (!filePath && biWeeklyPassageSummaryStore.status === 'fulfilled') {
+      handleGenerateDocument(biWeeklyPassageSummaryStore)
+    }
+  }, [biWeeklyPassageSummaryStore])
+
+  // this happens on "generate pdf" button press
+  // retrieves data back from db
+  // updates store with all of the information needed to generate the report
+  const handleGenerateReport = () => {
+    setFilePath(null)
+    dispatch(getBiWeeklyPassageSummary(1)) //change to selected program ID
+  }
+
   const generateReportsStore = useSelector(
     (state: RootState) => state.generateReports
   )
@@ -74,8 +107,9 @@ const ShareReport = ({
         name: '',
         email: '',
         frequency: '',
+        programName: '',
       }}
-      onSubmit={(values) => {
+      onSubmit={values => {
         // handleSubmitReport(values)
       }}
     >
@@ -98,51 +132,23 @@ const ShareReport = ({
             borderWidth='15'
           >
             <VStack space={5}>
-              <Heading>{`${reportTitle} Preview `}</Heading>
+              <Heading>{`${reportTitle}`}</Heading>
 
-              <VStack h='370' w='100%'>
-                <Center
-                  h='80%'
-                  borderColor='grey'
-                  borderWidth='3'
-                  borderRadius='3'
-                  borderBottomRadius='0'
-                >
-                  <Text fontSize='2xl'>Report Preview Placeholder</Text>
-                </Center>
-
-                <HStack
-                  borderColor='#ccc'
-                  borderBottomWidth='3'
-                  borderRightWidth='3'
-                  borderLeftWidth='3'
-                  borderRadius='3'
-                  borderTopRadius='0'
-                  alignSelf='center'
-                  h='20%'
-                  w='100%'
-                  justifyContent='space-evenly'
-                >
-                  <Text fontSize='xl' alignSelf='center'>
-                    Biweekly Passage Summary
-                  </Text>
-
-                  <Button
-                    bg='white'
-                    leftIcon={
-                      <Icon
-                        as={MaterialCommunityIcons}
-                        mr='2'
-                        name='clipboard-text'
-                        size='12'
-                        color='primary'
-                      />
-                    }
-                    onPress={() => setReportPreviewModalOpen(true)}
-                  >
-                    <Text fontSize='xl'>Preview</Text>
-                  </Button>
-                </HStack>
+              <VStack space={2}>
+                <FormControl>
+                  <CustomSelect
+                    selectedValue={values.programName}
+                    placeholder='Program name'
+                    label='What monitoring program are you generating a report for?'
+                    camelName='programName'
+                    onValueChange={handleChange('programName')}
+                    setFieldTouched={setFieldTouched}
+                    selectOptions={[
+                      { id: 1, definition: 'Mill Creek RST Monitoring' },
+                      { id: 2, definition: 'Deer Creek RST Monitoring' },
+                    ]}
+                  />
+                </FormControl>
               </VStack>
 
               <VStack space={2}>
@@ -154,26 +160,29 @@ const ShareReport = ({
                     test email
                   </Button>
                 </HStack>
-                <FormInputComponent
-                  label={'Name (First Last)'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.name ? `${values.name}` : ''}
-                  camelName={'name'}
-                  onChangeText={handleChange('name')}
-                  onBlur={handleBlur('name')}
-                />
-                <FormInputComponent
-                  label={'Email Address'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.email ? `${values.email}` : ''}
-                  camelName={'email'}
-                  onChangeText={handleChange('email')}
-                  onBlur={handleBlur('email')}
-                />
+                <HStack space={4} paddingRight='5'>
+                  <FormInputComponent
+                    label={'Name (First Last)'}
+                    touched={touched}
+                    errors={errors}
+                    value={values.name ? `${values.name}` : ''}
+                    camelName={'name'}
+                    onChangeText={handleChange('name')}
+                    onBlur={handleBlur('name')}
+                  />
+                  <FormInputComponent
+                    label={'Email Address'}
+                    touched={touched}
+                    errors={errors}
+                    value={values.email ? `${values.email}` : ''}
+                    camelName={'email'}
+                    onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
+                  />
+                </HStack>
               </VStack>
-
+            </VStack>
+            <VStack space={2} marginTop={10}>
               <HStack space={5} alignItems='center'>
                 <Text fontSize='2xl' fontWeight='500'>
                   Would you like to set up an automated report schedule?
@@ -191,20 +200,23 @@ const ShareReport = ({
               </HStack>
               {automatedReportChecked && (
                 <FormControl>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      How often do you want to share the report?
-                    </Text>
-                  </FormControl.Label>
                   <CustomSelect
                     selectedValue={values.frequency}
+                    label='How often do you want to share the report?'
                     placeholder='Frequency'
+                    camelName='frequency'
                     onValueChange={handleChange('frequency')}
                     setFieldTouched={setFieldTouched}
                     selectOptions={dropdownsState.values.frequency}
                   />
                 </FormControl>
               )}
+            </VStack>
+            <VStack space={2} marginTop={10}>
+              <Button bg='primary' onPress={handleGenerateReport}>
+                TEST - Generate PDF
+              </Button>
+              {filePath && <DocumentViewer filePath={filePath} />}
             </VStack>
           </View>
           <GenerateReportNavButtons navigation={navigation} />

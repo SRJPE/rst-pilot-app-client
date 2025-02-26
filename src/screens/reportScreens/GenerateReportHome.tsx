@@ -17,89 +17,24 @@ import {
 } from '../../redux/reducers/generateReportSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { useEffect, useState } from 'react'
-import CustomSelect from '../../components/Shared/CustomSelect'
-import { Formik } from 'formik'
+import React, { useEffect, useState } from 'react'
 import DocumentViewer from '../../components/Shared/DocumentViewer'
 
 const GenerateReportHome = ({ navigation }: { navigation: any }) => {
-  const dispatch = useDispatch<AppDispatch>()
-  const biWeeklyPassageSummaryStore = useSelector(
-    (state: RootState) => state.generateReports
-  )
-  const [filePath, setFilePath] = useState<string | null>(null)
-
-  const handleGenerateDocument = async (documentData: any) => {
-    const path = await generateWordDocument(documentData)
-    setFilePath(path)
-    dispatch(updateMostRecentReportFilePath(path))
-  }
-
-  useEffect(() => {
-    if (!filePath && biWeeklyPassageSummaryStore.status === 'fulfilled') {
-      // if (!filePath) {
-      handleGenerateDocument(biWeeklyPassageSummaryStore)
-      // }
-    }
-  }, [biWeeklyPassageSummaryStore])
-
-  const handleGenerateReport = () => {
-    dispatch(getBiWeeklyPassageSummary(1)) //change to selected program ID
-  }
-
   return (
-    <Formik
-      // validationSchema={setUpNewProgramSchema}
-      initialValues={{
-        programName: 'Mill Creek RST Monitoring',
-      }}
-      onSubmit={(values) => {
-        // SubmitNewMonitoringProgramValues(values)
-      }}
-    >
-      {({ handleChange, setFieldTouched, values }) => (
-        <>
-          <View
-            flex={1}
-            bg='#fff'
-            p='6%'
-            borderColor='themeGrey'
-            borderWidth='15'
-          >
-            <VStack space={6}>
-              <Heading>Select a standard report to share</Heading>
+    <>
+      <View flex={1} bg='#fff' p='6%' borderColor='themeGrey' borderWidth='15'>
+        <VStack space={6}>
+          <Heading>Select a standard report to generate</Heading>
 
-              <Divider bg='black' />
-              <HStack my='5' space='10' alignSelf='center'>
-                <ReportCard navigation={navigation} />
-              </HStack>
-              <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    What monitoring program are you generating a report for?
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={values.programName}
-                  placeholder='Program name'
-                  onValueChange={handleChange('frequency')}
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={[
-                    { id: 1, definition: 'Mill Creek RST Monitoring' },
-                    { id: 2, definition: 'Deer Creek RST Monitoring' },
-                  ]}
-                />
-              </FormControl>
-              <Button bg='primary' onPress={handleGenerateReport}>
-                Generate PDF
-              </Button>
-              {filePath && <DocumentViewer filePath={filePath} />}
-            </VStack>
-          </View>
-          <GenerateReportNavButtons navigation={navigation} />
-        </>
-      )}
-    </Formik>
+          <Divider bg='black' />
+          <HStack my='5' space='10' alignSelf='left'>
+            <ReportCard navigation={navigation} />
+          </HStack>
+        </VStack>
+      </View>
+      <GenerateReportNavButtons navigation={navigation} />
+    </>
   )
 }
 export default GenerateReportHome
