@@ -72,7 +72,7 @@ export const getBiWeeklyPassageSummary = createAsyncThunk(
   'generateReportsSlice/getBiWeeklyPassageSummary',
   async (programId: string | number) => {
     const response: APIResponseI = await api.get(
-      `reports/biWeeklyPassageSummary/${programId}`
+      `reports/bi-weekly-passage-summary/${programId}`
     )
     return response.data
   }
