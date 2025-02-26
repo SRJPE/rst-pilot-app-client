@@ -361,6 +361,7 @@ const TrapOperations = ({
     <Formik
       validationSchema={trapOperationsSchema}
       enableReinitialize={true}
+      validateOnChange={false}
       initialValues={
         activeTabId
           ? reduxState[activeTabId]
@@ -884,7 +885,7 @@ const TrapOperations = ({
                         </Box> */}
                       </HStack>
 
-                      {/* <ConditionalTrapVisitFields
+                      <ConditionalTrapVisitFields
                         touched={touched}
                         errors={errors}
                         values={values}
@@ -895,7 +896,7 @@ const TrapOperations = ({
                         activePage={activePage}
                         formFields={selectedProgramObj?.programFormFields}
                         setFieldValue={setFieldValue}
-                      /> */}
+                      />
                       <Text
                         color='black'
                         fontSize='xl'

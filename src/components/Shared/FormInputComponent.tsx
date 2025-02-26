@@ -7,7 +7,6 @@ import {
   TextInputFocusEventData,
 } from 'react-native'
 import { FastField } from 'formik'
-import { on } from 'events'
 
 interface FormInputComponentI {
   label: string
@@ -69,7 +68,7 @@ const FastInput = ({
       fontSize='16'
       keyboardType={keyboardType ? keyboardType : 'default'}
       placeholder={placeholder || 'No placeholder entered'}
-      onChangeText={(text: any) => form.setFieldValue(field.name, text)} // Update correctly
+      onChangeText={onChangeText} // Update correctly
       onBlur={onBlur}
       value={field.value}
       _focus={{

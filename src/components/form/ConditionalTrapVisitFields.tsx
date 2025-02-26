@@ -16,7 +16,8 @@ import { MaterialIcons } from '@expo/vector-icons'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../Shared/FormInputComponent'
-import CustomSelect from '../Shared/CustomSelect'
+import FastSelect from '../Shared/FastSelect'
+import YSITurbidity from './YSITurbidity'
 
 interface FieldInterface {
   id: number
@@ -74,6 +75,21 @@ const ConditionalTrapVisitFields = ({
     }
 
     const { fieldName, displayName, unitDefinition, fieldType } = item
+
+    if (fieldName === 'ysiTurbidity') {
+      return (
+        <YSITurbidity
+          {...{
+            touched,
+            errors,
+            values,
+            handleChange,
+            handleBlur,
+            setFieldValue,
+          }}
+        />
+      )
+    }
     if (fieldType === 'input') {
       const unitAbbrev = unitDefinition?.match(/\(([^)]+)\)/)?.[1] || undefined
       return (
@@ -109,7 +125,7 @@ const ConditionalTrapVisitFields = ({
           flexGrow={1}
           mr={8} // Removes right margin from every 3rd item
         >
-          <CustomSelect
+          <FastSelect
             selectedValue={values[fieldName]}
             placeholder={`Select Value for ${displayName}`}
             camelName={fieldName}
@@ -146,107 +162,6 @@ const ConditionalTrapVisitFields = ({
           )}
         </HStack>
       )}
-      <FormControl>
-        <HStack space={4} alignItems='center'>
-          <FormControl.Label>
-            <Text color='black' fontSize='xl'>
-              YSI Turbidity
-            </Text>
-          </FormControl.Label>
-          <Popover
-            placement='bottom left'
-            trigger={triggerProps => {
-              return (
-                <IconButton
-                  {...triggerProps}
-                  icon={
-                    <Icon
-                      as={MaterialIcons}
-                      color='black'
-                      name='info-outline'
-                      size='lg'
-                    />
-                  }
-                ></IconButton>
-              )
-            }}
-          >
-            <Popover.Content accessibilityLabel='RPM Info' w='600' mr='10'>
-              <Popover.Arrow />
-              <Popover.Header>
-                Take up to three measurements of cone rotations. The averages of
-                the entered values will be saved to the database.
-              </Popover.Header>
-            </Popover.Content>
-          </Popover>
-        </HStack>
-        <HStack space={8} flexWrap={'wrap'}>
-          <Box
-            flexBasis='20%' // Ensures 3 items per row (adjust for spacing)
-            minWidth='20%' // Prevents shrinking too much
-            maxWidth='20%' // Prevents growing beyond this size
-          >
-            <FormInputComponent
-              label={'Measure 1'}
-              placeholder='0'
-              touched={touched}
-              errors={errors}
-              value={values.turbidity1 ? `${values.turbidity1}` : ''}
-              camelName={'turbidity1'}
-              onChangeText={newValue => {
-                setFieldValue('turbidity1', newValue)
-              }}
-              onBlur={handleBlur('turbidity1')}
-            />
-          </Box>
-          <Box
-            flexBasis='20%' // Ensures 3 items per row (adjust for spacing)
-            minWidth='20%' // Prevents shrinking too much
-            maxWidth='20%' // Prevents growing beyond this size
-          >
-            <FormInputComponent
-              label={'Measure 2'}
-              placeholder='0'
-              touched={touched}
-              errors={errors}
-              value={values.turbidity2 ? `${values.turbidity2}` : ''}
-              camelName={'turbidity2'}
-              onChangeText={newValue => {
-                setFieldValue('turbidity2', newValue)
-              }}
-              onBlur={handleBlur('turbidity2')}
-            />
-          </Box>
-          <Box
-            flexBasis='20%' // Ensures 3 items per row (adjust for spacing)
-            minWidth='20%' // Prevents shrinking too much
-            maxWidth='20%' // Prevents growing beyond this size
-          >
-            <FormInputComponent
-              label={'Measure 3'}
-              placeholder='0'
-              touched={touched}
-              errors={errors}
-              value={values.turbidity3 ? `${values.turbidity3}` : ''}
-              camelName={'turbidity3'}
-              onChangeText={handleChange('turbidity3')}
-              onBlur={handleBlur('turbidity3')}
-            />
-          </Box>
-          <Box
-            flexBasis='20%' // Ensures 3 items per row (adjust for spacing)
-            minWidth='20%' // Prevents shrinking too much
-            maxWidth='20%' // Prevents growing beyond this size
-          >
-            <FormControl.Label>
-              <Text fontSize='16'>Mean FNU</Text>
-            </FormControl.Label>
-            <Text color='black' fontSize='2xl'>
-              {calcMeanFNU}
-            </Text>
-          </Box>
-        </HStack>
-      </FormControl>
     </>
   )
 }
