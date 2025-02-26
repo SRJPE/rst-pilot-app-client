@@ -1,24 +1,15 @@
 import React from 'react'
-import { Badge, IconButton, ScrollView, Text, VStack } from 'native-base'
+import { Badge, HStack, IconButton, ScrollView, Text } from 'native-base'
 import { Ionicons } from '@expo/vector-icons'
-import { capitalize } from 'lodash'
 
-interface markBadgeI {
-  markType: string
-  markColor: string
-  markPosition?: string
-  markCode?: string
-  bodyPart?: string
-}
-
-const TagBadgeList = ({
+const GeneticSampleBadgeList = ({
   badgeListContent,
-  setAppliedMarks,
-  appliedMarks,
+  setGeneticSamples,
+  geneticSamples,
 }: {
   badgeListContent: any
-  setAppliedMarks: any
-  appliedMarks: any
+  setGeneticSamples: any
+  geneticSamples: any
 }) => {
   const handleRemoveBadge = (index: number) => {
     //make copy of badge list
@@ -26,8 +17,8 @@ const TagBadgeList = ({
     //find selected badge in the list and remove it.
     badgeListCopy.splice(index, 1)
 
-    setAppliedMarks({
-      ...appliedMarks,
+    setGeneticSamples({
+      ...geneticSamples,
       value: badgeListCopy.splice(index, 1),
     })
   }
@@ -35,10 +26,10 @@ const TagBadgeList = ({
   return (
     <>
       <ScrollView maxHeight='220'>
-        <VStack space={5}>
+        <HStack space={5} flexWrap={'wrap'}>
           {badgeListContent.length > 0 &&
-            badgeListContent.map((badge: markBadgeI, index: number) => {
-              const { markType, markCode } = badge
+            badgeListContent.map((badge: any, index: number) => {
+              const { sampleId } = badge
               //TO-DO: incorporate the abbreviation lookup table
               return (
                 <Badge
@@ -46,7 +37,8 @@ const TagBadgeList = ({
                   bg='primary'
                   shadow='3'
                   borderRadius='5'
-                  w='70%'
+                  w='40%'
+                  marginBottom={5}
                   endIcon={
                     <IconButton
                       onPress={() => {
@@ -62,15 +54,15 @@ const TagBadgeList = ({
                   }
                 >
                   <Text color='white' fontWeight='500' fontSize='md'>
-                    {`${markType.replace(/\w+/g, capitalize)} - ${markCode}`}
+                    {sampleId}
                   </Text>
                 </Badge>
               )
             })}
-        </VStack>
+        </HStack>
       </ScrollView>
     </>
   )
 }
 
-export default TagBadgeList
+export default GeneticSampleBadgeList
