@@ -1,24 +1,7 @@
-import {
-  Button,
-  Divider,
-  FormControl,
-  Heading,
-  HStack,
-  Text,
-  View,
-  VStack,
-} from 'native-base'
+import { Divider, Heading, HStack, View, VStack } from 'native-base'
 import ReportCard from '../../components/generateReport/ReportCard'
 import GenerateReportNavButtons from '../../components/generateReport/GenerateReportNavButtons'
-import { generateWordDocument } from '../../components/generateReport/ReportGenerator'
-import {
-  getBiWeeklyPassageSummary,
-  updateMostRecentReportFilePath,
-} from '../../redux/reducers/generateReportSlice'
-import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
-import React, { useEffect, useState } from 'react'
-import DocumentViewer from '../../components/Shared/DocumentViewer'
+import React from 'react'
 
 const GenerateReportHome = ({ navigation }: { navigation: any }) => {
   return (

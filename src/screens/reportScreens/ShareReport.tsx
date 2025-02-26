@@ -214,7 +214,7 @@ const ShareReport = ({
             </VStack>
             <VStack space={2} marginTop={10}>
               <Button bg='primary' onPress={handleGenerateReport}>
-                TEST - Generate PDF
+                TEST - Generate Report
               </Button>
               {filePath && <DocumentViewer filePath={filePath} />}
             </VStack>
