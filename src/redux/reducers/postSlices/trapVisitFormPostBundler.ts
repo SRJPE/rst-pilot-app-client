@@ -262,14 +262,19 @@ export const postQCSubmissions = createAsyncThunk(
 
         const catchPromises = qcCatchRawSubmissions.map(
           (catchSubmission: any) => {
-            let id = catchSubmission.createdCatchRawResponse.id
-            let payload = { ...catchSubmission }
-            delete payload.createdCatchRawResponse.id
-            delete payload.stagedForSubmission
+            return Promise.resolve()
+              .then(() => {
+                let id = catchSubmission.createdCatchRawResponse.id
+                let payload = { ...catchSubmission }
+                delete payload.createdCatchRawResponse.id
+                delete payload.stagedForSubmission
 
-            return api.put(`catch-raw/${id}`, {
-              ...payload,
-            })
+                return api.put(`catch-raw/${id}`, payload)
+              })
+              .catch(error => {
+                console.log('error in catchPromises: ', error)
+                return Promise.reject(error) // Ensures it can be handled properly in Promise.allSettled
+              })
           }
         )
 
@@ -790,6 +795,8 @@ export const trapVisitPostBundler = createSlice({
       else {
         let qcCatchRaw: any = state.qcCatchRawSubmissions[qcCatchRawIdx]
 
+        qcCatchRaw.createdCatchRawResponse.qcCompleted = true
+        qcCatchRaw.createdCatchRawResponse.qcTime = new Date().toISOString()
         qcCatchRaw.createdCatchRawResponse.qcCompletedBy = userId
 
         for (const submission of submissions) {
