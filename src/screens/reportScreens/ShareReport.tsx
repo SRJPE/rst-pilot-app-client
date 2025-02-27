@@ -23,10 +23,14 @@ import EditAccountInfoModalContent from '../../components/generateReport/ReportP
 import {
   postBiWeeklyPassageSummaryEmail,
   updateMostRecentReportFilePath,
-  getBiWeeklyPassageSummary,
+  sendBiWeeklyPassageSummary,
 } from '../../redux/reducers/generateReportSlice'
 import { generateWordDocument } from '../../components/generateReport/ReportGenerator'
 import DocumentViewer from '../../components/Shared/DocumentViewer'
+import { shareReportSchema } from '../../utils/helpers/yupValidations'
+import yup from 'yup'
+
+type ShareReportProps = yup.InferType<typeof shareReportSchema>
 
 const ShareReport = ({
   navigation,
@@ -58,9 +62,11 @@ const ShareReport = ({
   // this happens on "generate pdf" button press
   // retrieves data back from db
   // updates store with all of the information needed to generate the report
-  const handleGenerateReport = () => {
+  const handleGenerateReport = (
+    values: yup.InferType<typeof shareReportSchema>
+  ) => {
     setFilePath(null)
-    dispatch(getBiWeeklyPassageSummary(1)) //change to selected program ID
+    dispatch(sendBiWeeklyPassageSummary(values)) //change to selected program ID
   }
 
   const generateReportsStore = useSelector(
@@ -102,15 +108,18 @@ const ShareReport = ({
 
   return (
     <Formik
-      // validationSchema={setUpNewProgramSchema}
+      validationSchema={shareReportSchema}
       initialValues={{
         name: '',
         email: '',
         frequency: '',
-        programName: '',
+        // programName: '',
+        programId: '',
       }}
       onSubmit={values => {
         // handleSubmitReport(values)
+        handleGenerateReport(values as ShareReportProps)
+        console.log('🚀 ~ ShareReport.tsx:115 ~ values:', values)
       }}
     >
       {({
@@ -122,6 +131,7 @@ const ShareReport = ({
         touched,
         errors,
         values,
+        isValid,
       }) => (
         <>
           <View
@@ -137,15 +147,19 @@ const ShareReport = ({
               <VStack space={2}>
                 <FormControl>
                   <CustomSelect
-                    selectedValue={values.programName}
-                    placeholder='Program name'
+                    // selectedValue={values.programName}
+                    selectedValue={values.programId}
+                    placeholder='Select a program'
                     label='What monitoring program are you generating a report for?'
-                    camelName='programName'
-                    onValueChange={handleChange('programName')}
+                    camelName='programId'
+                    onValueChange={
+                      handleChange('programId')
+                      // setFieldValue('programId', 1)
+                    }
                     setFieldTouched={setFieldTouched}
                     selectOptions={[
-                      { id: 1, definition: 'Mill Creek RST Monitoring' },
-                      { id: 2, definition: 'Deer Creek RST Monitoring' },
+                      { value: '1', label: 'Mill Creek RST Monitoring' },
+                      { value: '2', label: 'Deer Creek RST Monitoring' },
                     ]}
                   />
                 </FormControl>
@@ -213,13 +227,19 @@ const ShareReport = ({
               )}
             </VStack>
             <VStack space={2} marginTop={10}>
-              <Button bg='primary' onPress={handleGenerateReport}>
+              <Button
+                bg='primary' //onPress={handleGenerateReport}
+              >
                 TEST - Generate Report
               </Button>
               {filePath && <DocumentViewer filePath={filePath} />}
             </VStack>
           </View>
-          <GenerateReportNavButtons navigation={navigation} />
+          <GenerateReportNavButtons
+            navigation={navigation}
+            isDisabled={!isValid}
+            handleSubmit={handleSubmit}
+          />
           {/* --------- Modals --------- */}
           <CustomModal
             isOpen={reportPreviewModalOpen}

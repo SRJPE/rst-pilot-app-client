@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import api from '../../api/axiosConfig'
 import { RootState } from '../store'
 import { cloneDeep } from 'lodash'
+import { shareReportSchema } from '../../utils/helpers/yupValidations'
+import yup from 'yup'
 
 const uninitializedStatus = 'uninitialized'
 const pendingStatus = 'pending'
@@ -70,9 +72,21 @@ const initialState: any = {
 // Async actions API calls
 export const getBiWeeklyPassageSummary = createAsyncThunk(
   'generateReportsSlice/getBiWeeklyPassageSummary',
-  async (programId: string | number) => {
+  async (values: yup.InferType<typeof shareReportSchema>) => {
+    const programId = values.programId
     const response: APIResponseI = await api.get(
       `reports/bi-weekly-passage-summary/${programId}`
+    )
+    return response.data
+  }
+)
+export const sendBiWeeklyPassageSummary = createAsyncThunk(
+  'generateReportsSlice/getBiWeeklyPassageSummary',
+  async (values: yup.InferType<typeof shareReportSchema>) => {
+    const programId = values.programId
+    const response: APIResponseI = await api.post(
+      `reports/bi-weekly-passage-summary/${programId}`,
+      values
     )
     return response.data
   }

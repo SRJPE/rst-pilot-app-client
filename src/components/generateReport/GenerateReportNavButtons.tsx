@@ -1,10 +1,18 @@
 import { Box, HStack, Text, Button } from 'native-base'
-
+import React from 'react'
 import { useRoute } from '@react-navigation/native'
 import { Icon } from 'native-base'
 import { Ionicons } from '@expo/vector-icons'
 
-const GenerateReportNavButtons = ({ navigation }: { navigation?: any }) => {
+const GenerateReportNavButtons = ({
+  navigation,
+  isDisabled,
+  handleSubmit,
+}: {
+  navigation?: any
+  isDisabled: boolean
+  handleSubmit?: (e?: React.FormEvent<HTMLFormElement>) => void
+}) => {
   const activePage = useRoute().name
 
   const handleRightButton = async () => {
@@ -14,7 +22,9 @@ const GenerateReportNavButtons = ({ navigation }: { navigation?: any }) => {
           screen: 'Share Report',
         })
         break
-
+      case 'Share Report':
+        handleSubmit && handleSubmit()
+        break
       default:
         break
     }
@@ -97,7 +107,8 @@ const GenerateReportNavButtons = ({ navigation }: { navigation?: any }) => {
             rounded='xs'
             borderRadius='5'
             shadow='5'
-            isDisabled={disableRightButton()}
+            // isDisabled={disableRightButton()}
+            isDisabled={isDisabled}
             onPress={() => handleRightButton()}
           >
             <Text fontSize='xl' fontWeight='bold' color='white'>

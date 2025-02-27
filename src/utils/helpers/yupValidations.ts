@@ -442,6 +442,17 @@ export const setUpNewProgramSchema = yup.object().shape({
     }),
 })
 
+export const shareReportSchema = yup.object().shape({
+  name: yup.string().required('Name required'),
+  email: yup
+    .string()
+    .required('Email required')
+    .email('Email format is not valid'),
+  frequency: yup.string().optional(),
+  programId: yup.string().required('Program name required'),
+  // programId: yup.number().nullable().required('Program ID required'),
+})
+
 export const groupTrapSitesSchema = yup.object().shape({
   numberOfTrapSites: yup
     .number()

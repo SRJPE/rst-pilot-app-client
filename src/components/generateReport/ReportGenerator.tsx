@@ -32,27 +32,7 @@ export const generateWordDocument = async (
     environmentalBiWeekly,
     releaseBiWeekly,
   } = BiWeeklyPassageSummaryData.values
-  console.log('🚀 ~ file: ReportGenerator.tsx:35 ~ program:', program)
-  console.log(
-    '🚀 ~ file: ReportGenerator.tsx:35 ~ personnelLead:',
-    personnelLead
-  )
-  console.log(
-    '🚀 ~ file: ReportGenerator.tsx:35 ~ fundingAgency:',
-    fundingAgency
-  )
-  console.log(
-    '🚀 ~ file: ReportGenerator.tsx:35 ~ releaseBiWeekly:',
-    releaseBiWeekly
-  )
-  console.log(
-    '🚀 ~ file: ReportGenerator.tsx:35 ~ environmentalBiWeekly:',
-    environmentalBiWeekly
-  )
-  console.log(
-    '🚀 ~ file: ReportGenerator.tsx:35 ~ catchBiWeekly:',
-    catchBiWeekly
-  )
+
   const { definition: programLeadAgency } = fundingAgency
   const { streamName } = program
   const {
