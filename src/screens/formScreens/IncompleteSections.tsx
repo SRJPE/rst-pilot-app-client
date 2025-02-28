@@ -563,7 +563,7 @@ const IncompleteSections = ({
             }),
             geneticSamplingData: filterAndPrepareData(
               fishValue?.geneticSamples || [],
-              true
+              false
             ),
             appliedMarks: filterAndPrepareData(
               fishValue?.appliedMarks || [],
@@ -573,6 +573,8 @@ const IncompleteSections = ({
         })
       }
     })
+
+    console.log('crs', catchRawSubmissions)
 
     if (catchRawSubmissions.length) {
       const catchRawPlusCountCombined = combinePlusCounts(catchRawSubmissions)
