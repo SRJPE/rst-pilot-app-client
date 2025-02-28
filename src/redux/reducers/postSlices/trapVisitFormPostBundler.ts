@@ -300,6 +300,13 @@ export const postQCSubmissions = createAsyncThunk(
           }
         }
 
+        showSlideAlert(
+          thunkAPI.dispatch,
+          `${trapVisitResponse.length} trap visit QC and ${catchRawResponse.length} catch QC submissions saved`,
+          'success',
+          5000
+        )
+
         return {
           trapVisitResponse,
           catchRawResponse,

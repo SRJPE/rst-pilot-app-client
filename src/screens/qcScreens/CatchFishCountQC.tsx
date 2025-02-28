@@ -122,11 +122,6 @@ function CatchFishCountQC({
       }
     )
     setProgramName(currentProgram.programName)
-    console.log('previousCatchRawSubmissions QC', previousCatchRawSubmissions)
-    const test = previousCatchRawSubmissions.filter((catchRaw: any) => {
-      return catchRaw.createdCatchRawResponse.id === 1148
-    })
-    console.log('test', test)
     const programCatchRaw = previousCatchRawSubmissions.filter(
       (catchRaw: any) => {
         return catchRaw.createdCatchRawResponse.programId === programId

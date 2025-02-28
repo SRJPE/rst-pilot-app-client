@@ -10,7 +10,10 @@ import {
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { postQCSubmissions } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import {
+  postQCSubmissions,
+  catchRawQCSubmission,
+} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
 import { connect } from 'react-redux'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -55,35 +58,6 @@ function CatchFishCountByDateQC({
   const [tableData, setTableData] = useState<any[]>([])
   const [selectedDate, setSelectedDate] = useState(new Date() as any)
 
-  const identifierToName = {
-    taxonCode: 'Species',
-    captureRunClass: 'Run',
-    lifeStage: 'Life Stage',
-    forkLength: 'Fork Length',
-    markType: 'Mark Type',
-    markColor: 'Mark Color',
-    markPos: 'Mark Position',
-    dead: 'Mortality',
-    adiposeClipped: 'Adipose Clipped',
-    weight: 'Weight',
-    numFishCaught: 'Plus Count',
-    qcComments: 'Comments',
-  }
-
-  const identifierToDataValueFromRecord = {
-    taxonCode: 'createdCatchRawResponse.taxonCode',
-    captureRunClass: 'createdCatchRawResponse.captureRunClass',
-    lifeStage: 'createdCatchRawResponse.lifeStage',
-    forkLength: 'createdCatchRawResponse.forkLength',
-    markType: 'createdExistingMarksResponse[0].markTypeId',
-    markColor: 'createdExistingMarksResponse[0].markColorId',
-    markPos: 'createdExistingMarksResponse[0].markPositionId',
-    dead: 'createdCatchRawResponse.dead',
-    adiposeClipped: 'createdCatchRawResponse.adiposeClipped',
-    numFishCaught: 'createdCatchRawResponse.numFishCaught',
-    weight: 'createdCatchRawResponse.weight',
-  }
-
   useEffect(() => {
     const programId = route.params.programId
     const currentProgram = userCredentialsStore.userPrograms.find(
@@ -119,6 +93,38 @@ function CatchFishCountByDateQC({
   const onDateChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
     setSelectedDate(currentDate)
+  }
+
+  const handleConfirmQC = async () => {
+    // get all QC submissions that have been individually confirmed
+    const previouslySubmittedQCIDs = new Set(
+      qcCatchRawSubmissions.map((obj: any) => obj.createdCatchRawResponse.id)
+    )
+
+    // get all records that appear in table, that have not been explicitly confirmed
+    const unconfirmedData = tableData.filter(
+      obj => !previouslySubmittedQCIDs.has(obj.createdCatchRawResponse.id)
+    )
+
+    // submit all unconfirmed data as QC'd
+    await Promise.all(
+      unconfirmedData.map(async (obj: any) => {
+        await dispatch(
+          catchRawQCSubmission({
+            catchRawId: obj.createdCatchRawResponse.id,
+            userId: userCredentialsStore.id,
+            submissions: [
+              {
+                isFullObject: true,
+                value: obj.createdCatchRawResponse,
+              },
+            ],
+          })
+        )
+      })
+    )
+
+    dispatch(postQCSubmissions())
   }
 
   return (
@@ -181,9 +187,7 @@ function CatchFishCountByDateQC({
                   height='20'
                   shadow='5'
                   bg='primary'
-                  onPress={() => {
-                    dispatch(postQCSubmissions())
-                  }}
+                  onPress={handleConfirmQC}
                 >
                   <Text fontSize='xl' color='white' fontWeight={'bold'}>
                     Submit QC
