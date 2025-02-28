@@ -504,7 +504,7 @@ function EfficiencyQC({
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Save
+                Submit QC
               </Text>
             </Button>
           </HStack>

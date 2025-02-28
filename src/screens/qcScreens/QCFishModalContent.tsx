@@ -87,7 +87,7 @@ const QCFishModalContent = ({
   )
   const [forkLength, setForkLength] = useState<FormValueI>(
     createFormValueDefault({
-      value: createdCatchRawResponse.forkLength.toString(),
+      value: createdCatchRawResponse?.forkLength?.toString() || null,
       touched: true,
       required: false,
     })
@@ -99,13 +99,7 @@ const QCFishModalContent = ({
       required: false,
     })
   )
-  const [fishConditions, setFishConditions] = useState<FormValueI>(
-    createFormValueDefault({
-      value: createdCatchRawResponse.fishConditions,
-      touched: true,
-      required: false,
-    })
-  )
+
   const [weight, setWeight] = useState<FormValueI>(
     createFormValueDefault({
       value: createdCatchRawResponse.weight,
@@ -127,13 +121,7 @@ const QCFishModalContent = ({
       required: false,
     })
   )
-  const [existingMarks, setExistingMarks] = useState<FormValueI>(
-    createFormValueDefault({
-      value: createdCatchRawResponse.existingMarks,
-      touched: true,
-      required: false,
-    })
-  )
+
   const [dead, setDead] = useState<FormValueI>(
     createFormValueDefault({
       value: createdCatchRawResponse.dead,
@@ -141,51 +129,6 @@ const QCFishModalContent = ({
       required: false,
     })
   )
-
-  const [plusCountMethod, setPlusCountMethod] = useState<FormValueI>(
-    createFormValueDefault({
-      value: createdCatchRawResponse.plusCountMethod,
-      touched: true,
-      required: false,
-    })
-  )
-  const [comments, setComments] = useState<FormValueI>(
-    createFormValueDefault({
-      value: createdCatchRawResponse.comments?.toString(),
-      touched: true,
-      required: false,
-    })
-  )
-
-  const renderForkLengthWarning = (
-    forkLengthValue: number,
-    lifeStage: string
-  ) => {
-    //for juvenile max is 100 for all else use 1000
-    if (lifeStage === 'juvenile') {
-      return (
-        forkLengthValue > QARanges.forkLength.maxJuvenile && (
-          <RenderWarningMessage />
-        )
-      )
-    } else {
-      return (
-        forkLengthValue > QARanges.forkLength.maxAdult && (
-          <RenderWarningMessage />
-        )
-      )
-    }
-  }
-  const renderWeightWarning = (weightValue: number, lifeStage: string) => {
-    //for juvenile max is 50 for all else use 400
-    if (lifeStage === 'juvenile') {
-      return (
-        weightValue > QARanges.weight.maxJuvenile && <RenderWarningMessage />
-      )
-    } else {
-      return weightValue > QARanges.weight.maxAdult && <RenderWarningMessage />
-    }
-  }
 
   const handleSave = () => {
     try {
@@ -592,7 +535,7 @@ const QCFishModalContent = ({
             onPress={handleSave}
           >
             <Text fontSize='lg' fontWeight='bold' color='white'>
-              Save
+              Confirm
             </Text>
           </Button>
         </HStack>

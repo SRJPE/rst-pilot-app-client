@@ -31,7 +31,7 @@ import {
 } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 import moment from 'moment'
 import { DataTable } from 'react-native-paper'
-import { get, startCase } from 'lodash'
+import { find, get, startCase } from 'lodash'
 
 interface NestedModalDataI {
   catchRawId: number
@@ -620,6 +620,8 @@ function CatchFishCountQC({
             <CustomSelect
               selectedValue={selectedSpecies}
               placeholder={'Species'}
+              label='Species'
+              camelName='species'
               style={{ width: '100%' }}
               onValueChange={(value: string) => {
                 setSelectedSpecies(value)
@@ -679,7 +681,7 @@ function CatchFishCountQC({
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Save
+                Submit QC
               </Text>
             </Button>
           </HStack>
