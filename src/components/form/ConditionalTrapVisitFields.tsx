@@ -44,6 +44,8 @@ const ConditionalTrapVisitFields = ({
   activePage,
   formFields,
   setFieldValue,
+  activeTabId,
+  trapOperationsStore,
 }: {
   touched: any
   errors: any
@@ -55,6 +57,8 @@ const ConditionalTrapVisitFields = ({
   activePage: string
   formFields: Array<FieldInterface>
   setFieldValue: any
+  activeTabId: string | null
+  trapOperationsStore?: any
 }) => {
   const [sortedFormFields, setSortedFormFields] = useState<
     Array<FieldInterface>
@@ -76,6 +80,48 @@ const ConditionalTrapVisitFields = ({
 
     const { fieldName, displayName, unitDefinition, fieldType } = item
 
+    if (fieldName === 'conditionCode') {
+      return (
+        <>
+          <Box
+            key={index} // Always add a key when mapping
+            flexBasis='45%' // Ensures 3 items per row (adjust for spacing)
+            minWidth='45%' // Prevents shrinking too much
+            maxWidth='45%' // Prevents growing beyond this size>
+            flexGrow={1}
+            mr={8} // Removes right margin from every 3rd item
+          >
+            <FastSelect
+              selectedValue={values[fieldName]}
+              placeholder={`Select Value for ${displayName}`}
+              camelName={fieldName}
+              label={displayName}
+              errors={errors}
+              touched={touched}
+              onValueChange={handleChange(fieldName)}
+              setFieldTouched={() => setFieldTouched(fieldName)}
+              selectOptions={dropdownValues[fieldName]}
+              tooltip={
+                activeTabId ? (
+                  <>
+                    <Text fontSize='md'>
+                      Selected Vegetation Code Value:{' '}
+                      {
+                        trapOperationsStore?.[activeTabId]?.values
+                          ?.vegetationCode
+                      }
+                    </Text>
+                  </>
+                ) : (
+                  false
+                )
+              }
+            />
+          </Box>
+        </>
+      )
+    }
+
     if (fieldName === 'ysiTurbidity') {
       return (
         <YSITurbidity
@@ -95,9 +141,9 @@ const ConditionalTrapVisitFields = ({
       return (
         <Box
           key={index} // Always add a key when mapping
-          flexBasis='25%' // Ensures 3 items per row (adjust for spacing)
-          minWidth='25%' // Prevents shrinking too much
-          maxWidth='25%' // Prevents growing beyond this size>
+          flexBasis='27%' // Ensures 3 items per row (adjust for spacing)
+          minWidth='27%' // Prevents shrinking too much
+          maxWidth='27%' // Prevents growing beyond this size>
           mr={8} // Removes right margin from every 3rd item
         >
           <FormInputComponent
@@ -142,16 +188,6 @@ const ConditionalTrapVisitFields = ({
       return undefined
     }
   }
-
-  const calcMeanFNU = useMemo(() => {
-    if (values.turbidity1 && values.turbidity2 && values.turbidity3) {
-      const sum =
-        Number(values.turbidity1) +
-        Number(values.turbidity2) +
-        Number(values.turbidity3)
-      return (sum / 3).toFixed(2)
-    } else return undefined
-  }, [values.turbidity1, values.turbidity2, values.turbidity3])
 
   return (
     <>

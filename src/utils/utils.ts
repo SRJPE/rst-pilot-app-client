@@ -325,6 +325,7 @@ export const navigateFlowRightButton = ({
     case 'Visit Setup':
       return 'Trap Operations'
     case 'Trap Operations':
+      console.log('vaoues', values)
       if (values?.trapStatus === 'trap not functioning') {
         return 'Non Functional Trap'
       } else if (
@@ -335,6 +336,8 @@ export const navigateFlowRightButton = ({
         return 'High Flows'
       } else if (warnings?.warningResultTemp) {
         return 'High Temperatures'
+      } else if (values.gearStatus === 'S') {
+        return 'Trap Post-Processing'
       } else {
         return 'Fish Processing'
       }
@@ -353,11 +356,7 @@ export const navigateFlowRightButton = ({
 
       if (values?.fishProcessedResult === 'no fish caught') {
         return 'No Fish Caught'
-      } else if (
-        values?.fishProcessedResult ===
-          'no catch data, fish left in live box' ||
-        values?.fishProcessedResult === 'no catch data, fish released'
-      ) {
+      } else if (values?.fishProcessedResult.includes('no catch data')) {
         return 'Trap Post-Processing'
       } else {
         return 'Fish Input'
@@ -420,19 +419,14 @@ export const navigateFlowLeftButton = (
     case 'Started Trapping':
       return 'Trap Operations'
     case 'Trap Post-Processing':
+      console.log('🚀 TRAP POST PROCESSING CASE HIT', values)
       if (values?.fishProcessedResult === 'no fish caught') {
         return 'Fish Processing'
-      } else if (
-        values?.fishProcessedResult ===
-          'no catch data, fish left in live box' ||
-        values?.fishProcessedResult === 'no catch data, fish released'
-      ) {
+      } else if (values?.fishProcessedResult.includes('no catch data')) {
         return 'Fish Processing'
       } else {
         return 'Fish Input'
       }
-      break
-      return 'Fish Input'
     case 'Fish Holding':
       return 'Trap Post-Processing'
     case 'Incomplete Sections':

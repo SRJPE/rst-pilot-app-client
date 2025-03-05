@@ -45,19 +45,21 @@ const FastSelect = ({
   placeholder,
   selectOptions,
   dataType,
+  onValueChange,
 }: {
   field: any
   form: any
   placeholder: any
   selectOptions: any
   dataType: any
+  onValueChange: any
 }) => {
   return (
     <Select
       height={50}
       fontSize={16}
       selectedValue={field.value}
-      onValueChange={itemValue => form.setFieldValue(field.name, itemValue)}
+      onValueChange={onValueChange}
       placeholder='Choose an option'
       _selectedItem={{
         bg: 'teal.600',
@@ -169,13 +171,12 @@ const CustomSelect: React.FC<CustomSelectI> = ({
             >
               <Popover.Content
                 ml='10'
-                accessibilityLabel='Life Stage Info'
-                w='720'
-                h='600'
+                accessibilityLabel='tooltip'
+                // w='720'
+                // h='600'
               >
                 <Popover.Arrow />
-                <Popover.CloseButton />
-                <Popover.Body p={0}>{tooltip}</Popover.Body>
+                <Popover.Body padding={5}>{tooltip}</Popover.Body>
               </Popover.Content>
             </Popover>
           )}
@@ -186,6 +187,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
           placeholder={placeholder}
           selectOptions={selectOptions}
           dataType={dataType}
+          onValueChange={onValueChange}
         />
         {showError && (
           <Box mt={2} h={25}>

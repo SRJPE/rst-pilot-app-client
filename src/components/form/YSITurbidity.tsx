@@ -64,18 +64,15 @@ const YSITurbidity = ({
         >
           <Popover.Content accessibilityLabel='RPM Info' w='600' mr='10'>
             <Popover.Arrow />
-            <Popover.Header>
-              Take up to three measurements of cone rotations. The averages of
-              the entered values will be saved to the database.
-            </Popover.Header>
+            <Popover.Header>Take reading every 30 seconds</Popover.Header>
           </Popover.Content>
         </Popover>
       </HStack>
       <HStack space={8} flexWrap={'wrap'}>
         <Box
-          flexBasis='20%' // Ensures 3 items per row (adjust for spacing)
-          minWidth='20%' // Prevents shrinking too much
-          maxWidth='20%' // Prevents growing beyond this size
+          flexBasis='21%' // Ensures 3 items per row (adjust for spacing)
+          minWidth='21%' // Prevents shrinking too much
+          maxWidth='21%' // Prevents growing beyond this size
         >
           <FormInputComponent
             label={'Measure 1'}
@@ -91,9 +88,9 @@ const YSITurbidity = ({
           />
         </Box>
         <Box
-          flexBasis='20%' // Ensures 3 items per row (adjust for spacing)
-          minWidth='20%' // Prevents shrinking too much
-          maxWidth='20%' // Prevents growing beyond this size
+          flexBasis='21%' // Ensures 3 items per row (adjust for spacing)
+          minWidth='21%' // Prevents shrinking too much
+          maxWidth='21%' // Prevents growing beyond this size
         >
           <FormInputComponent
             label={'Measure 2'}
@@ -109,9 +106,9 @@ const YSITurbidity = ({
           />
         </Box>
         <Box
-          flexBasis='20%' // Ensures 3 items per row (adjust for spacing)
-          minWidth='20%' // Prevents shrinking too much
-          maxWidth='20%' // Prevents growing beyond this size
+          flexBasis='21%' // Ensures 3 items per row (adjust for spacing)
+          minWidth='21%' // Prevents shrinking too much
+          maxWidth='21%' // Prevents growing beyond this size
         >
           <FormInputComponent
             label={'Measure 3'}

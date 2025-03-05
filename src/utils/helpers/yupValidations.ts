@@ -14,6 +14,76 @@ export const trapVisitSchema = yup.object().shape({
   trapName: yup.array().min(1, 'At least 1 trap name is required').required(),
 })
 
+export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
+  const sectionFields = fields.filter(
+    (field: any) => field.formSection === 'Trap Operations'
+  )
+  // always required
+  let schema: { [key: string]: any } = {
+    trapStatus: yup.string().required('Trap status required'),
+    reasonNotFunc: yup.string().when('trapStatus', {
+      is: (val: string) =>
+        ['trap functioning but not normally', 'trap not functioning'].includes(
+          val
+        ),
+      then: yup.string().required('Reason for trap malfunction required'),
+    }),
+    flowMeasure: yup
+      .number()
+      .nullable()
+      .required('Flow measure is required')
+      .typeError('Value must be a number'),
+    waterTemperature: yup
+      .number()
+      .nullable()
+      .typeError('Value must be a number')
+      .required('Water temperature is required'),
+  }
+
+  sectionFields.forEach(field => {
+    let validator = yup.string() as any // Default to string validation
+
+    if (field.fieldName === 'ysiTurbidity') {
+      validator = yup.number().typeError('Must be a number')
+      validator = validator.required(`Measurement required`)
+      schema.turbidity1 = validator
+      schema.turbidity2 = validator
+      schema.turbidity3 = validator
+      return
+    }
+
+    if (field.fieldType === 'email') {
+      validator = yup.string().email('Invalid email format')
+    } else if (field.fieldType === 'input') {
+      validator = yup.number().typeError('Must be a number')
+    } else if (field.fieldType === 'boolean') {
+      validator = yup.boolean()
+    }
+
+    if (field.required) {
+      validator = validator.required(`${field.displayName} is required`)
+    }
+
+    if (field.minLength) {
+      validator = validator.min(
+        field.minLength,
+        `${field.displayName} must be at least ${field.minLength} characters`
+      )
+    }
+
+    if (field.maxLength) {
+      validator = validator.max(
+        field.maxLength,
+        `${field.displayName} must be at most ${field.maxLength} characters`
+      )
+    }
+
+    schema[field.fieldName] = validator
+  })
+
+  return yup.object().shape(schema)
+}
+
 export const trapOperationsSchema = yup.object().shape({
   trapStatus: yup.string().required('Trap status required'),
   reasonNotFunc: yup.string().when('trapStatus', {
@@ -108,11 +178,7 @@ export const trapPostProcessingSchema = yup.object().shape({
 export const fishProcessingSchema = yup.object().shape({
   fishProcessedResult: yup.string().required('Fish Processed status required'),
   reasonForNotProcessing: yup.string().when('fishProcessedResult', {
-    is: (val: string) =>
-      [
-        'no catch data, fish left in live box',
-        'no catch data, fish released',
-      ].includes(val),
+    is: (val: string) => val.includes('no catch data'),
     then: schema => schema.required('Reason for not processing required'),
     otherwise: schema => schema.optional(),
   }),

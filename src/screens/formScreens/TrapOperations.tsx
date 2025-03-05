@@ -14,7 +14,6 @@ import {
   Popover,
   Avatar,
   Pressable,
-  Radio,
   ScrollView,
   KeyboardAvoidingView,
   Switch,
@@ -22,7 +21,10 @@ import {
   Button,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
-import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
+import {
+  trapOperationsSchema,
+  generateDynamicTrapOpsSchema,
+} from '../../utils/helpers/yupValidations'
 import {
   markStepCompleted,
   updateActiveStep,
@@ -40,19 +42,16 @@ import {
   navigateFlowRightButton,
   navigateFlowLeftButton,
 } from '../../utils/utils'
-import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import OptimizedInput from '../../components/Shared/OptimizedInput'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { find } from 'lodash'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
-import * as Yup from 'yup'
-import { getAllTabProcessingResults } from '../../redux/reducers/formSlices/fishProcessingSlice'
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
+import TrapEndDateAndTime from '../../components/form/TrapEndDateAndTime'
+import RPMBefore from '../../components/form/RPMBefore'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -122,6 +121,8 @@ const TrapOperations = ({
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
   const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
+  const [validationSchema, setValidationSchema] =
+    useState<any>(trapOperationsSchema)
 
   useEffect(() => {
     // flow threshold on trap location
@@ -143,6 +144,13 @@ const TrapOperations = ({
       visitSetupDefaults.programs,
       (program: any) => program.id === selectedProgramId
     )
+
+    const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(
+      currentProgramInfo?.programFormFields
+    )
+    if (currentProgramInfo?.programFormFields.length) {
+      setValidationSchema(dynamicTrapOpsSchema)
+    }
 
     setSelectedProgramObj(currentProgramInfo)
   }, [
@@ -227,7 +235,7 @@ const TrapOperations = ({
 
   const checkForErrors = (values: any) => {
     try {
-      trapOperationsSchema.validateSync(values, {
+      validationSchema.validateSync(values, {
         abortEarly: false,
         context: { values },
       })
@@ -278,6 +286,11 @@ const TrapOperations = ({
 
       if (stepCompletedCheck)
         dispatch(markStepCompleted({ propName: 'trapOperations' }))
+
+      if (values.gearStatus === 'S') {
+        dispatch(markStepCompleted({ propName: 'fishProcessing' }))
+        dispatch(markStepCompleted({ propName: 'fishInput' }))
+      }
       showSlideAlert(dispatch)
       console.log('🚀 ~ handleSubmit ~ Status', values)
     }
@@ -357,9 +370,56 @@ const TrapOperations = ({
     }
   }
 
+  const renderTrappingDateAndTime = () => {
+    // no program form fields have been set
+    // assume has not been customized
+    if (!selectedProgramObj?.programFormFields.length) {
+      return (
+        <TrapEndDateAndTime
+          endTime={endTime}
+          onEndTimeChange={onEndTimeChange}
+          popoverTrigger={popoverTrigger}
+        />
+      )
+    } else {
+      setEndTime(null)
+    }
+  }
+
+  const renderRPMBefore = ({
+    touched,
+    errors,
+    values,
+    setFieldValue,
+    handleBlur,
+    handleChange,
+  }: {
+    touched: any
+    errors: any
+    values: any
+    setFieldValue: any
+    handleBlur: any
+    handleChange: any
+  }) => {
+    // no program form fields have been set
+    // assume has not been customized
+    if (!selectedProgramObj?.programFormFields.length) {
+      return (
+        <RPMBefore
+          touched={touched}
+          errors={errors}
+          values={values}
+          setFieldValue={setFieldValue}
+          handleBlur={handleBlur}
+          handleChange={handleChange}
+        />
+      )
+    }
+  }
+
   return (
     <Formik
-      validationSchema={trapOperationsSchema}
+      validationSchema={validationSchema}
       enableReinitialize={true}
       validateOnChange={false}
       initialValues={
@@ -403,8 +463,7 @@ const TrapOperations = ({
           const trapOperationsOtherTabsValidity = tabIds.map(tabId => {
             if (tabId !== activeTabId) {
               const tabFormValues = reduxState[tabId]?.values
-              const formIsValid =
-                trapOperationsSchema.isValidSync(tabFormValues)
+              const formIsValid = validationSchema.isValidSync(tabFormValues)
               return formIsValid
             }
 
@@ -456,6 +515,7 @@ const TrapOperations = ({
             resetForm()
           }
         }, [previouslyActiveTabId, activeTabId])
+
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
@@ -467,68 +527,13 @@ const TrapOperations = ({
               borderBottomWidth='0'
               borderTopWidth='0'
               my='15'
+              nestedScrollEnabled={true}
+              keyboardShouldPersistTaps='handled'
             >
               <Pressable onPress={Keyboard.dismiss}>
                 <VStack space={4}>
                   <Heading>Trap Operations</Heading>
-                  <FormControl>
-                    <VStack space={2}>
-                      <HStack space={2}>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Trapping End Date and Time:
-                          </Text>
-                          <Popover
-                            placement='bottom left'
-                            trigger={popoverTrigger}
-                          >
-                            <Popover.Content
-                              accessibilityLabel='Trap Visit End Info'
-                              w='600'
-                              mr='10'
-                            >
-                              <Popover.Arrow />
-                              <Popover.CloseButton />
-                              <Popover.Header>
-                                Please set the Date and Time of when you removed
-                                the trap to collect data and ended the current
-                                trapping period.
-                              </Popover.Header>
-                              <Popover.Body p={4}>
-                                <VStack space={2}>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Text fontSize='md'>
-                                      This value is used to record the date and
-                                      time of ending the current trapping period
-                                      and removing the trap from the water to
-                                      collect data.
-                                    </Text>
-                                  </HStack>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Text fontSize='md'>
-                                      At the end of this form during the Post
-                                      Processing step, if you continue trapping,
-                                      you will set the "Trapping Start Date and
-                                      Time" to record the time of starting the
-                                      trap again.
-                                    </Text>
-                                  </HStack>
-                                </VStack>
-                              </Popover.Body>
-                            </Popover.Content>
-                          </Popover>
-                        </FormControl.Label>
-                      </HStack>
-                      <Box alignSelf='flex-start' ml='-2'>
-                        <DateTimePicker
-                          value={endTime}
-                          mode='datetime'
-                          onChange={onEndTimeChange}
-                          accentColor='#007C7C'
-                        />
-                      </Box>
-                    </VStack>
-                  </FormControl>
+                  {renderTrappingDateAndTime()}
                   <FormControl>
                     <HStack space={2} alignItems='center'>
                       <FormControl.Label>
@@ -668,112 +673,14 @@ const TrapOperations = ({
                           </Radio.Group>
                         </HStack>
                       </FormControl> */}
-                      <FormControl>
-                        <HStack space={4} alignItems='center'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              RPM Before Cleaning
-                            </Text>
-                          </FormControl.Label>
-                          <Popover
-                            placement='bottom left'
-                            trigger={triggerProps => {
-                              return (
-                                <IconButton
-                                  {...triggerProps}
-                                  icon={
-                                    <Icon
-                                      as={MaterialIcons}
-                                      color='black'
-                                      name='info-outline'
-                                      size='lg'
-                                    />
-                                  }
-                                ></IconButton>
-                              )
-                            }}
-                          >
-                            <Popover.Content
-                              accessibilityLabel='RPM Info'
-                              w='600'
-                              mr='10'
-                            >
-                              <Popover.Arrow />
-                              <Popover.Header>
-                                Take up to three measurements of cone rotations.
-                                The averages of the entered values will be saved
-                                to the database.
-                              </Popover.Header>
-                            </Popover.Content>
-                          </Popover>
-                        </HStack>
-                        <HStack space={8} flexWrap={'wrap'}>
-                          <Box
-                            flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-                            minWidth='30%' // Prevents shrinking too much
-                            maxWidth='30%' // Prevents growing beyond this size
-                          >
-                            <FormInputComponent
-                              label={'Measure 1'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.rpm1 ? `${values.rpm1}` : ''}
-                              camelName={'rpm1'}
-                              onChangeText={newValue => {
-                                setFieldValue('rpm1', newValue)
-                                if (!newValue) {
-                                  setFieldValue('rpm2', null)
-                                  setFieldValue('rpm3', null)
-                                }
-                              }}
-                              onBlur={handleBlur('rpm1')}
-                            />
-                          </Box>
-                          <Box
-                            flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-                            minWidth='30%' // Prevents shrinking too much
-                            maxWidth='30%' // Prevents growing beyond this size
-                          >
-                            <FormInputComponent
-                              isDisabled={values.rpm1 ? false : true}
-                              label={'Measure 2 (optional)'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.rpm2 ? `${values.rpm2}` : ''}
-                              camelName={'rpm2'}
-                              onChangeText={newValue => {
-                                setFieldValue('rpm2', newValue)
-                                if (!newValue) {
-                                  setFieldValue('rpm3', null)
-                                }
-                              }}
-                              onBlur={handleBlur('rpm2')}
-                            />
-                          </Box>
-                          <Box
-                            flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-                            minWidth='30%' // Prevents shrinking too much
-                            maxWidth='30%' // Prevents growing beyond this size
-                          >
-                            <FormInputComponent
-                              isDisabled={
-                                values.rpm1 && values.rpm2 ? false : true
-                              }
-                              label={'Measure 3 (optional)'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.rpm3 ? `${values.rpm3}` : ''}
-                              camelName={'rpm3'}
-                              onChangeText={handleChange('rpm3')}
-                              onBlur={handleBlur('rpm3')}
-                            />
-                          </Box>
-                        </HStack>
-                      </FormControl>
-
+                      {renderRPMBefore({
+                        touched: touched,
+                        errors: errors,
+                        values: values,
+                        setFieldValue: setFieldValue,
+                        handleBlur: handleBlur,
+                        handleChange: handleChange,
+                      })}
                       <HStack
                         space={5}
                         width='100%'
@@ -896,6 +803,7 @@ const TrapOperations = ({
                         activePage={activePage}
                         formFields={selectedProgramObj?.programFormFields}
                         setFieldValue={setFieldValue}
+                        activeTabId={activeTabId}
                       />
                       <Text
                         color='black'

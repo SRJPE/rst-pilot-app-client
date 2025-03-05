@@ -1,4 +1,4 @@
-import React, { useCallback, memo } from 'react'
+import React, { useCallback, memo, useMemo } from 'react'
 import {
   Box,
   CheckIcon,
@@ -63,8 +63,27 @@ const CustomSelect: React.FC<CustomSelectI> = ({
       return label
     } else if (placeholder === 'Funding Agency' && label !== 'not recorded') {
       return label.toLocaleUpperCase()
+    } else if (camelName === 'trapSite') {
+      return label
     } else return label.replace(/\w+/g, capitalize)
   }
+
+  const sortedOptions = useMemo(() => {
+    return [...selectOptions].sort((a: any, b: any) => {
+      const aValue = a.definition || a.code || ''
+      const bValue = b.definition || b.code || ''
+
+      if (aValue === 'processed fish') return -1
+      if (bValue === 'processed fish') return 1
+
+      if (aValue === 'not recorded') return 1
+      if (bValue === 'not recorded') return -1
+
+      if (aValue < bValue) return -1
+      if (aValue > bValue) return 1
+      return 0
+    })
+  }, [selectOptions])
 
   return (
     <Box minH={100}>
@@ -133,8 +152,8 @@ const CustomSelect: React.FC<CustomSelectI> = ({
           }}
           isDisabled={disabled}
         >
-          {selectOptions ? (
-            selectOptions.map((item, idx) => {
+          {sortedOptions ? (
+            sortedOptions.map((item, idx) => {
               if (dataType === 'fundingAgency') {
                 return (
                   <Select.Item

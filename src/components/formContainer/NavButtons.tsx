@@ -137,11 +137,7 @@ const NavButtons = ({
       case 'Fish Processing':
         if (values?.fishProcessedResult === 'no fish caught') {
           navigateHelper('No Fish Caught')
-        } else if (
-          values?.fishProcessedResult ===
-            'no catch data, fish left in live box' ||
-          values?.fishProcessedResult === 'no catch data, fish released'
-        ) {
+        } else if (values?.fishProcessedResult.includes('no catch data')) {
           navigateHelper('Trap Post-Processing')
         } else {
           navigateHelper('Fish Input')
@@ -221,11 +217,7 @@ const NavButtons = ({
       case 'Trap Post-Processing':
         if (values?.fishProcessedResult === 'no fish caught') {
           navigateHelper('Fish Processing')
-        } else if (
-          values?.fishProcessedResult ===
-            'no catch data, fish left in live box' ||
-          values?.fishProcessedResult === 'no catch data, fish released'
-        ) {
+        } else if (values?.fishProcessedResult.includes('no catch data')) {
           navigateHelper('Fish Processing')
         } else {
           navigateHelper('Fish Input')

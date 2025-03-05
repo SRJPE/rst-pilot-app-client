@@ -118,9 +118,13 @@ const FishProcessing = ({
         }
       })
 
-      if (stepCompletedCheck)
+      if (stepCompletedCheck) {
         dispatch(markStepCompleted({ propName: 'fishProcessing' }))
-      dispatch(markStepCompleted({ propName: 'fishInput' }))
+      }
+
+      if (setFishInputCompleted) {
+        dispatch(markStepCompleted({ propName: 'fishInput' }))
+      }
       console.log('🚀 ~ handleSubmit~ FishProcessing', values)
     }
   }
@@ -229,10 +233,8 @@ const FishProcessing = ({
 
         const otherTabFormsValid = checkOtherTabForms()
 
-        const noCatchData = [
-          'no catch data, fish left in live box',
-          'no catch data, fish released',
-        ].includes(values.fishProcessedResult)
+        const noCatchData =
+          values?.fishProcessedResult.includes('no catch data')
         const navButtons = useMemo(
           () => (
             <NavButtons

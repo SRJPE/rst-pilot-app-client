@@ -32,7 +32,7 @@ import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
 } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { MaterialIcons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import {
@@ -72,6 +72,8 @@ const mapStateToProps = (state: RootState) => {
     selectedProgramId:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.programId,
+    trapOperationsStore: state.trapOperations,
+    fishProcessingSlice: state.fishProcessing,
   }
 }
 
@@ -86,17 +88,21 @@ const TrapPostProcessing = ({
   userCredentialsStore,
   visitSetupDefaults,
   selectedProgramId,
+  trapOperationsStore,
+  fishProcessingSlice,
 }: {
   navigation: any
   reduxState: any
   tabSlice: any
-  activeTabId: any
+  activeTabId: string | null
   willBeHoldingFishForMarkRecapture: boolean
   previouslyActiveTabId: string | null
   navigationSlice: any
   userCredentialsStore: any
   visitSetupDefaults: any
   selectedProgramId: any
+  trapOperationsStore: any
+  fishProcessingSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -228,7 +234,7 @@ const TrapPostProcessing = ({
   const initialValues = useMemo(() => {
     let initialValues
 
-    if (reduxState[activeTabId]) {
+    if (activeTabId && reduxState[activeTabId]) {
       initialValues = { ...reduxState[activeTabId].values }
 
       if (recordTurbidityInPostProcessing) {
@@ -253,6 +259,9 @@ const TrapPostProcessing = ({
 
   const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
     if (activeTabId && activeTabId != 'placeholderId') {
+      values.fishProcessedResult =
+        fishProcessingSlice?.[activeTabId]?.values?.fishProcessedResult
+
       const destination =
         direction === 'left'
           ? navigateFlowLeftButton(
@@ -386,6 +395,7 @@ const TrapPostProcessing = ({
               values,
               startTime,
               isValid,
+              fishProcessingSlice,
             ]
           )
           return (
@@ -549,7 +559,7 @@ const TrapPostProcessing = ({
                       </Box>
                     </HStack>
                   </FormControl>
-                  {/* <ConditionalTrapVisitFields
+                  <ConditionalTrapVisitFields
                     touched={touched}
                     errors={errors}
                     values={values}
@@ -560,7 +570,9 @@ const TrapPostProcessing = ({
                     activePage={activePage}
                     formFields={selectedProgramObj?.programFormFields}
                     setFieldValue={setFieldValue}
-                  /> */}
+                    activeTabId={activeTabId}
+                    trapOperationsStore={trapOperationsStore}
+                  />
                   <HStack
                     space={5}
                     justifyContent='space-between'

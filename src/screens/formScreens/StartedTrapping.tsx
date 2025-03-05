@@ -1,3 +1,4 @@
+import React from 'react'
 import { Heading, Image, View, VStack } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 

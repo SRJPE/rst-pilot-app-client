@@ -27,8 +27,7 @@ import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOp
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
-import { cloneDeep, flatten, uniq, values } from 'lodash'
-import { uid } from 'uid'
+import { cloneDeep, find, flatten, keyBy, uniq } from 'lodash'
 import {
   setIncompleteSectionTouched,
   TabStateI,
@@ -211,18 +210,117 @@ const IncompleteSections = ({
     return filteredNames
   }
 
-  const formatTrapVisitEnvironmentalValues = (values: any) => {
-    const environmentalFields = [
-      'flowMeasure',
-      'waterTemperature',
-      'waterTurbidity',
+  const getDBValue = (value: any, dropdownName: string) => {
+    const dropdownValues = dropdownsState.values[dropdownName]
+
+    const id = find(dropdownValues, { code: value })?.id || null
+    return id
+  }
+
+  const calcAvgValue = (valuesArray: (string | null)[]) => {
+    const validValues = valuesArray.filter(n => n)
+    if (!validValues.length) {
+      return null
+    }
+    const numericValues = validValues.map((str: any) => parseFloat(str))
+    let counter = 0
+    numericValues.forEach((num: number) => {
+      counter += num
+    })
+    return counter / numericValues.length
+  }
+
+  const formatTrapVisitEnvironmentalValues = (
+    values: any,
+    programId: number
+  ) => {
+    const selectedProgramObj = find(
+      visitSetupDefaultState.programs,
+      (program: any) => program.id === programId
+    )
+    console.log('trap visiit env values', values)
+
+    console.log('selectedProgramObj', selectedProgramObj)
+    const programFormFields = selectedProgramObj.programFormFields
+    console.log('programFormFields', programFormFields)
+    const dyanimcEnvironmentalFields = [
+      // 'flowMeasure',
+      // 'waterTemperature',
+      // 'waterTurbidity',
       'dissolvedOxygen',
       'electricalConductivity',
       'specificConductivity',
       'secchi',
       'ph',
+      // 'tideCode',
+      // 'flowDirection',
+      // 'weatherCode',
     ]
-    console.log('trap visiit env values', values)
+
+    const formFieldsLookup = keyBy(programFormFields, 'fieldName')
+
+    const baseEnvValues = [
+      {
+        measureName: 'flow measure',
+        measureValueNumeric: values.flowMeasure,
+        measureValueText: values.flowMeasure?.toString(),
+        measureUnit: 5,
+      },
+      {
+        measureName: 'water temperature',
+        measureValueNumeric: values.waterTemperature,
+        measureValueText: values.waterTemperature?.toString(),
+        measureUnit: values.waterTemperatureUnit === '°F' ? 1 : 2,
+      },
+      {
+        measureName: 'water turbidity',
+        measureValueNumeric:
+          values.waterTurbidity || values.waterTurbidity || null,
+        measureValueText:
+          values?.waterTurbidity?.toString() ||
+          values?.waterTurbidity?.toString() ||
+          '',
+        measureUnit: 25,
+      },
+    ] as Array<any>
+
+    dyanimcEnvironmentalFields.forEach((field: string) => {
+      if (values[field]) {
+        if (formFieldsLookup[field].fieldType === 'dropdown') {
+          baseEnvValues.push({
+            measureName: formFieldsLookup[field].fieldName,
+            measureValueNumeric: null,
+            measureValueText: values[field]?.toString(),
+            measureUnit: null,
+          })
+        } else {
+          baseEnvValues.push({
+            measureName: formFieldsLookup[field].fieldName,
+            measureValueNumeric: Number(values[field]),
+            measureValueText: values[field]?.toString(),
+            measureUnit: formFieldsLookup[field].unitId || null,
+          })
+        }
+      }
+    })
+
+    console.log('baseEnvValues', baseEnvValues)
+    let meanFNU = null
+    if (values.turbidity1 && values.turbidity2 && values.turbidity3) {
+      meanFNU = calcAvgValue([
+        values.turbidity1,
+        values.turbidity2,
+        values.turbidity3,
+      ])
+      baseEnvValues.push({
+        measureName: 'meanFNU',
+        measureValueNumeric: meanFNU,
+        measureValueText: meanFNU?.toString(),
+        measureUnit: null,
+      })
+    }
+
+    return baseEnvValues
   }
 
   const saveTrapVisits = () => {
@@ -241,18 +339,6 @@ const IncompleteSections = ({
     const trapStatusAtEndValues = returnDefinitionArray(
       dropdownsState.values.trapStatusAtEnd
     )
-    const calculateRpmAvg = (rpms: (string | null)[]) => {
-      const validRpms = rpms.filter(n => n)
-      if (!validRpms.length) {
-        return null
-      }
-      const numericRpms = validRpms.map((str: any) => parseFloat(str))
-      let counter = 0
-      numericRpms.forEach((num: number) => {
-        counter += num
-      })
-      return counter / numericRpms.length
-    }
 
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
@@ -268,12 +354,25 @@ const IncompleteSections = ({
       } = trapPostProcessingState[id].values
       const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
 
+      console.log(
+        'trapOperationsState[id].values',
+        trapOperationsState[id].values
+      )
+      console.log(
+        'trapPostProcessingState[id].values',
+        trapPostProcessingState[id].values
+      )
+
+      console.log('fishProcessingState[id]', fishProcessingState[id])
+
+      const programId = visitSetupState[id].values.programId
+
       const selectedCrewIds =
         findCrewIdsFromSelectedCrewNames(selectedCrewNames)
       const trapVisitSubmission = {
         trapVisitUid: id,
         crew: selectedCrewIds,
-        programId: visitSetupState[id].values.programId,
+        programId,
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
         isPaperEntry: visitSetupState[id].isPaperEntry,
@@ -282,12 +381,16 @@ const IncompleteSections = ({
         trapVisitTimeEnd: trapOperationsState[id].values.trapVisitStopTime,
         fishProcessed: returnNullableTableId(
           fishProcessedValues.indexOf(
-            fishProcessingState[id].values.fishProcessedResult
+            trapOperationsState[id].values.gearStatus === 'S'
+              ? 'no catch data, setting trap'
+              : fishProcessingState[id].values.fishProcessedResult
           )
         ),
         whyFishNotProcessed: returnNullableTableId(
           whyFishNotProcessedValues.indexOf(
-            fishProcessingState[id].values.reasonForNotProcessing
+            trapOperationsState[id].values.gearStatus === 'S'
+              ? 'not recorded'
+              : fishProcessingState?.[id]?.values?.reasonForNotProcessing
           )
         ),
         sampleGearId: null,
@@ -313,40 +416,15 @@ const IncompleteSections = ({
         totalRevolutions: trapPostProcessingState[id].values.totalRevolutions
           ? parseFloat(trapPostProcessingState[id].values.totalRevolutions)
           : null,
-        rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
-        rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
-        trapVisitEnvironmental: [
+        rpmAtStart: calcAvgValue([startRpm1, startRpm2, startRpm3]),
+        rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
+        trapVisitEnvironmental: formatTrapVisitEnvironmentalValues(
           {
-            measureName: 'flow measure',
-            measureValueNumeric: trapOperationsState[id].values.flowMeasure,
-            measureValueText:
-              trapOperationsState[id].values.flowMeasure?.toString(),
-            measureUnit: 5,
+            ...trapOperationsState[id].values,
+            ...trapPostProcessingState[id].values,
           },
-          {
-            measureName: 'water temperature',
-            measureValueNumeric:
-              trapOperationsState[id].values.waterTemperature,
-            measureValueText:
-              trapOperationsState[id].values.waterTemperature?.toString(),
-            measureUnit:
-              trapOperationsState[id].values.waterTemperatureUnit === '°F'
-                ? 1
-                : 2,
-          },
-          {
-            measureName: 'water turbidity',
-            measureValueNumeric:
-              trapOperationsState[id].values.waterTurbidity ||
-              trapPostProcessingState[id].values.waterTurbidity ||
-              null,
-            measureValueText:
-              trapOperationsState[id].values?.waterTurbidity?.toString() ||
-              trapPostProcessingState[id].values?.waterTurbidity?.toString() ||
-              '',
-            measureUnit: 25,
-          },
-        ],
+          programId
+        ),
         trapCoordinates: {
           xCoord: trapPostProcessingState[id].values.trapLatitude,
           yCoord: trapPostProcessingState[id].values.trapLongitude,
@@ -364,9 +442,34 @@ const IncompleteSections = ({
           ? trapPostProcessingState[id].values.comments
           : null,
         createdBy: userCredentialsStore.id,
+        // new form fields
+        revCounter: trapPostProcessingState?.[id]?.values?.revCounter || null,
+        ysiNum: getDBValue(trapOperationsState[id].values.ysiNum, 'ysiNum'),
+        gearStatus: getDBValue(
+          trapOperationsState[id].values.gearStatus,
+          'gearStatus'
+        ),
+        vegetationCode: getDBValue(
+          trapOperationsState[id].values.vegetationCode,
+          'vegetationCode'
+        ),
+        conditionCode: getDBValue(
+          trapPostProcessingState[id].values.conditionCode,
+          'conditionCode'
+        ),
+        tideCode: getDBValue(
+          trapOperationsState[id].values.tideCode,
+          'tideCode'
+        ),
+        flowDirection: getDBValue(
+          trapOperationsState[id].values.flowDirection,
+          'flowDirection'
+        ),
+        weatherCode: getDBValue(
+          trapPostProcessingState[id].values.weatherCode,
+          'weatherCode'
+        ),
       }
-
-      formatTrapVisitEnvironmentalValues(trapOperationsState[id].values)
 
       dispatch(saveTrapVisitSubmission(trapVisitSubmission))
 
