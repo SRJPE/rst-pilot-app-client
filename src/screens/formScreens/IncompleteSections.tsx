@@ -238,11 +238,8 @@ const IncompleteSections = ({
       visitSetupDefaultState.programs,
       (program: any) => program.id === programId
     )
-    console.log('trap visiit env values', values)
 
-    console.log('selectedProgramObj', selectedProgramObj)
     const programFormFields = selectedProgramObj.programFormFields
-    console.log('programFormFields', programFormFields)
     const dyanimcEnvironmentalFields = [
       // 'flowMeasure',
       // 'waterTemperature',
@@ -377,8 +374,9 @@ const IncompleteSections = ({
         trapLocationId: visitSetupState[id].values.trapLocationId,
         isPaperEntry: visitSetupState[id].isPaperEntry,
         trapVisitTimeStart:
-          trapPostProcessingState[id].values.trapVisitStartTime,
-        trapVisitTimeEnd: trapOperationsState[id].values.trapVisitStopTime,
+          trapPostProcessingState?.[id]?.values?.trapVisitStartTime || null,
+        trapVisitTimeEnd:
+          trapOperationsState?.[id]?.values?.trapVisitStopTime || null,
         fishProcessed: returnNullableTableId(
           fishProcessedValues.indexOf(
             trapOperationsState[id].values.gearStatus === 'S'

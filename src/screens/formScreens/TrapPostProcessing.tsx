@@ -155,7 +155,9 @@ const TrapPostProcessing = ({
         reduxState[activeTabId]?.values?.trapVisitStartTime &&
         reduxState[activeTabId]?.values?.trapVisitStartTime !== 'Invalid Date'
       ) {
-        setStartTime(reduxState[activeTabId]?.values?.trapVisitStartTime)
+        setStartTime(
+          reduxState[activeTabId]?.values?.trapVisitStartTime || new Date()
+        )
       }
     }
   }, [activeTabId, reduxState])
@@ -751,12 +753,14 @@ const TrapPostProcessing = ({
                           </FormControl.Label>
                         </HStack>
                         <Box alignSelf='flex-start' ml='-2'>
-                          <DateTimePicker
-                            value={startTime}
-                            mode='datetime'
-                            onChange={onStartTimeChange}
-                            accentColor='#007C7C'
-                          />
+                          {startTime ? (
+                            <DateTimePicker
+                              value={startTime}
+                              mode='datetime'
+                              onChange={onStartTimeChange}
+                              accentColor='#007C7C'
+                            />
+                          ) : null}
                         </Box>
                       </VStack>
                     </FormControl>

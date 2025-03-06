@@ -55,12 +55,14 @@ const TrapEndDateAndTime = ({
           </FormControl.Label>
         </HStack>
         <Box alignSelf='flex-start' ml='-2'>
-          <DateTimePicker
-            value={endTime}
-            mode='datetime'
-            onChange={onEndTimeChange}
-            accentColor='#007C7C'
-          />
+          {endTime ? (
+            <DateTimePicker
+              value={endTime}
+              mode='datetime'
+              onChange={onEndTimeChange}
+              accentColor='#007C7C'
+            />
+          ) : null}
         </Box>
       </VStack>
     </FormControl>

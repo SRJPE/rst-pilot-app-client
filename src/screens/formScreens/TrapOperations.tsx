@@ -324,7 +324,9 @@ const TrapOperations = ({
         reduxState[activeTabId]?.values?.trapVisitStopTime &&
         reduxState[activeTabId]?.values?.trapVisitStopTime !== 'Invalid Date'
       ) {
-        setEndTime(reduxState[activeTabId]?.values?.trapVisitStopTime)
+        setEndTime(
+          reduxState[activeTabId]?.values?.trapVisitStopTime || new Date()
+        )
       }
     }
   }, [activeTabId, reduxState])
