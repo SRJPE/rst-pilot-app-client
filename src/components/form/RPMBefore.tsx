@@ -18,6 +18,7 @@ const RPMBefore = ({
   setFieldValue,
   handleBlur,
   handleChange,
+  validationSchema,
 }: {
   touched: any
   errors: any
@@ -25,6 +26,7 @@ const RPMBefore = ({
   setFieldValue: any
   handleBlur: any
   handleChange: any
+  validationSchema: any
 }) => {
   return (
     <FormControl>
@@ -82,6 +84,7 @@ const RPMBefore = ({
               }
             }}
             onBlur={handleBlur('rpm1')}
+            validationSchema={validationSchema}
           />
         </Box>
         <Box
@@ -91,7 +94,7 @@ const RPMBefore = ({
         >
           <FormInputComponent
             isDisabled={values.rpm1 ? false : true}
-            label={'Measure 2 (optional)'}
+            label={'Measure 2'}
             placeholder='0'
             touched={touched}
             errors={errors}
@@ -104,6 +107,7 @@ const RPMBefore = ({
               }
             }}
             onBlur={handleBlur('rpm2')}
+            validationSchema={validationSchema}
           />
         </Box>
         <Box
@@ -113,7 +117,7 @@ const RPMBefore = ({
         >
           <FormInputComponent
             isDisabled={values.rpm1 && values.rpm2 ? false : true}
-            label={'Measure 3 (optional)'}
+            label={'Measure 3'}
             placeholder='0'
             touched={touched}
             errors={errors}
@@ -121,6 +125,7 @@ const RPMBefore = ({
             camelName={'rpm3'}
             onChangeText={handleChange('rpm3')}
             onBlur={handleBlur('rpm3')}
+            validationSchema={validationSchema}
           />
         </Box>
       </HStack>

@@ -325,7 +325,6 @@ export const navigateFlowRightButton = ({
     case 'Visit Setup':
       return 'Trap Operations'
     case 'Trap Operations':
-      console.log('vaoues', values)
       if (values?.trapStatus === 'trap not functioning') {
         return 'Non Functional Trap'
       } else if (

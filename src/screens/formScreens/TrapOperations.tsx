@@ -417,6 +417,7 @@ const TrapOperations = ({
           setFieldValue={setFieldValue}
           handleBlur={handleBlur}
           handleChange={handleChange}
+          validationSchema={validationSchema}
         />
       )
     }
@@ -784,9 +785,9 @@ const TrapOperations = ({
                             fieldName: 'waterTurbidity',
                           })) && (
                           <Box
-                            flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-                            minWidth='30%' // Prevents shrinking too much
-                            maxWidth='30%' // Prevents growing beyond this size
+                            flexBasis='40%' // Ensures 3 items per row (adjust for spacing)
+                            minWidth='40%' // Prevents shrinking too much
+                            maxWidth='40%' // Prevents growing beyond this size
                           >
                             <FormInputComponent
                               label={'Water Turbidity (via CDEC)'}
