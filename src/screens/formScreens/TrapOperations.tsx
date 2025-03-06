@@ -145,7 +145,7 @@ const TrapOperations = ({
       (program: any) => program.id === selectedProgramId
     )
 
-    if (currentProgramInfo?.programFormFields.length) {
+    if (currentProgramInfo?.programFormFields?.length) {
       const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(
         currentProgramInfo?.programFormFields
       )
@@ -374,7 +374,7 @@ const TrapOperations = ({
     // no program form fields have been set
     // assume has not been customized
     if (
-      !selectedProgramObj?.programFormFields.length ||
+      !selectedProgramObj?.programFormFields?.length ||
       find(selectedProgramObj?.programFormFields, {
         fieldName: 'trapVisitStopTime',
       })
@@ -408,7 +408,7 @@ const TrapOperations = ({
   }) => {
     // no program form fields have been set
     // assume has not been customized
-    if (!selectedProgramObj?.programFormFields.length) {
+    if (!selectedProgramObj?.programFormFields?.length) {
       return (
         <RPMBefore
           touched={touched}
@@ -780,7 +780,7 @@ const TrapOperations = ({
                             }
                           />
                         </Box>
-                        {(!selectedProgramObj?.programFormFields.length ||
+                        {(!selectedProgramObj?.programFormFields?.length ||
                           find(selectedProgramObj?.programFormFields, {
                             fieldName: 'waterTurbidity',
                           })) && (

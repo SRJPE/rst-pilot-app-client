@@ -141,7 +141,7 @@ const TrapPostProcessing = ({
     )
 
     setSelectedProgramObj(currentProgramInfo)
-    if (currentProgramInfo?.programFormFields.length) {
+    if (currentProgramInfo?.programFormFields?.length) {
       const dynamicTrapOpsSchema = generateDynamicTrapPostProcessingSchema(
         currentProgramInfo?.programFormFields
       )
@@ -329,7 +329,7 @@ const TrapPostProcessing = ({
   const shouldRenderField = (fieldName: string) => {
     // no dynamic fields set
     // render default fields
-    if (!selectedProgramObj?.programFormFields.length) {
+    if (!selectedProgramObj?.programFormFields?.length) {
       return true
     }
 
