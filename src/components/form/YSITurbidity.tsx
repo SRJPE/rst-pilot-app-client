@@ -18,6 +18,7 @@ const YSITurbidity = ({
   handleChange,
   handleBlur,
   setFieldValue,
+  validationSchema,
 }: {
   touched: any
   errors: any
@@ -25,6 +26,7 @@ const YSITurbidity = ({
   handleChange: any
   handleBlur: any
   setFieldValue: any
+  validationSchema: any
 }) => {
   const calcMeanFNU = useMemo(() => {
     if (values.turbidity1 && values.turbidity2 && values.turbidity3) {
@@ -85,6 +87,7 @@ const YSITurbidity = ({
               setFieldValue('turbidity1', newValue)
             }}
             onBlur={handleBlur('turbidity1')}
+            validationSchema={validationSchema}
           />
         </Box>
         <Box
@@ -103,6 +106,7 @@ const YSITurbidity = ({
               setFieldValue('turbidity2', newValue)
             }}
             onBlur={handleBlur('turbidity2')}
+            validationSchema={validationSchema}
           />
         </Box>
         <Box
@@ -119,6 +123,7 @@ const YSITurbidity = ({
             camelName={'turbidity3'}
             onChangeText={handleChange('turbidity3')}
             onBlur={handleBlur('turbidity3')}
+            validationSchema={validationSchema}
           />
         </Box>
         <Box

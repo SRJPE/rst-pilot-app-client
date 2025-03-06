@@ -575,3 +575,17 @@ export const decodedRecentReleaseMarks = (
       }
     })
 }
+
+export const renderRequiredOrOptionalLabel = ({
+  fieldName,
+  validationSchema,
+}: {
+  fieldName: string
+  validationSchema: any
+}) => {
+  if (validationSchema?.fields?.[fieldName]?.exclusiveTests?.required) {
+    return '*'
+  } else {
+    return ' (optional)'
+  }
+}

@@ -742,6 +742,7 @@ const TrapOperations = ({
                             onChangeText={handleChange('flowMeasure')}
                             onBlur={handleBlur('flowMeasure')}
                             RightElement={<TextInputAdornment text='cfs' />}
+                            validationSchema={validationSchema}
                           />
                         </Box>
                         <Box
@@ -759,6 +760,7 @@ const TrapOperations = ({
                             camelName={'waterTemperature'}
                             onChangeText={handleChange('waterTemperature')}
                             onBlur={handleBlur('waterTemperature')}
+                            validationSchema={validationSchema}
                             RightElement={
                               <Button
                                 bg='warmGray.200'
@@ -796,6 +798,7 @@ const TrapOperations = ({
                               onChangeText={handleChange('waterTurbidity')}
                               onBlur={handleBlur('waterTurbidity')}
                               RightElement={<TextInputAdornment text='ntu' />}
+                              validationSchema={validationSchema}
                             />
                           </Box>
                         )}
@@ -813,6 +816,7 @@ const TrapOperations = ({
                         formFields={selectedProgramObj?.programFormFields}
                         setFieldValue={setFieldValue}
                         activeTabId={activeTabId}
+                        validationSchema={validationSchema}
                       />
                       <Text
                         color='black'

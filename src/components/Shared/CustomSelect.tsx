@@ -14,6 +14,7 @@ import { StyleProp, ViewStyle } from 'react-native'
 import RenderErrorMessage from './RenderErrorMessage'
 import { FormikErrors, FormikTouched } from 'formik'
 import { MaterialIcons } from '@expo/vector-icons'
+import { renderRequiredOrOptionalLabel } from '../../utils/utils'
 
 interface CustomSelectI {
   selectedValue: string
@@ -29,6 +30,7 @@ interface CustomSelectI {
   camelName?: string
   touched?: FormikTouched<any>
   tooltip?: React.ReactNode
+  validationSchema?: any
 }
 
 const CustomSelect: React.FC<CustomSelectI> = ({
@@ -45,6 +47,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
   touched = {},
   label = 'No label provided',
   tooltip,
+  validationSchema,
 }) => {
   const handleOnChange = useCallback(
     (itemValue: any) => {
@@ -97,7 +100,13 @@ const CustomSelect: React.FC<CustomSelectI> = ({
           }}
         >
           <Text color={showError ? 'red.700' : 'black'} fontSize='md'>
-            {label}
+            {label}{' '}
+            {validationSchema
+              ? renderRequiredOrOptionalLabel({
+                  fieldName: camelName,
+                  validationSchema,
+                })
+              : ''}
           </Text>
           {tooltip && (
             <Popover

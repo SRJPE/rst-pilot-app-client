@@ -14,6 +14,7 @@ import { StyleProp, ViewStyle } from 'react-native'
 import RenderErrorMessage from './RenderErrorMessage'
 import { FormikErrors, FormikTouched, FastField } from 'formik'
 import { MaterialIcons } from '@expo/vector-icons'
+import { renderRequiredOrOptionalLabel } from '../../utils/utils'
 
 interface CustomSelectI {
   selectedValue: string
@@ -29,6 +30,7 @@ interface CustomSelectI {
   camelName?: string
   touched?: FormikTouched<any>
   tooltip?: React.ReactNode
+  validationSchema?: any
 }
 
 const itemLabelModifier = (label: string, placeholder: string) => {
@@ -115,7 +117,7 @@ const FastSelect = ({
   )
 }
 
-const CustomSelect: React.FC<CustomSelectI> = ({
+const CustomFastSelect: React.FC<CustomSelectI> = ({
   selectOptions,
   selectedValue,
   placeholder,
@@ -129,6 +131,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
   touched = {},
   label = 'No label provided',
   tooltip,
+  validationSchema,
 }) => {
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
@@ -148,6 +151,12 @@ const CustomSelect: React.FC<CustomSelectI> = ({
         >
           <Text color={showError ? 'red.700' : 'black'} fontSize='md'>
             {label}
+            {validationSchema
+              ? renderRequiredOrOptionalLabel({
+                  fieldName: camelName,
+                  validationSchema,
+                })
+              : ''}
           </Text>
           {tooltip && (
             <Popover
@@ -200,4 +209,4 @@ const CustomSelect: React.FC<CustomSelectI> = ({
     </Box>
   )
 }
-export default memo(CustomSelect)
+export default memo(CustomFastSelect)

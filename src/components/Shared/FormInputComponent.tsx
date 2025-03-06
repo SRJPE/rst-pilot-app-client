@@ -7,6 +7,7 @@ import {
   TextInputFocusEventData,
 } from 'react-native'
 import { FastField } from 'formik'
+import { renderRequiredOrOptionalLabel } from '../../utils/utils'
 
 interface FormInputComponentI {
   label: string
@@ -24,6 +25,7 @@ interface FormInputComponentI {
   multiline?: boolean
   showWarning?: boolean
   warningMessage?: string
+  validationSchema?: any
 }
 
 export const TextInputAdornment = ({ text }: { text: string }) => {
@@ -97,6 +99,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   multiline = false,
   showWarning = false,
   warningMessage = 'Value is out of range',
+  validationSchema,
 }) => {
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
@@ -120,6 +123,12 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
             fontSize='16'
           >
             {label}
+            {validationSchema
+              ? renderRequiredOrOptionalLabel({
+                  fieldName: camelName,
+                  validationSchema,
+                })
+              : ''}
           </Text>
         </FormControl.Label>
         <FastField

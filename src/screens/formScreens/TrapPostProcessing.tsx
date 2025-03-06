@@ -453,6 +453,7 @@ const TrapPostProcessing = ({
                           onBlur={() => setFieldTouched('debrisVolume')}
                           value={values.debrisVolume}
                           RightElement={<TextInputAdornment text='gal' />}
+                          validationSchema={validationSchema}
                         />
                       </Box>
                     )}
@@ -471,6 +472,7 @@ const TrapPostProcessing = ({
                           onChangeText={handleChange('totalRevolutions')}
                           onBlur={() => setFieldTouched('totalRevolutions')}
                           value={values.totalRevolutions}
+                          validationSchema={validationSchema}
                         />
                       </Box>
                     )}
@@ -564,12 +566,13 @@ const TrapPostProcessing = ({
                             }
                           }}
                           onBlur={handleBlur('rpm1')}
+                          validationSchema={validationSchema}
                         />
                       </Box>
                       <Box flex={1}>
                         <FormInputComponent
                           isDisabled={values.rpm1 ? false : true}
-                          label={'Measure 2 (optional)'}
+                          label={'Measure 2'}
                           placeholder='0'
                           touched={touched}
                           errors={errors}
@@ -582,12 +585,13 @@ const TrapPostProcessing = ({
                             }
                           }}
                           onBlur={handleBlur('rpm2')}
+                          validationSchema={validationSchema}
                         />
                       </Box>
                       <Box flex={1}>
                         <FormInputComponent
                           isDisabled={values.rpm1 && values.rpm2 ? false : true}
-                          label={'Measure 3 (optional)'}
+                          label={'Measure 3'}
                           placeholder='0'
                           touched={touched}
                           errors={errors}
@@ -595,6 +599,7 @@ const TrapPostProcessing = ({
                           camelName={'rpm3'}
                           onChangeText={handleChange('rpm3')}
                           onBlur={handleBlur('rpm3')}
+                          validationSchema={validationSchema}
                         />
                       </Box>
                     </HStack>
@@ -612,6 +617,7 @@ const TrapPostProcessing = ({
                     setFieldValue={setFieldValue}
                     activeTabId={activeTabId}
                     trapOperationsStore={trapOperationsStore}
+                    validationSchema={validationSchema}
                   />
                   <HStack
                     space={5}

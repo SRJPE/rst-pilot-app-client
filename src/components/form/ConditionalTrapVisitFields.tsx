@@ -46,6 +46,7 @@ const ConditionalTrapVisitFields = ({
   setFieldValue,
   activeTabId,
   trapOperationsStore,
+  validationSchema,
 }: {
   touched: any
   errors: any
@@ -59,6 +60,7 @@ const ConditionalTrapVisitFields = ({
   setFieldValue: any
   activeTabId: string | null
   trapOperationsStore?: any
+  validationSchema?: any
 }) => {
   const [sortedFormFields, setSortedFormFields] = useState<
     Array<FieldInterface>
@@ -101,6 +103,7 @@ const ConditionalTrapVisitFields = ({
               onValueChange={handleChange(fieldName)}
               setFieldTouched={() => setFieldTouched(fieldName)}
               selectOptions={dropdownValues[fieldName]}
+              validationSchema={validationSchema}
               tooltip={
                 activeTabId ? (
                   <>
@@ -132,6 +135,7 @@ const ConditionalTrapVisitFields = ({
             handleChange,
             handleBlur,
             setFieldValue,
+            validationSchema,
           }}
         />
       )
@@ -155,6 +159,7 @@ const ConditionalTrapVisitFields = ({
             camelName={fieldName}
             onChangeText={handleChange(fieldName)}
             onBlur={handleBlur(fieldName)}
+            validationSchema={validationSchema}
             RightElement={
               unitAbbrev ? <TextInputAdornment text={unitAbbrev} /> : undefined
             }
@@ -181,6 +186,7 @@ const ConditionalTrapVisitFields = ({
             onValueChange={handleChange(fieldName)}
             setFieldTouched={() => setFieldTouched(fieldName)}
             selectOptions={dropdownValues[fieldName]}
+            validationSchema={validationSchema}
           />
         </Box>
       )
