@@ -145,10 +145,10 @@ const TrapOperations = ({
       (program: any) => program.id === selectedProgramId
     )
 
-    const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(
-      currentProgramInfo?.programFormFields
-    )
     if (currentProgramInfo?.programFormFields.length) {
+      const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(
+        currentProgramInfo?.programFormFields
+      )
       setValidationSchema(dynamicTrapOpsSchema)
     }
 
@@ -373,7 +373,12 @@ const TrapOperations = ({
   const renderTrappingDateAndTime = () => {
     // no program form fields have been set
     // assume has not been customized
-    if (!selectedProgramObj?.programFormFields.length) {
+    if (
+      !selectedProgramObj?.programFormFields.length ||
+      find(selectedProgramObj?.programFormFields, {
+        fieldName: 'trapVisitStopTime',
+      })
+    ) {
       return (
         <TrapEndDateAndTime
           endTime={endTime}
@@ -421,7 +426,7 @@ const TrapOperations = ({
     <Formik
       validationSchema={validationSchema}
       enableReinitialize={true}
-      validateOnChange={false}
+      // validateOnChange={false}
       initialValues={
         activeTabId
           ? reduxState[activeTabId]
@@ -772,24 +777,28 @@ const TrapOperations = ({
                             }
                           />
                         </Box>
-
-                        {/* <Box
-                          flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-                          minWidth='30%' // Prevents shrinking too much
-                          maxWidth='30%' // Prevents growing beyond this size
-                        >
-                          <FormInputComponent
-                            label={'Water Turbidity (via CDEC)'}
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            value={values.waterTurbidity}
-                            camelName={'waterTurbidity'}
-                            onChangeText={handleChange('waterTurbidity')}
-                            onBlur={handleBlur('waterTurbidity')}
-                            RightElement={<TextInputAdornment text='ntu' />}
-                          />
-                        </Box> */}
+                        {(!selectedProgramObj?.programFormFields.length ||
+                          find(selectedProgramObj?.programFormFields, {
+                            fieldName: 'waterTurbidity',
+                          })) && (
+                          <Box
+                            flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                            minWidth='30%' // Prevents shrinking too much
+                            maxWidth='30%' // Prevents growing beyond this size
+                          >
+                            <FormInputComponent
+                              label={'Water Turbidity (via CDEC)'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.waterTurbidity}
+                              camelName={'waterTurbidity'}
+                              onChangeText={handleChange('waterTurbidity')}
+                              onBlur={handleBlur('waterTurbidity')}
+                              RightElement={<TextInputAdornment text='ntu' />}
+                            />
+                          </Box>
+                        )}
                       </HStack>
 
                       <ConditionalTrapVisitFields

@@ -31,7 +31,6 @@ const DrawerMenu = ({
 }: ExtendedDrawerProps) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
-  const reduxState = useSelector((state: any) => state)
   const { steps, activeStep } = navigationState
   const { state, navigation } = props
   const currentRoute = state?.routeNames[state.index]

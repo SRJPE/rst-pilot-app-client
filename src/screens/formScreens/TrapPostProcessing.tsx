@@ -18,7 +18,10 @@ import {
   ScrollView,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
-import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
+import {
+  trapPostProcessingSchema,
+  generateDynamicTrapPostProcessingSchema,
+} from '../../utils/helpers/yupValidations'
 import { DeviceEventEmitter, Keyboard } from 'react-native'
 import FormInputComponent, {
   TextInputAdornment,
@@ -120,9 +123,11 @@ const TrapPostProcessing = ({
   const [locationClicked, setLocationClicked] = useState(false as boolean)
   const [startTime, setStartTime] = useState(new Date() as any)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
+  const [validationSchema, setValidationSchema] = useState<any>(
+    trapPostProcessingSchema
+  )
 
   const userPrograms = userCredentialsStore?.userPrograms || []
-  const programNames = userPrograms.map((program: any) => program.programName)
 
   const onStartTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
@@ -136,6 +141,12 @@ const TrapPostProcessing = ({
     )
 
     setSelectedProgramObj(currentProgramInfo)
+    if (currentProgramInfo?.programFormFields.length) {
+      const dynamicTrapOpsSchema = generateDynamicTrapPostProcessingSchema(
+        currentProgramInfo?.programFormFields
+      )
+      setValidationSchema(dynamicTrapOpsSchema)
+    }
   }, [visitSetupDefaults.programs])
 
   useEffect(() => {
@@ -182,7 +193,7 @@ const TrapPostProcessing = ({
 
   const checkForErrors = (values: any) => {
     try {
-      trapPostProcessingSchema.validateSync(values, {
+      validationSchema.validateSync(values, {
         abortEarly: false,
         context: { values },
       })
@@ -315,10 +326,25 @@ const TrapPostProcessing = ({
     )
   }
 
+  const shouldRenderField = (fieldName: string) => {
+    // no dynamic fields set
+    // render default fields
+    if (!selectedProgramObj?.programFormFields.length) {
+      return true
+    }
+
+    // if (selectedProgramObj?.programFormFields) {
+    //   return selectedProgramObj.programFormFields.some((field: any) => {
+    //     return field.fieldName === fieldName
+    //   })
+    // }
+    return false
+  }
+
   return (
     <ScrollView>
       <Formik
-        validationSchema={trapPostProcessingSchema}
+        validationSchema={validationSchema}
         enableReinitialize={true}
         initialValues={initialValues}
         initialTouched={{ debrisVolume: true }}
@@ -346,8 +372,7 @@ const TrapPostProcessing = ({
             const fishProcessingOtherTabsValidity = tabIds.map(tabId => {
               if (tabId !== activeTabId) {
                 const tabFormValues = reduxState[tabId]?.values
-                const formIsValid =
-                  trapPostProcessingSchema.isValidSync(tabFormValues)
+                const formIsValid = validationSchema.isValidSync(tabFormValues)
 
                 return formIsValid
               }
@@ -412,28 +437,43 @@ const TrapPostProcessing = ({
                 <VStack space={1}>
                   <Heading>Trap Post-Processing</Heading>
                   <HStack space={5}>
-                    <FormInputComponent
-                      label='Debris Volume'
-                      placeholder='0'
-                      touched={touched}
-                      errors={errors}
-                      camelName='debrisVolume'
-                      onChangeText={handleChange('debrisVolume')}
-                      onBlur={() => setFieldTouched('debrisVolume')}
-                      value={values.debrisVolume}
-                      RightElement={<TextInputAdornment text='gal' />}
-                    />
-                    <FormInputComponent
-                      label='Total Revolutions'
-                      placeholder='0'
-                      touched={touched}
-                      errors={errors}
-                      camelName='totalRevolutions'
-                      onChangeText={handleChange('totalRevolutions')}
-                      onBlur={() => setFieldTouched('totalRevolutions')}
-                      value={values.totalRevolutions}
-                    />
-
+                    {shouldRenderField('debrisVolume') && (
+                      <Box
+                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                        minWidth='30%' // Prevents shrinking too much
+                        maxWidth='30%' // Prevents growing beyond this size
+                      >
+                        <FormInputComponent
+                          label='Debris Volume'
+                          placeholder='0'
+                          touched={touched}
+                          errors={errors}
+                          camelName='debrisVolume'
+                          onChangeText={handleChange('debrisVolume')}
+                          onBlur={() => setFieldTouched('debrisVolume')}
+                          value={values.debrisVolume}
+                          RightElement={<TextInputAdornment text='gal' />}
+                        />
+                      </Box>
+                    )}
+                    {shouldRenderField('totalRevolutions') && (
+                      <Box
+                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                        minWidth='30%' // Prevents shrinking too much
+                        maxWidth='30%' // Prevents growing beyond this size
+                      >
+                        <FormInputComponent
+                          label='Total Revolutions'
+                          placeholder='0'
+                          touched={touched}
+                          errors={errors}
+                          camelName='totalRevolutions'
+                          onChangeText={handleChange('totalRevolutions')}
+                          onBlur={() => setFieldTouched('totalRevolutions')}
+                          value={values.totalRevolutions}
+                        />
+                      </Box>
+                    )}
                     {recordTurbidityInPostProcessing && (
                       <FormControl w='30%'>
                         <FormControl.Label>

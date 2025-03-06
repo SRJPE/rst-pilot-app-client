@@ -466,7 +466,7 @@ const IncompleteSections = ({
           'flowDirection'
         ),
         weatherCode: getDBValue(
-          trapPostProcessingState[id].values.weatherCode,
+          trapOperationsState[id].values.weatherCode,
           'weatherCode'
         ),
       }

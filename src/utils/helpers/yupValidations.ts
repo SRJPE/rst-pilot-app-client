@@ -31,7 +31,7 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
     flowMeasure: yup
       .number()
       .nullable()
-      .required('Flow measure is required')
+      // .required('Flow measure is required')
       .typeError('Value must be a number'),
     waterTemperature: yup
       .number()
@@ -56,6 +56,19 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
       validator = yup.string().email('Invalid email format')
     } else if (field.fieldType === 'input') {
       validator = yup.number().typeError('Must be a number')
+      validator = validator.positive(`Measurement required`)
+      if (field.minThreshold) {
+        validator = validator.min(
+          field.minThreshold,
+          `${field.displayName} must be >= ${field.minThreshold}`
+        )
+      }
+      if (field.maxThreshold) {
+        validator = validator.max(
+          field.maxThreshold,
+          `${field.displayName} must be at <= ${field.maxThreshold}`
+        )
+      }
     } else if (field.fieldType === 'boolean') {
       validator = yup.boolean()
     }
@@ -135,11 +148,8 @@ export const trapOperationsSchema = yup.object().shape({
 })
 
 export const trapPostProcessingSchema = yup.object().shape({
-  debrisVolume: yup
-    .number()
-    .nullable()
-    .typeError('Value must be a number')
-    .required('Debris volume required'),
+  debrisVolume: yup.number().nullable().typeError('Value must be a number'),
+  // .required('Debris volume required'),
   totalRevolutions: yup.number().nullable().typeError('Value must be a number'),
   // .required('Total revolutions required'),
   isWaterTurbidityPresent: yup.boolean(),
@@ -157,8 +167,8 @@ export const trapPostProcessingSchema = yup.object().shape({
     .positive('Measurement must be > 0')
     .nullable()
     .max(30, 'Measurement must be ≤ 30')
-    .typeError('Value must be a number')
-    .required('Enter at least one measurement'),
+    .typeError('Value must be a number'),
+  // .required('Enter at least one measurement'),
   rpm2: yup
     .number()
     .positive('Measurement must be > 0')
@@ -174,6 +184,61 @@ export const trapPostProcessingSchema = yup.object().shape({
   trapLongitude: yup.number().nullable().typeError('Value must be a number'),
   trapLatitude: yup.number().nullable().typeError('Value must be a number'),
 })
+
+export const generateDynamicTrapPostProcessingSchema = (fields: Array<any>) => {
+  const sectionFields = fields.filter(
+    (field: any) => field.formSection === 'Trap Post-Processing'
+  )
+  // always required
+  let schema: { [key: string]: any } = {}
+
+  sectionFields.forEach(field => {
+    let validator = yup.string() as any // Default to string validation
+
+    if (field.fieldType === 'email') {
+      validator = yup.string().email('Invalid email format')
+    } else if (field.fieldType === 'input') {
+      validator = yup.number().typeError('Must be > 0')
+      validator = validator.positive(`Measurement required`)
+      if (field.minThreshold) {
+        validator = validator.min(
+          field.minThreshold,
+          `${field.displayName} must be >= ${field.minThreshold}`
+        )
+      }
+      if (field.maxThreshold) {
+        validator = validator.max(
+          field.maxThreshold,
+          `${field.displayName} must be at <= ${field.maxThreshold}`
+        )
+      }
+    } else if (field.fieldType === 'boolean') {
+      validator = yup.boolean()
+    }
+
+    if (field.required) {
+      validator = validator.required(`${field.displayName} is required`)
+    }
+
+    if (field.minLength) {
+      validator = validator.min(
+        field.minLength,
+        `${field.displayName} must be at least ${field.minLength} characters`
+      )
+    }
+
+    if (field.maxLength) {
+      validator = validator.max(
+        field.maxLength,
+        `${field.displayName} must be at most ${field.maxLength} characters`
+      )
+    }
+
+    schema[field.fieldName] = validator
+  })
+
+  return yup.object().shape(schema)
+}
 
 export const fishProcessingSchema = yup.object().shape({
   fishProcessedResult: yup.string().required('Fish Processed status required'),
