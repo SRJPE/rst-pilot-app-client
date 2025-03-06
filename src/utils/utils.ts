@@ -356,7 +356,7 @@ export const navigateFlowRightButton = ({
 
       if (values?.fishProcessedResult === 'no fish caught') {
         return 'No Fish Caught'
-      } else if (values?.fishProcessedResult.includes('no catch data')) {
+      } else if (values?.fishProcessedResult?.includes('no catch data')) {
         return 'Trap Post-Processing'
       } else {
         return 'Fish Input'
@@ -422,7 +422,7 @@ export const navigateFlowLeftButton = (
       console.log('🚀 TRAP POST PROCESSING CASE HIT', values)
       if (values?.fishProcessedResult === 'no fish caught') {
         return 'Fish Processing'
-      } else if (values?.fishProcessedResult.includes('no catch data')) {
+      } else if (values?.fishProcessedResult?.includes('no catch data')) {
         return 'Fish Processing'
       } else {
         return 'Fish Input'

@@ -218,6 +218,8 @@ export const generateDynamicTrapPostProcessingSchema = (fields: Array<any>) => {
 
     if (field.required) {
       validator = validator.required(`${field.displayName} is required`)
+    } else {
+      validator = validator.nullable()
     }
 
     if (field.minLength) {
