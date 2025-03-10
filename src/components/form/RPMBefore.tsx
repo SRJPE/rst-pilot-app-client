@@ -85,6 +85,7 @@ const RPMBefore = ({
             }}
             onBlur={handleBlur('rpm1')}
             validationSchema={validationSchema}
+            keyboardType={'number-pad'}
           />
         </Box>
         <Box
@@ -108,6 +109,7 @@ const RPMBefore = ({
             }}
             onBlur={handleBlur('rpm2')}
             validationSchema={validationSchema}
+            keyboardType={'number-pad'}
           />
         </Box>
         <Box
@@ -126,6 +128,7 @@ const RPMBefore = ({
             onChangeText={handleChange('rpm3')}
             onBlur={handleBlur('rpm3')}
             validationSchema={validationSchema}
+            keyboardType={'number-pad'}
           />
         </Box>
       </HStack>

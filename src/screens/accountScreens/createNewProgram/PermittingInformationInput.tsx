@@ -191,7 +191,7 @@ const PermittingInformationInput = ({
                           : ''
                       }
                       camelName={'waterTemperatureThreshold'}
-                      keyboardType={'numeric'}
+                      keyboardType={'number-pad'}
                       width={'40%'}
                       onChangeText={handleChange('waterTemperatureThreshold')}
                       onBlur={handleBlur('waterTemperatureThreshold')}
@@ -205,7 +205,7 @@ const PermittingInformationInput = ({
                         values.flowThreshold ? `${values.flowThreshold}` : ''
                       }
                       camelName={'flowThreshold'}
-                      keyboardType={'numeric'}
+                      keyboardType={'number-pad'}
                       width={'40%'}
                       onChangeText={handleChange('flowThreshold')}
                       onBlur={handleBlur('flowThreshold')}

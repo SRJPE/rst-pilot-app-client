@@ -203,7 +203,7 @@ const GraphModalContent = ({
                           width='100px'
                           textAlign={'center'}
                           fontSize='16'
-                          keyboardType='numeric'
+                          keyboardType={'number-pad'}
                           onChangeText={value => {
                             if (
                               value != payload[header].y ||

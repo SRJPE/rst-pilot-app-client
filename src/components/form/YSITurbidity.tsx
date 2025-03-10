@@ -88,6 +88,7 @@ const YSITurbidity = ({
             }}
             onBlur={handleBlur('turbidity1')}
             validationSchema={validationSchema}
+            keyboardType={'number-pad'}
           />
         </Box>
         <Box
@@ -107,6 +108,7 @@ const YSITurbidity = ({
             }}
             onBlur={handleBlur('turbidity2')}
             validationSchema={validationSchema}
+            keyboardType={'number-pad'}
           />
         </Box>
         <Box
@@ -124,6 +126,7 @@ const YSITurbidity = ({
             onChangeText={handleChange('turbidity3')}
             onBlur={handleBlur('turbidity3')}
             validationSchema={validationSchema}
+            keyboardType={'number-pad'}
           />
         </Box>
         <Box

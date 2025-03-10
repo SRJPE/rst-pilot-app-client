@@ -160,6 +160,7 @@ const ConditionalTrapVisitFields = ({
             onChangeText={handleChange(fieldName)}
             onBlur={handleBlur(fieldName)}
             validationSchema={validationSchema}
+            keyboardType={'number-pad'}
             RightElement={
               unitAbbrev ? <TextInputAdornment text={unitAbbrev} /> : undefined
             }

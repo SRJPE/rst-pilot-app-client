@@ -297,7 +297,7 @@ function PartialRecordsQC({
               width='350px'
               fontSize='16'
               placeholder='fork length...'
-              keyboardType='numeric'
+              keyboardType={'number-pad'}
               onChangeText={value => {
                 setNestedModalInputValue(value)
               }}
@@ -315,7 +315,7 @@ function PartialRecordsQC({
               width='350px'
               fontSize='16'
               placeholder='Weight...'
-              keyboardType='numeric'
+              keyboardType={'number-pad'}
               onChangeText={value => {
                 setNestedModalInputValue(value)
               }}
@@ -384,7 +384,7 @@ function PartialRecordsQC({
               width='350px'
               fontSize='16'
               placeholder='fish count...'
-              keyboardType='numeric'
+              keyboardType={'number-pad'}
               onChangeText={value => {
                 setNestedModalInputValue(value)
               }}

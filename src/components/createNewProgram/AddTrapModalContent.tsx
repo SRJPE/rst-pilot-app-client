@@ -84,7 +84,7 @@ const AddTrapModalContent = ({
                   errors={errors}
                   value={values.trapLatitude ? `${values.trapLatitude}` : ''}
                   camelName={'trapLatitude'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   onChangeText={handleChange('trapLatitude')}
                   onBlur={handleBlur('trapLatitude')}
                 />
@@ -95,7 +95,7 @@ const AddTrapModalContent = ({
                   errors={errors}
                   value={values.trapLongitude ? `${values.trapLongitude}` : ''}
                   camelName={'trapLongitude'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   onChangeText={handleChange('trapLongitude')}
                   onBlur={handleBlur('trapLongitude')}
                 />
@@ -109,7 +109,7 @@ const AddTrapModalContent = ({
                   errors={errors}
                   value={values.coneSize ? `${values.coneSize}` : ''}
                   camelName={'coneSize'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   width={'40%'}
                   onChangeText={handleChange('coneSize')}
                   onBlur={handleBlur('coneSize')}
@@ -126,7 +126,7 @@ const AddTrapModalContent = ({
                       : ''
                   }
                   camelName={'USGSStationNumber'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   width={'40%'}
                   onChangeText={handleChange('USGSStationNumber')}
                   onBlur={handleBlur('USGSStationNumber')}
@@ -159,7 +159,7 @@ const AddTrapModalContent = ({
                       : ''
                   }
                   camelName={'releaseSiteLatitude'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   width={'40%'}
                   onChangeText={handleChange('releaseSiteLatitude')}
                   onBlur={handleBlur('releaseSiteLatitude')}
@@ -175,7 +175,7 @@ const AddTrapModalContent = ({
                       : ''
                   }
                   camelName={'releaseSiteLongitude'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   onChangeText={handleChange('releaseSiteLongitude')}
                   onBlur={handleBlur('releaseSiteLongitude')}
                 />

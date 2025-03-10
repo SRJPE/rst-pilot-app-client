@@ -240,7 +240,7 @@ const QCFishModalContent = ({
                 height='50px'
                 fontSize='16'
                 placeholder='Numeric Value'
-                keyboardType='numeric'
+                keyboardType={'number-pad'}
                 onChangeText={value => {
                   let payload: FormValueI = {
                     ...forkLength,
@@ -282,7 +282,7 @@ const QCFishModalContent = ({
                 height='50px'
                 fontSize='16'
                 placeholder='Numeric Value'
-                keyboardType='numeric'
+                keyboardType={'number-pad'}
                 onChangeText={value => {
                   let payload: FormValueI = {
                     ...weight,
@@ -322,7 +322,7 @@ const QCFishModalContent = ({
                 height='50px'
                 fontSize='16'
                 placeholder='Numeric Value'
-                keyboardType='numeric'
+                keyboardType={'number-pad'}
                 onChangeText={value => setCount({ ...count, value })}
                 // TODO - onBlur logic?
                 // onBlur={handleBlur('numFishCaught')}

@@ -47,6 +47,7 @@ export interface IndividualFishValuesI {
   plusCountMethod: string // | number
   numFishCaught?: number | null
   plusCount?: boolean
+  comments?: string | null
 }
 
 export const individualFishInitialState = {
@@ -64,6 +65,7 @@ export const individualFishInitialState = {
   willBeUsedInRecapture: false,
   plusCountMethod: '',
   plusCount: false,
+  comments: null,
 }
 
 export interface FishInputValuesI {
@@ -228,8 +230,16 @@ export const saveFishSlice = createSlice({
       }
     },
     savePlusCount: (state, action) => {
-      const { tabId, species, count, run, lifeStage, plusCountMethod, dead } =
-        action.payload
+      const {
+        tabId,
+        species,
+        count,
+        run,
+        lifeStage,
+        plusCountMethod,
+        dead,
+        comments,
+      } = action.payload
 
       const plusCountEntry = {
         UID: null,
@@ -246,6 +256,7 @@ export const saveFishSlice = createSlice({
         willBeUsedInRecapture: null,
         plusCountMethod,
         plusCount: true,
+        comments: comments || null,
       } as IndividualFishValuesI
 
       let fishStoreCopy = cloneDeep(

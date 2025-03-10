@@ -721,7 +721,7 @@ function CatchCategoricalQC({
               width='350px'
               fontSize='16'
               placeholder='fork length...'
-              keyboardType='numeric'
+              keyboardType={'number-pad'}
               onChangeText={value => {
                 setNestedModalInputValue({ fieldClicked: 'forkLength', value })
               }}

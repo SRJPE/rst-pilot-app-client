@@ -456,6 +456,7 @@ const TrapPostProcessing = ({
                           value={values.debrisVolume}
                           RightElement={<TextInputAdornment text='gal' />}
                           validationSchema={validationSchema}
+                          keyboardType='number-pad'
                         />
                       </Box>
                     )}
@@ -475,6 +476,7 @@ const TrapPostProcessing = ({
                           onBlur={() => setFieldTouched('totalRevolutions')}
                           value={values.totalRevolutions}
                           validationSchema={validationSchema}
+                          keyboardType='number-pad'
                         />
                       </Box>
                     )}
@@ -489,7 +491,7 @@ const TrapPostProcessing = ({
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
-                          keyboardType='numeric'
+                          keyboardType={'number-pad'}
                           onChangeText={handleChange('waterTurbidity')}
                           onBlur={handleBlur('waterTurbidity')}
                           value={values.waterTurbidity}
@@ -569,6 +571,7 @@ const TrapPostProcessing = ({
                           }}
                           onBlur={handleBlur('rpm1')}
                           validationSchema={validationSchema}
+                          keyboardType='number-pad'
                         />
                       </Box>
                       <Box flex={1}>
@@ -588,6 +591,7 @@ const TrapPostProcessing = ({
                           }}
                           onBlur={handleBlur('rpm2')}
                           validationSchema={validationSchema}
+                          keyboardType='number-pad'
                         />
                       </Box>
                       <Box flex={1}>
@@ -602,6 +606,7 @@ const TrapPostProcessing = ({
                           onChangeText={handleChange('rpm3')}
                           onBlur={handleBlur('rpm3')}
                           validationSchema={validationSchema}
+                          keyboardType='number-pad'
                         />
                       </Box>
                     </HStack>
@@ -636,6 +641,8 @@ const TrapPostProcessing = ({
                         camelName={'trapLatitude'}
                         onChangeText={handleChange('trapLatitude')}
                         onBlur={handleBlur('trapLatitude')}
+                        validationSchema={validationSchema}
+                        keyboardType='number-pad'
                       />
                     </Box>
                     <Box flex={1}>
@@ -648,6 +655,8 @@ const TrapPostProcessing = ({
                         camelName={'trapLongitude'}
                         onChangeText={handleChange('trapLongitude')}
                         onBlur={handleBlur('trapLongitude')}
+                        validationSchema={validationSchema}
+                        keyboardType='number-pad'
                       />
                     </Box>
                     {nonFeatherYubaProgram && (

@@ -413,7 +413,7 @@ function CatchFishCountQC({
               width='350px'
               fontSize='16'
               placeholder='plus count...'
-              keyboardType='numeric'
+              keyboardType={'number-pad'}
               onChangeText={value => {
                 setNestedModalInputValue({
                   fieldClicked: 'numFishCaught',
@@ -451,7 +451,7 @@ function CatchFishCountQC({
               width='350px'
               fontSize='16'
               placeholder='fork length...'
-              keyboardType='numeric'
+              keyboardType={'number-pad'}
               onChangeText={value => {
                 onChangeTextCallback({
                   fieldClicked: 'forkLength',
@@ -472,7 +472,7 @@ function CatchFishCountQC({
               width='350px'
               fontSize='16'
               placeholder='weight...'
-              keyboardType='numeric'
+              keyboardType={'number-pad'}
               onChangeText={value => {
                 onChangeTextCallback({
                   fieldClicked: 'weight',

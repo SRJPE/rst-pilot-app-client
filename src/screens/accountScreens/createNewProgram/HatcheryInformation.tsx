@@ -186,7 +186,7 @@ const HatcheryInformation = ({
                             : ''
                         }
                         camelName={'expectedNumberOfFishReceivedAtEachPickup'}
-                        keyboardType={'numeric'}
+                        keyboardType={'number-pad'}
                         onChangeText={handleChange(
                           'expectedNumberOfFishReceivedAtEachPickup'
                         )}

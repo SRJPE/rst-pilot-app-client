@@ -746,6 +746,7 @@ const TrapOperations = ({
                             onBlur={handleBlur('flowMeasure')}
                             RightElement={<TextInputAdornment text='cfs' />}
                             validationSchema={validationSchema}
+                            keyboardType={'number-pad'}
                           />
                         </Box>
                         <Box
@@ -764,6 +765,7 @@ const TrapOperations = ({
                             onChangeText={handleChange('waterTemperature')}
                             onBlur={handleBlur('waterTemperature')}
                             validationSchema={validationSchema}
+                            keyboardType={'number-pad'}
                             RightElement={
                               <Button
                                 bg='warmGray.200'
@@ -802,6 +804,7 @@ const TrapOperations = ({
                               onBlur={handleBlur('waterTurbidity')}
                               RightElement={<TextInputAdornment text='ntu' />}
                               validationSchema={validationSchema}
+                              keyboardType={'number-pad'}
                             />
                           </Box>
                         )}
