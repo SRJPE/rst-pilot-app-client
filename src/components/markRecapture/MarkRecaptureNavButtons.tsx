@@ -7,6 +7,7 @@ import {
   resetMarkRecapSlice,
 } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
 import { StackActions, useRoute } from '@react-navigation/native'
+import { DeviceEventEmitter } from 'react-native'
 
 export default function MarkRecaptureNavButtons({
   navigation,
@@ -33,13 +34,12 @@ export default function MarkRecaptureNavButtons({
   // const activePage = useRoute()
 
   const handleRightButton = () => {
-    //   //if function truthy, submit form to check for errors and save to redux
-    if (handleSubmit) {
-      handleSubmit()
-    }
     //if Mark Recapture complete lear form values and go to QA and return
 
     if (activePage === 'Mark Recapture Complete') {
+      if (handleSubmit) {
+        handleSubmit()
+      }
       clearFormValues && clearFormValues()
       navigation?.navigate('Quality Control')
       navigation.reset({
@@ -49,15 +49,31 @@ export default function MarkRecaptureNavButtons({
       dispatch(resetMarkRecapSlice())
       return
     }
-    //navigate Right
-    navigation.dispatch(
-      StackActions.replace(navigationState.steps[activeStep + 1]?.name)
-    )
 
-    dispatch({
-      type: updateActiveMarkRecaptureStep,
-      payload: navigationState.activeStep + 1,
-    })
+    const callback = () => {
+      //navigate Right
+      navigation.dispatch(
+        StackActions.replace(navigationState.steps[activeStep + 1]?.name)
+      )
+
+      dispatch({
+        type: updateActiveMarkRecaptureStep,
+        payload: navigationState.activeStep + 1,
+      })
+    }
+
+    navigation.dispatch(StackActions.replace('Loading...'))
+
+    setTimeout(() => {
+      DeviceEventEmitter.emit('event.load', {
+        process: () => {
+          if (handleSubmit) {
+            handleSubmit()
+          }
+        },
+        callback,
+      })
+    }, 1000)
   }
 
   const handleLeftButton = () => {
