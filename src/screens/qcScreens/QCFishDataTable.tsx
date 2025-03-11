@@ -179,7 +179,7 @@ const QCFishDataTable = ({
             <DataTable.Title
               key={`${header}-${idx}`}
               style={{
-                flex: header === 'Species' || header === 'Species' ? 2 : 1,
+                flex: header === 'Species' ? 2 : 1,
               }}
             >
               {header}

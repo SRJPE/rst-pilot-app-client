@@ -1,7 +1,15 @@
 import React from 'react'
 import { DataTable } from 'react-native-paper'
 import { pick, cloneDeep, drop } from 'lodash'
-import { Row, IconButton, Icon, Text, VStack, View } from 'native-base'
+import {
+  Row,
+  IconButton,
+  Icon,
+  Text,
+  VStack,
+  View,
+  ScrollView,
+} from 'native-base'
 import { connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
@@ -132,7 +140,7 @@ const RSTRLogSheet = ({
   }
 
   return (
-    <View>
+    <ScrollView>
       <CustomModalHeader
         headerText={'RSTR Log Sheet'}
         showHeaderButton={true}
@@ -144,7 +152,7 @@ const RSTRLogSheet = ({
             <DataTable.Title
               key={`${header}-${idx}`}
               style={{
-                flex: header === 'Species' || header === 'Species' ? 2 : 1,
+                flex: header === 'Recorder' ? 1.5 : 1,
               }}
             >
               {header}
@@ -167,10 +175,11 @@ const RSTRLogSheet = ({
                       <DataTable.Cell
                         key={`${objKey}-${itemIdx}`}
                         style={{
-                          flex: objKey === 'species' ? 2 : 1,
-                          borderWidth: 0.5,
+                          flex: objKey === 'createdBy' ? 1.5 : 1,
+                          borderWidth: 0.25,
                           paddingLeft: 3,
                         }}
+                        textStyle={{ fontSize: 16 }}
                       >
                         {renderCell(
                           tableData[rowKey as keyof typeof tableData],
@@ -184,7 +193,7 @@ const RSTRLogSheet = ({
           )
         })}
       </DataTable>
-    </View>
+    </ScrollView>
   )
 }
 
