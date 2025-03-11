@@ -54,13 +54,18 @@ const RSTRLogSheet = ({
 }) => {
   const [tableData, setTableData] = React.useState<Array<any>>([])
 
+  const getTime = (obj: any) =>
+    new Date(
+      obj.trapVisitTimeStart || obj.trapVisitTimeEnd || obj.createdAt
+    ).getTime()
+
   React.useEffect(() => {
     let trapVisitsForLocation = [] as Array<any>
 
     const sortedTrapVisits = [...previousTrapVisits].sort(
       (a: any, b: any) =>
-        new Date(b.createdTrapVisitResponse.trapVisitTimeStart).getTime() -
-        new Date(a.createdTrapVisitResponse.trapVisitTimeStart).getTime()
+        getTime(b.createdTrapVisitResponse) -
+        getTime(a.createdTrapVisitResponse)
     )
 
     sortedTrapVisits.forEach((trapVisit: any) => {
@@ -71,15 +76,18 @@ const RSTRLogSheet = ({
       ) {
         const {
           trapVisitTimeStart,
+          trapVisitTimeEnd,
           createdBy,
           tideCode,
           revCounter,
           gearStatus,
           conditionCode,
           comments,
+          createdAt,
         } = trapVisit.createdTrapVisitResponse
 
-        const date = new Date(trapVisitTimeStart)
+        let date = new Date(trapVisitTimeStart || trapVisitTimeEnd || createdAt)
+
         const formattedDate = `${
           date.getMonth() + 1
         }/${date.getDate()}/${date.getFullYear()}`
