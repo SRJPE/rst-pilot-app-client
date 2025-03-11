@@ -351,19 +351,14 @@ const IncompleteSections = ({
       } = trapPostProcessingState[id].values
       const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
 
-      console.log(
-        'trapOperationsState[id].values',
-        trapOperationsState[id].values
-      )
-      console.log(
-        'trapPostProcessingState[id].values',
-        trapPostProcessingState[id].values
-      )
-
-      console.log('fishProcessingState[id]', fishProcessingState[id])
-
       const programId = visitSetupState[id].values.programId
 
+      let trapVisitTimeEnd =
+        trapOperationsState?.[id]?.values?.trapVisitStopTime || null
+
+      if (trapOperationsState[id].values.gearStatus === 'P') {
+        trapVisitTimeEnd = new Date()
+      }
       const selectedCrewIds =
         findCrewIdsFromSelectedCrewNames(selectedCrewNames)
       const trapVisitSubmission = {
@@ -375,8 +370,7 @@ const IncompleteSections = ({
         isPaperEntry: visitSetupState[id].isPaperEntry,
         trapVisitTimeStart:
           trapPostProcessingState?.[id]?.values?.trapVisitStartTime || null,
-        trapVisitTimeEnd:
-          trapOperationsState?.[id]?.values?.trapVisitStopTime || null,
+        trapVisitTimeEnd,
         fishProcessed: returnNullableTableId(
           fishProcessedValues.indexOf(
             trapOperationsState[id].values.gearStatus === 'S'
