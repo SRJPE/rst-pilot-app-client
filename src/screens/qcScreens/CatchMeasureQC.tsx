@@ -87,12 +87,17 @@ function CatchMeasureQC({
     let qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
     qcData = qcData.filter(data => {
-      let trapVisitTimeEnd = new Date(
+      let qcTrapVisitTime = new Date(
         data.createdCatchRawResponse.trapVisitTimeEnd
       )
+      if (!data.createdCatchRawResponse.trapVisitTimeEnd) {
+        qcTrapVisitTime = new Date(
+          data.createdCatchRawResponse.trapVisitTimeStart
+        )
+      }
       return (
-        trapVisitTimeEnd >= selectedDateRange.startDate &&
-        trapVisitTimeEnd <= selectedDateRange.endDate
+        qcTrapVisitTime >= selectedDateRange.startDate &&
+        qcTrapVisitTime <= selectedDateRange.endDate
       )
     })
 

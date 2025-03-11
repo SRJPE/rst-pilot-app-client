@@ -184,13 +184,18 @@ function CatchCategoricalQC({
           createdAt,
           qcCompleted,
           trapVisitTimeEnd,
+          trapVisitTimeStart,
         } = catchResponse.createdCatchRawResponse
         const qcNotStarted = !qcCompleted
 
         const createdExistingMarksResponse =
           catchResponse.createdExistingMarksResponse ?? []
 
-        const date = new Date(trapVisitTimeEnd)
+        let date = new Date(trapVisitTimeEnd)
+        let qcTrapVisitTime = new Date(trapVisitTimeEnd)
+        if (!trapVisitTimeEnd) {
+          qcTrapVisitTime = new Date(trapVisitTimeStart)
+        }
         date.setHours(0)
         date.setMinutes(0)
         date.setSeconds(0)

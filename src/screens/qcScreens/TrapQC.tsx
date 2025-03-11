@@ -121,11 +121,17 @@ function TrapQC({
 
         const trapVisitId = createdTrapVisitResponse.id
         const qcCompleted = createdTrapVisitResponse.qcCompleted
-        const trapVisitTimeEnd = new Date(
+        let qcTrapVisitTime = new Date(
           createdTrapVisitResponse.trapVisitTimeEnd
         )
 
-        const normalizedDate = normalizeDate(trapVisitTimeEnd)
+        if (!createdTrapVisitResponse.trapVisitTimeEnd) {
+          qcTrapVisitTime = new Date(
+            createdTrapVisitResponse.trapVisitTimeStart
+          )
+        }
+
+        const normalizedDate = normalizeDate(qcTrapVisitTime)
 
         if (trapVisitId) {
           let temp = createdTrapVisitEnvironmentalResponse

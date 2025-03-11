@@ -1,23 +1,12 @@
-import React, { useEffect, useState, useMemo, memo, useCallback } from 'react'
-import {
-  View,
-  Text,
-  Heading,
-  Input,
-  VStack,
-  HStack,
-  Box,
-  FormControl,
-  Popover,
-  IconButton,
-  Icon,
-} from 'native-base'
-import { MaterialIcons } from '@expo/vector-icons'
+import React, { useEffect, useState } from 'react'
+import { Text, HStack, Box, Link, VStack } from 'native-base'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../Shared/FormInputComponent'
 import FastSelect from '../Shared/FastSelect'
 import YSITurbidity from './YSITurbidity'
+import CustomModal from '../Shared/CustomModal'
+import RSTRLogSheet from './RSTRLogSheet'
 
 interface FieldInterface {
   id: number
@@ -65,6 +54,11 @@ const ConditionalTrapVisitFields = ({
   const [sortedFormFields, setSortedFormFields] = useState<
     Array<FieldInterface>
   >([])
+  const [showLogSheet, setShowLogSheet] = useState(false)
+
+  const handleLogSheetState = () => {
+    setShowLogSheet(!showLogSheet)
+  }
 
   useEffect(() => {
     if (formFields) {
@@ -93,34 +87,52 @@ const ConditionalTrapVisitFields = ({
             flexGrow={1}
             mr={8} // Removes right margin from every 3rd item
           >
-            <FastSelect
-              selectedValue={values[fieldName]}
-              placeholder={`Select Value for ${displayName}`}
-              camelName={fieldName}
-              label={displayName}
-              errors={errors}
-              touched={touched}
-              onValueChange={handleChange(fieldName)}
-              setFieldTouched={() => setFieldTouched(fieldName)}
-              selectOptions={dropdownValues[fieldName]}
-              validationSchema={validationSchema}
-              tooltip={
-                activeTabId ? (
-                  <>
-                    <Text fontSize='md'>
-                      Selected Vegetation Code Value:{' '}
-                      {
-                        trapOperationsStore?.[activeTabId]?.values
-                          ?.vegetationCode
-                      }
-                    </Text>
-                  </>
-                ) : (
-                  false
-                )
-              }
-            />
+            <VStack>
+              <FastSelect
+                selectedValue={values[fieldName]}
+                placeholder={`Select Value for ${displayName}`}
+                camelName={fieldName}
+                label={displayName}
+                errors={errors}
+                touched={touched}
+                onValueChange={handleChange(fieldName)}
+                setFieldTouched={() => setFieldTouched(fieldName)}
+                selectOptions={dropdownValues[fieldName]}
+                validationSchema={validationSchema}
+                tooltip={
+                  activeTabId ? (
+                    <>
+                      <Text fontSize='md'>
+                        Selected Vegetation Code Value:{' '}
+                        {
+                          trapOperationsStore?.[activeTabId]?.values
+                            ?.vegetationCode
+                        }
+                      </Text>
+                    </>
+                  ) : (
+                    false
+                  )
+                }
+              />
+              <Link
+                mb={5}
+                onPress={handleLogSheetState}
+                isUnderlined={true}
+                _text={{
+                  fontSize: 'lg',
+                  color: 'primary',
+                }}
+              >
+                View Log Sheet
+              </Link>
+            </VStack>
           </Box>
+          {showLogSheet && (
+            <CustomModal isOpen={showLogSheet} closeModal={handleLogSheetState}>
+              <RSTRLogSheet handleLogSheetState={handleLogSheetState} />
+            </CustomModal>
+          )}
         </>
       )
     }
