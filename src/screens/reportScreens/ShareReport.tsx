@@ -1,44 +1,48 @@
+import { Formik } from 'formik'
 import {
-  Button,
-  Center,
   Checkbox,
   FormControl,
   Heading,
   HStack,
-  Icon,
   Text,
   View,
   VStack,
 } from 'native-base'
-import React, { useState, useEffect } from 'react'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { AppDispatch, RootState } from '../../redux/store'
+import React, { useEffect, useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import GenerateReportNavButtons from '../../components/generateReport/GenerateReportNavButtons'
-import FormInputComponent from '../../components/Shared/FormInputComponent'
-import { Formik } from 'formik'
-import CustomSelect from '../../components/Shared/CustomSelect'
-import CustomModal from '../../components/Shared/CustomModal'
-import EditAccountInfoModalContent from '../../components/generateReport/ReportPreviewModalContent'
-import {
-  postBiWeeklyPassageSummaryEmail,
-  updateMostRecentReportFilePath,
-  sendBiWeeklyPassageSummary,
-} from '../../redux/reducers/generateReportSlice'
-import { generateWordDocument } from '../../components/generateReport/ReportGenerator'
-import DocumentViewer from '../../components/Shared/DocumentViewer'
-import { shareReportSchema } from '../../utils/helpers/yupValidations'
 import yup from 'yup'
+import GenerateReportNavButtons from '../../components/generateReport/GenerateReportNavButtons'
+import { generateWordDocument } from '../../components/generateReport/ReportGenerator'
+import EditAccountInfoModalContent from '../../components/generateReport/ReportPreviewModalContent'
+import CustomModal from '../../components/Shared/CustomModal'
+import CustomSelect from '../../components/Shared/CustomSelect'
+import FormInputComponent from '../../components/Shared/FormInputComponent'
+import {
+  sendBiWeeklyPassageSummary,
+  updateMostRecentReportFilePath,
+} from '../../redux/reducers/generateReportSlice'
+import { type InitialStateI } from '../../redux/reducers/userCredentialsSlice'
+import { AppDispatch, RootState } from '../../redux/store'
+import { shareReportSchema } from '../../utils/helpers/yupValidations'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 type ShareReportProps = yup.InferType<typeof shareReportSchema>
 
 const ShareReport = ({
   navigation,
   dropdownsState,
+  userCredentialsStore,
 }: {
   navigation: any
   dropdownsState: any
+  userCredentialsStore: InitialStateI
 }) => {
+  const programDropdownOptions = userCredentialsStore.userPrograms.map(
+    program => {
+      return { value: `${program.programId}`, label: program.programName }
+    }
+  )
+
   const dispatch = useDispatch<AppDispatch>()
   const biWeeklyPassageSummaryStore = useSelector(
     (state: RootState) => state.generateReports
@@ -62,16 +66,20 @@ const ShareReport = ({
   // this happens on "generate pdf" button press
   // retrieves data back from db
   // updates store with all of the information needed to generate the report
-  const handleGenerateReport = (
+  const handleGenerateReport = async (
     values: yup.InferType<typeof shareReportSchema>
   ) => {
     setFilePath(null)
-    dispatch(sendBiWeeklyPassageSummary(values)) //change to selected program ID
+    return await dispatch(
+      sendBiWeeklyPassageSummary({
+        values,
+        sender: {
+          senderName: userCredentialsStore.displayName,
+          senderEmail: userCredentialsStore.emailAddress,
+        },
+      })
+    ) //change to selected program ID
   }
-
-  const generateReportsStore = useSelector(
-    (state: RootState) => state.generateReports
-  )
 
   const [reportPreviewModalOpen, setReportPreviewModalOpen] = useState(
     false as boolean
@@ -81,31 +89,6 @@ const ShareReport = ({
   )
   const reportTitle = 'Biweekly Passage Summary'
 
-  // const sendEmail = async (email: string, subject: string) => {
-  //   try {
-  //     const { mostRecentReportFilePath } = generateReportsStore
-  //     console.log('🚀 ~ mostRecentReportFilePath:', mostRecentReportFilePath)
-  //     const response = await axios.post(
-  //       'http://localhost:8000/report/send-email',
-  //       {
-  //         to: email,
-  //         subject: subject,
-  //         filePath: mostRecentReportFilePath,
-  //       }
-  //     )
-
-  //     console.log('Email sent:', response)
-  //   } catch (error) {
-  //     console.error('Error sending email:', error)
-  //   }
-  // }
-
-  const handleSubmitReport = (values: any) => {
-    const { mostRecentReportFilePath } = generateReportsStore
-
-    dispatch(postBiWeeklyPassageSummaryEmail())
-  }
-
   return (
     <Formik
       validationSchema={shareReportSchema}
@@ -113,25 +96,30 @@ const ShareReport = ({
         name: '',
         email: '',
         frequency: '',
-        // programName: '',
         programId: '',
       }}
-      onSubmit={values => {
-        // handleSubmitReport(values)
+      onSubmit={(values, { setSubmitting, resetForm }) => {
         handleGenerateReport(values as ShareReportProps)
-        console.log('🚀 ~ ShareReport.tsx:115 ~ values:', values)
+        setSubmitting(false)
+        resetForm()
+        showSlideAlert(
+          dispatch,
+          'Bi-weekly passage summary report successfully sent',
+          'success',
+          5000
+        )
       }}
     >
       {({
         handleChange,
         handleBlur,
         handleSubmit,
-        setFieldValue,
         setFieldTouched,
         touched,
         errors,
         values,
         isValid,
+        isSubmitting,
       }) => (
         <>
           <View
@@ -147,20 +135,13 @@ const ShareReport = ({
               <VStack space={2}>
                 <FormControl>
                   <CustomSelect
-                    // selectedValue={values.programName}
                     selectedValue={values.programId}
                     placeholder='Select a program'
                     label='What monitoring program are you generating a report for?'
                     camelName='programId'
-                    onValueChange={
-                      handleChange('programId')
-                      // setFieldValue('programId', 1)
-                    }
+                    onValueChange={handleChange('programId')}
                     setFieldTouched={setFieldTouched}
-                    selectOptions={[
-                      { value: '1', label: 'Mill Creek RST Monitoring' },
-                      { value: '2', label: 'Deer Creek RST Monitoring' },
-                    ]}
+                    selectOptions={programDropdownOptions}
                   />
                 </FormControl>
               </VStack>
@@ -170,9 +151,6 @@ const ShareReport = ({
                   <Text fontSize='2xl' fontWeight='500'>
                     Who do you want to share the report to?
                   </Text>
-                  <Button bg='primary' onPress={handleSubmitReport}>
-                    test email
-                  </Button>
                 </HStack>
                 <HStack space={4} paddingRight='5'>
                   <FormInputComponent
@@ -226,25 +204,16 @@ const ShareReport = ({
                 </FormControl>
               )}
             </VStack>
-            <VStack space={2} marginTop={10}>
-              <Button
-                bg='primary' //onPress={handleGenerateReport}
-              >
-                TEST - Generate Report
-              </Button>
-              {filePath && <DocumentViewer filePath={filePath} />}
-            </VStack>
           </View>
           <GenerateReportNavButtons
             navigation={navigation}
-            isDisabled={!isValid}
+            isDisabled={!isValid || isSubmitting}
             handleSubmit={handleSubmit}
           />
           {/* --------- Modals --------- */}
           <CustomModal
             isOpen={reportPreviewModalOpen}
             closeModal={() => setReportPreviewModalOpen(false)}
-            // height='1/1'
           >
             <EditAccountInfoModalContent
               closeModal={() => setReportPreviewModalOpen(false)}
@@ -259,6 +228,7 @@ const ShareReport = ({
 const mapStateToProps = (state: RootState) => {
   return {
     dropdownsState: state.dropdowns,
+    userCredentialsStore: state.userCredentials,
   }
 }
 

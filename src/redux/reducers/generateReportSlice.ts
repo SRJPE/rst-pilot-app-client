@@ -1,9 +1,9 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import api from '../../api/axiosConfig'
-import { RootState } from '../store'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
-import { shareReportSchema } from '../../utils/helpers/yupValidations'
 import yup from 'yup'
+import api from '../../api/axiosConfig'
+import { shareReportSchema } from '../../utils/helpers/yupValidations'
+import { RootState } from '../store'
 
 const uninitializedStatus = 'uninitialized'
 const pendingStatus = 'pending'
@@ -44,7 +44,8 @@ export interface PersonnelI {
 // }
 
 interface APIResponseI {
-  data: any
+  data: unknown
+  status: number
 }
 
 const initialState: any = {
@@ -80,15 +81,24 @@ export const getBiWeeklyPassageSummary = createAsyncThunk(
     return response.data
   }
 )
+
+type ShareReportProps = yup.InferType<typeof shareReportSchema>
+
 export const sendBiWeeklyPassageSummary = createAsyncThunk(
   'generateReportsSlice/getBiWeeklyPassageSummary',
-  async (values: yup.InferType<typeof shareReportSchema>) => {
+  async ({
+    values,
+    sender,
+  }: {
+    values: ShareReportProps
+    sender: { senderName: string | null; senderEmail: string | null }
+  }) => {
     const programId = values.programId
     const response: APIResponseI = await api.post(
       `reports/bi-weekly-passage-summary/${programId}`,
-      values
+      { values, sender }
     )
-    return response.data
+    return response.status
   }
 )
 
