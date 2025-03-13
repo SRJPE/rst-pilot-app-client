@@ -1130,6 +1130,7 @@ const AddFishContent = ({
                                   markType,
                                   markColor,
                                   markPosition,
+                                  releasedAt,
                                 } = recentReleaseMark
                                 return (
                                   <Button
@@ -1143,12 +1144,13 @@ const AddFishContent = ({
                                     }
                                     shadow='3'
                                     borderRadius='5'
-                                    w='90%'
+                                    w='100%'
                                     onPress={() => {
                                       handlePressRecentExistingMarkButton(
                                         recentReleaseMark
                                       )
                                     }}
+                                    justifyContent='flex-start'
                                   >
                                     <Text
                                       color={
@@ -1161,11 +1163,15 @@ const AddFishContent = ({
                                       fontWeight='500'
                                       fontSize='md'
                                     >
-                                      {`${markType}${
+                                      Released On:{' '}
+                                      {new Date(
+                                        releasedAt
+                                      ).toLocaleDateString()}
+                                      {` (${markType}${
                                         markColor ? `- ${markColor}` : ''
                                       } ${
                                         markPosition ? `- ${markPosition}` : ''
-                                      }`}
+                                      })`}
                                     </Text>
                                   </Button>
                                 )

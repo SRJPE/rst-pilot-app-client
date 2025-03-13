@@ -256,8 +256,13 @@ const BatchCharacteristicsModalContent = ({
                               ?.programId
                           : null
                       ).map((recentReleaseMark: any, index: number) => {
-                        const { id, markType, markColor, markPosition } =
-                          recentReleaseMark
+                        const {
+                          id,
+                          markType,
+                          markColor,
+                          markPosition,
+                          releasedAt,
+                        } = recentReleaseMark
                         return (
                           <Button
                             key={index}
@@ -270,7 +275,8 @@ const BatchCharacteristicsModalContent = ({
                             }
                             shadow='3'
                             borderRadius='5'
-                            w='90%'
+                            w='100%'
+                            justifyContent='flex-start'
                             onPress={() => {
                               handlePressRecentExistingMarkButton(
                                 recentReleaseMark
@@ -288,9 +294,11 @@ const BatchCharacteristicsModalContent = ({
                               fontWeight='500'
                               fontSize='md'
                             >
-                              {`${markType}${
+                              Released On:{' '}
+                              {new Date(releasedAt).toLocaleDateString()}
+                              {` (${markType}${
                                 markColor ? `- ${markColor}` : ''
-                              } ${markPosition ? `- ${markPosition}` : ''}`}
+                              } ${markPosition ? `- ${markPosition}` : ''})`}
                             </Text>
                           </Button>
                         )
