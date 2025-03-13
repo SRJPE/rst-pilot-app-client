@@ -402,7 +402,7 @@ const ReleaseDataEntry = ({
                 <Text color='black' fontSize='xl'>
                   Confirm Marked Date and Time:
                 </Text>
-                <Box alignSelf='flex-start' minWidth='320'>
+                <Box alignSelf='flex-start'>
                   <DateTimePicker
                     value={markedTime}
                     mode='datetime'
@@ -415,7 +415,7 @@ const ReleaseDataEntry = ({
                 <Text color='black' fontSize='xl'>
                   Confirm Release Date and Time:
                 </Text>
-                <Box alignSelf='flex-start' minWidth='320'>
+                <Box alignSelf='flex-start'>
                   <DateTimePicker
                     value={releaseTime}
                     mode='datetime'
