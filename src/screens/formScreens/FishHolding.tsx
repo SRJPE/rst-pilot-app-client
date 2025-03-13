@@ -1,5 +1,14 @@
 import { useNavigation } from '@react-navigation/native'
-import { HStack, VStack, Text, Button, Heading, View } from 'native-base'
+import {
+  HStack,
+  VStack,
+  Text,
+  Button,
+  Heading,
+  View,
+  Input,
+  Box,
+} from 'native-base'
 import React, { useCallback, useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import { updateFishEntry } from '../../redux/reducers/formSlices/fishInputSlice'
@@ -53,7 +62,7 @@ const FishHolding = ({
   const [selectedFishStore, setSelectedFishStore] = useState({} as any)
   const [selectedLifeStages, setSelectedLifeStages] = useState([] as Array<any>)
   const [selectedRuns, setSelectedRuns] = useState([] as Array<any>)
-  const [totalFish, setTotalFish] = useState(0 as number)
+  const [totalFish, setTotalFish] = useState(0 as number | string)
 
   useEffect(() => {
     if (
@@ -216,8 +225,9 @@ const FishHolding = ({
   const tabIds = Object.keys(tabState.tabs)
   const handleSubmit = (tabId: string, buttonDirection?: string) => {
     if (tabId) {
+      const totalFishNumeric = parseInt(totalFish as string, 10)
       //saves for release trial
-      dispatch(saveTotalFishHolding(totalFish))
+      dispatch(saveTotalFishHolding(totalFishNumeric))
       //saves for releaseTrial data entry
       dispatch(
         saveTrapVisitInformation({
@@ -244,7 +254,7 @@ const FishHolding = ({
       }
       dispatch(
         saveFishHolding({
-          totalFishHolding: totalFish,
+          totalFishHolding: totalFishNumeric,
           selectedFishStore: selectedFishStore,
         })
       )
@@ -284,6 +294,8 @@ const FishHolding = ({
     )
   }, [selectedRuns, selectedLifeStages])
 
+  const handleTotalFishChange = (text: string) => setTotalFish(text)
+
   return (
     <>
       <View flex={1} bg='#fff' p='5%' borderColor='themeGrey' borderWidth='15'>
@@ -316,7 +328,19 @@ const FishHolding = ({
             </Button>
           </HStack>
           {renderFishHoldingCards()}
-          <Heading alignSelf='center'>Total Fish Holding: {totalFish}</Heading>
+          <HStack space={10} justifyContent='center'>
+            <Heading alignSelf='center'>Total Fish Holding:</Heading>
+            <Box alignItems='center' w={100}>
+              <Input
+                // type='number'
+                value={totalFish.toString()}
+                w='100%'
+                size={'2xl'}
+                onChangeText={handleTotalFishChange}
+                placeholder='Value Controlled Input'
+              />
+            </Box>
+          </HStack>
         </VStack>
       </View>
       <NavButtons

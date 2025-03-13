@@ -116,6 +116,7 @@ const FishInputDataTable = ({
       delete dataObj.appliedMarks
       delete dataObj.geneticSamples
       delete dataObj.captureRunClassMethod
+      delete dataObj.fishObjId
       let dataObjPadded = { ...emptyTableData, ...dataObj }
 
       const dataObjKeys = Object.keys(dataObjPadded)
