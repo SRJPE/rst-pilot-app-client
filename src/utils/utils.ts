@@ -569,8 +569,14 @@ export const decodedRecentReleaseMarks = (
   const markColorValues = returnDefinitionArray(dropdownValues.markColor)
   const bodyPartValues = returnDefinitionArray(dropdownValues.bodyPart)
 
+  const currentYear = new Date().getFullYear()
+
   return releaseMarks
-    .filter((mark: ReleaseMarkI) => mark.programId === programId)
+    .filter(
+      (mark: ReleaseMarkI) =>
+        mark.programId === programId &&
+        new Date(mark.releasedAt).getFullYear() === currentYear
+    )
     .slice(0, 2)
     .map((mark: ReleaseMarkI) => {
       return {

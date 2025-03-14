@@ -1,13 +1,13 @@
 import { useNavigation } from '@react-navigation/native'
 import {
   HStack,
-  VStack,
   Text,
   Button,
   Heading,
   View,
   Input,
   Box,
+  ScrollView,
 } from 'native-base'
 import React, { useCallback, useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
@@ -279,7 +279,7 @@ const FishHolding = ({
   //render new cards when selected runs or lifeStages change
   const renderFishHoldingCards = useCallback(() => {
     return (
-      <HStack space={10} justifyContent='center' h='70%'>
+      <HStack space={10} justifyContent='center' height={'400px'}>
         <FishHoldingCard
           cardContent={selectedLifeStages}
           handlePressRemoveBadge={handlePressRemoveBadge}
@@ -298,51 +298,66 @@ const FishHolding = ({
 
   return (
     <>
-      <View flex={1} bg='#fff' p='5%' borderColor='themeGrey' borderWidth='15'>
-        <VStack space={8}>
-          <Heading fontSize='28'>
-            Which fish are you holding for mark recapture trials?
-          </Heading>
-          <HStack>
-            <Button
-              bg='primary'
-              alignSelf='flex-start'
-              shadow='5'
-              ml='10'
-              onPress={handleClearAll}
-            >
-              <Text fontWeight='bold' color='white'>
-                Clear all, I am not holding any fish
-              </Text>
-            </Button>
-            <Button
-              bg='primary'
-              alignSelf='flex-start'
-              shadow='5'
-              ml='180'
-              onPress={handleResetAll}
-            >
-              <Text fontWeight='bold' color='white'>
-                Reset All
-              </Text>
-            </Button>
-          </HStack>
-          {renderFishHoldingCards()}
+      <ScrollView
+        bg='#fff'
+        p='5%'
+        borderColor='themeGrey'
+        borderWidth='15'
+        flex={1}
+        scrollEnabled
+        height={'100%'}
+      >
+        <Heading fontSize='28'>
+          Which fish are you holding for mark recapture trials?
+        </Heading>
+        <Box>
+          <Text fontSize={'xl'} marginTop={5}>
+            Select appropriate life stages and runs for the fish you are holding
+            for mark recapture trials. Total Fish Holding will be updated based
+            on the selected life stages and runs. You may also edit the final
+            number within the input field.
+          </Text>
+        </Box>
+        <View marginTop={10} marginBottom={10}>
           <HStack space={10} justifyContent='center'>
             <Heading alignSelf='center'>Total Fish Holding:</Heading>
             <Box alignItems='center' w={100}>
               <Input
-                // type='number'
                 value={totalFish.toString()}
                 w='100%'
                 size={'2xl'}
                 onChangeText={handleTotalFishChange}
-                placeholder='Value Controlled Input'
               />
             </Box>
           </HStack>
-        </VStack>
-      </View>
+        </View>
+        {/* {renderFishHoldingCards()} */}
+        <HStack marginBottom={10}>
+          <Button
+            bg='primary'
+            alignSelf='flex-start'
+            shadow='5'
+            ml='10'
+            onPress={handleClearAll}
+          >
+            <Text fontWeight='bold' color='white'>
+              Clear all, I am not holding any fish
+            </Text>
+          </Button>
+          <Button
+            bg='primary'
+            alignSelf='flex-start'
+            shadow='5'
+            ml='180'
+            onPress={handleResetAll}
+          >
+            <Text fontWeight='bold' color='white'>
+              Reset All
+            </Text>
+          </Button>
+        </HStack>
+        {renderFishHoldingCards()}
+      </ScrollView>
       <NavButtons
         navigation={navigation}
         handleSubmit={(buttonDirection?: string) => {
