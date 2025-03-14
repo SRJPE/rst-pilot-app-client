@@ -11,9 +11,8 @@ import {
   ScrollView,
   Text,
   VStack,
-  View,
 } from 'native-base'
-import React, { memo, useCallback, useState } from 'react'
+import React, { memo, useCallback, useState, useMemo } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   addMarkToBatchCountExistingMarks,
@@ -50,15 +49,16 @@ const BatchCharacteristicsModalContent = ({
   visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
-  const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
-
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+  const reorderedTaxon = useMemo(
+    () => reorderTaxon(dropdownValues.taxon),
+    [dropdownValues.taxon]
+  )
 
-  const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
-
+  const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
+  const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
   const [fishConditionDropdownOpen, setFishConditionDropdownOpen] = useState(
     false as boolean
   )
@@ -70,7 +70,6 @@ const BatchCharacteristicsModalContent = ({
       value: condition?.definition,
     }))
   )
-
   const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
     false as boolean
   )
@@ -82,6 +81,7 @@ const BatchCharacteristicsModalContent = ({
       value: taxon?.commonname,
     }))
   )
+
   const onSpeciesOpen = useCallback(() => {
     setFishConditionDropdownOpen(false)
   }, [])
@@ -363,16 +363,18 @@ const BatchCharacteristicsModalContent = ({
             </VStack>
             {/* --------- Modals --------- */}
 
-            <CustomModal
-              isOpen={addMarkModalOpen}
-              closeModal={() => setAddMarkModalOpen(false)}
-              height='1/2'
-            >
-              <AddAnotherMarkModalContent
+            {addMarkModalOpen && (
+              <CustomModal
+                isOpen={addMarkModalOpen}
                 closeModal={() => setAddMarkModalOpen(false)}
-                screenName={'batchCount'}
-              />
-            </CustomModal>
+                height='1/2'
+              >
+                <AddAnotherMarkModalContent
+                  closeModal={() => setAddMarkModalOpen(false)}
+                  screenName={'batchCount'}
+                />
+              </CustomModal>
+            )}
           </>
         )}
       </Formik>

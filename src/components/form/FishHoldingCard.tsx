@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
-import { Badge, Box, VStack, Center, Icon, ScrollView } from 'native-base'
+import { Badge, Box, VStack, Center, Icon, View } from 'native-base'
 import { memo } from 'react'
 
 const FishHoldingCard = ({
@@ -13,7 +13,7 @@ const FishHoldingCard = ({
 }) => {
   const renderFishHoldingCardContent = () => {
     return (
-      <ScrollView>
+      <View>
         {cardContent?.map((item, idx) => {
           return (
             <Badge
@@ -43,7 +43,7 @@ const FishHoldingCard = ({
             </Badge>
           )
         })}
-      </ScrollView>
+      </View>
     )
   }
 
@@ -68,7 +68,7 @@ const FishHoldingCard = ({
         px='4%'
         pt='4'
         overflow='hidden'
-        height={'100%'}
+        height={'75%'}
         bg='secondary'
         roundedBottom='xl'
       >
