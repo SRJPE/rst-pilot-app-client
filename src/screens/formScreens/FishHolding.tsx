@@ -327,6 +327,7 @@ const FishHolding = ({
                 w='100%'
                 size={'2xl'}
                 onChangeText={handleTotalFishChange}
+                keyboardType='number-pad'
               />
             </Box>
           </HStack>
