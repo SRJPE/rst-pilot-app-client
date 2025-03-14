@@ -51,7 +51,7 @@ const mapStateToProps = (state: RootState) => {
 
 export interface MarkRecaptureSubmissionI {
   programId: number
-  releasePurposeId?: null | null
+  releasePurposeId?: number | null
   releaseSiteId: number
   releasedAt: Date
   markedAt: Date
@@ -206,7 +206,7 @@ const ReleaseDataEntry = ({
       const markRecaptureSubmission: MarkRecaptureSubmissionI = {
         programId:
           releaseTrialDataEntryState.programId || programIdOfReleaseLocation,
-        // releasePurposeId: null, //left as null
+        releasePurposeId: 1, //left as null
         releaseSiteId:
           find(releaseSiteValues, [
             'releaseSiteName',
