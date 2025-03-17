@@ -442,6 +442,11 @@ const TrapOperations = ({
           ? reduxState[activeTabId].errors
           : null
       }
+      initialTouched={
+        activeTabId && reduxState[activeTabId]?.errors
+          ? reduxState[activeTabId].errors
+          : {}
+      }
       // only create initial error when form is not completed
       onSubmit={() => {}}
     >
@@ -518,7 +523,10 @@ const TrapOperations = ({
           endTime,
         ])
         useEffect(() => {
-          if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
+          if (
+            previouslyActiveTabId === activeTabId &&
+            navigationSlice.activeStep === 2
+          ) {
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }

@@ -23,7 +23,7 @@ interface TabInfoI {
 }
 
 interface ErrorDetailsI {
-  [pageName: string]: string
+  [pageName: string]: any
 }
 
 const initialState: TabStateI = {

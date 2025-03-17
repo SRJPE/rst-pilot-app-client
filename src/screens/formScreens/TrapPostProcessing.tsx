@@ -349,7 +349,11 @@ const TrapPostProcessing = ({
         validationSchema={validationSchema}
         enableReinitialize={true}
         initialValues={initialValues}
-        initialTouched={{ debrisVolume: true }}
+        initialTouched={
+          activeTabId && reduxState[activeTabId]
+            ? reduxState[activeTabId].errors
+            : null
+        }
         initialErrors={
           activeTabId && reduxState[activeTabId]
             ? reduxState[activeTabId].errors

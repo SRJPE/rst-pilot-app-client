@@ -87,6 +87,9 @@ const AddFishContent = ({
   visitSetupState: any
   visitSetupDefaults: any
 }) => {
+  const lastFishEntry = Object.values(fishStore).findLast(
+    fishEntry => !fishEntry.plusCount
+  )
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
   // @ts-ignore
@@ -610,6 +613,8 @@ const AddFishContent = ({
     setSpeciesDropDownOpen(false)
   }, [])
 
+  const showLifeStage = ['Chinook salmon', 'Steelhead / rainbow trout']
+
   return (
     <>
       <ScrollView
@@ -647,6 +652,28 @@ const AddFishContent = ({
           </HStack>
           <Divider mb='1' />
           <VStack paddingX='10' paddingBottom='3' space={3}>
+            {!route.params?.editModeData && lastFishEntry && (
+              <Box
+                py={3}
+                px={5}
+                w={'full'}
+                borderWidth={1}
+                borderColor={'primary'}
+                borderRadius={5}
+                bg='coolGray.100'
+              >
+                <VStack space={1}>
+                  <Text fontSize={'lg'}>
+                    <Text bold>Last Entry: </Text>
+                    {`${lastFishEntry.species} (${lastFishEntry.lifeStage}) - Fork Length: ${lastFishEntry.forkLength}mm`}
+                  </Text>
+                  <Text fontSize={'lg'}>
+                    <Text bold>Total Catch Count Entered: </Text>
+                    {Object.values(fishStore).length}
+                  </Text>
+                </VStack>
+              </Box>
+            )}
             <HStack alignItems='center'>
               <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 180 : 0}>
                 {/* //TODO: Form is being managed manually, refactor logic and form to properly show error messages */}
