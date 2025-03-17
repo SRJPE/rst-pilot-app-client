@@ -613,6 +613,7 @@ const IncompleteSections = ({
             markedForRelease: fishValue.willBeUsedInRecapture,
             adiposeClipped: fishValue.adiposeClipped ? true : false,
             dead: fishValue.dead ? true : false,
+            milting: fishValue.milting ? true : false,
 
             fishCondition: getCatchFishConditions(fishValue.fishCondition),
             lifeStage: returnNullableTableId(

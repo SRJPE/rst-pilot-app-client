@@ -57,7 +57,7 @@ import MarkBadgeList from '../../components/markRecapture/MarkBadgeList'
 import { uid } from 'uid'
 import SpeciesDropDown from '../../components/form/SpeciesDropDown'
 import FishConditionsDropDown from '../../components/form/FishConditionsDropDown'
-import { startCase } from 'lodash'
+import { startCase, find, keyBy } from 'lodash'
 import { ReleaseMarkI, FormValueI } from '../../utils/interfaces'
 import GeneticSampleBadgeList from '../../components/form/GeneticSampleBadgeList'
 
@@ -72,6 +72,7 @@ const AddFishContent = ({
   fishStore,
   tabSlice,
   visitSetupState,
+  visitSetupDefaults,
 }: {
   route?: any
   saveIndividualFish: any
@@ -84,12 +85,15 @@ const AddFishContent = ({
   fishStore: FishStoreI
   tabSlice: TabStateI
   visitSetupState: any
+  visitSetupDefaults: any
 }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch<AppDispatch>()
   // @ts-ignore
   const [fishUID, setFishUID] = useState(uid() as string)
-
+  const [conditionalFishInputFields, setConditionalFishInputFields] = useState(
+    {} as any
+  )
   const [tagFishModalOpen, setTagFishModalOpen] = useState(false as boolean)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
@@ -181,6 +185,11 @@ const AddFishContent = ({
         touched: true,
         required: true,
       }),
+      milting: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
       comments: createFormValueDefault({ value: null }),
@@ -203,6 +212,11 @@ const AddFishContent = ({
         value: false,
         touched: true,
         required: true,
+      }),
+      milting: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
@@ -227,6 +241,11 @@ const AddFishContent = ({
         value: false,
         touched: true,
         required: true,
+      }),
+      milting: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
@@ -345,6 +364,16 @@ const AddFishContent = ({
         })
   )
 
+  const [milting, setMilting] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.milting
+      : createFormValueDefault({
+          value: route.params?.editModeData.milting,
+          touched: true,
+          required: false,
+        })
+  )
+
   const [plusCountMethod, setPlusCountMethod] = useState<FormValueI>(
     !route.params?.editModeData
       ? stateDefaults.whenSpeciesChinook.plusCountMethod
@@ -377,6 +406,7 @@ const AddFishContent = ({
     adiposeClipped,
     existingMarks,
     dead,
+    milting,
     plusCountMethod,
   ])
 
@@ -392,6 +422,7 @@ const AddFishContent = ({
       adiposeClipped,
       existingMarks,
       dead,
+      milting,
       plusCountMethod,
     ]
     let hasError = false
@@ -410,6 +441,34 @@ const AddFishContent = ({
     })
     if (hasError !== formHasError) setFormHasError(hasError)
   }
+
+  useEffect(() => {
+    const selectedProgramId = tabSlice?.activeTabId
+      ? visitSetupState?.[tabSlice.activeTabId]?.values?.programId
+      : null
+
+    console.log('spinner', selectedProgramId)
+    if (selectedProgramId) {
+      const currentProgramInfo = find(
+        visitSetupDefaults.programs,
+        (program: any) => program.id === selectedProgramId
+      )
+
+      if (currentProgramInfo?.programFormFields?.length) {
+        console.log(
+          'currentProgramInfo?.programFormFields',
+          currentProgramInfo?.programFormFields
+        )
+        const fishInputFields = currentProgramInfo?.programFormFields.filter(
+          (formField: any) => {
+            return formField?.formSection === 'Fish Input'
+          }
+        )
+        console.log('fishIbputFields', fishInputFields)
+        setConditionalFishInputFields(keyBy(fishInputFields, 'fieldName'))
+      }
+    }
+  }, [visitSetupDefaults.programs])
 
   const resetFormState = (resetType: 'chinook' | 'steelhead' | 'other') => {
     let identifier:
@@ -432,6 +491,7 @@ const AddFishContent = ({
     setAdiposeClipped(stateDefaults[identifier].adiposeClipped)
     setExistingMarks(stateDefaults[identifier].existingMarks)
     setDead(stateDefaults[identifier].dead)
+    setMilting(stateDefaults[identifier].milting)
     setPlusCountMethod(stateDefaults[identifier].plusCountMethod)
     setFormHasError(true)
     setFishUID(uid())
@@ -510,6 +570,7 @@ const AddFishContent = ({
       // @ts-ignore
       existingMarks: [...existingMarks.value, ...recentExistingMarks],
       dead: dead.value,
+      milting: milting.value,
       plusCountMethod: plusCountMethod.value,
       comments: comments.value,
       appliedMarks: [...appliedMarks.value],
@@ -1036,6 +1097,51 @@ const AddFishContent = ({
                       </FormControl>
                     )}
                   </HStack>
+                  <HStack>
+                    {conditionalFishInputFields?.['milting'] && (
+                      <FormControl w='1/3'>
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Milting
+                            </Text>
+                          </FormControl.Label>
+
+                          <Radio.Group
+                            name='milting'
+                            accessibilityLabel='milting'
+                            value={`${milting.value}`}
+                            onChange={(value: any) => {
+                              if (value === 'true') {
+                                setMilting({ ...milting, value: true })
+                              } else {
+                                setMilting({ ...milting, value: false })
+                              }
+                            }}
+                          >
+                            <HStack space={4}>
+                              <Radio
+                                colorScheme='primary'
+                                value='true'
+                                my={1}
+                                _icon={{ color: 'primary' }}
+                              >
+                                Yes
+                              </Radio>
+                              <Radio
+                                colorScheme='primary'
+                                value='false'
+                                my={1}
+                                _icon={{ color: 'primary' }}
+                              >
+                                No
+                              </Radio>
+                            </HStack>
+                          </Radio.Group>
+                        </HStack>
+                      </FormControl>
+                    )}
+                  </HStack>
 
                   <HStack space={4} w='80%'>
                     {(species.value == 'Chinook salmon' ||
@@ -1509,6 +1615,7 @@ const mapStateToProps = (state: RootState) => {
     fishStore: state.fishInput[activeTabId].fishStore,
     tabSlice: state.tabSlice,
     visitSetupState: state.visitSetup,
+    visitSetupDefaults: state.visitSetupDefaults,
   }
 }
 
