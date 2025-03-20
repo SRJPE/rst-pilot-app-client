@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Heading, View, VStack } from 'native-base'
+import { Heading, ScrollView, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import navigationSlice, {
@@ -568,7 +568,7 @@ const IncompleteSections = ({
 
   return (
     <>
-      <View
+      <ScrollView
         flex={1}
         bg='#fff'
         // justifyContent='center'
@@ -593,7 +593,7 @@ const IncompleteSections = ({
             )
           })}
         </VStack>
-      </View>
+      </ScrollView>
       <NavButtons
         navigation={navigation}
         handleSubmit={emitSubmission}
