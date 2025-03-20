@@ -20,13 +20,16 @@ import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptur
 import { AppDispatch, RootState } from '../../redux/store'
 import AppLogo from '../Shared/AppLogo'
 import MenuButton from './MenuButton'
+import { setActiveTab } from '../../redux/reducers/formSlices/tabSlice'
 
 interface ExtendedDrawerProps extends DrawerContentComponentProps {
   userCredentialsStore: any
+  tabSlice: any
 }
 
 const DrawerMenu = ({
   userCredentialsStore,
+  tabSlice,
   ...props
 }: ExtendedDrawerProps) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -55,24 +58,28 @@ const DrawerMenu = ({
     [navigation]
   )
 
-  const handlePressFormButton = useCallback((buttonTitle: string) => {
-    navigation?.navigate('Trap Visit Form', { screen: buttonTitle })
-    //for each object in the steps Array
-    //if the Object contain the name property that matched button title
-    //assign the index top stepPayload
-    //navigate to the index + 1
-    let stepPayload
-    for (let i = 0; i < stepsArray.length; i++) {
-      if (stepsArray[i].name === buttonTitle) {
-        stepPayload = i + 1
+  const handlePressFormButton = useCallback(
+    (buttonTitle: string) => {
+      navigation?.navigate('Trap Visit Form', { screen: buttonTitle })
+      //for each object in the steps Array
+      //if the Object contain the name property that matched button title
+      //assign the index top stepPayload
+      //navigate to the index + 1
+      let stepPayload
+      for (let i = 0; i < stepsArray.length; i++) {
+        if (stepsArray[i].name === buttonTitle) {
+          stepPayload = i + 1
+        }
       }
-    }
-    dispatch({
-      type: updateActiveStep,
-      payload: stepPayload,
-      // payload: steps[buttonTitle],
-    })
-  }, [])
+      dispatch(setActiveTab(tabSlice.activeTabId))
+      dispatch({
+        type: updateActiveStep,
+        payload: stepPayload,
+        // payload: steps[buttonTitle],
+      })
+    },
+    [tabSlice]
+  )
 
   const handlePressMarkRecaptureButton = useCallback((buttonTitle: string) => {
     navigation.navigate('Mark Recapture', { screen: buttonTitle })
@@ -248,6 +255,7 @@ const DrawerMenu = ({
 const mapStateToProps = (state: RootState) => {
   return {
     userCredentialsStore: state.userCredentials,
+    tabSlice: state.tabSlice,
   }
 }
 

@@ -40,9 +40,10 @@ import {
   navigateFlowRightButton,
   navigateFlowLeftButton,
 } from '../../utils/utils'
-import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import OptimizedInput from '../../components/Shared/OptimizedInput'
-import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import {
+  TabStateI,
+  setActiveTab,
+} from '../../redux/reducers/formSlices/tabSlice'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -50,8 +51,6 @@ import { find } from 'lodash'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
-import * as Yup from 'yup'
-import { getAllTabProcessingResults } from '../../redux/reducers/formSlices/fishProcessingSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -276,31 +275,6 @@ const TrapOperations = ({
     }
   }
 
-  const inputUnit = (text: string, setFieldValue?: any) => {
-    return (
-      <Text
-        color='#A1A1A1'
-        position='absolute'
-        top={50}
-        right={4}
-        fontSize={16}
-        onPress={() => {
-          if (setFieldValue) {
-            if (text === '°C') {
-              setWaterTempUnitC(true)
-              setFieldValue('waterTemperatureUnit', '°F')
-            } else {
-              setWaterTempUnitC(false)
-              setFieldValue('waterTemperatureUnit', '°C')
-            }
-          }
-        }}
-      >
-        {text}
-      </Text>
-    )
-  }
-
   const popoverTrigger = (triggerProps: any) => {
     return (
       <IconButton
@@ -450,6 +424,7 @@ const TrapOperations = ({
                   warningResultFlow,
                   warningResultTemp
                 )
+                dispatch(setActiveTab(activeTabId))
               }}
               errors={errors}
               touched={touched}
