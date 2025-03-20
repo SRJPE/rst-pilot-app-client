@@ -40,9 +40,10 @@ import {
   navigateFlowRightButton,
   navigateFlowLeftButton,
 } from '../../utils/utils'
-import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import OptimizedInput from '../../components/Shared/OptimizedInput'
-import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import {
+  TabStateI,
+  setActiveTab,
+} from '../../redux/reducers/formSlices/tabSlice'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -428,6 +429,7 @@ const TrapOperations = ({
                   warningResultFlow,
                   warningResultTemp
                 )
+                dispatch(setActiveTab(activeTabId))
               }}
               errors={errors}
               touched={touched}
