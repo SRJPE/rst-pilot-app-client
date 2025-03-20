@@ -264,7 +264,7 @@ export const generateDynamicTrapPostProcessingSchema = (fields: Array<any>) => {
 export const fishProcessingSchema = yup.object().shape({
   fishProcessedResult: yup.string().required('Fish Processed status required'),
   reasonForNotProcessing: yup.string().when('fishProcessedResult', {
-    is: (val: string) => val.includes('no catch data'),
+    is: (val: string) => val?.includes('no catch data'),
     then: schema => schema.required('Reason for not processing required'),
     otherwise: schema => schema.optional(),
   }),
