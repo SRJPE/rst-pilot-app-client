@@ -528,10 +528,7 @@ const TrapOperations = ({
           endTime,
         ])
         useEffect(() => {
-          if (
-            previouslyActiveTabId === activeTabId &&
-            navigationSlice.activeStep === 2
-          ) {
+          if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }
