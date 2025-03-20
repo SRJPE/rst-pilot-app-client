@@ -206,7 +206,7 @@ const FishProcessing = ({
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }
-        }, [previouslyActiveTabId])
+        }, [previouslyActiveTabId, activeTabId])
 
         const checkOtherTabForms = () => {
           const tabIds = Object.keys(tabSlice.tabs)

@@ -128,20 +128,20 @@ export const trapOperationsSchema = yup.object().shape({
   waterTurbidityUnit: yup.string(),
   rpm1: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .nullable()
     .max(30, 'Measurement must be ≤ 30')
     .typeError('Value must be a number')
     .required('Enter at least one measurement'),
   rpm2: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
     .typeError('Value must be a number'),
   rpm3: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
     .typeError('Value must be a number'),
@@ -164,20 +164,20 @@ export const trapPostProcessingSchema = yup.object().shape({
   comments: yup.string(),
   rpm1: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .nullable()
     .max(30, 'Measurement must be ≤ 30')
     .typeError('Value must be a number')
     .required('Enter at least one measurement'),
   rpm2: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
     .typeError('Value must be a number'),
   rpm3: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
     .typeError('Value must be a number'),
