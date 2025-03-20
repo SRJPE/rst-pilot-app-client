@@ -7,6 +7,7 @@ import {
   HStack,
   IconButton,
   Pressable,
+  ScrollView,
   Text,
   VStack,
 } from 'native-base'
@@ -95,7 +96,7 @@ const DrawerMenu = ({
   }, [])
 
   return (
-    <>
+    <ScrollView>
       <VStack bg='primary' pt={8}>
         <AppLogo imageSize={175} />
         <IconButton
@@ -247,7 +248,7 @@ const DrawerMenu = ({
           title='Input Turbidity'
         />
       </VStack>
-    </>
+    </ScrollView>
   )
 }
 
