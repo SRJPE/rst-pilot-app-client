@@ -10,7 +10,7 @@ const GenerateReportNavButtons = ({
   handleSubmit,
 }: {
   navigation?: any
-  isDisabled: boolean
+  isDisabled?: boolean
   handleSubmit?: (e?: React.FormEvent<HTMLFormElement>) => void
 }) => {
   const activePage = useRoute().name
