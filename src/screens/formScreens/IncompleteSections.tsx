@@ -241,17 +241,11 @@ const IncompleteSections = ({
 
     const programFormFields = selectedProgramObj.programFormFields
     const dyanimcEnvironmentalFields = [
-      // 'flowMeasure',
-      // 'waterTemperature',
-      // 'waterTurbidity',
       'dissolvedOxygen',
       'electricalConductivity',
       'specificConductivity',
       'secchi',
       'ph',
-      // 'tideCode',
-      // 'flowDirection',
-      // 'weatherCode',
     ]
 
     const formFieldsLookup = keyBy(programFormFields, 'fieldName')
@@ -450,7 +444,7 @@ const IncompleteSections = ({
           'conditionCode'
         ),
         tideCode: getDBValue(
-          trapOperationsState[id].values.tideCode,
+          trapPostProcessingState[id].values.tideCode,
           'tideCode'
         ),
         flowDirection: getDBValue(
@@ -461,6 +455,9 @@ const IncompleteSections = ({
           trapOperationsState[id].values.weatherCode,
           'weatherCode'
         ),
+        samplingAltered: trapPostProcessingState[id].values.samplingAltered
+          ? true
+          : false,
       }
 
       dispatch(saveTrapVisitSubmission(trapVisitSubmission))

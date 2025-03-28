@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { Text, HStack, Box, Link, VStack } from 'native-base'
+import {
+  Text,
+  HStack,
+  Box,
+  Link,
+  VStack,
+  Radio,
+  FormControl,
+} from 'native-base'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../Shared/FormInputComponent'
@@ -201,6 +209,55 @@ const ConditionalTrapVisitFields = ({
             selectOptions={dropdownValues[fieldName]}
             validationSchema={validationSchema}
           />
+        </Box>
+      )
+    } else if (fieldType === 'radio') {
+      return (
+        <Box
+          key={index} // Always add a key when mapping
+          flexBasis='45%' // Ensures 3 items per row (adjust for spacing)
+          minWidth='45%' // Prevents shrinking too much
+          maxWidth='45%' // Prevents growing beyond this size>
+          flexGrow={1}
+          mr={8} // Removes right margin from every 3rd item
+        >
+          <FormControl>
+            <FormControl.Label>
+              <Text color='black' fontSize='xl'>
+                {displayName}
+              </Text>
+            </FormControl.Label>
+            <Radio.Group
+              name={fieldName}
+              accessibilityLabel={fieldName}
+              value={`${values[fieldName]}`}
+              onChange={(value: any) => {
+                setFieldTouched(fieldName, true)
+                if (value === 'true') {
+                  setFieldValue(fieldName, true)
+                } else {
+                  setFieldValue(fieldName, false)
+                }
+              }}
+            >
+              <Radio
+                colorScheme='primary'
+                value='true'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                Yes
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='false'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                No
+              </Radio>
+            </Radio.Group>
+          </FormControl>
         </Box>
       )
     } else {
