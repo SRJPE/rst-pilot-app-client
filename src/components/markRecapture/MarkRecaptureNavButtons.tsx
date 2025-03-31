@@ -115,7 +115,7 @@ export default function MarkRecaptureNavButtons({
       //if current screen uses formik && there are errors
       (touched && Object.keys(touched).length === 0) ||
       (errors && Object.keys(errors).length > 0) ||
-      !appliedMarks?.length
+      (activePage === 'Release Data Entry' && !appliedMarks?.length)
     )
   }
 
