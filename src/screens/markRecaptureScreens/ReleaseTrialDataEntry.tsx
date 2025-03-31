@@ -431,6 +431,7 @@ const ReleaseDataEntry = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
+            appliedMarks={releaseTrialDataEntryState.values.appliedMarks}
           />
           {/* --------- Modals --------- */}
           <CustomModal

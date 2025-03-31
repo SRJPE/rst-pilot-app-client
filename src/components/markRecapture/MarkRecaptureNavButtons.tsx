@@ -16,14 +16,15 @@ export default function MarkRecaptureNavButtons({
   touched,
   values,
   clearFormValues,
+  appliedMarks,
 }: {
   navigation?: any
   handleSubmit?: any
   errors?: any
   touched?: any
-
   values?: any
   clearFormValues?: any
+  appliedMarks?: Array<any>
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector(
@@ -113,7 +114,8 @@ export default function MarkRecaptureNavButtons({
       // OR
       //if current screen uses formik && there are errors
       (touched && Object.keys(touched).length === 0) ||
-      (errors && Object.keys(errors).length > 0)
+      (errors && Object.keys(errors).length > 0) ||
+      !appliedMarks?.length
     )
   }
 
