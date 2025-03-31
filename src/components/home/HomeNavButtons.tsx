@@ -197,7 +197,7 @@ export default function BottomNavigation({
               <HStack
                 space={2}
                 alignItems='center'
-                style={[{ transform: [{ translateX: -173 }] }]}
+                style={[{ transform: [{ translateX: -63 }] }]}
               >
                 <Badge
                   alignSelf='center'
@@ -207,7 +207,7 @@ export default function BottomNavigation({
                   borderRadius='5'
                 >
                   <Text fontSize={23} fontWeight='400'>
-                    Mark Recapture Release
+                    Release Trial
                   </Text>
                 </Badge>
                 <IconButton
