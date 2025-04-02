@@ -13,12 +13,9 @@ import {
   Popover,
   Radio,
   ScrollView,
-  View,
   Text,
   VStack,
   Pressable,
-  Center,
-  Badge,
 } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -46,9 +43,8 @@ import {
   alphabeticalSort,
   QARanges,
   reorderTaxon,
-  returnDefinitionArray,
   addFishErrorMessages,
-  decodedRecentReleaseMarks,
+  createFormValueDefault,
 } from '../../utils/utils'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
@@ -60,14 +56,13 @@ import FishConditionsDropDown from '../../components/form/FishConditionsDropDown
 import { startCase } from 'lodash'
 import { ReleaseMarkI, FormValueI } from '../../utils/interfaces'
 import GeneticSampleBadgeList from '../../components/form/GeneticSampleBadgeList'
+import AddExistingMark from '../../components/form/AddExistingMark'
 
 const AddFishContent = ({
   route,
   saveIndividualFish,
   updateFishEntry,
   deleteFishEntry,
-  activeTab,
-  setActiveTab,
   closeModal,
   fishStore,
   tabSlice,
@@ -78,8 +73,6 @@ const AddFishContent = ({
   saveMarkOrTagData: any
   updateFishEntry: any
   deleteFishEntry: any
-  activeTab: any
-  setActiveTab: any
   closeModal: any
   fishStore: FishStoreI
   tabSlice: TabStateI
@@ -148,20 +141,6 @@ const AddFishContent = ({
   }
 
   // ------------------------------------------------------------------------------------------------------------------------
-
-  const createFormValueDefault = ({
-    value,
-    required = false,
-    error = '',
-    touched = false,
-  }: {
-    value: Array<any> | string | boolean | null
-    required?: boolean
-    error?: string
-    touched?: boolean
-  }) => {
-    return { value, touched, error, required }
-  }
 
   const stateDefaults = {
     whenSpeciesChinook: {
@@ -1068,142 +1047,16 @@ const AddFishContent = ({
                     {(species.value == 'Chinook salmon' ||
                       species.value == 'Steelhead / rainbow trout') && (
                       <FormControl w='full'>
-                        <HStack space={2} alignItems='center'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Add Existing Mark
-                            </Text>
-                          </FormControl.Label>
-                          <Popover
-                            placement='top right'
-                            trigger={triggerProps => {
-                              return (
-                                <IconButton
-                                  {...triggerProps}
-                                  icon={
-                                    <Icon
-                                      as={MaterialIcons}
-                                      color='black'
-                                      name='info-outline'
-                                      size='xl'
-                                    />
-                                  }
-                                ></IconButton>
-                              )
-                            }}
-                          >
-                            <Popover.Content
-                              accessibilityLabel='Existing Mark  Info'
-                              w='600'
-                              ml='10'
-                            >
-                              <Popover.Arrow />
-                              <Popover.CloseButton />
-                              <Popover.Header>
-                                Click on one more existing mark buttons to add
-                                marks.
-                              </Popover.Header>
-                              <Popover.Body p={4}>
-                                <VStack space={2}>
-                                  <Text fontSize='md'>
-                                    The existing mark buttons display
-                                    abbreviated versions of marks recently used
-                                    for efficiency trials. If you catch a fish
-                                    with other existing marks, please click on
-                                    “select another mark type”. This will open
-                                    up a window where you can specify mark type,
-                                    color, position, and code if applicable.
-                                  </Text>
-                                  <Divider />
-
-                                  <Text fontSize='md'>
-                                    Abbreviations follow a consistent format
-                                    “mark type abbreviation - color abbreviation
-                                    - position abbreviation”. All of these
-                                    fields are only applicable to some mark
-                                    types. Any fields that are not applicable to
-                                    a particular mark type are left blank.
-                                  </Text>
-                                  <Text fontSize='md'>
-                                    Below are some examples of common marks:
-                                  </Text>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Avatar size={'2'} mt={'2'} />
-                                    <Text fontSize='md'>
-                                      CWT: Coded wire tag
-                                    </Text>
-                                  </HStack>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Avatar size={'2'} mt={'2'} />
-                                    <Text fontSize='md'>Fin Clip</Text>
-                                  </HStack>
-                                </VStack>
-                              </Popover.Body>
-                            </Popover.Content>
-                          </Popover>
-                        </HStack>
                         <VStack space={4}>
-                          <VStack space={5}>
-                            {dropdownValues?.releaseMarks?.length > 0 &&
-                              decodedRecentReleaseMarks(
-                                dropdownValues,
-                                tabSlice?.activeTabId
-                                  ? visitSetupState?.[tabSlice.activeTabId]
-                                      ?.values?.programId
-                                  : null
-                              ).map((recentReleaseMark: any, index: number) => {
-                                const {
-                                  id,
-                                  markType,
-                                  markColor,
-                                  markPosition,
-                                  releasedAt,
-                                } = recentReleaseMark
-                                return (
-                                  <Button
-                                    key={index}
-                                    bg={
-                                      recentExistingMarks.some(
-                                        (mark: ReleaseMarkI) => mark.id === id
-                                      )
-                                        ? 'primary'
-                                        : 'secondary'
-                                    }
-                                    shadow='3'
-                                    borderRadius='5'
-                                    w='100%'
-                                    onPress={() => {
-                                      handlePressRecentExistingMarkButton(
-                                        recentReleaseMark
-                                      )
-                                    }}
-                                    justifyContent='flex-start'
-                                  >
-                                    <Text
-                                      color={
-                                        recentExistingMarks.some(
-                                          (mark: ReleaseMarkI) => mark.id === id
-                                        )
-                                          ? 'white'
-                                          : 'primary'
-                                      }
-                                      fontWeight='500'
-                                      fontSize='md'
-                                    >
-                                      Released On:{' '}
-                                      {new Date(
-                                        releasedAt
-                                      ).toLocaleDateString()}
-                                      {` (${markType}${
-                                        markColor ? `- ${markColor}` : ''
-                                      } ${
-                                        markPosition ? `- ${markPosition}` : ''
-                                      })`}
-                                    </Text>
-                                  </Button>
-                                )
-                              })}
-                          </VStack>
+                          <AddExistingMark
+                            dropdownValues={dropdownValues}
+                            activeTabId={tabSlice.activeTabId}
+                            recentExistingMarks={recentExistingMarks}
+                            handlePressRecentExistingMarkButton={
+                              handlePressRecentExistingMarkButton
+                            }
+                            visitSetupState={visitSetupState}
+                          />
                           <MarkBadgeList
                             badgeListContent={existingMarks.value}
                             field='existingMarks'

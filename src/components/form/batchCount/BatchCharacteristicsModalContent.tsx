@@ -21,13 +21,8 @@ import {
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
-import {
-  reorderTaxon,
-  returnDefinitionArray,
-  decodedRecentReleaseMarks,
-} from '../../../utils/utils'
+import { reorderTaxon } from '../../../utils/utils'
 import CustomModalHeader from '../../Shared/CustomModalHeader'
-import CustomSelect from '../../Shared/CustomSelect'
 import MarkBadgeList from '../../markRecapture/MarkBadgeList'
 import CustomModal from '../../Shared/CustomModal'
 import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
@@ -37,6 +32,7 @@ import SpeciesDropDown from '../SpeciesDropDown'
 import FishConditionsDropDown from '../FishConditionsDropDown'
 import { startCase } from 'lodash'
 import { useNavigation } from '@react-navigation/native'
+import AddExistingMark from '../AddExistingMark'
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -257,68 +253,17 @@ const BatchCharacteristicsModalContent = ({
               </VStack>
 
               <VStack space={4} w={'80%'}>
-                <Text color='black' fontSize='xl'>
-                  Add Existing Mark
-                </Text>
                 {batchCountStore.batchCharacteristics.existingMarks.length <
                   1 && (
-                  <VStack space={5}>
-                    {dropdownValues?.releaseMarks?.length > 0 &&
-                      decodedRecentReleaseMarks(
-                        dropdownValues,
-                        tabSlice?.activeTabId
-                          ? visitSetupState?.[tabSlice.activeTabId]?.values
-                              ?.programId
-                          : null
-                      ).map((recentReleaseMark: any, index: number) => {
-                        const {
-                          id,
-                          markType,
-                          markColor,
-                          markPosition,
-                          releasedAt,
-                        } = recentReleaseMark
-                        return (
-                          <Button
-                            key={index}
-                            bg={
-                              recentExistingMarks.some(
-                                (mark: ReleaseMarkI) => mark.id === id
-                              )
-                                ? 'primary'
-                                : 'secondary'
-                            }
-                            shadow='3'
-                            borderRadius='5'
-                            w='100%'
-                            justifyContent='flex-start'
-                            onPress={() => {
-                              handlePressRecentExistingMarkButton(
-                                recentReleaseMark
-                              )
-                            }}
-                          >
-                            <Text
-                              color={
-                                recentExistingMarks.some(
-                                  (mark: ReleaseMarkI) => mark.id === id
-                                )
-                                  ? 'white'
-                                  : 'primary'
-                              }
-                              fontWeight='500'
-                              fontSize='md'
-                            >
-                              Released On:{' '}
-                              {new Date(releasedAt).toLocaleDateString()}
-                              {` (${markType}${
-                                markColor ? `- ${markColor}` : ''
-                              } ${markPosition ? `- ${markPosition}` : ''})`}
-                            </Text>
-                          </Button>
-                        )
-                      })}
-                  </VStack>
+                  <AddExistingMark
+                    dropdownValues={dropdownValues}
+                    activeTabId={tabSlice.activeTabId}
+                    recentExistingMarks={recentExistingMarks}
+                    handlePressRecentExistingMarkButton={
+                      handlePressRecentExistingMarkButton
+                    }
+                    visitSetupState={visitSetupState}
+                  />
                 )}
                 <MarkBadgeList
                   badgeListContent={

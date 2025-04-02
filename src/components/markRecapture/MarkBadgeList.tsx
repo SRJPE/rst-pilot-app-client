@@ -72,7 +72,7 @@ const MarkBadgeList = ({
                   bg='primary'
                   shadow='3'
                   borderRadius='5'
-                  w='90%'
+                  w='100%'
                   endIcon={
                     <IconButton
                       onPress={() => {
