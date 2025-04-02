@@ -587,3 +587,17 @@ export const decodedRecentReleaseMarks = (
       }
     })
 }
+
+export const createFormValueDefault = ({
+  value,
+  required = false,
+  error = '',
+  touched = false,
+}: {
+  value: Array<any> | string | boolean | null
+  required?: boolean
+  error?: string
+  touched?: boolean
+}) => {
+  return { value, touched, error, required }
+}

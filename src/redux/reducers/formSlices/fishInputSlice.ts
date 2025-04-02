@@ -228,8 +228,16 @@ export const saveFishSlice = createSlice({
       }
     },
     savePlusCount: (state, action) => {
-      const { tabId, species, count, run, lifeStage, plusCountMethod, dead } =
-        action.payload
+      const {
+        tabId,
+        species,
+        count,
+        run,
+        lifeStage,
+        plusCountMethod,
+        dead,
+        existingMarks,
+      } = action.payload
 
       const plusCountEntry = {
         UID: null,
@@ -241,7 +249,7 @@ export const saveFishSlice = createSlice({
         fishConditions: [],
         lifeStage: getLifeStage(species, lifeStage),
         adiposeClipped: null,
-        existingMarks: [],
+        existingMarks: existingMarks.length ? existingMarks : [],
         dead,
         willBeUsedInRecapture: null,
         plusCountMethod,
