@@ -494,8 +494,12 @@ const AddFishContent = ({
       dead: dead.value,
       plusCountMethod: plusCountMethod.value,
       comments: comments.value,
-      appliedMarks: [...appliedMarks.value],
-      geneticSamples: [...geneticSamples.value],
+      appliedMarks: Array.isArray(appliedMarks?.value)
+        ? [...appliedMarks.value]
+        : [],
+      geneticSamples: Array.isArray(geneticSamples?.value)
+        ? [...geneticSamples.value]
+        : [],
     }
 
     return values
