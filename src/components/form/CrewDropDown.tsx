@@ -16,7 +16,8 @@ export default function CrewDropDown({
   visitSetupState,
   stream,
   tabId,
-  values,
+  fieldName,
+  label,
 }: {
   open: boolean
   onOpen: any
@@ -28,7 +29,8 @@ export default function CrewDropDown({
   visitSetupState: any
   stream: string
   tabId: any
-  values: any
+  fieldName: string
+  label: string
 }) {
   const formikProps = useFormikContext<{ crew: PersonnelObject[] }>()
   const crewError = formikProps.errors.crew
@@ -47,8 +49,8 @@ export default function CrewDropDown({
   }, [tabId])
 
   useEffect(() => {
-    setFieldValue('crew', [...value])
-    if (value.length) setFieldTouched('crew', true)
+    setFieldValue(fieldName, [...value])
+    if (value.length) setFieldTouched(fieldName, true)
   }, [value])
 
   useEffect(() => {
@@ -60,18 +62,18 @@ export default function CrewDropDown({
 
   const clearSelectedValues = () => {
     setValue([])
-    setFieldValue('crew', [])
-    setFieldTouched('crew', false)
+    setFieldValue(fieldName, [])
+    setFieldTouched(fieldName, false)
   }
 
   return (
     <View>
       <Text color={crewDropdownHasError ? 'red.700' : 'black'} fontSize='md'>
-        Crew
+        {label}
       </Text>
       <DropDownPicker
         onClose={() => {
-          setFieldTouched('crew', true)
+          setFieldTouched(fieldName, true)
         }}
         open={open}
         onOpen={onOpen}

@@ -320,6 +320,9 @@ const NavButtons = ({
 
   const rightDisabledBool = useMemo(() => {
     switch (activePage) {
+      case 'Visit Setup':
+        // console.log('errors', errors)
+        return false
       case 'Incomplete Sections':
         return !isFormComplete
       case 'Non Functional Trap':

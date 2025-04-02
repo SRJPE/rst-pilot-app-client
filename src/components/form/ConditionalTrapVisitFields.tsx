@@ -15,6 +15,7 @@ import FastSelect from '../Shared/FastSelect'
 import YSITurbidity from './YSITurbidity'
 import CustomModal from '../Shared/CustomModal'
 import RSTRLogSheet from './RSTRLogSheet'
+import CustomSelect from '../Shared/CustomSelect'
 
 interface FieldInterface {
   id: number
@@ -158,6 +159,40 @@ const ConditionalTrapVisitFields = ({
             validationSchema,
           }}
         />
+      )
+    }
+
+    if (fieldName === 'dataRecorder') {
+      return (
+        <>
+          <Box
+            key={index} // Always add a key when mapping
+            flexBasis='100%' // Ensures 3 items per row (adjust for spacing)
+            minWidth='100%' // Prevents shrinking too much
+            maxWidth='100%' // Prevents growing beyond this size>
+            flexGrow={1}
+            mr={8} // Removes right margin from every 3rd item
+          >
+            <CustomSelect
+              camelName={fieldName}
+              label={displayName}
+              errors={errors}
+              touched={touched}
+              selectedValue={values.dataRecorder}
+              placeholder='Select Data Recorder'
+              onValueChange={(itemValue: string) => {
+                setFieldValue('dataRecorder', itemValue)
+                setFieldTouched('dataRecorder', true)
+              }}
+              setFieldTouched={() => setFieldTouched('dataRecorder')}
+              selectOptions={values?.crew?.map((crewMember: any) => ({
+                label: crewMember,
+                value: crewMember,
+              }))}
+              validationSchema={validationSchema}
+            />
+          </Box>
+        </>
       )
     }
     if (fieldType === 'input') {

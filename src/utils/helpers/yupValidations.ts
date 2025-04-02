@@ -14,6 +14,55 @@ export const trapVisitSchema = yup.object().shape({
   trapName: yup.array().min(1, 'At least 1 trap name is required').required(),
 })
 
+export const generateTrapVisitSchema = (fields: Array<any>) => {
+  const sectionFields = fields.filter(
+    (field: any) => field.formSection === 'Visit Setup'
+  )
+  // always required
+  let schema: { [key: string]: any } = {
+    stream: yup.string().required('Stream required'),
+    trapSite: yup.string().when('stream', {
+      is: (val: string) => val !== null,
+      then: yup.string().required('Trap site required'),
+    }),
+    crew: yup.array().min(1, 'At least 1 crew member is required').required(),
+    trapName: yup.array().min(1, 'At least 1 trap name is required').required(),
+  }
+
+  sectionFields.forEach(field => {
+    let validator = yup.string() as any // Default to string validation
+
+    if (field.fieldType === 'email') {
+      validator = yup.string().email('Invalid email format')
+    } else if (field.fieldType === 'input') {
+      validator = yup.number().typeError('Must be a number')
+      validator = validator.positive(`Measurement required`)
+      if (field.minThreshold) {
+        validator = validator.min(
+          field.minThreshold,
+          `${field.displayName} must be >= ${field.minThreshold}`
+        )
+      }
+      if (field.maxThreshold) {
+        validator = validator.max(
+          field.maxThreshold,
+          `${field.displayName} must be at <= ${field.maxThreshold}`
+        )
+      }
+    } else if (field.fieldType === 'boolean') {
+      validator = yup.boolean()
+    }
+
+    if (field.required) {
+      validator = validator.required(`${field.displayName} is required`)
+    }
+
+    schema[field.fieldName] = validator
+  })
+
+  return yup.object().shape(schema)
+}
+
 export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
   const sectionFields = fields.filter(
     (field: any) => field.formSection === 'Trap Operations'

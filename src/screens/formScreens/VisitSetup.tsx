@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Formik } from 'formik'
-import { connect, useDispatch } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
   markTrapVisitPaperEntry,
@@ -41,6 +41,8 @@ import TrapNameDropDown from '../../components/form/TrapNameDropDown'
 import { navigateHelper } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
+import { generateTrapVisitSchema } from '../../utils/helpers/yupValidations'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -66,6 +68,12 @@ const VisitSetup = ({
 }) => {
   // try {
   const dispatch = useDispatch<AppDispatch>()
+  const navigationState = useSelector((state: any) => state.navigation)
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
+  const activeStep = navigationState.activeStep
+  const activePage = navigationState.steps[activeStep]?.name
   const [isPaperEntry, setIsPaperEntry] = useState(false as boolean)
   const [selectedProgramId, setSelectedProgramId] = useState<number | null>(
     null
@@ -79,6 +87,8 @@ const VisitSetup = ({
   )
   const [trapDropDownOpen, setTrapDropDownOpen] = useState(false as boolean)
   const [crewDropDownOpen, setCrewDropDownOpen] = useState(false as boolean)
+  const [validationSchema, setValidationSchema] = useState<any>(trapVisitSchema)
+  const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
 
   const onTrapOpen = useCallback(() => {
     setCrewDropDownOpen(false)
@@ -88,6 +98,7 @@ const VisitSetup = ({
   }, [])
 
   useEffect(() => {
+    console.log('heRe', tabSlice?.activeTabId)
     if (tabSlice.activeTabId != null) {
       if (
         visitSetupState[tabSlice?.activeTabId]?.values?.programId !=
@@ -108,6 +119,23 @@ const VisitSetup = ({
       setIsPaperEntry(visitSetupState[tabSlice?.activeTabId]?.isPaperEntry)
     }
   }, [tabSlice?.activeTabId])
+
+  useEffect(() => {
+    const currentProgramInfo = find(
+      visitSetupDefaultsState.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+    console.log('currentProgramInfo', currentProgramInfo)
+
+    if (currentProgramInfo?.programFormFields?.length) {
+      const dynamicTrapOpsSchema = generateTrapVisitSchema(
+        currentProgramInfo?.programFormFields
+      )
+      setValidationSchema(dynamicTrapOpsSchema)
+    }
+
+    setSelectedProgramObj(currentProgramInfo)
+  }, [selectedProgramId])
 
   const onSubmit = (values: any, tabId: string | null) => {
     const programId = selectedProgramId
@@ -416,6 +444,8 @@ const VisitSetup = ({
         errors,
         values,
         resetForm,
+        handleChange,
+        handleBlur,
       }) => {
         useEffect(() => {
           if (
@@ -432,8 +462,8 @@ const VisitSetup = ({
             const programId = find(
               visitSetupDefaultsState?.trapLocations,
               (trapLocation: any) => trapLocation.id === values.trapLocationId
-            )?.id
-            setSelectedProgramId(programId)
+            )
+            setSelectedProgramId(programId.id)
             generateCrewList(programId)
             shouldShowTrapNameField(
               visitSetupState[tabSlice?.activeTabId]?.values?.trapSite
@@ -586,7 +616,22 @@ const VisitSetup = ({
                         visitSetupState={visitSetupState}
                         stream={values.stream}
                         tabId={tabSlice?.activeTabId}
+                        fieldName='crew'
+                        label='Crew'
+                      />
+                      <ConditionalTrapVisitFields
+                        touched={touched}
+                        errors={errors}
                         values={values}
+                        handleChange={handleChange}
+                        handleBlur={handleBlur}
+                        setFieldTouched={setFieldTouched}
+                        dropdownValues={dropdownValues}
+                        activePage={activePage}
+                        formFields={selectedProgramObj?.programFormFields}
+                        setFieldValue={setFieldValue}
+                        activeTabId={tabSlice.activeTabId}
+                        validationSchema={validationSchema}
                       />
                     </>
                   )}
