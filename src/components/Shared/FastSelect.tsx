@@ -70,7 +70,6 @@ const FastSelect = ({
     >
       {selectOptions ? (
         selectOptions.map((item: any, idx: number) => {
-          console.log('item', item)
           if (dataType === 'fundingAgency') {
             return (
               <Select.Item

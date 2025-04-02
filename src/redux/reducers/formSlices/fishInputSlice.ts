@@ -239,6 +239,7 @@ export const saveFishSlice = createSlice({
         plusCountMethod,
         dead,
         comments,
+        existingMarks,
       } = action.payload
 
       const plusCountEntry = {
@@ -251,7 +252,7 @@ export const saveFishSlice = createSlice({
         fishConditions: [],
         lifeStage: getLifeStage(species, lifeStage),
         adiposeClipped: null,
-        existingMarks: [],
+        existingMarks: existingMarks.length ? existingMarks : [],
         dead,
         willBeUsedInRecapture: null,
         plusCountMethod,

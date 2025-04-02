@@ -594,3 +594,16 @@ export const renderRequiredOrOptionalLabel = ({
     return ' (optional)'
   }
 }
+export const createFormValueDefault = ({
+  value,
+  required = false,
+  error = '',
+  touched = false,
+}: {
+  value: Array<any> | string | boolean | null
+  required?: boolean
+  error?: string
+  touched?: boolean
+}) => {
+  return { value, touched, error, required }
+}

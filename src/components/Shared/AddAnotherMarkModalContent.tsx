@@ -65,7 +65,10 @@ const AddAnotherMarkModalContent = ({
     } else if (screenName === 'markRecaptureRelease') {
       //if the modal is opened in mark recapture / release
       dispatch(addMarkToAppliedMarks(values))
-    } else if (screenName === 'addIndividualFish') {
+    } else if (
+      screenName === 'addIndividualFish' ||
+      screenName === 'plusCount'
+    ) {
       setExistingMarks({
         ...existingMarks,
         value: [...existingMarksArray, values],
