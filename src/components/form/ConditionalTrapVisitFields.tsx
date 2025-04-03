@@ -16,7 +16,7 @@ import YSITurbidity from './YSITurbidity'
 import CustomModal from '../Shared/CustomModal'
 import RSTRLogSheet from './RSTRLogSheet'
 import CustomSelect from '../Shared/CustomSelect'
-
+import { renderRequiredOrOptionalLabel } from '../../utils/utils'
 interface FieldInterface {
   id: number
   programId: number
@@ -259,7 +259,13 @@ const ConditionalTrapVisitFields = ({
           <FormControl>
             <FormControl.Label>
               <Text color='black' fontSize='xl'>
-                {displayName}
+                {displayName}{' '}
+                {validationSchema
+                  ? renderRequiredOrOptionalLabel({
+                      fieldName: fieldName,
+                      validationSchema,
+                    })
+                  : ''}
               </Text>
             </FormControl.Label>
             <Radio.Group

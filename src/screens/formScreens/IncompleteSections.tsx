@@ -379,7 +379,12 @@ const IncompleteSections = ({
               : fishProcessingState?.[id]?.values?.reasonForNotProcessing
           )
         ),
-        sampleGearId: null,
+        sampleGearId:
+          find(
+            visitSetupDefaultState?.trapLocations,
+            (trapLocation: any) =>
+              trapLocation.id === visitSetupState[id].values.trapLocationId
+          )?.equipmentId || null,
         coneDepth: trapOperationsState[id].values.coneDepth
           ? parseFloat(trapOperationsState[id].values.coneDepth)
           : null,

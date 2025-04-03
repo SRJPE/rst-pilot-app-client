@@ -38,7 +38,10 @@ import { DeviceEventEmitter, TouchableWithoutFeedback } from 'react-native'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import { uid } from 'uid'
 import TrapNameDropDown from '../../components/form/TrapNameDropDown'
-import { navigateHelper } from '../../utils/utils'
+import {
+  navigateHelper,
+  capitalizeFirstLetterOfEachWord,
+} from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
@@ -400,6 +403,26 @@ const VisitSetup = ({
     )
   }
 
+  const displayEquipmentType = (values: any) => {
+    let trapLocation = null
+    if (showTrapNameField) {
+      trapLocation = selectedProgramObj?.trappingSites?.find(
+        (obj: any) => obj.trapName === values.trapName[0]
+      )
+    } else {
+      trapLocation = visitSetupDefaultsState?.trapLocations?.find(
+        (obj: any) =>
+          obj.trapName === values.trapSite || obj.siteName === values.trapSite
+      )
+    }
+
+    return trapLocation?.definition ? (
+      <Text fontSize='lg' fontWeight='500' mt={0} pt={0}>
+        Equipment: {capitalizeFirstLetterOfEachWord(trapLocation?.definition)}
+      </Text>
+    ) : null
+  }
+
   return (
     <Formik
       validationSchema={trapVisitSchema}
@@ -498,7 +521,7 @@ const VisitSetup = ({
                 borderColor='themeGrey'
                 borderWidth='15'
               >
-                <VStack space={4}>
+                <VStack space={3}>
                   <FormControl>
                     <HStack space={3} alignItems='center'>
                       <FormControl.Label>
@@ -604,7 +627,7 @@ const VisitSetup = ({
                           tabSlice={tabSlice}
                         />
                       )}
-
+                      {displayEquipmentType(values)}
                       <CrewDropDown
                         open={crewDropDownOpen}
                         onOpen={onCrewOpen}

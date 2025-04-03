@@ -67,6 +67,7 @@ export default function TrapNameDropDown({
   }
   useEffect(() => {
     setMarginBottom(generateMarginBottom())
+    setValue([])
   }, [list])
 
   return (
