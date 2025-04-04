@@ -173,7 +173,7 @@ export default function BottomNavigation({
                   borderRadius='5'
                 >
                   <Text fontSize={23} fontWeight='400'>
-                    Standard Trap Visit
+                    Fish Sampling Data Entry
                   </Text>
                 </Badge>
                 <IconButton
