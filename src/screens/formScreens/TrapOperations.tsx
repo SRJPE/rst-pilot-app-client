@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { Formik, yupToFormErrors } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -127,6 +127,7 @@ const TrapOperations = ({
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
   const [validationSchema, setValidationSchema] =
     useState<any>(trapOperationsSchema)
+  const inputRefs = useRef({}) // key: field name, value: ref
 
   useEffect(() => {
     // flow threshold on trap location
@@ -250,7 +251,6 @@ const TrapOperations = ({
   }
 
   const onSubmit = (values: any, tabId: string | null) => {
-    console.log('values', values)
     if (tabId) {
       const errors = checkForErrors(values)
       if (values.recordTurbidityInPostProcessing) {
@@ -757,6 +757,7 @@ const TrapOperations = ({
                             RightElement={<TextInputAdornment text='cfs' />}
                             validationSchema={validationSchema}
                             keyboardType={'number-pad'}
+                            inputRefs={inputRefs}
                           />
                         </Box>
                         <Box
@@ -776,6 +777,7 @@ const TrapOperations = ({
                             onBlur={handleBlur('waterTemperature')}
                             validationSchema={validationSchema}
                             keyboardType={'number-pad'}
+                            inputRefs={inputRefs}
                             RightElement={
                               <Button
                                 bg='warmGray.200'
@@ -833,6 +835,7 @@ const TrapOperations = ({
                         setFieldValue={setFieldValue}
                         activeTabId={activeTabId}
                         validationSchema={validationSchema}
+                        inputRefs={inputRefs}
                       />
                       <Text
                         color='black'

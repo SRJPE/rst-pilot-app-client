@@ -101,7 +101,6 @@ const VisitSetup = ({
   }, [])
 
   useEffect(() => {
-    console.log('heRe', tabSlice?.activeTabId)
     if (tabSlice.activeTabId != null) {
       if (
         visitSetupState[tabSlice?.activeTabId]?.values?.programId !=
@@ -128,7 +127,6 @@ const VisitSetup = ({
       visitSetupDefaultsState.programs,
       (program: any) => program.id === selectedProgramId
     )
-    console.log('currentProgramInfo', currentProgramInfo)
 
     if (currentProgramInfo?.programFormFields?.length) {
       const dynamicTrapOpsSchema = generateTrapVisitSchema(

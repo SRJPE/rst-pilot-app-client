@@ -45,6 +45,7 @@ const ConditionalTrapVisitFields = ({
   activeTabId,
   trapOperationsStore,
   validationSchema,
+  inputRefs,
 }: {
   touched: any
   errors: any
@@ -59,6 +60,7 @@ const ConditionalTrapVisitFields = ({
   activeTabId: string | null
   trapOperationsStore?: any
   validationSchema?: any
+  inputRefs?: any
 }) => {
   const [sortedFormFields, setSortedFormFields] = useState<
     Array<FieldInterface>
@@ -71,17 +73,15 @@ const ConditionalTrapVisitFields = ({
 
   useEffect(() => {
     if (formFields) {
-      const sortedFields = [...formFields].sort(
-        (a, b) => a.orderIndex - b.orderIndex
-      )
+      const sortedFields = [
+        ...formFields.filter((field: any) => field.formSection === activePage),
+      ].sort((a, b) => a.orderIndex - b.orderIndex)
       setSortedFormFields(sortedFields)
     }
-  }, [formFields])
+  }, [formFields, activePage])
 
   const renderFieldComponent = (item: FieldInterface, index: number) => {
-    if (item.formSection !== activePage) {
-      return undefined
-    }
+    const isLast = index === formFields.length - 1
 
     const { fieldName, displayName, unitDefinition, fieldType } = item
 
@@ -157,6 +157,7 @@ const ConditionalTrapVisitFields = ({
             handleBlur,
             setFieldValue,
             validationSchema,
+            inputRefs,
           }}
         />
       )
@@ -216,6 +217,10 @@ const ConditionalTrapVisitFields = ({
             onBlur={handleBlur(fieldName)}
             validationSchema={validationSchema}
             keyboardType={'number-pad'}
+            inputRefs={inputRefs}
+            isLast={isLast}
+            formFields={sortedFormFields}
+            orderIndex={item.orderIndex}
             RightElement={
               unitAbbrev ? <TextInputAdornment text={unitAbbrev} /> : undefined
             }

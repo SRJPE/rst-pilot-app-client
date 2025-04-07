@@ -1,10 +1,11 @@
-import React, { ChangeEvent, memo } from 'react'
-import { Box, FormControl, HStack, Input, Text } from 'native-base'
+import React, { ChangeEvent, memo, useCallback } from 'react'
+import { Box, FormControl, Input, Text } from 'native-base'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
 import {
   KeyboardTypeOptions,
   NativeSyntheticEvent,
   TextInputFocusEventData,
+  Keyboard,
 } from 'react-native'
 import { FastField } from 'formik'
 import { renderRequiredOrOptionalLabel } from '../../utils/utils'
@@ -26,6 +27,10 @@ interface FormInputComponentI {
   showWarning?: boolean
   warningMessage?: string
   validationSchema?: any
+  inputRefs?: any
+  isLast?: boolean
+  formFields?: any
+  orderIndex?: number
 }
 
 export const TextInputAdornment = ({ text }: { text: string }) => {
@@ -48,6 +53,11 @@ const FastInput = ({
   isDisabled = false,
   multiline = false,
   showWarning = false,
+  inputRefs,
+  isLast,
+  formFields,
+  orderIndex,
+  camelName,
 }: {
   field: any
   form: any
@@ -60,7 +70,45 @@ const FastInput = ({
   isDisabled: any
   multiline: any
   showWarning: any
+  inputRefs: any
+  isLast: any
+  formFields?: any
+  orderIndex?: number
+  camelName?: string
 }) => {
+  const handleSubmitEditing = useCallback(() => {
+    if (formFields && !isLast && orderIndex !== undefined) {
+      const nextField = formFields.find(
+        (field: any) =>
+          field.orderIndex === orderIndex + 1 && field.fieldType === 'input'
+      )?.fieldName
+
+      if (nextField && inputRefs.current[nextField]) {
+        inputRefs.current[nextField]?.focus()
+      } else {
+        Keyboard.dismiss()
+      }
+    } else if (
+      camelName === 'flowMeasure' &&
+      inputRefs.current.waterTemperature
+    ) {
+      inputRefs.current.waterTemperature?.focus()
+    } else if (camelName?.includes('turbidity')) {
+      // Focus on the next turbidity input
+      const nextTurbidityIndex =
+        parseInt(camelName.replace('turbidity', '')) + 1
+      const nextTurbidityField = `turbidity${nextTurbidityIndex}`
+      const nextTurbidityInput = inputRefs.current[nextTurbidityField]
+      if (nextTurbidityInput) {
+        nextTurbidityInput.focus()
+      } else {
+        Keyboard.dismiss()
+      }
+    } else {
+      return
+    }
+  }, [formFields, isLast, orderIndex, inputRefs, camelName])
+
   return (
     <Input
       {...field} // Includes value and onChangeText automatically
@@ -80,6 +128,14 @@ const FastInput = ({
       borderColor={showWarning ? 'amber.700' : 'muted.300'}
       _invalid={{ borderColor: 'red.700' }}
       rightElement={RightElement}
+      ref={ref => {
+        if (inputRefs && camelName) {
+          inputRefs.current[camelName] = ref
+        } else return
+      }}
+      returnKeyType={inputRefs ? 'next' : 'default'}
+      submitBehavior={isLast ? 'blurAndSubmit' : 'submit'} // 👈 NEW PROP
+      onSubmitEditing={handleSubmitEditing}
     />
   )
 }
@@ -100,6 +156,10 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   showWarning = false,
   warningMessage = 'Value is out of range',
   validationSchema,
+  inputRefs,
+  isLast,
+  formFields,
+  orderIndex,
 }) => {
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
@@ -143,6 +203,11 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
           isDisabled={isDisabled}
           multiline={multiline}
           showWarning={showWarning}
+          inputRefs={inputRefs}
+          isLast={isLast}
+          formFields={formFields}
+          orderIndex={orderIndex}
+          camelName={camelName}
         />
         <Box mt={2} h={25}>
           {showError && (
