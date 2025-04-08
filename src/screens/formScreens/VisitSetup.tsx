@@ -92,6 +92,7 @@ const VisitSetup = ({
   const [crewDropDownOpen, setCrewDropDownOpen] = useState(false as boolean)
   const [validationSchema, setValidationSchema] = useState<any>(trapVisitSchema)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
+  const [formFields, setFormFields] = useState<any>(null)
 
   const onTrapOpen = useCallback(() => {
     setCrewDropDownOpen(false)
@@ -129,6 +130,22 @@ const VisitSetup = ({
     )
 
     if (currentProgramInfo?.programFormFields?.length) {
+      const trapEquimentType =
+        find(
+          visitSetupDefaultsState?.trapLocations,
+          (trapLocation: any) =>
+            trapLocation.id ===
+            visitSetupState[tabSlice.activeTabId ?? 'placeholderId']?.values
+              ?.trapLocationId
+        )?.equipmentId || null
+      // get fields for this section and equipment type, if applicable
+      // null equipmentId indicates field displayed for all equipment types
+      const sectionFields = currentProgramInfo?.programFormFields.filter(
+        (field: any) =>
+          field.formSection === activePage &&
+          (field.equipmentId === null || field.equipmentId === trapEquimentType)
+      )
+      setFormFields(sectionFields)
       const dynamicTrapOpsSchema = generateTrapVisitSchema(
         currentProgramInfo?.programFormFields
       )
@@ -136,7 +153,7 @@ const VisitSetup = ({
     }
 
     setSelectedProgramObj(currentProgramInfo)
-  }, [selectedProgramId])
+  }, [selectedProgramId, activePage, visitSetupDefaultsState])
 
   const onSubmit = (values: any, tabId: string | null) => {
     const programId = selectedProgramId
@@ -421,6 +438,20 @@ const VisitSetup = ({
     ) : null
   }
 
+  const closeOpenDropdowns = (
+    setFieldTouched: (arg0: string, arg1: boolean) => void
+  ) => {
+    if (crewDropDownOpen) {
+      setFieldTouched('crew', true)
+      setCrewDropDownOpen(false)
+    }
+
+    if (trapDropDownOpen) {
+      setFieldTouched('trapName', true)
+      setTrapDropDownOpen(false)
+    }
+  }
+
   return (
     <Formik
       validationSchema={trapVisitSchema}
@@ -499,15 +530,7 @@ const VisitSetup = ({
         return (
           <TouchableWithoutFeedback
             onPress={() => {
-              if (crewDropDownOpen) {
-                setFieldTouched('crew', true)
-                setCrewDropDownOpen(false)
-              }
-
-              if (trapDropDownOpen) {
-                setFieldTouched('trapName', true)
-                setTrapDropDownOpen(false)
-              }
+              closeOpenDropdowns(setFieldTouched)
             }}
           >
             <View flex={1} bg='#fff'>
@@ -553,6 +576,13 @@ const VisitSetup = ({
                       setFieldValue('stream', itemValue)
                       setFieldTouched('stream', true)
                       setFieldError('stream', undefined)
+
+                      if (itemValue !== values.stream) {
+                        setFieldValue('trapSite', [])
+                        setFieldTouched('trapSite', false)
+                        setFieldValue('trapName', [])
+                        setFieldTouched('trapName', false)
+                      }
 
                       if (itemValue === 'Mill Creek') {
                         setFieldValue('trapSite', 'Mill Creek RST')
@@ -649,10 +679,13 @@ const VisitSetup = ({
                         setFieldTouched={setFieldTouched}
                         dropdownValues={dropdownValues}
                         activePage={activePage}
-                        formFields={selectedProgramObj?.programFormFields}
+                        formFields={formFields}
                         setFieldValue={setFieldValue}
                         activeTabId={tabSlice.activeTabId}
                         validationSchema={validationSchema}
+                        onOpenCallback={() => {
+                          closeOpenDropdowns(setFieldTouched)
+                        }}
                       />
                     </>
                   )}

@@ -8,6 +8,8 @@ import {
   Radio,
   FormControl,
 } from 'native-base'
+import { connect } from 'react-redux'
+import { RootState } from '../../redux/store'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../Shared/FormInputComponent'
@@ -17,6 +19,7 @@ import CustomModal from '../Shared/CustomModal'
 import RSTRLogSheet from './RSTRLogSheet'
 import CustomSelect from '../Shared/CustomSelect'
 import { renderRequiredOrOptionalLabel } from '../../utils/utils'
+import { find } from 'lodash'
 interface FieldInterface {
   id: number
   programId: number
@@ -46,6 +49,9 @@ const ConditionalTrapVisitFields = ({
   trapOperationsStore,
   validationSchema,
   inputRefs,
+  onOpenCallback,
+  visitSetupState,
+  visitSetupDefaultsState,
 }: {
   touched: any
   errors: any
@@ -61,6 +67,9 @@ const ConditionalTrapVisitFields = ({
   trapOperationsStore?: any
   validationSchema?: any
   inputRefs?: any
+  onOpenCallback?: () => void
+  visitSetupState?: any
+  visitSetupDefaultsState?: any
 }) => {
   const [sortedFormFields, setSortedFormFields] = useState<
     Array<FieldInterface>
@@ -73,12 +82,12 @@ const ConditionalTrapVisitFields = ({
 
   useEffect(() => {
     if (formFields) {
-      const sortedFields = [
-        ...formFields.filter((field: any) => field.formSection === activePage),
-      ].sort((a, b) => a.orderIndex - b.orderIndex)
+      const sortedFields = [...formFields].sort(
+        (a, b) => a.orderIndex - b.orderIndex
+      )
       setSortedFormFields(sortedFields)
     }
-  }, [formFields, activePage])
+  }, [formFields])
 
   const renderFieldComponent = (item: FieldInterface, index: number) => {
     const isLast = index === formFields.length - 1
@@ -191,6 +200,7 @@ const ConditionalTrapVisitFields = ({
                 value: crewMember,
               }))}
               validationSchema={validationSchema}
+              onOpenCallback={onOpenCallback}
             />
           </Box>
         </>
@@ -324,4 +334,11 @@ const ConditionalTrapVisitFields = ({
   )
 }
 
-export default ConditionalTrapVisitFields
+const mapStateToProps = (state: RootState) => {
+  return {
+    visitSetupState: state.visitSetup,
+    visitSetupDefaultsState: state.visitSetupDefaults,
+  }
+}
+
+export default connect(mapStateToProps)(ConditionalTrapVisitFields)

@@ -103,8 +103,10 @@ const FastInput = ({
         nextTurbidityInput.focus()
       } else {
         Keyboard.dismiss()
+        return
       }
     } else {
+      Keyboard.dismiss()
       return
     }
   }, [formFields, isLast, orderIndex, inputRefs, camelName])

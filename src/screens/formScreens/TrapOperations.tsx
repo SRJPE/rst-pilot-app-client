@@ -127,6 +127,7 @@ const TrapOperations = ({
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
   const [validationSchema, setValidationSchema] =
     useState<any>(trapOperationsSchema)
+  const [formFields, setFormFields] = useState<any>(null)
   const inputRefs = useRef({}) // key: field name, value: ref
 
   useEffect(() => {
@@ -151,9 +152,21 @@ const TrapOperations = ({
     )
 
     if (currentProgramInfo?.programFormFields?.length) {
-      const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(
-        currentProgramInfo?.programFormFields
+      const trapEquimentType =
+        find(
+          visitSetupDefaults?.trapLocations,
+          (trapLocation: any) => trapLocation.id === selectedTrapLocationId
+        )?.equipmentId || null
+
+      // get fields for this section and equipment type, if applicable
+      // null equipmentId indicates field displayed for all equipment types
+      const sectionFields = currentProgramInfo?.programFormFields.filter(
+        (field: any) =>
+          field.formSection === activePage &&
+          (field.equipmentId === null || field.equipmentId === trapEquimentType)
       )
+      setFormFields(sectionFields)
+      const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(sectionFields)
       setValidationSchema(dynamicTrapOpsSchema)
     }
 
@@ -162,6 +175,7 @@ const TrapOperations = ({
     visitSetupDefaults.permitInfo,
     selectedTrapLocationId,
     visitSetupDefaults.programs,
+    activePage,
   ])
 
   const useFlowMeasureCalculationBool = (flowMeasureEntered: number | null) => {
@@ -396,6 +410,8 @@ const TrapOperations = ({
       setEndTime(null)
     }
   }
+
+  console.log('validationSchema', validationSchema)
 
   const renderRPMBefore = ({
     touched,
@@ -831,7 +847,7 @@ const TrapOperations = ({
                         setFieldTouched={setFieldTouched}
                         dropdownValues={dropdownValues}
                         activePage={activePage}
-                        formFields={selectedProgramObj?.programFormFields}
+                        formFields={formFields}
                         setFieldValue={setFieldValue}
                         activeTabId={activeTabId}
                         validationSchema={validationSchema}

@@ -31,6 +31,7 @@ interface CustomSelectI {
   touched?: FormikTouched<any>
   tooltip?: React.ReactNode
   validationSchema?: any
+  onOpenCallback?: () => void
 }
 
 const CustomSelect: React.FC<CustomSelectI> = ({
@@ -48,6 +49,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
   label = 'No label provided',
   tooltip,
   validationSchema,
+  onOpenCallback,
 }) => {
   const handleOnChange = useCallback(
     (itemValue: any) => {
@@ -148,6 +150,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
           selectedValue={selectedValue ?? ''}
           minWidth='100'
           style={style}
+          onOpen={onOpenCallback}
           accessibilityLabel={placeholder}
           placeholder={placeholder}
           _selectedItem={{
