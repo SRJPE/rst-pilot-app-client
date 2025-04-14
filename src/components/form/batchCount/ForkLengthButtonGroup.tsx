@@ -23,6 +23,9 @@ const ForkLengthButtonGroup = ({
       variant='subtle'
       colorScheme='muted'
       alignSelf='center'
+      display='flex'
+      justifyContent='center'
+      px='3%'
     >
       {buttonLookup &&
         Object.keys(buttonLookup).map((label: string, idx: number) => (
@@ -35,6 +38,7 @@ const ForkLengthButtonGroup = ({
             borderWidth='1'
             px='5%'
             shadow='3'
+            flex={1}
             onPress={() => handlePressGroupButton(label)}
           >
             <Text fontSize='md'>{label}</Text>

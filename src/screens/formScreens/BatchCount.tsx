@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native'
 import {
   Box,
   Button,
+  Checkbox,
   Divider,
   Heading,
   HStack,
@@ -61,6 +62,8 @@ const BatchCount = ({
   const [showTableModal, setShowTableModal] = useState(false as boolean)
   const [showTable, setShowTable] = useState(false as boolean)
   const [lifeStageRadioValue, setLifeStageRadioValue] = useState('' as string)
+  const [fishConditionsCheckboxValues, setFishConditionsCheckboxValues] =
+    useState([] as string[])
   const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
     useState(true as boolean)
   const [modalInitialData, setModalInitialData] = useState({
@@ -203,21 +206,21 @@ const BatchCount = ({
                 })}
               />
             </HStack>
-            <Divider m='1%' />
+            {/* <Divider m='1%' /> */}
             <Box px='2%'>
               <HStack space={6}>
                 <VStack>
                   <HStack space={6} mb='2'>
-                    <Text fontSize='16' bold>
+                    {/* <Text fontSize='16' bold>
                       Selected Batch Characteristics:
                     </Text>
                     <Text>
                       Species: <Text bold>{capitalize(species)}</Text>
-                    </Text>
+                    </Text> */}
 
                     {/* </HStack>
                   <HStack space={6} ml='100'> */}
-                    <Text>
+                    {/* <Text>
                       Adipose Clipped:{' '}
                       <Text bold>{adiposeClipped ? 'True' : 'False'}</Text>
                     </Text>
@@ -233,19 +236,19 @@ const BatchCount = ({
                             }`
                           : 'N/A'}
                       </Text>
-                    </Text>
+                    </Text> */}
                   </HStack>
-                  <Text>
+                  {/* <Text>
                     Fish Condition(s):{' '}
                     {fishConditions.map((condition: string, index: number) => (
                       <Text bold key={index}>
                         {`${index + 1}. ${capitalize(condition)} `}
                       </Text>
                     ))}
-                  </Text>
+                  </Text> */}
                 </VStack>
               </HStack>
-              <HStack space={4}>
+              {/* <HStack space={4}>
                 <Pressable onPress={handlePressSaveAndStartNewBatchCount}>
                   <Text fontSize='16' color='primary' bold>
                     Save and Start New Batch
@@ -258,168 +261,239 @@ const BatchCount = ({
                     Update Batch Characteristics
                   </Text>
                 </Pressable>
-              </HStack>
+              </HStack> */}
             </Box>
             <Divider m='1%' />
 
-            <Box
-              h='2/6'
-              w='5/6'
-              alignSelf='center'
-              alignItems='center'
-              justifyContent='center'
-              bg='secondary'
-            >
-              <BatchCountHistogram />
-            </Box>
+            {showTable ? (
+              <ScrollView height='369'>
+                <BatchCountDataTable
+                  handleShowTableModal={handleShowTableModal}
+                />
+              </ScrollView>
+            ) : (
+              <Box
+                // h='2/6'
+                w='5/6'
+                alignSelf='center'
+                alignItems='center'
+                justifyContent='center'
+                bg='secondary'
+              >
+                <BatchCountHistogram />
+              </Box>
+            )}
             <VStack space={3}>
               <HStack
                 alignItems='center'
-                space={10}
-                justifyContent='space-between'
-                px='5'
+                justifyContent='center'
+                my={2}
+                space={4}
+                mt={5}
               >
-                <Heading size='md' p='2%'>
-                  {showTable
-                    ? 'Record count for each fork length: '
-                    : 'Select size range for fork length buttons: '}
-                </Heading>
-                <HStack alignItems='center' space={4}>
-                  <Text fontSize='16'>Input Fork Lengths</Text>
-                  <Switch
-                    shadow='3'
-                    offTrackColor='primary'
-                    onTrackColor='primary'
-                    size='md'
-                    isChecked={showTable}
-                    onToggle={() => setShowTable(!showTable)}
-                  />
-                  <Text fontSize='16'>Show Table</Text>
-                </HStack>
+                <Text fontSize='16'>Show Histogram</Text>
+                <Switch
+                  shadow='3'
+                  offTrackColor='primary'
+                  onTrackColor='primary'
+                  size='md'
+                  isChecked={showTable}
+                  onToggle={() => setShowTable(!showTable)}
+                />
+                <Text fontSize='16'>Show Table</Text>
               </HStack>
-              {showTable ? (
-                <ScrollView height='369'>
-                  <BatchCountDataTable
-                    handleShowTableModal={handleShowTableModal}
-                  />
-                </ScrollView>
-              ) : (
-                <>
+              {/* </HStack> */}
+
+              <>
+                <Divider />
+
+                <Box px='2%'>
+                  <HStack space={3} alignItems='center'>
+                    <Text bold>Fish Conditions:</Text>
+                    <HStack alignItems='center' space={4} mt='2'>
+                      <HStack space={2}>
+                        <Checkbox
+                          value='dead'
+                          isChecked={deadToggle}
+                          shadow='3'
+                          _checked={{
+                            bg: 'primary',
+                            borderColor: 'primary',
+                          }}
+                          size='md'
+                          onChange={() => handleToggles(`dead`)}
+                        />
+                        <Text fontSize='16'>Dead</Text>
+                      </HStack>
+                      {fishConditions.length > 0 &&
+                        fishConditions.map(
+                          (condition: string, index: number) => (
+                            <HStack space={2}>
+                              <Checkbox
+                                value={`FC${index + 1}`}
+                                shadow='3'
+                                _checked={{
+                                  bg: 'primary',
+                                  borderColor: 'primary',
+                                }}
+                                size='md'
+                                isChecked={
+                                  index + 1 === 1
+                                    ? FC1Toggle
+                                    : index + 1 === 2
+                                    ? FC2Toggle
+                                    : FC3Toggle
+                                }
+                                onChange={() => handleToggles(`FC${index + 1}`)}
+                              />
+                              <Text fontSize='16'>{`${
+                                index + 1
+                              }. ${condition}`}</Text>
+                            </HStack>
+                          )
+                        )}
+                    </HStack>
+                  </HStack>
+                </Box>
+                {species === 'Chinook salmon' && (
+                  <Box px='2%'>
+                    <Divider mb='1%' />
+                    <HStack space={4} alignItems='center'>
+                      <Text bold>Life Stage:</Text>
+                      <Radio.Group
+                        name='lifeStageRadioGroup'
+                        value={lifeStageRadioValue}
+                        onChange={nextValue => {
+                          setLifeStageRadioValue(nextValue)
+                        }}
+                      >
+                        <Stack
+                          direction={{
+                            base: 'column',
+                            md: 'row',
+                          }}
+                          alignItems={{
+                            base: 'flex-start',
+                            md: 'center',
+                          }}
+                          space={10}
+                          w='75%'
+                          maxW='300px'
+                        >
+                          <Radio
+                            colorScheme='primary'
+                            value='Yolk Sac Fry'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Yolk Sac Fry
+                          </Radio>
+                          <Radio
+                            colorScheme='primary'
+                            value='Fry'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Fry
+                          </Radio>
+                          <Radio
+                            colorScheme='primary'
+                            value='Parr'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Parr
+                          </Radio>
+                          <Radio
+                            colorScheme='primary'
+                            value='Silvery Parr'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Silvery Parr
+                          </Radio>
+                          <Radio
+                            colorScheme='primary'
+                            value='Smolt'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Smolt
+                          </Radio>
+                        </Stack>
+                      </Radio.Group>
+                    </HStack>
+                    <Divider mt='1%' />
+                  </Box>
+                )}
+
+                <VStack alignItems='center' justifyContent='center'>
+                  <Heading size='sm' pb='2%'>
+                    {showTable
+                      ? 'Record count for each fork length: '
+                      : 'Select size range for fork length buttons: '}
+                  </Heading>
                   <ForkLengthButtonGroup
                     setFirstButton={setFirstButton}
                     setLifeStageRadioValue={setLifeStageRadioValue}
                     setNumberOfAdditionalButtons={setNumberOfAdditionalButtons}
                   />
-                  {species === 'Chinook salmon' && (
-                    <Box px='2%'>
-                      <Divider my='1%' />
-                      <HStack space={6} alignItems='center'>
-                        <Text bold>Life Stage:</Text>
-                        <Radio.Group
-                          name='lifeStageRadioGroup'
-                          value={lifeStageRadioValue}
-                          onChange={nextValue => {
-                            setLifeStageRadioValue(nextValue)
-                          }}
-                        >
-                          <Stack
-                            direction={{
-                              base: 'column',
-                              md: 'row',
-                            }}
-                            alignItems={{
-                              base: 'flex-start',
-                              md: 'center',
-                            }}
-                            space={10}
-                            w='75%'
-                            maxW='300px'
-                          >
-                            <Radio
-                              colorScheme='primary'
-                              value='Yolk Sac Fry'
-                              my={1}
-                              _icon={{ color: 'primary' }}
-                            >
-                              Yolk Sac Fry
-                            </Radio>
-                            <Radio
-                              colorScheme='primary'
-                              value='Fry'
-                              my={1}
-                              _icon={{ color: 'primary' }}
-                            >
-                              Fry
-                            </Radio>
-                            <Radio
-                              colorScheme='primary'
-                              value='Parr'
-                              my={1}
-                              _icon={{ color: 'primary' }}
-                            >
-                              Parr
-                            </Radio>
-                            <Radio
-                              colorScheme='primary'
-                              value='Silvery Parr'
-                              my={1}
-                              _icon={{ color: 'primary' }}
-                            >
-                              Silvery Parr
-                            </Radio>
-                            <Radio
-                              colorScheme='primary'
-                              value='Smolt'
-                              my={1}
-                              _icon={{ color: 'primary' }}
-                            >
-                              Smolt
-                            </Radio>
-                          </Stack>
-                        </Radio.Group>
-                      </HStack>
-                      <Divider my='1%' />
-                    </Box>
-                  )}
-                  <BatchCountButtonGrid
-                    firstButton={firstButton}
-                    numberOfAdditionalButtons={numberOfAdditionalButtons}
-                    selectedLifeStage={lifeStageRadioValue}
-                    ignoreLifeStage={species !== 'Chinook salmon'}
-                    deadToggle={deadToggle}
-                    markToggle={markToggle}
-                    fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
-                      .map((toggle, index) =>
-                        toggle ? fishConditions[index] : null
-                      )
-                      .filter(condition => condition !== null)}
-                    handleToggles={handleToggles}
-                    trapOperationsStore={trapOperationsStore}
-                    dropdownsStore={dropdownsStore}
-                    activeTabId={tabSlice.activeTabId}
-                    species={species}
-                  />
-                  {species !== 'Chinook salmon' && <View mb='65'></View>}
-                </>
-              )}
-              <HStack px='2%' justifyContent='space-between'>
-                <VStack space={4}>
-                  <Heading size='md'>
-                    Total Count: {calculateTotalCount()}
-                  </Heading>
-                  <HStack space={5}>
-                    <Button
-                      bg='primary'
-                      onPress={() => handlePressRemoveFish()}
-                      isDisabled={calculateTotalCount() === 0}
-                    >
-                      <Text fontSize='lg' bold color='white'>
-                        Remove Last Fish
-                      </Text>
-                    </Button>
-                  </HStack>
                 </VStack>
-                <VStack alignItems='center' space={2}>
+                <BatchCountButtonGrid
+                  firstButton={firstButton}
+                  numberOfAdditionalButtons={numberOfAdditionalButtons}
+                  selectedLifeStage={lifeStageRadioValue}
+                  ignoreLifeStage={species !== 'Chinook salmon'}
+                  deadToggle={deadToggle}
+                  markToggle={markToggle}
+                  fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
+                    .map((toggle, index) =>
+                      toggle ? fishConditions[index] : null
+                    )
+                    .filter(condition => condition !== null)}
+                  handleToggles={handleToggles}
+                  trapOperationsStore={trapOperationsStore}
+                  dropdownsStore={dropdownsStore}
+                  activeTabId={tabSlice.activeTabId}
+                  species={species}
+                />
+                {species !== 'Chinook salmon' && <View mb='65'></View>}
+              </>
+
+              <HStack
+                px='2%'
+                justifyContent='space-between'
+                borderTopWidth={1}
+                borderColor={'gray.300'}
+                pt={5}
+              >
+                {/* <VStack space={4}> */}
+                {/* <Heading size='md'>
+                    Total Count: {calculateTotalCount()}
+                  </Heading> */}
+                {/* <HStack space={5}> */}
+                <Button
+                  // borderColor='error.500'
+                  bg={'transparent'}
+                  onPress={() => handlePressRemoveFish()}
+                  isDisabled={calculateTotalCount() === 0}
+                >
+                  <Text fontSize='lg' bold color='error'>
+                    Remove Last Fish
+                  </Text>
+                </Button>
+                <Button
+                  // borderColor='error.500'
+                  bg={'transparent'}
+                  onPress={() => setBatchCharacteristicsModalOpen(true)}
+                >
+                  <Text fontSize='lg' bold color='primary'>
+                    Update Batch Characteristics
+                  </Text>
+                </Button>
+                {/* </HStack>
+                </VStack> */}
+                {/* <VStack alignItems='center' space={2}>
                   <HStack alignItems='center' space={2}>
                     <IconButton
                       // color='secondary'
@@ -451,8 +525,8 @@ const BatchCount = ({
                     // isDisabled={deadIsLocked}
                     onToggle={() => handleToggles('dead')}
                   />
-                </VStack>
-                {existingMarks && existingMarks.length > 0 && (
+                </VStack> */}
+                {/* {existingMarks && existingMarks.length > 0 && (
                   <VStack alignItems='center' space={4} mt='2'>
                     <Text fontSize='16'>Mark</Text>
                     <Switch
@@ -464,8 +538,8 @@ const BatchCount = ({
                       onToggle={() => handleToggles('mark')}
                     />
                   </VStack>
-                )}
-                {fishConditions.length > 0 &&
+                )} */}
+                {/* {fishConditions.length > 0 &&
                   fishConditions.map((condition: string, index: number) => (
                     <VStack alignItems='center' space={4} mt='2' key={index}>
                       <Text fontSize='16'>{`FC${index + 1}`}</Text>
@@ -484,18 +558,28 @@ const BatchCount = ({
                         onToggle={() => handleToggles(`FC${index + 1}`)}
                       />
                     </VStack>
-                  ))}
-                <VStack space={4}>
-                  <Heading size='md'>
+                  ))} */}
+                {/* <VStack space={4}> */}
+                {/* <Heading size='md'>
                     Last Fork length Entered: {calculateLastFish()}
-                  </Heading>
+                  </Heading> */}
 
-                  <Button bg='primary' onPress={handlePressSaveBatchCount}>
-                    <Text fontSize='lg' bold color='white'>
-                      Save Batch Count
-                    </Text>
-                  </Button>
-                </VStack>
+                <Button
+                  bg='transparent'
+                  borderColor='primary'
+                  borderWidth={1}
+                  onPress={handlePressSaveAndStartNewBatchCount}
+                >
+                  <Text fontSize='lg' bold color='primary'>
+                    Save & Start New
+                  </Text>
+                </Button>
+                <Button bg='primary' onPress={handlePressSaveBatchCount}>
+                  <Text fontSize='lg' bold color='white'>
+                    Save & Exit
+                  </Text>
+                </Button>
+                {/* </VStack> */}
               </HStack>
             </VStack>
           </Pressable>
