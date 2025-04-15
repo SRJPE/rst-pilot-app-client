@@ -20,6 +20,7 @@ import {
   Box,
   Button,
 } from 'native-base'
+import CopyFormValuesDialog from '../../components/form/CopyFormValuesDialog'
 import NavButtons from '../../components/formContainer/NavButtons'
 import {
   trapOperationsSchema,
@@ -512,6 +513,25 @@ const TrapOperations = ({
           return true
         }
 
+        const handleValuesCopy = () => {
+          const tabIds = Object.keys(tabSlice.tabs)
+          tabIds.map(tabId => {
+            if (tabId !== activeTabId) {
+              dispatch(
+                saveTrapOperations({
+                  tabId,
+                  values: {
+                    ...values,
+                    trapVisitStopTime: endTime, //refactor needed
+                    trapVisitStartTime: new Date(),
+                  },
+                  errors,
+                })
+              )
+            }
+          })
+        }
+
         const otherTabFormsValid = checkOtherTabForms()
 
         const navButtons = useMemo(() => {
@@ -543,6 +563,7 @@ const TrapOperations = ({
           isValid,
           endTime,
         ])
+
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
             onSubmit(values, previouslyActiveTabId)
@@ -666,47 +687,6 @@ const TrapOperations = ({
                   )}
                   {values.trapStatus.length > 0 && (
                     <>
-                      {/* <FormControl w='30%'>
-                        <HStack space={4} alignItems='center'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Cone Setting
-                            </Text>
-                          </FormControl.Label>
-                          <Radio.Group
-                            name='coneSetting'
-                            accessibilityLabel='cone setting'
-                            value={`${values.coneSetting}`}
-                            onChange={(value: any) => {
-                              setFieldTouched('coneSetting', true)
-                              if (value === 'full') {
-                                setFieldValue('coneSetting', 'full')
-                              } else {
-                                setFieldValue('coneSetting', 'half')
-                              }
-                            }}
-                          >
-                            <HStack space={4}>
-                              <Radio
-                                colorScheme='primary'
-                                value='full'
-                                my={1}
-                                _icon={{ color: 'primary' }}
-                              >
-                                Full
-                              </Radio>
-                              <Radio
-                                colorScheme='primary'
-                                value='half'
-                                my={1}
-                                _icon={{ color: 'primary' }}
-                              >
-                                Half
-                              </Radio>
-                            </HStack>
-                          </Radio.Group>
-                        </HStack>
-                      </FormControl> */}
                       {renderRPMBefore({
                         touched: touched,
                         errors: errors,
@@ -837,6 +817,10 @@ const TrapOperations = ({
                           </Box>
                         )}
                       </HStack>
+                      <CopyFormValuesDialog
+                        step='Trap Operations'
+                        onSubmit={handleValuesCopy}
+                      />
 
                       <ConditionalTrapVisitFields
                         touched={touched}
