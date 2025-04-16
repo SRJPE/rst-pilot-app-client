@@ -53,7 +53,7 @@ import MarkBadgeList from '../../components/markRecapture/MarkBadgeList'
 import { uid } from 'uid'
 import SpeciesDropDown from '../../components/form/SpeciesDropDown'
 import FishConditionsDropDown from '../../components/form/FishConditionsDropDown'
-import { startCase } from 'lodash'
+import { startCase, partition } from 'lodash'
 import { ReleaseMarkI, FormValueI } from '../../utils/interfaces'
 import GeneticSampleBadgeList from '../../components/form/GeneticSampleBadgeList'
 import AddExistingMark from '../../components/form/AddExistingMark'
@@ -91,6 +91,7 @@ const AddFishContent = ({
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
     false as boolean
   )
+  const [createdMarks, setCreatedMarks] = useState<any[]>([] as any)
 
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -481,7 +482,9 @@ const AddFishContent = ({
       species: species.value,
       forkLength: forkLength.value,
       run: determineValueNotRecordedOrNull(species.value, 'run', run.value),
-      fishConditions: fishConditions.value,
+      fishConditions: Array.isArray(fishConditions.value)
+        ? [...new Set(fishConditions.value)]
+        : fishConditions.value,
       weight: weight.value,
       lifeStage: determineValueNotRecordedOrNull(
         species.value,
@@ -490,15 +493,20 @@ const AddFishContent = ({
       ),
       adiposeClipped: adiposeClipped.value,
       // @ts-ignore
-      existingMarks: [...existingMarks.value, ...recentExistingMarks],
+      existingMarks: [
+        ...new Set([
+          ...(Array.isArray(existingMarks.value) ? existingMarks.value : []),
+          ...recentExistingMarks,
+        ]),
+      ],
       dead: dead.value,
       plusCountMethod: plusCountMethod.value,
       comments: comments.value,
       appliedMarks: Array.isArray(appliedMarks?.value)
-        ? [...appliedMarks.value]
+        ? [...new Set(appliedMarks.value)]
         : [],
       geneticSamples: Array.isArray(geneticSamples?.value)
-        ? [...geneticSamples.value]
+        ? [...new Set(geneticSamples.value)]
         : [],
     }
 
@@ -535,7 +543,18 @@ const AddFishContent = ({
     setSpeciesDropDownOpen(false)
   }, [])
 
-  const showLifeStage = ['Chinook salmon', 'Steelhead / rainbow trout']
+  useEffect(() => {
+    if (existingMarks?.value && Array.isArray(existingMarks.value)) {
+      const [existingReleaseMarks, nonExistingReleaseMarks] = partition(
+        existingMarks.value,
+        (mark: any) => {
+          return mark?.releaseId !== undefined
+        }
+      )
+      setRecentExistingMarks(existingReleaseMarks)
+      setCreatedMarks(nonExistingReleaseMarks)
+    }
+  }, [existingMarks])
 
   return (
     <>
@@ -1062,7 +1081,7 @@ const AddFishContent = ({
                             visitSetupState={visitSetupState}
                           />
                           <MarkBadgeList
-                            badgeListContent={existingMarks.value}
+                            badgeListContent={createdMarks}
                             field='existingMarks'
                             setExistingMarks={setExistingMarks}
                           />
