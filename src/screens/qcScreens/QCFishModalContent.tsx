@@ -10,17 +10,15 @@ import {
   Spacer,
   AlertDialog,
 } from 'native-base'
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import { FormValueI } from '../../utils/interfaces'
-
 import {
   addFishErrorMessages,
-  QARanges,
   reorderTaxon,
   alphabeticalSort,
+  createFormValueDefault,
 } from '../../utils/utils'
-import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, AppDispatch } from '../../redux/store'
 import CustomSelect from '../../components/Shared/CustomSelect'
@@ -28,21 +26,6 @@ import {
   catchRawQCDeletion,
   catchRawQCSubmission,
 } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import { convertUTCToLocalTime } from '../../utils/helpers/helperFunctions'
-
-const createFormValueDefault = ({
-  value,
-  required = false,
-  error = '',
-  touched = false,
-}: {
-  value: Array<any> | string | boolean | null
-  required?: boolean
-  error?: string
-  touched?: boolean
-}) => {
-  return { value, touched, error, required }
-}
 
 const QCFishModalContent = ({
   closeModal,

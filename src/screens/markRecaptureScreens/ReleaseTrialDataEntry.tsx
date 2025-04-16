@@ -205,7 +205,7 @@ const ReleaseDataEntry = ({
 
       const markRecaptureSubmission: MarkRecaptureSubmissionI = {
         programId:
-          releaseTrialDataEntryState.programId || programIdOfReleaseLocation,
+          programIdOfReleaseLocation || releaseTrialDataEntryState.programId,
         releasePurposeId: 1, //left as null
         releaseSiteId:
           find(releaseSiteValues, [
@@ -431,6 +431,7 @@ const ReleaseDataEntry = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
+            appliedMarks={releaseTrialDataEntryState.values.appliedMarks}
           />
           {/* --------- Modals --------- */}
           <CustomModal

@@ -1,6 +1,14 @@
 import React from 'react'
 import { Formik, useFormikContext } from 'formik'
-import { FormControl, View, VStack, Text, Button, Divider } from 'native-base'
+import {
+  FormControl,
+  View,
+  VStack,
+  Text,
+  Button,
+  Divider,
+  ScrollView,
+} from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { addMarkToAppliedMarks } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { addMarkToBatchCountExistingMarks } from '../../redux/reducers/formSlices/batchCountSlice'
@@ -57,7 +65,10 @@ const AddAnotherMarkModalContent = ({
     } else if (screenName === 'markRecaptureRelease') {
       //if the modal is opened in mark recapture / release
       dispatch(addMarkToAppliedMarks(values))
-    } else if (screenName === 'addIndividualFish') {
+    } else if (
+      screenName === 'addIndividualFish' ||
+      screenName === 'plusCount'
+    ) {
       setExistingMarks({
         ...existingMarks,
         value: [...existingMarksArray, values],
@@ -89,7 +100,7 @@ const AddAnotherMarkModalContent = ({
             showHeaderButton={false}
             closeModal={closeModal}
           />
-          <View>
+          <ScrollView>
             <VStack space={6} paddingX='10' paddingTop='7' paddingBottom='3'>
               <CustomSelect
                 selectedValue={values.markType}
@@ -143,7 +154,7 @@ const AddAnotherMarkModalContent = ({
                 </Text>
               </Button>
             </VStack>
-          </View>
+          </ScrollView>
         </>
       )}
     </Formik>
