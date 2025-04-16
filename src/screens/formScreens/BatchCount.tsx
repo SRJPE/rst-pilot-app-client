@@ -157,6 +157,10 @@ const BatchCount = ({
 
   const handlePressLockDead = () => {
     setDeadIsLocked(!deadIsLocked)
+    console.log(
+      '🚀 ~ BatchCount.tsx:161 ~ handlePressLockDead ~ deadIsLocked:',
+      !deadIsLocked
+    )
   }
 
   return (
@@ -252,13 +256,12 @@ const BatchCount = ({
                             borderColor: 'primary',
                           }}
                           size='md'
+                          isDisabled={deadIsLocked}
                           onChange={() => handleToggles(`dead`)}
                         />
                         <HStack space={1} alignItems={'center'}>
                           <Text fontSize='16'>Dead</Text>
                           <IconButton
-                            // color='secondary'
-                            // bg='secondary'
                             onPress={() => handlePressLockDead()}
                             icon={
                               <Icon
