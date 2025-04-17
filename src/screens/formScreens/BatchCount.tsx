@@ -157,10 +157,6 @@ const BatchCount = ({
 
   const handlePressLockDead = () => {
     setDeadIsLocked(!deadIsLocked)
-    console.log(
-      '🚀 ~ BatchCount.tsx:161 ~ handlePressLockDead ~ deadIsLocked:',
-      !deadIsLocked
-    )
   }
 
   return (
