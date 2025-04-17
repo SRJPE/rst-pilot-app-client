@@ -58,8 +58,6 @@ const MarkBadgeList = ({
     }
   }
 
-  console.log('badgeListContent', badgeListContent)
-
   return (
     <>
       <ScrollView maxHeight='220'>
