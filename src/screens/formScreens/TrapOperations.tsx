@@ -817,10 +817,10 @@ const TrapOperations = ({
                           </Box>
                         )}
                       </HStack>
-                      <CopyFormValuesDialog
+                      {/* <CopyFormValuesDialog
                         step='Trap Operations'
                         onSubmit={handleValuesCopy}
-                      />
+                      /> */}
 
                       <ConditionalTrapVisitFields
                         touched={touched}
