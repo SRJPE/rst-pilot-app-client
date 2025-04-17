@@ -28,7 +28,6 @@ export default function AddExistingMark({
   handlePressRecentExistingMarkButton: any
   visitSetupState: any
 }) {
-  console.log('recentExistingMarks', recentExistingMarks)
   return (
     <>
       <HStack space={2} alignItems='center'>
