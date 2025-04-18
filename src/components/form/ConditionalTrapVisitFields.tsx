@@ -265,9 +265,9 @@ const ConditionalTrapVisitFields = ({
       return (
         <Box
           key={index} // Always add a key when mapping
-          flexBasis='45%' // Ensures 3 items per row (adjust for spacing)
-          minWidth='45%' // Prevents shrinking too much
-          maxWidth='45%' // Prevents growing beyond this size>
+          flexBasis='100%' // Ensures 3 items per row (adjust for spacing)
+          minWidth='100%' // Prevents shrinking too much
+          maxWidth='100%' // Prevents growing beyond this size>
           flexGrow={1}
           mr={8} // Removes right margin from every 3rd item
         >

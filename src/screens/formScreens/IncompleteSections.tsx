@@ -460,6 +460,19 @@ const IncompleteSections = ({
           trapOperationsState[id].values.weatherCode,
           'weatherCode'
         ),
+        substrate: getDBValue(
+          trapOperationsState[id].values.substrate,
+          'substrate'
+        ),
+        length: trapOperationsState[id].values.length
+          ? parseFloat(trapOperationsState[id].values.length)
+          : null,
+        width: trapOperationsState[id].values.width
+          ? parseFloat(trapOperationsState[id].values.width)
+          : null,
+        depth: trapOperationsState[id].values.depth
+          ? parseFloat(trapOperationsState[id].values.depth)
+          : null,
         samplingAltered: trapPostProcessingState[id].values.samplingAltered
           ? true
           : false,

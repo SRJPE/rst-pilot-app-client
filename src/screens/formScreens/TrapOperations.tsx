@@ -141,7 +141,7 @@ const TrapOperations = ({
 
     const currentTrapLocationInfo = find(
       visitSetupDefaults.trapLocations,
-      (permit: any) => permit.id === selectedTrapLocationId
+      (trapLocation: any) => trapLocation.id === selectedTrapLocationId
     )
     setTrapPermitInfo(currentTrapPermitInfo)
 

@@ -77,6 +77,9 @@ const mapStateToProps = (state: RootState) => {
         ?.programId,
     trapOperationsStore: state.trapOperations,
     fishProcessingSlice: state.fishProcessing,
+    selectedTrapLocationId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.trapLocationId,
   }
 }
 
@@ -93,6 +96,7 @@ const TrapPostProcessing = ({
   selectedProgramId,
   trapOperationsStore,
   fishProcessingSlice,
+  selectedTrapLocationId,
 }: {
   navigation: any
   reduxState: any
@@ -106,6 +110,7 @@ const TrapPostProcessing = ({
   selectedProgramId: any
   trapOperationsStore: any
   fishProcessingSlice: any
+  selectedTrapLocationId: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -126,6 +131,7 @@ const TrapPostProcessing = ({
   const [validationSchema, setValidationSchema] = useState<any>(
     trapPostProcessingSchema
   )
+  const [formFields, setFormFields] = useState<any>(null)
 
   const userPrograms = userCredentialsStore?.userPrograms || []
 
@@ -141,13 +147,32 @@ const TrapPostProcessing = ({
     )
 
     setSelectedProgramObj(currentProgramInfo)
+
     if (currentProgramInfo?.programFormFields?.length) {
-      const dynamicTrapOpsSchema = generateDynamicTrapPostProcessingSchema(
-        currentProgramInfo?.programFormFields
+      const trapEquimentType =
+        find(
+          visitSetupDefaults?.trapLocations,
+          (trapLocation: any) => trapLocation.id === selectedTrapLocationId
+        )?.equipmentId || null
+
+      // get fields for this section and equipment type, if applicable
+      // null equipmentId indicates field displayed for all equipment types
+      const sectionFields = currentProgramInfo?.programFormFields.filter(
+        (field: any) =>
+          field.formSection === activePage &&
+          (field.equipmentId === null || field.equipmentId === trapEquimentType)
       )
-      setValidationSchema(dynamicTrapOpsSchema)
+      setFormFields(sectionFields)
+      const dynamicTrapPostProcessingSchema =
+        generateDynamicTrapPostProcessingSchema(sectionFields)
+      setValidationSchema(dynamicTrapPostProcessingSchema)
     }
-  }, [visitSetupDefaults.programs])
+  }, [
+    visitSetupDefaults.programs,
+    visitSetupDefaults.permitInfo,
+    selectedTrapLocationId,
+    activePage,
+  ])
 
   useEffect(() => {
     if (activeTabId) {
@@ -624,7 +649,7 @@ const TrapPostProcessing = ({
                     setFieldTouched={setFieldTouched}
                     dropdownValues={dropdownValues}
                     activePage={activePage}
-                    formFields={selectedProgramObj?.programFormFields}
+                    formFields={formFields}
                     setFieldValue={setFieldValue}
                     activeTabId={activeTabId}
                     trapOperationsStore={trapOperationsStore}
