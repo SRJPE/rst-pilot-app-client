@@ -429,21 +429,23 @@ const TrapOperations = ({
 
           tabIds.map(tabId => {
             if (tabId !== activeTabId) {
+              const tabIdValues = reduxState[tabId]?.values
               dispatch(
                 saveTrapOperations({
                   tabId,
                   values: {
-                    coneSetting: '',
+                    coneSetting: tabIdValues.coneSetting,
                     flowMeasure: values.flowMeasure,
                     flowMeasureUnit: values.flowMeasureUnit,
-                    reasonNotFunc: '',
-                    recordTurbidityInPostProcessing: false,
-                    rpm1: null,
-                    rpm2: null,
-                    rpm3: null,
-                    trapStatus: '',
-                    trapVisitStopTime: null,
-                    trapVisitStartTime: null,
+                    reasonNotFunc: tabIdValues.reasonNotFunc,
+                    recordTurbidityInPostProcessing:
+                      tabIdValues.recordTurbidityInPostProcessing,
+                    rpm1: tabIdValues.rpm1,
+                    rpm2: tabIdValues.rpm2,
+                    rpm3: tabIdValues.rpm3,
+                    trapStatus: tabIdValues.trapStatus,
+                    trapVisitStopTime: tabIdValues.trapVisitStopTime,
+                    trapVisitStartTime: tabIdValues.trapVisitStartTime,
                     waterTurbidity: values.waterTurbidity,
                     waterTurbidityUnit: values.waterTurbidityUnit,
                     waterTemperature: values.waterTemperature,
