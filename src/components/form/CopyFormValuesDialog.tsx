@@ -18,11 +18,12 @@ const CopyFormValuesDialog = ({
     <Center>
       <Button
         variant='outline'
+        bg={'primary'}
         onPress={() => setIsOpen(!isOpen)}
         w='full'
-        endIcon={<Icon as={Entypo} name='copy' color='black' />}
+        endIcon={<Icon as={Entypo} name='copy' color='white' />}
       >
-        <Text>{`Copy ${valueType} values`}</Text>
+        <Text color={'white'}>{`Copy ${valueType} values`}</Text>
       </Button>
       <AlertDialog
         leastDestructiveRef={cancelRef}
