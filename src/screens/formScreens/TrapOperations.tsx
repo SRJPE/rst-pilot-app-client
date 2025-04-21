@@ -520,34 +520,48 @@ const TrapOperations = ({
           tabIds.map(tabId => {
             const tabIdValues = reduxState[tabId]?.values
 
-            dispatch(
-              saveTrapOperations({
-                tabId,
-                values: {
-                  ...tabIdValues,
-                  coneSetting: tabIdValues.coneSetting,
-                  reasonNotFunc: tabIdValues.reasonNotFunc,
-                  recordTurbidityInPostProcessing:
-                    tabIdValues.recordTurbidityInPostProcessing,
-                  rpm1: tabIdValues.rpm1,
-                  rpm2: tabIdValues.rpm2,
-                  rpm3: tabIdValues.rpm3,
-                  trapStatus: tabIdValues.trapStatus,
-                  trapVisitStartTime: tabIdValues.trapVisitStartTime,
-                  flowMeasure: values.flowMeasure,
-                  flowMeasureUnit: values.flowMeasureUnit,
-                  waterTurbidity: values.waterTurbidity,
-                  waterTurbidityUnit: values.waterTurbidityUnit,
-                  waterTemperature: values.waterTemperature,
-                  waterTemperatureUnit: values.waterTemperatureUnit,
-                  trapVisitStopTime:
-                    tabId === activeTabId
-                      ? endTime
-                      : tabIdValues.trapVisitStopTime,
-                },
-                errors,
-              })
-            )
+            if (tabId === activeTabId) {
+              dispatch(
+                saveTrapOperations({
+                  tabId,
+                  values: {
+                    ...values,
+                    trapVisitStopTime: endTime, //refactor needed
+                    trapVisitStartTime: new Date(),
+                  },
+                  errors,
+                })
+              )
+            } else {
+              dispatch(
+                saveTrapOperations({
+                  tabId,
+                  values: {
+                    ...tabIdValues,
+                    coneSetting: tabIdValues.coneSetting,
+                    reasonNotFunc: tabIdValues.reasonNotFunc,
+                    recordTurbidityInPostProcessing:
+                      tabIdValues.recordTurbidityInPostProcessing,
+                    rpm1: tabIdValues.rpm1,
+                    rpm2: tabIdValues.rpm2,
+                    rpm3: tabIdValues.rpm3,
+                    trapStatus: tabIdValues.trapStatus,
+                    trapVisitStartTime: tabIdValues.trapVisitStartTime,
+                    flowMeasure: values.flowMeasure,
+                    flowMeasureUnit: values.flowMeasureUnit,
+                    waterTurbidity: values.waterTurbidity,
+                    waterTurbidityUnit: values.waterTurbidityUnit,
+                    waterTemperature: values.waterTemperature,
+                    waterTemperatureUnit: values.waterTemperatureUnit,
+                    trapVisitStopTime:
+                      tabId === activeTabId
+                        ? endTime
+                        : tabIdValues.trapVisitStopTime,
+                  },
+                  errors,
+                })
+              )
+            }
           })
         }
         const otherTabFormsValid = checkOtherTabForms()
