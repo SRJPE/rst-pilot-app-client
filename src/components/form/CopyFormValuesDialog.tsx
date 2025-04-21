@@ -4,9 +4,9 @@ import { useRef, useState } from 'react'
 
 const CopyFormValuesDialog = ({
   onSubmit,
-  step,
+  valueType,
 }: {
-  step: string
+  valueType: string
   onSubmit: () => void
 }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -18,11 +18,12 @@ const CopyFormValuesDialog = ({
     <Center>
       <Button
         variant='outline'
+        bg={'primary'}
         onPress={() => setIsOpen(!isOpen)}
         w='full'
-        endIcon={<Icon as={Entypo} name='copy' color='black' />}
+        endIcon={<Icon as={Entypo} name='copy' color='white' />}
       >
-        <Text>{`Copy ${step} Values`}</Text>
+        <Text color={'white'}>{`Copy ${valueType} values`}</Text>
       </Button>
       <AlertDialog
         leastDestructiveRef={cancelRef}
@@ -31,9 +32,9 @@ const CopyFormValuesDialog = ({
       >
         <AlertDialog.Content>
           <AlertDialog.CloseButton />
-          <AlertDialog.Header>{`Copy ${step} Values`}</AlertDialog.Header>
+          <AlertDialog.Header>{`Copy ${valueType} values`}</AlertDialog.Header>
           <AlertDialog.Body>
-            {`This will copy the current ${step} values to other tabs. Existing values in the target tabs will be overridden. This action cannot be reversed. Please confirm to proceed.`}
+            {`This will copy the current ${valueType} values to other traps. Existing values in the target traps will be overridden. This action cannot be reversed. Please confirm to proceed.`}
           </AlertDialog.Body>
           <AlertDialog.Footer>
             <Button.Group space={2}>
