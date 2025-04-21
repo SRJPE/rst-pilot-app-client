@@ -50,15 +50,8 @@ const OnStartupProvider = (props: Props) => {
           }
 
           if (tokenRefreshResponse === 'Tokens refreshed') {
-            console.log(
-              '🚀 ~ file: onStartupProvider.tsx:47 ~ Tokens refreshed on application launch'
-            )
             return
           }
-
-          console.log(
-            '🚀 ~ file: onStartupProvider.tsx:54 ~ Tokens still valid on application launch'
-          )
         }
       }
     })

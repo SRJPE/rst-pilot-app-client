@@ -21,6 +21,7 @@ import {
   Box,
   Button,
 } from 'native-base'
+import CopyFormValuesDialog from '../../components/form/CopyFormValuesDialog'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
 import {
@@ -47,7 +48,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { find } from 'lodash'
+import { find, flow } from 'lodash'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
@@ -126,6 +127,8 @@ const TrapOperations = ({
   const permitTempThreshold = waterTempUnitC
     ? trapPermitInfo?.temperatureThreshold
     : convertCtoF(trapPermitInfo?.temperatureThreshold)
+
+  const allTabIds: string[] = Object.keys(tabSlice.tabs)
 
   useEffect(() => {
     // flow threshold on trap location
@@ -249,7 +252,6 @@ const TrapOperations = ({
       )
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
-      const allTabIds: string[] = Object.keys(tabSlice.tabs)
       allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
@@ -416,6 +418,40 @@ const TrapOperations = ({
           return true
         }
 
+        const handleValuesCopy = () => {
+          const tabIds = Object.keys(tabSlice.tabs)
+
+          tabIds.map(tabId => {
+            if (tabId !== activeTabId) {
+              const tabIdValues = reduxState[tabId]?.values
+              dispatch(
+                saveTrapOperations({
+                  tabId,
+                  values: {
+                    coneSetting: tabIdValues.coneSetting,
+                    flowMeasure: values.flowMeasure,
+                    flowMeasureUnit: values.flowMeasureUnit,
+                    reasonNotFunc: tabIdValues.reasonNotFunc,
+                    recordTurbidityInPostProcessing:
+                      tabIdValues.recordTurbidityInPostProcessing,
+                    rpm1: tabIdValues.rpm1,
+                    rpm2: tabIdValues.rpm2,
+                    rpm3: tabIdValues.rpm3,
+                    trapStatus: tabIdValues.trapStatus,
+                    trapVisitStopTime: tabIdValues.trapVisitStopTime,
+                    trapVisitStartTime: tabIdValues.trapVisitStartTime,
+                    waterTurbidity: values.waterTurbidity,
+                    waterTurbidityUnit: values.waterTurbidityUnit,
+                    waterTemperature: values.waterTemperature,
+                    waterTemperatureUnit: values.waterTemperatureUnit,
+                  },
+                  errors,
+                })
+              )
+            }
+          })
+        }
+
         const otherTabFormsValid = checkOtherTabForms()
 
         const navButtons = useMemo(() => {
@@ -447,12 +483,14 @@ const TrapOperations = ({
           isValid,
           endTime,
         ])
+
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }
         }, [previouslyActiveTabId, activeTabId])
+
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
@@ -857,6 +895,12 @@ const TrapOperations = ({
                           />
                         </Box>
                       </HStack>
+                      {allTabIds.length > 1 && (
+                        <CopyFormValuesDialog
+                          valueType='environmental'
+                          onSubmit={handleValuesCopy}
+                        />
+                      )}
                       <Text
                         color='black'
                         fontSize='xl'

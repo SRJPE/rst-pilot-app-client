@@ -1,5 +1,5 @@
 import { Button, Text } from 'native-base'
-import React, { useState } from 'react'
+import React from 'react'
 import { buttonLookup } from '../../../utils/utils'
 
 const ForkLengthButtonGroup = ({
