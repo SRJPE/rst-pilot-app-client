@@ -524,9 +524,8 @@ const TrapOperations = ({
               saveTrapOperations({
                 tabId,
                 values: {
+                  ...tabIdValues,
                   coneSetting: tabIdValues.coneSetting,
-                  flowMeasure: values.flowMeasure,
-                  flowMeasureUnit: values.flowMeasureUnit,
                   reasonNotFunc: tabIdValues.reasonNotFunc,
                   recordTurbidityInPostProcessing:
                     tabIdValues.recordTurbidityInPostProcessing,
@@ -534,15 +533,17 @@ const TrapOperations = ({
                   rpm2: tabIdValues.rpm2,
                   rpm3: tabIdValues.rpm3,
                   trapStatus: tabIdValues.trapStatus,
-                  trapVisitStopTime:
-                    tabId === activeTabId
-                      ? endTime
-                      : tabIdValues.trapVisitStopTime,
                   trapVisitStartTime: tabIdValues.trapVisitStartTime,
+                  flowMeasure: values.flowMeasure,
+                  flowMeasureUnit: values.flowMeasureUnit,
                   waterTurbidity: values.waterTurbidity,
                   waterTurbidityUnit: values.waterTurbidityUnit,
                   waterTemperature: values.waterTemperature,
                   waterTemperatureUnit: values.waterTemperatureUnit,
+                  trapVisitStopTime:
+                    tabId === activeTabId
+                      ? endTime
+                      : tabIdValues.trapVisitStopTime,
                 },
                 errors,
               })
