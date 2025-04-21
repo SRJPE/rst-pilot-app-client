@@ -387,8 +387,6 @@ const TrapOperations = ({
         resetForm,
         isValid,
       }) => {
-        console.log('🚀 ~ TrapOperations.tsx:450 ~ values:', values)
-
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -422,10 +420,6 @@ const TrapOperations = ({
 
         const handleValuesCopy = () => {
           const tabIds = Object.keys(tabSlice.tabs)
-          console.log(
-            '🚀 ~ TrapOperations.tsx:423 ~ handleValuesCopy ~ values:',
-            values
-          )
 
           tabIds.map(tabId => {
             if (tabId !== activeTabId) {
