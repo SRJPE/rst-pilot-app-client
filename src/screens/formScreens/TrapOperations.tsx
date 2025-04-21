@@ -413,8 +413,6 @@ const TrapOperations = ({
     }
   }
 
-  console.log('validationSchema', validationSchema)
-
   const renderRPMBefore = ({
     touched,
     errors,
