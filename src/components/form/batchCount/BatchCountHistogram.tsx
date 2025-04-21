@@ -204,13 +204,13 @@ const BatchCountHistogram = ({
         {existingMarks && existingMarks.length > 0 ? (
           <VStack>
             <Text>
-              Mark type: <Text bold>{existingMarks[0].markType} </Text>
+              Mark Type: <Text bold>{existingMarks[0].markType} </Text>
             </Text>
             <Text>
-              Mark color: <Text bold>{existingMarks[0].markColor} </Text>
+              Mark Color: <Text bold>{existingMarks[0].markColor} </Text>
             </Text>
             <Text>
-              Mark position: <Text bold>{existingMarks[0].markPosition} </Text>
+              Mark Position: <Text bold>{existingMarks[0].markPosition} </Text>
             </Text>
           </VStack>
         ) : (
@@ -222,7 +222,7 @@ const BatchCountHistogram = ({
             Total: <Text bold>{calculateTotalCount()}</Text>
           </Text>
           <Text>
-            Last Fork length entered:{' '}
+            Last Fork Length Entered:{' '}
             <Text bold>{calculateLastFish() ?? 'N/A'}</Text>
           </Text>
         </VStack>

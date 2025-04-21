@@ -34,7 +34,7 @@ const CopyFormValuesDialog = ({
           <AlertDialog.CloseButton />
           <AlertDialog.Header>{`Copy ${valueType} values`}</AlertDialog.Header>
           <AlertDialog.Body>
-            {`This will copy the current ${valueType} values to other tabs. Existing values in the target traps will be overridden. This action cannot be reversed. Please confirm to proceed.`}
+            {`This will copy the current ${valueType} values to other traps. Existing values in the target traps will be overridden. This action cannot be reversed. Please confirm to proceed.`}
           </AlertDialog.Body>
           <AlertDialog.Footer>
             <Button.Group space={2}>
