@@ -127,6 +127,12 @@ const TrapOperations = ({
     ? trapPermitInfo?.temperatureThreshold
     : convertCtoF(trapPermitInfo?.temperatureThreshold)
 
+  const [isFeatherYubaProgram, setIsFeatherYubaProgram] =
+    useState<boolean>(false)
+  const toggleIsFeatherYubaProgram = () => {
+    setIsFeatherYubaProgram(!isFeatherYubaProgram)
+  }
+
   useEffect(() => {
     // flow threshold on trap location
     // TO DO: temp threshold WILL permit info (Needs to be refactored in db and monitoring program setup)
@@ -385,6 +391,8 @@ const TrapOperations = ({
         resetForm,
         isValid,
       }) => {
+        console.log('🚀 ~ TrapOperations.tsx:388 ~ values:', values)
+
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -453,6 +461,21 @@ const TrapOperations = ({
             resetForm()
           }
         }, [previouslyActiveTabId, activeTabId])
+
+        const handleTurbidityToggle = (newValue: boolean) => {
+          if (newValue === true) {
+            setFieldValue('waterTurbidity', null)
+            setFieldValue('recordTurbidityInPostProcessing', true)
+          }
+
+          if (newValue === false) {
+            setFieldValue('recordTurbidityInPostProcessing', false)
+            setFieldValue('waterTurbidity', '')
+          }
+
+          setTurbidityToggle(newValue)
+        }
+
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
@@ -466,10 +489,10 @@ const TrapOperations = ({
               my='15'
             >
               <Pressable onPress={Keyboard.dismiss}>
-                <VStack space={4}>
+                <VStack space={1}>
                   <Heading>Trap Operations</Heading>
                   <FormControl>
-                    <VStack space={2}>
+                    <VStack>
                       <HStack space={2}>
                         <FormControl.Label>
                           <Text color='black' fontSize='xl'>
@@ -516,7 +539,7 @@ const TrapOperations = ({
                           </Popover>
                         </FormControl.Label>
                       </HStack>
-                      <Box alignSelf='flex-start' ml='-2'>
+                      <Box alignSelf='flex-start' ml='-2' mb={1}>
                         <DateTimePicker
                           value={endTime}
                           mode='datetime'
@@ -760,42 +783,18 @@ const TrapOperations = ({
                       </FormControl>
 
                       <HStack
-                        space={5}
+                        space={4}
                         width='100%'
                         justifyContent='space-between'
                       >
                         <Heading>Environmental Conditions</Heading>
-                        <FormControl w='30%'>
-                          <HStack space={2} alignItems='center'>
-                            <FormControl.Label>
-                              <Text fontSize='14'>
-                                Record Turbidity in Post Processing
-                              </Text>
-                            </FormControl.Label>
-                            <Switch
-                              name='recordTurbidityInPostProcessing'
-                              shadow='3'
-                              offTrackColor='secondary'
-                              onTrackColor='primary'
-                              size='md'
-                              isChecked={turbidityToggle}
-                              value={values.recordTurbidityInPostProcessing}
-                              onToggle={() => {
-                                setFieldValue('waterTurbidity', null)
-                                !turbidityToggle
-                                  ? setFieldValue(
-                                      'recordTurbidityInPostProcessing',
-                                      true
-                                    )
-                                  : setFieldValue(
-                                      'recordTurbidityInPostProcessing',
-                                      false
-                                    )
-                                setTurbidityToggle(!turbidityToggle)
-                              }}
-                            />
-                          </HStack>
-                        </FormControl>
+                        <VStack>
+                          <Text>Toggle Feather/Yuba program</Text>
+                          <Switch
+                            value={isFeatherYubaProgram}
+                            onToggle={toggleIsFeatherYubaProgram}
+                          />
+                        </VStack>
                       </HStack>
 
                       <HStack space={5}>
@@ -813,6 +812,7 @@ const TrapOperations = ({
                             RightElement={<TextInputAdornment text='cfs' />}
                           />
                         </Box>
+
                         <Box flex={1}>
                           <FormInputComponent
                             showWarning={warningResultTemp}
@@ -843,20 +843,82 @@ const TrapOperations = ({
                           />
                         </Box>
 
-                        <Box flex={1}>
-                          <FormInputComponent
-                            label={'Water Turbidity (via CDEC)'}
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            value={values.waterTurbidity}
-                            camelName={'waterTurbidity'}
-                            onChangeText={handleChange('waterTurbidity')}
-                            onBlur={handleBlur('waterTurbidity')}
-                            RightElement={<TextInputAdornment text='ntu' />}
-                          />
-                        </Box>
+                        {values.recordTurbidityInPostProcessing === false && (
+                          <Box flex={1}>
+                            <FormInputComponent
+                              label={'Water Turbidity (via CDEC)'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.waterTurbidity}
+                              camelName={'waterTurbidity'}
+                              onChangeText={handleChange('waterTurbidity')}
+                              onBlur={handleBlur('waterTurbidity')}
+                              RightElement={<TextInputAdornment text='ntu' />}
+                            />
+                          </Box>
+                        )}
                       </HStack>
+
+                      {isFeatherYubaProgram && (
+                        <Box flex={1} h={'full'}>
+                          <FormControl width={'100%'}>
+                            <HStack space={4} alignItems='center'>
+                              <FormControl.Label>
+                                <Text color='black' fontSize='xl' mb={2}>
+                                  Record Turbidity After Trap Visit Save
+                                </Text>
+                              </FormControl.Label>
+                              <Popover
+                                placement='bottom left'
+                                trigger={triggerProps => {
+                                  return (
+                                    <IconButton
+                                      {...triggerProps}
+                                      icon={
+                                        <Icon
+                                          as={MaterialIcons}
+                                          color='black'
+                                          name='info-outline'
+                                          size='lg'
+                                        />
+                                      }
+                                    ></IconButton>
+                                  )
+                                }}
+                              >
+                                <Popover.Content
+                                  accessibilityLabel='RPM Info'
+                                  w='600'
+                                  mr='10'
+                                >
+                                  <Popover.Arrow />
+                                  <Popover.Header>
+                                    Take up to three measurements of cone
+                                    rotations. The averages of the entered
+                                    values will be saved to the database.
+                                  </Popover.Header>
+                                </Popover.Content>
+                              </Popover>
+                            </HStack>
+
+                            <HStack space={3}>
+                              <Text fontSize='16'>No</Text>
+                              <Switch
+                                name='recordTurbidityInPostProcessing'
+                                shadow='3'
+                                offTrackColor='secondary'
+                                onTrackColor='primary'
+                                size='md'
+                                isChecked={turbidityToggle}
+                                value={values.recordTurbidityInPostProcessing}
+                                onToggle={handleTurbidityToggle}
+                              />
+                              <Text fontSize='16'>Yes</Text>
+                            </HStack>
+                          </FormControl>
+                        </Box>
+                      )}
                       <Text
                         color='black'
                         fontSize='xl'
