@@ -130,7 +130,7 @@ const BatchCountButtonGrid = ({
                 <Box
                   justifyContent='center'
                   alignItems='center'
-                  bg='#FFC5B6'
+                  bg='primary'
                   h='55'
                   w='60'
                   margin='2'
@@ -163,7 +163,7 @@ const BatchCountButtonGrid = ({
                   <Box
                     justifyContent='center'
                     alignItems='center'
-                    bg='#FFC5B6'
+                    bg='primary'
                     h='55'
                     w='135'
                     margin='2'
