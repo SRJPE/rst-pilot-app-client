@@ -262,7 +262,10 @@ const NoFishCaught = ({
             measureValueNumeric:
               trapOperationsState[id].values.waterTurbidity || null,
             measureValueText:
-              trapOperationsState[id].values?.waterTurbidity?.toString() || '',
+              trapOperationsState[id].values?.waterTurbidity?.toString() ||
+              trapOperationsState[id].values.recordTurbidityInPostProcessing
+                ? ''
+                : 'undefined',
             measureUnit: 25,
           },
         ],

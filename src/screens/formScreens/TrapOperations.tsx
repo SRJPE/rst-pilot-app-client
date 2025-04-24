@@ -127,11 +127,7 @@ const TrapOperations = ({
     ? trapPermitInfo?.temperatureThreshold
     : convertCtoF(trapPermitInfo?.temperatureThreshold)
 
-  const [isFeatherYubaProgram, setIsFeatherYubaProgram] =
-    useState<boolean>(false)
-  const toggleIsFeatherYubaProgram = () => {
-    setIsFeatherYubaProgram(!isFeatherYubaProgram)
-  }
+  const isFeatherYubaProgram = [3, 4].includes(selectedProgramId || 0)
 
   useEffect(() => {
     // flow threshold on trap location
@@ -391,8 +387,6 @@ const TrapOperations = ({
         resetForm,
         isValid,
       }) => {
-        console.log('🚀 ~ TrapOperations.tsx:388 ~ values:', values)
-
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -788,13 +782,6 @@ const TrapOperations = ({
                         justifyContent='space-between'
                       >
                         <Heading>Environmental Conditions</Heading>
-                        <VStack>
-                          <Text>Toggle Feather/Yuba program</Text>
-                          <Switch
-                            value={isFeatherYubaProgram}
-                            onToggle={toggleIsFeatherYubaProgram}
-                          />
-                        </VStack>
                       </HStack>
 
                       <HStack space={5}>

@@ -250,10 +250,15 @@ const HighFlows = ({
           {
             measureName: 'water turbidity',
             measureValueNumeric:
-              trapOperationsState?.[id]?.values?.waterTurbidity || null,
+              trapOperationsState?.[id]?.values?.waterTurbidity ||
+              trapOperationsState[id].values.recordTurbidityInPostProcessing
+                ? null
+                : undefined,
             measureValueText:
               trapOperationsState?.[id]?.values?.waterTurbidity?.toString() ||
-              '',
+              trapOperationsState[id].values.recordTurbidityInPostProcessing
+                ? ''
+                : 'undefined',
             measureUnit: 25,
           },
         ],
