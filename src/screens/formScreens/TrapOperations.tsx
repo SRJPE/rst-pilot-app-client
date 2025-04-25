@@ -47,7 +47,6 @@ import {
   TabStateI,
   setActiveTab,
 } from '../../redux/reducers/formSlices/tabSlice'
-import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { find, flow } from 'lodash'
@@ -57,6 +56,7 @@ import FormInputComponent, {
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
 import TrapEndDateAndTime from '../../components/form/TrapEndDateAndTime'
 import RPMBefore from '../../components/form/RPMBefore'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -397,7 +397,7 @@ const TrapOperations = ({
     // assume has not been customized
     if (
       !selectedProgramObj?.programFormFields?.length ||
-      find(selectedProgramObj?.programFormFields, {
+      find(formFields, {
         fieldName: 'trapVisitStopTime',
       })
     ) {
@@ -407,6 +407,37 @@ const TrapOperations = ({
           onEndTimeChange={onEndTimeChange}
           popoverTrigger={popoverTrigger}
         />
+      )
+    } else if (
+      formFields?.length &&
+      find(formFields, {
+        fieldName: 'trapVisitTime',
+      })
+    ) {
+      const item = find(selectedProgramObj?.programFormFields, {
+        fieldName: 'trapVisitTime',
+      })
+      const { displayName } = item
+      return (
+        <FormControl marginBottom={4}>
+          <VStack space={2}>
+            <HStack space={4}>
+              <FormControl.Label>
+                <Text color='black' fontSize='xl'>
+                  {displayName}{' '}
+                </Text>
+              </FormControl.Label>
+            </HStack>
+            <Box alignSelf='flex-start' ml='-2'>
+              <DateTimePicker
+                value={new Date()}
+                mode='datetime'
+                // onChange={onStartTimeChange}
+                accentColor='#007C7C'
+              />
+            </Box>
+          </VStack>
+        </FormControl>
       )
     } else {
       setEndTime(null)

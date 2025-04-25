@@ -19,7 +19,7 @@ import CustomModal from '../Shared/CustomModal'
 import RSTRLogSheet from './RSTRLogSheet'
 import CustomSelect from '../Shared/CustomSelect'
 import { renderRequiredOrOptionalLabel } from '../../utils/utils'
-import { find } from 'lodash'
+
 interface FieldInterface {
   id: number
   programId: number

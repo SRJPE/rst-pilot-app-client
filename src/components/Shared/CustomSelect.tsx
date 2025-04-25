@@ -74,20 +74,22 @@ const CustomSelect: React.FC<CustomSelectI> = ({
   }
 
   const sortedOptions = useMemo(() => {
-    return [...selectOptions].sort((a: any, b: any) => {
-      const aValue = a.definition || a.code || ''
-      const bValue = b.definition || b.code || ''
+    return selectOptions
+      ? [...selectOptions].sort((a: any, b: any) => {
+          const aValue = a.definition || a.code || ''
+          const bValue = b.definition || b.code || ''
 
-      if (aValue === 'processed fish') return -1
-      if (bValue === 'processed fish') return 1
+          if (aValue === 'processed fish') return -1
+          if (bValue === 'processed fish') return 1
 
-      if (aValue === 'not recorded') return 1
-      if (bValue === 'not recorded') return -1
+          if (aValue === 'not recorded') return 1
+          if (bValue === 'not recorded') return -1
 
-      if (aValue < bValue) return -1
-      if (aValue > bValue) return 1
-      return 0
-    })
+          if (aValue < bValue) return -1
+          if (aValue > bValue) return 1
+          return 0
+        })
+      : []
   }, [selectOptions])
 
   return (
