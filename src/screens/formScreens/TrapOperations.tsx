@@ -123,7 +123,6 @@ const TrapOperations = ({
   const trapNotInServiceIdentifier = 'trap not in service - restart trapping'
   const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
   const [endTime, setEndTime] = useState(new Date() as any)
-  // const [trapVisitTime, setTrapVisitTime] = useState(new Date() as any)
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
   const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
@@ -339,11 +338,6 @@ const TrapOperations = ({
     setEndTime(currentDate)
   }
 
-  // const onTrapVisitTimeChange = (event: any, selectedDate: any) => {
-  //   const currentDate = selectedDate
-  //   setTrapVisitTime(currentDate)
-  // }
-
   useEffect(() => {
     if (activeTabId) {
       if (
@@ -424,6 +418,9 @@ const TrapOperations = ({
         fieldName: 'trapVisitTime',
       })
       const { displayName } = item
+      if (!values.trapVisitTime) {
+        setFieldValue('trapVisitTime', new Date())
+      }
       return (
         <FormControl marginBottom={4}>
           <VStack space={2}>
@@ -440,7 +437,6 @@ const TrapOperations = ({
                 mode='datetime'
                 onChange={(event: any, selectedDate: any) => {
                   setFieldValue('trapVisitTime', selectedDate || new Date())
-                  // setTrapVisitTime(currentDate)
                 }}
                 accentColor='#007C7C'
               />
@@ -525,6 +521,7 @@ const TrapOperations = ({
         isValid,
       }) => {
         console.log('errors', errors)
+        console.log('values', values)
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
