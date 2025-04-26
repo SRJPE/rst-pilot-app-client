@@ -49,7 +49,7 @@ import {
 } from '../../redux/reducers/formSlices/tabSlice'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { find, flow } from 'lodash'
+import { find } from 'lodash'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
@@ -123,6 +123,7 @@ const TrapOperations = ({
   const trapNotInServiceIdentifier = 'trap not in service - restart trapping'
   const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
   const [endTime, setEndTime] = useState(new Date() as any)
+  // const [trapVisitTime, setTrapVisitTime] = useState(new Date() as any)
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
   const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
@@ -338,6 +339,11 @@ const TrapOperations = ({
     setEndTime(currentDate)
   }
 
+  // const onTrapVisitTimeChange = (event: any, selectedDate: any) => {
+  //   const currentDate = selectedDate
+  //   setTrapVisitTime(currentDate)
+  // }
+
   useEffect(() => {
     if (activeTabId) {
       if (
@@ -392,7 +398,7 @@ const TrapOperations = ({
     }
   }
 
-  const renderTrappingDateAndTime = () => {
+  const renderTrappingDateAndTime = (values: any, setFieldValue: any) => {
     // no program form fields have been set
     // assume has not been customized
     if (
@@ -430,9 +436,12 @@ const TrapOperations = ({
             </HStack>
             <Box alignSelf='flex-start' ml='-2'>
               <DateTimePicker
-                value={new Date()}
+                value={values?.trapVisitTime || new Date()}
                 mode='datetime'
-                // onChange={onStartTimeChange}
+                onChange={(event: any, selectedDate: any) => {
+                  setFieldValue('trapVisitTime', selectedDate || new Date())
+                  // setTrapVisitTime(currentDate)
+                }}
                 accentColor='#007C7C'
               />
             </Box>
@@ -480,6 +489,8 @@ const TrapOperations = ({
     <Formik
       validationSchema={validationSchema}
       enableReinitialize={true}
+      validateOnMount={false}
+      isInitialValid={true}
       // validateOnChange={false}
       initialValues={
         activeTabId
@@ -513,6 +524,7 @@ const TrapOperations = ({
         resetForm,
         isValid,
       }) => {
+        console.log('errors', errors)
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -649,7 +661,7 @@ const TrapOperations = ({
               <Pressable onPress={Keyboard.dismiss}>
                 <VStack space={4}>
                   <Heading>Trap Operations</Heading>
-                  {renderTrappingDateAndTime()}
+                  {renderTrappingDateAndTime(values, setFieldValue)}
                   <FormControl>
                     <HStack space={2} alignItems='center'>
                       <FormControl.Label>
