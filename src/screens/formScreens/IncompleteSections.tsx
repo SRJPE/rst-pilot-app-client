@@ -350,7 +350,8 @@ const IncompleteSections = ({
       let trapVisitTimeEnd =
         trapOperationsState?.[id]?.values?.trapVisitStopTime || null
 
-      if (trapOperationsState[id].values.gearStatus === 'P') {
+      // if PULL day, set trap visit time end to now
+      if (trapOperationsState?.[id]?.values?.gearStatus === 'P') {
         trapVisitTimeEnd = new Date()
       }
       const selectedCrewIds =

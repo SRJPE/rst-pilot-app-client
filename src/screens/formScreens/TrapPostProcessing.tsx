@@ -185,7 +185,7 @@ const TrapPostProcessing = ({
         )
       }
     }
-  }, [activeTabId, reduxState, formFields])
+  }, [activeTabId, reduxState])
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
     ;(async () => {
@@ -368,63 +368,107 @@ const TrapPostProcessing = ({
     return false
   }
 
-  const renderTrappingDateAndTime = (values: any) => {
+  const renderTrappingDateAndTime = (
+    values: any,
+    setFieldValue: any,
+    setFieldTouched: any
+  ) => {
     // no program form fields have been set
     // assume has not been customized
     if (
       !formFields?.length ||
       find(formFields, {
-        fieldName: 'trapVisitEndTime',
+        fieldName: 'trapVisitStartTime',
       })
     ) {
-      return values.endingTrapStatus === 'Restart Trap' ? (
-        <FormControl>
-          <VStack space={2}>
-            <HStack space={4}>
-              <FormControl.Label>
-                <Text color='black' fontSize='xl'>
-                  Trapping Start Date and Time:
-                </Text>
-                <Popover placement='bottom left' trigger={popoverTrigger}>
-                  <Popover.Content
-                    accessibilityLabel='Trap Visit Start Info'
-                    w='600'
-                    mr='10'
-                  >
-                    <Popover.Arrow />
-                    <Popover.CloseButton />
-                    <Popover.Header>
-                      Please set the Date and Time of when you returned the trap
-                      to begin the new trapping period.
-                    </Popover.Header>
-                    <Popover.Body p={4}>
-                      <VStack space={2}>
-                        <HStack space={2} alignItems='flex-start'>
-                          <Text fontSize='md'>
-                            This value is used to record the date and time of
-                            returning the trap to the water to start the new
-                            trapping period.
-                          </Text>
-                        </HStack>
-                      </VStack>
-                    </Popover.Body>
-                  </Popover.Content>
-                </Popover>
-              </FormControl.Label>
-            </HStack>
-            <Box alignSelf='flex-start' ml='-2'>
-              {startTime ? (
-                <DateTimePicker
-                  value={startTime}
-                  mode='datetime'
-                  onChange={onStartTimeChange}
-                  accentColor='#007C7C'
-                />
-              ) : null}
-            </Box>
-          </VStack>
-        </FormControl>
-      ) : null
+      return (
+        <>
+          <FormControl w='30%'>
+            <FormControl.Label>
+              <Text color='black' fontSize='xl'>
+                Trap Status at End
+              </Text>
+            </FormControl.Label>
+            <Radio.Group
+              name='endingTrapStatus'
+              accessibilityLabel='Ending Trap Status'
+              value={`${values.endingTrapStatus}`}
+              onChange={(newValue: any) => {
+                handleTrapStatusAtEndRadio(
+                  newValue,
+                  setFieldTouched,
+                  setFieldValue
+                )
+              }}
+            >
+              <Radio
+                colorScheme='primary'
+                value='Restart Trap'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                Continue Trapping
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='End Trapping'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                End Trapping
+              </Radio>
+            </Radio.Group>
+          </FormControl>
+          {values.endingTrapStatus === 'Restart Trap' && (
+            <FormControl>
+              <VStack space={2}>
+                <HStack space={4}>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Trapping Start Date and Time:
+                    </Text>
+                    <Popover placement='bottom left' trigger={popoverTrigger}>
+                      <Popover.Content
+                        accessibilityLabel='Trap Visit Start Info'
+                        w='600'
+                        mr='10'
+                      >
+                        <Popover.Arrow />
+                        <Popover.CloseButton />
+                        <Popover.Header>
+                          Please set the Date and Time of when you returned the
+                          trap to begin the new trapping period.
+                        </Popover.Header>
+                        <Popover.Body p={4}>
+                          <VStack space={2}>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Text fontSize='md'>
+                                This value is used to record the date and time
+                                of returning the trap to the water to start the
+                                new trapping period.
+                              </Text>
+                            </HStack>
+                          </VStack>
+                        </Popover.Body>
+                      </Popover.Content>
+                    </Popover>
+                  </FormControl.Label>
+                </HStack>
+                <Box alignSelf='flex-start' ml='-2'>
+                  {startTime ? (
+                    <DateTimePicker
+                      value={startTime}
+                      mode='datetime'
+                      onChange={onStartTimeChange}
+                      accentColor='#007C7C'
+                    />
+                  ) : null}
+                </Box>
+              </VStack>
+            </FormControl>
+          )}
+        </>
+      )
     } else if (
       formFields?.length &&
       find(formFields, {
@@ -434,7 +478,10 @@ const TrapPostProcessing = ({
       const item = find(selectedProgramObj?.programFormFields, {
         fieldName: 'trapVisitTime',
       })
-      const { fieldName, displayName } = item
+      const { displayName } = item
+      if (!values.trapVisitTime) {
+        setFieldValue('trapVisitTime', new Date())
+      }
       return (
         <FormControl marginBottom={4}>
           <VStack space={2}>
@@ -447,9 +494,11 @@ const TrapPostProcessing = ({
             </HStack>
             <Box alignSelf='flex-start' ml='-2'>
               <DateTimePicker
-                value={new Date()}
+                value={values?.trapVisitTime || new Date()}
                 mode='datetime'
-                // onChange={onStartTimeChange}
+                onChange={(event: any, selectedDate: any) => {
+                  setFieldValue('trapVisitTime', selectedDate || new Date())
+                }}
                 accentColor='#007C7C'
               />
             </Box>
@@ -808,43 +857,11 @@ const TrapPostProcessing = ({
                       </Box>
                     )}
                   </HStack>
-                  <FormControl w='30%'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Trap Status at End
-                      </Text>
-                    </FormControl.Label>
-                    <Radio.Group
-                      name='endingTrapStatus'
-                      accessibilityLabel='Ending Trap Status'
-                      value={`${values.endingTrapStatus}`}
-                      onChange={(newValue: any) => {
-                        handleTrapStatusAtEndRadio(
-                          newValue,
-                          setFieldTouched,
-                          setFieldValue
-                        )
-                      }}
-                    >
-                      <Radio
-                        colorScheme='primary'
-                        value='Restart Trap'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        Continue Trapping
-                      </Radio>
-                      <Radio
-                        colorScheme='primary'
-                        value='End Trapping'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        End Trapping
-                      </Radio>
-                    </Radio.Group>
-                  </FormControl>
-                  {renderTrappingDateAndTime(values)}
+                  {renderTrappingDateAndTime(
+                    values,
+                    setFieldValue,
+                    setFieldTouched
+                  )}
                   <FormInputComponent
                     multiline={true}
                     label={'Comments'}
