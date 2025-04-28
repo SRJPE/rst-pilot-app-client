@@ -19,6 +19,7 @@ import { RootState, AppDispatch } from '../redux/store'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { find } from 'lodash'
 import { getUserPrograms } from '../redux/reducers/userCredentialsSlice'
+import AlertDialog from '../components/Shared/AlertDialog'
 
 const styles = StyleSheet.create({
   recentItemsContainer: {
@@ -67,6 +68,23 @@ const Home = ({
   previousTrapVisits: any
   visitSetupDefaultState: any
 }) => {
+  console.log('🚀 ~ Home.tsx:71 ~ previousTrapVisits:', previousTrapVisits)
+  const visitsRequiringTurbidity = previousTrapVisits?.filter(
+    (trapVisit: any) => {
+      return trapVisit.createdTrapVisitEnvironmentalResponse?.some(
+        (response: any) =>
+          response.measureName === 'water turbidity' &&
+          response.measureValueNumeric === null
+      )
+      //? Copilot suggested this line, would this be a good idea?
+      //&& trapVisit.createdTrapVisitResponse.trapVisitTimeEnd
+    }
+  )
+  console.log(
+    '🚀 ~ Home.tsx:73 ~ visitsRequiringTurbidity ~ visitsRequiringTurbidity:',
+    visitsRequiringTurbidity
+  )
+
   const [staggerOpen, setStaggerOpen] = useState(false as boolean)
   const [opacity, setOpacity] = useState(1 as number)
   const [recentTrapVisits, setRecentTrapVisits] = useState([] as Array<any>)
@@ -201,6 +219,14 @@ const Home = ({
             text: 'Input Turbidity',
           })}
         </View> */}
+        <AlertDialog
+          title='Action Required: Add Turbidity Values'
+          description={`There ${
+            visitsRequiringTurbidity.length === 1
+              ? 'is 1 program'
+              : `are ${visitsRequiringTurbidity.length} programs`
+          } missing turbidity values. Please add the missing data to complete your records.`}
+        />
       </View>
 
       <BottomNavigation

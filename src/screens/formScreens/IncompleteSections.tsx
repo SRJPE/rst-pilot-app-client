@@ -242,6 +242,9 @@ const IncompleteSections = ({
 
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
+      const waterTurbidityIsPresent =
+        trapOperationsState[id].values.waterTurbidity !== '' &&
+        trapOperationsState[id].values.waterTurbidity !== null
       const {
         rpm1: startRpm1,
         rpm2: startRpm2,
@@ -322,18 +325,16 @@ const IncompleteSections = ({
           },
           {
             measureName: 'water turbidity',
-            measureValueNumeric:
-              trapOperationsState[id].values.waterTurbidity ||
-              trapPostProcessingState[id].values.waterTurbidity ||
-              trapOperationsState[id].values.recordTurbidityInPostProcessing
-                ? null
-                : undefined,
-            measureValueText:
-              trapOperationsState[id].values?.waterTurbidity?.toString() ||
-              trapPostProcessingState[id].values?.waterTurbidity?.toString() ||
-              trapOperationsState[id].values.recordTurbidityInPostProcessing
-                ? ''
-                : 'undefined',
+            measureValueNumeric: waterTurbidityIsPresent
+              ? trapOperationsState[id].values.waterTurbidity
+              : trapOperationsState[id]?.values?.recordTurbidityInPostProcessing
+              ? null
+              : undefined,
+            measureValueText: waterTurbidityIsPresent
+              ? trapOperationsState[id].values.waterTurbidity?.toString()
+              : trapOperationsState[id]?.values?.recordTurbidityInPostProcessing
+              ? ''
+              : 'undefined',
             measureUnit: 25,
           },
         ],

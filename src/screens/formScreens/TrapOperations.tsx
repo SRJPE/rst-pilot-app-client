@@ -388,6 +388,8 @@ const TrapOperations = ({
         resetForm,
         isValid,
       }) => {
+        console.log('🚀 ~ TrapOperations.tsx:391 ~ values:', values)
+
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -424,6 +426,10 @@ const TrapOperations = ({
 
           tabIds.map(tabId => {
             const tabIdValues = reduxState[tabId]?.values
+            console.log(
+              '🚀 ~ TrapOperations.tsx:471 ~ handleValuesCopy ~ tabIdValues:',
+              tabIdValues
+            )
 
             if (tabId === activeTabId) {
               dispatch(
@@ -446,7 +452,7 @@ const TrapOperations = ({
                     coneSetting: tabIdValues.coneSetting,
                     reasonNotFunc: tabIdValues.reasonNotFunc,
                     recordTurbidityInPostProcessing:
-                      tabIdValues.recordTurbidityInPostProcessing,
+                      values.recordTurbidityInPostProcessing,
                     rpm1: tabIdValues.rpm1,
                     rpm2: tabIdValues.rpm2,
                     rpm3: tabIdValues.rpm3,
