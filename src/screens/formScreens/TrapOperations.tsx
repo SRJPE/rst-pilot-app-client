@@ -21,6 +21,7 @@ import {
   Box,
   Button,
 } from 'native-base'
+import CopyFormValuesDialog from '../../components/form/CopyFormValuesDialog'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
 import {
@@ -47,7 +48,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { find } from 'lodash'
+import { find, flow } from 'lodash'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
@@ -128,6 +129,7 @@ const TrapOperations = ({
     : convertCtoF(trapPermitInfo?.temperatureThreshold)
 
   const isFeatherYubaProgram = [3, 4].includes(selectedProgramId || 0)
+  const allTabIds: string[] = Object.keys(tabSlice.tabs)
 
   useEffect(() => {
     // flow threshold on trap location
@@ -251,7 +253,6 @@ const TrapOperations = ({
       )
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
-      const allTabIds: string[] = Object.keys(tabSlice.tabs)
       allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
@@ -418,6 +419,56 @@ const TrapOperations = ({
           return true
         }
 
+        const handleValuesCopy = () => {
+          const tabIds = Object.keys(tabSlice.tabs)
+
+          tabIds.map(tabId => {
+            const tabIdValues = reduxState[tabId]?.values
+
+            if (tabId === activeTabId) {
+              dispatch(
+                saveTrapOperations({
+                  tabId,
+                  values: {
+                    ...values,
+                    trapVisitStopTime: endTime, //refactor needed
+                    trapVisitStartTime: new Date(),
+                  },
+                  errors,
+                })
+              )
+            } else {
+              dispatch(
+                saveTrapOperations({
+                  tabId,
+                  values: {
+                    ...tabIdValues,
+                    coneSetting: tabIdValues.coneSetting,
+                    reasonNotFunc: tabIdValues.reasonNotFunc,
+                    recordTurbidityInPostProcessing:
+                      tabIdValues.recordTurbidityInPostProcessing,
+                    rpm1: tabIdValues.rpm1,
+                    rpm2: tabIdValues.rpm2,
+                    rpm3: tabIdValues.rpm3,
+                    trapStatus: tabIdValues.trapStatus,
+                    trapVisitStartTime: tabIdValues.trapVisitStartTime,
+                    flowMeasure: values.flowMeasure,
+                    flowMeasureUnit: values.flowMeasureUnit,
+                    waterTurbidity: values.waterTurbidity,
+                    waterTurbidityUnit: values.waterTurbidityUnit,
+                    waterTemperature: values.waterTemperature,
+                    waterTemperatureUnit: values.waterTemperatureUnit,
+                    trapVisitStopTime:
+                      tabId === activeTabId
+                        ? endTime
+                        : tabIdValues.trapVisitStopTime,
+                  },
+                  errors,
+                })
+              )
+            }
+          })
+        }
         const otherTabFormsValid = checkOtherTabForms()
 
         const navButtons = useMemo(() => {
@@ -449,6 +500,7 @@ const TrapOperations = ({
           isValid,
           endTime,
         ])
+
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
             onSubmit(values, previouslyActiveTabId)
@@ -905,6 +957,12 @@ const TrapOperations = ({
                             </HStack>
                           </FormControl>
                         </Box>
+                      )}
+                      {allTabIds.length > 1 && (
+                        <CopyFormValuesDialog
+                          valueType='environmental'
+                          onSubmit={handleValuesCopy}
+                        />
                       )}
                       <Text
                         color='black'
