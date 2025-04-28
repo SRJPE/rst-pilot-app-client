@@ -586,14 +586,6 @@ const VisitSetup = ({
                         setFieldTouched('trapName', false)
                       }
 
-                      if (itemValue === 'Mill Creek') {
-                        setFieldValue('trapSite', 'Mill Creek RST')
-                        setFieldTouched('trapSite', true)
-                      }
-                      if (itemValue === 'Deer Creek') {
-                        setFieldValue('trapSite', 'Deer Creek RST')
-                        setFieldTouched('trapSite', true)
-                      }
                       updateSelectedProgram(itemValue)
                       setFieldValue('crew', [])
                       setFieldTouched('crew', false)
