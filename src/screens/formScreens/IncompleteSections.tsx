@@ -350,9 +350,22 @@ const IncompleteSections = ({
       let trapVisitTimeEnd =
         trapOperationsState?.[id]?.values?.trapVisitStopTime || null
 
-      // if PULL day, set trap visit time end to now
-      if (trapOperationsState?.[id]?.values?.gearStatus === 'P') {
-        trapVisitTimeEnd = new Date()
+      let trapVisitTimeStart =
+        trapPostProcessingState?.[id]?.values?.trapVisitStartTime || null
+
+      // // if PULL day, set trap visit time end to now
+      // if (trapOperationsState?.[id]?.values?.gearStatus === 'P') {
+      //   trapVisitTimeEnd = new Date()
+      //   trapVisitTimeStart = new Date()
+      // }
+
+      if (trapOperationsState?.[id]?.values?.trapVisitTime) {
+        trapVisitTimeEnd = trapOperationsState?.[id]?.values?.trapVisitTime
+        trapVisitTimeStart = trapOperationsState?.[id]?.values?.trapVisitTime
+      } else if (trapPostProcessingState?.[id]?.values?.trapVisitTime) {
+        trapVisitTimeEnd = trapPostProcessingState?.[id]?.values?.trapVisitTime
+        trapVisitTimeStart =
+          trapPostProcessingState?.[id]?.values?.trapVisitTime
       }
       const selectedCrewIds =
         findCrewIdsFromSelectedCrewNames(selectedCrewNames)
@@ -363,8 +376,7 @@ const IncompleteSections = ({
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
         isPaperEntry: visitSetupState[id].isPaperEntry,
-        trapVisitTimeStart:
-          trapPostProcessingState?.[id]?.values?.trapVisitStartTime || null,
+        trapVisitTimeStart,
         trapVisitTimeEnd,
         fishProcessed: returnNullableTableId(
           fishProcessedValues.indexOf(
