@@ -84,6 +84,30 @@ export const buttonLookup: any = {
   '90-117+': { firstButton: 90, additionalButtons: 27, lifeStage: 'Smolt' },
 }
 
+export const yoloButtonLookup: any = {
+  '25-29': {
+    firstButton: 25,
+    additionalButtons: 4,
+    lifeStage: 'Yolk Sac Fry',
+  },
+  '30-40': { firstButton: 30, additionalButtons: 10, lifeStage: 'Fry' },
+  '41-59': { firstButton: 41, additionalButtons: 18, lifeStage: 'Parr' },
+  '60-89': {
+    firstButton: 60,
+    additionalButtons: 29,
+    lifeStage: 'Silvery Parr',
+  },
+  '90-117+': { firstButton: 90, additionalButtons: 27, lifeStage: 'Smolt' },
+}
+
+export const getButtonLookup = (selectedProgramObj: any) => {
+  if (selectedProgramObj?.programName?.includes('Yolo')) {
+    return yoloButtonLookup
+  } else {
+    return buttonLookup
+  }
+}
+
 export const calculateLifeStage = (forkLength: number) => {
   //look over the the values of lookup, return the first key that is >= forkLength
   const lifeStageLookup: any = {

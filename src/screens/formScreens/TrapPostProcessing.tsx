@@ -166,6 +166,9 @@ const TrapPostProcessing = ({
       const dynamicTrapPostProcessingSchema =
         generateDynamicTrapPostProcessingSchema(sectionFields)
       setValidationSchema(dynamicTrapPostProcessingSchema)
+    } else {
+      setFormFields(null)
+      setValidationSchema(trapPostProcessingSchema)
     }
   }, [
     visitSetupDefaults.programs,

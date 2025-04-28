@@ -1,16 +1,19 @@
 import { Button, Text } from 'native-base'
 import React from 'react'
-import { buttonLookup } from '../../../utils/utils'
+import { getButtonLookup } from '../../../utils/utils'
 
 const ForkLengthButtonGroup = ({
   setFirstButton,
   setLifeStageRadioValue,
   setNumberOfAdditionalButtons,
+  selectedProgramObj,
 }: {
   setFirstButton: any
   setLifeStageRadioValue: any
   setNumberOfAdditionalButtons: any
+  selectedProgramObj: any
 }) => {
+  const buttonLookup = getButtonLookup(selectedProgramObj)
   const handlePressGroupButton = (key: string) => {
     setFirstButton(buttonLookup[key].firstButton)
     setNumberOfAdditionalButtons(buttonLookup[key].additionalButtons)

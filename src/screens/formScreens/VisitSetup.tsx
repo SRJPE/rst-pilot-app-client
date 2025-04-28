@@ -128,6 +128,7 @@ const VisitSetup = ({
       visitSetupDefaultsState.programs,
       (program: any) => program.id === selectedProgramId
     )
+    setSelectedProgramObj(currentProgramInfo)
 
     if (currentProgramInfo?.programFormFields?.length) {
       const trapEquimentType =
@@ -150,9 +151,10 @@ const VisitSetup = ({
         currentProgramInfo?.programFormFields
       )
       setValidationSchema(dynamicTrapOpsSchema)
+    } else {
+      setFormFields(null)
+      setValidationSchema(trapVisitSchema)
     }
-
-    setSelectedProgramObj(currentProgramInfo)
   }, [selectedProgramId, activePage, visitSetupDefaultsState])
 
   const onSubmit = (values: any, tabId: string | null) => {

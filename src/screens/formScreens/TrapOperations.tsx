@@ -153,6 +153,7 @@ const TrapOperations = ({
       visitSetupDefaults.programs,
       (program: any) => program.id === selectedProgramId
     )
+    setSelectedProgramObj(currentProgramInfo)
 
     if (currentProgramInfo?.programFormFields?.length) {
       const trapEquimentType =
@@ -171,9 +172,10 @@ const TrapOperations = ({
       setFormFields(sectionFields)
       const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(sectionFields)
       setValidationSchema(dynamicTrapOpsSchema)
+    } else {
+      setFormFields(null)
+      setValidationSchema(trapOperationsSchema)
     }
-
-    setSelectedProgramObj(currentProgramInfo)
   }, [
     visitSetupDefaults.permitInfo,
     selectedTrapLocationId,

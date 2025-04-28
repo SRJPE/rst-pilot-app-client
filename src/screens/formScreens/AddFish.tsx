@@ -430,7 +430,6 @@ const AddFishContent = ({
       ? visitSetupState?.[tabSlice.activeTabId]?.values?.programId
       : null
 
-    console.log('spinner', selectedProgramId)
     if (selectedProgramId) {
       const currentProgramInfo = find(
         visitSetupDefaults.programs,
@@ -438,17 +437,14 @@ const AddFishContent = ({
       )
 
       if (currentProgramInfo?.programFormFields?.length) {
-        console.log(
-          'currentProgramInfo?.programFormFields',
-          currentProgramInfo?.programFormFields
-        )
         const fishInputFields = currentProgramInfo?.programFormFields.filter(
           (formField: any) => {
             return formField?.formSection === 'Fish Input'
           }
         )
-        console.log('fishIbputFields', fishInputFields)
         setConditionalFishInputFields(keyBy(fishInputFields, 'fieldName'))
+      } else {
+        setConditionalFishInputFields({})
       }
     }
   }, [visitSetupDefaults.programs])

@@ -18,7 +18,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Keyboard } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
 import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
@@ -39,19 +39,29 @@ import { saveBatchCount } from '../../redux/reducers/formSlices/fishInputSlice'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
+import { find } from 'lodash'
+import { visitSetupDefaultsSlice } from '../../redux/reducers/visitSetupDefaults'
 
 const BatchCount = ({
   tabSlice,
   batchCountStore,
   trapOperationsStore,
   dropdownsStore,
+  selectedProgramId,
+  visitSetupDefaults,
 }: {
   tabSlice: TabStateI
   batchCountStore: any
   trapOperationsStore: any
   dropdownsStore: any
+  selectedProgramId: number | null
+  visitSetupDefaults: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const currentProgramInfo = find(
+    visitSetupDefaults.programs,
+    (program: any) => program.id === selectedProgramId
+  )
   const navigation = useNavigation()
   const [firstButton, setFirstButton] = useState(0 as number)
   const [numberOfAdditionalButtons, setNumberOfAdditionalButtons] = useState(
@@ -77,6 +87,16 @@ const BatchCount = ({
 
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
   const { species, fishConditions, existingMarks } = batchCharacteristics
+
+  const [selectedProgramObj, setSelectedProgramObj] = useState({} as any)
+
+  useEffect(() => {
+    const currentProgramInfo = find(
+      visitSetupDefaults.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+    setSelectedProgramObj(currentProgramInfo)
+  }, [visitSetupDefaults.programs, selectedProgramId])
 
   const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())
@@ -405,6 +425,7 @@ const BatchCount = ({
                     setFirstButton={setFirstButton}
                     setLifeStageRadioValue={setLifeStageRadioValue}
                     setNumberOfAdditionalButtons={setNumberOfAdditionalButtons}
+                    selectedProgramObj={selectedProgramObj}
                   />
                 </VStack>
                 <BatchCountButtonGrid
@@ -503,6 +524,10 @@ const mapStateToProps = (state: RootState) => {
     batchCountStore: state.batchCount,
     trapOperationsStore: state.trapOperations,
     dropdownsStore: state.dropdowns,
+    selectedProgramId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.programId,
+    visitSetupDefaults: state.visitSetupDefaults,
   }
 }
 export default connect(mapStateToProps)(BatchCount)
