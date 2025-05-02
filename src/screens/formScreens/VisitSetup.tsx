@@ -422,13 +422,15 @@ const VisitSetup = ({
 
   const updateTrapNameValues = (trapSite: string) => {
     setTrapNameList(
-      visitSetupDefaultsState?.trapLocations
-        ?.filter((obj: any) => obj.siteName === trapSite)
-
-        ?.map((trapLocation: any) => ({
-          label: trapLocation?.trapName,
-          value: trapLocation?.trapName,
-        }))
+      sortBy(
+        visitSetupDefaultsState?.trapLocations
+          ?.filter((obj: any) => obj.siteName === trapSite)
+          ?.map((trapLocation: any) => ({
+            label: trapLocation?.trapName,
+            value: trapLocation?.trapName,
+          })),
+        'label'
+      )
     )
   }
 
@@ -637,14 +639,18 @@ const VisitSetup = ({
                         }}
                         setFieldTouched={() => setFieldTouched('trapSite')}
                         selectOptions={uniqBy(
-                          visitSetupDefaultsState?.trapLocations
-                            ?.filter(
-                              (obj: any) => obj.programId === selectedProgramId
-                            )
-                            ?.map((trapLocation: any) => ({
-                              label: trapLocation?.siteName,
-                              value: trapLocation?.siteName,
-                            })),
+                          sortBy(
+                            visitSetupDefaultsState?.trapLocations
+                              ?.filter(
+                                (obj: any) =>
+                                  obj.programId === selectedProgramId
+                              )
+                              ?.map((trapLocation: any) => ({
+                                label: trapLocation?.siteName,
+                                value: trapLocation?.siteName,
+                              })),
+                            'label'
+                          ),
                           'label'
                         )}
                       />

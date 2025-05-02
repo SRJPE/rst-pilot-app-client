@@ -169,6 +169,7 @@ const TrapOperations = ({
           field.formSection === activePage &&
           (field.equipmentId === null || field.equipmentId === trapEquimentType)
       )
+
       setFormFields(sectionFields)
       const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(sectionFields)
       setValidationSchema(dynamicTrapOpsSchema)

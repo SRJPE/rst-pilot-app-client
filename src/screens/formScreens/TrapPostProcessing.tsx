@@ -518,10 +518,11 @@ const TrapPostProcessing = ({
       <Formik
         validationSchema={validationSchema}
         enableReinitialize={true}
+        validateOnMount={false}
         initialValues={initialValues}
         initialTouched={
           activeTabId && reduxState[activeTabId]
-            ? reduxState[activeTabId].errors
+            ? reduxState[activeTabId].touched
             : null
         }
         initialErrors={
