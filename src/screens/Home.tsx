@@ -197,28 +197,22 @@ const Home = ({
       <Text fontWeight={300} fontSize={23}>
         Select the action you would like to perform.
       </Text>
-      <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
-        {/* <Text fontWeight={300} fontSize={20} marginBottom={5}>
-          Actions
-        </Text> */}
-        {/* <View style={styles.recentItemsCardRow}>
-          {recentItemsCard({
-            text: 'Input Turbidity',
-          })}
-        </View> */}
-        <AlertDialog
-          title='Action Required: Add Turbidity Values'
-          description={`There ${
-            visitsRequiringTurbidity.length === 1
-              ? 'is 1 program'
-              : `are ${visitsRequiringTurbidity.length} programs`
-          } missing turbidity values. Please add the missing data to complete your records.`}
-          onPress={() => {
-            navigation.navigate('Input Turbidity')
-            setStaggerOpen(false)
-          }}
-        />
-      </View>
+      {visitsRequiringTurbidity.length > 0 && (
+        <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
+          <AlertDialog
+            title='Action Required: Add Turbidity Values'
+            description={`There ${
+              visitsRequiringTurbidity.length === 1
+                ? 'is 1 program'
+                : `are ${visitsRequiringTurbidity.length} programs`
+            } missing turbidity values. Please add the missing data to complete your records.`}
+            onPress={() => {
+              navigation.navigate('Input Turbidity')
+              setStaggerOpen(false)
+            }}
+          />
+        </View>
+      )}
 
       <BottomNavigation
         navigation={navigation}

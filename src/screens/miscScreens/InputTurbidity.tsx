@@ -8,14 +8,36 @@ import {
   FormControl,
   View,
   VStack,
+  Divider,
+  Icon,
 } from 'native-base'
-import { RootState } from '../../redux/store'
-import { connect } from 'react-redux'
+import { Formik, Field, Form } from 'formik'
+import { RootState, AppDispatch } from '../../redux/store'
+import { connect, useDispatch } from 'react-redux'
 import { retrieveTrapVisitsRequiringTurbidity } from '../../utils/helpers/helperFunctions'
 import type { TrapVisitResponse } from '../../utils/interfaces'
 import type { InitialStateI } from '../../redux/reducers/visitSetupDefaults'
-
+import * as yup from 'yup'
 import { DataTable } from 'react-native-paper'
+import FormInputComponent, {
+  TextInputAdornment,
+} from '../../components/Shared/FormInputComponent'
+import { useFocusEffect } from '@react-navigation/native'
+import { useCallback, useEffect } from 'react'
+import { Keyboard } from 'react-native'
+import { set } from 'lodash'
+import api from '../../api/axiosConfig'
+import { Ionicons } from '@expo/vector-icons'
+import { fetchPreviousTrapAndCatch } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { QARanges } from '../../utils/utils'
+
+const TurbiditySchema = yup.object({
+  waterTurbidity: yup
+    .number()
+    .required('Water Turbidity is required')
+    .typeError('Value must be a number'),
+})
 
 function InputTurbidity({
   navigation,
@@ -30,6 +52,17 @@ function InputTurbidity({
   //TODO: import correct type so component cant be passed to the connect function without error  ==> previousTrapVisits: TrapVisitResponse[]
   visitSetupDefaultState: InitialStateI
 }) {
+  const dispatch = useDispatch<AppDispatch>()
+
+  const checkTurbidityRange = (value: string) => {
+    if (['', '-'].includes(value)) return
+
+    const isValid =
+      Number(value) > 0 && Number(value) <= QARanges.waterTurbidity.max
+    const showWarning = isValid === false
+    return showWarning
+  }
+
   const trapVisitsRequiringTurbidity =
     retrieveTrapVisitsRequiringTurbidity(previousTrapVisits)
 
@@ -84,77 +117,165 @@ function InputTurbidity({
           and complete record.
         </Text>
         {trapVisitTableData.map(trapVisit => (
-          <Box
+          <Formik
             key={trapVisit.trapVisitId}
-            borderColor={'secondary'}
-            shadow={1}
-            borderWidth={1}
-            borderTopWidth={5}
-            borderRadius={5}
-            borderTopColor={'primary'}
-            p={5}
-            mx={5}
-            background={'lightBlue.50'}
-          >
-            <Text fontSize='md'>
-              <Text bold>Program:</Text> {trapVisit.programName}
-            </Text>
-            <Text fontSize='md'>
-              <Text bold>Trap Location:</Text> {trapVisit.trapLocationName}
-            </Text>
-            <Text fontSize='md'>
-              <Text bold>Trap Visit End Time:</Text>{' '}
-              {new Date(trapVisit.trapVisitEndTime).toLocaleString()}
-            </Text>
-            <HStack justifyContent='space-between' alignItems='center'>
-              <Text fontSize='md'>
-                <Text bold>Water Turbidity:</Text>{' '}
-                {trapVisit.waterTurbidity ?? 'Not Recorded'}
-              </Text>
-              <Popover
-                placement='top'
-                trigger={triggerProps => {
-                  return (
-                    <Button bg='primary' {...triggerProps}>
-                      <Text fontSize='md' color='white'>
-                        Input Turbidity
-                      </Text>
-                    </Button>
+            initialValues={{
+              waterTurbidity: '',
+            }}
+            validationSchema={TurbiditySchema}
+            onSubmit={(values, { setSubmitting }) => {
+              api
+                .put(`trap-visit/${trapVisit.trapVisitId}/environmental`, {
+                  waterTurbidity: values.waterTurbidity,
+                })
+                .then(response => {
+                  // Handle success
+
+                  if (response.data.status !== 200) {
+                    throw new Error('Water turbidity could not be saved')
+                  }
+                  dispatch(fetchPreviousTrapAndCatch())
+
+                  showSlideAlert(
+                    dispatch,
+                    'Water turbidity saved successfully',
+                    'success'
                   )
-                }}
-              >
-                <Popover.Content accessibilityLabel='Delete Customerd' w='56'>
-                  <Popover.Arrow />
-                  <Popover.CloseButton />
-                  <Popover.Header>
-                    <Text fontSize='sm' bold>
-                      Save Turbidity Value
+                })
+                .catch(error => {
+                  console.error('Error:', error)
+                  // Handle error
+                  showSlideAlert(
+                    dispatch,
+                    'Water turbidity could not be saved',
+                    'error'
+                  )
+                })
+                .finally(() => {
+                  setSubmitting(false)
+                })
+            }}
+          >
+            {({
+              isSubmitting,
+              handleSubmit,
+              handleBlur,
+              touched,
+              values,
+              errors,
+              submitForm,
+              handleChange,
+              resetForm,
+            }) => {
+              // Reset the form when the page is navigated away
+              useFocusEffect(
+                useCallback(() => {
+                  return () => {
+                    resetForm() // Reset the form state
+                  }
+                }, [resetForm])
+              )
+
+              const displayInputWarning = checkTurbidityRange(
+                values.waterTurbidity
+              )
+
+              return (
+                <>
+                  <Box
+                    key={trapVisit.trapVisitId}
+                    borderColor={'secondary'}
+                    shadow={1}
+                    borderWidth={1}
+                    borderTopWidth={5}
+                    borderRadius={5}
+                    borderTopColor={'primary'}
+                    p={5}
+                    mx={5}
+                    background={'lightBlue.50'}
+                  >
+                    <Text fontSize='md'>
+                      <Text bold>Program:</Text> {trapVisit.programName}
                     </Text>
-                  </Popover.Header>
-                  <Popover.Body>
-                    <Input placeholder='0' />
-                  </Popover.Body>
-                  <Popover.Footer justifyContent='stretch'>
-                    <Button variant={'outline'} w='full' borderColor='primary'>
-                      <Text color='primary' bold>
-                        Save
-                      </Text>
-                    </Button>
-                  </Popover.Footer>
-                </Popover.Content>
-              </Popover>
-            </HStack>
-          </Box>
+                    <Text fontSize='md'>
+                      <Text bold>Trap Location:</Text>{' '}
+                      {trapVisit.trapLocationName}
+                    </Text>
+                    <Text fontSize='md'>
+                      <Text bold>Trap Visit End Time:</Text>{' '}
+                      {new Date(trapVisit.trapVisitEndTime).toLocaleString()}
+                    </Text>
+                    <Divider my={2} />
+                    <HStack alignItems='center' space={3} h={100}>
+                      <Box flex={3}>
+                        <FormInputComponent
+                          showWarning={displayInputWarning}
+                          label={'Water Turbidity (via CDEC)'}
+                          placeholder='0'
+                          touched={touched}
+                          errors={errors}
+                          value={values.waterTurbidity}
+                          camelName={'waterTurbidity'}
+                          onChangeText={handleChange('waterTurbidity')}
+                          onBlur={handleBlur('waterTurbidity')}
+                          RightElement={<TextInputAdornment text='ntu' />}
+                        />
+                      </Box>
+                      <Box flex={1} mt={3}>
+                        <Button
+                          isDisabled={isSubmitting}
+                          isLoading={isSubmitting}
+                          isLoadingText='Saving...'
+                          onPress={() => submitForm()}
+                          variant={'solid'}
+                          bg='primary'
+                          py={3}
+                        >
+                          <Text color='white' bold>
+                            Save
+                          </Text>
+                        </Button>
+                      </Box>
+                    </HStack>
+                  </Box>
+                </>
+              )
+            }}
+          </Formik>
         ))}
+        {trapVisitTableData.length === 0 && (
+          <VStack
+            alignItems={'center'}
+            justifyContent='center'
+            space={2}
+            flex={1}
+          >
+            <Icon
+              as={Ionicons}
+              name='checkmark-circle-outline'
+              size='6xl'
+              color='primary'
+            />
+            <Text fontSize='lg' textAlign='center'>
+              No trap visits requiring water turbidity input.
+            </Text>
+          </VStack>
+        )}
         <Button
           bg={'primary'}
           mt='auto'
           mx={25}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => {
+            Keyboard.dismiss()
+            navigation.navigate('Home')
+          }}
         >
-          <Text fontSize='md' color='white'>
-            Return Home
-          </Text>
+          <HStack space={3} alignItems='center'>
+            <Icon as={Ionicons} name='home' size='lg' color='white' />
+            <Text fontSize='md' color='white'>
+              Return Home
+            </Text>
+          </HStack>
         </Button>
       </VStack>
     </View>
