@@ -155,6 +155,52 @@ const ConditionalTrapVisitFields = ({
       )
     }
 
+    if (fieldName === 'coneSetting') {
+      return (
+        <FormControl w='100%'>
+          <HStack space={4} alignItems='center'>
+            <FormControl.Label>
+              <Text color='black' fontSize='xl'>
+                Cone Setting
+              </Text>
+            </FormControl.Label>
+            <Radio.Group
+              name='coneSetting'
+              accessibilityLabel='cone setting'
+              value={`${values.coneSetting}`}
+              onChange={(value: any) => {
+                setFieldTouched('coneSetting', true)
+                if (value === 'full') {
+                  setFieldValue('coneSetting', 'full')
+                } else {
+                  setFieldValue('coneSetting', 'half')
+                }
+              }}
+            >
+              <HStack space={4}>
+                <Radio
+                  colorScheme='primary'
+                  value='full'
+                  my={1}
+                  _icon={{ color: 'primary' }}
+                >
+                  Full
+                </Radio>
+                <Radio
+                  colorScheme='primary'
+                  value='half'
+                  my={1}
+                  _icon={{ color: 'primary' }}
+                >
+                  Half
+                </Radio>
+              </HStack>
+            </Radio.Group>
+          </HStack>
+        </FormControl>
+      )
+    }
+
     if (fieldName === 'ysiTurbidity') {
       return (
         <YSITurbidity

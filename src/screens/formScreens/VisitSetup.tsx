@@ -175,7 +175,10 @@ const VisitSetup = ({
               values: {
                 ...payload,
                 trapName,
-                trapLocationId: getTrapLocationId({ trapName }),
+                trapLocationId: getTrapLocationId({
+                  trapName,
+                  trapSite: values.trapSite,
+                }),
               },
               isPaperEntry,
             })
@@ -353,18 +356,27 @@ const VisitSetup = ({
   }) => {
     let trapLocationId = null
 
-    if (trapSite) {
+    if (trapName) {
       const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
-        (obj: any) => obj.siteName === trapSite
+        (obj: any) => obj.trapName === trapName
       )
       if (trapLocations.length === 1) {
         trapLocationId = trapLocations[0].id
       }
+
+      if (trapLocationId === null) {
+        const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
+          (obj: any) => obj.trapSite === trapName
+        )
+        if (trapLocations.length === 1) {
+          trapLocationId = trapLocations[0].id
+        }
+      }
     }
 
-    if (trapName) {
+    if (trapSite) {
       const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
-        (obj: any) => obj.trapName === trapName
+        (obj: any) => obj.siteName === trapSite
       )
       if (trapLocations.length === 1) {
         trapLocationId = trapLocations[0].id

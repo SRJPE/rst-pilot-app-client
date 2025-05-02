@@ -181,6 +181,8 @@ const TrapOperations = ({
     selectedTrapLocationId,
     visitSetupDefaults.programs,
     activePage,
+    visitSetupDefaults?.trapLocations,
+    selectedTrapLocationId,
   ])
 
   const useFlowMeasureCalculationBool = (flowMeasureEntered: number | null) => {
