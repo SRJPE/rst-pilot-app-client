@@ -388,8 +388,6 @@ const TrapOperations = ({
         resetForm,
         isValid,
       }) => {
-        console.log('🚀 ~ TrapOperations.tsx:391 ~ values:', values)
-
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
