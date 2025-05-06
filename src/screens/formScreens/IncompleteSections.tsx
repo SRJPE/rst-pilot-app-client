@@ -38,6 +38,7 @@ import {
   combinePlusCounts,
   navigateHelper,
   returnDefinitionArray,
+  getCrewValue,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -199,7 +200,7 @@ const IncompleteSections = ({
       {}
     )
 
-    const filteredNames = uniq(
+    const filteredCrewIds = uniq(
       allCrewObjects
         .filter(
           (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
@@ -207,7 +208,7 @@ const IncompleteSections = ({
         .map((obj: any) => Number(obj.personnelId))
     )
     //if the array contains a single string, return the string in an array
-    return filteredNames
+    return filteredCrewIds
   }
 
   const getDBValue = (value: any, dropdownName: string) => {
@@ -343,7 +344,6 @@ const IncompleteSections = ({
         rpm2: endRpm2,
         rpm3: endRpm3,
       } = trapPostProcessingState[id].values
-      const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
 
       const programId = visitSetupState[id].values.programId
 
@@ -367,11 +367,13 @@ const IncompleteSections = ({
         trapVisitTimeStart =
           trapPostProcessingState?.[id]?.values?.trapVisitTime
       }
-      const selectedCrewIds =
-        findCrewIdsFromSelectedCrewNames(selectedCrewNames)
+
       const trapVisitSubmission = {
         trapVisitUid: id,
-        crew: selectedCrewIds,
+        crew: getCrewValue({
+          visitSetupValues: visitSetupState[id].values,
+          visitSetupDefaultState,
+        }),
         programId,
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
