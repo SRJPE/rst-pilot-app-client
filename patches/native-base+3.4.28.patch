@@ -1,0 +1,111 @@
+diff --git a/node_modules/native-base/lib/commonjs/hooks/useKeyboardDismissable.js b/node_modules/native-base/lib/commonjs/hooks/useKeyboardDismissable.js
+index e9364fb..56cc9da 100644
+--- a/node_modules/native-base/lib/commonjs/hooks/useKeyboardDismissable.js
++++ b/node_modules/native-base/lib/commonjs/hooks/useKeyboardDismissable.js
+@@ -64,18 +64,20 @@ function useBackHandler({
+   callback
+ }) {
+   (0, _react.useEffect)(() => {
+-    let backHandler = () => {
+-      callback();
+-      return true;
+-    };
+-
+-    if (enabled) {
+-      _reactNative.BackHandler.addEventListener('hardwareBackPress', backHandler);
+-    } else {
+-      _reactNative.BackHandler.removeEventListener('hardwareBackPress', backHandler);
+-    }
+-
+-    return () => _reactNative.BackHandler.removeEventListener('hardwareBackPress', backHandler);
++      let backAction = () => {
++        callback();
++        return true;
++      };
++      const backHandler = BackHandler.addEventListener(
++      'hardwareBackPress',
++      backAction,
++    );
++      if (enabled) {
++        BackHandler.addEventListener('hardwareBackPress', backAction);
++      } else {
++        // BackHandler.removeEventListener('hardwareBackPress', backHandler);
++      }
++       return () => backHandler.remove();
+   }, [enabled, callback]);
+ }
+ //# sourceMappingURL=useKeyboardDismissable.js.map
+\ No newline at end of file
+diff --git a/node_modules/native-base/lib/module/hooks/useKeyboardDismissable.js b/node_modules/native-base/lib/module/hooks/useKeyboardDismissable.js
+index 266ed74..30eaad4 100644
+--- a/node_modules/native-base/lib/module/hooks/useKeyboardDismissable.js
++++ b/node_modules/native-base/lib/module/hooks/useKeyboardDismissable.js
+@@ -45,18 +45,20 @@ export function useBackHandler({
+   callback
+ }) {
+   useEffect(() => {
+-    let backHandler = () => {
+-      callback();
+-      return true;
+-    };
+-
+-    if (enabled) {
+-      BackHandler.addEventListener('hardwareBackPress', backHandler);
+-    } else {
+-      BackHandler.removeEventListener('hardwareBackPress', backHandler);
+-    }
+-
+-    return () => BackHandler.removeEventListener('hardwareBackPress', backHandler);
++      let backAction = () => {
++        callback();
++        return true;
++      };
++      const backHandler = BackHandler.addEventListener(
++      'hardwareBackPress',
++      backAction,
++    );
++      if (enabled) {
++        BackHandler.addEventListener('hardwareBackPress', backAction);
++      } else {
++        // BackHandler.removeEventListener('hardwareBackPress', backHandler);
++      }
++       return () => backHandler.remove();
+   }, [enabled, callback]);
+ }
+ //# sourceMappingURL=useKeyboardDismissable.js.map
+\ No newline at end of file
+diff --git a/node_modules/native-base/src/hooks/useKeyboardDismissable.ts b/node_modules/native-base/src/hooks/useKeyboardDismissable.ts
+index f3cfa44..ce19f00 100644
+--- a/node_modules/native-base/src/hooks/useKeyboardDismissable.ts
++++ b/node_modules/native-base/src/hooks/useKeyboardDismissable.ts
+@@ -44,16 +44,19 @@ export const useKeyboardDismissable = ({ enabled, callback }: IParams) => {
+ 
+ export function useBackHandler({ enabled, callback }: IParams) {
+   useEffect(() => {
+-    let backHandler = () => {
+-      callback();
+-      return true;
+-    };
+-    if (enabled) {
+-      BackHandler.addEventListener('hardwareBackPress', backHandler);
+-    } else {
+-      BackHandler.removeEventListener('hardwareBackPress', backHandler);
+-    }
+-    return () =>
+-      BackHandler.removeEventListener('hardwareBackPress', backHandler);
++      let backAction = () => {
++        callback();
++        return true;
++      };
++      const backHandler = BackHandler.addEventListener(
++      'hardwareBackPress',
++      backAction,
++    );
++      if (enabled) {
++        BackHandler.addEventListener('hardwareBackPress', backAction);
++      } else {
++        // BackHandler.removeEventListener('hardwareBackPress', backHandler);
++      }
++       return () => backHandler.remove();
+   }, [enabled, callback]);
+ }
