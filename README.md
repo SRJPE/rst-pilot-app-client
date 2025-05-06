@@ -19,7 +19,7 @@ Please ensure these software are installed on your computer:
 - Node.js
 - Xcode for running the iOS Simulator (If you are developing from a Windows or a Linux machine, you will need a physical iOS device for testing)
   - View this page for assistance: https://docs.expo.dev/workflow/ios-simulator/
- 
+
 ## Install Source Code
 
 - Using your method of choice, install the source code (`git clone`, GitHub Desktop, zip file, etc)
@@ -44,6 +44,11 @@ Current Azure B2C Configuration Environmental Variables:
 
 ## Setup
 
+### Sign Up for an Expo Developer Account
+
+- https://docs.expo.dev/
+- This will allow you to create projects, use ExpoGo, generate development builds, distributables, and share with other users.
+
 ### Local Development using Expo Go and iOS Simulator
 
 - Run `npm install` to install all package dependencies. If that fails, attempt running `npm install --legacy-peer-deps`
@@ -55,6 +60,9 @@ Current Azure B2C Configuration Environmental Variables:
 - This will launch the application in the Simulator software
 
 ### Development Build
+
+- Run `eas build -p ios --profile development-simulator` to create a development simulator build
+- After creating, the command line will direct you to install it locally on the simulator
 
 ### Native Application Build
 
@@ -73,11 +81,14 @@ Please visit the GitHub repositories for the Server and Database to access setup
 [RST Database Repo](https://github.com/SRJPE/rst-database)
 
 ## Troubleshooting
+
 **Error**:
+
 ```
 Error: xcrun exited with non-zero code: 148
 Invalid device or device pair: 3C84B562-463E-4524-AD01-4E8A959D3415
 ```
+
 **Fix**:
 If that happens and you have created a new simulator:
 You can also press shift + i in the Expo CLI to interactively select a simulator to open.
