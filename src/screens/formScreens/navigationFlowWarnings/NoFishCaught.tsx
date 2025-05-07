@@ -188,15 +188,6 @@ const NoFishCaught = ({
 
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
-      console.log(
-        '🚀 ~ NoFishCaught.tsx:306 ~ saveTrapVisits ~ trapOperationsState[id]?.values:',
-        trapOperationsState[id]?.values
-      )
-      console.log(
-        '🚀 ~ NoFishCaught.tsx:309 ~ saveTrapVisits ~ trapOperationsState[id].values.waterTurbidity:',
-        trapOperationsState[id].values.waterTurbidity
-      )
-
       const waterTurbidityIsPresent =
         trapOperationsState[id].values.waterTurbidity !== '' &&
         trapOperationsState[id].values.waterTurbidity !== null
