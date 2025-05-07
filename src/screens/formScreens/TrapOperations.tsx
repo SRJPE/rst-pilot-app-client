@@ -585,7 +585,7 @@ const TrapOperations = ({
                     coneSetting: tabIdValues.coneSetting,
                     reasonNotFunc: tabIdValues.reasonNotFunc,
                     recordTurbidityInPostProcessing:
-                      tabIdValues.recordTurbidityInPostProcessing,
+                      values.recordTurbidityInPostProcessing,
                     rpm1: tabIdValues.rpm1,
                     rpm2: tabIdValues.rpm2,
                     rpm3: tabIdValues.rpm3,
@@ -647,6 +647,20 @@ const TrapOperations = ({
           }
         }, [previouslyActiveTabId, activeTabId])
 
+        const handleTurbidityToggle = (newValue: boolean) => {
+          if (newValue === true) {
+            setFieldValue('waterTurbidity', null)
+            setFieldValue('recordTurbidityInPostProcessing', true)
+          }
+
+          if (newValue === false) {
+            setFieldValue('recordTurbidityInPostProcessing', false)
+            setFieldValue('waterTurbidity', '')
+          }
+
+          setTurbidityToggle(newValue)
+        }
+
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
@@ -662,7 +676,7 @@ const TrapOperations = ({
               keyboardShouldPersistTaps='handled'
             >
               <Pressable onPress={Keyboard.dismiss}>
-                <VStack space={4}>
+                <VStack space={1}>
                   <Heading>Trap Operations</Heading>
                   {renderTrappingDateAndTime(values, setFieldValue)}
                   <FormControl>
@@ -772,50 +786,15 @@ const TrapOperations = ({
                         handleChange: handleChange,
                       })}
                       <HStack
-                        space={5}
+                        space={4}
                         width='100%'
                         justifyContent='space-between'
                       >
                         <Heading>Environmental Conditions</Heading>
-                        <FormControl w='30%'>
-                          <HStack space={2} alignItems='center'>
-                            <FormControl.Label>
-                              <Text fontSize='14'>
-                                Record Turbidity in Post Processing
-                              </Text>
-                            </FormControl.Label>
-                            <Switch
-                              name='recordTurbidityInPostProcessing'
-                              shadow='3'
-                              offTrackColor='secondary'
-                              onTrackColor='primary'
-                              size='md'
-                              isChecked={turbidityToggle}
-                              value={values.recordTurbidityInPostProcessing}
-                              onToggle={() => {
-                                setFieldValue('waterTurbidity', null)
-                                !turbidityToggle
-                                  ? setFieldValue(
-                                      'recordTurbidityInPostProcessing',
-                                      true
-                                    )
-                                  : setFieldValue(
-                                      'recordTurbidityInPostProcessing',
-                                      false
-                                    )
-                                setTurbidityToggle(!turbidityToggle)
-                              }}
-                            />
-                          </HStack>
-                        </FormControl>
                       </HStack>
 
-                      <HStack space={8} flexWrap={'wrap'}>
-                        <Box
-                          flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-                          minWidth='30%' // Prevents shrinking too much
-                          maxWidth='30%' // Prevents growing beyond this size
-                        >
+                      <HStack space={5}>
+                        <Box flex={1}>
                           <FormInputComponent
                             showWarning={warningResultFlow}
                             label={'Flow Measure'}
@@ -832,11 +811,8 @@ const TrapOperations = ({
                             inputRefs={inputRefs}
                           />
                         </Box>
-                        <Box
-                          flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-                          minWidth='30%' // Prevents shrinking too much
-                          maxWidth='30%' // Prevents growing beyond this size
-                        >
+
+                        <Box flex={1}>
                           <FormInputComponent
                             showWarning={warningResultTemp}
                             label={'Water Temperature'}
@@ -868,32 +844,95 @@ const TrapOperations = ({
                             }
                           />
                         </Box>
-                        {(!selectedProgramObj?.programFormFields?.length ||
-                          find(selectedProgramObj?.programFormFields, {
-                            fieldName: 'waterTurbidity',
-                          })) && (
-                          <Box
-                            flexBasis='40%' // Ensures 3 items per row (adjust for spacing)
-                            minWidth='40%' // Prevents shrinking too much
-                            maxWidth='40%' // Prevents growing beyond this size
-                          >
-                            <FormInputComponent
-                              label={'Water Turbidity (via CDEC)'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.waterTurbidity}
-                              camelName={'waterTurbidity'}
-                              onChangeText={handleChange('waterTurbidity')}
-                              onBlur={handleBlur('waterTurbidity')}
-                              RightElement={<TextInputAdornment text='ntu' />}
-                              validationSchema={validationSchema}
-                              keyboardType={'number-pad'}
-                            />
-                          </Box>
-                        )}
-                      </HStack>
 
+                        {values.recordTurbidityInPostProcessing === false &&
+                          (!selectedProgramObj?.programFormFields?.length ||
+                            find(selectedProgramObj?.programFormFields, {
+                              fieldName: 'waterTurbidity',
+                            })) && (
+                            <Box flex={1}>
+                              <FormInputComponent
+                                label={'Turbidity'}
+                                placeholder='0'
+                                touched={touched}
+                                errors={errors}
+                                value={values.waterTurbidity}
+                                camelName={'waterTurbidity'}
+                                onChangeText={handleChange('waterTurbidity')}
+                                onBlur={handleBlur('waterTurbidity')}
+                                RightElement={<TextInputAdornment text='ntu' />}
+                                validationSchema={validationSchema}
+                                keyboardType={'number-pad'}
+                              />
+                            </Box>
+                          )}
+                      </HStack>
+                      {console.log(
+                        'selectedProgramObj?.programFormFields?.length',
+                        !selectedProgramObj?.programFormFields?.length
+                      )}
+                      {(!selectedProgramObj?.programFormFields?.length ||
+                        find(selectedProgramObj?.programFormFields, {
+                          fieldName: 'waterTurbidity',
+                        })) && (
+                        <Box flex={1} h={'full'}>
+                          <FormControl width={'100%'}>
+                            <HStack space={4} alignItems='center'>
+                              <FormControl.Label>
+                                <Text color='black' fontSize='xl' mb={2}>
+                                  Record Turbidity After Trap Visit Save
+                                </Text>
+                              </FormControl.Label>
+                              <Popover
+                                placement='bottom left'
+                                trigger={triggerProps => {
+                                  return (
+                                    <IconButton
+                                      {...triggerProps}
+                                      icon={
+                                        <Icon
+                                          as={MaterialIcons}
+                                          color='black'
+                                          name='info-outline'
+                                          size='lg'
+                                        />
+                                      }
+                                    ></IconButton>
+                                  )
+                                }}
+                              >
+                                <Popover.Content
+                                  accessibilityLabel='RPM Info'
+                                  w='600'
+                                  mr='10'
+                                >
+                                  <Popover.Arrow />
+                                  <Popover.Header>
+                                    Take up to three measurements of cone
+                                    rotations. The averages of the entered
+                                    values will be saved to the database.
+                                  </Popover.Header>
+                                </Popover.Content>
+                              </Popover>
+                            </HStack>
+
+                            <HStack space={3}>
+                              <Text fontSize='16'>No</Text>
+                              <Switch
+                                name='recordTurbidityInPostProcessing'
+                                shadow='3'
+                                offTrackColor='secondary'
+                                onTrackColor='primary'
+                                size='md'
+                                isChecked={turbidityToggle}
+                                value={values.recordTurbidityInPostProcessing}
+                                onToggle={handleTurbidityToggle}
+                              />
+                              <Text fontSize='16'>Yes</Text>
+                            </HStack>
+                          </FormControl>
+                        </Box>
+                      )}
                       <ConditionalTrapVisitFields
                         touched={touched}
                         errors={errors}

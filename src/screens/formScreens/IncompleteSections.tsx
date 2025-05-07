@@ -253,12 +253,6 @@ const IncompleteSections = ({
 
     const baseEnvValues = [
       {
-        measureName: 'flow measure',
-        measureValueNumeric: values.flowMeasure,
-        measureValueText: values.flowMeasure?.toString(),
-        measureUnit: 5,
-      },
-      {
         measureName: 'water temperature',
         measureValueNumeric: values.waterTemperature,
         measureValueText: values.waterTemperature?.toString(),
@@ -266,12 +260,16 @@ const IncompleteSections = ({
       },
       {
         measureName: 'water turbidity',
-        measureValueNumeric:
-          values.waterTurbidity || values.waterTurbidity || null,
-        measureValueText:
-          values?.waterTurbidity?.toString() ||
-          values?.waterTurbidity?.toString() ||
-          '',
+        measureValueNumeric: values.waterTurbidityIsPresent
+          ? values.waterTurbidity
+          : values?.recordTurbidityInPostProcessing
+          ? null
+          : undefined,
+        measureValueText: values.waterTurbidityIsPresent
+          ? values.waterTurbidity?.toString()
+          : values?.recordTurbidityInPostProcessing
+          ? ''
+          : 'undefined',
         measureUnit: 25,
       },
     ] as Array<any>
@@ -334,6 +332,9 @@ const IncompleteSections = ({
 
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
+      const waterTurbidityIsPresent =
+        trapOperationsState[id].values.waterTurbidity !== '' &&
+        trapOperationsState[id].values.waterTurbidity !== null
       const {
         rpm1: startRpm1,
         rpm2: startRpm2,
@@ -369,12 +370,17 @@ const IncompleteSections = ({
           trapPostProcessingState?.[id]?.values?.trapVisitTime
       }
 
+      const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
+      const selectedCrewIds =
+        findCrewIdsFromSelectedCrewNames(selectedCrewNames)
+
       const trapVisitSubmission = {
         trapVisitUid: id,
-        crew: getCrewValue({
-          visitSetupValues: visitSetupState[id].values,
-          visitSetupDefaultState,
-        }),
+        crew: selectedCrewIds,
+        // crew: getCrewValue({
+        //   visitSetupValues: visitSetupState[id].values,
+        //   visitSetupDefaultState,
+        // }),
         programId,
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
@@ -429,6 +435,7 @@ const IncompleteSections = ({
           {
             ...trapOperationsState[id].values,
             ...trapPostProcessingState[id].values,
+            waterTurbidityIsPresent,
           },
           programId
         ),

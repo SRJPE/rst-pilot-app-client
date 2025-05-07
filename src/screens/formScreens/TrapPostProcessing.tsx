@@ -121,7 +121,7 @@ const TrapPostProcessing = ({
   const activePage = navigationState.steps[activeStep]?.name
   const recordTurbidityInPostProcessing = useSelector(
     (state: any) =>
-      state.trapOperations?.[tabSlice.activeTabId]?.values
+      !state.trapOperations?.[tabSlice.activeTabId]?.values
         ?.recordTurbidityInPostProcessing
   )
 
@@ -656,37 +656,16 @@ const TrapPostProcessing = ({
                       </Box>
                     )}
                     {recordTurbidityInPostProcessing && (
-                      <FormControl w='30%'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Water Turbidity
-                          </Text>
-                        </FormControl.Label>
-                        <Input
-                          height='50px'
-                          fontSize='16'
-                          placeholder='Numeric Value'
-                          keyboardType={'number-pad'}
-                          onChangeText={handleChange('waterTurbidity')}
-                          onBlur={handleBlur('waterTurbidity')}
-                          value={values.waterTurbidity}
-                        />
-
-                        <Text
-                          color='#A1A1A1'
-                          position='absolute'
-                          top={50}
-                          right={4}
-                          fontSize={16}
-                        >
-                          {'ntu'}
-                        </Text>
-
-                        {Number(values.waterTurbidity) >
-                          QARanges.waterTurbidity.max && (
-                          <RenderWarningMessage />
-                        )}
-                      </FormControl>
+                      <FormInputComponent
+                        label=' Water Turbidity (optional)'
+                        placeholder='0'
+                        touched={touched}
+                        errors={errors}
+                        camelName='waterTurbidity'
+                        onChangeText={handleChange('waterTurbidity')}
+                        onBlur={() => setFieldTouched('waterTurbidity')}
+                        value={values.waterTurbidity}
+                      />
                     )}
                   </HStack>
                   <FormControl>
