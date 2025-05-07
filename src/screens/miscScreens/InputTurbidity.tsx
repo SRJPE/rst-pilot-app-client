@@ -2,30 +2,24 @@ import {
   Box,
   Button,
   HStack,
-  Input,
-  Popover,
   Text,
-  FormControl,
-  View,
+  ScrollView,
   VStack,
   Divider,
   Icon,
 } from 'native-base'
-import { Formik, Field, Form } from 'formik'
+import { Formik } from 'formik'
 import { RootState, AppDispatch } from '../../redux/store'
 import { connect, useDispatch } from 'react-redux'
 import { retrieveTrapVisitsRequiringTurbidity } from '../../utils/helpers/helperFunctions'
-import type { TrapVisitResponse } from '../../utils/interfaces'
 import type { InitialStateI } from '../../redux/reducers/visitSetupDefaults'
 import * as yup from 'yup'
-import { DataTable } from 'react-native-paper'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
 import { useFocusEffect } from '@react-navigation/native'
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { Keyboard } from 'react-native'
-import { set } from 'lodash'
 import api from '../../api/axiosConfig'
 import { Ionicons } from '@expo/vector-icons'
 import { fetchPreviousTrapAndCatch } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
@@ -99,7 +93,7 @@ function InputTurbidity({
   )
 
   return (
-    <View flex={1} p={5}>
+    <ScrollView flex={1} p={5}>
       <VStack
         space={5}
         bg='white'
@@ -278,7 +272,7 @@ function InputTurbidity({
           </HStack>
         </Button>
       </VStack>
-    </View>
+    </ScrollView>
   )
 }
 
