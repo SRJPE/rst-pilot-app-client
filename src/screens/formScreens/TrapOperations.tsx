@@ -402,6 +402,7 @@ const TrapOperations = ({
     // assume has not been customized
     if (
       !selectedProgramObj?.programFormFields?.length ||
+      !formFields.length ||
       find(formFields, {
         fieldName: 'trapVisitStopTime',
       })

@@ -359,6 +359,7 @@ const IncompleteSections = ({
       //   trapVisitTimeStart = new Date()
       // }
 
+      // if trapVisitTime , which is time for checking, set both to the saem value
       if (trapOperationsState?.[id]?.values?.trapVisitTime) {
         trapVisitTimeEnd = trapOperationsState?.[id]?.values?.trapVisitTime
         trapVisitTimeStart = trapOperationsState?.[id]?.values?.trapVisitTime
