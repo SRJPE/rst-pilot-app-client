@@ -26,6 +26,8 @@ import { clearUserCredentials } from '../../redux/reducers/userCredentialsSlice'
 import { AppDispatch, RootState, persistor } from '../../redux/store'
 import { MonitoringProgram } from '../../utils/interfaces'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { resetTrapVisitFormPostBundler } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { resetVisitSetupDefaultSlice } from '../../redux/reducers/visitSetupDefaults'
 
 import {
   // @ts-ignore
@@ -365,6 +367,8 @@ const Profile = ({
               onPress={() => {
                 // clear cache on sign out to ensure no data from previous user is cached
                 persistor.purge()
+                dispatch(resetTrapVisitFormPostBundler())
+                dispatch(resetVisitSetupDefaultSlice())
 
                 setLogoutModalOpen(false)
                 dispatch(clearUserCredentials())

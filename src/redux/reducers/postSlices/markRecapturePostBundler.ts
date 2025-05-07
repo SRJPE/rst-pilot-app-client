@@ -151,7 +151,7 @@ export const fetchExistingMarks = createAsyncThunk(
     const allUserExistingMarks: any[] = []
     try {
       const state = thunkAPI.getState() as RootState
-      const userPrograms = state.visitSetupDefaults.programs
+      const userPrograms = state.userCredentials.userPrograms
       if (
         state.connectivity.isConnected &&
         state.connectivity.isInternetReachable

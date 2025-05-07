@@ -127,7 +127,11 @@ export const getVisitSetupDefaults = createAsyncThunk(
 export const visitSetupDefaultsSlice = createSlice({
   name: 'visitSetupDefaults',
   initialState: initialState,
-  reducers: {},
+  reducers: {
+    resetVisitSetupDefaultSlice: () => {
+      return initialState
+    },
+  },
   extraReducers: {
     [getVisitSetupDefaults.pending.type]: (state, action) => {
       state.status = pendingStatus
@@ -148,5 +152,7 @@ export const visitSetupDefaultsSlice = createSlice({
     },
   },
 })
+
+export const { resetVisitSetupDefaultSlice } = visitSetupDefaultsSlice.actions
 
 export default visitSetupDefaultsSlice.reducer

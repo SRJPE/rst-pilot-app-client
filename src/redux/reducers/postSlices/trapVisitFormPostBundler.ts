@@ -331,7 +331,8 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
     const previousCatchRaw: any[] = []
     try {
       const state = thunkAPI.getState() as RootState
-      const userPrograms = state.visitSetupDefaults.programs
+      const userPrograms = state.userCredentials.userPrograms
+
       if (
         state.connectivity.isConnected &&
         state.connectivity.isInternetReachable
@@ -925,7 +926,7 @@ export const trapVisitPostBundler = createSlice({
 
       state.qcCatchRawDeletions.push(catchRawId)
     },
-    reset: () => {
+    resetTrapVisitFormPostBundler: () => {
       return initialState
     },
     clearPendingTrapVisitSubs: state => {
@@ -1051,7 +1052,7 @@ export const {
   saveCatchRawSubmissions,
   trapVisitQCSubmission,
   catchRawQCSubmission,
-  reset,
+  resetTrapVisitFormPostBundler,
   clearPendingTrapVisitSubs,
   clearPendingCatchRawSubs,
   addMissingFetchedRecords,
