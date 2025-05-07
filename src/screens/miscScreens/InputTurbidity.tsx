@@ -106,9 +106,9 @@ function InputTurbidity({
           Input Water Turbidity
         </Text>
         <Text fontSize='md' p={5}>
-          The following trap visits require water turbidity input. Click the
-          Input Turbidity button to edit the water turbidity for each trap visit
-          and complete record.
+          The following trap visits require water turbidity input. Enter the
+          value for each trap visit and click the Save button to upload the
+          data.
         </Text>
         {trapVisitTableData.map(trapVisit => (
           <Formik
