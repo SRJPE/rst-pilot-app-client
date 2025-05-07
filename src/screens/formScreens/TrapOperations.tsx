@@ -128,7 +128,6 @@ const TrapOperations = ({
     ? trapPermitInfo?.temperatureThreshold
     : convertCtoF(trapPermitInfo?.temperatureThreshold)
 
-  const isFeatherYubaProgram = [3, 4].includes(selectedProgramId || 0)
   const allTabIds: string[] = Object.keys(tabSlice.tabs)
 
   useEffect(() => {
@@ -899,65 +898,63 @@ const TrapOperations = ({
                         )}
                       </HStack>
 
-                      {isFeatherYubaProgram && (
-                        <Box flex={1} h={'full'}>
-                          <FormControl width={'100%'}>
-                            <HStack space={4} alignItems='center'>
-                              <FormControl.Label>
-                                <Text color='black' fontSize='xl' mb={2}>
-                                  Record Turbidity After Trap Visit Save
-                                </Text>
-                              </FormControl.Label>
-                              <Popover
-                                placement='bottom left'
-                                trigger={triggerProps => {
-                                  return (
-                                    <IconButton
-                                      {...triggerProps}
-                                      icon={
-                                        <Icon
-                                          as={MaterialIcons}
-                                          color='black'
-                                          name='info-outline'
-                                          size='lg'
-                                        />
-                                      }
-                                    ></IconButton>
-                                  )
-                                }}
+                      <Box flex={1} h={'full'}>
+                        <FormControl width={'100%'}>
+                          <HStack space={4} alignItems='center'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl' mb={2}>
+                                Record Turbidity After Trap Visit Save
+                              </Text>
+                            </FormControl.Label>
+                            <Popover
+                              placement='bottom left'
+                              trigger={triggerProps => {
+                                return (
+                                  <IconButton
+                                    {...triggerProps}
+                                    icon={
+                                      <Icon
+                                        as={MaterialIcons}
+                                        color='black'
+                                        name='info-outline'
+                                        size='lg'
+                                      />
+                                    }
+                                  ></IconButton>
+                                )
+                              }}
+                            >
+                              <Popover.Content
+                                accessibilityLabel='RPM Info'
+                                w='600'
+                                mr='10'
                               >
-                                <Popover.Content
-                                  accessibilityLabel='RPM Info'
-                                  w='600'
-                                  mr='10'
-                                >
-                                  <Popover.Arrow />
-                                  <Popover.Header>
-                                    Take up to three measurements of cone
-                                    rotations. The averages of the entered
-                                    values will be saved to the database.
-                                  </Popover.Header>
-                                </Popover.Content>
-                              </Popover>
-                            </HStack>
+                                <Popover.Arrow />
+                                <Popover.Header>
+                                  Take up to three measurements of cone
+                                  rotations. The averages of the entered values
+                                  will be saved to the database.
+                                </Popover.Header>
+                              </Popover.Content>
+                            </Popover>
+                          </HStack>
 
-                            <HStack space={3}>
-                              <Text fontSize='16'>No</Text>
-                              <Switch
-                                name='recordTurbidityInPostProcessing'
-                                shadow='3'
-                                offTrackColor='secondary'
-                                onTrackColor='primary'
-                                size='md'
-                                isChecked={turbidityToggle}
-                                value={values.recordTurbidityInPostProcessing}
-                                onToggle={handleTurbidityToggle}
-                              />
-                              <Text fontSize='16'>Yes</Text>
-                            </HStack>
-                          </FormControl>
-                        </Box>
-                      )}
+                          <HStack space={3}>
+                            <Text fontSize='16'>No</Text>
+                            <Switch
+                              name='recordTurbidityInPostProcessing'
+                              shadow='3'
+                              offTrackColor='secondary'
+                              onTrackColor='primary'
+                              size='md'
+                              isChecked={turbidityToggle}
+                              value={values.recordTurbidityInPostProcessing}
+                              onToggle={handleTurbidityToggle}
+                            />
+                            <Text fontSize='16'>Yes</Text>
+                          </HStack>
+                        </FormControl>
+                      </Box>
                       {allTabIds.length > 1 && (
                         <CopyFormValuesDialog
                           valueType='environmental'
