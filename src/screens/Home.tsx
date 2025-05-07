@@ -74,7 +74,6 @@ const Home = ({
 
   const [staggerOpen, setStaggerOpen] = useState(false as boolean)
   const [opacity, setOpacity] = useState(1 as number)
-  const [recentTrapVisits, setRecentTrapVisits] = useState([] as Array<any>)
   const dispatch = useDispatch<AppDispatch>()
 
   const connectivityState = useSelector((state: any) => state.connectivity)
@@ -82,38 +81,6 @@ const Home = ({
   useEffect(() => {
     staggerOpen ? setOpacity(0.25) : setOpacity(1)
   }, [staggerOpen])
-
-  useEffect(() => {
-    let filteredTrapVisits = previousTrapVisits?.filter((trapVisit: any) =>
-      trapVisit.createdTrapVisitEnvironmentalResponse?.some(
-        (response: any) =>
-          response.measureName === 'water turbidity' &&
-          response.measureValueNumeric === null
-      )
-    )
-    console.log('filteredTrapVisits', filteredTrapVisits)
-    let sortedTrapVisits = filteredTrapVisits
-    sortedTrapVisits.sort(
-      (a: any, b: any) =>
-        new Date(b.createdTrapVisitResponse.trapVisitTimeEnd).getTime() -
-        new Date(a.createdTrapVisitResponse.trapVisitTimeEnd).getTime()
-    )
-    sortedTrapVisits = sortedTrapVisits.map((trapVisit: any) => {
-      return {
-        date: new Date(
-          trapVisit.createdTrapVisitResponse.trapVisitTimeEnd
-        )?.toLocaleDateString('en-US'),
-        streamName: find(visitSetupDefaultState.programs, {
-          id: trapVisit.createdTrapVisitResponse.programId,
-        })?.streamName,
-        trapName: find(visitSetupDefaultState.trapLocations, {
-          id: trapVisit.createdTrapVisitResponse.trapLocationId,
-        })?.trapName,
-      }
-    })
-
-    setRecentTrapVisits(sortedTrapVisits.slice(0, 3))
-  }, [previousTrapVisits, visitSetupDefaultState])
 
   useEffect(() => {
     if (
