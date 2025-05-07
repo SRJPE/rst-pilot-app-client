@@ -6,7 +6,7 @@ const pendingStatus = 'pending'
 const fulfilledStatus = 'fulfilled'
 const rejectedStatus = 'rejected'
 
-interface InitialStateI {
+export interface InitialStateI {
   status: string
   programs: ProgramI[]
   trapLocations: TrapLocationI[]
