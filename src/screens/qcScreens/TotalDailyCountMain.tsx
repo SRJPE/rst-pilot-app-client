@@ -4,19 +4,7 @@ import { SceneMap, TabBar, TabBarProps, TabView } from 'react-native-tab-view'
 import CatchFishCountQC from './CatchFishCountQC'
 import CatchFishCountByDateQC from './CatchFishCountByDateQC'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
-import {
-  Button,
-  HStack,
-  View as NativeBaseView,
-  VStack,
-  Text,
-  ScrollView,
-  Icon,
-  Input,
-  Box,
-  Heading,
-  Radio,
-} from 'native-base'
+import { View as NativeBaseView } from 'native-base'
 
 const initialLayout = { width: Dimensions.get('window').width }
 
@@ -53,7 +41,7 @@ const TotalDailyCountMain = ({
       {...props}
       indicatorStyle={{ backgroundColor: '#007C7C' }}
       style={{ backgroundColor: 'white' }}
-      labelStyle={{ color: '#007C7C' }}
+      // tabStyle={{ color: '#007C7C' }}
     />
   )
 
@@ -78,6 +66,7 @@ const TotalDailyCountMain = ({
           renderTabBar={renderTabBar}
           onIndexChange={setIndex}
           initialLayout={initialLayout}
+          commonOptions={{ labelStyle: { color: '#007C7C' } }}
         />
       </NativeBaseView>
     </>
