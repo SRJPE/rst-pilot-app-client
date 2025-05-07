@@ -294,7 +294,6 @@ const IncompleteSections = ({
       }
     })
 
-    console.log('baseEnvValues', baseEnvValues)
     let meanFNU = null
     if (values.turbidity1 && values.turbidity2 && values.turbidity3) {
       meanFNU = calcAvgValue([

@@ -275,14 +275,15 @@ const TrapOperations = ({
   const onSubmit = (values: any, tabId: string | null) => {
     if (tabId) {
       const errors = checkForErrors(values)
-      if (values.recordTurbidityInPostProcessing) {
-        values.waterTurbidity = null
-      }
+
       dispatch(
         saveTrapOperations({
           tabId,
           values: {
             ...values,
+            waterTurbidity: values.recordTurbidityInPostProcessing
+              ? null
+              : values.waterTurbidity,
             trapVisitStopTime: endTime, //refactor needed
             trapVisitStartTime: new Date(),
           },
@@ -867,10 +868,7 @@ const TrapOperations = ({
                             </Box>
                           )}
                       </HStack>
-                      {console.log(
-                        'selectedProgramObj?.programFormFields?.length',
-                        !selectedProgramObj?.programFormFields?.length
-                      )}
+
                       {(!selectedProgramObj?.programFormFields?.length ||
                         find(selectedProgramObj?.programFormFields, {
                           fieldName: 'waterTurbidity',
