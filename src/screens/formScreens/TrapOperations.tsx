@@ -424,10 +424,6 @@ const TrapOperations = ({
 
           tabIds.map(tabId => {
             const tabIdValues = reduxState[tabId]?.values
-            console.log(
-              '🚀 ~ TrapOperations.tsx:471 ~ handleValuesCopy ~ tabIdValues:',
-              tabIdValues
-            )
 
             if (tabId === activeTabId) {
               dispatch(
