@@ -527,8 +527,6 @@ const TrapOperations = ({
         resetForm,
         isValid,
       }) => {
-        console.log('errors', errors)
-        console.log('values', values)
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -881,37 +879,6 @@ const TrapOperations = ({
                                   Record Turbidity After Trap Visit Save
                                 </Text>
                               </FormControl.Label>
-                              <Popover
-                                placement='bottom left'
-                                trigger={triggerProps => {
-                                  return (
-                                    <IconButton
-                                      {...triggerProps}
-                                      icon={
-                                        <Icon
-                                          as={MaterialIcons}
-                                          color='black'
-                                          name='info-outline'
-                                          size='lg'
-                                        />
-                                      }
-                                    ></IconButton>
-                                  )
-                                }}
-                              >
-                                <Popover.Content
-                                  accessibilityLabel='RPM Info'
-                                  w='600'
-                                  mr='10'
-                                >
-                                  <Popover.Arrow />
-                                  <Popover.Header>
-                                    Take up to three measurements of cone
-                                    rotations. The averages of the entered
-                                    values will be saved to the database.
-                                  </Popover.Header>
-                                </Popover.Content>
-                              </Popover>
                             </HStack>
 
                             <HStack space={3}>

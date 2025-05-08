@@ -17,7 +17,6 @@ import { getTrapVisitDropdownValues } from '../redux/reducers/dropdownsSlice'
 import { fetchPreviousTrapAndCatch } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { RootState, AppDispatch } from '../redux/store'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { find } from 'lodash'
 import { getUserPrograms } from '../redux/reducers/userCredentialsSlice'
 import AlertDialog from '../components/Shared/AlertDialog'
 import { retrieveTrapVisitsRequiringTurbidity } from '../utils/helpers/helperFunctions'
@@ -69,14 +68,21 @@ const Home = ({
   previousTrapVisits: any
   visitSetupDefaultState: any
 }) => {
-  const visitsRequiringTurbidity =
-    retrieveTrapVisitsRequiringTurbidity(previousTrapVisits)
+  // const visitsRequiringTurbidity =
+  //   retrieveTrapVisitsRequiringTurbidity(previousTrapVisits)
 
   const [staggerOpen, setStaggerOpen] = useState(false as boolean)
   const [opacity, setOpacity] = useState(1 as number)
+  const [visitsRequiringTurbidity, setVisitsRequiringTurbidity] = useState([])
   const dispatch = useDispatch<AppDispatch>()
 
   const connectivityState = useSelector((state: any) => state.connectivity)
+
+  useEffect(() => {
+    setVisitsRequiringTurbidity(
+      retrieveTrapVisitsRequiringTurbidity(previousTrapVisits)
+    )
+  }, [previousTrapVisits])
 
   useEffect(() => {
     staggerOpen ? setOpacity(0.25) : setOpacity(1)
@@ -170,8 +176,8 @@ const Home = ({
             title='Action Required: Add Turbidity Values'
             description={`There ${
               visitsRequiringTurbidity.length === 1
-                ? 'is 1 program'
-                : `are ${visitsRequiringTurbidity.length} programs`
+                ? 'is 1 trap visit'
+                : `are ${visitsRequiringTurbidity.length} trap visits`
             } missing turbidity values. Please add the missing data to complete your records.`}
             onPress={() => {
               navigation.navigate('Input Turbidity')
