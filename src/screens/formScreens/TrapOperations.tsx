@@ -236,14 +236,15 @@ const TrapOperations = ({
   const onSubmit = (values: any, tabId: string | null) => {
     if (tabId) {
       const errors = checkForErrors(values)
-      if (values.recordTurbidityInPostProcessing) {
-        values.waterTurbidity = null
-      }
+
       dispatch(
         saveTrapOperations({
           tabId,
           values: {
             ...values,
+            waterTurbidity: values.recordTurbidityInPostProcessing
+              ? null
+              : values.waterTurbidity,
             trapVisitStopTime: endTime, //refactor needed
             trapVisitStartTime: new Date(),
           },
@@ -906,37 +907,6 @@ const TrapOperations = ({
                                 Record Turbidity After Trap Visit Save
                               </Text>
                             </FormControl.Label>
-                            <Popover
-                              placement='bottom left'
-                              trigger={triggerProps => {
-                                return (
-                                  <IconButton
-                                    {...triggerProps}
-                                    icon={
-                                      <Icon
-                                        as={MaterialIcons}
-                                        color='black'
-                                        name='info-outline'
-                                        size='lg'
-                                      />
-                                    }
-                                  ></IconButton>
-                                )
-                              }}
-                            >
-                              <Popover.Content
-                                accessibilityLabel='RPM Info'
-                                w='600'
-                                mr='10'
-                              >
-                                <Popover.Arrow />
-                                <Popover.Header>
-                                  Take up to three measurements of cone
-                                  rotations. The averages of the entered values
-                                  will be saved to the database.
-                                </Popover.Header>
-                              </Popover.Content>
-                            </Popover>
                           </HStack>
 
                           <HStack space={3}>
