@@ -184,17 +184,10 @@ const PlusCountModalContent = ({
                     onValueChange={handleChange('lifeStage')}
                     setFieldTouched={() => setFieldTouched('lifeStage')}
                     validationSchema={addPlusCountsSchema}
-                    selectOptions={
-                      values.species === 'Chinook salmon'
-                        ? alphabeticalLifeStage.map((item: any) => ({
-                            label: item.definition,
-                            value: item.definition,
-                          }))
-                        : [
-                            { label: 'adult', value: 'adult' },
-                            { label: 'juvenile', value: 'juvenile' },
-                          ]
-                    }
+                    selectOptions={alphabeticalLifeStage.map((item: any) => ({
+                      label: item.definition,
+                      value: item.definition,
+                    }))}
                   />
                 )}
 
