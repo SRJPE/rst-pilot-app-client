@@ -170,8 +170,8 @@ const Home = ({
             title='Action Required: Add Turbidity Values'
             description={`There ${
               visitsRequiringTurbidity.length === 1
-                ? 'is 1 program'
-                : `are ${visitsRequiringTurbidity.length} programs`
+                ? 'is 1 trap visit'
+                : `are ${visitsRequiringTurbidity.length} trap visits`
             } missing turbidity values. Please add the missing data to complete your records.`}
             onPress={() => {
               navigation.navigate('Input Turbidity')
