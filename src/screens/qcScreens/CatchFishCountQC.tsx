@@ -31,7 +31,7 @@ import {
 } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 import moment from 'moment'
 import { DataTable } from 'react-native-paper'
-import { find, get, startCase } from 'lodash'
+import { get, startCase } from 'lodash'
 
 interface NestedModalDataI {
   catchRawId: number
