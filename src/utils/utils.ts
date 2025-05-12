@@ -601,3 +601,16 @@ export const createFormValueDefault = ({
 }) => {
   return { value, touched, error, required }
 }
+
+export const calculateRpmAvg = (rpms: (string | null)[]) => {
+  const validRpms = rpms.filter(n => n)
+  if (!validRpms.length) {
+    return null
+  }
+  const numericRpms = validRpms.map((str: any) => parseFloat(str))
+  let counter = 0
+  numericRpms.forEach((num: number) => {
+    counter += num
+  })
+  return counter / numericRpms.length
+}
