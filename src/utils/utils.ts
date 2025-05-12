@@ -345,14 +345,16 @@ export const navigateFlowRightButton = ({
         } else if (
           every(tabValues, { fishProcessedResult: 'no fish caught' })
         ) {
-          return 'No Fish Caught'
+          return 'Trap Post-Processing'
+          // return 'No Fish Caught'
         } else {
           return 'Trap Post-Processing'
         }
       }
 
       if (values?.fishProcessedResult === 'no fish caught') {
-        return 'No Fish Caught'
+        return 'Trap Post-Processing'
+        // return 'No Fish Caught'
       } else if (
         values?.fishProcessedResult ===
           'no catch data, fish left in live box' ||

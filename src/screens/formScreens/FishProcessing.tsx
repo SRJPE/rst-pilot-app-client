@@ -337,8 +337,8 @@ const FishProcessing = ({
                         </Heading>
                       </FormControl.Label>
                       <Radio.Group
-                        name='coneSetting'
-                        accessibilityLabel='cone setting'
+                        name='willBeHoldingFishForMarkRecapture'
+                        accessibilityLabel='hold fish for mark recapture radio'
                         value={`${values.willBeHoldingFishForMarkRecapture}`}
                         onChange={(value: any) => {
                           setFieldTouched(
