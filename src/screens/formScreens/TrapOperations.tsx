@@ -485,6 +485,7 @@ const TrapOperations = ({
           handleBlur={handleBlur}
           handleChange={handleChange}
           validationSchema={validationSchema}
+          trapRestart={values.trapStatus === trapNotInServiceIdentifier}
         />
       )
     }
@@ -829,103 +830,6 @@ const TrapOperations = ({
                               </Radio>
                             </HStack>
                           </Radio.Group>
-                        </HStack>
-                      </FormControl>
-                      <FormControl>
-                        <HStack space={4} alignItems='center'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              RPM{' '}
-                              {values.trapStatus === trapNotInServiceIdentifier
-                                ? 'After'
-                                : 'Before'}{' '}
-                              Cleaning
-                            </Text>
-                          </FormControl.Label>
-                          <Popover
-                            placement='bottom left'
-                            trigger={triggerProps => {
-                              return (
-                                <IconButton
-                                  {...triggerProps}
-                                  icon={
-                                    <Icon
-                                      as={MaterialIcons}
-                                      color='black'
-                                      name='info-outline'
-                                      size='lg'
-                                    />
-                                  }
-                                ></IconButton>
-                              )
-                            }}
-                          >
-                            <Popover.Content
-                              accessibilityLabel='RPM Info'
-                              w='600'
-                              mr='10'
-                            >
-                              <Popover.Arrow />
-                              <Popover.Header>
-                                Take up to three measurements of cone rotations.
-                                The averages of the entered values will be saved
-                                to the database.
-                              </Popover.Header>
-                            </Popover.Content>
-                          </Popover>
-                        </HStack>
-                        <HStack space={8} justifyContent='space-between'>
-                          <Box flex={1}>
-                            <FormInputComponent
-                              label={'Measure 1'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.rpm1 ? `${values.rpm1}` : ''}
-                              camelName={'rpm1'}
-                              onChangeText={newValue => {
-                                setFieldValue('rpm1', newValue)
-                                if (!newValue) {
-                                  setFieldValue('rpm2', null)
-                                  setFieldValue('rpm3', null)
-                                }
-                              }}
-                              onBlur={handleBlur('rpm1')}
-                            />
-                          </Box>
-                          <Box flex={1}>
-                            <FormInputComponent
-                              isDisabled={values.rpm1 ? false : true}
-                              label={'Measure 2 (optional)'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.rpm2 ? `${values.rpm2}` : ''}
-                              camelName={'rpm2'}
-                              onChangeText={newValue => {
-                                setFieldValue('rpm2', newValue)
-                                if (!newValue) {
-                                  setFieldValue('rpm3', null)
-                                }
-                              }}
-                              onBlur={handleBlur('rpm2')}
-                            />
-                          </Box>
-                          <Box flex={1}>
-                            <FormInputComponent
-                              isDisabled={
-                                values.rpm1 && values.rpm2 ? false : true
-                              }
-                              label={'Measure 3 (optional)'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.rpm3 ? `${values.rpm3}` : ''}
-                              camelName={'rpm3'}
-                              onChangeText={handleChange('rpm3')}
-                              onBlur={handleBlur('rpm3')}
-                            />
-                          </Box>
                         </HStack>
                       </FormControl>
 

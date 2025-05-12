@@ -19,6 +19,7 @@ const RPMBefore = ({
   handleBlur,
   handleChange,
   validationSchema,
+  trapRestart,
 }: {
   touched: any
   errors: any
@@ -27,13 +28,14 @@ const RPMBefore = ({
   handleBlur: any
   handleChange: any
   validationSchema: any
+  trapRestart: boolean
 }) => {
   return (
     <FormControl>
       <HStack space={4} alignItems='center'>
         <FormControl.Label>
           <Text color='black' fontSize='xl'>
-            RPM Before Cleaning
+            RPM {trapRestart ? 'After' : 'Before'} Cleaning
           </Text>
         </FormControl.Label>
         <Popover
