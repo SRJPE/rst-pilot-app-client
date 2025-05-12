@@ -28,7 +28,6 @@ import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetup
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
 import { cloneDeep, flatten, uniq } from 'lodash'
-import { uid } from 'uid'
 import {
   setIncompleteSectionTouched,
   TabStateI,
@@ -40,6 +39,7 @@ import {
   navigateHelper,
   returnDefinitionArray,
   calculateRpmAvg,
+  returnNullableTableId,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -186,7 +186,6 @@ const IncompleteSections = ({
     return container
   }
 
-  const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
   const findCrewIdsFromSelectedCrewNames = (
     selectedCrewNames: Array<string>
   ) => {

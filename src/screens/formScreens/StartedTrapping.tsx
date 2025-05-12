@@ -21,7 +21,11 @@ import { flatten, uniq } from 'lodash'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { returnDefinitionArray, calculateRpmAvg } from '../../utils/utils'
+import {
+  returnDefinitionArray,
+  calculateRpmAvg,
+  returnNullableTableId,
+} from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -125,7 +129,6 @@ const StartedTrapping = ({
     return container
   }
 
-  const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
   const findCrewIdsFromSelectedCrewNames = (
     selectedCrewNames: Array<string>
   ) => {
@@ -171,107 +174,107 @@ const StartedTrapping = ({
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
       const waterTurbidityIsPresent =
-        trapOperationsState[id].values.waterTurbidity !== '' &&
-        trapOperationsState[id].values.waterTurbidity !== null
-      const {
-        rpm1: startRpm1,
-        rpm2: startRpm2,
-        rpm3: startRpm3,
-      } = trapOperationsState[id].values
+        trapOperationsState?.[id].values.waterTurbidity !== '' &&
+        trapOperationsState?.[id].values.waterTurbidity !== null
 
-      const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
+      const {
+        rpm1: endRpm1,
+        rpm2: endRpm2,
+        rpm3: endRpm3,
+      } = trapOperationsState?.[id].values // end rpm if restart bc no start
+
+      const selectedCrewNames: string[] = [
+        ...visitSetupState?.[id]?.values.crew,
+      ] // ['james', 'steve']
 
       const selectedCrewIds =
         findCrewIdsFromSelectedCrewNames(selectedCrewNames)
       const trapVisitSubmission = {
         trapVisitUid: id,
         crew: selectedCrewIds,
-        programId: visitSetupState[id].values.programId,
+        programId: visitSetupState?.[id]?.values.programId,
         visitTypeId: null,
-        trapLocationId: visitSetupState[id].values.trapLocationId,
-        isPaperEntry: visitSetupState[id].isPaperEntry,
-        trapVisitTimeStart: trapOperationsState[id].values.trapVisitStopTime, // this is now, when trap is being restarted
-        trapVisitTimeEnd: null, // trap was already ended/removed last visit
+        trapLocationId: visitSetupState?.[id]?.values.trapLocationId,
+        isPaperEntry: visitSetupState?.[id].isPaperEntry,
+        trapVisitTimeStart: trapOperationsState?.[id]?.values.trapVisitStopTime, // time from trap operations will BE START TIME bc they are restarting the trap
+        // trapVisitTimeEnd: trapOperationsState?.[id]?.values.trapVisitStopTime,
         fishProcessed: returnNullableTableId(
-          fishProcessedValues.indexOf(
-            fishProcessingState[id].values.fishProcessedResult
-          )
+          fishProcessedValues.indexOf('no fish caught')
         ),
         whyFishNotProcessed: returnNullableTableId(
-          whyFishNotProcessedValues.indexOf(
-            fishProcessingState[id].values.reasonForNotProcessing
-          )
+          whyFishNotProcessedValues.indexOf('not recorded')
         ),
         sampleGearId: null,
-        coneDepth: trapOperationsState[id].values.coneDepth
-          ? parseFloat(trapOperationsState[id].values.coneDepth)
+        coneDepth: trapOperationsState?.[id]?.values.coneDepth
+          ? parseFloat(trapOperationsState?.[id]?.values.coneDepth)
           : null,
         trapInThalweg: null,
         trapFunctioning: returnNullableTableId(
-          trapFunctioningValues.indexOf(
-            trapOperationsState[id].values.trapStatus
-          )
+          trapFunctioningValues.indexOf('trap not in service')
         ),
         whyTrapNotFunctioning: returnNullableTableId(
           whyTrapNotFunctioningValues.indexOf(
-            trapOperationsState[id].values.reasonNotFunc
+            trapOperationsState?.[id]?.values.reasonNotFunc
           )
         ),
         trapStatusAtEnd: returnNullableTableId(
-          trapStatusAtEndValues.indexOf(`Restart Trap`.toLowerCase())
+          trapStatusAtEndValues.indexOf('restart trap')
         ),
-        totalRevolutions: null,
-        // rpmAtStart: calculateRpmAvg([endRpm1, endRpm2, endRpm3]), // there is no start RPM bc trap was not running
-        rpmAtEnd: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
+        totalRevolutions: trapPostProcessingState?.[id]?.values.totalRevolutions
+          ? parseFloat(trapPostProcessingState?.[id]?.values.totalRevolutions)
+          : null,
+        rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
         trapVisitEnvironmental: [
           {
             measureName: 'flow measure',
-            measureValueNumeric: trapOperationsState[id].values.flowMeasure,
+            measureValueNumeric: trapOperationsState?.[id]?.values.flowMeasure,
             measureValueText:
-              trapOperationsState[id].values.flowMeasure?.toString(),
+              trapOperationsState?.[id]?.values.flowMeasure?.toString(),
             measureUnit: 5,
           },
           {
             measureName: 'water temperature',
             measureValueNumeric:
-              trapOperationsState[id].values.waterTemperature,
+              trapOperationsState?.[id]?.values.waterTemperature,
             measureValueText:
-              trapOperationsState[id].values.waterTemperature?.toString(),
+              trapOperationsState?.[id]?.values.waterTemperature?.toString(),
             measureUnit:
-              trapOperationsState[id].values.waterTemperatureUnit === '°F'
+              trapOperationsState?.[id]?.values.waterTemperatureUnit === '°F'
                 ? 1
                 : 2,
           },
           {
             measureName: 'water turbidity',
             measureValueNumeric: waterTurbidityIsPresent
-              ? trapOperationsState[id].values.waterTurbidity
-              : trapOperationsState[id]?.values?.recordTurbidityInPostProcessing
+              ? trapOperationsState?.[id]?.values.waterTurbidity
+              : trapOperationsState?.[id]?.values
+                  ?.recordTurbidityInPostProcessing
               ? null
               : undefined,
             measureValueText: waterTurbidityIsPresent
-              ? trapOperationsState[id].values.waterTurbidity?.toString()
-              : trapOperationsState[id]?.values?.recordTurbidityInPostProcessing
+              ? trapOperationsState?.[id]?.values.waterTurbidity?.toString()
+              : trapOperationsState?.[id]?.values
+                  ?.recordTurbidityInPostProcessing
               ? ''
               : 'undefined',
             measureUnit: 25,
           },
         ],
         trapCoordinates: {
-          xCoord: trapPostProcessingState?.[id]?.values?.trapLatitude || null,
-          yCoord: trapPostProcessingState?.[id]?.values?.trapLongitude || null,
+          xCoord: trapPostProcessingState?.[id]?.values.trapLatitude,
+          yCoord: trapPostProcessingState?.[id]?.values.trapLongitude,
           datum: null,
           projection: null,
         },
         inHalfConeConfiguration:
           trapOperationsState[id].values.coneSetting === 'half' ? true : false,
-        debrisVolumeGal: trapPostProcessingState?.[id]?.values?.debrisVolume
-          ? parseFloat(trapPostProcessingState?.[id]?.values?.debrisVolume)
+        debrisVolumeGal: trapPostProcessingState?.[id]?.values.debrisVolume
+          ? parseFloat(trapPostProcessingState?.[id]?.values.debrisVolume)
           : null,
         qcCompleted: null,
         qcCompletedAt: null,
-        comments: paperEntryState[id]
-          ? paperEntryState[id].values.comments
+        comments: trapPostProcessingState?.[id]?.values.comments
+          ? trapPostProcessingState?.[id]?.values.comments
           : null,
         createdBy: userCredentialsStore.id,
       }
@@ -306,9 +309,9 @@ const StartedTrapping = ({
             color='themeGrey'
           />
           <Heading textAlign='center'>
-            {
-              'Looks like you just dropped your cone to start trapping. Please check the trap every 24 hours while running.'
-            }
+            {`Looks like you just dropped your cone to start trapping. 
+
+              Save your restart trap information`}
           </Heading>
         </VStack>
       </View>

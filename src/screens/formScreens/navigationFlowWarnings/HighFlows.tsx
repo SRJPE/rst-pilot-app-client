@@ -25,7 +25,11 @@ import { flatten, uniq } from 'lodash'
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
-import { returnDefinitionArray, calculateRpmAvg } from '../../../utils/utils'
+import {
+  returnDefinitionArray,
+  calculateRpmAvg,
+  returnNullableTableId,
+} from '../../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -125,7 +129,6 @@ const HighFlows = ({
     return container
   }
 
-  const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
   const findCrewIdsFromSelectedCrewNames = (
     selectedCrewNames: Array<string>
   ) => {
