@@ -627,7 +627,11 @@ const TrapOperations = ({
                         <HStack space={2}>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
-                              Trapping End Date and Time:
+                              Trapping{' '}
+                              {values.trapStatus === trapNotInServiceIdentifier
+                                ? 'Start'
+                                : 'End'}{' '}
+                              Date and Time:
                             </Text>
                             <Popover
                               placement='bottom left'
@@ -742,7 +746,11 @@ const TrapOperations = ({
                         <HStack space={4} alignItems='center'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
-                              RPM Before Cleaning
+                              RPM{' '}
+                              {values.trapStatus === trapNotInServiceIdentifier
+                                ? 'After'
+                                : 'Before'}{' '}
+                              Cleaning
                             </Text>
                           </FormControl.Label>
                           <Popover
