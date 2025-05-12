@@ -10,6 +10,8 @@ import {
   resetNavigationSlice,
   updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
+import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
+import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
@@ -80,7 +82,7 @@ const NavButtons = ({
     return false
   }
   function useDeepCompareMemoize(value: any) {
-    const ref = useRef()
+    const ref = useRef<any>(null)
 
     if (!isEqual(value, ref.current)) {
       ref.current = value
@@ -261,9 +263,12 @@ const NavButtons = ({
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen
     if (activePage === 'Visit Setup') {
+      console.log('resetting form', resetForm)
       //If the left button the form is being reset to clear errors and input styles
       if (resetForm) resetForm()
       dispatch(resetNavigationSlice())
+      dispatch(resetVisitSetupSlice())
+      dispatch(resetTabsSlice())
       navigation.reset({
         index: 0,
         routes: [{ name: 'Visit Setup' }],
@@ -311,7 +316,7 @@ const NavButtons = ({
         buttonText = 'End Trap Visit'
         break
       case 'Started Trapping':
-        buttonText = 'Home'
+        buttonText = 'Save Trap Visit'
         break
       case 'High Temperatures':
         buttonText = 'Move on to Fish Processing'

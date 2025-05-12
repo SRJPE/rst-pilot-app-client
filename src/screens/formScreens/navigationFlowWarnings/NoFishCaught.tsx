@@ -24,7 +24,7 @@ import { flatten, uniq } from 'lodash'
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
-import { returnDefinitionArray } from '../../../utils/utils'
+import { returnDefinitionArray, calculateRpmAvg } from '../../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -173,18 +173,6 @@ const NoFishCaught = ({
     const trapStatusAtEndValues = returnDefinitionArray(
       dropdownsState.values.trapStatusAtEnd
     )
-    const calculateRpmAvg = (rpms: (string | null)[]) => {
-      const validRpms = rpms.filter(n => n)
-      if (!validRpms.length) {
-        return null
-      }
-      const numericRpms = validRpms.map((str: any) => parseFloat(str))
-      let counter = 0
-      numericRpms.forEach((num: number) => {
-        counter += num
-      })
-      return counter / numericRpms.length
-    }
 
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {

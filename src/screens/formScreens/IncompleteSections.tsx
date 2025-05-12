@@ -39,6 +39,7 @@ import {
   combinePlusCounts,
   navigateHelper,
   returnDefinitionArray,
+  calculateRpmAvg,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -227,18 +228,6 @@ const IncompleteSections = ({
     const trapStatusAtEndValues = returnDefinitionArray(
       dropdownsState.values.trapStatusAtEnd
     )
-    const calculateRpmAvg = (rpms: (string | null)[]) => {
-      const validRpms = rpms.filter(n => n)
-      if (!validRpms.length) {
-        return null
-      }
-      const numericRpms = validRpms.map((str: any) => parseFloat(str))
-      let counter = 0
-      numericRpms.forEach((num: number) => {
-        counter += num
-      })
-      return counter / numericRpms.length
-    }
 
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
