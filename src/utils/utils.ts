@@ -683,3 +683,16 @@ export const getCrewValue = ({
   )
   return filteredCrewIds
 }
+
+export const calcAvgValue = (valuesArray: (string | null)[]) => {
+  const validValues = valuesArray.filter(n => n)
+  if (!validValues.length) {
+    return null
+  }
+  const numericValues = validValues.map((str: any) => parseFloat(str))
+  let counter = 0
+  numericValues.forEach((num: number) => {
+    counter += num
+  })
+  return counter / numericValues.length
+}

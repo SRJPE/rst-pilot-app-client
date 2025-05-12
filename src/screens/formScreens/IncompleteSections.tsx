@@ -39,6 +39,8 @@ import {
   navigateHelper,
   returnDefinitionArray,
   getCrewValue,
+  returnNullableTableId,
+  calcAvgValue,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -185,7 +187,6 @@ const IncompleteSections = ({
     return container
   }
 
-  const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
   const findCrewIdsFromSelectedCrewNames = (
     selectedCrewNames: Array<string>
   ) => {
@@ -216,19 +217,6 @@ const IncompleteSections = ({
 
     const id = find(dropdownValues, { code: value })?.id || null
     return id
-  }
-
-  const calcAvgValue = (valuesArray: (string | null)[]) => {
-    const validValues = valuesArray.filter(n => n)
-    if (!validValues.length) {
-      return null
-    }
-    const numericValues = validValues.map((str: any) => parseFloat(str))
-    let counter = 0
-    numericValues.forEach((num: number) => {
-      counter += num
-    })
-    return counter / numericValues.length
   }
 
   const formatTrapVisitEnvironmentalValues = (
