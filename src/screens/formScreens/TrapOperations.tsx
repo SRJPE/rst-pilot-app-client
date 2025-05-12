@@ -414,6 +414,7 @@ const TrapOperations = ({
           endTime={endTime}
           onEndTimeChange={onEndTimeChange}
           popoverTrigger={popoverTrigger}
+          trapRestart={values.trapStatus === trapNotInServiceIdentifier}
         />
       )
     } else if (
@@ -680,7 +681,6 @@ const TrapOperations = ({
               <Pressable onPress={Keyboard.dismiss}>
                 <VStack space={1}>
                   <Heading>Trap Operations</Heading>
-                  {renderTrappingDateAndTime(values, setFieldValue)}
                   <FormControl>
                     <HStack space={2} alignItems='center'>
                       <FormControl.Label>
@@ -763,70 +763,9 @@ const TrapOperations = ({
                       )}
                     />
                   </FormControl>
-                  {values.trapStatus.length > 0 && (
-                    <FormControl>
-                      <VStack>
-                        <HStack space={2}>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Trapping{' '}
-                              {values.trapStatus === trapNotInServiceIdentifier
-                                ? 'Start'
-                                : 'End'}{' '}
-                              Date and Time:
-                            </Text>
-                            <Popover
-                              placement='bottom left'
-                              trigger={popoverTrigger}
-                            >
-                              <Popover.Content
-                                accessibilityLabel='Trap Visit End Info'
-                                w='600'
-                                mr='10'
-                              >
-                                <Popover.Arrow />
-                                <Popover.CloseButton />
-                                <Popover.Header>
-                                  Please set the Date and Time of when you
-                                  removed the trap to collect data and ended the
-                                  current trapping period.
-                                </Popover.Header>
-                                <Popover.Body p={4}>
-                                  <VStack space={2}>
-                                    <HStack space={2} alignItems='flex-start'>
-                                      <Text fontSize='md'>
-                                        This value is used to record the date
-                                        and time of ending the current trapping
-                                        period and removing the trap from the
-                                        water to collect data.
-                                      </Text>
-                                    </HStack>
-                                    <HStack space={2} alignItems='flex-start'>
-                                      <Text fontSize='md'>
-                                        At the end of this form during the Post
-                                        Processing step, if you continue
-                                        trapping, you will set the "Trapping
-                                        Start Date and Time" to record the time
-                                        of starting the trap again.
-                                      </Text>
-                                    </HStack>
-                                  </VStack>
-                                </Popover.Body>
-                              </Popover.Content>
-                            </Popover>
-                          </FormControl.Label>
-                        </HStack>
-                        <Box alignSelf='flex-start' ml='-2' mb={1}>
-                          <DateTimePicker
-                            value={endTime}
-                            mode='datetime'
-                            onChange={onEndTimeChange}
-                            accentColor='#007C7C'
-                          />
-                        </Box>
-                      </VStack>
-                    </FormControl>
-                  )}
+                  {values.trapStatus.length > 0 ? (
+                    <>{renderTrappingDateAndTime(values, setFieldValue)}</>
+                  ) : null}
                   {(values.trapStatus === 'trap functioning but not normally' ||
                     values.trapStatus === 'trap not functioning') && (
                     <CustomSelect

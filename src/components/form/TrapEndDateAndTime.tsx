@@ -6,10 +6,12 @@ const TrapEndDateAndTime = ({
   endTime,
   onEndTimeChange,
   popoverTrigger,
+  trapRestart,
 }: {
   endTime: any
   onEndTimeChange: any
   popoverTrigger: any
+  trapRestart: boolean
 }) => {
   return (
     <FormControl>
@@ -17,7 +19,7 @@ const TrapEndDateAndTime = ({
         <HStack space={2}>
           <FormControl.Label>
             <Text color='black' fontSize='xl'>
-              Trapping End Date and Time:
+              Trapping {trapRestart ? 'Start' : 'End'} Date and Time:
             </Text>
             <Popover placement='bottom left' trigger={popoverTrigger}>
               <Popover.Content
