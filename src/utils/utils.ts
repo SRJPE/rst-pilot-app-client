@@ -603,3 +603,48 @@ export const createFormValueDefault = ({
 }) => {
   return { value, touched, error, required }
 }
+
+export const groupBySpeciesForkLength = (data: Array<any>) => {
+  const result = {} as any
+  let totalCount = 0 as number
+
+  Object.values(data).forEach((fish: any) => {
+    const { species, forkLength, numFishCaught, run } = fish
+
+    totalCount += Number(numFishCaught)
+
+    if (fish.plusCount) {
+      if (!result[`${species} - ${run} Plus Count`]) {
+        result[`${species} - ${run} Plus Count`] = Number(numFishCaught)
+      } else {
+        result[`${species} - ${run} Plus Count`] += Number(numFishCaught)
+      }
+      return
+    }
+
+    if (!result[species]) {
+      result[species] = []
+    }
+
+    // Add `forkLength` repeated `numFishCaught` times
+    for (let i = 0; i < numFishCaught; i++) {
+      if (forkLength) {
+        result[species].push(forkLength)
+      }
+    }
+  })
+
+  // Sort the result object by its keys alphabetically
+  const sortedResult = Object.keys(result)
+    .sort()
+    .reduce((acc, key) => {
+      acc[key] = result[key]
+      return acc
+    }, {} as any)
+
+  Object.assign(result, sortedResult)
+
+  sortedResult['totalCount'] = totalCount
+
+  return sortedResult
+}

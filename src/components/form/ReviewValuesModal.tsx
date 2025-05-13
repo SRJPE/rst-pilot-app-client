@@ -1,65 +1,113 @@
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView, Dimensions } from 'react-native'
+import { SafeAreaView, Dimensions, Platform } from 'react-native'
 import CustomModal from '../Shared/CustomModal'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import { Text, Button, ScrollView, Divider, HStack, View } from 'native-base'
 import { List } from 'react-native-paper'
 import { SceneMap, TabBar, TabBarProps, TabView } from 'react-native-tab-view'
 import { startCase } from 'lodash'
+import { groupBySpeciesForkLength } from '../../utils/utils'
+import * as Print from 'expo-print'
+import { shareAsync } from 'expo-sharing'
 
 const initialLayout = { width: Dimensions.get('window').width }
+
+const hiddenFields = [
+  'isWaterTurbidityPresent',
+  'recordTurbidityInPostProcessing',
+]
+
+export function generateAccordionHtmlFromTabValues({
+  routes,
+  formValues,
+}: any) {
+  const sectionHtml = (title: string, data: Record<string, any>) => {
+    const rows = Object.entries(data)
+      .filter(
+        ([key]) =>
+          !key.includes('Unit') &&
+          !hiddenFields.includes(key) &&
+          !key.includes('Id')
+      )
+      .map(([key, value]) => {
+        let displayKey = /\d/.test(key) ? key.toUpperCase() : startCase(key)
+        let displayValue = value
+
+        if (value instanceof Date) {
+          displayValue = value.toLocaleString()
+        } else if (typeof value === 'boolean') {
+          displayValue = value ? 'Yes' : 'No'
+        } else if (Array.isArray(value)) {
+          if (value.length) {
+            displayValue = value.join(', ')
+            if (title === 'Fish Input') {
+              displayValue = `${displayValue} (Count: ${value.length})`
+            }
+          } else {
+            displayValue = ''
+          }
+        }
+
+        const unit = data[`${key}Unit`] || ''
+        return displayValue
+          ? `<tr><td><strong>${displayKey}</strong></td><td style="text-align:right">${displayValue} ${unit}</td></tr>`
+          : ''
+      })
+      .join('\n')
+
+    return rows
+      ? `<h2>${title}</h2><table style="width:100%;border-collapse:collapse;">${rows}</table><hr/>`
+      : ''
+  }
+
+  return `
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 16px; }
+          h2 { margin-top: 24px; border-bottom: 1px solid #ccc; }
+          table td { padding: 4px 8px; vertical-align: top; }
+          hr { margin: 24px 0; }
+        </style>
+      </head>
+      <body>
+      ${routes.map((route: any) => {
+        const visitSetupState = formValues?.visitSetupState?.[route.key]?.values
+        const trapOperationsState =
+          formValues?.trapOperationsState?.[route.key]?.values
+        const fishProcessingState =
+          formValues?.fishProcessingState?.[route.key]?.values
+        const fishInputState =
+          formValues?.fishInputState?.[route.key]?.fishStore
+        const trapPostProcessingState =
+          formValues?.trapPostProcessingState?.[route.key]?.values
+        const filteredTrapOps = { ...trapOperationsState }
+        delete filteredTrapOps.trapVisitStartTime
+
+        const fishInputLookupObj = groupBySpeciesForkLength(fishInputState)
+
+        const htmlSections = [
+          sectionHtml('Visit Setup', visitSetupState),
+          sectionHtml('Trap Operations', filteredTrapOps),
+          sectionHtml('Fish Processing', fishProcessingState),
+          sectionHtml('Fish Input', fishInputLookupObj),
+          sectionHtml('Trap Post-Processing', trapPostProcessingState),
+        ]
+        return `
+          <h1>${route.title}</h1>
+          ${htmlSections.join('\n')}
+        `
+      })}
+      </body>
+    </html>
+  `
+}
 
 type Props = {
   handleCloseReviewValuesModal: () => void
   formValues: any
   isOpen: boolean
   tabState: any
-}
-const hiddenFields = ['isWaterTurbidityPresent']
-
-function groupBySpeciesForkLength(data: Array<any>) {
-  const result = {} as any
-  let totalCount = 0 as number
-
-  Object.values(data).forEach((fish: any) => {
-    const { species, forkLength, numFishCaught, run } = fish
-
-    totalCount += Number(numFishCaught)
-
-    if (fish.plusCount) {
-      if (!result[`${species} - ${run} Plus Count`]) {
-        result[`${species} - ${run} Plus Count`] = Number(numFishCaught)
-      } else {
-        result[`${species} - ${run} Plus Count`] += Number(numFishCaught)
-      }
-      return
-    }
-
-    if (!result[species]) {
-      result[species] = []
-    }
-
-    // Add `forkLength` repeated `numFishCaught` times
-    for (let i = 0; i < numFishCaught; i++) {
-      if (forkLength) {
-        result[species].push(forkLength)
-      }
-    }
-  })
-
-  // Sort the result object by its keys alphabetically
-  const sortedResult = Object.keys(result)
-    .sort()
-    .reduce((acc, key) => {
-      acc[key] = result[key]
-      return acc
-    }, {} as any)
-
-  Object.assign(result, sortedResult)
-
-  sortedResult['totalCount'] = totalCount
-
-  return sortedResult
 }
 
 const AccordionListItem = ({
@@ -239,6 +287,22 @@ const ReviewValuesModal = ({
     />
   )
 
+  const printToFile = async () => {
+    // On iOS/android prints the given html. On web prints the HTML from the current page.
+    const html = generateAccordionHtmlFromTabValues({ routes, formValues })
+    const { uri } = await Print.printToFileAsync({ html })
+    try {
+      await shareAsync(uri, {
+        UTI: '.pdf',
+        mimeType: 'application/pdf',
+      })
+      handleCloseReviewValuesModal()
+    } catch (error) {
+      console.error('Error sharing file:', error)
+      alert('Error sharing file. Please try again.')
+    }
+  }
+
   return (
     <SafeAreaView style={{ height: '100%' }}>
       <CustomModal
@@ -281,7 +345,7 @@ const ReviewValuesModal = ({
               minWidth={300}
               bgColor='primary'
               colorScheme='coolGray'
-              onPress={handleCloseReviewValuesModal}
+              onPress={printToFile}
             >
               <Text fontSize='xl' color='white'>
                 Export as File
