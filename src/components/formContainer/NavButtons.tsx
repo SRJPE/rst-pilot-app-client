@@ -138,7 +138,7 @@ const NavButtons = ({
         break
       case 'Fish Processing':
         if (values?.fishProcessedResult === 'no fish caught') {
-          navigateHelper('No Fish Caught')
+          navigateHelper('Trap Post-Processing')
         } else if (
           values?.fishProcessedResult ===
             'no catch data, fish left in live box' ||
