@@ -87,3 +87,30 @@ export interface FormValueI {
   error: string
   required: boolean
 }
+
+export interface Taxon {
+  code: string
+  commonname: string
+  latinname: string
+  kingdomcommon: string
+  phylumcommon: string
+  classcommon: string
+  ordercommon: string
+  familycommon: string
+  genuscommon: string | null
+  speciescommon: string
+  subspeciescommon: string | null
+  kingdomlatin: string
+  phylumlatin: string
+  classlatin: string
+  orderlatin: string
+  familylatin: string
+  genuslatin: string
+  specieslatin: string
+  subspecieslatin: string | null
+  createdAt: string // ISO date string
+  updatedAt: string // ISO date string
+  taxonAbbreviations: string[] // Array of abbreviations
+  label: string
+  value: string
+}

@@ -1,62 +1,60 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import Ionicons from '@expo/vector-icons/Ionicons'
+import { useNavigation } from '@react-navigation/native'
+import { partition, startCase } from 'lodash'
 import {
-  Avatar,
   Box,
   Button,
   Divider,
   FormControl,
   HStack,
   Icon,
-  IconButton,
   Image,
   Input,
-  Popover,
+  Pressable,
   Radio,
   ScrollView,
   Text,
+  View,
   VStack,
-  Pressable,
 } from 'native-base'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Keyboard, TouchableNativeFeedback } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
-import Ionicons from '@expo/vector-icons/Ionicons'
+import { uid } from 'uid'
+import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
 import CustomModal from '../../components/Shared/CustomModal'
-import CustomSelect from '../../components/Shared/CustomSelect'
 import CustomModalHeader, {
   AddFishModalHeaderButton,
 } from '../../components/Shared/CustomModalHeader'
-import TagFishModalContent from '../../components/form/TagFishModalContent'
-import TagBadgeList from '../../components/form/TagBadgeList'
+import CustomSelect from '../../components/Shared/CustomSelect'
+import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
+import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
+import AddExistingMark from '../../components/form/AddExistingMark'
 import AddGeneticsModalContent from '../../components/form/AddGeneticsModalContent'
+import FishConditionsDropDown from '../../components/form/FishConditionsDropDown'
+import GeneticSampleBadgeList from '../../components/form/GeneticSampleBadgeList'
+import SpeciesDropDown from '../../components/form/SpeciesDropDown'
+import TagBadgeList from '../../components/form/TagBadgeList'
+import TagFishModalContent from '../../components/form/TagFishModalContent'
+import MarkBadgeList from '../../components/markRecapture/MarkBadgeList'
 import {
+  deleteFishEntry,
   FishStoreI,
   saveIndividualFish,
   updateFishEntry,
-  deleteFishEntry,
 } from '../../redux/reducers/formSlices/fishInputSlice'
-import { MaterialIcons } from '@expo/vector-icons'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
-import { useNavigation } from '@react-navigation/native'
+import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { Keyboard } from 'react-native'
+import { AppDispatch, RootState } from '../../redux/store'
+import { FormValueI, ReleaseMarkI } from '../../utils/interfaces'
 import {
+  addFishErrorMessages,
   alphabeticalSort,
+  createFormValueDefault,
+  handleSpeciesSearchTextChange,
   QARanges,
   reorderTaxon,
-  addFishErrorMessages,
-  createFormValueDefault,
 } from '../../utils/utils'
-import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import AddAnotherMarkModalContent from '../../components/Shared/AddAnotherMarkModalContent'
-import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import MarkBadgeList from '../../components/markRecapture/MarkBadgeList'
-import { uid } from 'uid'
-import SpeciesDropDown from '../../components/form/SpeciesDropDown'
-import FishConditionsDropDown from '../../components/form/FishConditionsDropDown'
-import { startCase, partition } from 'lodash'
-import { ReleaseMarkI, FormValueI } from '../../utils/interfaces'
-import GeneticSampleBadgeList from '../../components/form/GeneticSampleBadgeList'
-import AddExistingMark from '../../components/form/AddExistingMark'
 
 const AddFishContent = ({
   route,
@@ -98,6 +96,9 @@ const AddFishContent = ({
   )
 
   const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
+
+  const [speciesList, setSpeciesList] =
+    useState<{ label: string; value: string }[]>(reorderedTaxon)
 
   const alphabeticalLifeStage = alphabeticalSort(
     dropdownValues.lifeStage,
@@ -517,14 +518,6 @@ const AddFishContent = ({
   const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
     false as boolean
   )
-  const [speciesList, setSpeciesList] = useState<
-    { label: string; value: string }[]
-  >(
-    reorderedTaxon.map((taxon: any) => ({
-      label: taxon?.commonname,
-      value: taxon?.commonname,
-    }))
-  )
   const [fishConditionsDropdownOpen, setFishConditionsDropdownOpen] = useState(
     false as boolean
   )
@@ -557,488 +550,395 @@ const AddFishContent = ({
   }, [existingMarks])
 
   return (
-    <>
-      <ScrollView
-        scrollEnabled
-        flex={1}
-        bg='#fff'
-        borderWidth='10'
-        borderBottomWidth='0'
-        borderColor='themeGrey'
-      >
-        <Pressable onPress={Keyboard.dismiss}>
-          <HStack space={10}>
-            <CustomModalHeader
-              headerText={
-                route.params?.editModeData
-                  ? tabSlice.activeTabId
-                    ? `Edit Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
-                    : 'Edit Fish'
-                  : tabSlice.activeTabId
-                  ? `Add Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
-                  : 'Add Fish'
-              }
-              showHeaderButton={true}
-              closeModal={closeModal}
-              navigateBack={true}
-              headerButton={
-                route.params?.editModeData
-                  ? null
-                  : AddFishModalHeaderButton({
-                      activeTab: 'Individual',
-                      buttonNav,
-                    })
-              }
-            />
-          </HStack>
-          <Divider mb='1' />
-          <VStack paddingX='10' paddingBottom='3' space={3}>
-            {!route.params?.editModeData && lastFishEntry && (
-              <Box
-                py={3}
-                px={5}
-                w={'full'}
-                borderWidth={1}
-                borderColor={'primary'}
-                borderRadius={5}
-                bg='coolGray.100'
-              >
-                <VStack space={1}>
-                  <Text fontSize={'lg'}>
-                    <Text bold>Last Entry: </Text>
-                    {`${lastFishEntry.species} (${lastFishEntry.lifeStage}) - Fork Length: ${lastFishEntry.forkLength}mm`}
-                  </Text>
-                  <Text fontSize={'lg'}>
-                    <Text bold>Total Catch Count Entered: </Text>
-                    {Object.values(fishStore).length}
-                  </Text>
-                </VStack>
-              </Box>
-            )}
-            <HStack alignItems='center'>
-              <FormControl w='1/2' pr='5' mb={speciesDropDownOpen ? 180 : 0}>
-                {/* //TODO: Form is being managed manually, refactor logic and form to properly show error messages */}
-                <HStack space={4} alignItems='center'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Species
-                    </Text>
-                  </FormControl.Label>
-                  <Popover
-                    placement='bottom right'
-                    trigger={triggerProps => {
-                      return (
-                        <IconButton
-                          {...triggerProps}
-                          icon={
-                            <Icon
-                              as={MaterialIcons}
-                              color='black'
-                              name='info-outline'
-                              size='xl'
-                            />
-                          }
-                        ></IconButton>
-                      )
-                    }}
-                  >
-                    <Popover.Content
-                      mx='10'
-                      mb='10'
-                      accessibilityLabel='Species Lookup'
-                      minW='720'
-                      minH='300'
-                      backgroundColor='light.100'
-                    >
-                      <Popover.Arrow />
-                      <Popover.CloseButton />
-                      <Popover.Body p={0}>
-                        <ScrollView>
-                          <Image
-                            source={require('../../../assets/speciesID/Species_ID_Sheet_1-1.jpg')}
-                            alt='Species ID'
-                            size='1000px'
-                          />
-                          <Image
-                            source={require('../../../assets/speciesID/Species_ID_Sheet_2-2.jpg')}
-                            alt='Species ID'
-                            size='1000px'
-                          />
-                          <Image
-                            source={require('../../../assets/speciesID/Species_ID_Sheet_3-3.jpg')}
-                            alt='Species ID'
-                            size='1000px'
-                          />
-                          <Image
-                            source={require('../../../assets/speciesID/Species_ID_Sheet_4-end.jpg')}
-                            alt='Species ID'
-                            size='1000px'
-                          />
-                        </ScrollView>
-                      </Popover.Body>
-                    </Popover.Content>
-                  </Popover>
-
-                  {/* {species.touched &&
-                    species.error &&
-                    RenderErrorMessage(species.error, 'species')} */}
-                </HStack>
-                <SpeciesDropDown
-                  editModeValue={route.params?.editModeData?.species}
-                  open={speciesDropDownOpen}
-                  onOpen={onSpeciesOpen}
-                  setOpen={setSpeciesDropDownOpen}
-                  list={speciesList}
-                  setList={setSpeciesList}
-                  speciesValue={species.value as string}
-                  onChangeValue={(value: string) => {
-                    let payload = { ...species, value, touched: true }
-
-                    //if in edit mode, do not reset form state based on species
-                    if (route.params?.editModeData !== undefined) return
-
-                    //if not in edit mode, reset form state based on species
-                    if (value.toLowerCase().includes('chinook')) {
-                      resetFormState('chinook')
-                    } else if (value.toLowerCase().includes('steelhead')) {
-                      resetFormState('steelhead')
-                    } else {
-                      resetFormState('other')
-                    }
-                    setSpecies(payload)
-                  }}
-                  setFieldTouched={() =>
-                    setSpecies({ ...species, touched: true })
-                  }
-                />
-              </FormControl>
+    <TouchableNativeFeedback
+      onPress={() => {
+        if (speciesDropDownOpen) {
+          setSpeciesDropDownOpen(false)
+          setSpeciesList(reorderedTaxon)
+          setSpecies(prevState => ({
+            ...prevState,
+            touched: true,
+          }))
+        }
+      }}
+    >
+      <View flex={1}>
+        <ScrollView
+          scrollEnabled
+          flex={1}
+          bg='#fff'
+          borderWidth='10'
+          borderBottomWidth='0'
+          borderColor='themeGrey'
+        >
+          <Pressable onPress={Keyboard.dismiss}>
+            <HStack space={10}>
+              <CustomModalHeader
+                headerText={
+                  route.params?.editModeData
+                    ? tabSlice.activeTabId
+                      ? `Edit Fish - ${
+                          tabSlice.tabs[tabSlice.activeTabId].name
+                        }`
+                      : 'Edit Fish'
+                    : tabSlice.activeTabId
+                    ? `Add Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
+                    : 'Add Fish'
+                }
+                showHeaderButton={true}
+                closeModal={closeModal}
+                navigateBack={true}
+                headerButton={
+                  route.params?.editModeData
+                    ? null
+                    : AddFishModalHeaderButton({
+                        activeTab: 'Individual',
+                        buttonNav,
+                      })
+                }
+              />
             </HStack>
+            <Divider mb='1' />
+            <VStack paddingX='10' paddingBottom='3' space={3}>
+              {!route.params?.editModeData && lastFishEntry && (
+                <Box
+                  py={3}
+                  px={5}
+                  w={'full'}
+                  borderWidth={1}
+                  borderColor={'primary'}
+                  borderRadius={5}
+                  bg='coolGray.100'
+                >
+                  <VStack space={1}>
+                    <Text fontSize={'lg'}>
+                      <Text bold>Last Entry: </Text>
+                      {`${lastFishEntry.species} (${lastFishEntry.lifeStage}) - Fork Length: ${lastFishEntry.forkLength}mm`}
+                    </Text>
+                    <Text fontSize={'lg'}>
+                      <Text bold>Total Catch Count Entered: </Text>
+                      {Object.values(fishStore).length}
+                    </Text>
+                  </VStack>
+                </Box>
+              )}
+              <HStack alignItems='center'>
+                <FormControl pr='5' mb={speciesDropDownOpen ? 180 : 0}>
+                  {/* //TODO: Form is being managed manually, refactor logic and form to properly show error messages */}
 
-            <Divider mt={1} />
-
-            {(species.value as string) !== '' && species.value !== null && (
-              <>
-                <VStack space={4}>
-                  <Text color='black' fontSize='lg'>
-                    * : Required
-                  </Text>
-                  <HStack space={4}>
-                    <FormControl
-                      flex={1}
-                      // w={route.params?.editModeData ? '1/3' : '1/2'}
-                      // pr='5'
-                    >
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='md'>
-                            Fork Length *
-                          </Text>
-                        </FormControl.Label>
-                        {renderForkLengthWarning(
-                          Number(forkLength.value),
-                          lifeStage.value as string
-                        )}
-                        {forkLength.touched && forkLength.error && (
-                          <RenderErrorMessage
-                            errors={{ forkLength: forkLength.error }}
-                            inputName={'forkLength'}
-                          />
-                        )}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={value => {
-                          let payload: FormValueI = {
-                            ...forkLength,
-                            value,
-                            touched: true,
-                            error: '',
-                          }
-                          if (value === '') {
-                            payload.error =
-                              addFishErrorMessages.forkLength.emptyError
-                          } else if (!Number(value)) {
-                            payload.error =
-                              addFishErrorMessages.forkLength.typeError
-                          }
-                          setForkLength(payload)
-                        }}
-                        // TODO - onBlur logic?
-                        // onBlur={handleBlur('forkLength')}
-                        value={forkLength.value as string}
-                      />
-                      <Text
-                        color='#A1A1A1'
-                        position='absolute'
-                        top={50}
-                        right={8}
-                        fontSize={16}
+                  <SpeciesDropDown
+                    editModeValue={route.params?.editModeData?.species}
+                    open={speciesDropDownOpen}
+                    onOpen={onSpeciesOpen}
+                    setOpen={setSpeciesDropDownOpen}
+                    list={speciesList}
+                    setList={setSpeciesList}
+                    speciesValue={species.value as string}
+                    onClose={() => {
+                      setSpeciesList(reorderedTaxon)
+                    }}
+                    onChangeSearchText={searchValue =>
+                      handleSpeciesSearchTextChange({
+                        reorderedTaxon,
+                        searchValue,
+                        setSpeciesList,
+                      })
+                    }
+                    onChangeValue={(value: string) => {
+                      let payload = { ...species, value, touched: true }
+                      //if in edit mode, do not reset form state based on species
+                      if (route.params?.editModeData !== undefined) return
+                      //if not in edit mode, reset form state based on species
+                      if (value.toLowerCase().includes('chinook')) {
+                        resetFormState('chinook')
+                      } else if (value.toLowerCase().includes('steelhead')) {
+                        resetFormState('steelhead')
+                      } else {
+                        resetFormState('other')
+                      }
+                      setSpecies(payload)
+                    }}
+                    setFieldTouched={() =>
+                      setSpecies({ ...species, touched: true })
+                    }
+                  />
+                </FormControl>
+              </HStack>
+              <Divider mt={1} />
+              {(species.value as string) !== '' && species.value !== null && (
+                <>
+                  <VStack space={4}>
+                    <Text color='black' fontSize='lg'>
+                      * : Required
+                    </Text>
+                    <HStack space={4}>
+                      <FormControl
+                        flex={1}
+                        // w={route.params?.editModeData ? '1/3' : '1/2'}
+                        // pr='5'
                       >
-                        {'mm'}
-                      </Text>
-                    </FormControl>
-                    <FormControl
-                      flex={1}
-                      // w={route.params?.editModeData ? '1/3' : '1/2'}
-                      // paddingRight='9'
-                    >
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='md'>
-                            Weight (optional)
-                          </Text>
-                        </FormControl.Label>
-                        {renderWeightWarning(
-                          Number(weight.value),
-                          weight.value as string
-                        )}
-                        {weight.touched && weight.error && (
-                          <RenderErrorMessage
-                            errors={{ weight: weight.error }}
-                            inputName={'weight'}
-                          />
-                        )}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={value => {
-                          let payload: FormValueI = {
-                            ...weight,
-                            value,
-                            touched: true,
-                            error: '',
-                          }
-                          if (value === '') {
-                            payload.error = ''
-                          } else if (!Number(value)) {
-                            payload.error =
-                              addFishErrorMessages.weight.typeError
-                          }
-                          setWeight(payload)
-                        }}
-                        // TODO - onBlur logic?
-                        // onBlur={handleBlur('weight')}
-                        value={weight.value as string}
-                      />
-                      <Text
-                        color='#A1A1A1'
-                        position='absolute'
-                        top={50}
-                        right={12}
-                        fontSize={16}
-                      >
-                        {'g'}
-                      </Text>
-                    </FormControl>
-                    {route.params?.editModeData ? (
-                      <FormControl flex={1}>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='md'>
-                            Count
-                          </Text>
-                        </FormControl.Label>
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='md'>
+                              Fork Length *
+                            </Text>
+                          </FormControl.Label>
+                          {renderForkLengthWarning(
+                            Number(forkLength.value),
+                            lifeStage.value as string
+                          )}
+                          {forkLength.touched && forkLength.error && (
+                            <RenderErrorMessage
+                              errors={{ forkLength: forkLength.error }}
+                              inputName={'forkLength'}
+                            />
+                          )}
+                        </HStack>
                         <Input
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
                           keyboardType='numeric'
-                          onChangeText={value => setCount({ ...count, value })}
-                          // TODO - onBlur logic?
-                          // onBlur={handleBlur('numFishCaught')}
-                          value={`${count.value}`}
-                        />
-                      </FormControl>
-                    ) : (
-                      <></>
-                    )}
-                  </HStack>
-                  {/*workaround for customselect first component causing gray box issue*/}
-                  <FormControl w='1/2' paddingRight='9' display='none'>
-                    <CustomSelect
-                      selectedValue={''}
-                      placeholder={''}
-                      onValueChange={null}
-                      selectOptions={[]}
-                    />
-                  </FormControl>
-                  <HStack space={4} alignItems='center'>
-                    {(species.value === 'Chinook salmon' ||
-                      species.value === 'Steelhead / rainbow trout') && (
-                      <Box flex={1}>
-                        <CustomSelect
-                          label='Life Stage'
-                          selectedValue={lifeStage.value as string}
-                          placeholder={'Life Stage'}
-                          onValueChange={(value: string) => {
+                          onChangeText={value => {
                             let payload: FormValueI = {
-                              ...lifeStage,
+                              ...forkLength,
                               value,
+                              touched: true,
                               error: '',
                             }
-                            setLifeStage(payload)
-                          }}
-                          setFieldTouched={() => {
-                            let payload = { ...lifeStage, touched: true }
-                            if (!lifeStage.value)
+                            if (value === '') {
                               payload.error =
-                                addFishErrorMessages.lifeStage.emptyError
-                            setLifeStage(payload)
-                          }}
-                          selectOptions={alphabeticalLifeStage
-                            .filter((item: any) => {
-                              if (
-                                item?.definition?.includes('juvenile') ||
-                                item?.definition?.includes('adult')
-                              ) {
-                                return item
-                              } else if (species.value == 'Chinook salmon') {
-                                return item
-                              }
-                            })
-                            .map((item: any) => ({
-                              label: item?.definition,
-                              value: item?.definition,
-                            }))}
-                          tooltip={
-                            <ScrollView>
-                              <Image
-                                source={require('../../../assets/life_stage_image.png')}
-                                alt='Life Stage Image'
-                                width='720'
-                              />
-                              <Image
-                                source={require('../../../assets/life_stage_table.png')}
-                                alt='Life Stage Image'
-                              />
-                            </ScrollView>
-                          }
-                        />
-                      </Box>
-                    )}
-                    {species.value == 'Chinook salmon' && (
-                      <Box flex={1}>
-                        <CustomSelect
-                          label='Run (optional)'
-                          selectedValue={run.value as string}
-                          placeholder={'Run'}
-                          onValueChange={(value: string) =>
-                            setRun({ ...run, value })
-                          }
-                          setFieldTouched={() =>
-                            setRun({ ...run, touched: true })
-                          }
-                          selectOptions={dropdownValues?.run}
-                        />
-                      </Box>
-                    )}
-                  </HStack>
-
-                  <FormControl
-                    w='100%'
-                    paddingRight='9'
-                    mb={fishConditionsDropdownOpen ? 160 : 0}
-                  >
-                    <FormControl.Label>
-                      <Text color='black' fontSize='md'>
-                        Fish Conditions
-                      </Text>
-                    </FormControl.Label>
-                    <FishConditionsDropDown
-                      editModeValue={
-                        route.params?.editModeData
-                          ? route.params?.editModeData?.fishConditions
-                          : undefined
-                      }
-                      open={fishConditionsDropdownOpen}
-                      onOpen={onFishConditionsOpen}
-                      setOpen={setFishConditionsDropdownOpen}
-                      list={fishConditionsList}
-                      setList={setFishConditionsList}
-                      onChangeValue={(value: string) => {
-                        setFishConditions({ ...fishConditions, value })
-                      }}
-                      setFieldTouched={() =>
-                        setFishConditions({
-                          ...fishConditions,
-                          touched: true,
-                        })
-                      }
-                      fishConditionsValues={fishConditions.value as string[]}
-                    />
-                  </FormControl>
-                  <HStack>
-                    <FormControl w='1/3'>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Dead
-                          </Text>
-                        </FormControl.Label>
-
-                        <Radio.Group
-                          name='dead'
-                          accessibilityLabel='dead'
-                          value={`${dead.value}`}
-                          onChange={(value: any) => {
-                            if (value === 'true') {
-                              setDead({ ...dead, value: true })
-                            } else {
-                              setDead({ ...dead, value: false })
+                                addFishErrorMessages.forkLength.emptyError
+                            } else if (!Number(value)) {
+                              payload.error =
+                                addFishErrorMessages.forkLength.typeError
                             }
+                            setForkLength(payload)
                           }}
+                          // TODO - onBlur logic?
+                          // onBlur={handleBlur('forkLength')}
+                          value={forkLength.value as string}
+                        />
+                        <Text
+                          color='#A1A1A1'
+                          position='absolute'
+                          top={50}
+                          right={8}
+                          fontSize={16}
                         >
-                          <HStack space={4}>
-                            <Radio
-                              colorScheme='primary'
-                              value='true'
-                              my={1}
-                              _icon={{ color: 'primary' }}
-                            >
-                              Yes
-                            </Radio>
-                            <Radio
-                              colorScheme='primary'
-                              value='false'
-                              my={1}
-                              _icon={{ color: 'primary' }}
-                            >
-                              No
-                            </Radio>
-                          </HStack>
-                        </Radio.Group>
-                      </HStack>
+                          {'mm'}
+                        </Text>
+                      </FormControl>
+                      <FormControl
+                        flex={1}
+                        // w={route.params?.editModeData ? '1/3' : '1/2'}
+                        // paddingRight='9'
+                      >
+                        <HStack space={4} alignItems='center'>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='md'>
+                              Weight (optional)
+                            </Text>
+                          </FormControl.Label>
+                          {renderWeightWarning(
+                            Number(weight.value),
+                            weight.value as string
+                          )}
+                          {weight.touched && weight.error && (
+                            <RenderErrorMessage
+                              errors={{ weight: weight.error }}
+                              inputName={'weight'}
+                            />
+                          )}
+                        </HStack>
+                        <Input
+                          height='50px'
+                          fontSize='16'
+                          placeholder='Numeric Value'
+                          keyboardType='numeric'
+                          onChangeText={value => {
+                            let payload: FormValueI = {
+                              ...weight,
+                              value,
+                              touched: true,
+                              error: '',
+                            }
+                            if (value === '') {
+                              payload.error = ''
+                            } else if (!Number(value)) {
+                              payload.error =
+                                addFishErrorMessages.weight.typeError
+                            }
+                            setWeight(payload)
+                          }}
+                          // TODO - onBlur logic?
+                          // onBlur={handleBlur('weight')}
+                          value={weight.value as string}
+                        />
+                        <Text
+                          color='#A1A1A1'
+                          position='absolute'
+                          top={50}
+                          right={12}
+                          fontSize={16}
+                        >
+                          {'g'}
+                        </Text>
+                      </FormControl>
+                      {route.params?.editModeData ? (
+                        <FormControl flex={1}>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='md'>
+                              Count
+                            </Text>
+                          </FormControl.Label>
+                          <Input
+                            height='50px'
+                            fontSize='16'
+                            placeholder='Numeric Value'
+                            keyboardType='numeric'
+                            onChangeText={value =>
+                              setCount({ ...count, value })
+                            }
+                            // TODO - onBlur logic?
+                            // onBlur={handleBlur('numFishCaught')}
+                            value={`${count.value}`}
+                          />
+                        </FormControl>
+                      ) : (
+                        <></>
+                      )}
+                    </HStack>
+                    {/*workaround for customselect first component causing gray box issue*/}
+                    <FormControl w='1/2' paddingRight='9' display='none'>
+                      <CustomSelect
+                        selectedValue={''}
+                        placeholder={''}
+                        onValueChange={null}
+                        selectOptions={[]}
+                      />
                     </FormControl>
-
-                    {species.value === 'Chinook salmon' && (
+                    <HStack space={4} alignItems='center'>
+                      {(species.value === 'Chinook salmon' ||
+                        species.value === 'Steelhead / rainbow trout') && (
+                        <Box flex={1}>
+                          <CustomSelect
+                            label='Life Stage'
+                            selectedValue={lifeStage.value as string}
+                            placeholder={'Life Stage'}
+                            onValueChange={(value: string) => {
+                              let payload: FormValueI = {
+                                ...lifeStage,
+                                value,
+                                error: '',
+                              }
+                              setLifeStage(payload)
+                            }}
+                            setFieldTouched={() => {
+                              let payload = { ...lifeStage, touched: true }
+                              if (!lifeStage.value)
+                                payload.error =
+                                  addFishErrorMessages.lifeStage.emptyError
+                              setLifeStage(payload)
+                            }}
+                            selectOptions={alphabeticalLifeStage
+                              .filter((item: any) => {
+                                if (
+                                  item?.definition?.includes('juvenile') ||
+                                  item?.definition?.includes('adult')
+                                ) {
+                                  return item
+                                } else if (species.value == 'Chinook salmon') {
+                                  return item
+                                }
+                              })
+                              .map((item: any) => ({
+                                label: item?.definition,
+                                value: item?.definition,
+                              }))}
+                            tooltip={
+                              <ScrollView>
+                                <Image
+                                  source={require('../../../assets/life_stage_image.png')}
+                                  alt='Life Stage Image'
+                                  width='720'
+                                />
+                                <Image
+                                  source={require('../../../assets/life_stage_table.png')}
+                                  alt='Life Stage Image'
+                                />
+                              </ScrollView>
+                            }
+                          />
+                        </Box>
+                      )}
+                      {species.value == 'Chinook salmon' && (
+                        <Box flex={1}>
+                          <CustomSelect
+                            label='Run (optional)'
+                            selectedValue={run.value as string}
+                            placeholder={'Run'}
+                            onValueChange={(value: string) =>
+                              setRun({ ...run, value })
+                            }
+                            setFieldTouched={() =>
+                              setRun({ ...run, touched: true })
+                            }
+                            selectOptions={dropdownValues?.run}
+                          />
+                        </Box>
+                      )}
+                    </HStack>
+                    <FormControl
+                      w='100%'
+                      paddingRight='9'
+                      mb={fishConditionsDropdownOpen ? 160 : 0}
+                    >
+                      <FormControl.Label>
+                        <Text color='black' fontSize='md'>
+                          Fish Conditions
+                        </Text>
+                      </FormControl.Label>
+                      <FishConditionsDropDown
+                        editModeValue={
+                          route.params?.editModeData
+                            ? route.params?.editModeData?.fishConditions
+                            : undefined
+                        }
+                        open={fishConditionsDropdownOpen}
+                        onOpen={onFishConditionsOpen}
+                        setOpen={setFishConditionsDropdownOpen}
+                        list={fishConditionsList}
+                        setList={setFishConditionsList}
+                        onChangeValue={(value: string) => {
+                          setFishConditions({ ...fishConditions, value })
+                        }}
+                        setFieldTouched={() =>
+                          setFishConditions({
+                            ...fishConditions,
+                            touched: true,
+                          })
+                        }
+                        fishConditionsValues={fishConditions.value as string[]}
+                      />
+                    </FormControl>
+                    <HStack>
                       <FormControl w='1/3'>
                         <HStack space={4} alignItems='center'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
-                              Adipose Clipped
+                              Dead
                             </Text>
                           </FormControl.Label>
-
                           <Radio.Group
-                            name='adiposeClipped'
-                            accessibilityLabel='adipose clipped'
-                            value={`${adiposeClipped.value}`}
+                            name='dead'
+                            accessibilityLabel='dead'
+                            value={`${dead.value}`}
                             onChange={(value: any) => {
                               if (value === 'true') {
-                                setAdiposeClipped({
-                                  ...adiposeClipped,
-                                  value: true,
-                                })
+                                setDead({ ...dead, value: true })
                               } else {
-                                setAdiposeClipped({
-                                  ...adiposeClipped,
-                                  value: false,
-                                })
+                                setDead({ ...dead, value: false })
                               }
                             }}
                           >
@@ -1049,7 +949,7 @@ const AddFishContent = ({
                                 my={1}
                                 _icon={{ color: 'primary' }}
                               >
-                                True
+                                Yes
                               </Radio>
                               <Radio
                                 colorScheme='primary'
@@ -1057,345 +957,389 @@ const AddFishContent = ({
                                 my={1}
                                 _icon={{ color: 'primary' }}
                               >
-                                False
+                                No
                               </Radio>
                             </HStack>
                           </Radio.Group>
                         </HStack>
                       </FormControl>
-                    )}
-                  </HStack>
-
-                  <HStack space={4} w='80%'>
-                    {(species.value == 'Chinook salmon' ||
-                      species.value == 'Steelhead / rainbow trout') && (
-                      <FormControl w='full'>
-                        <VStack space={4}>
-                          <AddExistingMark
-                            dropdownValues={dropdownValues}
-                            activeTabId={tabSlice.activeTabId}
-                            recentExistingMarks={recentExistingMarks}
-                            handlePressRecentExistingMarkButton={
-                              handlePressRecentExistingMarkButton
-                            }
-                            visitSetupState={visitSetupState}
-                          />
-                          <MarkBadgeList
-                            badgeListContent={createdMarks}
-                            field='existingMarks'
-                            setExistingMarks={setExistingMarks}
-                          />
-                          {!fishConditionsDropdownOpen &&
-                            !speciesDropDownOpen && (
-                              <Pressable
-                                onPress={() => setAddMarkModalOpen(true)}
-                              >
-                                <HStack alignItems='center'>
-                                  <Icon
-                                    as={Ionicons}
-                                    name={'add-circle'}
-                                    size='3xl'
-                                    color='primary'
-                                    marginRight='1'
-                                  />
-                                  <Text color='primary' fontSize='lg'>
-                                    Add Another Mark
-                                  </Text>
-                                </HStack>
-                              </Pressable>
-                            )}
-                        </VStack>
-                      </FormControl>
-                    )}
-                  </HStack>
-
-                  {species.value === 'other' && (
-                    <FormControl w='full'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Life Stage
-                        </Text>
-                      </FormControl.Label>
-                      <Radio.Group
-                        name='lifeStage'
-                        accessibilityLabel='lifeStage'
-                        value={
-                          lifeStage.value !== ''
-                            ? (lifeStage.value as string)
-                            : 'adult'
-                        }
-                        onChange={(value: any) => {
-                          if (value === 'adult') {
-                            setLifeStage({ ...lifeStage, value })
-                          } else {
-                            setLifeStage({ ...lifeStage, value: 'juvenile' })
-                          }
-                        }}
-                      >
-                        <Radio
-                          colorScheme='primary'
-                          value='adult'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          Adult
-                        </Radio>
-                        <Radio
-                          colorScheme='primary'
-                          value='juvenile'
-                          my={1}
-                          _icon={{ color: 'primary' }}
-                        >
-                          Juvenile
-                        </Radio>
-                      </Radio.Group>
-                    </FormControl>
-                  )}
-                  {!fishConditionsDropdownOpen && !speciesDropDownOpen && (
-                    <HStack mb={'4'}>
-                      {(species.value === 'Chinook salmon' ||
-                        species.value === 'Steelhead / rainbow trout') && (
-                        <Button
-                          height='40px'
-                          fontSize='16'
-                          bg='secondary'
-                          color='#007C7C'
-                          py='1'
-                          px='20'
-                          shadow='3'
-                          borderRadius='5'
-                          maxWidth='40%'
-                          marginRight='10'
-                          onPress={() => setTagFishModalOpen(true)}
-                        >
-                          <Text color='primary'>Tag Fish</Text>
-                        </Button>
-                      )}
                       {species.value === 'Chinook salmon' && (
-                        <Button
-                          bg='secondary'
-                          color='#007C7C'
-                          py='1'
-                          px='12'
-                          shadow='3'
-                          borderRadius='5'
-                          maxWidth='40%'
-                          onPress={() => setAddGeneticModalOpen(true)}
-                        >
-                          <Text color='primary'>Take Genetic Sample</Text>
-                        </Button>
+                        <FormControl w='1/3'>
+                          <HStack space={4} alignItems='center'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                Adipose Clipped
+                              </Text>
+                            </FormControl.Label>
+                            <Radio.Group
+                              name='adiposeClipped'
+                              accessibilityLabel='adipose clipped'
+                              value={`${adiposeClipped.value}`}
+                              onChange={(value: any) => {
+                                if (value === 'true') {
+                                  setAdiposeClipped({
+                                    ...adiposeClipped,
+                                    value: true,
+                                  })
+                                } else {
+                                  setAdiposeClipped({
+                                    ...adiposeClipped,
+                                    value: false,
+                                  })
+                                }
+                              }}
+                            >
+                              <HStack space={4}>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='true'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  True
+                                </Radio>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='false'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  False
+                                </Radio>
+                              </HStack>
+                            </Radio.Group>
+                          </HStack>
+                        </FormControl>
                       )}
                     </HStack>
-                  )}
-                  {Array.isArray(appliedMarks?.value) &&
-                    appliedMarks.value.length > 0 && (
-                      <>
-                        <Text color='black' fontSize='xl'>
-                          Tags
-                        </Text>
-                        <TagBadgeList
-                          badgeListContent={appliedMarks.value}
-                          setAppliedMarks={setAppliedMarks}
-                          appliedMarks={appliedMarks}
-                        />
-                      </>
+                    <HStack space={4} w='80%'>
+                      {(species.value == 'Chinook salmon' ||
+                        species.value == 'Steelhead / rainbow trout') && (
+                        <FormControl w='full'>
+                          <VStack space={4}>
+                            <AddExistingMark
+                              dropdownValues={dropdownValues}
+                              activeTabId={tabSlice.activeTabId}
+                              recentExistingMarks={recentExistingMarks}
+                              handlePressRecentExistingMarkButton={
+                                handlePressRecentExistingMarkButton
+                              }
+                              visitSetupState={visitSetupState}
+                            />
+                            <MarkBadgeList
+                              badgeListContent={createdMarks}
+                              field='existingMarks'
+                              setExistingMarks={setExistingMarks}
+                            />
+                            {!fishConditionsDropdownOpen &&
+                              !speciesDropDownOpen && (
+                                <Pressable
+                                  onPress={() => setAddMarkModalOpen(true)}
+                                >
+                                  <HStack alignItems='center'>
+                                    <Icon
+                                      as={Ionicons}
+                                      name={'add-circle'}
+                                      size='3xl'
+                                      color='primary'
+                                      marginRight='1'
+                                    />
+                                    <Text color='primary' fontSize='lg'>
+                                      Add Another Mark
+                                    </Text>
+                                  </HStack>
+                                </Pressable>
+                              )}
+                          </VStack>
+                        </FormControl>
+                      )}
+                    </HStack>
+                    {species.value === 'other' && (
+                      <FormControl w='full'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Life Stage
+                          </Text>
+                        </FormControl.Label>
+                        <Radio.Group
+                          name='lifeStage'
+                          accessibilityLabel='lifeStage'
+                          value={
+                            lifeStage.value !== ''
+                              ? (lifeStage.value as string)
+                              : 'adult'
+                          }
+                          onChange={(value: any) => {
+                            if (value === 'adult') {
+                              setLifeStage({ ...lifeStage, value })
+                            } else {
+                              setLifeStage({ ...lifeStage, value: 'juvenile' })
+                            }
+                          }}
+                        >
+                          <Radio
+                            colorScheme='primary'
+                            value='adult'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Adult
+                          </Radio>
+                          <Radio
+                            colorScheme='primary'
+                            value='juvenile'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            Juvenile
+                          </Radio>
+                        </Radio.Group>
+                      </FormControl>
                     )}
-                  {Array.isArray(geneticSamples?.value) &&
-                    geneticSamples.value.length > 0 && (
-                      <>
-                        <Text color='black' fontSize='xl'>
-                          Genetic Samples
-                        </Text>
-                        <GeneticSampleBadgeList
-                          badgeListContent={geneticSamples.value}
-                          setGeneticSamples={setGeneticSamples}
-                          geneticSamples={geneticSamples}
-                        />
-                      </>
+                    {!fishConditionsDropdownOpen && !speciesDropDownOpen && (
+                      <HStack mb={'4'}>
+                        {(species.value === 'Chinook salmon' ||
+                          species.value === 'Steelhead / rainbow trout') && (
+                          <Button
+                            height='40px'
+                            fontSize='16'
+                            bg='secondary'
+                            color='#007C7C'
+                            py='1'
+                            px='20'
+                            shadow='3'
+                            borderRadius='5'
+                            maxWidth='40%'
+                            marginRight='10'
+                            onPress={() => setTagFishModalOpen(true)}
+                          >
+                            <Text color='primary'>Tag Fish</Text>
+                          </Button>
+                        )}
+                        {species.value === 'Chinook salmon' && (
+                          <Button
+                            bg='secondary'
+                            color='#007C7C'
+                            py='1'
+                            px='12'
+                            shadow='3'
+                            borderRadius='5'
+                            maxWidth='40%'
+                            onPress={() => setAddGeneticModalOpen(true)}
+                          >
+                            <Text color='primary'>Take Genetic Sample</Text>
+                          </Button>
+                        )}
+                      </HStack>
                     )}
-                  <FormControl>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Comments
-                      </Text>
-                    </FormControl.Label>
-                    <Input
-                      height='50px'
-                      fontSize='16'
-                      placeholder='Write a comment'
-                      keyboardType='default'
-                      onChangeText={value => {
-                        let payload: FormValueI = {
-                          ...comments,
-                          value,
-                          touched: true,
-                          error: '',
-                        }
-
-                        setComments(payload)
-                      }}
-                      value={comments.value as string}
-                    />
-                  </FormControl>
-                </VStack>
-              </>
-            )}
-          </VStack>
-        </Pressable>
-      </ScrollView>
-      <Box bg='themeGrey' pb='12' py='6' px='3'>
-        <HStack justifyContent='space-evenly'>
-          <Button
-            flex='1'
-            py='5'
-            mx='2'
-            bg='themeOrange'
-            shadow='5'
-            isDisabled={route.params?.editModeData ? false : formHasError}
-            onPress={() => {
-              if (route.params?.editModeData) {
-                navigation.goBack()
-                showSlideAlert(dispatch, 'Fish Input Saved')
-              } else {
-                const activeTabId = tabSlice.activeTabId
-                if (activeTabId) {
-                  let payload = returnFormValues()
-                  saveIndividualFish({
-                    tabId: activeTabId,
-                    formValues: payload,
-                    UID: fishUID,
-                  })
-                  navigation.goBack()
-                  showSlideAlert(dispatch, 'Fish Input Saved')
-                }
-              }
-            }}
-          >
-            <Text fontWeight='bold' color='white' fontSize='xl'>
-              {route.params?.editModeData ? 'Cancel' : 'Save and Exit'}
-            </Text>
-          </Button>
-          {route.params?.editModeData ? (
+                    {Array.isArray(appliedMarks?.value) &&
+                      appliedMarks.value.length > 0 && (
+                        <>
+                          <Text color='black' fontSize='xl'>
+                            Tags
+                          </Text>
+                          <TagBadgeList
+                            badgeListContent={appliedMarks.value}
+                            setAppliedMarks={setAppliedMarks}
+                            appliedMarks={appliedMarks}
+                          />
+                        </>
+                      )}
+                    {Array.isArray(geneticSamples?.value) &&
+                      geneticSamples.value.length > 0 && (
+                        <>
+                          <Text color='black' fontSize='xl'>
+                            Genetic Samples
+                          </Text>
+                          <GeneticSampleBadgeList
+                            badgeListContent={geneticSamples.value}
+                            setGeneticSamples={setGeneticSamples}
+                            geneticSamples={geneticSamples}
+                          />
+                        </>
+                      )}
+                    <FormControl>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Comments
+                        </Text>
+                      </FormControl.Label>
+                      <Input
+                        height='50px'
+                        fontSize='16'
+                        placeholder='Write a comment'
+                        keyboardType='default'
+                        onChangeText={value => {
+                          let payload: FormValueI = {
+                            ...comments,
+                            value,
+                            touched: true,
+                            error: '',
+                          }
+                          setComments(payload)
+                        }}
+                        value={comments.value as string}
+                      />
+                    </FormControl>
+                  </VStack>
+                </>
+              )}
+            </VStack>
+          </Pressable>
+        </ScrollView>
+        <Box bg='themeGrey' pb='12' py='6' px='3'>
+          <HStack justifyContent='space-evenly'>
             <Button
               flex='1'
-              bg='#b71c1c'
+              py='5'
+              mx='2'
+              bg='themeOrange'
+              shadow='5'
+              isDisabled={route.params?.editModeData ? false : formHasError}
               onPress={() => {
-                const activeTabId = tabSlice.activeTabId
-                if (activeTabId) {
-                  deleteFishEntry({
-                    tabId: activeTabId,
-                    id: route.params?.editModeData?.id,
-                  })
+                if (route.params?.editModeData) {
                   navigation.goBack()
+                  showSlideAlert(dispatch, 'Fish Input Saved')
+                } else {
+                  const activeTabId = tabSlice.activeTabId
+                  if (activeTabId) {
+                    let payload = returnFormValues()
+                    saveIndividualFish({
+                      tabId: activeTabId,
+                      formValues: payload,
+                      UID: fishUID,
+                    })
+                    navigation.goBack()
+                    showSlideAlert(dispatch, 'Fish Input Saved')
+                  }
                 }
               }}
             >
               <Text fontWeight='bold' color='white' fontSize='xl'>
-                Delete
+                {route.params?.editModeData ? 'Cancel' : 'Save and Exit'}
               </Text>
             </Button>
-          ) : (
-            <></>
-          )}
-          <Button
-            flex='1'
-            py='5'
-            mx='2'
-            bg='primary'
-            shadow='5'
-            isDisabled={route.params?.editModeData ? false : formHasError}
-            onPress={() => {
-              let payload = returnFormValues()
-              const activeTabId = tabSlice.activeTabId
-              if (route.params?.editModeData) {
-                if (activeTabId) {
-                  updateFishEntry({
-                    tabId: activeTabId,
-                    id: route.params?.editModeData?.id,
-                    ...payload,
-                    numFishCaught: count.value,
-                  })
-                  navigation.goBack()
-                  showSlideAlert(dispatch, 'Fish Input Updated')
-                }
-              } else {
+            {route.params?.editModeData ? (
+              <Button
+                flex='1'
+                bg='#b71c1c'
+                onPress={() => {
+                  const activeTabId = tabSlice.activeTabId
+                  if (activeTabId) {
+                    deleteFishEntry({
+                      tabId: activeTabId,
+                      id: route.params?.editModeData?.id,
+                    })
+                    navigation.goBack()
+                  }
+                }}
+              >
+                <Text fontWeight='bold' color='white' fontSize='xl'>
+                  Delete
+                </Text>
+              </Button>
+            ) : (
+              <></>
+            )}
+            <Button
+              flex='1'
+              py='5'
+              mx='2'
+              bg='primary'
+              shadow='5'
+              isDisabled={route.params?.editModeData ? false : formHasError}
+              onPress={() => {
+                let payload = returnFormValues()
                 const activeTabId = tabSlice.activeTabId
-                if (activeTabId) {
-                  saveIndividualFish({
-                    tabId: activeTabId,
-                    formValues: payload,
-                  })
-                  showSlideAlert(dispatch, 'Fish Input Saved')
-                  if (
-                    species.value &&
-                    typeof species.value === 'string' &&
-                    species.value.includes('Chinook')
-                  ) {
-                    resetFormState('chinook')
-                  } else if (
-                    species.value &&
-                    typeof species.value === 'string' &&
-                    species.value.includes('Steelhead')
-                  ) {
-                    resetFormState('steelhead')
-                  } else {
-                    resetFormState('other')
+                if (route.params?.editModeData) {
+                  if (activeTabId) {
+                    updateFishEntry({
+                      tabId: activeTabId,
+                      id: route.params?.editModeData?.id,
+                      ...payload,
+                      numFishCaught: count.value,
+                    })
+                    navigation.goBack()
+                    showSlideAlert(dispatch, 'Fish Input Updated')
+                  }
+                } else {
+                  const activeTabId = tabSlice.activeTabId
+                  if (activeTabId) {
+                    saveIndividualFish({
+                      tabId: activeTabId,
+                      formValues: payload,
+                    })
+                    showSlideAlert(dispatch, 'Fish Input Saved')
+                    if (
+                      species.value &&
+                      typeof species.value === 'string' &&
+                      species.value.includes('Chinook')
+                    ) {
+                      resetFormState('chinook')
+                    } else if (
+                      species.value &&
+                      typeof species.value === 'string' &&
+                      species.value.includes('Steelhead')
+                    ) {
+                      resetFormState('steelhead')
+                    } else {
+                      resetFormState('other')
+                    }
                   }
                 }
-              }
-            }}
-          >
-            <Text fontWeight='bold' color='white' fontSize='xl'>
-              {route.params?.editModeData
-                ? 'Update'
-                : 'Save and Add Another Fish'}
-            </Text>
-          </Button>
-        </HStack>
-      </Box>
-
-      {/* --------- Modals --------- */}
-      {tagFishModalOpen && (
-        <CustomModal
-          isOpen={tagFishModalOpen}
-          closeModal={() => setTagFishModalOpen(false)}
-          height='80%'
-        >
-          <TagFishModalContent
-            handleMarkFishFormSubmit={handleMarkFishFormSubmit}
+              }}
+            >
+              <Text fontWeight='bold' color='white' fontSize='xl'>
+                {route.params?.editModeData
+                  ? 'Update'
+                  : 'Save and Add Another Fish'}
+              </Text>
+            </Button>
+          </HStack>
+        </Box>
+        {/* --------- Modals --------- */}
+        {tagFishModalOpen && (
+          <CustomModal
+            isOpen={tagFishModalOpen}
             closeModal={() => setTagFishModalOpen(false)}
-          />
-        </CustomModal>
-      )}
-      {addGeneticModalOpen && (
-        <CustomModal
-          isOpen={addGeneticModalOpen}
-          closeModal={() => setAddGeneticModalOpen(false)}
-          height='3/4'
-        >
-          <AddGeneticsModalContent
-            handleGeneticSampleFormSubmit={handleGeneticSamplesFormSubmit}
+            height='80%'
+          >
+            <TagFishModalContent
+              handleMarkFishFormSubmit={handleMarkFishFormSubmit}
+              closeModal={() => setTagFishModalOpen(false)}
+            />
+          </CustomModal>
+        )}
+        {addGeneticModalOpen && (
+          <CustomModal
+            isOpen={addGeneticModalOpen}
             closeModal={() => setAddGeneticModalOpen(false)}
-          />
-        </CustomModal>
-      )}
-      {addMarkModalOpen && (
-        <CustomModal
-          isOpen={addMarkModalOpen}
-          closeModal={() => setAddMarkModalOpen(false)}
-          height='1/2'
-        >
-          <AddAnotherMarkModalContent
-            // handleAddAnotherMarkFormSubmit={handleAddAnotherMarkFormSubmit}
+            height='3/4'
+          >
+            <AddGeneticsModalContent
+              handleGeneticSampleFormSubmit={handleGeneticSamplesFormSubmit}
+              closeModal={() => setAddGeneticModalOpen(false)}
+            />
+          </CustomModal>
+        )}
+        {addMarkModalOpen && (
+          <CustomModal
+            isOpen={addMarkModalOpen}
             closeModal={() => setAddMarkModalOpen(false)}
-            screenName={'addIndividualFish'}
-            setExistingMarks={setExistingMarks}
-            existingMarks={existingMarks}
-            existingMarksArray={existingMarks.value}
-          />
-        </CustomModal>
-      )}
-    </>
+            height='1/2'
+          >
+            <AddAnotherMarkModalContent
+              // handleAddAnotherMarkFormSubmit={handleAddAnotherMarkFormSubmit}
+              closeModal={() => setAddMarkModalOpen(false)}
+              screenName={'addIndividualFish'}
+              setExistingMarks={setExistingMarks}
+              existingMarks={existingMarks}
+              existingMarksArray={existingMarks.value}
+            />
+          </CustomModal>
+        )}
+      </View>
+    </TouchableNativeFeedback>
   )
 }
 

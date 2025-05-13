@@ -21,7 +21,10 @@ import {
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
-import { reorderTaxon } from '../../../utils/utils'
+import {
+  handleSpeciesSearchTextChange,
+  reorderTaxon,
+} from '../../../utils/utils'
 import CustomModalHeader from '../../Shared/CustomModalHeader'
 import MarkBadgeList from '../../markRecapture/MarkBadgeList'
 import CustomModal from '../../Shared/CustomModal'
@@ -33,6 +36,7 @@ import FishConditionsDropDown from '../FishConditionsDropDown'
 import { startCase } from 'lodash'
 import { useNavigation } from '@react-navigation/native'
 import AddExistingMark from '../AddExistingMark'
+import { TouchableWithoutFeedback } from 'react-native'
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -152,7 +156,6 @@ const BatchCharacteristicsModalContent = ({
               showHeaderButton={false}
               closeModal={() => {
                 closeModal()
-
                 if (
                   !values.species &&
                   !batchCountStore.batchCharacteristics.species
@@ -170,36 +173,33 @@ const BatchCharacteristicsModalContent = ({
                 marking or sampling a fish.
               </Text>
               <VStack space={4}>
-                <FormControl pr='5' mb={speciesDropDownOpen ? 180 : 0}>
+                {/* //TODO: Add error logic for custom species dropdown */}
+                {/* //TODO: Replace with Custom Select component */}
+                <SpeciesDropDown
+                  open={speciesDropDownOpen}
+                  onOpen={onSpeciesOpen}
+                  setOpen={setSpeciesDropDownOpen}
+                  list={speciesList}
+                  setList={setSpeciesList}
+                  setFieldValue={setFieldValue}
+                  setFieldTouched={setFieldTouched}
+                  onClose={() => {
+                    setSpeciesList(reorderedTaxon)
+                  }}
+                  onChangeSearchText={searchValue =>
+                    handleSpeciesSearchTextChange({
+                      reorderedTaxon,
+                      searchValue,
+                      setSpeciesList,
+                    })
+                  }
+                />
+                <FormControl w='100%'>
                   <FormControl.Label>
                     <Text color='black' fontSize='md'>
-                      Species
+                      Fish Condition (optional)
                     </Text>
                   </FormControl.Label>
-
-                  {/* //TODO: Add error logic for custom species dropdown */}
-                  {/* //TODO: Replace with Custom Select component */}
-                  <SpeciesDropDown
-                    open={speciesDropDownOpen}
-                    onOpen={onSpeciesOpen}
-                    setOpen={setSpeciesDropDownOpen}
-                    list={speciesList}
-                    setList={setSpeciesList}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                  />
-                </FormControl>
-                <FormControl
-                  w='100%'
-                  pr='5'
-                  mb={fishConditionDropdownOpen ? 160 : 0}
-                >
-                  <FormControl.Label>
-                    <Text color='black' fontSize='md'>
-                      Fish Condition
-                    </Text>
-                  </FormControl.Label>
-
                   {/* //TODO: Add error logic for custom fish conditions dropdown */}
                   <FishConditionsDropDown
                     open={fishConditionDropdownOpen}
@@ -212,7 +212,6 @@ const BatchCharacteristicsModalContent = ({
                   />
                 </FormControl>
               </VStack>
-
               <VStack space={4} w={'20%'}>
                 <FormControl>
                   <FormControl.Label>
@@ -251,7 +250,6 @@ const BatchCharacteristicsModalContent = ({
                   </Radio.Group>
                 </FormControl>
               </VStack>
-
               <VStack space={4} w={'80%'}>
                 {batchCountStore.batchCharacteristics.existingMarks.length <
                   1 && (
@@ -312,7 +310,6 @@ const BatchCharacteristicsModalContent = ({
                 onPress={() => {
                   handleSubmit()
                   setFishConditionDropdownOpen(false)
-
                   closeModal()
                 }}
               >
@@ -322,7 +319,6 @@ const BatchCharacteristicsModalContent = ({
               </Button>
             </VStack>
             {/* --------- Modals --------- */}
-
             {addMarkModalOpen && (
               <CustomModal
                 isOpen={addMarkModalOpen}
