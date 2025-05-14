@@ -99,8 +99,11 @@ const TagFishModalContent = ({
                   errors={errors}
                   selectedValue={values.markType}
                   placeholder={'Select Mark Type'}
-                  onValueChange={handleChange('markType')}
-                  setFieldTouched={() => setFieldTouched('markType')}
+                  onValueChange={(itemValue: string) => {
+                    setFieldValue('markType', itemValue).then(() => {
+                      setFieldTouched('markType', true)
+                    })
+                  }}
                   selectOptions={sortedMarkTypeValues.map((item: any) => ({
                     label: item.definition,
                     value: item.definition,
@@ -124,8 +127,11 @@ const TagFishModalContent = ({
                   camelName='markPosition'
                   selectedValue={values.markPosition}
                   placeholder={'Select Mark Position'}
-                  onValueChange={handleChange('markPosition')}
-                  setFieldTouched={() => setFieldTouched('markPosition')}
+                  onValueChange={(itemValue: string) => {
+                    setFieldValue('markPosition', itemValue).then(() => {
+                      setFieldTouched('markPosition', true)
+                    })
+                  }}
                   selectOptions={
                     dropdownValues.bodyPart
                       ? dropdownValues.bodyPart.map((item: any) => ({
@@ -143,8 +149,11 @@ const TagFishModalContent = ({
                   camelName='markColor'
                   selectedValue={values.markColor}
                   placeholder={'Mark Color'}
-                  onValueChange={handleChange('markColor')}
-                  setFieldTouched={() => setFieldTouched('markColor')}
+                  onValueChange={(itemValue: string) => {
+                    setFieldValue('markColor', itemValue).then(() => {
+                      setFieldTouched('markColor', true)
+                    })
+                  }}
                   selectOptions={
                     dropdownValues.markColor
                       ? dropdownValues.markColor.map((item: any) => ({
@@ -162,8 +171,11 @@ const TagFishModalContent = ({
                   errors={errors}
                   selectedValue={values.crewMember}
                   placeholder={'Select Crew Member'}
-                  onValueChange={handleChange('crewMember')}
-                  setFieldTouched={() => setFieldTouched('crewMember')}
+                  onValueChange={(itemValue: string) => {
+                    setFieldValue('crewMember', itemValue).then(() => {
+                      setFieldTouched('crewMember', true)
+                    })
+                  }}
                   selectOptions={crewMembers.map((item: any) => ({
                     label: item,
                     value: item,

@@ -80,12 +80,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
   }
 
   return (
-    <Box
-      minH={100}
-      style={{
-        zIndex: 100000,
-      }}
-    >
+    <Box minH={100}>
       <FormControl>
         <FormControlLabel
           style={{
