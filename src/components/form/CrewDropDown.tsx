@@ -67,7 +67,7 @@ export default function CrewDropDown({
   }
 
   return (
-    <View style={{ zIndex: 10000 }}>
+    <View style={{ zIndex: 10000, marginBottom: 10 }}>
       <Text color={crewDropdownHasError ? 'red.700' : 'black'} fontSize='md'>
         {label}
       </Text>

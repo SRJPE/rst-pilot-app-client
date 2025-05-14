@@ -1,15 +1,14 @@
 import React, { useCallback, memo } from 'react'
 import {
   Box,
-  CheckIcon,
   FormControl,
   Icon,
   IconButton,
   Popover,
-  // Select,
+  Select as NBSelect,
   Text,
 } from 'native-base'
-import { capitalize } from 'lodash'
+import { capitalize, find } from 'lodash'
 import { StyleProp, ViewStyle } from 'react-native'
 import RenderErrorMessage from './RenderErrorMessage'
 import { FormikErrors, FormikTouched, FastField } from 'formik'
@@ -71,6 +70,18 @@ const FastSelect = ({
   dataType: any
   onValueChange: any
 }) => {
+  let selectInputValue = itemLabelModifier(field.value ?? '', placeholder)
+
+  if (selectOptions?.[0]?.code && field.value) {
+    const item = find(
+      selectOptions,
+      (item: any) => item?.code?.toUpperCase() === field?.value?.toUpperCase()
+    )
+
+    if (item) {
+      selectInputValue = `${item.code.toUpperCase()}`
+    }
+  }
   return (
     <Select
       style={[
@@ -101,7 +112,11 @@ const FastSelect = ({
           placeholder='Select option'
           className='flex-1'
           // selectedValue=
-          value={itemLabelModifier(field.value ?? '', placeholder)}
+          value={selectInputValue}
+          multiline={false}
+          style={{
+            overflow: 'hidden',
+          }}
         />
         <SelectIcon className='mr-3' as={ChevronDownIcon} />
       </SelectTrigger>
@@ -141,6 +156,26 @@ const FastSelect = ({
                       textStyle={itemStyle}
                     />
                   )
+                } else if (item.code) {
+                  return (
+                    <SelectItem
+                      key={item.id}
+                      label={`${item.code.toUpperCase()} ${
+                        item.description ? `- ${item.description}` : ''
+                      }`}
+                      value={item.code}
+                      textStyle={itemStyle}
+                    />
+                  )
+                } else {
+                  return (
+                    <SelectItem
+                      key={`item-${idx}`}
+                      label={item}
+                      value={item}
+                      textStyle={itemStyle}
+                    />
+                  )
                 }
               })
             ) : (
@@ -156,7 +191,7 @@ const FastSelect = ({
     </Select>
   )
   // return (
-  //   <Select
+  //   <NBSelect
   //     height={50}
   //     fontSize={16}
   //     selectedValue={field.value}
@@ -171,7 +206,7 @@ const FastSelect = ({
   //       selectOptions.map((item: any, idx: number) => {
   //         if (dataType === 'fundingAgency') {
   //           return (
-  //             <Select.Item
+  //             <NBSelect.Item
   //               key={item.id ?? idx}
   //               label={itemLabelModifier(item.definition, placeholder)}
   //               value={item.definition}
@@ -179,7 +214,7 @@ const FastSelect = ({
   //           )
   //         } else if (item.value) {
   //           return (
-  //             <Select.Item
+  //             <NBSelect.Item
   //               key={item.id ?? idx}
   //               label={itemLabelModifier(item.label, placeholder)}
   //               value={item.value}
@@ -187,7 +222,7 @@ const FastSelect = ({
   //           )
   //         } else if (item.definition) {
   //           return (
-  //             <Select.Item
+  //             <NBSelect.Item
   //               key={item.id}
   //               label={itemLabelModifier(item.definition, placeholder)}
   //               value={item.definition}
@@ -195,7 +230,7 @@ const FastSelect = ({
   //           )
   //         } else if (item.code) {
   //           return (
-  //             <Select.Item
+  //             <NBSelect.Item
   //               key={item.id}
   //               label={`${item.code.toUpperCase()} ${
   //                 item.description ? `- ${item.description}` : ''
@@ -204,18 +239,19 @@ const FastSelect = ({
   //             />
   //           )
   //         } else {
-  //           return <Select.Item key={`item-${idx}`} label={item} value={item} />
+  //           return (
+  //             <NBSelect.Item key={`item-${idx}`} label={item} value={item} />
+  //           )
   //         }
   //       })
   //     ) : (
-  //       <Select.Item
+  //       <NBSelect.Item
   //         key={'not received from api'}
   //         label={'No options found... connect to wifi!'}
   //         value={'No options found... connect to wifi!'}
   //       />
   //     )}
-  //   </Select>
-
+  //   </NBSelect>
   // )
 }
 
