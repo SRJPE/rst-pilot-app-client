@@ -65,7 +65,7 @@ export default function CrewDropDown({
   }
 
   return (
-    <View style={{ zIndex: 999 }}>
+    <View style={{ zIndex: 10000 }}>
       <Text color={crewDropdownHasError ? 'red.700' : 'black'} fontSize='md'>
         Crew
       </Text>
@@ -74,7 +74,7 @@ export default function CrewDropDown({
           setFieldTouched('crew', true)
         }}
         zIndex={3000}
-        zIndexInverse={1000}
+        zIndexInverse={3000}
         open={open}
         onOpen={onOpen}
         value={value}
