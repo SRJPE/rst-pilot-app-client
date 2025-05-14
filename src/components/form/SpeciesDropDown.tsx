@@ -150,7 +150,7 @@ export default function SpeciesDropDown({
         items={list}
         setOpen={setOpen}
         onClose={() => {
-          console.log('touched should be true')
+          onClose && onClose()
           setFieldTouched('species', true)
         }}
         onChangeValue={handleOnChange}

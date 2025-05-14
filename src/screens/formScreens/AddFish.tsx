@@ -842,16 +842,7 @@ const AddFishContent = ({
                               setLifeStage(payload)
                             }}
                             selectOptions={alphabeticalLifeStage
-                              .filter((item: any) => {
-                                if (
-                                  item?.definition?.includes('juvenile') ||
-                                  item?.definition?.includes('adult')
-                                ) {
-                                  return item
-                                } else if (species.value == 'Chinook salmon') {
-                                  return item
-                                }
-                              })
+                              .filter((item: any) => item)
                               .map((item: any) => ({
                                 label: item?.definition,
                                 value: item?.definition,
