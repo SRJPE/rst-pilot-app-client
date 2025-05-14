@@ -177,7 +177,7 @@ const FishProcessing = ({
           : reduxState['placeholderId'].values
       }
       //hacky workaround to set the screen to touched (select cannot easily be passed handleBlur)
-      initialTouched={{ fishProcessedResult: true }}
+      // initialTouched={{ fishProcessedResult: true }}
       initialErrors={
         activeTabId && reduxState[activeTabId]
           ? reduxState[activeTabId].errors
@@ -279,12 +279,14 @@ const FishProcessing = ({
                   selectedValue={values.fishProcessedResult}
                   placeholder='Select Result'
                   onValueChange={(newValue: string) => {
-                    setFieldTouched('fishProcessedResult')
-                    setFieldValue('fishProcessedResult', newValue)
+                    setFieldValue('fishProcessedResult', newValue).then(() => {
+                      setFieldTouched('fishProcessedResult', true)
+                    })
 
                     if (noCatchData) {
-                      setFieldValue('reasonForNotProcessing', '')
-                      setFieldTouched('reasonForNotProcessing', false)
+                      setFieldValue('reasonForNotProcessing', '').then(() => {
+                        setFieldTouched('reasonForNotProcessing', false)
+                      })
                       setFieldError('reasonForNotProcessing', undefined)
                     }
                   }}
@@ -300,10 +302,13 @@ const FishProcessing = ({
                     touched={touched}
                     selectedValue={values.reasonForNotProcessing}
                     placeholder='Select Reason'
-                    onValueChange={handleChange('reasonForNotProcessing')}
-                    setFieldTouched={() =>
-                      setFieldTouched('reasonForNotProcessing')
-                    }
+                    onValueChange={(newValue: string) => {
+                      setFieldValue('reasonForNotProcessing', newValue).then(
+                        () => {
+                          setFieldTouched('reasonForNotProcessing', true)
+                        }
+                      )
+                    }}
                     selectOptions={whyFishNotProcessedDropdowns}
                   />
                 )}

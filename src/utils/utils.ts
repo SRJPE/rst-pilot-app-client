@@ -354,7 +354,6 @@ export const navigateFlowRightButton = ({
 
       if (values?.fishProcessedResult === 'no fish caught') {
         return 'Trap Post-Processing'
-        // return 'No Fish Caught'
       } else if (
         values?.fishProcessedResult ===
           'no catch data, fish left in live box' ||
@@ -647,4 +646,17 @@ export const groupBySpeciesForkLength = (data: Array<any>) => {
   sortedResult['totalCount'] = totalCount
 
   return sortedResult
+}
+
+export const calculateRpmAvg = (rpms: (string | null)[]) => {
+  const validRpms = rpms.filter(n => n)
+  if (!validRpms.length) {
+    return null
+  }
+  const numericRpms = validRpms.map((str: any) => parseFloat(str))
+  let counter = 0
+  numericRpms.forEach((num: number) => {
+    counter += num
+  })
+  return counter / numericRpms.length
 }

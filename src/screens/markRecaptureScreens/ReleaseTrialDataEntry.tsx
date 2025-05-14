@@ -35,7 +35,7 @@ import {
 } from '../../redux/reducers/postSlices/markRecapturePostBundler'
 import { flatten, uniq, findIndex, find } from 'lodash'
 import { ReleaseMarkI } from '../../redux/reducers/addAnotherMarkSlice'
-import { returnDefinitionArray } from '../../utils/utils'
+import { returnDefinitionArray, returnNullableTableId } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -132,8 +132,6 @@ const ReleaseDataEntry = ({
     const currentDate = selectedDate
     setMarkedTime(currentDate)
   }
-
-  const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
 
   const runValues = returnDefinitionArray(dropdownValues.run)
   const markTypeValues = returnDefinitionArray(dropdownValues.markType)
