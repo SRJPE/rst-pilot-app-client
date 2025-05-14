@@ -24,7 +24,11 @@ import { flatten, uniq } from 'lodash'
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
-import { returnDefinitionArray } from '../../../utils/utils'
+import {
+  returnDefinitionArray,
+  calculateRpmAvg,
+  returnNullableTableId,
+} from '../../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -131,7 +135,6 @@ const NoFishCaught = ({
     return container
   }
 
-  const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
   const findCrewIdsFromSelectedCrewNames = (
     selectedCrewNames: Array<string>
   ) => {
@@ -173,21 +176,12 @@ const NoFishCaught = ({
     const trapStatusAtEndValues = returnDefinitionArray(
       dropdownsState.values.trapStatusAtEnd
     )
-    const calculateRpmAvg = (rpms: (string | null)[]) => {
-      const validRpms = rpms.filter(n => n)
-      if (!validRpms.length) {
-        return null
-      }
-      const numericRpms = validRpms.map((str: any) => parseFloat(str))
-      let counter = 0
-      numericRpms.forEach((num: number) => {
-        counter += num
-      })
-      return counter / numericRpms.length
-    }
 
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
+      const waterTurbidityIsPresent =
+        trapOperationsState[id].values.waterTurbidity !== '' &&
+        trapOperationsState[id].values.waterTurbidity !== null
       const {
         rpm1: startRpm1,
         rpm2: startRpm2,
@@ -259,10 +253,16 @@ const NoFishCaught = ({
           },
           {
             measureName: 'water turbidity',
-            measureValueNumeric:
-              trapOperationsState[id].values.waterTurbidity || null,
-            measureValueText:
-              trapOperationsState[id].values?.waterTurbidity?.toString() || '',
+            measureValueNumeric: waterTurbidityIsPresent
+              ? trapOperationsState[id].values.waterTurbidity
+              : trapOperationsState[id]?.values?.recordTurbidityInPostProcessing
+              ? null
+              : undefined,
+            measureValueText: waterTurbidityIsPresent
+              ? trapOperationsState[id].values.waterTurbidity?.toString()
+              : trapOperationsState[id]?.values?.recordTurbidityInPostProcessing
+              ? ''
+              : 'undefined',
             measureUnit: 25,
           },
         ],

@@ -17,7 +17,7 @@ export interface TrapOperationsValuesI {
   flowMeasureUnit: string
   waterTemperature: number | null
   waterTemperatureUnit: string
-  waterTurbidity: number | null
+  waterTurbidity: number | null | ''
   waterTurbidityUnit: string
   recordTurbidityInPostProcessing: boolean
   coneSetting: string | null
@@ -38,7 +38,7 @@ const initialState: InitialStateI = {
       flowMeasureUnit: 'cfs',
       waterTemperature: null,
       waterTemperatureUnit: '°C',
-      waterTurbidity: null,
+      waterTurbidity: '',
       waterTurbidityUnit: 'ntu',
       recordTurbidityInPostProcessing: false,
       coneSetting: 'full',

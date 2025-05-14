@@ -37,11 +37,24 @@ export const trapOperationsSchema = yup.object().shape({
 
   flowMeasureUnit: yup.string(),
   waterTemperatureUnit: yup.string(),
-  waterTurbidity: yup
-    .number()
-    .nullable()
-    // .required('Water Turbidity Required')
-    .typeError('Value must be a number'),
+  waterTurbidity: yup.lazy(value =>
+    value === ''
+      ? yup.string().min(0)
+      : yup
+          .number()
+          .nullable()
+          .typeError('Value must be a number')
+          .positive('Value should be positive')
+  ),
+  // waterTurbidity: yup
+  //   .number()
+  //   .nullable()
+  //   .typeError('Value must be a number'),
+  // waterTurbidity: yup
+  //   .mixed()
+  //   .test('is-empty-or-number', 'Value must be a number', value => {
+  //     return value === '' || value === null || !isNaN(value)
+  //   }),
   waterTurbidityUnit: yup.string(),
   rpm1: yup
     .number()
@@ -72,15 +85,15 @@ export const trapPostProcessingSchema = yup.object().shape({
     .required('Debris volume required'),
   totalRevolutions: yup.number().nullable().typeError('Value must be a number'),
   // .required('Total revolutions required'),
-  isWaterTurbidityPresent: yup.boolean(),
-  waterTurbidity: yup.number().when('isWaterTurbidityPresent', {
-    is: true,
-    then: yup
-      .number()
-      .typeError('Value must be a number')
-      .required('Water Turbidity Required'),
-    otherwise: yup.number().nullable(),
-  }),
+  // waterTurbidity: yup
+  //   .number()
+  //   .typeError('Value must be a number')
+  //   .required('Water Turbidity Required'),
+  waterTurbidity: yup
+    .mixed()
+    .test('is-empty-or-number', 'Value must be a number', value => {
+      return value === '' || value === null || !isNaN(value)
+    }),
   comments: yup.string(),
   rpm1: yup
     .number()

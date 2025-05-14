@@ -114,3 +114,67 @@ export interface Taxon {
   label: string
   value: string
 }
+
+export type TrapVisitResponse = {
+  createdTrapVisitResponse: {
+    id: number
+    programId: number
+    visitTypeId: number | null
+    trapLocationId: number
+    isPaperEntry: boolean
+    trapVisitTimeStart: string // ISO date string
+    trapVisitTimeEnd: string // ISO date string
+    fishProcessed: number | null
+    whyFishNotProcessed: number | null
+    sampleGearId: number | null
+    coneDepth: number | null
+    trapInThalweg: boolean | null
+    trapFunctioning: number | null
+    whyTrapNotFunctioning: number | null
+    trapStatusAtEnd: number | null
+    totalRevolutions: number | null
+    rpmAtStart: string | null
+    rpmAtEnd: string | null
+    inHalfConeConfiguration: boolean
+    debrisVolumeGal: string | null
+    createdAt: string // ISO date string
+    updatedAt: string // ISO date string
+    qcCompleted: boolean | null
+    qcCompletedAt: string | null // ISO date string
+    comments: string | null
+    trapVisitUid: string
+    createdBy: number
+    qcCompletedBy: number | null
+    vegetationCode: string | null
+    conditionCode: string | null
+    gearStatus: string | null
+    ysiNum: string | null
+    revCounter: string | null
+    tideCode: string | null
+    flowDirection: string | null
+    weatherCode: string | null
+    samplingAltered: boolean | null
+    length: number | null
+    width: number | null
+    depth: number | null
+    substrate: string | null
+  }
+  createdTrapVisitCrewResponse: number[] // Array of crew member IDs
+  createdTrapCoordinatesResponse: {
+    id: number
+    trapVisitId: number
+    trapLocationsId: number
+    xCoord: number | null
+    yCoord: number | null
+    datum: string | null
+    projection: string | null
+  }
+  createdTrapVisitEnvironmentalResponse: {
+    id: number
+    trapVisitId: number
+    measureName: string
+    measureValueNumeric: string | null
+    measureValueText: string | null
+    measureUnit: number
+  }[]
+}
