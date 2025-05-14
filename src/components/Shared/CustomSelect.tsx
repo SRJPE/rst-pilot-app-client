@@ -24,6 +24,7 @@ import { StyleProp, ViewStyle } from 'react-native'
 import RenderErrorMessage from './RenderErrorMessage'
 import { FormikErrors, FormikTouched } from 'formik'
 import { MaterialIcons } from '@expo/vector-icons'
+import { color } from 'native-base/lib/typescript/theme/styled-system'
 
 interface CustomSelectI {
   selectedValue: string
@@ -40,6 +41,8 @@ interface CustomSelectI {
   touched?: FormikTouched<any>
   tooltip?: React.ReactNode
 }
+
+const itemStyle = { style: { fontSize: 16, height: 24, color: 'black' } }
 
 const CustomSelect: React.FC<CustomSelectI> = ({
   selectOptions,
@@ -180,7 +183,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                           key={item.id ?? idx}
                           label={itemLabelModifier(item.definition)}
                           value={item.definition}
-                          textStyle={{ style: { fontSize: 16, height: 24 } }}
+                          textStyle={itemStyle}
                         />
                       )
                     } else if (item.value) {
@@ -189,7 +192,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                           key={item.id ?? idx}
                           label={itemLabelModifier(item.label)}
                           value={item.value}
-                          textStyle={{ style: { fontSize: 16, height: 24 } }}
+                          textStyle={itemStyle}
                         />
                       )
                     } else if (item.definition) {
@@ -198,7 +201,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                           key={item.id}
                           label={itemLabelModifier(item.definition)}
                           value={item.definition}
-                          textStyle={{ style: { fontSize: 16, height: 24 } }}
+                          textStyle={itemStyle}
                         />
                       )
                     }
