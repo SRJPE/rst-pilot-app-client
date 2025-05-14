@@ -556,6 +556,8 @@ const AddFishContent = ({
     }
   }, [existingMarks])
 
+  console.log('lifeStage.value', lifeStage)
+
   return (
     <>
       <ScrollView
@@ -880,16 +882,19 @@ const AddFishContent = ({
                               ...lifeStage,
                               value,
                               error: '',
+                              touched: true,
                             }
+                            console.log('payload', payload)
                             setLifeStage(payload)
                           }}
-                          setFieldTouched={() => {
-                            let payload = { ...lifeStage, touched: true }
-                            if (!lifeStage.value)
-                              payload.error =
-                                addFishErrorMessages.lifeStage.emptyError
-                            setLifeStage(payload)
-                          }}
+                          // setFieldTouched={() => {
+                          //   let payload = { ...lifeStage, touched: true }
+                          //   if (!lifeStage.value)
+                          //     payload.error =
+                          //       addFishErrorMessages.lifeStage.emptyError
+                          //   console.log('payload touched', payload)
+                          //   setLifeStage(payload)
+                          // }}
                           selectOptions={alphabeticalLifeStage
                             .filter((item: any) => {
                               return item
@@ -921,11 +926,11 @@ const AddFishContent = ({
                           selectedValue={run.value as string}
                           placeholder={'Run'}
                           onValueChange={(value: string) =>
-                            setRun({ ...run, value })
+                            setRun({ ...run, value, touched: true })
                           }
-                          setFieldTouched={() =>
-                            setRun({ ...run, touched: true })
-                          }
+                          // setFieldTouched={() =>
+                          //   setRun({ ...run, touched: true })
+                          // }
                           selectOptions={dropdownValues?.run}
                         />
                       </Box>

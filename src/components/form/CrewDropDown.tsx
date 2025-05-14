@@ -95,6 +95,7 @@ export default function CrewDropDown({
           borderRadius: 4,
           height: 50,
           backgroundColor: '#fff',
+          zIndex: 9999,
         }}
         arrowIconStyle={{
           width: 30,
@@ -105,9 +106,15 @@ export default function CrewDropDown({
           borderColor: '#d4d4d4d4',
           borderBottomLeftRadius: 4,
           borderBottomRightRadius: 4,
+          zIndex: 9999,
         }}
         textStyle={{
           fontSize: 16,
+        }}
+        containerProps={{
+          style: {
+            backgroundColor: '#fff',
+          },
         }}
         // renderListItem={props => <CrewListItem {...props} />}
       />
