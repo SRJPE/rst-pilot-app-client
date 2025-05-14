@@ -6,7 +6,7 @@ import {
   Icon,
   IconButton,
   Popover,
-  Select,
+  // Select,
   Text,
 } from 'native-base'
 import { capitalize } from 'lodash'
@@ -15,6 +15,20 @@ import RenderErrorMessage from './RenderErrorMessage'
 import { FormikErrors, FormikTouched, FastField } from 'formik'
 import { MaterialIcons } from '@expo/vector-icons'
 import { renderRequiredOrOptionalLabel } from '../../utils/utils'
+import {
+  Select,
+  SelectTrigger,
+  SelectInput,
+  SelectIcon,
+  SelectPortal,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicator,
+  SelectDragIndicatorWrapper,
+  SelectItem,
+  SelectScrollView,
+} from '@/components/ui/select'
+import { ChevronDownIcon } from '@/components/ui/icon'
 
 interface CustomSelectI {
   selectedValue: string
@@ -32,6 +46,7 @@ interface CustomSelectI {
   tooltip?: React.ReactNode
   validationSchema?: any
 }
+const itemStyle = { style: { fontSize: 16, height: 24, color: 'black' } }
 
 const itemLabelModifier = (label: string, placeholder: string) => {
   if (placeholder === 'Species') {
@@ -58,65 +73,150 @@ const FastSelect = ({
 }) => {
   return (
     <Select
-      height={50}
-      fontSize={16}
+      style={[
+        {
+          borderColor: '#d4d4d4d4',
+          borderWidth: 1,
+          minWidth: 100,
+          marginTop: 1,
+          borderRadius: 4,
+          height: 50,
+        },
+      ]}
       selectedValue={field.value}
+      accessibilityLabel={placeholder}
+      placeholder={placeholder}
       onValueChange={onValueChange}
-      placeholder='Choose an option'
-      _selectedItem={{
-        bg: 'teal.600',
-        endIcon: <CheckIcon size='5' />,
-      }}
     >
-      {selectOptions ? (
-        selectOptions.map((item: any, idx: number) => {
-          if (dataType === 'fundingAgency') {
-            return (
-              <Select.Item
-                key={item.id ?? idx}
-                label={itemLabelModifier(item.definition, placeholder)}
-                value={item.definition}
-              />
-            )
-          } else if (item.value) {
-            return (
-              <Select.Item
-                key={item.id ?? idx}
-                label={itemLabelModifier(item.label, placeholder)}
-                value={item.value}
-              />
-            )
-          } else if (item.definition) {
-            return (
-              <Select.Item
-                key={item.id}
-                label={itemLabelModifier(item.definition, placeholder)}
-                value={item.definition}
-              />
-            )
-          } else if (item.code) {
-            return (
-              <Select.Item
-                key={item.id}
-                label={`${item.code.toUpperCase()} ${
-                  item.description ? `- ${item.description}` : ''
-                }`}
-                value={item.code}
-              />
-            )
-          } else {
-            return <Select.Item key={`item-${idx}`} label={item} value={item} />
-          }
-        })
-      ) : (
-        <Select.Item
-          key={'not received from api'}
-          label={'No options found... connect to wifi!'}
-          value={'No options found... connect to wifi!'}
+      <SelectTrigger
+        variant='outline'
+        size='lg'
+        style={[
+          {
+            height: '100%',
+          },
+        ]}
+      >
+        <SelectInput
+          placeholder='Select option'
+          className='flex-1'
+          // selectedValue=
+          value={itemLabelModifier(field.value ?? '', placeholder)}
         />
-      )}
+        <SelectIcon className='mr-3' as={ChevronDownIcon} />
+      </SelectTrigger>
+      <SelectPortal>
+        <SelectBackdrop />
+        <SelectContent style={{ maxHeight: 400, overflow: 'scroll' }}>
+          <SelectDragIndicatorWrapper>
+            <SelectDragIndicator />
+          </SelectDragIndicatorWrapper>
+          <SelectScrollView>
+            {selectOptions ? (
+              selectOptions.map((item: any, idx: number) => {
+                if (dataType === 'fundingAgency') {
+                  return (
+                    <SelectItem
+                      key={item.id ?? idx}
+                      label={itemLabelModifier(item.definition, placeholder)}
+                      value={item.definition}
+                      textStyle={itemStyle}
+                    />
+                  )
+                } else if (item.value) {
+                  return (
+                    <SelectItem
+                      key={item.id ?? idx}
+                      label={itemLabelModifier(item.label, placeholder)}
+                      value={item.value}
+                      textStyle={itemStyle}
+                    />
+                  )
+                } else if (item.definition) {
+                  return (
+                    <SelectItem
+                      key={item.id}
+                      label={itemLabelModifier(item.definition, placeholder)}
+                      value={item.definition}
+                      textStyle={itemStyle}
+                    />
+                  )
+                }
+              })
+            ) : (
+              <SelectItem
+                key={'not received from api'}
+                label={'No options found... connect to wifi!'}
+                value={'No options found... connect to wifi!'}
+              />
+            )}
+          </SelectScrollView>
+        </SelectContent>
+      </SelectPortal>
     </Select>
   )
+  // return (
+  //   <Select
+  //     height={50}
+  //     fontSize={16}
+  //     selectedValue={field.value}
+  //     onValueChange={onValueChange}
+  //     placeholder='Choose an option'
+  //     _selectedItem={{
+  //       bg: 'teal.600',
+  //       endIcon: <CheckIcon size='5' />,
+  //     }}
+  //   >
+  //     {selectOptions ? (
+  //       selectOptions.map((item: any, idx: number) => {
+  //         if (dataType === 'fundingAgency') {
+  //           return (
+  //             <Select.Item
+  //               key={item.id ?? idx}
+  //               label={itemLabelModifier(item.definition, placeholder)}
+  //               value={item.definition}
+  //             />
+  //           )
+  //         } else if (item.value) {
+  //           return (
+  //             <Select.Item
+  //               key={item.id ?? idx}
+  //               label={itemLabelModifier(item.label, placeholder)}
+  //               value={item.value}
+  //             />
+  //           )
+  //         } else if (item.definition) {
+  //           return (
+  //             <Select.Item
+  //               key={item.id}
+  //               label={itemLabelModifier(item.definition, placeholder)}
+  //               value={item.definition}
+  //             />
+  //           )
+  //         } else if (item.code) {
+  //           return (
+  //             <Select.Item
+  //               key={item.id}
+  //               label={`${item.code.toUpperCase()} ${
+  //                 item.description ? `- ${item.description}` : ''
+  //               }`}
+  //               value={item.code}
+  //             />
+  //           )
+  //         } else {
+  //           return <Select.Item key={`item-${idx}`} label={item} value={item} />
+  //         }
+  //       })
+  //     ) : (
+  //       <Select.Item
+  //         key={'not received from api'}
+  //         label={'No options found... connect to wifi!'}
+  //         value={'No options found... connect to wifi!'}
+  //       />
+  //     )}
+  //   </Select>
+
+  // )
 }
 
 const CustomFastSelect: React.FC<CustomSelectI> = ({

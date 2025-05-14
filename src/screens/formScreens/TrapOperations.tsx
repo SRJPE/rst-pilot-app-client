@@ -663,8 +663,6 @@ const TrapOperations = ({
           setTurbidityToggle(newValue)
         }
 
-        console.log('values.trapStatus', values.trapStatus)
-
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
@@ -743,10 +741,14 @@ const TrapOperations = ({
                       label='Trap Status'
                       placeholder='Select Trap Status'
                       camelName='trapStatus'
-                      onValueChange={handleChange('trapStatus')}
+                      onValueChange={(itemValue: string) => {
+                        setFieldValue('trapStatus', itemValue).then(() => {
+                          setFieldTouched('trapStatus', true)
+                        })
+                      }}
                       touched={touched}
                       errors={errors}
-                      setFieldTouched={() => setFieldTouched('trapStatus')}
+                      // setFieldTouched={() => setFieldTouched('trapStatus')}
                       selectOptions={dropdownValues.trapFunctionality.map(
                         (item: any) => {
                           if (item.definition == 'trap not in service') {

@@ -67,7 +67,7 @@ export default function CrewDropDown({
   }
 
   return (
-    <View>
+    <View style={{ zIndex: 10000 }}>
       <Text color={crewDropdownHasError ? 'red.700' : 'black'} fontSize='md'>
         {label}
       </Text>
@@ -75,6 +75,8 @@ export default function CrewDropDown({
         onClose={() => {
           setFieldTouched(fieldName, true)
         }}
+        zIndex={3000}
+        zIndexInverse={3000}
         open={open}
         onOpen={onOpen}
         value={value}
@@ -103,13 +105,18 @@ export default function CrewDropDown({
           height: 30,
         }}
         dropDownContainerStyle={{
-          backgroundColor: '#fff',
+          backgroundColor: 'white',
           borderColor: '#d4d4d4d4',
           borderBottomLeftRadius: 4,
           borderBottomRightRadius: 4,
         }}
         textStyle={{
           fontSize: 16,
+        }}
+        containerProps={{
+          style: {
+            backgroundColor: '#fff',
+          },
         }}
         // renderListItem={props => <CrewListItem {...props} />}
       />

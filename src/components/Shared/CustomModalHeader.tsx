@@ -11,7 +11,6 @@ import {
   Text,
   View,
 } from 'native-base'
-import React from 'react'
 import { Keyboard, StyleProp, StyleSheet, TextStyle } from 'react-native'
 
 const CustomModalHeader = ({
@@ -33,7 +32,10 @@ const CustomModalHeader = ({
 }) => {
   const navigation = useNavigation() as any
   const formikContext = useFormikContext()
-  const resetForm = formikContext?.resetForm
+  let resetForm = null as any
+  if (formikContext) {
+    resetForm = formikContext.resetForm
+  }
 
   if (showHeaderButton) {
     return (

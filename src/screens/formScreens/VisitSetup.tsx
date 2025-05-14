@@ -336,6 +336,7 @@ const VisitSetup = ({
   }
 
   const updateSelectedProgram = (streamName: string) => {
+    console.log('updateSelectedProgram', streamName)
     dispatch(resetTabsSlice())
     dispatch(resetVisitSetupSlice())
     let programId = null
@@ -543,6 +544,8 @@ const VisitSetup = ({
           }
         }, [tabSlice.previouslyActiveTabId])
 
+        console.log('errors', errors)
+
         return (
           <TouchableWithoutFeedback
             onPress={() => {
@@ -589,20 +592,28 @@ const VisitSetup = ({
                     selectedValue={values.stream}
                     placeholder='Select Stream'
                     onValueChange={(itemValue: string) => {
-                      setFieldValue('stream', itemValue)
-                      setFieldTouched('stream', true)
+                      setFieldValue('stream', itemValue).then(() => {
+                        setFieldTouched('stream', true)
+                      })
+                      // setFieldValue('stream', itemValue)
+                      // setFieldTouched('stream', true)
                       setFieldError('stream', undefined)
 
                       if (itemValue !== values.stream) {
-                        setFieldValue('trapSite', [])
-                        setFieldTouched('trapSite', false)
-                        setFieldValue('trapName', [])
-                        setFieldTouched('trapName', false)
+                        setFieldValue('trapSite', []).then(() => {
+                          setFieldTouched('trapSite', false)
+                        })
+                        setFieldValue('trapName', []).then(() => {
+                          setFieldTouched('trapName', false)
+                        })
                       }
 
                       updateSelectedProgram(itemValue)
-                      setFieldValue('crew', [])
-                      setFieldTouched('crew', false)
+                      setFieldValue('crew', []).then(() => {
+                        setFieldTouched('crew', false)
+                      })
+                      // setFieldValue('crew', [])
+                      // setFieldTouched('crew', false)
                     }}
                     setFieldTouched={() => setFieldTouched('stream')}
                     selectOptions={visitSetupDefaultsState?.programs?.map(
@@ -625,19 +636,24 @@ const VisitSetup = ({
                         selectedValue={values.trapSite}
                         placeholder='Select Trap Site'
                         onValueChange={(itemValue: string) => {
+                          console.log('itemValue', itemValue)
                           dispatch(resetTabsSlice())
                           const showTrapName =
                             shouldShowTrapNameField(itemValue)
-                          setFieldValue('trapSite', itemValue)
+                          setFieldValue('trapSite', itemValue).then(() => {
+                            setFieldTouched('trapSite', true)
+                          })
 
                           if (showTrapName) {
-                            setFieldValue('trapName', [])
-                            setFieldTouched('trapName', true)
+                            setFieldValue('trapName', []).then(() => {
+                              setFieldTouched('trapName', true)
+                            })
                           } else {
-                            setFieldValue('trapName', [itemValue])
+                            setFieldValue('trapName', [itemValue]).then(() => {
+                              setFieldTouched('trapName', true)
+                            })
                           }
                         }}
-                        setFieldTouched={() => setFieldTouched('trapSite')}
                         selectOptions={uniqBy(
                           sortBy(
                             visitSetupDefaultsState?.trapLocations

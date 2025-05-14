@@ -10,15 +10,22 @@ import {
   Icon,
   IconButton,
   Pressable,
-  Radio,
+  // Radio,
   ScrollView,
-  Stack,
   Switch,
   Text,
   View,
   VStack,
 } from 'native-base'
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
+import {
+  Radio,
+  RadioGroup,
+  RadioIndicator,
+  RadioLabel,
+  RadioIcon,
+} from '@/components/ui/radio'
+import { CircleIcon } from '@/components/ui/icon'
 import { Keyboard } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
 import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
@@ -40,7 +47,6 @@ import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { find } from 'lodash'
-import { visitSetupDefaultsSlice } from '../../redux/reducers/visitSetupDefaults'
 
 const BatchCount = ({
   tabSlice,
@@ -179,7 +185,10 @@ const BatchCount = ({
     setDeadIsLocked(!deadIsLocked)
   }
 
-  return (
+  const navState = navigation?.getState()
+  const currentRoute = navState?.routes[navState?.index]
+
+  return currentRoute?.name === 'Batch Count' ? (
     <>
       <ScrollView
         scrollEnabled
@@ -348,68 +357,95 @@ const BatchCount = ({
                       Life Stage:
                     </Text>
                     <HStack space={4} alignItems='center'>
-                      <Radio.Group
-                        name='lifeStageRadioGroup'
+                      <RadioGroup
+                        // name='lifeStageRadioGroup'
                         value={lifeStageRadioValue}
                         onChange={nextValue => {
                           setLifeStageRadioValue(nextValue)
                         }}
                       >
-                        <Stack
-                          direction={{
-                            base: 'column',
-                            md: 'row',
-                          }}
-                          alignItems={{
-                            base: 'flex-start',
-                            md: 'center',
-                          }}
+                        <HStack
+                          // direction={{
+                          //   base: 'column',
+                          //   md: 'row',
+                          // }}
+                          // alignItems={{
+                          //   base: 'flex-start',
+                          //   md: 'center',
+                          // }}
                           space={10}
-                          w='75%'
-                          maxW='300px'
+                          // w='75%'
+                          // maxW='300px'
                         >
-                          <Radio
-                            colorScheme='primary'
-                            value='Yolk Sac Fry'
-                            my={1}
-                            _icon={{ color: 'primary' }}
-                          >
-                            Yolk Sac Fry
+                          <Radio value='Yolk Sac Fry'>
+                            <RadioIndicator style={{ width: 25, height: 25 }}>
+                              <RadioIcon
+                                as={CircleIcon}
+                                style={{ width: 15, height: 15 }}
+                              />
+                            </RadioIndicator>
+                            <RadioLabel selectionColor='primary' size='lg'>
+                              Yolk Sac Fry
+                            </RadioLabel>
                           </Radio>
                           <Radio
-                            colorScheme='primary'
+                            // colorScheme='primary'
                             value='Fry'
-                            my={1}
-                            _icon={{ color: 'primary' }}
+                            // my={1}
+                            // _icon={{ color: 'primary' }}
                           >
-                            Fry
+                            <RadioIndicator style={{ width: 25, height: 25 }}>
+                              <RadioIcon
+                                as={CircleIcon}
+                                style={{ width: 15, height: 15 }}
+                              />
+                            </RadioIndicator>
+                            <RadioLabel>Fry</RadioLabel>
                           </Radio>
                           <Radio
-                            colorScheme='primary'
+                            // colorScheme='primary'
                             value='Parr'
-                            my={1}
-                            _icon={{ color: 'primary' }}
+                            // my={1}
+                            // _icon={{ color: 'primary' }}
                           >
-                            Parr
+                            <RadioIndicator style={{ width: 25, height: 25 }}>
+                              <RadioIcon
+                                as={CircleIcon}
+                                style={{ width: 15, height: 15 }}
+                              />
+                            </RadioIndicator>
+                            <RadioLabel>Parr</RadioLabel>
                           </Radio>
                           <Radio
-                            colorScheme='primary'
+                            // colorScheme='primary'
                             value='Silvery Parr'
-                            my={1}
-                            _icon={{ color: 'primary' }}
+                            // my={1}
+                            // _icon={{ color: 'primary' }}
                           >
-                            Silvery Parr
+                            <RadioIndicator style={{ width: 25, height: 25 }}>
+                              <RadioIcon
+                                as={CircleIcon}
+                                style={{ width: 15, height: 15 }}
+                              />
+                            </RadioIndicator>
+                            <RadioLabel>Silvery Parr</RadioLabel>
                           </Radio>
                           <Radio
-                            colorScheme='primary'
+                            // colorScheme='primary'
                             value='Smolt'
-                            my={1}
-                            _icon={{ color: 'primary' }}
+                            // my={1}
+                            // _icon={{ color: 'primary' }}
                           >
-                            Smolt
+                            <RadioIndicator style={{ width: 25, height: 25 }}>
+                              <RadioIcon
+                                as={CircleIcon}
+                                style={{ width: 15, height: 15 }}
+                              />
+                            </RadioIndicator>
+                            <RadioLabel>Smolt</RadioLabel>
                           </Radio>
-                        </Stack>
-                      </Radio.Group>
+                        </HStack>
+                      </RadioGroup>
                     </HStack>
                     <Divider mt='1%' />
                   </Box>
@@ -515,6 +551,8 @@ const BatchCount = ({
         />
       )}
     </>
+  ) : (
+    <></>
   )
 }
 

@@ -93,6 +93,7 @@ const AddAnotherMarkModalContent = ({
         touched,
         errors,
         values,
+        setFieldValue,
       }) => (
         <>
           <CustomModalHeader
@@ -105,8 +106,11 @@ const AddAnotherMarkModalContent = ({
               <CustomSelect
                 selectedValue={values.markType}
                 placeholder='Select Mark Type'
-                onValueChange={handleChange('markType')}
-                setFieldTouched={() => setFieldTouched('markType')}
+                onValueChange={(itemValue: string) => {
+                  setFieldValue('markType', itemValue).then(() => {
+                    setFieldTouched('markType', true)
+                  })
+                }}
                 selectOptions={sortedDropdownValues}
                 errors={errors}
                 touched={touched}
@@ -117,8 +121,11 @@ const AddAnotherMarkModalContent = ({
               <CustomSelect
                 selectedValue={values.markColor}
                 placeholder='Color'
-                onValueChange={handleChange('markColor')}
-                setFieldTouched={() => setFieldTouched('markColor')}
+                onValueChange={(itemValue: string) => {
+                  setFieldValue('markColor', itemValue).then(() => {
+                    setFieldTouched('markColor', true)
+                  })
+                }}
                 selectOptions={markColor}
                 errors={errors}
                 touched={touched}
@@ -129,8 +136,11 @@ const AddAnotherMarkModalContent = ({
               <CustomSelect
                 selectedValue={values.markPosition}
                 placeholder='Position'
-                onValueChange={handleChange('markPosition')}
-                setFieldTouched={() => setFieldTouched('markPosition')}
+                onValueChange={(itemValue: string) => {
+                  setFieldValue('markPosition', itemValue).then(() => {
+                    setFieldTouched('markPosition', true)
+                  })
+                }}
                 selectOptions={bodyPart}
                 errors={errors}
                 touched={touched}
