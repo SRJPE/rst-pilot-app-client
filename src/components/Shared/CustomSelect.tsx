@@ -180,7 +180,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                           key={item.id ?? idx}
                           label={itemLabelModifier(item.definition)}
                           value={item.definition}
-                          // textStyle={{size: 16 }}
+                          textStyle={{ style: { fontSize: 16, height: 24 } }}
                         />
                       )
                     } else if (item.value) {
@@ -189,6 +189,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                           key={item.id ?? idx}
                           label={itemLabelModifier(item.label)}
                           value={item.value}
+                          textStyle={{ style: { fontSize: 16, height: 24 } }}
                         />
                       )
                     } else if (item.definition) {
@@ -197,6 +198,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                           key={item.id}
                           label={itemLabelModifier(item.definition)}
                           value={item.definition}
+                          textStyle={{ style: { fontSize: 16, height: 24 } }}
                         />
                       )
                     }
