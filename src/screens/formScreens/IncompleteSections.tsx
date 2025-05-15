@@ -723,7 +723,7 @@ const IncompleteSections = ({
         borderWidth='15'
       >
         <VStack space={8} p='15%'>
-          <Heading textAlign='center'>
+          <Heading textAlign='center' padding={0}>
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>
           {stepsArray.map((step: any, idx: number) => {

@@ -54,6 +54,14 @@ const getFilteredTrapOperationsState = (trapOperationsState: any) => {
   return filteredTrapOperationsState
 }
 
+const getFilteredPostProcessingState = (trapPostProcessingState: any) => {
+  let filteredTrapPostProcessingState = {
+    ...trapPostProcessingState,
+  }
+  delete filteredTrapPostProcessingState.fishProcessedResult
+  return filteredTrapPostProcessingState
+}
+
 const getProgramFormFieldsLookup = (
   visitSetupState: any,
   visitSetupDefaultState: any
@@ -169,8 +177,9 @@ export function generateAccordionHtmlFromTabValues({
           formValues?.fishProcessingState?.[route.key]?.values
         const fishInputState =
           formValues?.fishInputState?.[route.key]?.fishStore
-        const trapPostProcessingState =
+        const trapPostProcessingState = getFilteredPostProcessingState(
           formValues?.trapPostProcessingState?.[route.key]?.values
+        )
         // const filteredTrapOps = { ...trapOperationsState }
 
         const fishInputLookupObj = fishInputState
@@ -285,6 +294,10 @@ const AccordionView = ({
   const filteredTrapOperationsState = getFilteredTrapOperationsState(
     tabValues.trapOperationsState
   )
+
+  const filteredTrapPostProcessingState = getFilteredPostProcessingState(
+    tabValues.trapPostProcessingState
+  )
   const fishInputLookupObj = tabValues.fishInputState
     ? groupBySpeciesForkLength(tabValues.fishInputState)
     : {}
@@ -370,12 +383,12 @@ const AccordionView = ({
         title='Trap Post-Processing'
         titleStyle={{ fontSize: 20 }}
       >
-        {tabValues.trapPostProcessingState ? (
-          Object.keys(tabValues.trapPostProcessingState).map(key => {
+        {filteredTrapPostProcessingState ? (
+          Object.keys(filteredTrapPostProcessingState).map(key => {
             return (
               <AccordionListItem
                 field={key}
-                sectionValues={tabValues.trapPostProcessingState}
+                sectionValues={filteredTrapPostProcessingState}
                 sectionTitle='Trap Post-Processing'
                 programFormFieldsObj={programFormFieldsObj}
               />

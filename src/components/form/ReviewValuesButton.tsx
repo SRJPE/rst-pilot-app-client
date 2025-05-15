@@ -19,6 +19,7 @@ const ReviewValuesButton = ({
         // justifyContent='space-between'
         onPress={handleOpenReviewValuesModal}
         textAlign={'center'}
+        marginBottom={100}
       >
         <Text
           fontSize='xl'
