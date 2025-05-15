@@ -58,13 +58,14 @@ const getProgramFormFieldsLookup = (
   visitSetupState: any,
   visitSetupDefaultState: any
 ) => {
+  if (!visitSetupState.programs) return {}
   const programId = visitSetupState.programId
   const selectedProgramObj = find(
     visitSetupDefaultState.programs,
     (program: any) => program.id === programId
   )
   const programFormFields = selectedProgramObj.programFormFields
-  const programFormFieldsObj = programFormFields.length
+  const programFormFieldsObj = programFormFields?.length
     ? keyBy(programFormFields, 'fieldName')
     : {}
   return programFormFieldsObj
@@ -81,7 +82,7 @@ const getUnitAbbreviation = ({
 }) => {
   let unit = sectionValues[`${field}Unit`] || ''
 
-  if (programFormFieldsObj[field]) {
+  if (programFormFieldsObj && programFormFieldsObj[field]) {
     if (programFormFieldsObj[field].unitDefinition) {
       const unitAbbrev =
         programFormFieldsObj[field].unitDefinition?.match(/\(([^)]+)\)/)?.[1] ||
