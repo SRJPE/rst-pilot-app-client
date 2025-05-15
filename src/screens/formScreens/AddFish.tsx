@@ -707,7 +707,6 @@ const AddFishContent = ({
                               value,
                               touched: true,
                               error: '',
-                              touched: true,
                             }
                             if (value === '') {
                               payload.error =
