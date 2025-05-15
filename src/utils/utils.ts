@@ -29,7 +29,11 @@ export const reorderTaxon = (taxon: Array<any>) => {
     }
   }
   alphabeticalTaxon.unshift(chinook, steelhead)
-  return alphabeticalTaxon
+  return alphabeticalTaxon?.map((taxon: any) => ({
+    ...taxon,
+    label: taxon?.commonname,
+    value: taxon?.commonname,
+  }))
 }
 
 export const createArray = (start: number, end: number) => {
@@ -49,6 +53,34 @@ interface FormattedFishData {
   [forkLength: number]: {
     [lifeStage: string]: number
   }
+}
+
+export const handleSpeciesSearchTextChange = ({
+  reorderedTaxon,
+  searchValue,
+  setSpeciesList,
+}: {
+  reorderedTaxon: any[]
+  searchValue: string
+  setSpeciesList: React.Dispatch<
+    React.SetStateAction<
+      {
+        label: string
+        value: string
+      }[]
+    >
+  >
+}) => {
+  const filteredSpeciesList = reorderedTaxon.filter(
+    (species: any) =>
+      species.label.toLowerCase().includes(searchValue.toLowerCase()) ||
+      // species.taxonAbbreviations.includes(searchValue.toUpperCase())
+      species.taxonAbbreviations.some((abbr: string) =>
+        abbr.toLowerCase().includes(searchValue.toLowerCase())
+      )
+  )
+
+  setSpeciesList(filteredSpeciesList)
 }
 
 export const reformatBatchCountData = (

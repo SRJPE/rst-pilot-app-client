@@ -1,38 +1,40 @@
+import { Ionicons } from '@expo/vector-icons'
 import { Formik } from 'formik'
 import {
   Button,
   FormControl,
   HStack,
+  Icon,
+  Pressable,
   Radio,
+  ScrollView,
   Text,
   View,
   VStack,
-  ScrollView,
-  Pressable,
-  Icon,
 } from 'native-base'
 import React, { useState } from 'react'
+import { TouchableWithoutFeedback } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
+import { ReleaseMarkI } from '../../utils/interfaces'
 import {
   alphabeticalSort,
-  reorderTaxon,
   createFormValueDefault,
+  handleSpeciesSearchTextChange,
+  reorderTaxon,
 } from '../../utils/utils'
+import MarkBadgeList from '../markRecapture/MarkBadgeList'
+import AddAnotherMarkModalContent from '../Shared/AddAnotherMarkModalContent'
+import CustomModal from '../Shared/CustomModal'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 import FormInputComponent from '../Shared/FormInputComponent'
-import SpeciesDropDown from './SpeciesDropDown'
-import { ReleaseMarkI } from '../../utils/interfaces'
 import AddExistingMark from './AddExistingMark'
-import MarkBadgeList from '../markRecapture/MarkBadgeList'
-import { Ionicons } from '@expo/vector-icons'
-import CustomModal from '../Shared/CustomModal'
-import AddAnotherMarkModalContent from '../Shared/AddAnotherMarkModalContent'
+import SpeciesDropDown from './SpeciesDropDown'
 
 const initialFormValues = {
   species: '',
@@ -143,197 +145,212 @@ const PlusCountModalContent = ({
             values,
             setFieldValue,
             resetForm,
-          }) => (
-            <>
-              <CustomModalHeader
-                headerText={`Enter Plus Count`}
-                showHeaderButton={false}
-                closeModal={closeModal}
-              />
-              <VStack space={5} paddingX='20' paddingTop='7' paddingBottom='3'>
-                <FormControl mb={speciesDropDownOpen ? 250 : 0}>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='md'>
-                        Species
-                      </Text>
-                    </FormControl.Label>
+          }) => {
+            console.log('🚀 ~ PlusCountModalContent.tsx:149 ~ values:', values)
 
-                    {/* //TODO: set error messge for this custom dropdown */}
-                  </HStack>
-                  <SpeciesDropDown
-                    open={speciesDropDownOpen}
-                    setOpen={setSpeciesDropDownOpen}
-                    list={speciesList}
-                    setList={setSpeciesList}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                  />
-                </FormControl>
-                {(values.species === 'Chinook salmon' ||
-                  values.species === 'Steelhead / rainbow trout' ||
-                  !values.species) && (
-                  <CustomSelect
-                    label='Life Stage (optional)'
-                    camelName='lifeStage'
-                    errors={errors}
-                    touched={touched}
-                    selectedValue={values.lifeStage}
-                    placeholder={'Select Life stage'}
-                    onValueChange={handleChange('lifeStage')}
-                    setFieldTouched={() => setFieldTouched('lifeStage')}
-                    selectOptions={alphabeticalLifeStage.map((item: any) => ({
-                      label: item.definition,
-                      value: item.definition,
-                    }))}
-                  />
-                )}
-
-                {(values.species === 'Chinook salmon' || !values.species) && (
-                  <CustomSelect
-                    label='Run (optional)'
-                    camelName='run'
-                    errors={errors}
-                    touched={touched}
-                    selectedValue={values.run}
-                    placeholder={'Run'}
-                    onValueChange={handleChange('run')}
-                    setFieldTouched={() => setFieldTouched('run')}
-                    selectOptions={run.map((item: any) => ({
-                      label: item.definition,
-                      value: item.definition,
-                    }))}
-                  />
-                )}
-                <FormInputComponent
-                  label='Count'
-                  placeholder='0'
-                  touched={touched}
-                  errors={errors}
-                  camelName='count'
-                  onBlur={handleBlur('count')}
-                  value={values.count}
-                  onChangeText={handleChange('count')}
-                />
-                {/* //TODO: Fix bug where input won't blur unless dropdown is clicked ^ */}
-                <FormControl w='48.5%'>
-                  <HStack space={4} alignItems='center'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Dead
-                      </Text>
-                    </FormControl.Label>
-                  </HStack>
-                  <Radio.Group
-                    name='dead'
-                    accessibilityLabel='dead'
-                    value={`${values.dead}`}
-                    onChange={(value: any) => {
-                      setFieldTouched('dead', true)
-                      if (value === 'true') {
-                        setFieldValue('dead', true)
-                      } else {
-                        setFieldValue('dead', false)
-                      }
-                    }}
-                  >
-                    <HStack space={4}>
-                      <Radio
-                        colorScheme='primary'
-                        value='true'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        True
-                      </Radio>
-                      <Radio
-                        colorScheme='primary'
-                        value='false'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        False
-                      </Radio>
-                    </HStack>
-                  </Radio.Group>
-                </FormControl>
-
-                <CustomSelect
-                  label='Plus Count Method'
-                  camelName='plusCountMethod'
-                  errors={errors}
-                  touched={touched}
-                  selectedValue={values.plusCountMethod}
-                  placeholder={'Method'}
-                  onValueChange={handleChange('plusCountMethod')}
-                  setFieldTouched={() => setFieldTouched('plusCountMethod')}
-                  selectOptions={plusCountMethodology.map((item: any) => ({
-                    label: item.definition,
-                    value: item.definition,
-                  }))}
-                />
-                <VStack space={4} w={'80%'}>
-                  <AddExistingMark
-                    dropdownValues={dropdownValues}
-                    activeTabId={tabSlice.activeTabId}
-                    recentExistingMarks={recentExistingMarks}
-                    handlePressRecentExistingMarkButton={
-                      handlePressRecentExistingMarkButton
-                    }
-                    visitSetupState={visitSetupState}
-                  />
-
-                  <MarkBadgeList
-                    badgeListContent={existingMarks.value}
-                    field='existingMarks'
-                    setExistingMarks={setExistingMarks}
-                  />
-
-                  <Pressable
-                    onPress={() => {
-                      setRecentExistingMarks([])
-                      setAddMarkModalOpen(true)
-                    }}
-                  >
-                    <HStack alignItems='center'>
-                      <Icon
-                        as={Ionicons}
-                        name={'add-circle'}
-                        size='3xl'
-                        color='primary'
-                        marginRight='1'
-                      />
-                      <Text color='primary' fontSize='lg'>
-                        Add Mark
-                      </Text>
-                    </HStack>
-                  </Pressable>
-                </VStack>
-                <Button
-                  bg='primary'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    (touched && Object.keys(touched).length === 0) ||
-                    (errors && Object.keys(errors).length > 0)
+            return (
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  if (speciesDropDownOpen) {
+                    setSpeciesDropDownOpen(false)
+                    setSpeciesList(reorderedTaxon)
+                    setFieldTouched('species', true)
                   }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Save
-                  </Text>
-                </Button>
-              </VStack>
-            </>
-          )}
+                }}
+              >
+                <View>
+                  <CustomModalHeader
+                    headerText={`Enter Plus Count`}
+                    showHeaderButton={false}
+                    closeModal={closeModal}
+                  />
+                  <VStack
+                    space={5}
+                    paddingX='20'
+                    paddingTop='7'
+                    paddingBottom='3'
+                  >
+                    <SpeciesDropDown
+                      open={speciesDropDownOpen}
+                      setOpen={setSpeciesDropDownOpen}
+                      list={speciesList}
+                      setList={setSpeciesList}
+                      setFieldValue={setFieldValue}
+                      setFieldTouched={setFieldTouched}
+                      onClose={() => {
+                        setSpeciesList(reorderedTaxon)
+                      }}
+                      onChangeSearchText={searchValue =>
+                        handleSpeciesSearchTextChange({
+                          reorderedTaxon,
+                          searchValue,
+                          setSpeciesList,
+                        })
+                      }
+                    />
+                    {(values.species === 'Chinook salmon' ||
+                      values.species === 'Steelhead / rainbow trout' ||
+                      !values.species) && (
+                      <CustomSelect
+                        label='Life Stage (optional)'
+                        camelName='lifeStage'
+                        errors={errors}
+                        touched={touched}
+                        selectedValue={values.lifeStage}
+                        placeholder={'Select Life stage'}
+                        onValueChange={handleChange('lifeStage')}
+                        setFieldTouched={() => setFieldTouched('lifeStage')}
+                        selectOptions={alphabeticalLifeStage.map(
+                          (item: any) => ({
+                            label: item.definition,
+                            value: item.definition,
+                          })
+                        )}
+                      />
+                    )}
+                    {(values.species === 'Chinook salmon' ||
+                      !values.species) && (
+                      <CustomSelect
+                        label='Run (optional)'
+                        camelName='run'
+                        errors={errors}
+                        touched={touched}
+                        selectedValue={values.run}
+                        placeholder={'Run'}
+                        onValueChange={handleChange('run')}
+                        setFieldTouched={() => setFieldTouched('run')}
+                        selectOptions={run.map((item: any) => ({
+                          label: item.definition,
+                          value: item.definition,
+                        }))}
+                      />
+                    )}
+                    <FormInputComponent
+                      label='Count'
+                      placeholder='0'
+                      touched={touched}
+                      errors={errors}
+                      camelName='count'
+                      onBlur={handleBlur('count')}
+                      value={values.count}
+                      onChangeText={handleChange('count')}
+                    />
+                    {/* //TODO: Fix bug where input won't blur unless dropdown is clicked ^ */}
+                    <FormControl w='48.5%'>
+                      <HStack space={4} alignItems='center'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Dead
+                          </Text>
+                        </FormControl.Label>
+                      </HStack>
+                      <Radio.Group
+                        name='dead'
+                        accessibilityLabel='dead'
+                        value={`${values.dead}`}
+                        onChange={(value: any) => {
+                          setFieldTouched('dead', true)
+                          if (value === 'true') {
+                            setFieldValue('dead', true)
+                          } else {
+                            setFieldValue('dead', false)
+                          }
+                        }}
+                      >
+                        <HStack space={4}>
+                          <Radio
+                            colorScheme='primary'
+                            value='true'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            True
+                          </Radio>
+                          <Radio
+                            colorScheme='primary'
+                            value='false'
+                            my={1}
+                            _icon={{ color: 'primary' }}
+                          >
+                            False
+                          </Radio>
+                        </HStack>
+                      </Radio.Group>
+                    </FormControl>
+                    <CustomSelect
+                      label='Plus Count Method'
+                      camelName='plusCountMethod'
+                      errors={errors}
+                      touched={touched}
+                      selectedValue={values.plusCountMethod}
+                      placeholder={'Method'}
+                      onValueChange={handleChange('plusCountMethod')}
+                      setFieldTouched={() => setFieldTouched('plusCountMethod')}
+                      selectOptions={plusCountMethodology.map((item: any) => ({
+                        label: item.definition,
+                        value: item.definition,
+                      }))}
+                    />
+                    <VStack space={4} w={'80%'}>
+                      <AddExistingMark
+                        dropdownValues={dropdownValues}
+                        activeTabId={tabSlice.activeTabId}
+                        recentExistingMarks={recentExistingMarks}
+                        handlePressRecentExistingMarkButton={
+                          handlePressRecentExistingMarkButton
+                        }
+                        visitSetupState={visitSetupState}
+                      />
+                      <MarkBadgeList
+                        badgeListContent={existingMarks.value}
+                        field='existingMarks'
+                        setExistingMarks={setExistingMarks}
+                      />
+                      <Pressable
+                        onPress={() => {
+                          setRecentExistingMarks([])
+                          setAddMarkModalOpen(true)
+                        }}
+                      >
+                        <HStack alignItems='center'>
+                          <Icon
+                            as={Ionicons}
+                            name={'add-circle'}
+                            size='3xl'
+                            color='primary'
+                            marginRight='1'
+                          />
+                          <Text color='primary' fontSize='lg'>
+                            Add Mark
+                          </Text>
+                        </HStack>
+                      </Pressable>
+                    </VStack>
+                    <Button
+                      bg='primary'
+                      px='10'
+                      shadow='3'
+                      isDisabled={
+                        (touched && Object.keys(touched).length === 0) ||
+                        (errors && Object.keys(errors).length > 0)
+                      }
+                      onPress={() => {
+                        handleSubmit()
+                        closeModal()
+                      }}
+                    >
+                      <Text fontSize='xl' color='white'>
+                        Save
+                      </Text>
+                    </Button>
+                  </VStack>
+                </View>
+              </TouchableWithoutFeedback>
+            )
+          }}
         </Formik>
       </ScrollView>
-
       {/* --------- Modals --------- */}
-
       {addMarkModalOpen && (
         <CustomModal
           isOpen={addMarkModalOpen}
