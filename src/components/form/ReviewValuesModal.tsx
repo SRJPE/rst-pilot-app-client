@@ -54,11 +54,19 @@ const getFilteredTrapOperationsState = (trapOperationsState: any) => {
   return filteredTrapOperationsState
 }
 
-const getFilteredPostProcessingState = (trapPostProcessingState: any) => {
+const getFilteredPostProcessingState = (
+  trapPostProcessingState: any,
+  visitSetupState: any
+) => {
   let filteredTrapPostProcessingState = {
     ...trapPostProcessingState,
   }
   delete filteredTrapPostProcessingState.fishProcessedResult
+
+  if (visitSetupState?.stream === 'Toe Drain') {
+    delete filteredTrapPostProcessingState.trapVisitStartTime
+    delete filteredTrapPostProcessingState.endingTrapStatus
+  }
   return filteredTrapPostProcessingState
 }
 
@@ -178,7 +186,8 @@ export function generateAccordionHtmlFromTabValues({
         const fishInputState =
           formValues?.fishInputState?.[route.key]?.fishStore
         const trapPostProcessingState = getFilteredPostProcessingState(
-          formValues?.trapPostProcessingState?.[route.key]?.values
+          formValues?.trapPostProcessingState?.[route.key]?.values,
+          formValues?.visitSetupState?.[route.key]?.values
         )
         // const filteredTrapOps = { ...trapOperationsState }
 
@@ -296,7 +305,8 @@ const AccordionView = ({
   )
 
   const filteredTrapPostProcessingState = getFilteredPostProcessingState(
-    tabValues.trapPostProcessingState
+    tabValues.trapPostProcessingState,
+    tabValues.visitSetupState
   )
   const fishInputLookupObj = tabValues.fishInputState
     ? groupBySpeciesForkLength(tabValues.fishInputState)

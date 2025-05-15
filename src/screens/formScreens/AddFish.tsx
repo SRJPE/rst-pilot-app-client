@@ -606,8 +606,6 @@ const AddFishContent = ({
     }
   }, [existingMarks])
 
-  console.log('lifeStage.value', lifeStage)
-
   return (
     <TouchableNativeFeedback
       onPress={() => {
@@ -672,7 +670,11 @@ const AddFishContent = ({
                   <VStack space={1}>
                     <Text fontSize={'lg'}>
                       <Text bold>Last Entry: </Text>
-                      {`${lastFishEntry.species} (${lastFishEntry.lifeStage}) - Fork Length: ${lastFishEntry.forkLength}mm`}
+                      {`${lastFishEntry.species} ${
+                        lastFishEntry.lifeStage
+                          ? `(${lastFishEntry.lifeStage})`
+                          : ''
+                      } - Fork Length: ${lastFishEntry.forkLength} mm`}
                     </Text>
                     <Text fontSize={'lg'}>
                       <Text bold>Total Catch Count Entered: </Text>
@@ -757,7 +759,7 @@ const AddFishContent = ({
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
-                          keyboardType='numeric'
+                          keyboardType={'number-pad'}
                           onChangeText={value => {
                             let payload: FormValueI = {
                               ...forkLength,
@@ -814,7 +816,7 @@ const AddFishContent = ({
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
-                          keyboardType='numeric'
+                          keyboardType={'number-pad'}
                           onChangeText={value => {
                             let payload: FormValueI = {
                               ...weight,
@@ -855,7 +857,7 @@ const AddFishContent = ({
                             height='50px'
                             fontSize='16'
                             placeholder='Numeric Value'
-                            keyboardType='numeric'
+                            keyboardType={'number-pad'}
                             onChangeText={value =>
                               setCount({ ...count, value })
                             }
@@ -1056,6 +1058,51 @@ const AddFishContent = ({
                                   _icon={{ color: 'primary' }}
                                 >
                                   False
+                                </Radio>
+                              </HStack>
+                            </Radio.Group>
+                          </HStack>
+                        </FormControl>
+                      )}
+                    </HStack>
+                    <HStack>
+                      {conditionalFishInputFields?.['milting'] && (
+                        <FormControl w='1/3'>
+                          <HStack space={4} alignItems='center'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                Milting
+                              </Text>
+                            </FormControl.Label>
+
+                            <Radio.Group
+                              name='milting'
+                              accessibilityLabel='milting'
+                              value={`${milting.value}`}
+                              onChange={(value: any) => {
+                                if (value === 'true') {
+                                  setMilting({ ...milting, value: true })
+                                } else {
+                                  setMilting({ ...milting, value: false })
+                                }
+                              }}
+                            >
+                              <HStack space={4}>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='true'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  Yes
+                                </Radio>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='false'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  No
                                 </Radio>
                               </HStack>
                             </Radio.Group>
