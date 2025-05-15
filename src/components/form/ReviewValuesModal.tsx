@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView, Dimensions, Platform } from 'react-native'
+import { SafeAreaView, Dimensions } from 'react-native'
 import CustomModal from '../Shared/CustomModal'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import { Text, Button, ScrollView, Divider, HStack, View } from 'native-base'
 import { List } from 'react-native-paper'
 import { SceneMap, TabBar, TabBarProps, TabView } from 'react-native-tab-view'
-import { startCase } from 'lodash'
+import { startCase, find, keyBy } from 'lodash'
 import { groupBySpeciesForkLength } from '../../utils/utils'
 import * as Print from 'expo-print'
 import { shareAsync } from 'expo-sharing'
@@ -15,13 +15,81 @@ const initialLayout = { width: Dimensions.get('window').width }
 const hiddenFields = [
   'isWaterTurbidityPresent',
   'recordTurbidityInPostProcessing',
+  'trapName',
 ]
+
+type Props = {
+  handleCloseReviewValuesModal: () => void
+  formValues: any
+  isOpen: boolean
+  tabState: any
+  visitSetupDefaultState?: any
+}
+
+const getFilteredTrapOperationsState = (trapOperationsState: any) => {
+  let filteredTrapOperationsState = {
+    ...trapOperationsState,
+  }
+  delete filteredTrapOperationsState.trapVisitStartTime
+  if ('trapVisitTime' in filteredTrapOperationsState) {
+    delete filteredTrapOperationsState.trapVisitStopTime
+  }
+
+  return filteredTrapOperationsState
+}
+
+const getProgramFormFieldsLookup = (
+  visitSetupState: any,
+  visitSetupDefaultState: any
+) => {
+  if (!visitSetupState.programs) return {}
+  const programId = visitSetupState.programId
+  const selectedProgramObj = find(
+    visitSetupDefaultState.programs,
+    (program: any) => program.id === programId
+  )
+  const programFormFields = selectedProgramObj.programFormFields
+  const programFormFieldsObj = programFormFields?.length
+    ? keyBy(programFormFields, 'fieldName')
+    : {}
+  return programFormFieldsObj
+}
+
+const getUnitAbbreviation = ({
+  field,
+  sectionValues,
+  programFormFieldsObj,
+}: {
+  field: string
+  sectionValues: any
+  programFormFieldsObj: any
+}) => {
+  let unit = sectionValues[`${field}Unit`] || ''
+
+  if (programFormFieldsObj && programFormFieldsObj[field]) {
+    if (programFormFieldsObj[field].unitDefinition) {
+      const unitAbbrev =
+        programFormFieldsObj[field].unitDefinition?.match(/\(([^)]+)\)/)?.[1] ||
+        undefined
+      unit = unitAbbrev || unit
+    }
+  }
+
+  return unit
+}
 
 export function generateAccordionHtmlFromTabValues({
   routes,
   formValues,
+  visitSetupDefaultState,
 }: any) {
-  const sectionHtml = (title: string, data: Record<string, any>) => {
+  const sectionHtml = (
+    title: string,
+    data: Record<string, any>,
+    programFormFieldsObj: any = {}
+  ) => {
+    if (!data)
+      return `<h2>${title}</h2><table style="width:100%;border-collapse:collapse;">No Data</table><hr/>`
     const rows = Object.entries(data)
       .filter(
         ([key]) =>
@@ -48,7 +116,12 @@ export function generateAccordionHtmlFromTabValues({
           }
         }
 
-        const unit = data[`${key}Unit`] || ''
+        const unit = getUnitAbbreviation({
+          field: key,
+          sectionValues: data,
+          programFormFieldsObj,
+        })
+
         return displayValue
           ? `<tr><td><strong>${displayKey}</strong></td><td style="text-align:right">${displayValue} ${unit}</td></tr>`
           : ''
@@ -73,25 +146,44 @@ export function generateAccordionHtmlFromTabValues({
       <body>
       ${routes.map((route: any) => {
         const visitSetupState = formValues?.visitSetupState?.[route.key]?.values
-        const trapOperationsState =
+        const trapOperationsState = getFilteredTrapOperationsState(
           formValues?.trapOperationsState?.[route.key]?.values
+        )
         const fishProcessingState =
           formValues?.fishProcessingState?.[route.key]?.values
         const fishInputState =
           formValues?.fishInputState?.[route.key]?.fishStore
         const trapPostProcessingState =
           formValues?.trapPostProcessingState?.[route.key]?.values
-        const filteredTrapOps = { ...trapOperationsState }
-        delete filteredTrapOps.trapVisitStartTime
+        // const filteredTrapOps = { ...trapOperationsState }
 
-        const fishInputLookupObj = groupBySpeciesForkLength(fishInputState)
+        const fishInputLookupObj = fishInputState
+          ? groupBySpeciesForkLength(fishInputState)
+          : undefined
+
+        const programFormFieldsObj = getProgramFormFieldsLookup(
+          visitSetupState,
+          visitSetupDefaultState
+        )
 
         const htmlSections = [
-          sectionHtml('Visit Setup', visitSetupState),
-          sectionHtml('Trap Operations', filteredTrapOps),
-          sectionHtml('Fish Processing', fishProcessingState),
-          sectionHtml('Fish Input', fishInputLookupObj),
-          sectionHtml('Trap Post-Processing', trapPostProcessingState),
+          sectionHtml('Visit Setup', visitSetupState, programFormFieldsObj),
+          sectionHtml(
+            'Trap Operations',
+            trapOperationsState,
+            programFormFieldsObj
+          ),
+          sectionHtml(
+            'Fish Processing',
+            fishProcessingState,
+            programFormFieldsObj
+          ),
+          sectionHtml('Fish Input', fishInputLookupObj, programFormFieldsObj),
+          sectionHtml(
+            'Trap Post-Processing',
+            trapPostProcessingState,
+            programFormFieldsObj
+          ),
         ]
         return `
           <h1>${route.title}</h1>
@@ -103,21 +195,16 @@ export function generateAccordionHtmlFromTabValues({
   `
 }
 
-type Props = {
-  handleCloseReviewValuesModal: () => void
-  formValues: any
-  isOpen: boolean
-  tabState: any
-}
-
 const AccordionListItem = ({
   field,
   sectionValues,
   sectionTitle,
+  programFormFieldsObj,
 }: {
   field: string
   sectionValues: any
   sectionTitle: string
+  programFormFieldsObj?: any
 }) => {
   // if unit field, do not show
   if (field.includes('Unit')) return null
@@ -127,6 +214,10 @@ const AccordionListItem = ({
   // if field has a number in it, capitalize
   if (/\d/.test(field)) {
     fieldName = field.toUpperCase()
+  } else if (field === 'ph') {
+    fieldName = 'pH'
+  } else if (field === 'ysiNum') {
+    fieldName = 'YSI #'
   } else {
     fieldName = startCase(field)
   }
@@ -146,6 +237,12 @@ const AccordionListItem = ({
     }
   }
 
+  const unitValue = getUnitAbbreviation({
+    field,
+    sectionValues,
+    programFormFieldsObj,
+  })
+
   return field && fieldValue ? (
     <List.Item
       title={fieldName}
@@ -154,7 +251,7 @@ const AccordionListItem = ({
       right={() => (
         <View style={{ width: '50%', alignItems: 'flex-end' }}>
           <Text fontSize={'md'}>
-            {fieldValue} {sectionValues[`${field}Unit`] || ''}
+            {fieldValue} {unitValue}
           </Text>
         </View>
       )}
@@ -162,13 +259,24 @@ const AccordionListItem = ({
   ) : null
 }
 
-const AccordionView = ({ tabValues }: { tabValues?: any }) => {
-  const filteredTrapOperationsState = {
-    ...tabValues.trapOperationsState,
-  }
-  delete filteredTrapOperationsState.trapVisitStartTime
+const AccordionView = ({
+  tabValues,
+  visitSetupDefaultState,
+}: {
+  tabValues?: any
+  visitSetupDefaultState?: any
+}) => {
+  const filteredTrapOperationsState = getFilteredTrapOperationsState(
+    tabValues.trapOperationsState
+  )
+  const fishInputLookupObj = tabValues.fishInputState
+    ? groupBySpeciesForkLength(tabValues.fishInputState)
+    : {}
 
-  const fishInputLookupObj = groupBySpeciesForkLength(tabValues.fishInputState)
+  const programFormFieldsObj = getProgramFormFieldsLookup(
+    tabValues.visitSetupState,
+    visitSetupDefaultState
+  )
   return (
     <ScrollView>
       <List.Accordion title='Visit Setup' titleStyle={{ fontSize: 20 }}>
@@ -176,62 +284,94 @@ const AccordionView = ({ tabValues }: { tabValues?: any }) => {
           field={'crew'}
           sectionValues={tabValues.visitSetupState}
           sectionTitle='Visit Setup'
+          programFormFieldsObj={programFormFieldsObj}
         />
         {'dataRecorder' in tabValues.visitSetupState && (
           <AccordionListItem
             field={'dataRecorder'}
             sectionValues={tabValues.visitSetupState}
             sectionTitle='Visit Setup'
+            programFormFieldsObj={programFormFieldsObj}
           />
         )}
         <Divider width={'97%'} alignSelf={'center'} />
       </List.Accordion>
       <List.Accordion title='Trap Operations' titleStyle={{ fontSize: 20 }}>
-        {Object.keys(filteredTrapOperationsState).map(key => {
-          return (
-            <AccordionListItem
-              field={key}
-              sectionValues={filteredTrapOperationsState}
-              sectionTitle='Trap Operations'
-            />
-          )
-        })}
+        {Object.keys(filteredTrapOperationsState).length
+          ? Object.keys(filteredTrapOperationsState).map(key => {
+              return (
+                <AccordionListItem
+                  field={key}
+                  sectionValues={filteredTrapOperationsState}
+                  sectionTitle='Trap Operations'
+                  programFormFieldsObj={programFormFieldsObj}
+                />
+              )
+            })
+          : null}
       </List.Accordion>
       <List.Accordion title='Fish Processing' titleStyle={{ fontSize: 20 }}>
-        {Object.keys(tabValues.fishProcessingState).map(key => {
-          return (
-            <AccordionListItem
-              field={key}
-              sectionValues={tabValues.fishProcessingState}
-              sectionTitle='Fish Processing'
-            />
-          )
-        })}
+        {tabValues.fishProcessingState ? (
+          Object.keys(tabValues.fishProcessingState).map(key => {
+            return (
+              <AccordionListItem
+                field={key}
+                sectionValues={tabValues.fishProcessingState}
+                sectionTitle='Fish Processing'
+                programFormFieldsObj={programFormFieldsObj}
+              />
+            )
+          })
+        ) : (
+          <List.Item
+            title={'No Fish Processed'}
+            titleStyle={{ fontSize: 16, fontWeight: 'bold' }}
+            style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }}
+          />
+        )}
       </List.Accordion>
       <List.Accordion title='Fish Input' titleStyle={{ fontSize: 20 }}>
-        {Object.keys(fishInputLookupObj).map(key => {
-          return (
-            <AccordionListItem
-              field={key}
-              sectionValues={fishInputLookupObj}
-              sectionTitle='Fish Input'
-            />
-          )
-        })}
+        {tabValues.fishInputState ? (
+          Object.keys(fishInputLookupObj).map(key => {
+            return (
+              <AccordionListItem
+                field={key}
+                sectionValues={fishInputLookupObj}
+                sectionTitle='Fish Input'
+                programFormFieldsObj={programFormFieldsObj}
+              />
+            )
+          })
+        ) : (
+          <List.Item
+            title={'No Fish Caught'}
+            titleStyle={{ fontSize: 16, fontWeight: 'bold' }}
+            style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }}
+          />
+        )}
       </List.Accordion>
       <List.Accordion
         title='Trap Post-Processing'
         titleStyle={{ fontSize: 20 }}
       >
-        {Object.keys(tabValues.trapPostProcessingState).map(key => {
-          return (
-            <AccordionListItem
-              field={key}
-              sectionValues={tabValues.trapPostProcessingState}
-              sectionTitle='Trap Post-Processing'
-            />
-          )
-        })}
+        {tabValues.trapPostProcessingState ? (
+          Object.keys(tabValues.trapPostProcessingState).map(key => {
+            return (
+              <AccordionListItem
+                field={key}
+                sectionValues={tabValues.trapPostProcessingState}
+                sectionTitle='Trap Post-Processing'
+                programFormFieldsObj={programFormFieldsObj}
+              />
+            )
+          })
+        ) : (
+          <List.Item
+            title={'No Post-Processing Values'}
+            titleStyle={{ fontSize: 16, fontWeight: 'bold' }}
+            style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }}
+          />
+        )}
       </List.Accordion>
     </ScrollView>
   )
@@ -242,6 +382,7 @@ const ReviewValuesModal = ({
   formValues,
   isOpen,
   tabState,
+  visitSetupDefaultState,
 }: Props) => {
   const [index, setIndex] = useState(0)
   const [routes, setRoutes] = useState(
@@ -270,6 +411,7 @@ const ReviewValuesModal = ({
             trapPostProcessingState:
               formValues?.trapPostProcessingState?.[tab.key]?.values,
           }}
+          visitSetupDefaultState={visitSetupDefaultState}
         />
       )
     })
@@ -289,7 +431,11 @@ const ReviewValuesModal = ({
 
   const printToFile = async () => {
     // On iOS/android prints the given html. On web prints the HTML from the current page.
-    const html = generateAccordionHtmlFromTabValues({ routes, formValues })
+    const html = generateAccordionHtmlFromTabValues({
+      routes,
+      formValues,
+      visitSetupDefaultState,
+    })
     const { uri } = await Print.printToFileAsync({ html })
     try {
       await shareAsync(uri, {
