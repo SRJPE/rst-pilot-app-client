@@ -756,6 +756,7 @@ const IncompleteSections = ({
             trapPostProcessingState,
           }}
           tabState={tabState}
+          visitSetupDefaultState={visitSetupDefaultState}
         />
       )}
       <NavButtons
