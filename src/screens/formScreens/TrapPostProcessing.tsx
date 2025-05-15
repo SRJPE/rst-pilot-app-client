@@ -655,7 +655,7 @@ const TrapPostProcessing = ({
                         />
                       </Box>
                     )}
-                    {recordTurbidityInPostProcessing && (
+                    {/* {recordTurbidityInPostProcessing && (
                       <FormInputComponent
                         label=' Water Turbidity (optional)'
                         placeholder='0'
@@ -666,7 +666,7 @@ const TrapPostProcessing = ({
                         onBlur={() => setFieldTouched('waterTurbidity')}
                         value={values.waterTurbidity}
                       />
-                    )}
+                    )} */}
                   </HStack>
                   <FormControl>
                     <HStack space={4} alignItems='center'>

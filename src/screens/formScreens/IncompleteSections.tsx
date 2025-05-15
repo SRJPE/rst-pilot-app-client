@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Heading, ScrollView, View, VStack } from 'native-base'
+import { Box, Divider, Heading, ScrollView, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import navigationSlice, {
@@ -44,6 +44,8 @@ import {
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import ReviewValuesModal from '../../components/form/ReviewValuesModal'
+import ReviewValuesButton from '../../components/form/ReviewValuesButton'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -56,7 +58,6 @@ const mapStateToProps = (state: RootState) => {
     dropdownsState: state.dropdowns,
     connectivityState: state.connectivity,
     fishInputState: state.fishInput,
-    paperEntryState: state.paperEntry,
     tabState: state.tabSlice,
     addGeneticSamplesState: state.addGeneticSamples,
     appliedMarksState: state.addMarksOrTags,
@@ -75,7 +76,6 @@ const IncompleteSections = ({
   dropdownsState,
   connectivityState,
   fishInputState,
-  paperEntryState,
   tabState,
   addGeneticSamplesState,
   appliedMarksState,
@@ -91,7 +91,6 @@ const IncompleteSections = ({
   dropdownsState: any
   connectivityState: any
   fishInputState: any
-  paperEntryState: any
   tabState: TabStateI
   addGeneticSamplesState: any
   appliedMarksState: any
@@ -103,6 +102,9 @@ const IncompleteSections = ({
     numOfFormSteps - 1
   ) as Array<any>
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [reviewValuesModalIsOpen, setReviewValuesModalIsOpen] = useState(
+    false as boolean
+  )
   const hasSubmittedRef = useRef(false)
 
   useEffect(() => {
@@ -695,17 +697,24 @@ const IncompleteSections = ({
       }
     })
 
-    console.log('crs', catchRawSubmissions)
-
     if (catchRawSubmissions.length) {
       const catchRawPlusCountCombined = combinePlusCounts(catchRawSubmissions)
       dispatch(saveCatchRawSubmissions(catchRawPlusCountCombined))
     }
   }
 
+  const handleOpenReviewValuesModal = () => {
+    setReviewValuesModalIsOpen(true)
+  }
+
+  const handleCloseReviewValuesModal = () => {
+    setReviewValuesModalIsOpen(false)
+  }
+
   return (
     <>
       <ScrollView
+        height={'800px'}
         flex={1}
         bg='#fff'
         // justifyContent='center'
@@ -713,7 +722,7 @@ const IncompleteSections = ({
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={10} p='15%'>
+        <VStack space={8} p='15%'>
           <Heading textAlign='center'>
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>
@@ -729,8 +738,26 @@ const IncompleteSections = ({
               />
             )
           })}
+          <Divider />
+          <ReviewValuesButton
+            handleOpenReviewValuesModal={handleOpenReviewValuesModal}
+          />
         </VStack>
       </ScrollView>
+      {reviewValuesModalIsOpen && (
+        <ReviewValuesModal
+          handleCloseReviewValuesModal={handleCloseReviewValuesModal}
+          isOpen={reviewValuesModalIsOpen}
+          formValues={{
+            visitSetupState,
+            trapOperationsState,
+            fishProcessingState,
+            fishInputState,
+            trapPostProcessingState,
+          }}
+          tabState={tabState}
+        />
+      )}
       <NavButtons
         navigation={navigation}
         handleSubmit={emitSubmission}

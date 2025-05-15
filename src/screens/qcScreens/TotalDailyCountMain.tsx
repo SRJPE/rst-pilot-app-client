@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Dimensions, StyleSheet, View } from 'react-native'
+import { Dimensions } from 'react-native'
 import { SceneMap, TabBar, TabBarProps, TabView } from 'react-native-tab-view'
 import CatchFishCountQC from './CatchFishCountQC'
 import CatchFishCountByDateQC from './CatchFishCountByDateQC'
@@ -7,12 +7,6 @@ import CustomModalHeader from '../../components/Shared/CustomModalHeader'
 import { View as NativeBaseView } from 'native-base'
 
 const initialLayout = { width: Dimensions.get('window').width }
-
-export const TabPanelWrapper = ({
-  children,
-}: {
-  children: React.ReactNode
-}) => <View style={styles.tabPanel}>{children}</View>
 
 const TotalDailyCountMain = ({
   navigation,
@@ -72,12 +66,5 @@ const TotalDailyCountMain = ({
     </>
   )
 }
-
-const styles = StyleSheet.create({
-  tabPanel: {
-    flex: 1,
-    padding: 25,
-  },
-})
 
 export default TotalDailyCountMain

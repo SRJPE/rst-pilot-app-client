@@ -371,7 +371,8 @@ export const navigateFlowRightButton = ({
         } else if (
           every(tabValues, { fishProcessedResult: 'no fish caught' })
         ) {
-          return 'No Fish Caught'
+          return 'Trap Post-Processing'
+          // return 'No Fish Caught'
         } else {
           return 'Trap Post-Processing'
         }
@@ -699,4 +700,52 @@ export const calcAvgValue = (valuesArray: (string | null)[]) => {
     counter += num
   })
   return counter / numericValues.length
+}
+
+export const groupBySpeciesForkLength = (data: Array<any>) => {
+  const result = {} as any
+  let totalCount = 0 as number
+
+  Object.values(data).forEach((fish: any) => {
+    const { species, forkLength, numFishCaught, run } = fish
+
+    totalCount += Number(numFishCaught)
+
+    if (fish.plusCount) {
+      const key = `${species} - ${
+        run && run !== 'not recorded' ? run : ''
+      } Plus Count`
+      if (!result[key]) {
+        result[key] = Number(numFishCaught)
+      } else {
+        result[key] += Number(numFishCaught)
+      }
+      return
+    }
+
+    if (!result[species]) {
+      result[species] = []
+    }
+
+    // Add `forkLength` repeated `numFishCaught` times
+    for (let i = 0; i < numFishCaught; i++) {
+      if (forkLength) {
+        result[species].push(forkLength)
+      }
+    }
+  })
+
+  // Sort the result object by its keys alphabetically
+  const sortedResult = Object.keys(result)
+    .sort()
+    .reduce((acc, key) => {
+      acc[key] = result[key]
+      return acc
+    }, {} as any)
+
+  Object.assign(result, sortedResult)
+
+  sortedResult['totalCount'] = totalCount
+
+  return sortedResult
 }
