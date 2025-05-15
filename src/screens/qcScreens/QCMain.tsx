@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { JSX, useEffect, useState } from 'react'
 import { Box, Button, Center, Icon, Text, View, VStack } from 'native-base'
 import { LayoutAnimation, TouchableOpacity } from 'react-native'
 import api from '../../api/axiosConfig'

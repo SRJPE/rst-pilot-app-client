@@ -549,6 +549,8 @@ const AddFishContent = ({
     }
   }, [existingMarks])
 
+  console.log('lifeStage.value', lifeStage)
+
   return (
     <TouchableNativeFeedback
       onPress={() => {
@@ -705,6 +707,7 @@ const AddFishContent = ({
                               value,
                               touched: true,
                               error: '',
+                              touched: true,
                             }
                             if (value === '') {
                               payload.error =
