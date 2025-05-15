@@ -50,7 +50,7 @@ const getProgramFormFieldsLookup = (
   visitSetupState: any,
   visitSetupDefaultState: any
 ) => {
-  if (!visitSetupState.programs) return {}
+  if (!visitSetupDefaultState.programs) return {}
   const programId = visitSetupState.programId
   const selectedProgramObj = find(
     visitSetupDefaultState.programs,
