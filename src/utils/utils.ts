@@ -613,10 +613,13 @@ export const groupBySpeciesForkLength = (data: Array<any>) => {
     totalCount += Number(numFishCaught)
 
     if (fish.plusCount) {
-      if (!result[`${species} - ${run} Plus Count`]) {
-        result[`${species} - ${run} Plus Count`] = Number(numFishCaught)
+      const key = `${species} - ${
+        run && run !== 'not recorded' ? run : ''
+      } Plus Count`
+      if (!result[key]) {
+        result[key] = Number(numFishCaught)
       } else {
-        result[`${species} - ${run} Plus Count`] += Number(numFishCaught)
+        result[key] += Number(numFishCaught)
       }
       return
     }
