@@ -64,6 +64,7 @@ export default function FishConditionsDropDown({
       multiple={true}
       min={0}
       max={3}
+      zIndex={1000}
       mode='BADGE'
       listMode='SCROLLVIEW'
       badgeDotColors={['#007C7C']}

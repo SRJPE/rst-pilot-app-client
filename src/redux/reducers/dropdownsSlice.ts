@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import api from '../../api/axiosConfig'
+import { Taxon } from '../../utils/interfaces'
 
 // Constants
 const uninitializedStatus = 'uninitialized'
@@ -17,7 +18,7 @@ interface ValuesI {
   trapFunctionality: any[]
   whyTrapNotFunctioning: any[]
   trapStatusAtEnd: any[]
-  taxon: any[]
+  taxon: Taxon[]
   fishProcessed: any[]
   whyFishNotProcessed: any[]
   lifeStage: any[]
