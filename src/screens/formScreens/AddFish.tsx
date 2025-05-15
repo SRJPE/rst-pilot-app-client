@@ -833,16 +833,17 @@ const AddFishContent = ({
                                 ...lifeStage,
                                 value,
                                 error: '',
+                                touched: true,
                               }
                               setLifeStage(payload)
                             }}
-                            setFieldTouched={() => {
-                              let payload = { ...lifeStage, touched: true }
-                              if (!lifeStage.value)
-                                payload.error =
-                                  addFishErrorMessages.lifeStage.emptyError
-                              setLifeStage(payload)
-                            }}
+                            // setFieldTouched={() => {
+                            //   let payload = { ...lifeStage, touched: true }
+                            //   if (!lifeStage.value)
+                            //     payload.error =
+                            //       addFishErrorMessages.lifeStage.emptyError
+                            //   setLifeStage(payload)
+                            // }}
                             selectOptions={alphabeticalLifeStage
                               .filter((item: any) => item)
                               .map((item: any) => ({
@@ -872,11 +873,11 @@ const AddFishContent = ({
                             selectedValue={run.value as string}
                             placeholder={'Run'}
                             onValueChange={(value: string) =>
-                              setRun({ ...run, value })
+                              setRun({ ...run, value, touched: true })
                             }
-                            setFieldTouched={() =>
-                              setRun({ ...run, touched: true })
-                            }
+                            // setFieldTouched={() =>
+                            //   setRun({ ...run, touched: true })
+                            // }
                             selectOptions={dropdownValues?.run}
                           />
                         </Box>
