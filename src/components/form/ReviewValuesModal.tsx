@@ -103,6 +103,8 @@ export function generateAccordionHtmlFromTabValues({
     data: Record<string, any>,
     programFormFieldsObj: any = {}
   ) => {
+    if (!data)
+      return `<h2>${title}</h2><table style="width:100%;border-collapse:collapse;">No Data</table><hr/>`
     const rows = Object.entries(data)
       .filter(
         ([key]) =>
@@ -172,7 +174,7 @@ export function generateAccordionHtmlFromTabValues({
 
         const fishInputLookupObj = fishInputState
           ? groupBySpeciesForkLength(fishInputState)
-          : {}
+          : undefined
 
         const programFormFieldsObj = getProgramFormFieldsLookup(
           visitSetupState,
@@ -310,28 +312,38 @@ const AccordionView = ({
         <Divider width={'97%'} alignSelf={'center'} />
       </List.Accordion>
       <List.Accordion title='Trap Operations' titleStyle={{ fontSize: 20 }}>
-        {Object.keys(filteredTrapOperationsState).map(key => {
-          return (
-            <AccordionListItem
-              field={key}
-              sectionValues={filteredTrapOperationsState}
-              sectionTitle='Trap Operations'
-              programFormFieldsObj={programFormFieldsObj}
-            />
-          )
-        })}
+        {Object.keys(filteredTrapOperationsState).length
+          ? Object.keys(filteredTrapOperationsState).map(key => {
+              return (
+                <AccordionListItem
+                  field={key}
+                  sectionValues={filteredTrapOperationsState}
+                  sectionTitle='Trap Operations'
+                  programFormFieldsObj={programFormFieldsObj}
+                />
+              )
+            })
+          : null}
       </List.Accordion>
       <List.Accordion title='Fish Processing' titleStyle={{ fontSize: 20 }}>
-        {Object.keys(tabValues.fishProcessingState).map(key => {
-          return (
-            <AccordionListItem
-              field={key}
-              sectionValues={tabValues.fishProcessingState}
-              sectionTitle='Fish Processing'
-              programFormFieldsObj={programFormFieldsObj}
-            />
-          )
-        })}
+        {tabValues.fishProcessingState ? (
+          Object.keys(tabValues.fishProcessingState).map(key => {
+            return (
+              <AccordionListItem
+                field={key}
+                sectionValues={tabValues.fishProcessingState}
+                sectionTitle='Fish Processing'
+                programFormFieldsObj={programFormFieldsObj}
+              />
+            )
+          })
+        ) : (
+          <List.Item
+            title={'No Fish Processed'}
+            titleStyle={{ fontSize: 16, fontWeight: 'bold' }}
+            style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }}
+          />
+        )}
       </List.Accordion>
       <List.Accordion title='Fish Input' titleStyle={{ fontSize: 20 }}>
         {tabValues.fishInputState ? (
@@ -357,16 +369,24 @@ const AccordionView = ({
         title='Trap Post-Processing'
         titleStyle={{ fontSize: 20 }}
       >
-        {Object.keys(tabValues.trapPostProcessingState).map(key => {
-          return (
-            <AccordionListItem
-              field={key}
-              sectionValues={tabValues.trapPostProcessingState}
-              sectionTitle='Trap Post-Processing'
-              programFormFieldsObj={programFormFieldsObj}
-            />
-          )
-        })}
+        {tabValues.trapPostProcessingState ? (
+          Object.keys(tabValues.trapPostProcessingState).map(key => {
+            return (
+              <AccordionListItem
+                field={key}
+                sectionValues={tabValues.trapPostProcessingState}
+                sectionTitle='Trap Post-Processing'
+                programFormFieldsObj={programFormFieldsObj}
+              />
+            )
+          })
+        ) : (
+          <List.Item
+            title={'No Post-Processing Values'}
+            titleStyle={{ fontSize: 16, fontWeight: 'bold' }}
+            style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }}
+          />
+        )}
       </List.Accordion>
     </ScrollView>
   )
