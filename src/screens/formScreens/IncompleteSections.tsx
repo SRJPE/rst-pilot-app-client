@@ -46,6 +46,7 @@ import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ReviewValuesModal from '../../components/form/ReviewValuesModal'
 import ReviewValuesButton from '../../components/form/ReviewValuesButton'
+import CustomSelect from '@/src/components/Shared/CustomSelect'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -106,6 +107,11 @@ const IncompleteSections = ({
     false as boolean
   )
   const hasSubmittedRef = useRef(false)
+  const [
+    conditionalIncompleteSectionFields,
+    setConditionalIncompleteSectionFields,
+  ] = useState({} as any)
+  const [fieldCheckValue, setFieldCheckValue] = useState(null as any)
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
@@ -188,6 +194,40 @@ const IncompleteSections = ({
     }
     return container
   }
+
+  useEffect(() => {
+    const selectedProgramId = tabState?.activeTabId
+      ? visitSetupState?.[tabState.activeTabId]?.values?.programId
+      : null
+
+    if (selectedProgramId) {
+      const currentProgramInfo = find(
+        visitSetupDefaultState.programs,
+        (program: any) => program.id === selectedProgramId
+      )
+
+      if (currentProgramInfo?.programFormFields?.length) {
+        const incompleteSectionFields =
+          currentProgramInfo?.programFormFields.filter((formField: any) => {
+            return formField?.formSection === 'Incomplete Sections'
+          })
+        console.log(
+          'incompleteSections incompleteSectionFields',
+          incompleteSectionFields
+        )
+        setConditionalIncompleteSectionFields(
+          keyBy(incompleteSectionFields, 'fieldName')
+        )
+      } else {
+        setConditionalIncompleteSectionFields({})
+      }
+    }
+  }, [visitSetupDefaultState.programs])
+
+  console.log(
+    'conditionalIncompleteSectionFields',
+    conditionalIncompleteSectionFields
+  )
 
   const findCrewIdsFromSelectedCrewNames = (
     selectedCrewNames: Array<string>
@@ -365,11 +405,12 @@ const IncompleteSections = ({
 
       const trapVisitSubmission = {
         trapVisitUid: id,
-        crew: selectedCrewIds,
-        // crew: getCrewValue({
-        //   visitSetupValues: visitSetupState[id].values,
-        //   visitSetupDefaultState,
-        // }),
+        // crew: selectedCrewIds,
+        crew: getCrewValue({
+          visitSetupValues: visitSetupState[id].values,
+          visitSetupDefaultState,
+          fieldCheckValue,
+        }),
         programId,
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
@@ -711,6 +752,9 @@ const IncompleteSections = ({
     setReviewValuesModalIsOpen(false)
   }
 
+  console.log('visitSetupState', visitSetupState)
+  console.log('tabState', tabState)
+
   return (
     <>
       <ScrollView
@@ -722,7 +766,7 @@ const IncompleteSections = ({
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={8} p='15%'>
+        <VStack space={8} p='15%' height={'100%'} flex={1}>
           <Heading textAlign='center' padding={0}>
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>
@@ -742,6 +786,41 @@ const IncompleteSections = ({
           <ReviewValuesButton
             handleOpenReviewValuesModal={handleOpenReviewValuesModal}
           />
+          {conditionalIncompleteSectionFields['fieldCheck'] && (
+            <Box
+              key={'index'} // Always add a key when mapping
+              // flexBasis='100%' // Ensures 3 items per row (adjust for spacing)
+              // minWidth='100%' // Prevents shrinking too much
+              // maxWidth='100%' // Prevents growing beyond this size>
+              // flexGrow={1}
+              // mr={8} // Removes right margin from every 3rd item
+              mb={100} // Adds bottom margin to each item
+            >
+              <CustomSelect
+                camelName={'fieldCheck'}
+                label={
+                  conditionalIncompleteSectionFields['fieldCheck'].displayName
+                }
+                selectedValue={fieldCheckValue}
+                placeholder='Select Field Check'
+                onValueChange={(itemValue: string) => {
+                  setFieldCheckValue(itemValue)
+                }}
+                selectOptions={
+                  tabState?.activeTabId
+                    ? visitSetupState?.[
+                        tabState.activeTabId
+                      ]?.values?.crew?.map((crewMember: any) => ({
+                        label: crewMember,
+                        value: crewMember,
+                      }))
+                    : []
+                }
+                // validationSchema={validationSchema}
+                // onOpenCallback={onOpenCallback}
+              />
+            </Box>
+          )}
         </VStack>
       </ScrollView>
       {reviewValuesModalIsOpen && (

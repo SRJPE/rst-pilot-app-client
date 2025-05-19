@@ -672,13 +672,14 @@ export const createFormValueDefault = ({
 export const getCrewValue = ({
   visitSetupValues,
   visitSetupDefaultState,
+  fieldCheckValue,
 }: {
   visitSetupValues: {
     crew: string[]
     dataRecorder?: string
-    fieldCheck?: string
   }
   visitSetupDefaultState: { crewMembers: any[] }
+  fieldCheckValue?: string
 }) => {
   const selectedCrewNames: string[] = [...visitSetupValues.crew] // ['james', 'steve']
 
@@ -705,9 +706,8 @@ export const getCrewValue = ({
         }
 
         let fieldCheck = null
-        if (visitSetupValues.fieldCheck) {
-          fieldCheck =
-            `${obj.firstName} ${obj.lastName}` === visitSetupValues.fieldCheck
+        if (fieldCheckValue) {
+          fieldCheck = `${obj.firstName} ${obj.lastName}` === fieldCheckValue
         }
 
         return {
