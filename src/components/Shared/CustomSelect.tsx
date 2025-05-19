@@ -165,7 +165,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
           style={[
             {
               borderColor: showError ? 'darkred' : '#d4d4d4d4',
-              borderWidth: 1,
+              borderWidth: 0,
               minWidth: 100,
               marginTop: 1,
               borderRadius: 4,
@@ -188,6 +188,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
             style={[
               {
                 height: '100%',
+                // borderWidth: 0,
               },
             ]}
           >

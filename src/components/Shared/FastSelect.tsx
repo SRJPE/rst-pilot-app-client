@@ -87,7 +87,7 @@ const FastSelect = ({
       style={[
         {
           borderColor: '#d4d4d4d4',
-          borderWidth: 1,
+          borderWidth: 0,
           minWidth: 100,
           marginTop: 1,
           borderRadius: 4,
