@@ -1,6 +1,6 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
-import { every, some, sortBy, flatten, uniq, uniqBy } from 'lodash'
+import { every, some, sortBy, flatten, uniqBy } from 'lodash'
 import { ReleaseMarkI } from './interfaces'
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
