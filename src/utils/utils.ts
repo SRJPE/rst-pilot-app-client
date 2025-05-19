@@ -1,6 +1,6 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
-import { every, some, sortBy } from 'lodash'
+import { every, some, sortBy, flatten, uniqBy } from 'lodash'
 import { ReleaseMarkI } from './interfaces'
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
@@ -694,4 +694,56 @@ export const calculateRpmAvg = (rpms: (string | null)[]) => {
     counter += num
   })
   return counter / numericRpms.length
+}
+
+export const getCrewValue = ({
+  visitSetupValues,
+  visitSetupDefaultState,
+  fieldCheckValue,
+}: {
+  visitSetupValues: {
+    crew: string[]
+    dataRecorder?: string
+  }
+  visitSetupDefaultState: { crewMembers: any[] }
+  fieldCheckValue?: string | null
+}) => {
+  const selectedCrewNames: string[] = [...visitSetupValues.crew] // ['james', 'steve']
+
+  const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
+
+  const selectedCrewNamesMap: any = selectedCrewNames.reduce(
+    (acc, name: string) => ({
+      ...acc,
+      [name]: true,
+    }),
+    {}
+  )
+
+  const filteredCrewIds = uniqBy(
+    allCrewObjects
+      .filter(
+        (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
+      )
+      .map((obj: any) => {
+        let dataRecorder = null
+        if (visitSetupValues.dataRecorder) {
+          dataRecorder =
+            `${obj.firstName} ${obj.lastName}` === visitSetupValues.dataRecorder
+        }
+
+        let fieldCheck = null
+        if (fieldCheckValue) {
+          fieldCheck = `${obj.firstName} ${obj.lastName}` === fieldCheckValue
+        }
+
+        return {
+          personnelId: Number(obj.personnelId),
+          dataRecorder,
+          fieldCheck,
+        }
+      }),
+    'personnelId'
+  )
+  return filteredCrewIds
 }

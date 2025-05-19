@@ -40,6 +40,7 @@ import {
   returnDefinitionArray,
   calculateRpmAvg,
   returnNullableTableId,
+  getCrewValue,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -251,7 +252,10 @@ const IncompleteSections = ({
         findCrewIdsFromSelectedCrewNames(selectedCrewNames)
       const trapVisitSubmission = {
         trapVisitUid: id,
-        crew: selectedCrewIds,
+        crew: getCrewValue({
+          visitSetupValues: visitSetupState[id].values,
+          visitSetupDefaultState,
+        }),
         programId: visitSetupState[id].values.programId,
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
