@@ -224,11 +224,6 @@ const IncompleteSections = ({
     }
   }, [visitSetupDefaultState.programs])
 
-  console.log(
-    'conditionalIncompleteSectionFields',
-    conditionalIncompleteSectionFields
-  )
-
   const findCrewIdsFromSelectedCrewNames = (
     selectedCrewNames: Array<string>
   ) => {
