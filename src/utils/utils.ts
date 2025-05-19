@@ -679,7 +679,7 @@ export const getCrewValue = ({
     dataRecorder?: string
   }
   visitSetupDefaultState: { crewMembers: any[] }
-  fieldCheckValue?: string
+  fieldCheckValue?: string | null
 }) => {
   const selectedCrewNames: string[] = [...visitSetupValues.crew] // ['james', 'steve']
 
