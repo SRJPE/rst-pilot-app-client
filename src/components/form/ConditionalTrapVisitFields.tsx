@@ -94,6 +94,10 @@ const ConditionalTrapVisitFields = ({
 
     const { fieldName, displayName, unitDefinition, fieldType } = item
 
+    if (fieldName === 'waterTurbidity') {
+      return null
+    }
+
     if (fieldName === 'conditionCode') {
       return (
         <>

@@ -924,15 +924,13 @@ const TrapOperations = ({
                         })) && (
                         <Box flex={1} h={'full'}>
                           <FormControl width={'100%'}>
-                            <HStack space={4} alignItems='center'>
-                              <FormControl.Label>
-                                <Text color='black' fontSize='xl' mb={2}>
-                                  Record Turbidity After Trap Visit Save
-                                </Text>
-                              </FormControl.Label>
-                            </HStack>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl' mb={2}>
+                                Record Turbidity After Trap Visit Save
+                              </Text>
+                            </FormControl.Label>
 
-                            <HStack space={3}>
+                            <HStack space={2} mb={4}>
                               <Text fontSize='16'>No</Text>
                               <Switch
                                 name='recordTurbidityInPostProcessing'

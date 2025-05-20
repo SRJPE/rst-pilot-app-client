@@ -30,7 +30,6 @@ const initialState: InitialStateI = {
     values: {
       debrisVolume: null,
       totalRevolutions: null,
-      waterTurbidity: null,
       rpm1: null,
       rpm2: null,
       rpm3: null,
