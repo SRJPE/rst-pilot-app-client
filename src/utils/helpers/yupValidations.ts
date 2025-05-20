@@ -218,11 +218,11 @@ export const trapPostProcessingSchema = yup.object().shape({
   //   .number()
   //   .typeError('Value must be a number')
   //   .required('Water Turbidity Required'),
-  waterTurbidity: yup
-    .mixed()
-    .test('is-empty-or-number', 'Value must be a number', value => {
-      return value === '' || value === null || !isNaN(value)
-    }),
+  // waterTurbidity: yup
+  //   .mixed()
+  //   .test('is-empty-or-number', 'Value must be a number', value => {
+  //     return value === '' || value === null || !isNaN(value)
+  //   }),
   comments: yup.string(),
   rpm1: yup
     .number()
