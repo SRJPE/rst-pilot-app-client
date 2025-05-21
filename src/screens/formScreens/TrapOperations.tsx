@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react'
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { Formik, yupToFormErrors } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -399,64 +399,89 @@ const TrapOperations = ({
     }
   }
 
-  const renderTrappingDateAndTime = (values: any, setFieldValue: any) => {
-    // no program form fields have been set
-    // assume has not been customized
-    if (
-      !selectedProgramObj?.programFormFields?.length ||
-      !formFields.length ||
-      find(formFields, {
-        fieldName: 'trapVisitStopTime',
-      })
-    ) {
-      return (
-        <TrapEndDateAndTime
-          endTime={endTime}
-          onEndTimeChange={onEndTimeChange}
-          popoverTrigger={popoverTrigger}
-          trapRestart={values.trapStatus === trapNotInServiceIdentifier}
-        />
-      )
-    } else if (
-      formFields?.length &&
-      find(formFields, {
-        fieldName: 'trapVisitTime',
-      })
-    ) {
-      const item = find(selectedProgramObj?.programFormFields, {
-        fieldName: 'trapVisitTime',
-      })
-      const { displayName } = item
-      if (!values.trapVisitTime) {
-        setFieldValue('trapVisitTime', new Date())
+  const renderTrappingDateAndTime = useCallback(
+    (values: any, setFieldValue: any) => {
+      // no program form fields have been set
+      // assume has not been customized
+      console.log('formFields', formFields)
+      if (
+        !selectedProgramObj?.programFormFields?.length ||
+        !formFields.length ||
+        find(formFields, {
+          fieldType: 'trapVisitStopTime',
+        })
+      ) {
+        return (
+          <TrapEndDateAndTime
+            endTime={endTime}
+            onEndTimeChange={onEndTimeChange}
+            popoverTrigger={popoverTrigger}
+            trapRestart={values.trapStatus === trapNotInServiceIdentifier}
+          />
+        )
+      } else if (
+        formFields?.length &&
+        find(formFields, {
+          fieldType: 'datetime',
+          formSection: 'Trap Operations',
+        })
+      ) {
+        const dateFields = formFields?.filter((field: any) => {
+          return (
+            field.fieldType === 'datetime' &&
+            field.formSection === 'Trap Operations'
+          )
+        })
+        if (!dateFields?.length) {
+          return null
+        }
+
+        return dateFields.map((item: any) => {
+          const { displayName, fieldName } = item
+          if (!values[fieldName]) {
+            console.log('here??')
+            setFieldValue(fieldName, new Date())
+          }
+          return (
+            <FormControl marginBottom={4} key={fieldName}>
+              <VStack space={2}>
+                <HStack space={4}>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      {displayName}{' '}
+                    </Text>
+                  </FormControl.Label>
+                </HStack>
+                <Box alignSelf='flex-start' ml='-2'>
+                  <DateTimePicker
+                    value={values?.[fieldName] || new Date()}
+                    mode='datetime'
+                    onChange={(event: any, selectedDate: any) => {
+                      console.log('fieldName', fieldName)
+                      console.log('selectedDate', selectedDate)
+                      console.log('values', values)
+                      setFieldValue(fieldName, selectedDate || new Date())
+                    }}
+                    accentColor='#007C7C'
+                  />
+                </Box>
+              </VStack>
+            </FormControl>
+          )
+        })
+      } else {
+        setEndTime(null)
       }
-      return (
-        <FormControl marginBottom={4}>
-          <VStack space={2}>
-            <HStack space={4}>
-              <FormControl.Label>
-                <Text color='black' fontSize='xl'>
-                  {displayName}{' '}
-                </Text>
-              </FormControl.Label>
-            </HStack>
-            <Box alignSelf='flex-start' ml='-2'>
-              <DateTimePicker
-                value={values?.trapVisitTime || new Date()}
-                mode='datetime'
-                onChange={(event: any, selectedDate: any) => {
-                  setFieldValue('trapVisitTime', selectedDate || new Date())
-                }}
-                accentColor='#007C7C'
-              />
-            </Box>
-          </VStack>
-        </FormControl>
-      )
-    } else {
-      setEndTime(null)
-    }
-  }
+    },
+    [
+      endTime,
+      formFields,
+      onEndTimeChange,
+      popoverTrigger,
+      selectedProgramObj,
+      trapNotInServiceIdentifier,
+    ]
+  )
 
   const renderRPMBefore = ({
     touched,
@@ -490,6 +515,8 @@ const TrapOperations = ({
       )
     }
   }
+
+  console.log('vs,', validationSchema)
 
   return (
     <Formik
@@ -530,6 +557,7 @@ const TrapOperations = ({
         resetForm,
         isValid,
       }) => {
+        console.log('TO errors', errors)
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -793,7 +821,7 @@ const TrapOperations = ({
                         handleBlur: handleBlur,
                         handleChange: handleChange,
                       })}
-                      <FormControl w='30%'>
+                      {/* <FormControl w='30%'>
                         <HStack space={4} alignItems='center'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
@@ -833,7 +861,7 @@ const TrapOperations = ({
                             </HStack>
                           </Radio.Group>
                         </HStack>
-                      </FormControl>
+                      </FormControl> */}
 
                       <HStack
                         space={4}

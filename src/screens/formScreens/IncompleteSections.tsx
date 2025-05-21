@@ -27,7 +27,7 @@ import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOp
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
-import { cloneDeep, find, flatten, keyBy, uniq } from 'lodash'
+import { cloneDeep, find, flatten, keyBy, uniq, map } from 'lodash'
 import {
   setIncompleteSectionTouched,
   TabStateI,
@@ -274,9 +274,26 @@ const IncompleteSections = ({
       'ph',
     ]
 
+    console.log('pff', programFormFields)
+
+    const def = programFormFields
+      .filter((obj: any) => obj.isEnvironmentalField)
+      .map((obj: any) => obj.fieldName)
+    console.log('def', def)
+
+    delete def['flowMeasure']
+    delete def['waterTemperature']
+    delete def['waterTurbidity']
+
     const formFieldsLookup = keyBy(programFormFields, 'fieldName')
 
     const baseEnvValues = [
+      {
+        measureName: 'flow measure',
+        measureValueNumeric: values.flowMeasure,
+        measureValueText: values.flowMeasure?.toString(),
+        measureUnit: 5,
+      },
       {
         measureName: 'water temperature',
         measureValueNumeric: values.waterTemperature,
@@ -299,7 +316,7 @@ const IncompleteSections = ({
       },
     ] as Array<any>
 
-    dyanimcEnvironmentalFields.forEach((field: string) => {
+    def.forEach((field: string) => {
       if (values[field]) {
         if (formFieldsLookup[field].fieldType === 'dropdown') {
           baseEnvValues.push({
@@ -334,6 +351,7 @@ const IncompleteSections = ({
       })
     }
 
+    console.log('baseEnvValues', baseEnvValues)
     return baseEnvValues
   }
 
@@ -747,8 +765,8 @@ const IncompleteSections = ({
     setReviewValuesModalIsOpen(false)
   }
 
-  console.log('visitSetupState', visitSetupState)
-  console.log('tabState', tabState)
+  // console.log('visitSetupState', visitSetupState)
+  // console.log('tabState', tabState)
 
   return (
     <>
