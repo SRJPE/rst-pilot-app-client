@@ -209,7 +209,10 @@ const StartedTrapping = ({
         coneDepth: trapOperationsState?.[id]?.values.coneDepth
           ? parseFloat(trapOperationsState?.[id]?.values.coneDepth)
           : null,
-        trapInThalweg: null,
+        trapInThalweg:
+          typeof trapOperationsState?.[id]?.values?.trapInThalweg === 'boolean'
+            ? trapOperationsState?.[id]?.values?.trapInThalweg
+            : null,
         trapFunctioning: returnNullableTableId(
           trapFunctioningValues.indexOf('trap not in service')
         ),
