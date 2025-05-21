@@ -781,3 +781,14 @@ export const groupBySpeciesForkLength = (data: Array<any>) => {
 
   return sortedResult
 }
+
+export const mergePreserveNonNull = (...objects: Record<string, any>[]) => {
+  return objects.reduce((acc, obj) => {
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== null || !(key in acc)) {
+        acc[key] = value
+      }
+    }
+    return acc
+  }, {} as Record<string, any>)
+}

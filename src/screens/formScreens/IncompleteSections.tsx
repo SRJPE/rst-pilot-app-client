@@ -41,6 +41,7 @@ import {
   getCrewValue,
   returnNullableTableId,
   calcAvgValue,
+  mergePreserveNonNull,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -276,28 +277,44 @@ const IncompleteSections = ({
 
     console.log('pff', programFormFields)
 
+    const environmentalFieldsToIgnore = [
+      'flowMeasure',
+      'waterTemperature',
+      'waterTurbidity',
+    ]
+
     const def = programFormFields
-      .filter((obj: any) => obj.isEnvironmentalField)
+      .filter(
+        (obj: any) =>
+          obj.isEnvironmentalField &&
+          !environmentalFieldsToIgnore.includes(obj.fieldName)
+      )
       .map((obj: any) => obj.fieldName)
     console.log('def', def)
 
-    delete def['flowMeasure']
-    delete def['waterTemperature']
-    delete def['waterTurbidity']
-
     const formFieldsLookup = keyBy(programFormFields, 'fieldName')
+
+    console.log('def', def)
 
     const baseEnvValues = [
       {
         measureName: 'flow measure',
-        measureValueNumeric: values.flowMeasure,
-        measureValueText: values.flowMeasure?.toString(),
+        measureValueNumeric: values.flowMeasure
+          ? Number(values.flowMeasure)
+          : undefined,
+        measureValueText: values.flowMeasure
+          ? values.flowMeasure?.toString()
+          : undefined,
         measureUnit: 5,
       },
       {
         measureName: 'water temperature',
-        measureValueNumeric: values.waterTemperature,
-        measureValueText: values.waterTemperature?.toString(),
+        measureValueNumeric: values.waterTemperature
+          ? Number(values.waterTemperature)
+          : undefined,
+        measureValueText: values.waterTemperature
+          ? values.waterTemperature?.toString()
+          : undefined,
         measureUnit: values.waterTemperatureUnit === '°F' ? 1 : 2,
       },
       {
@@ -311,10 +328,12 @@ const IncompleteSections = ({
           ? values.waterTurbidity?.toString()
           : values?.recordTurbidityInPostProcessing
           ? ''
-          : 'undefined',
+          : undefined,
         measureUnit: 25,
       },
     ] as Array<any>
+
+    console.log('values', values)
 
     def.forEach((field: string) => {
       if (values[field]) {
@@ -475,11 +494,11 @@ const IncompleteSections = ({
         rpmAtStart: calcAvgValue([startRpm1, startRpm2, startRpm3]),
         rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
         trapVisitEnvironmental: formatTrapVisitEnvironmentalValues(
-          {
-            ...trapOperationsState[id].values,
-            ...trapPostProcessingState[id].values,
-            waterTurbidityIsPresent,
-          },
+          mergePreserveNonNull(
+            trapOperationsState[id].values,
+            trapPostProcessingState[id].values,
+            { waterTurbidityIsPresent }
+          ),
           programId
         ),
         trapCoordinates: {

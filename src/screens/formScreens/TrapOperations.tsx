@@ -558,6 +558,7 @@ const TrapOperations = ({
         isValid,
       }) => {
         console.log('TO errors', errors)
+        console.log('TO values', values)
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )

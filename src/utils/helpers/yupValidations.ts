@@ -1,5 +1,52 @@
 import * as yup from 'yup'
 
+const getValidator = (field: any) => {
+  let validator = yup.string() as any // Default to string validation
+
+  if (field.fieldType === 'email') {
+    validator = yup.string().email('Invalid email format')
+  } else if (field.fieldType === 'input') {
+    validator = yup.number().typeError('Must be a number')
+    validator = validator.positive(`Measurement required`)
+    if (field.minThreshold) {
+      validator = validator.min(
+        field.minThreshold,
+        `${field.displayName} must be >= ${field.minThreshold}`
+      )
+    }
+    if (field.maxThreshold) {
+      validator = validator.max(
+        field.maxThreshold,
+        `${field.displayName} must be at <= ${field.maxThreshold}`
+      )
+    }
+  } else if (field.fieldType === 'boolean') {
+    validator = yup.boolean()
+  }
+
+  if (field.required) {
+    validator = validator.required(`${field.displayName} is required`)
+  } else {
+    validator = validator.nullable()
+  }
+
+  if (field.minLength) {
+    validator = validator.min(
+      field.minLength,
+      `${field.displayName} must be at least ${field.minLength} characters`
+    )
+  }
+
+  if (field.maxLength) {
+    validator = validator.max(
+      field.maxLength,
+      `${field.displayName} must be at most ${field.maxLength} characters`
+    )
+  }
+
+  return validator
+}
+
 /*----------------------------------------------------------------
   TRAP VISIT SCHEMAS
 ----------------------------------------------------------------*/
@@ -30,32 +77,7 @@ export const generateTrapVisitSchema = (fields: Array<any>) => {
   }
 
   sectionFields.forEach(field => {
-    let validator = yup.string() as any // Default to string validation
-
-    if (field.fieldType === 'email') {
-      validator = yup.string().email('Invalid email format')
-    } else if (field.fieldType === 'input') {
-      validator = yup.number().typeError('Must be a number')
-      validator = validator.positive(`Measurement required`)
-      if (field.minThreshold) {
-        validator = validator.min(
-          field.minThreshold,
-          `${field.displayName} must be >= ${field.minThreshold}`
-        )
-      }
-      if (field.maxThreshold) {
-        validator = validator.max(
-          field.maxThreshold,
-          `${field.displayName} must be at <= ${field.maxThreshold}`
-        )
-      }
-    } else if (field.fieldType === 'boolean') {
-      validator = yup.boolean()
-    }
-
-    if (field.required) {
-      validator = validator.required(`${field.displayName} is required`)
-    }
+    const validator = getValidator(field)
 
     schema[field.fieldName] = validator
   })
@@ -101,44 +123,7 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
       return
     }
 
-    if (field.fieldType === 'email') {
-      validator = yup.string().email('Invalid email format')
-    } else if (field.fieldType === 'input') {
-      validator = yup.number().typeError('Must be a number')
-      validator = validator.positive(`Measurement required`)
-      if (field.minThreshold) {
-        validator = validator.min(
-          field.minThreshold,
-          `${field.displayName} must be >= ${field.minThreshold}`
-        )
-      }
-      if (field.maxThreshold) {
-        validator = validator.max(
-          field.maxThreshold,
-          `${field.displayName} must be at <= ${field.maxThreshold}`
-        )
-      }
-    } else if (field.fieldType === 'boolean') {
-      validator = yup.boolean()
-    }
-
-    if (field.required) {
-      validator = validator.required(`${field.displayName} is required`)
-    }
-
-    if (field.minLength) {
-      validator = validator.min(
-        field.minLength,
-        `${field.displayName} must be at least ${field.minLength} characters`
-      )
-    }
-
-    if (field.maxLength) {
-      validator = validator.max(
-        field.maxLength,
-        `${field.displayName} must be at most ${field.maxLength} characters`
-      )
-    }
+    validator = getValidator(field)
 
     schema[field.fieldName] = validator
   })
@@ -170,7 +155,7 @@ export const trapOperationsSchema = yup.object().shape({
   flowMeasureUnit: yup.string(),
   waterTemperatureUnit: yup.string(),
   waterTurbidity: yup.lazy(value =>
-    value === ''
+    value === '' || value === null
       ? yup.string().min(0)
       : yup
           .number()
@@ -274,49 +259,7 @@ export const generateDynamicTrapPostProcessingSchema = (fields: Array<any>) => {
   }
 
   sectionFields.forEach(field => {
-    let validator = yup.string() as any // Default to string validation
-
-    if (field.fieldType === 'email') {
-      validator = yup.string().email('Invalid email format')
-    } else if (field.fieldType === 'input') {
-      validator = yup.number().typeError('Must be > 0')
-      validator = validator.positive(`Measurement required`)
-      if (field.minThreshold) {
-        validator = validator.min(
-          field.minThreshold,
-          `${field.displayName} must be >= ${field.minThreshold}`
-        )
-      }
-      if (field.maxThreshold) {
-        validator = validator.max(
-          field.maxThreshold,
-          `${field.displayName} must be at <= ${field.maxThreshold}`
-        )
-      }
-    } else if (field.fieldType === 'boolean') {
-      validator = yup.boolean()
-    }
-
-    if (field.required) {
-      validator = validator.required(`${field.displayName} is required`)
-    } else {
-      validator = validator.nullable()
-    }
-
-    if (field.minLength) {
-      validator = validator.min(
-        field.minLength,
-        `${field.displayName} must be at least ${field.minLength} characters`
-      )
-    }
-
-    if (field.maxLength) {
-      validator = validator.max(
-        field.maxLength,
-        `${field.displayName} must be at most ${field.maxLength} characters`
-      )
-    }
-
+    const validator = getValidator(field)
     schema[field.fieldName] = validator
   })
 
