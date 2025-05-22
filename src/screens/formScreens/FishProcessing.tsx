@@ -127,12 +127,12 @@ const FishProcessing = ({
           reduxState[allTabId]?.values?.fishProcessedResult === 'processed fish'
         ) {
           setFishInputCompleted = false
+          dispatch(markStepCompleted({ propName: 'fishInput' }))
         }
       })
 
       if (stepCompletedCheck && otherTabFormsValid) {
         dispatch(markStepCompleted({ propName: 'fishProcessing' }))
-        dispatch(markStepCompleted({ propName: 'fishInput' }))
       }
     }
   }
