@@ -90,7 +90,7 @@ const TabBar = ({
           case 'Fish Input':
             if (
               activePage === 'Fish Input' &&
-              fishProcessingSlice[tabId].values.fishProcessedResult ===
+              fishProcessingSlice[tabId]?.values?.fishProcessedResult ===
                 'processed fish' &&
               Object.values(formSlice[tabId]?.fishStore || {}).length < 1
             ) {
