@@ -5,9 +5,17 @@ import {
   Box,
   Link,
   VStack,
-  Radio,
+  // Radio,
   FormControl,
 } from 'native-base'
+import {
+  Radio,
+  RadioGroup,
+  RadioIndicator,
+  RadioLabel,
+  RadioIcon,
+} from '@/components/ui/radio'
+import { CircleIcon } from '@/components/ui/icon'
 import { connect } from 'react-redux'
 import { RootState } from '../../redux/store'
 import FormInputComponent, {
@@ -162,27 +170,48 @@ const ConditionalTrapVisitFields = ({
     if (fieldName === 'coneSetting') {
       return (
         <FormControl w='100%'>
-          <HStack space={4} alignItems='center'>
-            <FormControl.Label>
-              <Text color='black' fontSize='xl'>
-                Cone Setting
-              </Text>
-            </FormControl.Label>
-            <Radio.Group
-              name='coneSetting'
-              accessibilityLabel='cone setting'
-              value={`${values.coneSetting}`}
-              onChange={(value: any) => {
-                setFieldTouched('coneSetting', true)
-                if (value === 'full') {
-                  setFieldValue('coneSetting', 'full')
-                } else {
-                  setFieldValue('coneSetting', 'half')
-                }
-              }}
-            >
-              <HStack space={4}>
-                <Radio
+          <FormControl.Label>
+            <Text color='black' fontSize='xl'>
+              Cone Setting
+            </Text>
+          </FormControl.Label>
+          <RadioGroup
+            // name='coneSetting'
+            accessibilityLabel='cone setting'
+            value={`${values.coneSetting}`}
+            onChange={(value: any) => {
+              setFieldTouched('coneSetting', true)
+              if (value === 'full') {
+                setFieldValue('coneSetting', 'full')
+              } else {
+                setFieldValue('coneSetting', 'half')
+              }
+            }}
+          >
+            <HStack space={4} marginBottom={5}>
+              <Radio value='full'>
+                <RadioIndicator style={{ width: 25, height: 25 }}>
+                  <RadioIcon
+                    as={CircleIcon}
+                    style={{ width: 15, height: 15 }}
+                  />
+                </RadioIndicator>
+                <RadioLabel selectionColor='primary' size='lg'>
+                  Full
+                </RadioLabel>
+              </Radio>
+              <Radio value='half'>
+                <RadioIndicator style={{ width: 25, height: 25 }}>
+                  <RadioIcon
+                    as={CircleIcon}
+                    style={{ width: 15, height: 15 }}
+                  />
+                </RadioIndicator>
+                <RadioLabel selectionColor='primary' size='lg'>
+                  Half
+                </RadioLabel>
+              </Radio>
+              {/* <Radio
                   colorScheme='primary'
                   value='full'
                   my={1}
@@ -197,10 +226,9 @@ const ConditionalTrapVisitFields = ({
                   _icon={{ color: 'primary' }}
                 >
                   Half
-                </Radio>
-              </HStack>
-            </Radio.Group>
-          </HStack>
+                </Radio> */}
+            </HStack>
+          </RadioGroup>
         </FormControl>
       )
     }
@@ -333,8 +361,8 @@ const ConditionalTrapVisitFields = ({
                   : ''}
               </Text>
             </FormControl.Label>
-            <Radio.Group
-              name={fieldName}
+            <RadioGroup
+              // name={fieldName}
               accessibilityLabel={fieldName}
               value={`${values[fieldName]}`}
               onChange={(value: any) => {
@@ -346,7 +374,7 @@ const ConditionalTrapVisitFields = ({
                 }
               }}
             >
-              <Radio
+              {/* <Radio
                 colorScheme='primary'
                 value='true'
                 my={1}
@@ -361,8 +389,32 @@ const ConditionalTrapVisitFields = ({
                 _icon={{ color: 'primary' }}
               >
                 No
-              </Radio>
-            </Radio.Group>
+              </Radio> */}
+              <HStack space={4} marginBottom={5}>
+                <Radio value='true'>
+                  <RadioIndicator style={{ width: 25, height: 25 }}>
+                    <RadioIcon
+                      as={CircleIcon}
+                      style={{ width: 15, height: 15 }}
+                    />
+                  </RadioIndicator>
+                  <RadioLabel selectionColor='primary' size='lg'>
+                    Yes
+                  </RadioLabel>
+                </Radio>
+                <Radio value='false'>
+                  <RadioIndicator style={{ width: 25, height: 25 }}>
+                    <RadioIcon
+                      as={CircleIcon}
+                      style={{ width: 15, height: 15 }}
+                    />
+                  </RadioIndicator>
+                  <RadioLabel selectionColor='primary' size='lg'>
+                    No
+                  </RadioLabel>
+                </Radio>
+              </HStack>
+            </RadioGroup>
           </FormControl>
         </Box>
       )

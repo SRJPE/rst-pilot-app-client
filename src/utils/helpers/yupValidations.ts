@@ -6,7 +6,7 @@ const getValidator = (field: any) => {
   if (field.fieldType === 'email') {
     validator = yup.string().email('Invalid email format')
   } else if (field.fieldType === 'input') {
-    validator = yup.number().typeError('Must be a number')
+    validator = yup.number()
     validator = validator.positive(`Measurement required`)
     if (field.minThreshold) {
       validator = validator.min(
@@ -19,6 +19,9 @@ const getValidator = (field: any) => {
         field.maxThreshold,
         `${field.displayName} must be at <= ${field.maxThreshold}`
       )
+    }
+    if (field.required) {
+      validator = validator.typeError('Must be a number')
     }
   } else if (field.fieldType === 'boolean') {
     validator = yup.boolean()

@@ -127,8 +127,7 @@ const TrapOperations = ({
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
   const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
-  const [validationSchema, setValidationSchema] =
-    useState<any>(trapOperationsSchema)
+  const [validationSchema, setValidationSchema] = useState<any>(null)
   const [formFields, setFormFields] = useState<any>(null)
   const inputRefs = useRef({}) // key: field name, value: ref
 
