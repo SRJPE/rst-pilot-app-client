@@ -38,7 +38,7 @@ const initialState: InitialStateI = {
       flowMeasureUnit: 'cfs',
       waterTemperature: null,
       waterTemperatureUnit: '°C',
-      waterTurbidity: '',
+      waterTurbidity: null,
       waterTurbidityUnit: 'ntu',
       recordTurbidityInPostProcessing: false,
       coneSetting: 'full',

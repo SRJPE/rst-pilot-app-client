@@ -125,6 +125,14 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
       schema.turbidity3 = validator
       return
     }
+    if (field.fieldName === 'riverDepth') {
+      validator = yup.number().typeError('Must be a number')
+      validator = validator.required(`Measurement required`)
+      schema.riverLeft = validator
+      schema.riverCenter = validator
+      schema.riverRight = validator
+      return
+    }
 
     validator = getValidator(field)
 

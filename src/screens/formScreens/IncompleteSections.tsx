@@ -267,15 +267,6 @@ const IncompleteSections = ({
     )
 
     const programFormFields = selectedProgramObj.programFormFields
-    const dyanimcEnvironmentalFields = [
-      'dissolvedOxygen',
-      'electricalConductivity',
-      'specificConductivity',
-      'secchi',
-      'ph',
-    ]
-
-    console.log('pff', programFormFields)
 
     const environmentalFieldsToIgnore = [
       'flowMeasure',
@@ -296,7 +287,7 @@ const IncompleteSections = ({
 
     console.log('def', def)
 
-    const baseEnvValues = [
+    let baseEnvValues = [
       {
         measureName: 'flow measure',
         measureValueNumeric: values.flowMeasure
@@ -368,6 +359,29 @@ const IncompleteSections = ({
         measureValueText: meanFNU?.toString(),
         measureUnit: null,
       })
+    }
+
+    if (def.includes('riverDepth')) {
+      baseEnvValues = baseEnvValues.concat(
+        {
+          measureName: 'riverLeft',
+          measureValueNumeric: values.riverLeft,
+          measureValueText: values.riverLeft?.toString(),
+          measureUnit: 9,
+        },
+        {
+          measureName: 'riverCenter',
+          measureValueNumeric: values.riverCenter,
+          measureValueText: values.riverCenter?.toString(),
+          measureUnit: 9,
+        },
+        {
+          measureName: 'riverRight',
+          measureValueNumeric: values.riverRight,
+          measureValueText: values.riverRight?.toString(),
+          measureUnit: 9,
+        }
+      )
     }
 
     console.log('baseEnvValues', baseEnvValues)

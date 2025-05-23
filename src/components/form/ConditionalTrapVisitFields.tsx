@@ -27,6 +27,7 @@ import CustomModal from '../Shared/CustomModal'
 import RSTRLogSheet from './RSTRLogSheet'
 import CustomSelect from '../Shared/CustomSelect'
 import { renderRequiredOrOptionalLabel } from '../../utils/utils'
+import RiverDepth from './RiverDepth'
 
 interface FieldInterface {
   id: number
@@ -101,6 +102,7 @@ const ConditionalTrapVisitFields = ({
     const isLast = index === formFields.length - 1
 
     const { fieldName, displayName, unitDefinition, fieldType } = item
+    const unitAbbrev = unitDefinition?.match(/\(([^)]+)\)/)?.[1] || undefined
 
     if (fieldName === 'waterTurbidity') {
       return null
@@ -211,22 +213,6 @@ const ConditionalTrapVisitFields = ({
                   Half
                 </RadioLabel>
               </Radio>
-              {/* <Radio
-                  colorScheme='primary'
-                  value='full'
-                  my={1}
-                  _icon={{ color: 'primary' }}
-                >
-                  Full
-                </Radio>
-                <Radio
-                  colorScheme='primary'
-                  value='half'
-                  my={1}
-                  _icon={{ color: 'primary' }}
-                >
-                  Half
-                </Radio> */}
             </HStack>
           </RadioGroup>
         </FormControl>
@@ -245,6 +231,24 @@ const ConditionalTrapVisitFields = ({
             setFieldValue,
             validationSchema,
             inputRefs,
+          }}
+        />
+      )
+    }
+
+    if (fieldName === 'riverDepth') {
+      return (
+        <RiverDepth
+          {...{
+            touched,
+            errors,
+            values,
+            handleChange,
+            handleBlur,
+            setFieldValue,
+            validationSchema,
+            inputRefs,
+            unitAbbrev,
           }}
         />
       )
@@ -285,7 +289,6 @@ const ConditionalTrapVisitFields = ({
       )
     }
     if (fieldType === 'input') {
-      const unitAbbrev = unitDefinition?.match(/\(([^)]+)\)/)?.[1] || undefined
       return (
         <Box
           key={index} // Always add a key when mapping
@@ -374,22 +377,6 @@ const ConditionalTrapVisitFields = ({
                 }
               }}
             >
-              {/* <Radio
-                colorScheme='primary'
-                value='true'
-                my={1}
-                _icon={{ color: 'primary' }}
-              >
-                Yes
-              </Radio>
-              <Radio
-                colorScheme='primary'
-                value='false'
-                my={1}
-                _icon={{ color: 'primary' }}
-              >
-                No
-              </Radio> */}
               <HStack space={4} marginBottom={5}>
                 <Radio value='true'>
                   <RadioIndicator style={{ width: 25, height: 25 }}>
