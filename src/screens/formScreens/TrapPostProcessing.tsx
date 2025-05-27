@@ -1,25 +1,27 @@
-import { Formik, yupToFormErrors, FormikProps } from 'formik'
-import { connect, useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
+import { MaterialIcons } from '@expo/vector-icons'
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { StackActions } from '@react-navigation/native'
+import * as Location from 'expo-location'
+import { Formik, yupToFormErrors } from 'formik'
 import {
-  Text,
-  FormControl,
-  Heading,
-  Input,
-  VStack,
-  HStack,
-  Radio,
-  Icon,
-  Button,
-  Pressable,
-  Popover,
   Box,
+  Button,
+  FormControl,
+  HStack,
+  Heading,
+  Icon,
   IconButton,
+  Popover,
+  Pressable,
+  Radio,
   ScrollView,
+  Text,
+  VStack,
 } from 'native-base'
-import NavButtons from '../../components/formContainer/NavButtons'
-import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DeviceEventEmitter, Keyboard } from 'react-native'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import NavButtons from '../../components/formContainer/NavButtons'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
@@ -32,20 +34,15 @@ import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
 } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
-import * as Location from 'expo-location'
-import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { AppDispatch, RootState } from '../../redux/store'
+import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
 import {
-  QARanges,
-  navigateHelper,
-  navigateFlowRightButton,
   navigateFlowLeftButton,
+  navigateFlowRightButton,
+  navigateHelper,
   showFishInputButton,
 } from '../../utils/utils'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { StackActions } from '@react-navigation/native'
-import DateTimePicker from '@react-native-community/datetimepicker'
-import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = state.tabSlice.activeTabId
@@ -92,11 +89,6 @@ const TrapPostProcessing = ({
   fishProcessingSlice: any
   userCredentialsStore: any
 }) => {
-  console.log(
-    '🚀 ~ TrapPostProcessing.tsx:94 ~ fishProcessingSlice:',
-    fishProcessingSlice
-  )
-
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
@@ -179,7 +171,6 @@ const TrapPostProcessing = ({
   }
 
   const onSubmit = (values: any, tabId: string) => {
-    console.log('🚀 ~ onSubmit ~ values', values)
     let trapVisitStartTime = null
     if (values.endingTrapStatus == 'Restart Trap') {
       trapVisitStartTime = startTime || new Date()

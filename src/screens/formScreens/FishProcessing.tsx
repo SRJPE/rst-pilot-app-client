@@ -101,9 +101,6 @@ const FishProcessing = ({
       dispatch(saveFishProcessing({ tabId, values, errors }))
       dispatch(markFishProcessingCompleted({ tabId, value: true }))
 
-      if (values) {
-      }
-
       let stepCompletedCheck = true
 
       // if skipping over fish input, set to completed

@@ -577,10 +577,6 @@ const IncompleteSections = ({
     fishProcessing: fishProcessingState,
     tabIds,
   })
-  console.log(
-    '🚀 ~ IncompleteSections.tsx:580 ~ renderFishInputButton:',
-    renderFishInputButton
-  )
 
   return (
     <>

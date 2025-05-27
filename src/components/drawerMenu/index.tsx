@@ -238,9 +238,6 @@ const DrawerMenu = ({
                     icon='ellipse'
                     listItem={true}
                     title={step.name}
-                    // isDisabled={
-                    //   reduxState[step.propName]?.completed ? false : true
-                    // }
                     onPress={() => handlePressMarkRecaptureButton(step.name)}
                   />
                 </VStack>
@@ -264,9 +261,6 @@ const DrawerMenu = ({
                   <VStack ml='4' key={index}>
                     <MenuButton
                       active={activeStep - 1 === index}
-                      // isDisabled={
-                      //   reduxState[step.propName]?.completed ? false : true
-                      // }
                       completed={step.completed}
                       onPress={() => handlePressFormButton(step.name)}
                       icon='ellipse'
