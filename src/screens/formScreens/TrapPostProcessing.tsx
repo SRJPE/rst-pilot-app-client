@@ -40,6 +40,7 @@ import {
   navigateHelper,
   navigateFlowRightButton,
   navigateFlowLeftButton,
+  showFishInputButton,
 } from '../../utils/utils'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { StackActions } from '@react-navigation/native'
@@ -66,6 +67,7 @@ const mapStateToProps = (state: RootState) => {
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
     userCredentialsStore: state.userCredentials,
+    fishProcessingSlice: state.fishProcessing,
   }
 }
 
@@ -78,6 +80,7 @@ const TrapPostProcessing = ({
   previouslyActiveTabId,
   navigationSlice,
   userCredentialsStore,
+  fishProcessingSlice,
 }: {
   navigation: any
   reduxState: any
@@ -86,8 +89,14 @@ const TrapPostProcessing = ({
   willBeHoldingFishForMarkRecapture: boolean
   previouslyActiveTabId: string | null
   navigationSlice: any
+  fishProcessingSlice: any
   userCredentialsStore: any
 }) => {
+  console.log(
+    '🚀 ~ TrapPostProcessing.tsx:94 ~ fishProcessingSlice:',
+    fishProcessingSlice
+  )
+
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
@@ -108,6 +117,12 @@ const TrapPostProcessing = ({
     const currentDate = selectedDate
     setStartTime(currentDate)
   }
+
+  const tabIds = Object.keys(tabSlice.tabs)
+  const shouldNavigateToFishInput = showFishInputButton({
+    fishProcessing: fishProcessingSlice,
+    tabIds,
+  })
 
   useEffect(() => {
     if (activeTabId) {
@@ -230,20 +245,24 @@ const TrapPostProcessing = ({
 
   const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
     if (activeTabId && activeTabId != 'placeholderId') {
-      const destination =
-        direction === 'left'
+      let destination = navigateFlowRightButton({
+        values,
+        activePage,
+        holdingForMarkRecap: willBeHoldingFishForMarkRecapture,
+        navigation,
+      })
+
+      if (direction === 'left') {
+        destination = shouldNavigateToFishInput
           ? navigateFlowLeftButton(
               activePage,
               willBeHoldingFishForMarkRecapture,
               navigation,
               values
             )
-          : navigateFlowRightButton({
-              values,
-              activePage,
-              holdingForMarkRecap: willBeHoldingFishForMarkRecapture,
-              navigation,
-            })
+          : 'Fish Processing'
+      }
+
       const callback = () => {
         navigateHelper(
           destination,
