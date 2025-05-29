@@ -559,7 +559,7 @@ const TrapPostProcessing = ({
             const fishProcessingOtherTabsValidity = tabIds.map(tabId => {
               if (tabId !== activeTabId) {
                 const tabFormValues = reduxState[tabId]?.values
-                const formIsValid = validationSchema.isValidSync(tabFormValues)
+                const formIsValid = validationSchema?.isValidSync(tabFormValues)
 
                 return formIsValid
               }

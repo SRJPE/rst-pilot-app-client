@@ -571,7 +571,7 @@ const TrapOperations = ({
       }) => {
         console.log('TO errors', errors)
         console.log('TO values', values)
-        const isValid = validationSchema.isValidSync(values)
+        const isValid = validationSchema?.isValidSync(values)
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
