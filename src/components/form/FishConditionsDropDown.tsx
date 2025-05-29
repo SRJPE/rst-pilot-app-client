@@ -65,7 +65,7 @@ export default function FishConditionsDropDown({
       open={open}
       onOpen={onOpen}
       value={values}
-      items={list}
+      items={sortedList}
       setOpen={setOpen}
       setValue={setValues}
       setItems={setList}
