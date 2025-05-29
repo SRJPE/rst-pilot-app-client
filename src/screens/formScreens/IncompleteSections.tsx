@@ -41,6 +41,7 @@ import {
   calculateRpmAvg,
   returnNullableTableId,
   getCrewValue,
+  showFishInputButton,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -106,6 +107,7 @@ const IncompleteSections = ({
     false as boolean
   )
   const hasSubmittedRef = useRef(false)
+  const tabIds = Object.keys(tabState?.tabs)
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
@@ -571,6 +573,11 @@ const IncompleteSections = ({
     setReviewValuesModalIsOpen(false)
   }
 
+  const renderFishInputButton = showFishInputButton({
+    fishProcessing: fishProcessingState,
+    tabIds,
+  })
+
   return (
     <>
       <ScrollView
@@ -582,21 +589,25 @@ const IncompleteSections = ({
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={8} p='15%'>
+        <VStack space={8} p='25px'>
           <Heading textAlign='center' padding={0}>
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>
           {stepsArray.map((step: any, idx: number) => {
-            return (
-              <IncompleteSectionButton
-                name={step.name}
-                completed={step.completed}
-                navigation={navigation}
-                key={idx}
-                step={idx + 1}
-                tabState={tabState}
-              />
+            if (
+              (step.name === 'Fish Input' && renderFishInputButton) ||
+              step.name !== 'Fish Input'
             )
+              return (
+                <IncompleteSectionButton
+                  name={step.name}
+                  completed={step.completed}
+                  navigation={navigation}
+                  key={idx}
+                  step={idx + 1}
+                  tabState={tabState}
+                />
+              )
           })}
           <Divider />
           <ReviewValuesButton

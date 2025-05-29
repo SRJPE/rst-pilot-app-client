@@ -40,6 +40,7 @@ import {
   navigateHelper,
   navigateFlowRightButton,
   navigateFlowLeftButton,
+  checkOtherTabForms,
 } from '../../utils/utils'
 import {
   TabStateI,
@@ -52,6 +53,7 @@ import { find, flow } from 'lodash'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
+import * as yup from 'yup'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -271,10 +273,12 @@ const TrapOperations = ({
         }
       })
 
-      if (stepCompletedCheck)
+      if (stepCompletedCheck) {
+        showSlideAlert(dispatch)
+      }
+
+      if (otherTabFormsValid)
         dispatch(markStepCompleted({ propName: 'trapOperations' }))
-      showSlideAlert(dispatch)
-      console.log('🚀 ~ handleSubmit ~ Status', values)
     }
   }
 
@@ -299,6 +303,13 @@ const TrapOperations = ({
     const currentDate = selectedDate
     setEndTime(currentDate)
   }
+
+  const otherTabFormsValid = checkOtherTabForms({
+    tabSlice,
+    activeTabId,
+    reduxState,
+    schema: trapOperationsSchema,
+  })
 
   useEffect(() => {
     if (activeTabId) {
@@ -387,8 +398,8 @@ const TrapOperations = ({
         errors,
         values,
         resetForm,
-        isValid,
       }) => {
+        const isValid = trapOperationsSchema.isValidSync(values)
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -396,29 +407,6 @@ const TrapOperations = ({
           Number(values.waterTemperature),
           values.waterTemperatureUnit
         )
-
-        const checkOtherTabForms = () => {
-          const tabIds = Object.keys(tabSlice.tabs)
-
-          const trapOperationsOtherTabsValidity = tabIds.map(tabId => {
-            if (tabId !== activeTabId) {
-              const tabFormValues = reduxState[tabId]?.values
-              const formIsValid =
-                trapOperationsSchema.isValidSync(tabFormValues)
-              return formIsValid
-            }
-
-            return
-          })
-
-          const tabIncomplete = trapOperationsOtherTabsValidity.some(
-            result => result === false
-          )
-
-          if (tabIncomplete) return false
-
-          return true
-        }
 
         const handleValuesCopy = () => {
           const tabIds = Object.keys(tabSlice.tabs)
@@ -444,15 +432,15 @@ const TrapOperations = ({
                   tabId,
                   values: {
                     ...tabIdValues,
-                    coneSetting: tabIdValues.coneSetting,
-                    reasonNotFunc: tabIdValues.reasonNotFunc,
+                    coneSetting: tabIdValues?.coneSetting,
+                    reasonNotFunc: tabIdValues?.reasonNotFunc,
                     recordTurbidityInPostProcessing:
                       values.recordTurbidityInPostProcessing,
-                    rpm1: tabIdValues.rpm1,
-                    rpm2: tabIdValues.rpm2,
-                    rpm3: tabIdValues.rpm3,
-                    trapStatus: tabIdValues.trapStatus,
-                    trapVisitStartTime: tabIdValues.trapVisitStartTime,
+                    rpm1: tabIdValues?.rpm1,
+                    rpm2: tabIdValues?.rpm2,
+                    rpm3: tabIdValues?.rpm3,
+                    trapStatus: tabIdValues?.trapStatus,
+                    trapVisitStartTime: tabIdValues?.trapVisitStartTime,
                     flowMeasure: values.flowMeasure,
                     flowMeasureUnit: values.flowMeasureUnit,
                     waterTurbidity: values.waterTurbidity,
@@ -462,7 +450,7 @@ const TrapOperations = ({
                     trapVisitStopTime:
                       tabId === activeTabId
                         ? endTime
-                        : tabIdValues.trapVisitStopTime,
+                        : tabIdValues?.trapVisitStopTime,
                   },
                   errors,
                 })
@@ -470,7 +458,6 @@ const TrapOperations = ({
             }
           })
         }
-        const otherTabFormsValid = checkOtherTabForms()
 
         const navButtons = useMemo(() => {
           return (
@@ -624,7 +611,7 @@ const TrapOperations = ({
                       )}
                     />
                   </FormControl>
-                  {values.trapStatus.length > 0 && (
+                  {values.trapStatus?.length > 0 && (
                     <FormControl>
                       <VStack>
                         <HStack space={2}>
@@ -702,7 +689,7 @@ const TrapOperations = ({
                       selectOptions={whyTrapNotFunctioning}
                     />
                   )}
-                  {values.trapStatus.length > 0 && (
+                  {values.trapStatus?.length > 0 && (
                     <>
                       <FormControl w='30%'>
                         <HStack space={4} alignItems='center'>

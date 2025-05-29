@@ -28,6 +28,7 @@ import {
   navigateHelper,
   navigateFlowRightButton,
   navigateFlowLeftButton,
+  checkOtherTabForms,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -87,11 +88,19 @@ const FishProcessing = ({
     }
   }
 
+  const otherTabFormsValid = checkOtherTabForms({
+    tabSlice,
+    activeTabId,
+    reduxState,
+    schema: fishProcessingSchema,
+  })
+
   const onSubmit = (values: any, tabId: string | null) => {
     if (tabId) {
       const errors = checkForErrors(values)
       dispatch(saveFishProcessing({ tabId, values, errors }))
       dispatch(markFishProcessingCompleted({ tabId, value: true }))
+
       let stepCompletedCheck = true
 
       // if skipping over fish input, set to completed
@@ -115,13 +124,13 @@ const FishProcessing = ({
           reduxState[allTabId]?.values?.fishProcessedResult === 'processed fish'
         ) {
           setFishInputCompleted = false
+          dispatch(markStepCompleted({ propName: 'fishInput' }))
         }
       })
 
-      if (stepCompletedCheck)
+      if (stepCompletedCheck && otherTabFormsValid) {
         dispatch(markStepCompleted({ propName: 'fishProcessing' }))
-      dispatch(markStepCompleted({ propName: 'fishInput' }))
-      console.log('🚀 ~ handleSubmit~ FishProcessing', values)
+      }
     }
   }
 
