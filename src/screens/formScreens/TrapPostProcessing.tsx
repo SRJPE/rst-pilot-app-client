@@ -1,28 +1,31 @@
-import { Formik, yupToFormErrors, FormikProps } from 'formik'
-import { connect, useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
+import { MaterialIcons } from '@expo/vector-icons'
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { StackActions } from '@react-navigation/native'
+import * as Location from 'expo-location'
+import { Formik, yupToFormErrors } from 'formik'
 import {
-  Text,
-  FormControl,
-  Heading,
-  Input,
-  VStack,
-  HStack,
-  Radio,
-  Icon,
-  Button,
-  Pressable,
-  Popover,
   Box,
+  Button,
+  FormControl,
+  HStack,
+  Heading,
+  Icon,
   IconButton,
+  Popover,
+  Pressable,
+  Radio,
   ScrollView,
+  Text,
+  VStack,
 } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import {
   trapPostProcessingSchema,
   generateDynamicTrapPostProcessingSchema,
 } from '../../utils/helpers/yupValidations'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DeviceEventEmitter, Keyboard } from 'react-native'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
@@ -35,21 +38,18 @@ import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
 } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
-import { MaterialIcons } from '@expo/vector-icons'
-import * as Location from 'expo-location'
 import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import {
   QARanges,
   navigateHelper,
   navigateFlowRightButton,
   navigateFlowLeftButton,
+  showFishInputButton,
 } from '../../utils/utils'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { StackActions } from '@react-navigation/native'
-import DateTimePicker from '@react-native-community/datetimepicker'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
 import { find } from 'lodash'
+import { AppDispatch, RootState } from '../../redux/store'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = state.tabSlice.activeTabId
@@ -80,6 +80,7 @@ const mapStateToProps = (state: RootState) => {
     selectedTrapLocationId:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.trapLocationId,
+    fishProcessingSlice: state.fishProcessing,
   }
 }
 
@@ -105,11 +106,11 @@ const TrapPostProcessing = ({
   willBeHoldingFishForMarkRecapture: boolean
   previouslyActiveTabId: string | null
   navigationSlice: any
+  fishProcessingSlice: any
   userCredentialsStore: any
   visitSetupDefaults: any
   selectedProgramId: any
   trapOperationsStore: any
-  fishProcessingSlice: any
   selectedTrapLocationId: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -139,6 +140,12 @@ const TrapPostProcessing = ({
     const currentDate = selectedDate
     setStartTime(currentDate)
   }
+
+  const tabIds = Object.keys(tabSlice.tabs)
+  const shouldNavigateToFishInput = showFishInputButton({
+    fishProcessing: fishProcessingSlice,
+    tabIds,
+  })
 
   useEffect(() => {
     const currentProgramInfo = find(
@@ -234,7 +241,6 @@ const TrapPostProcessing = ({
   }
 
   const onSubmit = (values: any, tabId: string) => {
-    console.log('🚀 ~ onSubmit ~ values', values)
     let trapVisitStartTime = null
     if (values.endingTrapStatus == 'Restart Trap') {
       trapVisitStartTime = startTime || new Date()
@@ -303,20 +309,24 @@ const TrapPostProcessing = ({
       values.fishProcessedResult =
         fishProcessingSlice?.[activeTabId]?.values?.fishProcessedResult
 
-      const destination =
-        direction === 'left'
+      let destination = navigateFlowRightButton({
+        values,
+        activePage,
+        holdingForMarkRecap: willBeHoldingFishForMarkRecapture,
+        navigation,
+      })
+
+      if (direction === 'left') {
+        destination = shouldNavigateToFishInput
           ? navigateFlowLeftButton(
               activePage,
               willBeHoldingFishForMarkRecapture,
               navigation,
               values
             )
-          : navigateFlowRightButton({
-              values,
-              activePage,
-              holdingForMarkRecap: willBeHoldingFishForMarkRecapture,
-              navigation,
-            })
+          : 'Fish Processing'
+      }
+
       const callback = () => {
         navigateHelper(
           destination,

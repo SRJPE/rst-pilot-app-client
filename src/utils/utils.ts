@@ -2,6 +2,52 @@ import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
 import { every, some, sortBy, flatten, uniqBy } from 'lodash'
 import { ReleaseMarkI } from './interfaces'
+import { ObjectSchema } from 'yup'
+import type { InitialStateI as FishProcessingSliceState } from '../redux/reducers/formSlices/fishProcessingSlice'
+
+export const checkOtherTabForms = ({
+  tabSlice,
+  activeTabId,
+  reduxState,
+  schema,
+}: {
+  tabSlice: any
+  activeTabId: string | null
+  reduxState: any
+  schema: ObjectSchema<any>
+}) => {
+  const tabIds = Object.keys(tabSlice.tabs)
+
+  const otherTabsValidity = tabIds.map(tabId => {
+    if (tabId !== activeTabId) {
+      const tabFormValues = reduxState[tabId]?.values
+      const formIsValid = schema.isValidSync(tabFormValues)
+      return formIsValid
+    }
+
+    return
+  })
+
+  const tabIncomplete = otherTabsValidity.some(result => result === false)
+
+  if (tabIncomplete) return false
+  return true
+}
+
+export const showFishInputButton = ({
+  fishProcessing,
+  tabIds,
+}: {
+  fishProcessing: FishProcessingSliceState
+  tabIds: Array<string>
+}) => {
+  const fishInputRequired = tabIds.some(
+    (tabId: any) =>
+      fishProcessing[tabId]?.values?.fishProcessedResult === 'processed fish'
+  )
+
+  return fishInputRequired
+}
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   //returns an alphabetically sorted copy of the original array

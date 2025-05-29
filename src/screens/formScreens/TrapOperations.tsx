@@ -43,6 +43,7 @@ import {
   navigateHelper,
   navigateFlowRightButton,
   navigateFlowLeftButton,
+  checkOtherTabForms,
 } from '../../utils/utils'
 import {
   TabStateI,
@@ -58,6 +59,7 @@ import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVis
 import TrapEndDateAndTime from '../../components/form/TrapEndDateAndTime'
 import RPMBefore from '../../components/form/RPMBefore'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import * as yup from 'yup'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -310,8 +312,13 @@ const TrapOperations = ({
         }
       })
 
-      if (stepCompletedCheck)
+      if (stepCompletedCheck) {
+        showSlideAlert(dispatch)
+      }
+
+      if (otherTabFormsValid) {
         dispatch(markStepCompleted({ propName: 'trapOperations' }))
+      }
 
       if (values.gearStatus === 'S') {
         dispatch(markStepCompleted({ propName: 'fishProcessing' }))
@@ -343,6 +350,13 @@ const TrapOperations = ({
     const currentDate = selectedDate
     setEndTime(currentDate)
   }
+
+  const otherTabFormsValid = checkOtherTabForms({
+    tabSlice,
+    activeTabId,
+    reduxState,
+    schema: validationSchema,
+  })
 
   useEffect(() => {
     if (activeTabId) {
@@ -554,10 +568,10 @@ const TrapOperations = ({
         errors,
         values,
         resetForm,
-        isValid,
       }) => {
         console.log('TO errors', errors)
         console.log('TO values', values)
+        const isValid = validationSchema.isValidSync(values)
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -612,15 +626,15 @@ const TrapOperations = ({
                   tabId,
                   values: {
                     ...tabIdValues,
-                    coneSetting: tabIdValues.coneSetting,
-                    reasonNotFunc: tabIdValues.reasonNotFunc,
+                    coneSetting: tabIdValues?.coneSetting,
+                    reasonNotFunc: tabIdValues?.reasonNotFunc,
                     recordTurbidityInPostProcessing:
                       values.recordTurbidityInPostProcessing,
-                    rpm1: tabIdValues.rpm1,
-                    rpm2: tabIdValues.rpm2,
-                    rpm3: tabIdValues.rpm3,
-                    trapStatus: tabIdValues.trapStatus,
-                    trapVisitStartTime: tabIdValues.trapVisitStartTime,
+                    rpm1: tabIdValues?.rpm1,
+                    rpm2: tabIdValues?.rpm2,
+                    rpm3: tabIdValues?.rpm3,
+                    trapStatus: tabIdValues?.trapStatus,
+                    trapVisitStartTime: tabIdValues?.trapVisitStartTime,
                     flowMeasure: values.flowMeasure,
                     flowMeasureUnit: values.flowMeasureUnit,
                     waterTurbidity: values.waterTurbidity,
@@ -630,7 +644,7 @@ const TrapOperations = ({
                     trapVisitStopTime:
                       tabId === activeTabId
                         ? endTime
-                        : tabIdValues.trapVisitStopTime,
+                        : tabIdValues?.trapVisitStopTime,
                   },
                   errors,
                 })
@@ -638,9 +652,9 @@ const TrapOperations = ({
             }
           })
         }
-        const otherTabFormsValid = checkOtherTabForms()
 
         const navButtons = useMemo(() => {
+          console.log(isValid, otherTabFormsValid)
           return (
             <NavButtons
               navigation={navigation}
@@ -668,6 +682,7 @@ const TrapOperations = ({
           values,
           isValid,
           endTime,
+          otherTabFormsValid,
         ])
 
         useEffect(() => {
@@ -811,7 +826,7 @@ const TrapOperations = ({
                       selectOptions={whyTrapNotFunctioning}
                     />
                   )}
-                  {values.trapStatus.length > 0 && (
+                  {values.trapStatus?.length > 0 && (
                     <>
                       {renderRPMBefore({
                         touched: touched,

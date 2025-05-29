@@ -26,6 +26,15 @@ export default function FishConditionsDropDown({
 }) {
   const [values, setValues] = useState((editModeValue || []) as string[])
 
+  const [sortedList, setSortedList] = useState(
+    list.sort((a: any, b: any) => a.label.localeCompare(b.label))
+  )
+
+  useEffect(() => {
+    // Sort the list alphabetically by label
+    setSortedList(list.sort((a: any, b: any) => a.label.localeCompare(b.label)))
+  }, [list])
+
   useEffect(() => {
     //if using formik
     if (setFieldTouched && setFieldValue) {
@@ -56,7 +65,7 @@ export default function FishConditionsDropDown({
       open={open}
       onOpen={onOpen}
       value={values}
-      items={list}
+      items={sortedList}
       setOpen={setOpen}
       setValue={setValues}
       setItems={setList}
@@ -70,7 +79,7 @@ export default function FishConditionsDropDown({
       badgeDotColors={['#007C7C']}
       placeholder='Select up to three fish conditions'
       searchPlaceholder='Search...'
-      maxHeight={175}
+      maxHeight={300}
       style={{
         marginTop: 4,
         borderColor: '#d4d4d4d4',

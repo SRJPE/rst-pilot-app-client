@@ -10,7 +10,7 @@ const ReviewValuesButton = ({
       <Button
         rounded='xs'
         alignSelf='center'
-        w='104%'
+        w='100%'
         h='100%'
         borderRadius='5'
         variant={'outline'}
