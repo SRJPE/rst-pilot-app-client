@@ -118,6 +118,7 @@ const FishInputDataTable = ({
       delete dataObj.captureRunClassMethod
       delete dataObj.fishObjId
       delete dataObj.milting
+      delete dataObj.eggs
       dataObj = pick(dataObj, sortedDataByHeaders)
       let dataObjPadded = { ...emptyTableData, ...dataObj }
 

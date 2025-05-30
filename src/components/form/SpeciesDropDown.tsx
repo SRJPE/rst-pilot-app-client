@@ -157,6 +157,9 @@ export default function SpeciesDropDown({
         onChangeSearchText={onChangeSearchText}
         setValue={setValue}
         searchable={true}
+        searchTextInputProps={{
+          autoCorrect: false,
+        }}
         setItems={setList}
         disableLocalSearch={true} // required for remote search
         multiple={false}

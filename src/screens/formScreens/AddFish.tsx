@@ -174,6 +174,11 @@ const AddFishContent = ({
         touched: true,
         required: false,
       }),
+      eggs: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
       comments: createFormValueDefault({ value: null }),
@@ -198,6 +203,11 @@ const AddFishContent = ({
         required: true,
       }),
       milting: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
+      eggs: createFormValueDefault({
         value: false,
         touched: true,
         required: false,
@@ -227,6 +237,11 @@ const AddFishContent = ({
         required: true,
       }),
       milting: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
+      eggs: createFormValueDefault({
         value: false,
         touched: true,
         required: false,
@@ -358,6 +373,16 @@ const AddFishContent = ({
         })
   )
 
+  const [eggs, setEggs] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.eggs
+      : createFormValueDefault({
+          value: route.params?.editModeData.eggs,
+          touched: true,
+          required: false,
+        })
+  )
+
   const [plusCountMethod, setPlusCountMethod] = useState<FormValueI>(
     !route.params?.editModeData
       ? stateDefaults.whenSpeciesChinook.plusCountMethod
@@ -391,6 +416,7 @@ const AddFishContent = ({
     existingMarks,
     dead,
     milting,
+    eggs,
     plusCountMethod,
   ])
 
@@ -407,6 +433,7 @@ const AddFishContent = ({
       existingMarks,
       dead,
       milting,
+      eggs,
       plusCountMethod,
     ]
     let hasError = false
@@ -443,6 +470,7 @@ const AddFishContent = ({
             return formField?.formSection === 'Fish Input'
           }
         )
+        console.log('fishInputFields', fishInputFields)
         setConditionalFishInputFields(keyBy(fishInputFields, 'fieldName'))
       } else {
         setConditionalFishInputFields({})
@@ -472,6 +500,7 @@ const AddFishContent = ({
     setExistingMarks(stateDefaults[identifier].existingMarks)
     setDead(stateDefaults[identifier].dead)
     setMilting(stateDefaults[identifier].milting)
+    setEggs(stateDefaults[identifier].eggs)
     setPlusCountMethod(stateDefaults[identifier].plusCountMethod)
     setFormHasError(true)
     setFishUID(uid())
@@ -558,6 +587,7 @@ const AddFishContent = ({
       ],
       dead: dead.value,
       milting: milting.value,
+      eggs: eggs.value,
       plusCountMethod: plusCountMethod.value,
       comments: comments.value,
       appliedMarks: Array.isArray(appliedMarks?.value)
@@ -1084,6 +1114,51 @@ const AddFishContent = ({
                                   setMilting({ ...milting, value: true })
                                 } else {
                                   setMilting({ ...milting, value: false })
+                                }
+                              }}
+                            >
+                              <HStack space={4}>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='true'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  Yes
+                                </Radio>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='false'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  No
+                                </Radio>
+                              </HStack>
+                            </Radio.Group>
+                          </HStack>
+                        </FormControl>
+                      )}
+                    </HStack>
+                    <HStack>
+                      {conditionalFishInputFields?.['eggs'] && (
+                        <FormControl w='1/3'>
+                          <HStack space={4} alignItems='center'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                Eggs
+                              </Text>
+                            </FormControl.Label>
+
+                            <Radio.Group
+                              name='eggs'
+                              accessibilityLabel='eggs'
+                              value={`${eggs.value}`}
+                              onChange={(value: any) => {
+                                if (value === 'true') {
+                                  setEggs({ ...eggs, value: true })
+                                } else {
+                                  setEggs({ ...eggs, value: false })
                                 }
                               }}
                             >
