@@ -412,11 +412,43 @@ const TrapOperations = ({
     }
   }
 
+  const resetNonExistentFields = useCallback(
+    (values: any, setField: any) => {
+      if (!values || !formFields || !validationSchema) {
+        return
+      }
+      const formFieldsToKeep = [
+        'flowMeasureUnit',
+        'waterTemperatureUnit',
+        'waterTurbidityUnit',
+        'recordTurbidityInPostProcessing',
+        'coneSetting',
+        'trapVisitStopTime',
+        'trapVisitStartTime',
+      ]
+      const extraFields = Object.keys(values).filter(
+        key =>
+          values[key] !== null &&
+          values[key] !== undefined &&
+          !formFieldsToKeep.includes(key) &&
+          !(
+            validationSchema?.fields &&
+            Object.prototype.hasOwnProperty.call(validationSchema.fields, key)
+          )
+      )
+      if (extraFields.length) {
+        extraFields.forEach((field: string) => {
+          setField(field, null)
+        })
+      }
+    },
+    [formFields, validationSchema]
+  )
+
   const renderTrappingDateAndTime = useCallback(
     (values: any, setFieldValue: any) => {
       // no program form fields have been set
       // assume has not been customized
-      console.log('formFields', formFields)
       if (
         !selectedProgramObj?.programFormFields?.length ||
         !formFields.length ||
@@ -529,8 +561,6 @@ const TrapOperations = ({
     }
   }
 
-  console.log('vs,', validationSchema)
-
   return (
     <Formik
       validationSchema={validationSchema}
@@ -569,8 +599,8 @@ const TrapOperations = ({
         values,
         resetForm,
       }) => {
-        console.log('TO errors', errors)
-        console.log('TO values', values)
+        resetNonExistentFields(values, setFieldValue)
+
         const isValid = validationSchema?.isValidSync(values)
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
@@ -580,27 +610,27 @@ const TrapOperations = ({
           values.waterTemperatureUnit
         )
 
-        const checkOtherTabForms = () => {
-          const tabIds = Object.keys(tabSlice.tabs)
+        // const checkOtherTabForms = () => {
+        //   const tabIds = Object.keys(tabSlice.tabs)
 
-          const trapOperationsOtherTabsValidity = tabIds.map(tabId => {
-            if (tabId !== activeTabId) {
-              const tabFormValues = reduxState[tabId]?.values
-              const formIsValid = validationSchema.isValidSync(tabFormValues)
-              return formIsValid
-            }
+        //   const trapOperationsOtherTabsValidity = tabIds.map(tabId => {
+        //     if (tabId !== activeTabId) {
+        //       const tabFormValues = reduxState[tabId]?.values
+        //       const formIsValid = validationSchema.isValidSync(tabFormValues)
+        //       return formIsValid
+        //     }
 
-            return
-          })
+        //     return
+        //   })
 
-          const tabIncomplete = trapOperationsOtherTabsValidity.some(
-            result => result === false
-          )
+        //   const tabIncomplete = trapOperationsOtherTabsValidity.some(
+        //     result => result === false
+        //   )
 
-          if (tabIncomplete) return false
+        //   if (tabIncomplete) return false
 
-          return true
-        }
+        //   return true
+        // }
 
         const handleValuesCopy = () => {
           const tabIds = Object.keys(tabSlice.tabs)
