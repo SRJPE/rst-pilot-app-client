@@ -94,6 +94,19 @@ const VisitSetup = ({
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
   const [formFields, setFormFields] = useState<any>(null)
 
+  const checkYoloProgram = useCallback(
+    (programId: number | null) =>
+      visitSetupDefaultsState.programs.find(
+        (program: any) => program.id === programId
+      )?.programName === 'Yolo Bypass Fish Monitoring Program (YBFMP)',
+    [visitSetupDefaultsState.programs]
+  )
+
+  const isYoloProgram = useMemo(
+    () => checkYoloProgram(selectedProgramId),
+    [selectedProgramId, checkYoloProgram]
+  )
+
   const onTrapOpen = useCallback(() => {
     setCrewDropDownOpen(false)
   }, [])
@@ -242,11 +255,15 @@ const VisitSetup = ({
         }
 
         values?.trapName?.forEach((trapName: string) => {
-          if (currentTabsTrapNames.includes(trapName)) {
+          if (currentTabsTrapNames.includes(trapName) || isYoloProgram) {
             const tabIds = Object.keys(tabSlice.tabs)
-            const tabIdToUpdate = tabIds.filter(id => {
-              return tabSlice.tabs[id].name == trapName
-            })[0]
+
+            const tabIdToUpdate = isYoloProgram
+              ? tabIds[0]
+              : tabIds.filter(id => {
+                  return tabSlice.tabs[id].name == trapName
+                })[0]
+
             dispatch(
               saveVisitSetup({
                 tabId: tabIdToUpdate,
@@ -636,8 +653,6 @@ const VisitSetup = ({
                         selectedValue={values.trapSite}
                         placeholder='Select Trap Site'
                         onValueChange={(itemValue: string) => {
-                          console.log('itemValue', itemValue)
-                          dispatch(resetTabsSlice())
                           const showTrapName =
                             shouldShowTrapNameField(itemValue)
                           setFieldValue('trapSite', itemValue).then(() => {
