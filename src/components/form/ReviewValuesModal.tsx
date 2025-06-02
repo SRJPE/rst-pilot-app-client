@@ -24,6 +24,7 @@ type Props = {
   isOpen: boolean
   tabState: any
   visitSetupDefaultState?: any
+  fieldCheck?: any
 }
 
 const getFilteredTrapOperationsState = (trapOperationsState: any) => {
@@ -114,6 +115,7 @@ export function generateAccordionHtmlFromTabValues({
   routes,
   formValues,
   visitSetupDefaultState,
+  fieldCheck,
 }: any) {
   const sectionHtml = (
     title: string,
@@ -177,7 +179,10 @@ export function generateAccordionHtmlFromTabValues({
       </head>
       <body>
       ${routes.map((route: any) => {
-        const visitSetupState = formValues?.visitSetupState?.[route.key]?.values
+        const visitSetupState = {
+          ...formValues?.visitSetupState?.[route.key]?.values,
+          fieldCheck,
+        }
         const trapOperationsState = getFilteredTrapOperationsState(
           formValues?.trapOperationsState?.[route.key]?.values
         )
@@ -333,6 +338,14 @@ const AccordionView = ({
             programFormFieldsObj={programFormFieldsObj}
           />
         )}
+        {'fieldCheck' in tabValues.incompleteSectionsState && (
+          <AccordionListItem
+            field={'fieldCheck'}
+            sectionValues={tabValues.incompleteSectionsState}
+            sectionTitle='Visit Setup'
+            programFormFieldsObj={programFormFieldsObj}
+          />
+        )}
         <Divider width={'97%'} alignSelf={'center'} />
       </List.Accordion>
       <List.Accordion title='Trap Operations' titleStyle={{ fontSize: 20 }}>
@@ -422,6 +435,7 @@ const ReviewValuesModal = ({
   isOpen,
   tabState,
   visitSetupDefaultState,
+  fieldCheck,
 }: Props) => {
   const [index, setIndex] = useState(0)
   const [routes, setRoutes] = useState(
@@ -449,6 +463,9 @@ const ReviewValuesModal = ({
             fishInputState: formValues?.fishInputState?.[tab.key]?.fishStore,
             trapPostProcessingState:
               formValues?.trapPostProcessingState?.[tab.key]?.values,
+            incompleteSectionsState: {
+              fieldCheck,
+            },
           }}
           visitSetupDefaultState={visitSetupDefaultState}
         />
@@ -474,6 +491,7 @@ const ReviewValuesModal = ({
       routes,
       formValues,
       visitSetupDefaultState,
+      fieldCheck,
     })
     const { uri } = await Print.printToFileAsync({ html })
     try {

@@ -113,13 +113,29 @@ const IncompleteSections = ({
     conditionalIncompleteSectionFields,
     setConditionalIncompleteSectionFields,
   ] = useState({} as any)
-  const [fieldCheckValue, setFieldCheckValue] = useState(null as any)
+  const [
+    conditionalIncompleteSectionValues,
+    setConditionalIncompleteSectionValues,
+  ] = useState({} as any)
+  const [isValid, setIsValid] = useState(false)
   const tabIds = Object.keys(tabState?.tabs)
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
     dispatch(checkIfFormIsComplete())
   }, [])
+
+  useEffect(() => {
+    // if no conditional fields, then section is valid
+    if (!Object.keys(conditionalIncompleteSectionValues).length) {
+      setIsValid(true)
+    } else if (Object.keys(conditionalIncompleteSectionValues).length > 0) {
+      const isValid = Object.values(conditionalIncompleteSectionValues).every(
+        value => value !== undefined && value !== null && value !== ''
+      )
+      setIsValid(isValid)
+    }
+  }, [conditionalIncompleteSectionFields, conditionalIncompleteSectionValues])
 
   const emitSubmission = () => {
     if (isSubmitting) return // If already submitting, return early
@@ -214,15 +230,23 @@ const IncompleteSections = ({
           currentProgramInfo?.programFormFields.filter((formField: any) => {
             return formField?.formSection === 'Incomplete Sections'
           })
-        console.log(
-          'incompleteSections incompleteSectionFields',
-          incompleteSectionFields
-        )
-        setConditionalIncompleteSectionFields(
-          keyBy(incompleteSectionFields, 'fieldName')
+
+        const sectionFieldsObj = keyBy(incompleteSectionFields, 'fieldName')
+
+        setConditionalIncompleteSectionFields(sectionFieldsObj)
+
+        setConditionalIncompleteSectionValues(
+          Object.keys(sectionFieldsObj).reduce<{ [key: string]: any }>(
+            (obj, key) => {
+              obj[key] = undefined
+              return obj
+            },
+            {}
+          )
         )
       } else {
         setConditionalIncompleteSectionFields({})
+        setConditionalIncompleteSectionValues({})
       }
     }
   }, [visitSetupDefaultState.programs])
@@ -457,7 +481,7 @@ const IncompleteSections = ({
         crew: getCrewValue({
           visitSetupValues: visitSetupState[id].values,
           visitSetupDefaultState,
-          fieldCheckValue,
+          fieldCheckValue: conditionalIncompleteSectionValues['fieldCheck'],
         }),
         programId,
         visitTypeId: null,
@@ -860,10 +884,14 @@ const IncompleteSections = ({
                 label={
                   conditionalIncompleteSectionFields['fieldCheck'].displayName
                 }
-                selectedValue={fieldCheckValue}
+                selectedValue={conditionalIncompleteSectionValues['fieldCheck']}
                 placeholder='Select Field Check'
                 onValueChange={(itemValue: string) => {
-                  setFieldCheckValue(itemValue)
+                  setConditionalIncompleteSectionValues((prevFields: any) => {
+                    const updatedFields = cloneDeep(prevFields)
+                    updatedFields['fieldCheck'] = itemValue
+                    return updatedFields
+                  }) // Update the state with the selected value
                 }}
                 selectOptions={
                   tabState?.activeTabId
@@ -895,12 +923,14 @@ const IncompleteSections = ({
           }}
           tabState={tabState}
           visitSetupDefaultState={visitSetupDefaultState}
+          fieldCheck={conditionalIncompleteSectionValues['fieldCheck']}
         />
       )}
       <NavButtons
         navigation={navigation}
         handleSubmit={emitSubmission}
         shouldProceedToLoadingScreen={true}
+        isValid={isValid}
       />
     </>
   )

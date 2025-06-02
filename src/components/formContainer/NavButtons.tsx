@@ -334,7 +334,7 @@ const NavButtons = ({
         // console.log('errors', errors)
         return false
       case 'Incomplete Sections':
-        return !isFormComplete
+        return !isFormComplete || !isValid
       case 'Non Functional Trap':
         return false
       case 'Fish Input':
