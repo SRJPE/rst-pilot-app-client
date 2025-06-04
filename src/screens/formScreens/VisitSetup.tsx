@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Formik } from 'formik'
+import { Formik, FormikErrors } from 'formik'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
@@ -33,7 +33,7 @@ import {
   TabStateI,
   resetTabsSlice,
 } from '../../redux/reducers/formSlices/tabSlice'
-import { uniqBy, sortBy, find } from 'lodash'
+import { uniqBy, sortBy, find, set } from 'lodash'
 import { DeviceEventEmitter, TouchableWithoutFeedback } from 'react-native'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import { uid } from 'uid'
@@ -46,6 +46,7 @@ import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
 import { generateTrapVisitSchema } from '../../utils/helpers/yupValidations'
+import { InferType } from 'yup'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -94,17 +95,14 @@ const VisitSetup = ({
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
   const [formFields, setFormFields] = useState<any>(null)
 
-  const checkYoloProgram = useCallback(
-    (programId: number | null) =>
-      visitSetupDefaultsState.programs.find(
-        (program: any) => program.id === programId
-      )?.programName === 'Yolo Bypass Fish Monitoring Program (YBFMP)',
-    [visitSetupDefaultsState.programs]
-  )
+  const isSiteAndTrapNameEqual = useCallback(
+    (visitSetupValues: InferType<typeof trapVisitSchema>) => {
+      const siteAndTrapNameEqual =
+        visitSetupValues?.trapSite === visitSetupValues?.trapName?.join('')
 
-  const isYoloProgram = useMemo(
-    () => checkYoloProgram(selectedProgramId),
-    [selectedProgramId, checkYoloProgram]
+      return siteAndTrapNameEqual || false
+    },
+    []
   )
 
   const onTrapOpen = useCallback(() => {
@@ -174,6 +172,10 @@ const VisitSetup = ({
     const programId = selectedProgramId
     const payload = {
       ...values,
+      trapName:
+        typeof values.trapName === 'string'
+          ? [values.trapName]
+          : values.trapName,
       programId,
     }
     // if no current tabs, create all new tabs
@@ -255,10 +257,11 @@ const VisitSetup = ({
         }
 
         values?.trapName?.forEach((trapName: string) => {
-          if (currentTabsTrapNames.includes(trapName) || isYoloProgram) {
+          const siteTrapMatch = isSiteAndTrapNameEqual(values)
+          if (currentTabsTrapNames.includes(trapName) || siteTrapMatch) {
             const tabIds = Object.keys(tabSlice.tabs)
 
-            const tabIdToUpdate = isYoloProgram
+            const tabIdToUpdate = siteTrapMatch
               ? tabIds[0]
               : tabIds.filter(id => {
                   return tabSlice.tabs[id].name == trapName
