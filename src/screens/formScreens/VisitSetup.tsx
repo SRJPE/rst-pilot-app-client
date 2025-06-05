@@ -249,7 +249,7 @@ const VisitSetup = ({
           name => !values.trapName.includes(name)
         )
 
-        if (missingFromTrapNames.length > 0) {
+        if (missingFromTrapNames.length > 0 && showTrapNameField) {
           Object.keys(tabSlice.tabs).forEach(tabId => {
             const tabTrapName = tabSlice.tabs[tabId].name
 
@@ -280,6 +280,7 @@ const VisitSetup = ({
                 isPaperEntry,
               })
             )
+            console.log('tabIdToUpdate', tabIdToUpdate)
             dispatch(
               setTabName({
                 tabId: tabIdToUpdate,
