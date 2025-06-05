@@ -245,12 +245,15 @@ const VisitSetup = ({
 
       // if trapNames, iterate through all trap names and create / overwrite / delete tabs
       if (values.trapName && Array.isArray(values?.trapName)) {
-        // remove any tabs that are not in values.trapName
-        if (values.trapName.length < currentTabsTrapNames.length) {
+        const missingFromTrapNames = currentTabsTrapNames.filter(
+          name => !values.trapName.includes(name)
+        )
+
+        if (missingFromTrapNames.length > 0) {
           Object.keys(tabSlice.tabs).forEach(tabId => {
             const tabTrapName = tabSlice.tabs[tabId].name
 
-            if (!values.trapName.includes(tabTrapName)) {
+            if (missingFromTrapNames.includes(tabTrapName)) {
               dispatch(deleteTab(tabId))
             }
           })
@@ -356,7 +359,6 @@ const VisitSetup = ({
   }
 
   const updateSelectedProgram = (streamName: string) => {
-    console.log('updateSelectedProgram', streamName)
     dispatch(resetTabsSlice())
     dispatch(resetVisitSetupSlice())
     let programId = null
@@ -537,12 +539,12 @@ const VisitSetup = ({
         handleBlur,
       }) => {
         useEffect(() => {
-          if (
-            tabSlice.previouslyActiveTabId &&
-            navigationSlice.activeStep === 1
-          ) {
-            onSubmit(values, tabSlice.previouslyActiveTabId)
-          }
+          // if (
+          //   tabSlice.previouslyActiveTabId &&
+          //   navigationSlice.activeStep === 1
+          // ) {
+          //   onSubmit(values, tabSlice.previouslyActiveTabId)
+          // }
 
           if (
             tabSlice?.activeTabId &&
@@ -562,9 +564,7 @@ const VisitSetup = ({
               visitSetupState[tabSlice?.activeTabId]?.values?.trapSite
             )
           }
-        }, [tabSlice.previouslyActiveTabId])
-
-        console.log('errors', errors)
+        }, [tabSlice.previouslyActiveTabId, tabSlice.activeTabId])
 
         return (
           <TouchableWithoutFeedback

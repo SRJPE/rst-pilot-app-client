@@ -52,6 +52,7 @@ export const tabsSlice = createSlice({
       })
       const errorCount = 0
       const errorDetails = {}
+      console.log('Creating tab:', tabName)
       state.tabs[tabId] = {
         name: tabName,
         trapSite,

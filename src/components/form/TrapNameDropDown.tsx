@@ -3,6 +3,7 @@ import { View, Text } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { useFormikContext } from 'formik'
+import { uniq, flatten } from 'lodash'
 
 export default function TrapNameDropDown({
   open,
@@ -34,6 +35,16 @@ export default function TrapNameDropDown({
   const trapNameDropdownHasError = trapNameError && trapNameTouched
 
   useEffect(() => {
+    if (Object.keys(tabSlice.tabs).length > 1) {
+      let trapNames = Object.keys(tabSlice.tabs).map(
+        (tabId: any) => visitSetupState[tabId]?.values?.trapName
+      )
+      trapNames = uniq(flatten(trapNames))
+      if (trapNames.length > 0) {
+        setValue(trapNames)
+        return
+      }
+    }
     if (
       tabSlice?.activeTabId &&
       visitSetupState[tabSlice.activeTabId]?.values?.trapName
@@ -41,12 +52,12 @@ export default function TrapNameDropDown({
       const trapNameOrNames =
         visitSetupState[tabSlice.activeTabId]?.values?.trapName
       if (Array.isArray(trapNameOrNames)) {
-        setValue([...trapNameOrNames])
+        setValue(trapNameOrNames)
       } else {
         setValue([trapNameOrNames])
       }
     }
-  }, [tabSlice.activeTabId])
+  }, [tabSlice, tabSlice.activeTabId])
 
   useEffect(() => {
     setFieldValue('trapName', [...value])
