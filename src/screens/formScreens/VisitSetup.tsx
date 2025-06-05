@@ -249,7 +249,7 @@ const VisitSetup = ({
           name => !values.trapName.includes(name)
         )
 
-        if (missingFromTrapNames.length > 0 && showTrapNameField) {
+        if (missingFromTrapNames.length && showTrapNameField) {
           Object.keys(tabSlice.tabs).forEach(tabId => {
             const tabTrapName = tabSlice.tabs[tabId].name
 
@@ -257,6 +257,54 @@ const VisitSetup = ({
               dispatch(deleteTab(tabId))
             }
           })
+        }
+
+        // if going trap site with multiple trap names to single trap site
+        if (
+          missingFromTrapNames.length &&
+          currentTabsTrapNames.length > 1 &&
+          !showTrapNameField
+        ) {
+          Object.keys(tabSlice.tabs).forEach(tabId => {
+            const tabTrapName = tabSlice.tabs[tabId].name
+
+            if (missingFromTrapNames.includes(tabTrapName)) {
+              dispatch(deleteTab(tabId))
+            }
+          })
+          let tabId = uid()
+          dispatch(
+            saveVisitSetup({
+              tabId,
+              values: {
+                ...payload,
+                trapLocationId: getTrapLocationId({
+                  trapName: values.trapName,
+                }),
+              },
+              isPaperEntry,
+            })
+          )
+          dispatch(
+            createTab({
+              tabId,
+              tabName: values.trapName ?? values.trapSite,
+              trapSite: values.trapSite,
+            })
+          )
+          dispatch(
+            markVisitSetupCompleted({
+              tabId,
+              completed: true,
+            })
+          )
+          dispatch(
+            markTrapVisitPaperEntry({
+              tabId,
+              isPaperEntry,
+            })
+          )
+          return
         }
 
         values?.trapName?.forEach((trapName: string) => {
@@ -270,17 +318,17 @@ const VisitSetup = ({
                   return tabSlice.tabs[id].name == trapName
                 })[0]
 
-            dispatch(
-              saveVisitSetup({
-                tabId: tabIdToUpdate,
-                values: {
-                  ...payload,
-                  trapLocationId: getTrapLocationId({ trapName }),
-                },
-                isPaperEntry,
-              })
-            )
-            console.log('tabIdToUpdate', tabIdToUpdate)
+            tabIdToUpdate &&
+              dispatch(
+                saveVisitSetup({
+                  tabId: tabIdToUpdate,
+                  values: {
+                    ...payload,
+                    trapLocationId: getTrapLocationId({ trapName }),
+                  },
+                  isPaperEntry,
+                })
+              )
             dispatch(
               setTabName({
                 tabId: tabIdToUpdate,
