@@ -12,6 +12,7 @@ interface FishInputStateI {
   modalOpen: boolean
   speciesCaptured: Array<string>
   fishStore: FishStoreI
+  fishMeasureCounts: Record<string, number>
 }
 
 interface FishEntry {
@@ -76,6 +77,7 @@ const initialState: InitialStateI = {
     modalOpen: false,
     speciesCaptured: [],
     fishStore: {},
+    fishMeasureCounts: {},
   },
 }
 
@@ -93,6 +95,19 @@ const getLifeStage = (species: string, lifeStageValue: any) => {
   } else {
     return null
   }
+}
+
+const getFishMeasureCounts = (fishStore: FishStoreI) => {
+  const fishMeasureCounts = {} as Record<string, number>
+  Object.values(fishStore).forEach((fishObj: any) => {
+    if (fishObj.species && !fishObj.plusCount) {
+      if (!fishMeasureCounts[fishObj.species]) {
+        fishMeasureCounts[fishObj.species] = 0
+      }
+      fishMeasureCounts[fishObj.species] += Number(fishObj.numFishCaught)
+    }
+  })
+  return fishMeasureCounts
 }
 
 function organizeFishEntries(
@@ -194,12 +209,16 @@ export const saveFishSlice = createSlice({
 
         fishStoreCopy[id] = batchCountEntry
       }
+      const fishMeasureCounts = getFishMeasureCounts(fishStoreCopy)
+
       if (state[tabId]) {
         state[tabId].fishStore = fishStoreCopy
+        state[tabId].fishMeasureCounts = fishMeasureCounts
       } else {
         state[tabId] = {
           ...initialState['placeholderId'],
           fishStore: fishStoreCopy,
+          fishMeasureCounts,
         }
       }
     },
@@ -218,12 +237,16 @@ export const saveFishSlice = createSlice({
       }
       fishStoreCopy[id] = { ...formValues, UID, numFishCaught: 1 }
 
+      const fishMeasureCounts = getFishMeasureCounts(fishStoreCopy)
+
       if (state[tabId]) {
         state[tabId].fishStore = fishStoreCopy
+        state[tabId].fishMeasureCounts = fishMeasureCounts
       } else {
         state[tabId] = {
           ...initialState['placeholderId'],
           fishStore: fishStoreCopy,
+          fishMeasureCounts,
         }
       }
     },
@@ -288,12 +311,17 @@ export const saveFishSlice = createSlice({
       delete actionPayloadCopy.tabId
       fishStoreCopy[id] = actionPayloadCopy
       state[tabId].fishStore = fishStoreCopy
+
+      const fishMeasureCounts = getFishMeasureCounts(fishStoreCopy)
+      state[tabId].fishMeasureCounts = fishMeasureCounts
     },
     deleteFishEntry: (state, action) => {
       const { tabId, id } = action.payload
       let fishStoreCopy = cloneDeep(state[tabId].fishStore)
       delete fishStoreCopy[id]
       state[tabId].fishStore = fishStoreCopy
+      const fishMeasureCounts = getFishMeasureCounts(fishStoreCopy)
+      state[tabId].fishMeasureCounts = fishMeasureCounts
     },
     markFishInputCompleted: (state, action) => {
       const { tabId, bool } = action.payload

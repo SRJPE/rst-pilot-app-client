@@ -12,6 +12,7 @@ import {
 } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
 import { MaterialIcons } from '@expo/vector-icons'
+import { set } from 'lodash'
 
 export default function SpeciesDropDown({
   open,
@@ -76,6 +77,13 @@ export default function SpeciesDropDown({
       }
     }
   }, [value])
+
+  useEffect(() => {
+    console.log('species valeu changed:', speciesValue)
+    if (speciesValue !== value) {
+      setValue(speciesValue || '')
+    }
+  }, [speciesValue])
 
   return (
     <View>

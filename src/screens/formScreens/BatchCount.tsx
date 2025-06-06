@@ -518,7 +518,7 @@ const BatchCount = ({
         <CustomModal
           isOpen={batchCharacteristicsModalOpen}
           closeModal={() => setBatchCharacteristicsModalOpen(false)}
-          height='2/3'
+          height='100%'
         >
           <BatchCharacteristicsModalContent
             closeModal={() => setBatchCharacteristicsModalOpen(false)}

@@ -33,6 +33,7 @@ import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { StackActions } from '@react-navigation/native'
 import { navigateHelper } from '../../utils/utils'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { find, keyBy, mapValues } from 'lodash'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
@@ -50,6 +51,8 @@ const mapStateToProps = (state: RootState) => {
     tabSlice: state.tabSlice,
     fishInputSlice: state.fishInput,
     navigationSlice: state.navigation,
+    visitSetupState: state.visitSetup,
+    visitSetupDefaultsState: state.visitSetupDefaults,
   }
 }
 
@@ -60,6 +63,8 @@ const FishInput = ({
   tabSlice,
   fishInputSlice,
   navigationSlice,
+  visitSetupState,
+  visitSetupDefaultsState,
 }: {
   navigation: any
   activeTabId: string
@@ -67,12 +72,18 @@ const FishInput = ({
   tabSlice: TabStateI
   fishInputSlice: any
   navigationSlice: any
+  visitSetupState: any
+  visitSetupDefaultsState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addPlusCountModalOpen, setAddPlusCountModalOpen] = useState(
     false as boolean
   )
   const [showError, setShowError] = useState(false as boolean)
+  const [fishMeasureProtocol, setFishMeasureProtocol] = useState(
+    {} as Record<string, number>
+  )
+  const [totalCatchCount, setTotalCatchCount] = useState(0)
   const [addFishModalTab, setAddFishModalTab] = useState<
     'Individual' | 'Batch'
   >('Individual')
@@ -89,6 +100,37 @@ const FishInput = ({
   useEffect(() => {
     checkboxGroupValue.length < 1 ? setShowError(true) : setShowError(false)
   }, [checkboxGroupValue])
+
+  useEffect(() => {
+    if (!tabSlice?.activeTabId || !fishInputSlice) return
+
+    const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
+      ?.fishMeasureCounts as { [key: string]: number }
+
+    if (!fishMeasureCounts) return
+
+    const total = Object.values(fishMeasureCounts).reduce(
+      (sum: number, count: number) =>
+        sum + (typeof count === 'number' ? count : 0),
+      0
+    ) as number
+
+    setTotalCatchCount(total)
+  }, [tabSlice.activeTabId, fishInputSlice])
+
+  useEffect(() => {
+    const activeTabId = tabSlice.activeTabId || 'placeholderId'
+
+    const selectedProgramId = visitSetupState[activeTabId]?.values?.programId
+    const selectedProgramObj = find(visitSetupDefaultsState.programs, {
+      programId: selectedProgramId,
+    })
+    const fishMeasureProtocolObj = mapValues(
+      keyBy(selectedProgramObj.fishMeasureProtocol, 'commonname'),
+      (obj: any) => Number(obj.numberMeasured) || 0
+    )
+    setFishMeasureProtocol(fishMeasureProtocolObj)
+  }, [visitSetupState, tabSlice, visitSetupDefaultsState])
 
   const handleSubmit = () => {
     dispatch(
@@ -156,7 +198,10 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Add Fish')
+                navigation.navigate('Add Fish', {
+                  // Add any props you want to pass here, for example:
+                  fishMeasureProtocol,
+                })
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>
@@ -200,7 +245,16 @@ const FishInput = ({
           </HStack>
 
           <Box px='4'>
-            <Heading>Catch Table</Heading>
+            <HStack space={2} alignItems='center'>
+              <Heading mb={0}>Catch Table</Heading>
+              <Text
+                fontSize='xl'
+                mb={0}
+                style={{ textAlignVertical: 'center' }}
+              >
+                (Total Catch Count: {totalCatchCount})
+              </Text>
+            </HStack>
             <FishInputDataTable navigation={navigation} />
           </Box>
         </VStack>
@@ -216,7 +270,7 @@ const FishInput = ({
                 )
               }
             }}
-            height='3/4'
+            height='100%'
           >
             <PlusCountModalContent
               closeModal={() => {

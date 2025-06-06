@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native'
-import { partition, startCase } from 'lodash'
+import { partition, set, startCase } from 'lodash'
 import {
   Box,
   Button,
@@ -17,7 +17,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { use, useCallback, useEffect, useState } from 'react'
 import { Keyboard, TouchableNativeFeedback } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { uid } from 'uid'
@@ -51,10 +51,12 @@ import {
   addFishErrorMessages,
   alphabeticalSort,
   createFormValueDefault,
+  getAddFishStateDefaults,
   handleSpeciesSearchTextChange,
   QARanges,
   reorderTaxon,
 } from '../../utils/utils'
+import MeasureMetPlusCount from '@/src/components/form/MeasureMetPlusCount'
 
 const AddFishContent = ({
   route,
@@ -65,6 +67,7 @@ const AddFishContent = ({
   fishStore,
   tabSlice,
   visitSetupState,
+  fishInputSlice,
 }: {
   route?: any
   saveIndividualFish: any
@@ -75,6 +78,7 @@ const AddFishContent = ({
   fishStore: FishStoreI
   tabSlice: TabStateI
   visitSetupState: any
+  fishInputSlice: any
 }) => {
   const lastFishEntry = Object.values(fishStore).findLast(
     fishEntry => !fishEntry.plusCount
@@ -90,6 +94,10 @@ const AddFishContent = ({
     false as boolean
   )
   const [createdMarks, setCreatedMarks] = useState<any[]>([] as any)
+  const [totalCatchCount, setTotalCatchCount] = useState(0 as number)
+  const [fishMeasureMetModalOpen, setFishMeasureMetModalOpen] = useState(
+    false as boolean
+  )
 
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -144,79 +152,7 @@ const AddFishContent = ({
 
   // ------------------------------------------------------------------------------------------------------------------------
 
-  const stateDefaults = {
-    whenSpeciesChinook: {
-      species: createFormValueDefault({ value: null, required: true }),
-      count: createFormValueDefault({ value: null }),
-      forkLength: createFormValueDefault({ value: null, required: true }),
-      run: createFormValueDefault({ value: null }),
-      weight: createFormValueDefault({ value: null }),
-      lifeStage: createFormValueDefault({ value: null, required: true }),
-      adiposeClipped: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: true,
-      }),
-      existingMarks: createFormValueDefault({ value: [] }),
-      appliedMarks: createFormValueDefault({ value: [] }),
-      geneticSamples: createFormValueDefault({ value: [] }),
-      dead: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: true,
-      }),
-      plusCountMethod: createFormValueDefault({ value: null }),
-      fishConditions: createFormValueDefault({ value: [] }),
-      comments: createFormValueDefault({ value: null }),
-    },
-    whenSpeciesSteelhead: {
-      species: createFormValueDefault({ value: null, required: true }),
-      count: createFormValueDefault({ value: null }),
-      forkLength: createFormValueDefault({ value: null, required: true }),
-      run: createFormValueDefault({ value: null }),
-      weight: createFormValueDefault({ value: null }),
-      lifeStage: createFormValueDefault({ value: null, required: true }),
-      adiposeClipped: createFormValueDefault({
-        value: null,
-        touched: true,
-      }),
-      existingMarks: createFormValueDefault({ value: [] }),
-      appliedMarks: createFormValueDefault({ value: [] }),
-      geneticSamples: createFormValueDefault({ value: [] }),
-      dead: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: true,
-      }),
-      plusCountMethod: createFormValueDefault({ value: null }),
-      fishConditions: createFormValueDefault({ value: [] }),
-      comments: createFormValueDefault({ value: null }),
-    },
-    whenSpeciesOther: {
-      species: createFormValueDefault({ value: null, required: true }),
-      count: createFormValueDefault({ value: null }),
-      forkLength: createFormValueDefault({ value: null, required: true }),
-      run: createFormValueDefault({ value: null }),
-      weight: createFormValueDefault({ value: null }),
-      lifeStage: createFormValueDefault({ value: null }),
-      adiposeClipped: createFormValueDefault({
-        value: null,
-        touched: true,
-        required: false,
-      }),
-      existingMarks: createFormValueDefault({ value: [] }),
-      appliedMarks: createFormValueDefault({ value: [] }),
-      geneticSamples: createFormValueDefault({ value: [] }),
-      dead: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: true,
-      }),
-      plusCountMethod: createFormValueDefault({ value: null }),
-      fishConditions: createFormValueDefault({ value: [] }),
-      comments: createFormValueDefault({ value: null }),
-    },
-  }
+  const stateDefaults = getAddFishStateDefaults()
 
   const [formHasError, setFormHasError] = useState<boolean>(true)
 
@@ -363,6 +299,45 @@ const AddFishContent = ({
     dead,
     plusCountMethod,
   ])
+
+  useEffect(() => {
+    if (!tabSlice?.activeTabId || !fishInputSlice) return
+
+    const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
+      ?.fishMeasureCounts as { [key: string]: number }
+
+    if (!fishMeasureCounts) return
+
+    const total = Object.values(fishMeasureCounts).reduce(
+      (sum: number, count: number) =>
+        sum + (typeof count === 'number' ? count : 0),
+      0
+    ) as number
+
+    setTotalCatchCount(total)
+
+    console.log('soecess', species.value)
+
+    if (
+      typeof species.value === 'string' &&
+      species.value &&
+      route.params?.fishMeasureProtocol &&
+      fishMeasureCounts[species.value] ===
+        route.params?.fishMeasureProtocol[species.value]
+    ) {
+      console.log('met fish measure protocol')
+      setFishMeasureMetModalOpen(true)
+    } else {
+      console.log('did not meet fish measure protocol')
+      setFishMeasureMetModalOpen(false)
+    }
+  }, [tabSlice.activeTabId, fishInputSlice, species.value])
+
+  const closeFishMeasureMetModal = () => {
+    setFishMeasureMetModalOpen(false)
+    // setSpecies(stateDefaults.whenSpeciesChinook.species)
+    resetFormState('other')
+  }
 
   const checkForFormError = () => {
     const formValues = [
@@ -549,8 +524,6 @@ const AddFishContent = ({
     }
   }, [existingMarks])
 
-  console.log('lifeStage.value', lifeStage)
-
   return (
     <TouchableNativeFeedback
       onPress={() => {
@@ -611,16 +584,39 @@ const AddFishContent = ({
                   borderColor={'primary'}
                   borderRadius={5}
                   bg='coolGray.100'
+                  mt={2}
                 >
                   <VStack space={1}>
                     <Text fontSize={'lg'}>
                       <Text bold>Last Entry: </Text>
-                      {`${lastFishEntry.species} (${lastFishEntry.lifeStage}) - Fork Length: ${lastFishEntry.forkLength}mm`}
+                      {`${lastFishEntry.species} ${
+                        lastFishEntry.lifeStage
+                          ? `(${lastFishEntry.lifeStage})`
+                          : ''
+                      } - Fork Length: ${lastFishEntry.forkLength}mm`}
                     </Text>
                     <Text fontSize={'lg'}>
                       <Text bold>Total Catch Count Entered: </Text>
-                      {Object.values(fishStore).length}
+                      {totalCatchCount}
                     </Text>
+                    {tabSlice?.activeTabId && fishInputSlice && (
+                      <>
+                        <Text fontSize={'lg'}>
+                          <Text bold>Species Counts: </Text>
+                        </Text>
+                        <VStack space={0.5}>
+                          {Object.entries(
+                            fishInputSlice?.[tabSlice?.activeTabId]
+                              ?.fishMeasureCounts || {}
+                          ).map(([fishName, countValue]) => (
+                            <Text key={fishName} fontSize={'lg'}>
+                              {fishName}: {String(countValue)} /{' '}
+                              {route.params?.fishMeasureProtocol[fishName]}
+                            </Text>
+                          ))}
+                        </VStack>
+                      </>
+                    )}
                   </VStack>
                 </Box>
               )}
@@ -1308,7 +1304,7 @@ const AddFishContent = ({
           <CustomModal
             isOpen={addGeneticModalOpen}
             closeModal={() => setAddGeneticModalOpen(false)}
-            height='3/4'
+            height='100%'
           >
             <AddGeneticsModalContent
               handleGeneticSampleFormSubmit={handleGeneticSamplesFormSubmit}
@@ -1320,7 +1316,7 @@ const AddFishContent = ({
           <CustomModal
             isOpen={addMarkModalOpen}
             closeModal={() => setAddMarkModalOpen(false)}
-            height='1/2'
+            height='100%'
           >
             <AddAnotherMarkModalContent
               // handleAddAnotherMarkFormSubmit={handleAddAnotherMarkFormSubmit}
@@ -1329,6 +1325,19 @@ const AddFishContent = ({
               setExistingMarks={setExistingMarks}
               existingMarks={existingMarks}
               existingMarksArray={existingMarks.value}
+            />
+          </CustomModal>
+        )}
+        {fishMeasureMetModalOpen && (
+          <CustomModal
+            isOpen={fishMeasureMetModalOpen}
+            closeModal={closeFishMeasureMetModal}
+            height='40%'
+            width={'80%'}
+          >
+            <MeasureMetPlusCount
+              species={species}
+              closeModal={closeFishMeasureMetModal}
             />
           </CustomModal>
         )}
@@ -1350,6 +1359,8 @@ const mapStateToProps = (state: RootState) => {
     fishStore: state.fishInput[activeTabId].fishStore,
     tabSlice: state.tabSlice,
     visitSetupState: state.visitSetup,
+    visitSetupDefaultsState: state.visitSetupDefaults,
+    fishInputSlice: state.fishInput,
   }
 }
 

@@ -1127,7 +1127,7 @@ function CatchFishCountQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height='3/4'
+          height='100%'
         >
           <>
             <CustomModalHeader

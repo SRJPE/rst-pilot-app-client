@@ -793,3 +793,79 @@ export const getCrewValue = ({
   )
   return filteredCrewIds
 }
+
+export const getAddFishStateDefaults = () => {
+  return {
+    whenSpeciesChinook: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null, required: true }),
+      adiposeClipped: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+      fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
+    },
+    whenSpeciesSteelhead: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null, required: true }),
+      adiposeClipped: createFormValueDefault({
+        value: null,
+        touched: true,
+      }),
+      existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+      fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
+    },
+    whenSpeciesOther: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null }),
+      adiposeClipped: createFormValueDefault({
+        value: null,
+        touched: true,
+        required: false,
+      }),
+      existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+      fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
+    },
+  }
+}

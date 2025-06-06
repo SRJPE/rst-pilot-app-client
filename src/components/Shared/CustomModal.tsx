@@ -16,13 +16,31 @@ import {
   Button,
   Provider,
 } from 'react-native-paper'
+import { Animated } from 'react-native'
 
 interface ModalPropsI {
   isOpen: boolean
   closeModal: any
   children: JSX.Element
-  height?: string
+  height?:
+    | number
+    | `${number}%`
+    | Animated.Value
+    | Animated.AnimatedInterpolation<string | number>
+    | 'auto'
+    | Animated.WithAnimatedObject<Animated.AnimatedNode>
+    | null
+    | undefined
   style?: Record<string, string | number>
+  width?:
+    | number
+    | `${number}%`
+    | Animated.Value
+    | Animated.AnimatedInterpolation<string | number>
+    | 'auto'
+    | Animated.WithAnimatedObject<Animated.AnimatedNode>
+    | null
+    | undefined
   size?: 'full' | 'lg' | 'md' | 'sm' | 'xs' | undefined
 }
 
@@ -34,7 +52,15 @@ const CustomModal = (props: ModalPropsI) => {
           visible={props.isOpen}
           onDismiss={props.closeModal}
           dismissable={true}
-          contentContainerStyle={{ backgroundColor: 'white', height: '100%' }}
+          contentContainerStyle={{
+            backgroundColor: 'white',
+            height: props.height ? props.height : '100%',
+            width: props.width ? props.width : '100%',
+            // justifyContent: 'center',
+            // alignItems: 'center',
+            alignSelf: 'center',
+            // display: 'flex',
+          }}
         >
           {props.children}
         </PaperModal>

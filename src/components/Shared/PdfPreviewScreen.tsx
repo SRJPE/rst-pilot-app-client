@@ -18,7 +18,7 @@ const PdfPreviewScreen = ({
       <CustomModal
         isOpen={uri ? true : false}
         closeModal={handleClosePdfPreview}
-        height='full'
+        height='100%'
       >
         <>
           <Text textAlign='center' fontSize='3xl' py={5}>
