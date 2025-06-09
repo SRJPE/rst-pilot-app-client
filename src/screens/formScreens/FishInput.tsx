@@ -104,14 +104,15 @@ const FishInput = ({
   useEffect(() => {
     if (!tabSlice?.activeTabId || !fishInputSlice) return
 
-    const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
-      ?.fishMeasureCounts as { [key: string]: number }
+    const fishStore = fishInputSlice?.[tabSlice.activeTabId]?.fishStore as {
+      [key: string]: number
+    }
 
-    if (!fishMeasureCounts) return
+    if (!fishStore) return
 
-    const total = Object.values(fishMeasureCounts).reduce(
-      (sum: number, count: number) =>
-        sum + (typeof count === 'number' ? count : 0),
+    const total = Object.values(fishStore).reduce(
+      (sum: number, fishObj: any) =>
+        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
       0
     ) as number
 

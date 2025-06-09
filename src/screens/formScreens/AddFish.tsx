@@ -56,7 +56,7 @@ import {
   QARanges,
   reorderTaxon,
 } from '../../utils/utils'
-import MeasureMetPlusCount from '@/src/components/form/MeasureMetPlusCount'
+import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
 
 const AddFishContent = ({
   route,
@@ -300,42 +300,48 @@ const AddFishContent = ({
     plusCountMethod,
   ])
 
+  useEffect(() => {}, [fishMeasureMetModalOpen])
+
   useEffect(() => {
     if (!tabSlice?.activeTabId || !fishInputSlice) return
 
     const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
-      ?.fishMeasureCounts as { [key: string]: number }
+      ?.fishMeasureCounts as { [key: string]: any }
 
     if (!fishMeasureCounts) return
+    const fishStore = fishInputSlice?.[tabSlice.activeTabId]?.fishStore as {
+      [key: string]: number
+    }
 
-    const total = Object.values(fishMeasureCounts).reduce(
-      (sum: number, count: number) =>
-        sum + (typeof count === 'number' ? count : 0),
+    if (!fishStore) return
+
+    const total = Object.values(fishStore).reduce(
+      (sum: number, fishObj: any) =>
+        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
       0
     ) as number
 
     setTotalCatchCount(total)
 
-    console.log('soecess', species.value)
-
     if (
       typeof species.value === 'string' &&
       species.value &&
       route.params?.fishMeasureProtocol &&
-      fishMeasureCounts[species.value] ===
-        route.params?.fishMeasureProtocol[species.value]
+      fishMeasureCounts[species.value]?.individualCount ===
+        route.params?.fishMeasureProtocol?.[species.value]
     ) {
-      console.log('met fish measure protocol')
       setFishMeasureMetModalOpen(true)
     } else {
-      console.log('did not meet fish measure protocol')
       setFishMeasureMetModalOpen(false)
     }
   }, [tabSlice.activeTabId, fishInputSlice, species.value])
 
   const closeFishMeasureMetModal = () => {
     setFishMeasureMetModalOpen(false)
-    // setSpecies(stateDefaults.whenSpeciesChinook.species)
+  }
+
+  const resetSpecies = () => {
+    setSpecies(stateDefaults.whenSpeciesChinook.species)
     resetFormState('other')
   }
 
@@ -607,11 +613,23 @@ const AddFishContent = ({
                         <VStack space={0.5}>
                           {Object.entries(
                             fishInputSlice?.[tabSlice?.activeTabId]
-                              ?.fishMeasureCounts || {}
-                          ).map(([fishName, countValue]) => (
+                              ?.fishMeasureCounts ||
+                              ({} as Record<
+                                string,
+                                { individualCount?: number }
+                              >)
+                          ).map(([fishName, countObj]) => (
                             <Text key={fishName} fontSize={'lg'}>
-                              {fishName}: {String(countValue)} /{' '}
-                              {route.params?.fishMeasureProtocol[fishName]}
+                              {fishName}:{' '}
+                              {String(
+                                (countObj as { individualCount?: number })
+                                  ?.individualCount
+                              )}{' '}
+                              / {route.params?.fishMeasureProtocol[fishName]}{' '}
+                              (Plus Count:{' '}
+                              {(countObj as { plusCount?: number }).plusCount ||
+                                0}
+                              )
                             </Text>
                           ))}
                         </VStack>
@@ -1338,6 +1356,8 @@ const AddFishContent = ({
             <MeasureMetPlusCount
               species={species}
               closeModal={closeFishMeasureMetModal}
+              activeTabId={tabSlice.activeTabId}
+              resetSpecies={resetSpecies}
             />
           </CustomModal>
         )}

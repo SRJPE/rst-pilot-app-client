@@ -12,7 +12,7 @@ interface FishInputStateI {
   modalOpen: boolean
   speciesCaptured: Array<string>
   fishStore: FishStoreI
-  fishMeasureCounts: Record<string, number>
+  fishMeasureCounts: Record<string, any>
 }
 
 interface FishEntry {
@@ -98,13 +98,27 @@ const getLifeStage = (species: string, lifeStageValue: any) => {
 }
 
 const getFishMeasureCounts = (fishStore: FishStoreI) => {
-  const fishMeasureCounts = {} as Record<string, number>
+  const fishMeasureCounts = {} as Record<string, any>
   Object.values(fishStore).forEach((fishObj: any) => {
-    if (fishObj.species && !fishObj.plusCount) {
+    if (fishObj.species) {
       if (!fishMeasureCounts[fishObj.species]) {
-        fishMeasureCounts[fishObj.species] = 0
+        fishMeasureCounts[fishObj.species] = {
+          individualCount: 0,
+          plusCount: 0,
+        }
       }
-      fishMeasureCounts[fishObj.species] += Number(fishObj.numFishCaught)
+
+      if (fishObj.plusCount) {
+        fishMeasureCounts[fishObj.species].plusCount += parseInt(
+          fishObj.numFishCaught,
+          10
+        )
+      } else {
+        fishMeasureCounts[fishObj.species].individualCount += parseInt(
+          fishObj.numFishCaught,
+          10
+        )
+      }
     }
   })
   return fishMeasureCounts
@@ -272,7 +286,7 @@ export const saveFishSlice = createSlice({
         fishConditions: [],
         lifeStage: getLifeStage(species, lifeStage),
         adiposeClipped: null,
-        existingMarks: existingMarks.length ? existingMarks : [],
+        existingMarks: existingMarks?.length ? existingMarks : [],
         dead,
         willBeUsedInRecapture: null,
         plusCountMethod,
@@ -290,6 +304,7 @@ export const saveFishSlice = createSlice({
       } else {
         id = 0
       }
+
       if (state[tabId]) {
         state[tabId].fishStore = fishStoreCopy
       } else {
@@ -301,6 +316,8 @@ export const saveFishSlice = createSlice({
 
       fishStoreCopy[id] = plusCountEntry
       state[tabId].fishStore = fishStoreCopy
+      const fishMeasureCounts = getFishMeasureCounts(state[tabId].fishStore)
+      state[tabId].fishMeasureCounts = fishMeasureCounts
     },
     updateFishEntry: (state, action) => {
       const tabId = action.payload.tabId

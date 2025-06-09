@@ -1,12 +1,9 @@
 import React, { useEffect } from 'react'
-import { Formik, useFormikContext } from 'formik'
 import {
   // FormControl,
-  View,
   VStack,
   Text,
   Button,
-  Divider,
   Box,
   ScrollView,
 } from 'native-base'
@@ -14,20 +11,15 @@ import { Input, InputField } from '@/components/ui/input'
 
 import {
   FormControl,
-  FormControlError,
-  FormControlErrorText,
-  FormControlErrorIcon,
   FormControlLabel,
   FormControlLabelText,
-  FormControlHelper,
-  FormControlHelperText,
 } from '@/components/ui/form-control'
 import { HStack } from '@/components/ui/hstack'
 
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
-import { ReleaseMarkI } from '../../redux/reducers/addAnotherMarkSlice'
+import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -41,17 +33,41 @@ Make sure to take BisMark Brown into account
 const MeasureMetPlusCount = ({
   species,
   closeModal,
+  activeTabId,
+  resetSpecies,
 }: {
   species: any
   closeModal: any
+  activeTabId: string
+  resetSpecies: () => void
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
   const [inputValue, setInputValue] = React.useState('')
 
   const handleSubmit = () => {
-    const plusCount = parseInt(inputValue, 10)
-    console.log('plusCount:', plusCount)
+    try {
+      const plusCount = parseInt(inputValue, 10)
+      if (activeTabId) {
+        dispatch(
+          savePlusCount({
+            tabId: activeTabId,
+            existingMarks: [],
+            count: plusCount,
+            dead: false,
+            lifeStage: '',
+            plusCountMethod: 'none',
+            run: '',
+            species: species.value,
+          })
+        )
+        closeModal()
+        resetSpecies() // Reset species after submission
+        setInputValue('') // Reset input value after submission
+      }
+    } catch (error) {
+      console.error('Error in handleSubmit:', error)
+    }
   }
 
   return (

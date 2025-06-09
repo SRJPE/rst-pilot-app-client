@@ -79,7 +79,6 @@ export default function SpeciesDropDown({
   }, [value])
 
   useEffect(() => {
-    console.log('species valeu changed:', speciesValue)
     if (speciesValue !== value) {
       setValue(speciesValue || '')
     }
