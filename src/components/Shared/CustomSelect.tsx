@@ -76,9 +76,12 @@ const CustomSelect: React.FC<CustomSelectI> = ({
   const showError = hasError && isTouched
 
   const itemLabelModifier = (label: string) => {
-    // console.log('label', label)
     if (typeof label !== 'string') return ''
-    if (placeholder === 'Species') {
+    if (
+      placeholder === 'Species' ||
+      camelName === 'dataRecorder' ||
+      camelName === 'fieldCheck'
+    ) {
       return label
     } else if (placeholder === 'Funding Agency' && label !== 'not recorded') {
       return label.toLocaleUpperCase()

@@ -80,7 +80,6 @@ const mapStateToProps = (state: RootState) => {
     selectedTrapLocationId:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.trapLocationId,
-    fishProcessingSlice: state.fishProcessing,
   }
 }
 

@@ -21,7 +21,7 @@ export const checkOtherTabForms = ({
   const otherTabsValidity = tabIds.map(tabId => {
     if (tabId !== activeTabId) {
       const tabFormValues = reduxState[tabId]?.values
-      const formIsValid = schema.isValidSync(tabFormValues)
+      const formIsValid = schema?.isValidSync(tabFormValues)
       return formIsValid
     }
 
