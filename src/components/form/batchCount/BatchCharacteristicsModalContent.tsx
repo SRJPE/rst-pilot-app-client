@@ -53,8 +53,10 @@ const BatchCharacteristicsModalContent = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+  const tabId = tabSlice?.activeTabId || 'placeholderId'
+  const activeProgramId = visitSetupState?.[tabId]?.values?.programId
   const reorderedTaxon = useMemo(
-    () => reorderTaxon(dropdownValues.taxon),
+    () => reorderTaxon(dropdownValues.taxon, activeProgramId),
     [dropdownValues.taxon]
   )
 
@@ -74,14 +76,9 @@ const BatchCharacteristicsModalContent = ({
   const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
     false as boolean
   )
-  const [speciesList, setSpeciesList] = useState<
-    { label: string; value: string }[]
-  >(
-    reorderedTaxon.map((taxon: any) => ({
-      label: taxon?.commonname,
-      value: taxon?.commonname,
-    }))
-  )
+
+  const [speciesList, setSpeciesList] =
+    useState<{ label: string; value: string }[]>(reorderedTaxon)
 
   const onSpeciesOpen = useCallback(() => {
     setFishConditionDropdownOpen(false)

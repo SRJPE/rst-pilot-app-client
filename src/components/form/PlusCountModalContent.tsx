@@ -12,7 +12,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { TouchableWithoutFeedback } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
@@ -63,7 +63,12 @@ const PlusCountModalContent = ({
   const { lifeStage, run, plusCountMethodology, taxon } = useSelector(
     (state: RootState) => state.dropdowns.values
   )
-  const reorderedTaxon = reorderTaxon(taxon)
+  const tabId = tabSlice?.activeTabId || 'placeholderId'
+  const activeProgramId = visitSetupState?.[tabId]?.values?.programId
+  const reorderedTaxon = useMemo(
+    () => reorderTaxon(dropdownValues.taxon, activeProgramId),
+    [dropdownValues.taxon]
+  )
   const alphabeticalLifeStage = alphabeticalSort(lifeStage, 'definition')
 
   const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(

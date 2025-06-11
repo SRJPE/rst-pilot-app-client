@@ -17,7 +17,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Keyboard, TouchableNativeFeedback } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { uid } from 'uid'
@@ -76,8 +76,16 @@ const AddFishContent = ({
   tabSlice: TabStateI
   visitSetupState: any
 }) => {
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
+
   const tabId = tabSlice?.activeTabId || 'placeholderId'
   const activeProgramId = visitSetupState?.[tabId]?.values?.programId
+  const reorderedTaxon = useMemo(
+    () => reorderTaxon(dropdownValues.taxon, activeProgramId),
+    [dropdownValues.taxon]
+  )
 
   const lastFishEntry = Object.values(fishStore).findLast(
     fishEntry => !fishEntry.plusCount
@@ -93,13 +101,6 @@ const AddFishContent = ({
     false as boolean
   )
   const [createdMarks, setCreatedMarks] = useState<any[]>([] as any)
-
-  const dropdownValues = useSelector(
-    (state: RootState) => state.dropdowns.values
-  )
-
-  const reorderedTaxon = reorderTaxon(dropdownValues.taxon, activeProgramId)
-  console.log('🚀 ~ AddFish.tsx:106 ~ reorderedTaxon:', reorderedTaxon)
 
   const [speciesList, setSpeciesList] =
     useState<{ label: string; value: string }[]>(reorderedTaxon)
