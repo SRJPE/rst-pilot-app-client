@@ -301,42 +301,6 @@ const AddFishContent = ({
     plusCountMethod,
   ])
 
-  useEffect(() => {}, [fishMeasureMetModalOpen])
-
-  useEffect(() => {
-    if (!tabSlice?.activeTabId || !fishInputSlice) return
-
-    const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
-      ?.fishMeasureCounts as { [key: string]: any }
-
-    if (!fishMeasureCounts) return
-    const fishStore = fishInputSlice?.[tabSlice.activeTabId]?.fishStore as {
-      [key: string]: number
-    }
-
-    if (!fishStore) return
-
-    const total = Object.values(fishStore).reduce(
-      (sum: number, fishObj: any) =>
-        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
-      0
-    ) as number
-
-    setTotalCatchCount(total)
-
-    if (
-      typeof species.value === 'string' &&
-      species.value &&
-      route.params?.fishMeasureProtocol &&
-      fishMeasureCounts[species.value]?.individualCount ===
-        route.params?.fishMeasureProtocol?.[species.value]
-    ) {
-      setFishMeasureMetModalOpen(true)
-    } else {
-      setFishMeasureMetModalOpen(false)
-    }
-  }, [tabSlice.activeTabId, fishInputSlice, species.value])
-
   const closeFishMeasureMetModal = () => {
     setFishMeasureMetModalOpen(false)
   }
@@ -530,6 +494,41 @@ const AddFishContent = ({
       setCreatedMarks(nonExistingReleaseMarks)
     }
   }, [existingMarks])
+
+  useEffect(() => {
+    if (!tabSlice?.activeTabId || !fishInputSlice) return
+
+    const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
+      ?.fishMeasureCounts as { [key: string]: any }
+
+    if (!fishMeasureCounts) return
+    const fishStore = fishInputSlice?.[tabSlice.activeTabId]?.fishStore as {
+      [key: string]: number
+    }
+
+    if (!fishStore) return
+
+    const total = Object.values(fishStore).reduce(
+      (sum: number, fishObj: any) =>
+        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
+      0
+    ) as number
+
+    setTotalCatchCount(total)
+
+    if (
+      typeof species.value === 'string' &&
+      species.value &&
+      route.params?.fishMeasureProtocol &&
+      fishMeasureCounts[species.value]?.individualCount ===
+        route.params?.fishMeasureProtocol?.[species.value] &&
+      !speciesDropDownOpen
+    ) {
+      setFishMeasureMetModalOpen(true)
+    } else {
+      setFishMeasureMetModalOpen(false)
+    }
+  }, [tabSlice.activeTabId, fishInputSlice, species.value])
 
   return (
     <TouchableNativeFeedback

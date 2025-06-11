@@ -78,11 +78,11 @@ export default function SpeciesDropDown({
     }
   }, [value])
 
-  useEffect(() => {
-    if (speciesValue !== value) {
-      setValue(speciesValue || '')
-    }
-  }, [speciesValue])
+  // useEffect(() => {
+  //   if (speciesValue !== value) {
+  //     setValue(speciesValue || '')
+  //   }
+  // }, [speciesValue])
 
   return (
     <View>

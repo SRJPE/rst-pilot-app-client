@@ -55,6 +55,10 @@ const FishEntriesSummary = ({
               isCollapsible={true}
               isDisabled={false}
               defaultValue={['species']}
+              style={{
+                marginTop: 0,
+                paddingTop: 0,
+              }}
             >
               <AccordionItem value='species'>
                 <AccordionHeader>
@@ -62,6 +66,7 @@ const FishEntriesSummary = ({
                     style={{
                       width: '100%',
                       paddingLeft: 0,
+                      paddingTop: 0,
                     }}
                   >
                     {({ isExpanded }: { isExpanded: boolean }) => {
