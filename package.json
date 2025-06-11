@@ -19,6 +19,7 @@
     "@expo/metro-config": "~0.20.0",
     "@expo/vector-icons": "^14.1.0",
     "@expo/webpack-config": "^19.0.0",
+    "@gluestack-ui/accordion": "^1.0.14",
     "@gluestack-ui/actionsheet": "^0.2.53",
     "@gluestack-ui/form-control": "^0.1.19",
     "@gluestack-ui/icon": "^0.1.27",

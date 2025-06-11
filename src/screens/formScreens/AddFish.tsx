@@ -57,6 +57,7 @@ import {
   reorderTaxon,
 } from '../../utils/utils'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
+import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
 
 const AddFishContent = ({
   route,
@@ -582,61 +583,13 @@ const AddFishContent = ({
             <Divider mb='1' />
             <VStack paddingX='10' paddingBottom='3' space={3}>
               {!route.params?.editModeData && lastFishEntry && (
-                <Box
-                  py={3}
-                  px={5}
-                  w={'full'}
-                  borderWidth={1}
-                  borderColor={'primary'}
-                  borderRadius={5}
-                  bg='coolGray.100'
-                  mt={2}
-                >
-                  <VStack space={1}>
-                    <Text fontSize={'lg'}>
-                      <Text bold>Last Entry: </Text>
-                      {`${lastFishEntry.species} ${
-                        lastFishEntry.lifeStage
-                          ? `(${lastFishEntry.lifeStage})`
-                          : ''
-                      } - Fork Length: ${lastFishEntry.forkLength}mm`}
-                    </Text>
-                    <Text fontSize={'lg'}>
-                      <Text bold>Total Catch Count Entered: </Text>
-                      {totalCatchCount}
-                    </Text>
-                    {tabSlice?.activeTabId && fishInputSlice && (
-                      <>
-                        <Text fontSize={'lg'}>
-                          <Text bold>Species Counts: </Text>
-                        </Text>
-                        <VStack space={0.5}>
-                          {Object.entries(
-                            fishInputSlice?.[tabSlice?.activeTabId]
-                              ?.fishMeasureCounts ||
-                              ({} as Record<
-                                string,
-                                { individualCount?: number }
-                              >)
-                          ).map(([fishName, countObj]) => (
-                            <Text key={fishName} fontSize={'lg'}>
-                              {fishName}:{' '}
-                              {String(
-                                (countObj as { individualCount?: number })
-                                  ?.individualCount
-                              )}{' '}
-                              / {route.params?.fishMeasureProtocol[fishName]}{' '}
-                              (Plus Count:{' '}
-                              {(countObj as { plusCount?: number }).plusCount ||
-                                0}
-                              )
-                            </Text>
-                          ))}
-                        </VStack>
-                      </>
-                    )}
-                  </VStack>
-                </Box>
+                <FishEntriesSummary
+                  lastFishEntry={lastFishEntry}
+                  totalCatchCount={totalCatchCount}
+                  fishMeasureProtocol={route.params?.fishMeasureProtocol || {}}
+                  activeTabId={tabSlice.activeTabId}
+                  fishInputSlice={fishInputSlice}
+                />
               )}
               <HStack alignItems='center'>
                 <FormControl pr='5' mb={speciesDropDownOpen ? 180 : 0}>
