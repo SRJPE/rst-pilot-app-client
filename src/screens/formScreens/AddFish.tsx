@@ -76,6 +76,9 @@ const AddFishContent = ({
   tabSlice: TabStateI
   visitSetupState: any
 }) => {
+  const tabId = tabSlice?.activeTabId || 'placeholderId'
+  const activeProgramId = visitSetupState?.[tabId]?.values?.programId
+
   const lastFishEntry = Object.values(fishStore).findLast(
     fishEntry => !fishEntry.plusCount
   )
@@ -95,7 +98,8 @@ const AddFishContent = ({
     (state: RootState) => state.dropdowns.values
   )
 
-  const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
+  const reorderedTaxon = reorderTaxon(dropdownValues.taxon, activeProgramId)
+  console.log('🚀 ~ AddFish.tsx:106 ~ reorderedTaxon:', reorderedTaxon)
 
   const [speciesList, setSpeciesList] =
     useState<{ label: string; value: string }[]>(reorderedTaxon)
@@ -229,6 +233,7 @@ const AddFishContent = ({
           required: false,
         })
   )
+
   const [count, setCount] = useState<FormValueI>(
     !route.params?.editModeData
       ? stateDefaults.whenSpeciesChinook.count
@@ -424,6 +429,13 @@ const AddFishContent = ({
     setAppliedMarks(stateDefaults[identifier].appliedMarks)
     setGeneticSamples(stateDefaults[identifier].geneticSamples)
   }
+
+  const findTaxonCode = useCallback(
+    (speciesValue: string) =>
+      reorderedTaxon.find(taxon => taxon.commonname === speciesValue)
+        ?.taxonCode,
+    [reorderedTaxon]
+  )
 
   const handleMarkFishFormSubmit = (values: any) => {
     setAppliedMarks({
@@ -1191,6 +1203,9 @@ const AddFishContent = ({
               shadow='5'
               isDisabled={route.params?.editModeData ? false : formHasError}
               onPress={() => {
+                const selectedTaxonCode = findTaxonCode(
+                  species?.value as string
+                )
                 if (route.params?.editModeData) {
                   navigation.goBack()
                   showSlideAlert(dispatch, 'Fish Input Saved')
@@ -1200,7 +1215,7 @@ const AddFishContent = ({
                     let payload = returnFormValues()
                     saveIndividualFish({
                       tabId: activeTabId,
-                      formValues: payload,
+                      formValues: { ...payload, taxonCode: selectedTaxonCode },
                       UID: fishUID,
                     })
                     navigation.goBack()
@@ -1244,6 +1259,9 @@ const AddFishContent = ({
               isDisabled={route.params?.editModeData ? false : formHasError}
               onPress={() => {
                 let payload = returnFormValues()
+                const selectedTaxonCode = findTaxonCode(
+                  species?.value as string
+                )
                 const activeTabId = tabSlice.activeTabId
                 if (route.params?.editModeData) {
                   if (activeTabId) {
@@ -1251,6 +1269,7 @@ const AddFishContent = ({
                       tabId: activeTabId,
                       id: route.params?.editModeData?.id,
                       ...payload,
+                      taxonCode: selectedTaxonCode,
                       numFishCaught: count.value,
                     })
                     navigation.goBack()
@@ -1261,7 +1280,7 @@ const AddFishContent = ({
                   if (activeTabId) {
                     saveIndividualFish({
                       tabId: activeTabId,
-                      formValues: payload,
+                      formValues: { ...payload, taxonCode: selectedTaxonCode },
                     })
                     showSlideAlert(dispatch, 'Fish Input Saved')
                     if (

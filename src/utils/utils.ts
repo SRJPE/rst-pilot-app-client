@@ -59,9 +59,12 @@ export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   return alphabeticalArray
 }
 
-export const reorderTaxon = (taxon: Array<any>) => {
+export const reorderTaxon = (taxon: Array<any>, programId: number) => {
+  const filteredTaxon = taxon.filter(
+    (taxonObj: any) => taxonObj.programId === programId
+  )
   //sort the taxon
-  const alphabeticalTaxon = alphabeticalSort(taxon, 'commonname')
+  const alphabeticalTaxon = alphabeticalSort(filteredTaxon, 'commonname')
   //move chinook and steelhead to the front
   let chinook, steelhead
   for (var i = 0; i < alphabeticalTaxon.length; i++) {
@@ -77,7 +80,7 @@ export const reorderTaxon = (taxon: Array<any>) => {
   alphabeticalTaxon.unshift(chinook, steelhead)
   return alphabeticalTaxon?.map((taxon: any) => ({
     ...taxon,
-    label: taxon?.commonname,
+    label: `${taxon?.commonname} (${taxon?.abbreviationCode})`,
     value: taxon?.commonname,
   }))
 }
@@ -119,11 +122,8 @@ export const handleSpeciesSearchTextChange = ({
 }) => {
   const filteredSpeciesList = reorderedTaxon.filter(
     (species: any) =>
-      species.label.toLowerCase().includes(searchValue.toLowerCase()) ||
-      // species.taxonAbbreviations.includes(searchValue.toUpperCase())
-      species.taxonAbbreviations.some((abbr: string) =>
-        abbr.toLowerCase().includes(searchValue.toLowerCase())
-      )
+      species.commonname.toLowerCase().includes(searchValue.toLowerCase()) ||
+      species.abbreviationCode.toLowerCase().includes(searchValue.toLowerCase())
   )
 
   setSpeciesList(filteredSpeciesList)

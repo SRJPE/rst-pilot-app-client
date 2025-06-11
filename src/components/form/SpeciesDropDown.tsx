@@ -43,7 +43,6 @@ export default function SpeciesDropDown({
   const [value, setValue] = useState(editModeValue || ('' as string))
 
   const formikProps = useFormikContext<{ species: string[] }>()
-  console.log('🚀 ~ SpeciesDropDown.tsx:37 ~ formikProps:', formikProps)
 
   const speciesError = formikProps?.errors.species
 
