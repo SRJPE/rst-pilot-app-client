@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native'
-import { partition, set, startCase } from 'lodash'
+import { cond, partition, set, startCase } from 'lodash'
 import {
   Box,
   Button,
@@ -99,6 +99,7 @@ const AddFishContent = ({
   const [fishMeasureMetModalOpen, setFishMeasureMetModalOpen] = useState(
     false as boolean
   )
+  const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
 
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -499,36 +500,102 @@ const AddFishContent = ({
     if (!tabSlice?.activeTabId || !fishInputSlice) return
 
     const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
-      ?.fishMeasureCounts as { [key: string]: any }
+      ?.fishMeasureCounts as Record<
+      string,
+      { individualCount: number; plusCount: number }
+    >
 
-    if (!fishMeasureCounts) return
-    const fishStore = fishInputSlice?.[tabSlice.activeTabId]?.fishStore as {
-      [key: string]: number
-    }
+    const fishStore = fishInputSlice?.[tabSlice.activeTabId]
+      ?.fishStore as Record<string, { numFishCaught: number }>
 
-    if (!fishStore) return
+    if (!fishMeasureCounts || !fishStore) return
 
     const total = Object.values(fishStore).reduce(
-      (sum: number, fishObj: any) =>
+      (sum, fishObj) =>
         sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
       0
-    ) as number
+    )
 
     setTotalCatchCount(total)
+
+    const protocol = route.params?.fishMeasureProtocol as Record<string, number>
 
     if (
       typeof species.value === 'string' &&
       species.value &&
-      route.params?.fishMeasureProtocol &&
-      fishMeasureCounts[species.value]?.individualCount ===
-        route.params?.fishMeasureProtocol?.[species.value] &&
+      protocol &&
       !speciesDropDownOpen
     ) {
-      setFishMeasureMetModalOpen(true)
+      // Sum all counts that match any protocol key beginning with the current species
+      let protocolMet = false
+
+      for (const protoKey of Object.keys(protocol)) {
+        if (protoKey.startsWith(species.value)) {
+          if (protoKey.includes(' - ')) {
+            console.log('run, lifeStage', run.value, lifeStage.value)
+            if (!run.value && !lifeStage.value) {
+              // protocol has run or lifestage but form values do not match. not met
+              continue
+            }
+            // Extract the species part from the protocol key
+            const speciesParts = protoKey.split(' - ')
+            const protoRunOrLifestageName = speciesParts[1] || ''
+            const protoLifeStageName = speciesParts[2] || ''
+
+            if (
+              protoRunOrLifestageName &&
+              protoRunOrLifestageName !== lifeStage.value &&
+              protoRunOrLifestageName !== run.value
+            ) {
+              // protocol has run or lifestage but form values do not match. not met
+              continue
+            } else if (
+              protoRunOrLifestageName &&
+              protoRunOrLifestageName !== run.value &&
+              protoLifeStageName &&
+              protoLifeStageName !== lifeStage.value
+            ) {
+              //protocol has run and life stage but form values do not match. not met
+              continue
+            }
+          }
+
+          console.log('EXPECT ONLY MATCHING PROTOCOL KEYS', protoKey)
+          const threshold = protocol[protoKey]
+
+          // Sum individualCounts of all matching fishMeasureCounts keys
+          const matchingSum = Object.entries(fishMeasureCounts).reduce(
+            (sum, [key, count]) => {
+              return key.startsWith(protoKey)
+                ? sum + (count.individualCount || 0)
+                : sum
+            },
+            0
+          )
+
+          if (matchingSum >= threshold) {
+            protocolMet = true
+            setProtocolKeyMet(protoKey)
+            break
+          }
+        }
+      }
+
+      if (protocolMet) {
+        setFishMeasureMetModalOpen(true)
+      } else {
+        setFishMeasureMetModalOpen(false)
+      }
     } else {
       setFishMeasureMetModalOpen(false)
     }
-  }, [tabSlice.activeTabId, fishInputSlice, species.value])
+  }, [
+    tabSlice.activeTabId,
+    fishInputSlice,
+    species.value,
+    lifeStage.value,
+    run.value,
+  ])
 
   return (
     <TouchableNativeFeedback
@@ -1310,6 +1377,9 @@ const AddFishContent = ({
               closeModal={closeFishMeasureMetModal}
               activeTabId={tabSlice.activeTabId}
               resetSpecies={resetSpecies}
+              protocolKeyMet={protocolKeyMet}
+              lifeStageValue={lifeStage.value}
+              runValue={run.value}
             />
           </CustomModal>
         )}

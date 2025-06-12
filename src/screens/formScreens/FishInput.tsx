@@ -126,10 +126,21 @@ const FishInput = ({
     const selectedProgramObj = find(visitSetupDefaultsState.programs, {
       programId: selectedProgramId,
     })
+
     const fishMeasureProtocolObj = mapValues(
-      keyBy(selectedProgramObj.fishMeasureProtocol, 'commonname'),
+      keyBy(selectedProgramObj.fishMeasureProtocol, function (obj) {
+        let keyName = obj.commonname
+        if (obj.runName) {
+          keyName += ` - ${obj.runName}`
+        }
+        if (obj.lifeStageName) {
+          keyName += ` - ${obj.lifeStageName}`
+        }
+        return keyName
+      }),
       (obj: any) => Number(obj.numberMeasured) || 0
     )
+    console.log('fishMeasureProtocolObj', fishMeasureProtocolObj)
     setFishMeasureProtocol(fishMeasureProtocolObj)
   }, [visitSetupState, tabSlice, visitSetupDefaultsState])
 

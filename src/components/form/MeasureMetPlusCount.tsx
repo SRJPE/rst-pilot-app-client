@@ -35,17 +35,28 @@ const MeasureMetPlusCount = ({
   closeModal,
   activeTabId,
   resetSpecies,
+  protocolKeyMet,
+  lifeStageValue,
+  runValue,
 }: {
   species: any
   closeModal: any
   activeTabId: string
   resetSpecies: () => void
+  protocolKeyMet: string
+  lifeStageValue: string
+  runValue: string
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
   const [inputValue, setInputValue] = React.useState('')
 
   const handleSubmit = () => {
+    let submittedRun = ''
+    let submittedLifeStage = ''
+    if (protocolKeyMet.includes(runValue)) submittedRun = runValue
+    if (protocolKeyMet.includes(lifeStageValue))
+      submittedLifeStage = lifeStageValue
     try {
       const plusCount = parseInt(inputValue, 10)
       if (activeTabId) {
@@ -55,9 +66,9 @@ const MeasureMetPlusCount = ({
             existingMarks: [],
             count: plusCount,
             dead: false,
-            lifeStage: '',
+            lifeStage: submittedLifeStage,
             plusCountMethod: 'none',
-            run: '',
+            run: submittedRun,
             species: species.value,
           })
         )
@@ -73,15 +84,17 @@ const MeasureMetPlusCount = ({
   return (
     <>
       <CustomModalHeader
-        headerText={`Enter Plus Count for ${species.value}`}
+        headerText={`Enter Plus Count for ${protocolKeyMet}`}
+        headerFontSize={24}
         showHeaderButton={true}
         closeModal={closeModal}
       />
       <ScrollView>
         <Box paddingX='10' paddingTop='7' paddingBottom='3'>
           <Text fontSize='xl' color='black'>
-            You have met the fish measure count requirement for {species.value}.
-            You may now enter plus counts for all remaining {species.value}.
+            You have met the fish measure count requirement for{' '}
+            <Text bold>{protocolKeyMet}</Text>. You may now enter plus counts
+            for all remaining <Text bold>{protocolKeyMet}</Text>.
           </Text>
           <VStack space={4} mt={5}>
             <FormControl
