@@ -100,7 +100,6 @@ const getLifeStage = (species: string, lifeStageValue: any) => {
 const getFishMeasureCounts = (fishStore: FishStoreI) => {
   const fishMeasureCounts = {} as Record<string, any>
   Object.values(fishStore).forEach((fishObj: any) => {
-    console.log('fishObj', fishObj)
     if (fishObj.species) {
       let keyName = fishObj.species
       if (fishObj.run) {

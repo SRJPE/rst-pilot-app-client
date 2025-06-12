@@ -532,7 +532,6 @@ const AddFishContent = ({
       for (const protoKey of Object.keys(protocol)) {
         if (protoKey.startsWith(species.value)) {
           if (protoKey.includes(' - ')) {
-            console.log('run, lifeStage', run.value, lifeStage.value)
             if (!run.value && !lifeStage.value) {
               // protocol has run or lifestage but form values do not match. not met
               continue
@@ -560,7 +559,6 @@ const AddFishContent = ({
             }
           }
 
-          console.log('EXPECT ONLY MATCHING PROTOCOL KEYS', protoKey)
           const threshold = protocol[protoKey]
 
           // Sum individualCounts of all matching fishMeasureCounts keys

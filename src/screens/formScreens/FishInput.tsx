@@ -140,7 +140,6 @@ const FishInput = ({
       }),
       (obj: any) => Number(obj.numberMeasured) || 0
     )
-    console.log('fishMeasureProtocolObj', fishMeasureProtocolObj)
     setFishMeasureProtocol(fishMeasureProtocolObj)
   }, [visitSetupState, tabSlice, visitSetupDefaultsState])
 
