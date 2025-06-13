@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native'
-import { cond, partition, set, startCase } from 'lodash'
+import { partition, startCase } from 'lodash'
 import {
   Box,
   Button,
@@ -17,7 +17,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { use, useCallback, useEffect, useState } from 'react'
+import React, { use, useCallback, useEffect, useState, useRef } from 'react'
 import { Keyboard, TouchableNativeFeedback } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { uid } from 'uid'
@@ -58,6 +58,11 @@ import {
 } from '../../utils/utils'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
 import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
+import {
+  findLengthAtDateRun,
+  findRunDefinition,
+} from '../../utils/helpers/helperFunctions'
+import { fork } from 'child_process'
 
 const AddFishContent = ({
   route,
@@ -69,6 +74,8 @@ const AddFishContent = ({
   tabSlice,
   visitSetupState,
   fishInputSlice,
+  dropdownsStore,
+  trapOperationsStore,
 }: {
   route?: any
   saveIndividualFish: any
@@ -80,6 +87,8 @@ const AddFishContent = ({
   tabSlice: TabStateI
   visitSetupState: any
   fishInputSlice: any
+  dropdownsStore: any
+  trapOperationsStore: any
 }) => {
   const lastFishEntry = Object.values(fishStore).findLast(
     fishEntry => !fishEntry.plusCount
@@ -88,6 +97,16 @@ const AddFishContent = ({
   const dispatch = useDispatch<AppDispatch>()
   // @ts-ignore
   const [fishUID, setFishUID] = useState(uid() as string)
+  const [lengthAtDateModel, setLengthAtDateModel] = useState([] as any[])
+
+  useEffect(() => {
+    const programLadModelName = route?.params?.selectedProgramObj?.ladModel
+    if (programLadModelName === 'river') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
+    } else if (programLadModelName === 'delta') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateDelta)
+    }
+  }, [dropdownsStore.values])
 
   const [tagFishModalOpen, setTagFishModalOpen] = useState(false as boolean)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
@@ -595,6 +614,12 @@ const AddFishContent = ({
     run.value,
   ])
 
+  const forkLengthRef = useRef(forkLength)
+
+  useEffect(() => {
+    forkLengthRef.current = forkLength
+  }, [forkLength.value])
+
   return (
     <TouchableNativeFeedback
       onPress={() => {
@@ -748,8 +773,40 @@ const AddFishContent = ({
                             }
                             setForkLength(payload)
                           }}
-                          // TODO - onBlur logic?
-                          // onBlur={handleBlur('forkLength')}
+                          onBlur={() => {
+                            setTimeout(() => {
+                              if (
+                                species.value === 'Chinook salmon' &&
+                                tabSlice.activeTabId
+                              ) {
+                                if (!forkLengthRef.current.value) {
+                                  setRun(stateDefaults.whenSpeciesChinook.run)
+                                  return
+                                }
+
+                                const ladObj = findLengthAtDateRun(
+                                  lengthAtDateModel,
+                                  trapOperationsStore?.[tabSlice.activeTabId]
+                                    ?.values?.trapVisitStopTime
+                                )
+
+                                const runDefinition = findRunDefinition(
+                                  ladObj,
+                                  Number(forkLengthRef.current.value)
+                                )
+
+                                if (runDefinition) {
+                                  setRun({
+                                    ...run,
+                                    value: runDefinition,
+                                    touched: true,
+                                  })
+                                } else {
+                                  setRun(stateDefaults.whenSpeciesChinook.run)
+                                }
+                              }
+                            }, 1000)
+                          }}
                           value={forkLength.value as string}
                         />
                         <Text
@@ -910,6 +967,11 @@ const AddFishContent = ({
                             //   setRun({ ...run, touched: true })
                             // }
                             selectOptions={dropdownValues?.run}
+                            tooltip={
+                              <Text fontSize='md' padding={5} marginRight={10}>
+                                Automatically set by Length At Date (LAD)
+                              </Text>
+                            }
                           />
                         </Box>
                       )}
@@ -1401,6 +1463,8 @@ const mapStateToProps = (state: RootState) => {
     visitSetupState: state.visitSetup,
     visitSetupDefaultsState: state.visitSetupDefaults,
     fishInputSlice: state.fishInput,
+    dropdownsStore: state.dropdowns,
+    trapOperationsStore: state.trapOperations,
   }
 }
 

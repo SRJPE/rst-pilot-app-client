@@ -31,6 +31,7 @@ const BatchCountButtonGrid = ({
   dropdownsStore,
   activeTabId,
   species,
+  selectedProgramObj,
 }: {
   firstButton: number
   numberOfAdditionalButtons: number
@@ -44,14 +45,24 @@ const BatchCountButtonGrid = ({
   dropdownsStore: any
   activeTabId: string | null
   species: string
+  selectedProgramObj: any
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
-  const [lengthAtDate, setLengthAtDate] = useState([] as number[])
+  const [lengthAtDateModel, setLengthAtDateModel] = useState([] as number[])
   const dispatch = useDispatch<AppDispatch>()
   const [showPopover, setShowPopover] = useState<boolean>(false)
 
   useEffect(() => {
-    setLengthAtDate(dropdownsStore.values.lengthAtDate)
+    setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
+  }, [dropdownsStore.values])
+
+  useEffect(() => {
+    const programLadModelName = selectedProgramObj?.ladModel
+    if (programLadModelName === 'river') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
+    } else if (programLadModelName === 'delta') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateDelta)
+    }
   }, [dropdownsStore.values])
 
   useEffect(() => {
@@ -62,7 +73,7 @@ const BatchCountButtonGrid = ({
     let runDefinition = null as string | null
     if (species === 'Chinook salmon' && activeTabId) {
       const ladObj = findLengthAtDateRun(
-        lengthAtDate,
+        lengthAtDateModel,
         trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
       )
 

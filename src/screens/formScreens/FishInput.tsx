@@ -92,6 +92,8 @@ const FishInput = ({
       ? ([...speciesCaptured] as Array<string>)
       : (['YOY Chinook'] as Array<string>)
   )
+
+  const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
   const errorMessage =
     tabSlice.tabs[tabSlice.activeTabId || activeTabId]?.errorDetails[
       'Fish Input'
@@ -126,6 +128,7 @@ const FishInput = ({
     const selectedProgramObj = find(visitSetupDefaultsState.programs, {
       programId: selectedProgramId,
     })
+    setSelectedProgramObj(selectedProgramObj)
 
     const fishMeasureProtocolObj = mapValues(
       keyBy(selectedProgramObj.fishMeasureProtocol, function (obj) {
@@ -212,6 +215,7 @@ const FishInput = ({
                 navigation.navigate('Add Fish', {
                   // Add any props you want to pass here, for example:
                   fishMeasureProtocol,
+                  selectedProgramObj,
                 })
               }}
             >
@@ -226,7 +230,11 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Batch Count')
+                navigation.navigate('Batch Count', {
+                  // Add any props you want to pass here, for example:
+                  fishMeasureProtocol,
+                  selectedProgramObj,
+                })
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>

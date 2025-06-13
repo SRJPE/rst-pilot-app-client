@@ -51,11 +51,13 @@ import { AppDispatch, RootState } from '../../redux/store'
 import { current } from '@reduxjs/toolkit'
 
 const BatchCount = ({
+  route,
   tabSlice,
   batchCountStore,
   trapOperationsStore,
   dropdownsStore,
 }: {
+  route: any
   tabSlice: TabStateI
   batchCountStore: any
   trapOperationsStore: any
@@ -464,6 +466,7 @@ const BatchCount = ({
                   dropdownsStore={dropdownsStore}
                   activeTabId={tabSlice.activeTabId}
                   species={species}
+                  selectedProgramObj={route?.params?.selectedProgramObj}
                 />
                 {species !== 'Chinook salmon' && <View mb='65'></View>}
               </>
