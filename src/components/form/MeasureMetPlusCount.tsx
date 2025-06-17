@@ -34,7 +34,7 @@ const MeasureMetPlusCount = ({
   species,
   closeModal,
   activeTabId,
-  resetSpecies,
+  onSaveCallback,
   protocolKeyMet,
   lifeStageValue,
   runValue,
@@ -42,7 +42,7 @@ const MeasureMetPlusCount = ({
   species: any
   closeModal: any
   activeTabId: string
-  resetSpecies: () => void
+  onSaveCallback?: () => void
   protocolKeyMet: string
   lifeStageValue: string
   runValue: string
@@ -73,7 +73,9 @@ const MeasureMetPlusCount = ({
           })
         )
         closeModal()
-        resetSpecies() // Reset species after submission
+        if (onSaveCallback) {
+          onSaveCallback() // Reset species after submission
+        }
         setInputValue('') // Reset input value after submission
       }
     } catch (error) {

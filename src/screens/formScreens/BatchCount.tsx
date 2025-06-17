@@ -52,6 +52,7 @@ import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { calculateLastFish, checkFishMeasureProtocol } from '../../utils/utils'
 import FishEntriesSummary from '../../components/form/FishEntriesSummary'
+import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
 
 const BatchCount = ({
   route,
@@ -95,6 +96,10 @@ const BatchCount = ({
   const [combinedFishMeasureCounts, setCombinedFishMeasureCounts] = useState(
     {} as Record<string, any>
   )
+  const [fishMeasureMetModalOpen, setFishMeasureMetModalOpen] = useState(
+    false as boolean
+  )
+  const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
 
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
   const { species, fishConditions, existingMarks } = batchCharacteristics
@@ -183,6 +188,9 @@ const BatchCount = ({
   useEffect(() => {
     if (!tabSlice?.activeTabId || !fishInputSlice) return
 
+    if (batchCharacteristicsModalOpen) {
+      return
+    }
     const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
       ?.fishMeasureCounts as Record<
       string,
@@ -193,9 +201,9 @@ const BatchCount = ({
       (flObj: any) => {
         return {
           forkLength: flObj.forkLength,
-          run: flObj.runDefinition,
-          lifeStage: flObj.lifeStage.toLowerCase(),
-          species: batchCountStore.batchCharacteristics.species,
+          run: flObj?.runDefinition,
+          lifeStage: flObj?.lifeStage?.toLowerCase(),
+          species: batchCountStore?.batchCharacteristics?.species,
           numFishCaught: 1,
         }
       }
@@ -218,7 +226,7 @@ const BatchCount = ({
       getFishMeasureCounts(combinedFishStoreObj)
     setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
 
-    if (!fishMeasureCounts || !combinedFishStoreObj) return
+    if (!combinedFishStoreObj) return
 
     const total = Object.values(combinedFishStoreObj).reduce(
       (sum, fishObj) =>
@@ -228,31 +236,35 @@ const BatchCount = ({
 
     setTotalCatchCount(total)
 
-    // const protocolResult = checkFishMeasureProtocol({
-    //   fishMeasureCounts: combinedFishMeasureCountsObj,
-    //   fishMeasureProtocol: route.params?.fishMeasureProtocol,
-    //   speciesValue: species.value as string,
-    //   runValue: run.value as string,
-    //   lifeStageValue: lifeStage.value as string,
-    // })
+    const protocolResult = checkFishMeasureProtocol({
+      fishMeasureCounts: combinedFishMeasureCountsObj,
+      fishMeasureProtocol: route.params?.fishMeasureProtocol,
+      speciesValue: species as string,
+      runValue: '' as string,
+      lifeStageValue: '' as string,
+    })
 
-    // if (protocolResult && protocolResult.protocolMet) {
-    //   setFishMeasureMetModalOpen(true)
-    // } else {
-    //   setFishMeasureMetModalOpen(false)
-    // }
+    if (protocolResult && protocolResult.protocolMet) {
+      setFishMeasureMetModalOpen(true)
+    } else {
+      setFishMeasureMetModalOpen(false)
+    }
 
-    // if (protocolResult && protocolResult.protocolKeyMet) {
-    //   setProtocolKeyMet(protocolResult.protocolKeyMet)
-    // } else {
-    //   setProtocolKeyMet(null)
-    // }
+    if (protocolResult && protocolResult.protocolKeyMet) {
+      setProtocolKeyMet(protocolResult.protocolKeyMet)
+    } else {
+      setProtocolKeyMet(null)
+    }
   }, [
     tabSlice.activeTabId,
     fishInputSlice,
     species,
     batchCountStore.forkLengths,
   ])
+
+  const closeFishMeasureMetModal = () => {
+    setFishMeasureMetModalOpen(false)
+  }
 
   const navState = navigation?.getState()
   const currentRoute = navState?.routes[navState?.index]
@@ -637,6 +649,24 @@ const BatchCount = ({
           setShowTableModal={setShowTableModal}
           modalInitialData={modalInitialData}
         />
+      )}
+      {fishMeasureMetModalOpen && (
+        <CustomModal
+          isOpen={fishMeasureMetModalOpen}
+          closeModal={closeFishMeasureMetModal}
+          height='40%'
+          width={'80%'}
+        >
+          <MeasureMetPlusCount
+            species={{ value: species }}
+            closeModal={closeFishMeasureMetModal}
+            activeTabId={tabSlice.activeTabId}
+            protocolKeyMet={protocolKeyMet}
+            lifeStageValue={''}
+            runValue={''}
+            onSaveCallback={handlePressSaveBatchCount}
+          />
+        </CustomModal>
       )}
     </>
   ) : (

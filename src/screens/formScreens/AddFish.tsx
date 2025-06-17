@@ -63,7 +63,6 @@ import {
   findLengthAtDateRun,
   findRunDefinition,
 } from '../../utils/helpers/helperFunctions'
-import { fork } from 'child_process'
 
 const AddFishContent = ({
   route,
@@ -1410,7 +1409,7 @@ const AddFishContent = ({
               species={species}
               closeModal={closeFishMeasureMetModal}
               activeTabId={tabSlice.activeTabId}
-              resetSpecies={resetSpecies}
+              onSaveCallback={resetSpecies}
               protocolKeyMet={protocolKeyMet}
               lifeStageValue={lifeStage.value}
               runValue={run.value}
