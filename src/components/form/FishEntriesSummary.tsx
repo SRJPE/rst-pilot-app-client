@@ -22,14 +22,12 @@ const FishEntriesSummary = ({
   lastFishEntry,
   totalCatchCount,
   fishMeasureProtocol,
-  activeTabId,
-  fishInputSlice,
+  fishMeasureCounts,
 }: {
   lastFishEntry: any
   totalCatchCount: number
   fishMeasureProtocol: Record<string, string>
-  activeTabId: string | null
-  fishInputSlice: Record<string, any> | null | undefined
+  fishMeasureCounts: Record<string, any>
 }) => {
   const [protocolCounts, setProtocolCounts] = useState<Record<string, number>>(
     {}
@@ -132,16 +130,20 @@ const FishEntriesSummary = ({
   }
 
   useEffect(() => {
-    if (activeTabId === null || !fishInputSlice) {
+    if (
+      !fishMeasureProtocol ||
+      !fishMeasureCounts ||
+      !Object.keys(fishMeasureCounts).length
+    ) {
       return
     }
 
     const finalSums = sumCountsWithFallback(
       fishMeasureProtocol,
-      fishInputSlice[activeTabId].fishMeasureCounts
+      fishMeasureCounts
     )
     setProtocolCounts(finalSums)
-  }, [fishInputSlice, activeTabId, fishMeasureProtocol])
+  }, [fishMeasureProtocol, fishMeasureCounts])
 
   return (
     <Box
@@ -159,13 +161,13 @@ const FishEntriesSummary = ({
           <Text bold>Last Entry: </Text>
           {`${lastFishEntry.species} ${
             lastFishEntry.lifeStage ? `(${lastFishEntry.lifeStage})` : ''
-          } - Fork Length: ${lastFishEntry.forkLength}mm`}
+          } - FL: ${lastFishEntry.forkLength}mm`}
         </Text>
         <Text fontSize={'lg'}>
           <Text bold>Total Catch Count Entered: </Text>
           {totalCatchCount}
         </Text>
-        {activeTabId && fishInputSlice && (
+        {fishMeasureCounts && (
           <>
             <Accordion
               size='lg'

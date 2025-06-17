@@ -18,7 +18,6 @@ import {
   View,
   VStack,
 } from 'native-base'
-import { HStack as GlueHStack } from '@/components/ui/hstack'
 import {
   Radio,
   RadioGroup,
@@ -27,9 +26,9 @@ import {
   RadioIcon,
 } from '@/components/ui/radio'
 import { CircleIcon } from '@/components/ui/icon'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Keyboard } from 'react-native'
-import { connect, useDispatch } from 'react-redux'
+import { batch, connect, useDispatch } from 'react-redux'
 import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
 import BatchCountButtonGrid from '../../components/form/batchCount/BatchCountButtonGrid'
 import BatchCountDataTable from '../../components/form/batchCount/BatchCountDataTable'
@@ -44,11 +43,15 @@ import {
   removeLastForkLengthEntered,
   resetBatchCountSlice,
 } from '../../redux/reducers/formSlices/batchCountSlice'
-import { saveBatchCount } from '../../redux/reducers/formSlices/fishInputSlice'
+import {
+  saveBatchCount,
+  getFishMeasureCounts,
+} from '../../redux/reducers/formSlices/fishInputSlice'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import { current } from '@reduxjs/toolkit'
+import { calculateLastFish, checkFishMeasureProtocol } from '../../utils/utils'
+import FishEntriesSummary from '../../components/form/FishEntriesSummary'
 
 const BatchCount = ({
   route,
@@ -56,12 +59,14 @@ const BatchCount = ({
   batchCountStore,
   trapOperationsStore,
   dropdownsStore,
+  fishInputSlice,
 }: {
   route: any
   tabSlice: TabStateI
   batchCountStore: any
   trapOperationsStore: any
   dropdownsStore: any
+  fishInputSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
@@ -86,6 +91,10 @@ const BatchCount = ({
   const [FC1Toggle, setFC1Toggle] = useState(false as boolean)
   const [FC2Toggle, setFC2Toggle] = useState(false as boolean)
   const [FC3Toggle, setFC3Toggle] = useState(false as boolean)
+  const [totalCatchCount, setTotalCatchCount] = useState(0 as number)
+  const [combinedFishMeasureCounts, setCombinedFishMeasureCounts] = useState(
+    {} as Record<string, any>
+  )
 
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
   const { species, fishConditions, existingMarks } = batchCharacteristics
@@ -171,6 +180,80 @@ const BatchCount = ({
     setDeadIsLocked(!deadIsLocked)
   }
 
+  useEffect(() => {
+    if (!tabSlice?.activeTabId || !fishInputSlice) return
+
+    const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
+      ?.fishMeasureCounts as Record<
+      string,
+      { individualCount: number; plusCount: number }
+    >
+
+    const batchCountFishStore = Object.values(batchCountStore?.forkLengths).map(
+      (flObj: any) => {
+        return {
+          forkLength: flObj.forkLength,
+          run: flObj.runDefinition,
+          lifeStage: flObj.lifeStage.toLowerCase(),
+          species: batchCountStore.batchCharacteristics.species,
+          numFishCaught: 1,
+        }
+      }
+    )
+
+    const existingFishStore = fishInputSlice?.[tabSlice.activeTabId]
+      ?.fishStore as Record<string, { numFishCaught: number }>
+
+    const combinedFishStoreObj = {
+      ...existingFishStore,
+    } as Record<string, any>
+
+    let nextIndex = Object.keys(combinedFishStoreObj).length
+    batchCountFishStore.forEach(fish => {
+      combinedFishStoreObj[nextIndex] = fish
+      nextIndex++
+    })
+
+    const combinedFishMeasureCountsObj =
+      getFishMeasureCounts(combinedFishStoreObj)
+    setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
+
+    if (!fishMeasureCounts || !combinedFishStoreObj) return
+
+    const total = Object.values(combinedFishStoreObj).reduce(
+      (sum, fishObj) =>
+        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
+      0
+    )
+
+    setTotalCatchCount(total)
+
+    // const protocolResult = checkFishMeasureProtocol({
+    //   fishMeasureCounts: combinedFishMeasureCountsObj,
+    //   fishMeasureProtocol: route.params?.fishMeasureProtocol,
+    //   speciesValue: species.value as string,
+    //   runValue: run.value as string,
+    //   lifeStageValue: lifeStage.value as string,
+    // })
+
+    // if (protocolResult && protocolResult.protocolMet) {
+    //   setFishMeasureMetModalOpen(true)
+    // } else {
+    //   setFishMeasureMetModalOpen(false)
+    // }
+
+    // if (protocolResult && protocolResult.protocolKeyMet) {
+    //   setProtocolKeyMet(protocolResult.protocolKeyMet)
+    // } else {
+    //   setProtocolKeyMet(null)
+    // }
+  }, [
+    tabSlice.activeTabId,
+    fishInputSlice,
+    species,
+    batchCountStore.forkLengths,
+  ])
+
   const navState = navigation?.getState()
   const currentRoute = navState?.routes[navState?.index]
 
@@ -210,6 +293,25 @@ const BatchCount = ({
               </HStack>
             </Box>
             <Divider m='1%' />
+
+            {combinedFishMeasureCounts &&
+              Object.keys(combinedFishMeasureCounts).length && (
+                <Box mb={4}>
+                  <FishEntriesSummary
+                    lastFishEntry={{
+                      species: batchCountStore.batchCharacteristics.species,
+                      forkLength: calculateLastFish(
+                        batchCountStore.forkLengths
+                      ),
+                    }}
+                    totalCatchCount={totalCatchCount}
+                    fishMeasureProtocol={
+                      route.params?.fishMeasureProtocol || {}
+                    }
+                    fishMeasureCounts={combinedFishMeasureCounts}
+                  />
+                </Box>
+              )}
 
             {showTable ? (
               <ScrollView height='369'>
@@ -548,6 +650,7 @@ const mapStateToProps = (state: RootState) => {
     batchCountStore: state.batchCount,
     trapOperationsStore: state.trapOperations,
     dropdownsStore: state.dropdowns,
+    fishInputSlice: state.fishInput,
   }
 }
 export default connect(mapStateToProps)(BatchCount)

@@ -97,7 +97,7 @@ const getLifeStage = (species: string, lifeStageValue: any) => {
   }
 }
 
-const getFishMeasureCounts = (fishStore: FishStoreI) => {
+export const getFishMeasureCounts = (fishStore: FishStoreI) => {
   const fishMeasureCounts = {} as Record<string, any>
   Object.values(fishStore).forEach((fishObj: any) => {
     if (fishObj.species) {

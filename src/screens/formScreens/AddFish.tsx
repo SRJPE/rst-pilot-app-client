@@ -50,6 +50,7 @@ import { FormValueI, ReleaseMarkI } from '../../utils/interfaces'
 import {
   addFishErrorMessages,
   alphabeticalSort,
+  checkFishMeasureProtocol,
   createFormValueDefault,
   getAddFishStateDefaults,
   handleSpeciesSearchTextChange,
@@ -57,7 +58,7 @@ import {
   reorderTaxon,
 } from '../../utils/utils'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
-import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
+import FishEntriesSummary from '../../components/form/FishEntriesSummary'
 import {
   findLengthAtDateRun,
   findRunDefinition,
@@ -98,9 +99,15 @@ const AddFishContent = ({
   // @ts-ignore
   const [fishUID, setFishUID] = useState(uid() as string)
   const [lengthAtDateModel, setLengthAtDateModel] = useState([] as any[])
+  const [programLADModelName, setProgramLADModelName] = useState<string | null>(
+    null
+  )
 
   useEffect(() => {
     const programLadModelName = route?.params?.selectedProgramObj?.ladModel
+      ? route?.params?.selectedProgramObj.ladModel.toLowerCase()
+      : null
+    setProgramLADModelName(programLadModelName)
     if (programLadModelName === 'river') {
       setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
     } else if (programLadModelName === 'delta') {
@@ -537,71 +544,25 @@ const AddFishContent = ({
 
     setTotalCatchCount(total)
 
-    const protocol = route.params?.fishMeasureProtocol as Record<string, number>
+    if (!speciesDropDownOpen) {
+      const protocolResult = checkFishMeasureProtocol({
+        fishMeasureCounts,
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        speciesValue: species.value as string,
+        runValue: run.value as string,
+        lifeStageValue: lifeStage.value as string,
+      })
 
-    if (
-      typeof species.value === 'string' &&
-      species.value &&
-      protocol &&
-      !speciesDropDownOpen
-    ) {
-      // Sum all counts that match any protocol key beginning with the current species
-      let protocolMet = false
-
-      for (const protoKey of Object.keys(protocol)) {
-        if (protoKey.startsWith(species.value)) {
-          if (protoKey.includes(' - ')) {
-            if (!run.value && !lifeStage.value) {
-              // protocol has run or lifestage but form values do not match. not met
-              continue
-            }
-            // Extract the species part from the protocol key
-            const speciesParts = protoKey.split(' - ')
-            const protoRunOrLifestageName = speciesParts[1] || ''
-            const protoLifeStageName = speciesParts[2] || ''
-
-            if (
-              protoRunOrLifestageName &&
-              protoRunOrLifestageName !== lifeStage.value &&
-              protoRunOrLifestageName !== run.value
-            ) {
-              // protocol has run or lifestage but form values do not match. not met
-              continue
-            } else if (
-              protoRunOrLifestageName &&
-              protoRunOrLifestageName !== run.value &&
-              protoLifeStageName &&
-              protoLifeStageName !== lifeStage.value
-            ) {
-              //protocol has run and life stage but form values do not match. not met
-              continue
-            }
-          }
-
-          const threshold = protocol[protoKey]
-
-          // Sum individualCounts of all matching fishMeasureCounts keys
-          const matchingSum = Object.entries(fishMeasureCounts).reduce(
-            (sum, [key, count]) => {
-              return key.startsWith(protoKey)
-                ? sum + (count.individualCount || 0)
-                : sum
-            },
-            0
-          )
-
-          if (matchingSum >= threshold) {
-            protocolMet = true
-            setProtocolKeyMet(protoKey)
-            break
-          }
-        }
-      }
-
-      if (protocolMet) {
+      if (protocolResult && protocolResult.protocolMet) {
         setFishMeasureMetModalOpen(true)
       } else {
         setFishMeasureMetModalOpen(false)
+      }
+
+      if (protocolResult && protocolResult.protocolKeyMet) {
+        setProtocolKeyMet(protocolResult.protocolKeyMet)
+      } else {
+        setProtocolKeyMet(null)
       }
     } else {
       setFishMeasureMetModalOpen(false)
@@ -671,15 +632,20 @@ const AddFishContent = ({
             </HStack>
             <Divider mb='1' />
             <VStack paddingX='10' paddingBottom='3' space={3}>
-              {!route.params?.editModeData && lastFishEntry && (
-                <FishEntriesSummary
-                  lastFishEntry={lastFishEntry}
-                  totalCatchCount={totalCatchCount}
-                  fishMeasureProtocol={route.params?.fishMeasureProtocol || {}}
-                  activeTabId={tabSlice.activeTabId}
-                  fishInputSlice={fishInputSlice}
-                />
-              )}
+              {!route.params?.editModeData &&
+                lastFishEntry &&
+                tabSlice.activeTabId && (
+                  <FishEntriesSummary
+                    lastFishEntry={lastFishEntry}
+                    totalCatchCount={totalCatchCount}
+                    fishMeasureProtocol={
+                      route.params?.fishMeasureProtocol || {}
+                    }
+                    fishMeasureCounts={
+                      fishInputSlice?.[tabSlice.activeTabId]?.fishMeasureCounts
+                    }
+                  />
+                )}
               <HStack alignItems='center'>
                 <FormControl pr='5' mb={speciesDropDownOpen ? 180 : 0}>
                   {/* //TODO: Form is being managed manually, refactor logic and form to properly show error messages */}
@@ -968,9 +934,17 @@ const AddFishContent = ({
                             // }
                             selectOptions={dropdownValues?.run}
                             tooltip={
-                              <Text fontSize='md' padding={5} marginRight={10}>
-                                Automatically set by Length At Date (LAD)
-                              </Text>
+                              programLADModelName ? (
+                                <Text
+                                  fontSize='md'
+                                  padding={5}
+                                  marginRight={10}
+                                >
+                                  Run being set using{' '}
+                                  {startCase(programLADModelName)} Length At
+                                  Date (LAD)
+                                </Text>
+                              ) : null
                             }
                           />
                         </Box>

@@ -869,3 +869,94 @@ export const getAddFishStateDefaults = () => {
     },
   }
 }
+
+export const checkFishMeasureProtocol = ({
+  fishMeasureCounts,
+  fishMeasureProtocol,
+  speciesValue,
+  runValue,
+  lifeStageValue,
+}: {
+  fishMeasureCounts: any
+  fishMeasureProtocol: Record<string, number>
+  speciesValue: string
+  runValue: string
+  lifeStageValue: string
+}) => {
+  // This function is a placeholder for future implementation
+  // It currently does nothing and returns undefined
+  // You can add your logic here when needed
+  const protocol = fishMeasureProtocol
+
+  if (typeof speciesValue === 'string' && speciesValue && protocol) {
+    // Sum all counts that match any protocol key beginning with the current species
+    let protocolMet = false
+    let protocolKeyMet = null as string | null
+
+    for (const protoKey of Object.keys(protocol)) {
+      if (protoKey.startsWith(speciesValue)) {
+        if (protoKey.includes(' - ')) {
+          if (!runValue && !lifeStageValue) {
+            // protocol has run or lifestage but form values do not match. not met
+            continue
+          }
+          // Extract the species part from the protocol key
+          const speciesParts = protoKey.split(' - ')
+          const protoRunOrLifestageName = speciesParts[1] || ''
+          const protoLifeStageName = speciesParts[2] || ''
+
+          if (
+            protoRunOrLifestageName &&
+            protoRunOrLifestageName !== lifeStageValue &&
+            protoRunOrLifestageName !== runValue
+          ) {
+            // protocol has run or lifestage but form values do not match. not met
+            continue
+          } else if (
+            protoRunOrLifestageName &&
+            protoRunOrLifestageName !== runValue &&
+            protoLifeStageName &&
+            protoLifeStageName !== lifeStageValue
+          ) {
+            //protocol has run and life stage but form values do not match. not met
+            continue
+          }
+        }
+
+        const threshold = protocol[protoKey]
+
+        // Sum individualCounts of all matching fishMeasureCounts keys
+        const matchingSum = Object.entries(fishMeasureCounts).reduce(
+          (sum, [key, count]) => {
+            return key.startsWith(protoKey)
+              ? sum +
+                  ((count as { individualCount?: number }).individualCount || 0)
+              : sum
+          },
+          0
+        )
+
+        if (matchingSum >= threshold) {
+          protocolMet = true
+
+          protocolKeyMet = protoKey
+          break
+        }
+      }
+    }
+    return {
+      protocolMet,
+      protocolKeyMet,
+    }
+  }
+}
+
+export const calculateLastFish = (
+  forkLengths: Record<string, any> | null | undefined
+): number | null => {
+  if (!forkLengths || !Object.values(forkLengths).length) return null
+
+  const values = Object.values(forkLengths)
+  const lastObject = values[values.length - 1] as any
+  return lastObject.forkLength || null
+}

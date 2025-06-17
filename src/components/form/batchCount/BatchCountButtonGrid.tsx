@@ -49,6 +49,9 @@ const BatchCountButtonGrid = ({
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
   const [lengthAtDateModel, setLengthAtDateModel] = useState([] as number[])
+  const [programLADModelName, setProgramLADModelName] = useState<string | null>(
+    null
+  )
   const dispatch = useDispatch<AppDispatch>()
   const [showPopover, setShowPopover] = useState<boolean>(false)
 
@@ -58,6 +61,9 @@ const BatchCountButtonGrid = ({
 
   useEffect(() => {
     const programLadModelName = selectedProgramObj?.ladModel
+      ? selectedProgramObj.ladModel.toLowerCase()
+      : null
+    setProgramLADModelName(programLadModelName)
     if (programLadModelName === 'river') {
       setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
     } else if (programLadModelName === 'delta') {
