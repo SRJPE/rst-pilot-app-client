@@ -355,7 +355,7 @@ const PlusCountModalContent = ({
         <CustomModal
           isOpen={addMarkModalOpen}
           closeModal={() => setAddMarkModalOpen(false)}
-          height='1/2'
+          height='100%'
         >
           <AddAnotherMarkModalContent
             closeModal={() => setAddMarkModalOpen(false)}
