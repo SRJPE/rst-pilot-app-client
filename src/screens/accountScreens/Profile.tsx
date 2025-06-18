@@ -323,7 +323,7 @@ const Profile = ({
         <CustomModal
           isOpen={monitoringProgramInfoModalOpen}
           closeModal={() => setMonitoringProgramInfoModalOpen(false)}
-          height='full'
+          height='100%'
         >
           <MonitoringProgramInfoModalContent
             closeModal={() => setMonitoringProgramInfoModalOpen(false)}

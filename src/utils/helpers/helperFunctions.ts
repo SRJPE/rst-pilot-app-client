@@ -82,7 +82,7 @@ export const findRunDefinition = (ladObj: any, number: number) => {
 }
 
 export const retrieveTrapVisitsRequiringTurbidity = (
-  previousTrapVisits: TrapVisitResponse[]
+  previousTrapVisits: any[]
 ) => {
   const filteredTrapVisits = previousTrapVisits?.filter((trapVisit: any) => {
     return trapVisit.createdTrapVisitEnvironmentalResponse?.some(

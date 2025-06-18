@@ -411,7 +411,7 @@ function TrapQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height='1/2'
+          height='100%'
         >
           <GraphModalContent
             closeModal={() => handleCloseModal()}

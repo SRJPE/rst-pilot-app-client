@@ -12,6 +12,7 @@ interface FishInputStateI {
   modalOpen: boolean
   speciesCaptured: Array<string>
   fishStore: FishStoreI
+  fishMeasureCounts: Record<string, any>
 }
 
 interface FishEntry {
@@ -78,6 +79,7 @@ const initialState: InitialStateI = {
     modalOpen: false,
     speciesCaptured: [],
     fishStore: {},
+    fishMeasureCounts: {},
   },
 }
 
@@ -95,6 +97,41 @@ const getLifeStage = (species: string, lifeStageValue: any) => {
   } else {
     return null
   }
+}
+
+export const getFishMeasureCounts = (fishStore: FishStoreI) => {
+  const fishMeasureCounts = {} as Record<string, any>
+  Object.values(fishStore).forEach((fishObj: any) => {
+    if (fishObj.species) {
+      let keyName = fishObj.species
+      if (fishObj.run) {
+        keyName += ` - ${fishObj.run}`
+      }
+      if (fishObj.lifeStage) {
+        keyName += ` - ${fishObj.lifeStage}`
+      }
+
+      if (!fishMeasureCounts[keyName]) {
+        fishMeasureCounts[keyName] = {
+          individualCount: 0,
+          plusCount: 0,
+        }
+      }
+
+      if (fishObj.plusCount) {
+        fishMeasureCounts[keyName].plusCount += parseInt(
+          fishObj.numFishCaught,
+          10
+        )
+      } else {
+        fishMeasureCounts[keyName].individualCount += parseInt(
+          fishObj.numFishCaught,
+          10
+        )
+      }
+    }
+  })
+  return fishMeasureCounts
 }
 
 function organizeFishEntries(
@@ -196,12 +233,16 @@ export const saveFishSlice = createSlice({
 
         fishStoreCopy[id] = batchCountEntry
       }
+      const fishMeasureCounts = getFishMeasureCounts(fishStoreCopy)
+
       if (state[tabId]) {
         state[tabId].fishStore = fishStoreCopy
+        state[tabId].fishMeasureCounts = fishMeasureCounts
       } else {
         state[tabId] = {
           ...initialState['placeholderId'],
           fishStore: fishStoreCopy,
+          fishMeasureCounts,
         }
       }
     },
@@ -220,12 +261,16 @@ export const saveFishSlice = createSlice({
       }
       fishStoreCopy[id] = { ...formValues, UID, numFishCaught: 1 }
 
+      const fishMeasureCounts = getFishMeasureCounts(fishStoreCopy)
+
       if (state[tabId]) {
         state[tabId].fishStore = fishStoreCopy
+        state[tabId].fishMeasureCounts = fishMeasureCounts
       } else {
         state[tabId] = {
           ...initialState['placeholderId'],
           fishStore: fishStoreCopy,
+          fishMeasureCounts,
         }
       }
     },
@@ -252,7 +297,7 @@ export const saveFishSlice = createSlice({
         fishConditions: [],
         lifeStage: getLifeStage(species, lifeStage),
         adiposeClipped: null,
-        existingMarks: existingMarks.length ? existingMarks : [],
+        existingMarks: existingMarks?.length ? existingMarks : [],
         dead,
         willBeUsedInRecapture: null,
         plusCountMethod,
@@ -271,6 +316,7 @@ export const saveFishSlice = createSlice({
       } else {
         id = 0
       }
+
       if (state[tabId]) {
         state[tabId].fishStore = fishStoreCopy
       } else {
@@ -282,6 +328,8 @@ export const saveFishSlice = createSlice({
 
       fishStoreCopy[id] = plusCountEntry
       state[tabId].fishStore = fishStoreCopy
+      const fishMeasureCounts = getFishMeasureCounts(state[tabId].fishStore)
+      state[tabId].fishMeasureCounts = fishMeasureCounts
     },
     updateFishEntry: (state, action) => {
       const tabId = action.payload.tabId
@@ -292,12 +340,17 @@ export const saveFishSlice = createSlice({
       delete actionPayloadCopy.tabId
       fishStoreCopy[id] = actionPayloadCopy
       state[tabId].fishStore = fishStoreCopy
+
+      const fishMeasureCounts = getFishMeasureCounts(fishStoreCopy)
+      state[tabId].fishMeasureCounts = fishMeasureCounts
     },
     deleteFishEntry: (state, action) => {
       const { tabId, id } = action.payload
       let fishStoreCopy = cloneDeep(state[tabId].fishStore)
       delete fishStoreCopy[id]
       state[tabId].fishStore = fishStoreCopy
+      const fishMeasureCounts = getFishMeasureCounts(fishStoreCopy)
+      state[tabId].fishMeasureCounts = fishMeasureCounts
     },
     markFishInputCompleted: (state, action) => {
       const { tabId, bool } = action.payload

@@ -838,3 +838,200 @@ export const mergePreserveNonNull = (...objects: Record<string, any>[]) => {
     return acc
   }, {} as Record<string, any>)
 }
+
+export const getAddFishStateDefaults = () => {
+  return {
+    whenSpeciesChinook: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null, required: true }),
+      adiposeClipped: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      milting: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
+      eggs: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+      fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
+    },
+    whenSpeciesSteelhead: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null, required: true }),
+      adiposeClipped: createFormValueDefault({
+        value: null,
+        touched: true,
+      }),
+      existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      milting: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
+      eggs: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+      fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
+    },
+    whenSpeciesOther: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null }),
+      adiposeClipped: createFormValueDefault({
+        value: null,
+        touched: true,
+        required: false,
+      }),
+      existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      milting: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
+      eggs: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+      fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
+    },
+  }
+}
+
+export const checkFishMeasureProtocol = ({
+  fishMeasureCounts,
+  fishMeasureProtocol,
+  speciesValue,
+  runValue,
+  lifeStageValue,
+}: {
+  fishMeasureCounts: any
+  fishMeasureProtocol: Record<string, number>
+  speciesValue: string
+  runValue: string
+  lifeStageValue: string
+}) => {
+  // This function is a placeholder for future implementation
+  // It currently does nothing and returns undefined
+  // You can add your logic here when needed
+  const protocol = fishMeasureProtocol
+
+  if (typeof speciesValue === 'string' && speciesValue && protocol) {
+    // Sum all counts that match any protocol key beginning with the current species
+    let protocolMet = false
+    let protocolKeyMet = null as string | null
+
+    for (const protoKey of Object.keys(protocol)) {
+      if (protoKey.startsWith(speciesValue)) {
+        if (protoKey.includes(' - ')) {
+          if (!runValue && !lifeStageValue) {
+            // protocol has run or lifestage but form values do not match. not met
+            continue
+          }
+          // Extract the species part from the protocol key
+          const speciesParts = protoKey.split(' - ')
+          const protoRunOrLifestageName = speciesParts[1] || ''
+          const protoLifeStageName = speciesParts[2] || ''
+
+          if (
+            protoRunOrLifestageName &&
+            protoRunOrLifestageName !== lifeStageValue &&
+            protoRunOrLifestageName !== runValue
+          ) {
+            // protocol has run or lifestage but form values do not match. not met
+            continue
+          } else if (
+            protoRunOrLifestageName &&
+            protoRunOrLifestageName !== runValue &&
+            protoLifeStageName &&
+            protoLifeStageName !== lifeStageValue
+          ) {
+            //protocol has run and life stage but form values do not match. not met
+            continue
+          }
+        }
+
+        const threshold = protocol[protoKey]
+
+        // Sum individualCounts of all matching fishMeasureCounts keys
+        const matchingSum = Object.entries(fishMeasureCounts).reduce(
+          (sum, [key, count]) => {
+            return key.startsWith(protoKey)
+              ? sum +
+                  ((count as { individualCount?: number }).individualCount || 0)
+              : sum
+          },
+          0
+        )
+
+        if (matchingSum >= threshold) {
+          protocolMet = true
+
+          protocolKeyMet = protoKey
+          break
+        }
+      }
+    }
+    return {
+      protocolMet,
+      protocolKeyMet,
+    }
+  }
+}
+
+export const calculateLastFish = (
+  forkLengths: Record<string, any> | null | undefined
+): number | null => {
+  if (!forkLengths || !Object.values(forkLengths).length) return null
+
+  const values = Object.values(forkLengths)
+  const lastObject = values[values.length - 1] as any
+  return lastObject.forkLength || null
+}

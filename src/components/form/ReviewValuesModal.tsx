@@ -511,7 +511,7 @@ const ReviewValuesModal = ({
       <CustomModal
         isOpen={isOpen}
         closeModal={handleCloseReviewValuesModal}
-        height='full'
+        height='100%'
       >
         <>
           <CustomModalHeader

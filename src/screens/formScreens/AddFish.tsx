@@ -16,7 +16,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { use, useCallback, useEffect, useState, useRef } from 'react'
 import { Keyboard, TouchableNativeFeedback } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { uid } from 'uid'
@@ -49,12 +49,20 @@ import { FormValueI, ReleaseMarkI } from '../../utils/interfaces'
 import {
   addFishErrorMessages,
   alphabeticalSort,
+  checkFishMeasureProtocol,
   createFormValueDefault,
+  getAddFishStateDefaults,
   handleSpeciesSearchTextChange,
   QARanges,
   reorderTaxon,
 } from '../../utils/utils'
 import { startCase, find, keyBy, partition } from 'lodash'
+import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
+import FishEntriesSummary from '../../components/form/FishEntriesSummary'
+import {
+  findLengthAtDateRun,
+  findRunDefinition,
+} from '../../utils/helpers/helperFunctions'
 
 const AddFishContent = ({
   route,
@@ -66,6 +74,9 @@ const AddFishContent = ({
   tabSlice,
   visitSetupState,
   visitSetupDefaults,
+  fishInputSlice,
+  dropdownsStore,
+  trapOperationsStore,
 }: {
   route?: any
   saveIndividualFish: any
@@ -77,6 +88,9 @@ const AddFishContent = ({
   tabSlice: TabStateI
   visitSetupState: any
   visitSetupDefaults: any
+  fishInputSlice: any
+  dropdownsStore: any
+  trapOperationsStore: any
 }) => {
   const lastFishEntry = Object.values(fishStore).findLast(
     fishEntry => !fishEntry.plusCount
@@ -88,12 +102,34 @@ const AddFishContent = ({
   const [conditionalFishInputFields, setConditionalFishInputFields] = useState(
     {} as any
   )
+  const [lengthAtDateModel, setLengthAtDateModel] = useState([] as any[])
+  const [programLADModelName, setProgramLADModelName] = useState<string | null>(
+    null
+  )
+
+  useEffect(() => {
+    const programLadModelName = route?.params?.selectedProgramObj?.ladModel
+      ? route?.params?.selectedProgramObj.ladModel.toLowerCase()
+      : null
+    setProgramLADModelName(programLadModelName)
+    if (programLadModelName === 'river') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
+    } else if (programLadModelName === 'delta') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateDelta)
+    }
+  }, [dropdownsStore.values])
+
   const [tagFishModalOpen, setTagFishModalOpen] = useState(false as boolean)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
   const [addGeneticModalOpen, setAddGeneticModalOpen] = useState(
     false as boolean
   )
   const [createdMarks, setCreatedMarks] = useState<any[]>([] as any)
+  const [totalCatchCount, setTotalCatchCount] = useState(0 as number)
+  const [fishMeasureMetModalOpen, setFishMeasureMetModalOpen] = useState(
+    false as boolean
+  )
+  const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
 
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -148,109 +184,7 @@ const AddFishContent = ({
 
   // ------------------------------------------------------------------------------------------------------------------------
 
-  const stateDefaults = {
-    whenSpeciesChinook: {
-      species: createFormValueDefault({ value: null, required: true }),
-      count: createFormValueDefault({ value: null }),
-      forkLength: createFormValueDefault({ value: null, required: true }),
-      run: createFormValueDefault({ value: null }),
-      weight: createFormValueDefault({ value: null }),
-      lifeStage: createFormValueDefault({ value: null, required: true }),
-      adiposeClipped: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: true,
-      }),
-      existingMarks: createFormValueDefault({ value: [] }),
-      appliedMarks: createFormValueDefault({ value: [] }),
-      geneticSamples: createFormValueDefault({ value: [] }),
-      dead: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: true,
-      }),
-      milting: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: false,
-      }),
-      eggs: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: false,
-      }),
-      plusCountMethod: createFormValueDefault({ value: null }),
-      fishConditions: createFormValueDefault({ value: [] }),
-      comments: createFormValueDefault({ value: null }),
-    },
-    whenSpeciesSteelhead: {
-      species: createFormValueDefault({ value: null, required: true }),
-      count: createFormValueDefault({ value: null }),
-      forkLength: createFormValueDefault({ value: null, required: true }),
-      run: createFormValueDefault({ value: null }),
-      weight: createFormValueDefault({ value: null }),
-      lifeStage: createFormValueDefault({ value: null, required: true }),
-      adiposeClipped: createFormValueDefault({
-        value: null,
-        touched: true,
-      }),
-      existingMarks: createFormValueDefault({ value: [] }),
-      appliedMarks: createFormValueDefault({ value: [] }),
-      geneticSamples: createFormValueDefault({ value: [] }),
-      dead: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: true,
-      }),
-      milting: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: false,
-      }),
-      eggs: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: false,
-      }),
-      plusCountMethod: createFormValueDefault({ value: null }),
-      fishConditions: createFormValueDefault({ value: [] }),
-      comments: createFormValueDefault({ value: null }),
-    },
-    whenSpeciesOther: {
-      species: createFormValueDefault({ value: null, required: true }),
-      count: createFormValueDefault({ value: null }),
-      forkLength: createFormValueDefault({ value: null, required: true }),
-      run: createFormValueDefault({ value: null }),
-      weight: createFormValueDefault({ value: null }),
-      lifeStage: createFormValueDefault({ value: null }),
-      adiposeClipped: createFormValueDefault({
-        value: null,
-        touched: true,
-        required: false,
-      }),
-      existingMarks: createFormValueDefault({ value: [] }),
-      appliedMarks: createFormValueDefault({ value: [] }),
-      geneticSamples: createFormValueDefault({ value: [] }),
-      dead: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: true,
-      }),
-      milting: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: false,
-      }),
-      eggs: createFormValueDefault({
-        value: false,
-        touched: true,
-        required: false,
-      }),
-      plusCountMethod: createFormValueDefault({ value: null }),
-      fishConditions: createFormValueDefault({ value: [] }),
-      comments: createFormValueDefault({ value: null }),
-    },
-  }
+  const stateDefaults = getAddFishStateDefaults()
 
   const [formHasError, setFormHasError] = useState<boolean>(true)
 
@@ -419,6 +353,15 @@ const AddFishContent = ({
     eggs,
     plusCountMethod,
   ])
+
+  const closeFishMeasureMetModal = () => {
+    setFishMeasureMetModalOpen(false)
+  }
+
+  const resetSpecies = () => {
+    setSpecies(stateDefaults.whenSpeciesChinook.species)
+    resetFormState('other')
+  }
 
   const checkForFormError = () => {
     const formValues = [
@@ -636,6 +579,65 @@ const AddFishContent = ({
     }
   }, [existingMarks])
 
+  useEffect(() => {
+    if (!tabSlice?.activeTabId || !fishInputSlice) return
+
+    const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
+      ?.fishMeasureCounts as Record<
+      string,
+      { individualCount: number; plusCount: number }
+    >
+
+    const fishStore = fishInputSlice?.[tabSlice.activeTabId]
+      ?.fishStore as Record<string, { numFishCaught: number }>
+
+    if (!fishMeasureCounts || !fishStore) return
+
+    const total = Object.values(fishStore).reduce(
+      (sum, fishObj) =>
+        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
+      0
+    )
+
+    setTotalCatchCount(total)
+
+    if (!speciesDropDownOpen) {
+      const protocolResult = checkFishMeasureProtocol({
+        fishMeasureCounts,
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        speciesValue: species.value as string,
+        runValue: run.value as string,
+        lifeStageValue: lifeStage.value as string,
+      })
+
+      if (protocolResult && protocolResult.protocolMet) {
+        setFishMeasureMetModalOpen(true)
+      } else {
+        setFishMeasureMetModalOpen(false)
+      }
+
+      if (protocolResult && protocolResult.protocolKeyMet) {
+        setProtocolKeyMet(protocolResult.protocolKeyMet)
+      } else {
+        setProtocolKeyMet(null)
+      }
+    } else {
+      setFishMeasureMetModalOpen(false)
+    }
+  }, [
+    tabSlice.activeTabId,
+    fishInputSlice,
+    species.value,
+    lifeStage.value,
+    run.value,
+  ])
+
+  const forkLengthRef = useRef(forkLength)
+
+  useEffect(() => {
+    forkLengthRef.current = forkLength
+  }, [forkLength.value])
+
   return (
     <TouchableNativeFeedback
       onPress={() => {
@@ -687,32 +689,20 @@ const AddFishContent = ({
             </HStack>
             <Divider mb='1' />
             <VStack paddingX='10' paddingBottom='3' space={3}>
-              {!route.params?.editModeData && lastFishEntry && (
-                <Box
-                  py={3}
-                  px={5}
-                  w={'full'}
-                  borderWidth={1}
-                  borderColor={'primary'}
-                  borderRadius={5}
-                  bg='coolGray.100'
-                >
-                  <VStack space={1}>
-                    <Text fontSize={'lg'}>
-                      <Text bold>Last Entry: </Text>
-                      {`${lastFishEntry.species} ${
-                        lastFishEntry.lifeStage
-                          ? `(${lastFishEntry.lifeStage})`
-                          : ''
-                      } - Fork Length: ${lastFishEntry.forkLength} mm`}
-                    </Text>
-                    <Text fontSize={'lg'}>
-                      <Text bold>Total Catch Count Entered: </Text>
-                      {Object.values(fishStore).length}
-                    </Text>
-                  </VStack>
-                </Box>
-              )}
+              {!route.params?.editModeData &&
+                lastFishEntry &&
+                tabSlice.activeTabId && (
+                  <FishEntriesSummary
+                    lastFishEntry={lastFishEntry}
+                    totalCatchCount={totalCatchCount}
+                    fishMeasureProtocol={
+                      route.params?.fishMeasureProtocol || {}
+                    }
+                    fishMeasureCounts={
+                      fishInputSlice?.[tabSlice.activeTabId]?.fishMeasureCounts
+                    }
+                  />
+                )}
               <HStack alignItems='center'>
                 <FormControl pr='5' mb={speciesDropDownOpen ? 180 : 0}>
                   {/* //TODO: Form is being managed manually, refactor logic and form to properly show error messages */}
@@ -806,8 +796,40 @@ const AddFishContent = ({
                             }
                             setForkLength(payload)
                           }}
-                          // TODO - onBlur logic?
-                          // onBlur={handleBlur('forkLength')}
+                          onBlur={() => {
+                            setTimeout(() => {
+                              if (
+                                species.value === 'Chinook salmon' &&
+                                tabSlice.activeTabId
+                              ) {
+                                if (!forkLengthRef.current.value) {
+                                  setRun(stateDefaults.whenSpeciesChinook.run)
+                                  return
+                                }
+
+                                const ladObj = findLengthAtDateRun(
+                                  lengthAtDateModel,
+                                  trapOperationsStore?.[tabSlice.activeTabId]
+                                    ?.values?.trapVisitStopTime
+                                )
+
+                                const runDefinition = findRunDefinition(
+                                  ladObj,
+                                  Number(forkLengthRef.current.value)
+                                )
+
+                                if (runDefinition) {
+                                  setRun({
+                                    ...run,
+                                    value: runDefinition,
+                                    touched: true,
+                                  })
+                                } else {
+                                  setRun(stateDefaults.whenSpeciesChinook.run)
+                                }
+                              }
+                            }, 1000)
+                          }}
                           value={forkLength.value as string}
                         />
                         <Text
@@ -968,6 +990,19 @@ const AddFishContent = ({
                             //   setRun({ ...run, touched: true })
                             // }
                             selectOptions={dropdownValues?.run}
+                            tooltip={
+                              programLADModelName ? (
+                                <Text
+                                  fontSize='md'
+                                  padding={5}
+                                  marginRight={10}
+                                >
+                                  Run being set using{' '}
+                                  {startCase(programLADModelName)} Length At
+                                  Date (LAD)
+                                </Text>
+                              ) : null
+                            }
                           />
                         </Box>
                       )}
@@ -1487,7 +1522,7 @@ const AddFishContent = ({
           <CustomModal
             isOpen={addGeneticModalOpen}
             closeModal={() => setAddGeneticModalOpen(false)}
-            height='3/4'
+            height='100%'
           >
             <AddGeneticsModalContent
               handleGeneticSampleFormSubmit={handleGeneticSamplesFormSubmit}
@@ -1499,7 +1534,7 @@ const AddFishContent = ({
           <CustomModal
             isOpen={addMarkModalOpen}
             closeModal={() => setAddMarkModalOpen(false)}
-            height='1/2'
+            height='100%'
           >
             <AddAnotherMarkModalContent
               // handleAddAnotherMarkFormSubmit={handleAddAnotherMarkFormSubmit}
@@ -1508,6 +1543,24 @@ const AddFishContent = ({
               setExistingMarks={setExistingMarks}
               existingMarks={existingMarks}
               existingMarksArray={existingMarks.value}
+            />
+          </CustomModal>
+        )}
+        {fishMeasureMetModalOpen && (
+          <CustomModal
+            isOpen={fishMeasureMetModalOpen}
+            closeModal={closeFishMeasureMetModal}
+            height='40%'
+            width={'80%'}
+          >
+            <MeasureMetPlusCount
+              species={species}
+              closeModal={closeFishMeasureMetModal}
+              activeTabId={tabSlice.activeTabId}
+              onSaveCallback={resetSpecies}
+              protocolKeyMet={protocolKeyMet}
+              lifeStageValue={lifeStage.value}
+              runValue={run.value}
             />
           </CustomModal>
         )}
@@ -1530,6 +1583,10 @@ const mapStateToProps = (state: RootState) => {
     tabSlice: state.tabSlice,
     visitSetupState: state.visitSetup,
     visitSetupDefaults: state.visitSetupDefaults,
+    visitSetupDefaultsState: state.visitSetupDefaults,
+    fishInputSlice: state.fishInput,
+    dropdownsStore: state.dropdowns,
+    trapOperationsStore: state.trapOperations,
   }
 }
 

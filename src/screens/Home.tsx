@@ -73,7 +73,9 @@ const Home = ({
 
   const [staggerOpen, setStaggerOpen] = useState(false as boolean)
   const [opacity, setOpacity] = useState(1 as number)
-  const [visitsRequiringTurbidity, setVisitsRequiringTurbidity] = useState([])
+  const [visitsRequiringTurbidity, setVisitsRequiringTurbidity] = useState(
+    [] as any[]
+  )
   const dispatch = useDispatch<AppDispatch>()
 
   const connectivityState = useSelector((state: any) => state.connectivity)

@@ -151,12 +151,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                 )
               }}
             >
-              <Popover.Content
-                ml='10'
-                accessibilityLabel='Life Stage Info'
-                w='720'
-                h='600'
-              >
+              <Popover.Content ml='10' accessibilityLabel='Life Stage Info'>
                 <Popover.Arrow />
                 <Popover.CloseButton />
                 <Popover.Body p={0}>{tooltip}</Popover.Body>

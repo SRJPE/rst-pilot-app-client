@@ -556,7 +556,7 @@ function PartialRecordsQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => setIsModalOpen(false)}
-          height='5/6'
+          height='100%'
         >
           <VStack>
             <HStack alignItems={'center'}>
@@ -1072,7 +1072,7 @@ function PartialRecordsQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseNestedModal()}
-          height='3/4'
+          height='100%'
         >
           <>
             <CustomModalHeader
