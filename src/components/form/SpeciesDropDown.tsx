@@ -12,7 +12,6 @@ import {
 } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
 import { MaterialIcons } from '@expo/vector-icons'
-import { set } from 'lodash'
 
 export default function SpeciesDropDown({
   open,
