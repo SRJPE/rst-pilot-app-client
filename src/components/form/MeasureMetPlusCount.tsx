@@ -92,7 +92,7 @@ const MeasureMetPlusCount = ({
         closeModal={closeModal}
       />
       <ScrollView>
-        <Box paddingX='10' paddingTop='7' paddingBottom='3'>
+        <Box paddingX='10' paddingTop='2' paddingBottom='2'>
           <Text fontSize='xl' color='black'>
             You have met the fish measure count requirement for{' '}
             <Text bold>{protocolKeyMet}</Text>. You may now enter plus counts
@@ -129,7 +129,7 @@ const MeasureMetPlusCount = ({
               // flexDirection='row'
               justifyContent='space-between'
               width={'100%'}
-              my={5}
+              my={3}
             >
               <HStack>
                 <Button
