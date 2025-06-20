@@ -247,17 +247,22 @@ const BatchCount = ({
   }
 
   useEffect(() => {
-    if (!tabSlice?.activeTabId || !fishInputSlice) return
-
-    if (batchCharacteristicsModalOpen) {
+    if (currentRoute?.name !== 'Batch Count') {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
       return
     }
-    const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
-      ?.fishMeasureCounts as Record<
-      string,
-      { individualCount: number; plusCount: number }
-    >
+    if (!tabSlice?.activeTabId || !fishInputSlice) {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      return
+    }
 
+    if (batchCharacteristicsModalOpen) {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      return
+    }
     const batchCountFishStore = Object.values(batchCountStore?.forkLengths).map(
       (flObj: any) => {
         return {
@@ -300,7 +305,7 @@ const BatchCount = ({
     const protocolResult = checkFishMeasureProtocol({
       fishMeasureCounts: combinedFishMeasureCountsObj,
       fishMeasureProtocol: route.params?.fishMeasureProtocol,
-      speciesValue: species as string,
+      speciesValue: batchCountStore?.batchCharacteristics?.species as string,
       runValue: '' as string,
       lifeStageValue: '' as string,
     })
@@ -319,12 +324,13 @@ const BatchCount = ({
   }, [
     tabSlice.activeTabId,
     fishInputSlice,
-    species,
+    batchCountStore?.batchCharacteristics?.species,
     batchCountStore.forkLengths,
   ])
 
   const closeFishMeasureMetModal = () => {
     setFishMeasureMetModalOpen(false)
+    setProtocolKeyMet(null)
   }
 
   const navState = navigation?.getState()

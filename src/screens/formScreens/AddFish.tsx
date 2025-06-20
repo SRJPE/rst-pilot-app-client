@@ -356,11 +356,14 @@ const AddFishContent = ({
 
   const closeFishMeasureMetModal = () => {
     setFishMeasureMetModalOpen(false)
+    setProtocolKeyMet(null)
   }
 
   const resetSpecies = () => {
     setSpecies(stateDefaults.whenSpeciesChinook.species)
     resetFormState('other')
+    setFishMeasureMetModalOpen(false)
+    setProtocolKeyMet(null)
   }
 
   const checkForFormError = () => {
@@ -580,7 +583,11 @@ const AddFishContent = ({
   }, [existingMarks])
 
   useEffect(() => {
-    if (!tabSlice?.activeTabId || !fishInputSlice) return
+    if (!tabSlice?.activeTabId || !fishInputSlice) {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      return
+    }
 
     const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
       ?.fishMeasureCounts as Record<
@@ -609,6 +616,8 @@ const AddFishContent = ({
         runValue: run.value as string,
         lifeStageValue: lifeStage.value as string,
       })
+
+      console.log('species.value', species.value)
 
       if (protocolResult && protocolResult.protocolMet) {
         setFishMeasureMetModalOpen(true)
