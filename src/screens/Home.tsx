@@ -96,7 +96,7 @@ const Home = ({
     ) {
       try {
         dispatch(getVisitSetupDefaults(userCredentialsStore.id))
-        dispatch(getTrapVisitDropdownValues())
+        dispatch(getTrapVisitDropdownValues(userCredentialsStore.id))
         dispatch(fetchPreviousTrapAndCatch())
       } catch (error) {
         console.log('error from home screen: ', error)

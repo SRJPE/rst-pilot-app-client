@@ -1,7 +1,7 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
 import { every, some, sortBy, flatten, uniqBy } from 'lodash'
-import { ReleaseMarkI } from './interfaces'
+import { ReleaseMarkI, Taxon } from './interfaces'
 import { ObjectSchema } from 'yup'
 import type { InitialStateI as FishProcessingSliceState } from '../redux/reducers/formSlices/fishProcessingSlice'
 
@@ -59,12 +59,9 @@ export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   return alphabeticalArray
 }
 
-export const reorderTaxon = (taxon: Array<any>, programId: number) => {
-  const filteredTaxon = taxon.filter(
-    (taxonObj: any) => taxonObj.programId === programId
-  )
+export const reorderTaxon = (taxonArray: Array<any>, programId: number) => {
   //sort the taxon
-  const alphabeticalTaxon = alphabeticalSort(filteredTaxon, 'commonname')
+  const alphabeticalTaxon = alphabeticalSort(taxonArray, 'commonname')
   //move chinook and steelhead to the front
   let chinook, steelhead
   for (var i = 0; i < alphabeticalTaxon.length; i++) {
@@ -80,9 +77,46 @@ export const reorderTaxon = (taxon: Array<any>, programId: number) => {
   alphabeticalTaxon.unshift(chinook, steelhead)
   return alphabeticalTaxon?.map((taxon: any) => ({
     ...taxon,
-    label: `${taxon?.commonname} (${taxon?.abbreviationCode})`,
+    label: `${taxon?.commonname} ${
+      taxon?.abbreviationCode ? `(${taxon?.abbreviationCode})` : ''
+    }`,
     value: taxon?.commonname,
   }))
+}
+
+export const groupAndFillTaxons = (
+  programTaxonAbbreviations: any,
+  allTaxons: any
+) => {
+  const result: { [programId: string]: any[] } = {}
+
+  // Group taxons by programId, but skip adding to result if programId is null
+  for (const taxon of programTaxonAbbreviations) {
+    const { programId } = taxon
+
+    if (programId == null) {
+      // Don't create a null key, just skip adding this taxon to result
+      continue
+    }
+
+    if (!result[programId]) {
+      result[programId] = []
+    }
+    result[programId].push(taxon)
+  }
+
+  // Fill each group with missing taxons from allTaxons
+  for (const programId in result) {
+    const existingCodes = new Set(result[programId].map(taxon => taxon.code))
+
+    const missingTaxons = allTaxons.filter(
+      (taxon: Taxon) => !existingCodes.has(taxon.code)
+    )
+
+    result[programId] = result[programId].concat(missingTaxons)
+  }
+
+  return { ...result }
 }
 
 export const createArray = (start: number, end: number) => {
@@ -123,7 +157,9 @@ export const handleSpeciesSearchTextChange = ({
   const filteredSpeciesList = reorderedTaxon.filter(
     (species: any) =>
       species.commonname.toLowerCase().includes(searchValue.toLowerCase()) ||
-      species.abbreviationCode.toLowerCase().includes(searchValue.toLowerCase())
+      species.abbreviationCode
+        ?.toLowerCase()
+        .includes(searchValue.toLowerCase())
   )
 
   setSpeciesList(filteredSpeciesList)

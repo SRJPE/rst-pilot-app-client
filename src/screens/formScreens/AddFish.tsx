@@ -51,6 +51,7 @@ import {
   addFishErrorMessages,
   alphabeticalSort,
   createFormValueDefault,
+  groupAndFillTaxons,
   handleSpeciesSearchTextChange,
   QARanges,
   reorderTaxon,
@@ -79,12 +80,32 @@ const AddFishContent = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
-
   const tabId = tabSlice?.activeTabId || 'placeholderId'
+
   const activeProgramId = visitSetupState?.[tabId]?.values?.programId
+
+  const taxonGroupedByProgramId = useMemo(
+    () =>
+      groupAndFillTaxons(
+        dropdownValues.programTaxonAbbreviation,
+        dropdownValues.taxon
+      ),
+    [dropdownValues.taxon, dropdownValues.programTaxonAbbreviation]
+  )
+  console.log(
+    '🚀 ~ AddFish.tsx:95 ~ taxonGroupedByProgramId:',
+    taxonGroupedByProgramId
+  )
+
+  const currentProgramTaxon = taxonGroupedByProgramId[activeProgramId]
+
   const reorderedTaxon = useMemo(
-    () => reorderTaxon(dropdownValues.taxon, activeProgramId),
-    [dropdownValues.taxon]
+    () =>
+      reorderTaxon(
+        currentProgramTaxon || dropdownValues.taxon,
+        activeProgramId
+      ),
+    [currentProgramTaxon, activeProgramId]
   )
 
   const lastFishEntry = Object.values(fishStore).findLast(
@@ -1214,9 +1235,11 @@ const AddFishContent = ({
                   const activeTabId = tabSlice.activeTabId
                   if (activeTabId) {
                     let payload = returnFormValues()
+                    console.log('🚀 ~ AddFish.tsx:1270 ~ payload:', payload)
+
                     saveIndividualFish({
                       tabId: activeTabId,
-                      formValues: { ...payload, taxonCode: selectedTaxonCode },
+                      formValues: { ...payload },
                       UID: fishUID,
                     })
                     navigation.goBack()
@@ -1260,9 +1283,16 @@ const AddFishContent = ({
               isDisabled={route.params?.editModeData ? false : formHasError}
               onPress={() => {
                 let payload = returnFormValues()
+
                 const selectedTaxonCode = findTaxonCode(
                   species?.value as string
                 )
+                console.log('🚀 ~ AddFish.tsx:1316 ~ payload:', payload)
+                console.log(
+                  '🚀 ~ AddFish.tsx:1321 ~ selectedTaxonCode:',
+                  selectedTaxonCode
+                )
+
                 const activeTabId = tabSlice.activeTabId
                 if (route.params?.editModeData) {
                   if (activeTabId) {

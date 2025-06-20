@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import api from '../../api/axiosConfig'
-import { Taxon } from '../../utils/interfaces'
+import { Taxon, ProgramTaxonAbbreviation } from '../../utils/interfaces'
 
 // Constants
 const uninitializedStatus = 'uninitialized'
@@ -19,6 +19,7 @@ interface ValuesI {
   whyTrapNotFunctioning: any[]
   trapStatusAtEnd: any[]
   taxon: Taxon[]
+  programTaxonAbbreviation: ProgramTaxonAbbreviation[]
   fishProcessed: any[]
   whyFishNotProcessed: any[]
   lifeStage: any[]
@@ -50,6 +51,7 @@ const initialState: InitialStateI = {
     whyTrapNotFunctioning: [],
     trapStatusAtEnd: [],
     taxon: [],
+    programTaxonAbbreviation: [],
     fishProcessed: [],
     whyFishNotProcessed: [],
     lifeStage: [],
@@ -71,10 +73,12 @@ const initialState: InitialStateI = {
 }
 
 // Async actions API calls
-export const getTrapVisitDropdownValues = createAsyncThunk(
+export const getTrapVisitDropdownValues = createAsyncThunk<any, string>(
   'dropdowns/getTrapVisitDropdownValues',
-  async () => {
-    const response: APIResponseI = await api.get('trap-visit/dropdowns')
+  async userId => {
+    const response: APIResponseI = await api.get(
+      `trap-visit/dropdowns/${userId}`
+    )
     return response.data
   }
 )

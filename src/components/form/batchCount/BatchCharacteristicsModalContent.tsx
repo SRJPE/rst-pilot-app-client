@@ -22,6 +22,7 @@ import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
 import {
+  groupAndFillTaxons,
   handleSpeciesSearchTextChange,
   reorderTaxon,
 } from '../../../utils/utils'
@@ -55,9 +56,24 @@ const BatchCharacteristicsModalContent = ({
   )
   const tabId = tabSlice?.activeTabId || 'placeholderId'
   const activeProgramId = visitSetupState?.[tabId]?.values?.programId
+  const taxonGroupedByProgramId = useMemo(
+    () =>
+      groupAndFillTaxons(
+        dropdownValues.programTaxonAbbreviation,
+        dropdownValues.taxon
+      ),
+    [dropdownValues.taxon, dropdownValues.programTaxonAbbreviation]
+  )
+
+  const currentProgramTaxon = taxonGroupedByProgramId[activeProgramId]
+
   const reorderedTaxon = useMemo(
-    () => reorderTaxon(dropdownValues.taxon, activeProgramId),
-    [dropdownValues.taxon]
+    () =>
+      reorderTaxon(
+        currentProgramTaxon || dropdownValues.taxon,
+        activeProgramId
+      ),
+    [currentProgramTaxon, activeProgramId]
   )
 
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
