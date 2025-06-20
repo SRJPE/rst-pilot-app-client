@@ -17,6 +17,7 @@ import {
   findLengthAtDateRun,
   findRunDefinition,
 } from '../../../utils/helpers/helperFunctions'
+import { Vibration } from 'react-native'
 
 const BatchCountButtonGrid = ({
   firstButton,
@@ -149,21 +150,35 @@ const BatchCountButtonGrid = ({
         {numArray.length > 1 ? (
           numArray.map((num: number, idx: number) => {
             return (
-              <Pressable key={idx} onPress={() => handlePress(num)}>
-                <Box
-                  justifyContent='center'
-                  alignItems='center'
-                  bg='primary'
-                  h='55'
-                  w='60'
-                  margin='2'
-                  borderRadius='sm'
-                  shadow='3'
-                >
-                  <Text fontSize='lg' bold color='white'>
-                    {num}
-                  </Text>
-                </Box>
+              <Pressable
+                key={idx}
+                onPress={() => handlePress(num)}
+                // onPressIn={() => {
+                //   // Optional: Add haptic feedback on press
+                //   Vibration.vibrate(100)
+                // }}
+                _pressed={{
+                  bg: 'pink',
+                }}
+              >
+                {({ isPressed }) => {
+                  return (
+                    <Box
+                      justifyContent='center'
+                      alignItems='center'
+                      bg={isPressed ? 'secondary' : 'primary'}
+                      h='55'
+                      w='60'
+                      margin='2'
+                      borderRadius='sm'
+                      shadow='3'
+                    >
+                      <Text fontSize='lg' bold color='white'>
+                        {num}
+                      </Text>
+                    </Box>
+                  )
+                }}
               </Pressable>
             )
           })

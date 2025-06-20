@@ -632,6 +632,7 @@ const AddFishContent = ({
       }
     } else {
       setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
     }
   }, [
     tabSlice.activeTabId,
