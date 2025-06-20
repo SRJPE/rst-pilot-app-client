@@ -186,17 +186,22 @@ const BatchCount = ({
   }
 
   useEffect(() => {
-    if (!tabSlice?.activeTabId || !fishInputSlice) return
-
-    if (batchCharacteristicsModalOpen) {
+    if (currentRoute?.name !== 'Batch Count') {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
       return
     }
-    const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
-      ?.fishMeasureCounts as Record<
-      string,
-      { individualCount: number; plusCount: number }
-    >
+    if (!tabSlice?.activeTabId || !fishInputSlice) {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      return
+    }
 
+    if (batchCharacteristicsModalOpen) {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      return
+    }
     const batchCountFishStore = Object.values(batchCountStore?.forkLengths).map(
       (flObj: any) => {
         return {
@@ -264,6 +269,7 @@ const BatchCount = ({
 
   const closeFishMeasureMetModal = () => {
     setFishMeasureMetModalOpen(false)
+    setProtocolKeyMet(null)
   }
 
   const navState = navigation?.getState()
