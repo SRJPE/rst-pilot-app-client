@@ -5,8 +5,12 @@ import CustomModalHeader from '../Shared/CustomModalHeader'
 import { Text, Button, ScrollView, Divider, HStack, View } from 'native-base'
 import { List } from 'react-native-paper'
 import { SceneMap, TabBar, TabBarProps, TabView } from 'react-native-tab-view'
-import { startCase, find, keyBy } from 'lodash'
-import { groupBySpeciesForkLength, calcAvgValue } from '../../utils/utils'
+import { startCase } from 'lodash'
+import {
+  groupBySpeciesForkLength,
+  calcAvgValue,
+  getProgramFormFieldsLookup,
+} from '../../utils/utils'
 import * as Print from 'expo-print'
 import { shareAsync } from 'expo-sharing'
 
@@ -69,23 +73,6 @@ const getFilteredPostProcessingState = (
     delete filteredTrapPostProcessingState.endingTrapStatus
   }
   return filteredTrapPostProcessingState
-}
-
-const getProgramFormFieldsLookup = (
-  visitSetupState: any,
-  visitSetupDefaultState: any
-) => {
-  if (!visitSetupDefaultState || !visitSetupDefaultState.programs) return {}
-  const programId = visitSetupState.programId
-  const selectedProgramObj = find(
-    visitSetupDefaultState.programs,
-    (program: any) => program.id === programId
-  )
-  const programFormFields = selectedProgramObj.programFormFields
-  const programFormFieldsObj = programFormFields?.length
-    ? keyBy(programFormFields, 'fieldName')
-    : {}
-  return programFormFieldsObj
 }
 
 const getUnitAbbreviation = ({

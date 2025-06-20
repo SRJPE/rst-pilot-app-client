@@ -1,6 +1,6 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
-import { every, some, sortBy, flatten, uniqBy } from 'lodash'
+import { every, some, sortBy, flatten, uniqBy, find, keyBy } from 'lodash'
 import { ReleaseMarkI } from './interfaces'
 import { ObjectSchema } from 'yup'
 import type { InitialStateI as FishProcessingSliceState } from '../redux/reducers/formSlices/fishProcessingSlice'
@@ -1034,4 +1034,21 @@ export const calculateLastFish = (
   const values = Object.values(forkLengths)
   const lastObject = values[values.length - 1] as any
   return lastObject.forkLength || null
+}
+
+export const getProgramFormFieldsLookup = (
+  visitSetupState: any,
+  visitSetupDefaultState: any
+) => {
+  if (!visitSetupDefaultState || !visitSetupDefaultState.programs) return {}
+  const programId = visitSetupState.programId
+  const selectedProgramObj = find(
+    visitSetupDefaultState.programs,
+    (program: any) => program.id === programId
+  )
+  const programFormFields = selectedProgramObj.programFormFields
+  const programFormFieldsObj = programFormFields?.length
+    ? keyBy(programFormFields, 'fieldName')
+    : {}
+  return programFormFieldsObj
 }

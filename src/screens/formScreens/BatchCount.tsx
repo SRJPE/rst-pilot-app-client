@@ -49,7 +49,7 @@ import {
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import { find } from 'lodash'
+import { find, keyBy } from 'lodash'
 import { calculateLastFish, checkFishMeasureProtocol } from '../../utils/utils'
 import FishEntriesSummary from '../../components/form/FishEntriesSummary'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
@@ -63,6 +63,7 @@ const BatchCount = ({
   selectedProgramId,
   visitSetupDefaults,
   fishInputSlice,
+  visitSetupState,
 }: {
   route: any
   tabSlice: TabStateI
@@ -72,6 +73,7 @@ const BatchCount = ({
   selectedProgramId: number | null
   visitSetupDefaults: any
   fishInputSlice: any
+  visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const currentProgramInfo = find(
@@ -96,6 +98,10 @@ const BatchCount = ({
 
   const [deadIsLocked, setDeadIsLocked] = useState(false as boolean)
   const [deadToggle, setDeadToggle] = useState(false as boolean)
+  const [miltingIsLocked, setMiltingIsLocked] = useState(false as boolean)
+  const [miltingToggle, setMiltingToggle] = useState(null as boolean | null)
+  const [eggsIsLocked, setEggsIsLocked] = useState(false as boolean)
+  const [eggsToggle, setEggsToggle] = useState(null as boolean | null)
   const [markToggle, setMarkToggle] = useState(false as boolean)
   const [FC1Toggle, setFC1Toggle] = useState(false as boolean)
   const [FC2Toggle, setFC2Toggle] = useState(false as boolean)
@@ -108,7 +114,9 @@ const BatchCount = ({
     false as boolean
   )
   const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
-
+  const [programFormFieldsObj, setProgramFormFieldsObj] = useState(
+    {} as Record<string, any>
+  )
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
   const { species, fishConditions, existingMarks } = batchCharacteristics
 
@@ -121,6 +129,21 @@ const BatchCount = ({
     )
     setSelectedProgramObj(currentProgramInfo)
   }, [visitSetupDefaults.programs, selectedProgramId])
+
+  useEffect(() => {
+    const currentProgramInfo = find(
+      visitSetupDefaults.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+
+    if (!currentProgramInfo) return
+
+    const formFieldsLookup = keyBy(
+      currentProgramInfo?.programFormFields,
+      'fieldName'
+    )
+    setProgramFormFieldsObj(formFieldsLookup)
+  }, [visitSetupState, visitSetupDefaults])
 
   const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())
@@ -187,6 +210,16 @@ const BatchCount = ({
       case 'FC3':
         setFC3Toggle(!FC3Toggle)
         break
+      case 'milting':
+        if (miltingIsLocked) return
+        if (miltingToggle === null) return
+        setMiltingToggle(!miltingToggle)
+        break
+      case 'eggs':
+        if (eggsIsLocked) return
+        if (eggsToggle === null) return
+        setEggsToggle(!eggsToggle)
+        break
 
       default:
         setMarkToggle(false)
@@ -195,12 +228,22 @@ const BatchCount = ({
         setFC3Toggle(false)
         if (deadIsLocked) return
         setDeadToggle(false)
+        if (miltingIsLocked) return
+        setMiltingToggle(null)
+        if (eggsIsLocked) return
+        setEggsToggle(null)
         break
     }
   }
 
   const handlePressLockDead = () => {
     setDeadIsLocked(!deadIsLocked)
+  }
+  const handlePressLockMilting = () => {
+    setMiltingIsLocked(!miltingIsLocked)
+  }
+  const handlePressLockEggs = () => {
+    setEggsIsLocked(!eggsIsLocked)
   }
 
   useEffect(() => {
@@ -387,86 +430,163 @@ const BatchCount = ({
                   <Text bold mb={2}>
                     Fish Conditions:
                   </Text>
-                  <HStack space={3} alignItems='center'>
-                    <HStack alignItems='center' space={4}>
-                      <HStack space={2} alignItems={'center'}>
-                        <Checkbox
-                          value='dead'
-                          isChecked={deadToggle}
-                          shadow='3'
-                          _checked={{
-                            bg: 'primary',
-                            borderColor: 'primary',
-                          }}
-                          size='md'
-                          isDisabled={deadIsLocked}
-                          onChange={() => handleToggles(`dead`)}
-                        />
-                        <HStack space={1} alignItems={'center'}>
-                          <Text fontSize='16'>Dead</Text>
-                          <IconButton
-                            onPress={() => handlePressLockDead()}
-                            icon={
-                              <Icon
-                                as={FontAwesome}
-                                name={deadIsLocked ? 'lock' : 'unlock'}
-                              />
-                            }
-                            borderRadius='full'
-                            _icon={{
-                              size: 5,
-                            }}
-                            _pressed={{
-                              bg: '#FFF',
-                            }}
-                          />
-                        </HStack>
-                      </HStack>
-                      {existingMarks && existingMarks.length > 0 && (
-                        <HStack space={2}>
+                  <ScrollView
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                  >
+                    <HStack space={3} alignItems='center'>
+                      <HStack alignItems='center' space={4}>
+                        <HStack space={2} alignItems={'center'}>
                           <Checkbox
-                            value='mark'
-                            isChecked={markToggle}
+                            value='dead'
+                            isChecked={deadToggle}
                             shadow='3'
                             _checked={{
                               bg: 'primary',
                               borderColor: 'primary',
                             }}
                             size='md'
-                            onChange={() => handleToggles('mark')}
+                            isDisabled={deadIsLocked}
+                            onChange={() => handleToggles(`dead`)}
                           />
-                          <Text fontSize='16'>Marked</Text>
+                          <HStack space={1} alignItems={'center'}>
+                            <Text fontSize='16'>Dead</Text>
+                            <IconButton
+                              onPress={() => handlePressLockDead()}
+                              icon={
+                                <Icon
+                                  as={FontAwesome}
+                                  name={deadIsLocked ? 'lock' : 'unlock'}
+                                />
+                              }
+                              borderRadius='full'
+                              _icon={{
+                                size: 5,
+                              }}
+                              _pressed={{
+                                bg: '#FFF',
+                              }}
+                            />
+                          </HStack>
                         </HStack>
-                      )}
-                      {fishConditions.length > 0 &&
-                        fishConditions.map(
-                          (condition: string, index: number) => (
-                            <HStack space={2}>
-                              <Checkbox
-                                value={`FC${index + 1}`}
-                                shadow='3'
-                                _checked={{
-                                  bg: 'primary',
-                                  borderColor: 'primary',
-                                }}
-                                size='md'
-                                isChecked={
-                                  index + 1 === 1
-                                    ? FC1Toggle
-                                    : index + 1 === 2
-                                    ? FC2Toggle
-                                    : FC3Toggle
+                        {programFormFieldsObj?.['milting'] && (
+                          <HStack space={2} alignItems={'center'}>
+                            <Checkbox
+                              value='milting'
+                              isChecked={miltingToggle || false}
+                              shadow='3'
+                              _checked={{
+                                bg: 'primary',
+                                borderColor: 'primary',
+                              }}
+                              size='md'
+                              isDisabled={miltingIsLocked}
+                              onChange={() => handleToggles(`milting`)}
+                            />
+                            <HStack space={1} alignItems={'center'}>
+                              <Text fontSize='16'>Milting</Text>
+                              <IconButton
+                                onPress={() => handlePressLockMilting()}
+                                icon={
+                                  <Icon
+                                    as={FontAwesome}
+                                    name={miltingIsLocked ? 'lock' : 'unlock'}
+                                  />
                                 }
-                                onChange={() => handleToggles(`FC${index + 1}`)}
+                                borderRadius='full'
+                                _icon={{
+                                  size: 5,
+                                }}
+                                _pressed={{
+                                  bg: '#FFF',
+                                }}
                               />
-                              <Text fontSize='16'>{`${
-                                index + 1
-                              }. ${condition}`}</Text>
                             </HStack>
-                          )
+                          </HStack>
                         )}
+                        {programFormFieldsObj?.['eggs'] && (
+                          <HStack space={2} alignItems={'center'}>
+                            <Checkbox
+                              value='eggs'
+                              isChecked={eggsToggle || false}
+                              shadow='3'
+                              _checked={{
+                                bg: 'primary',
+                                borderColor: 'primary',
+                              }}
+                              size='md'
+                              isDisabled={eggsIsLocked}
+                              onChange={() => handleToggles(`eggs`)}
+                            />
+                            <HStack space={1} alignItems={'center'}>
+                              <Text fontSize='16'>Eggs</Text>
+                              <IconButton
+                                onPress={() => handlePressLockEggs()}
+                                icon={
+                                  <Icon
+                                    as={FontAwesome}
+                                    name={eggsIsLocked ? 'lock' : 'unlock'}
+                                  />
+                                }
+                                borderRadius='full'
+                                _icon={{
+                                  size: 5,
+                                }}
+                                _pressed={{
+                                  bg: '#FFF',
+                                }}
+                              />
+                            </HStack>
+                          </HStack>
+                        )}
+                        {existingMarks && existingMarks.length > 0 && (
+                          <HStack space={2}>
+                            <Checkbox
+                              value='mark'
+                              isChecked={markToggle}
+                              shadow='3'
+                              _checked={{
+                                bg: 'primary',
+                                borderColor: 'primary',
+                              }}
+                              size='md'
+                              onChange={() => handleToggles('mark')}
+                            />
+                            <Text fontSize='16'>Marked</Text>
+                          </HStack>
+                        )}
+                        {fishConditions.length > 0 &&
+                          fishConditions.map(
+                            (condition: string, index: number) => (
+                              <HStack space={2}>
+                                <Checkbox
+                                  value={`FC${index + 1}`}
+                                  shadow='3'
+                                  _checked={{
+                                    bg: 'primary',
+                                    borderColor: 'primary',
+                                  }}
+                                  size='md'
+                                  isChecked={
+                                    index + 1 === 1
+                                      ? FC1Toggle
+                                      : index + 1 === 2
+                                      ? FC2Toggle
+                                      : FC3Toggle
+                                  }
+                                  onChange={() =>
+                                    handleToggles(`FC${index + 1}`)
+                                  }
+                                />
+                                <Text fontSize='16'>{`${
+                                  index + 1
+                                }. ${condition}`}</Text>
+                              </HStack>
+                            )
+                          )}
+                      </HStack>
                     </HStack>
-                  </HStack>
+                  </ScrollView>
                 </Box>
                 {species === 'Chinook salmon' && (
                   <Box px='2%'>
@@ -589,6 +709,8 @@ const BatchCount = ({
                   ignoreLifeStage={species !== 'Chinook salmon'}
                   deadToggle={deadToggle}
                   markToggle={markToggle}
+                  miltingToggle={miltingToggle}
+                  eggsToggle={eggsToggle}
                   fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
                     .map((toggle, index) =>
                       toggle ? fishConditions[index] : null
@@ -704,6 +826,7 @@ const mapStateToProps = (state: RootState) => {
         ?.programId,
     visitSetupDefaults: state.visitSetupDefaults,
     fishInputSlice: state.fishInput,
+    visitSetupState: state.visitSetup,
   }
 }
 export default connect(mapStateToProps)(BatchCount)

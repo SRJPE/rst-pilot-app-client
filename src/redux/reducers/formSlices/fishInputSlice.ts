@@ -22,6 +22,8 @@ interface FishEntry {
   existingMark: boolean
   fishConditions: string[]
   runDefinition?: string
+  eggs?: boolean | null | undefined
+  milting?: boolean | null | undefined
 }
 
 interface PreparedFishEntry {
@@ -49,6 +51,8 @@ export interface IndividualFishValuesI {
   numFishCaught?: number | null
   plusCount?: boolean
   comments?: string | null
+  eggs?: boolean | null | undefined
+  milting?: boolean | null | undefined
 }
 
 export const individualFishInitialState = {
@@ -178,8 +182,7 @@ export const saveFishSlice = createSlice({
 
     saveBatchCount: (state, action) => {
       const { tabId, batchCharacteristics, forkLengths } = action.payload
-      const { species, adiposeClipped, existingMarks, fishConditions } =
-        batchCharacteristics
+      const { species, adiposeClipped, existingMarks } = batchCharacteristics
       let fishStoreCopy = cloneDeep(
         state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
       )
@@ -222,6 +225,12 @@ export const saveFishSlice = createSlice({
           plusCountMethod: null,
           plusCount: false,
         } as any
+        if (typeof value?.fishEntryData?.eggs === 'boolean') {
+          batchCountEntry.eggs = value?.fishEntryData?.eggs
+        }
+        if (typeof value?.fishEntryData?.milting === 'boolean') {
+          batchCountEntry.milting = value?.fishEntryData?.milting
+        }
         let id = null
         if (Object.keys(fishStoreCopy).length) {
           // @ts-ignore

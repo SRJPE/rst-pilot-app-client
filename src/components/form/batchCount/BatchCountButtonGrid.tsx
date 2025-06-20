@@ -25,6 +25,8 @@ const BatchCountButtonGrid = ({
   ignoreLifeStage,
   deadToggle,
   markToggle,
+  miltingToggle,
+  eggsToggle,
   fishConditions,
   handleToggles,
   trapOperationsStore,
@@ -39,6 +41,8 @@ const BatchCountButtonGrid = ({
   ignoreLifeStage?: boolean
   deadToggle: boolean
   markToggle: boolean
+  miltingToggle: boolean | null
+  eggsToggle: boolean | null
   fishConditions: string[]
   handleToggles: any
   trapOperationsStore: any
@@ -95,6 +99,8 @@ const BatchCountButtonGrid = ({
         lifeStage: ignoreLifeStage ? null : selectedLifeStage,
         dead: deadToggle,
         existingMark: markToggle,
+        milting: miltingToggle,
+        eggs: eggsToggle,
         fishConditions,
         runDefinition: runDefinition,
       })
