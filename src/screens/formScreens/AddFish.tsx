@@ -329,11 +329,14 @@ const AddFishContent = ({
 
   const closeFishMeasureMetModal = () => {
     setFishMeasureMetModalOpen(false)
+    setProtocolKeyMet(null)
   }
 
   const resetSpecies = () => {
     setSpecies(stateDefaults.whenSpeciesChinook.species)
     resetFormState('other')
+    setFishMeasureMetModalOpen(false)
+    setProtocolKeyMet(null)
   }
 
   const checkForFormError = () => {
@@ -565,6 +568,7 @@ const AddFishContent = ({
       }
     } else {
       setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
     }
   }, [
     tabSlice.activeTabId,
