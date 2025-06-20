@@ -532,8 +532,8 @@ const AddFishContent = ({
         ]),
       ],
       dead: dead.value,
-      milting: milting.value,
-      eggs: eggs.value,
+      milting: conditionalFishInputFields?.['milting'] ? milting.value : null,
+      eggs: conditionalFishInputFields?.['eggs'] ? eggs.value : null,
       plusCountMethod: plusCountMethod.value,
       comments: comments.value,
       appliedMarks: Array.isArray(appliedMarks?.value)

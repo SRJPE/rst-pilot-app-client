@@ -756,8 +756,9 @@ const IncompleteSections = ({
             markedForRelease: fishValue.willBeUsedInRecapture,
             adiposeClipped: fishValue.adiposeClipped ? true : false,
             dead: fishValue.dead ? true : false,
-            milting: fishValue.milting ? true : false,
-            eggs: fishValue.eggs ? true : false,
+            milting:
+              typeof fishValue.milting === 'boolean' ? fishValue.milting : null,
+            eggs: typeof fishValue.eggs === 'boolean' ? fishValue.eggs : null,
             fishCondition: getCatchFishConditions(fishValue.fishCondition),
             lifeStage: returnNullableTableId(
               lifeStageValues.indexOf(fishValue.lifeStage)

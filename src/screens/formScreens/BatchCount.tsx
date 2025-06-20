@@ -99,9 +99,9 @@ const BatchCount = ({
   const [deadIsLocked, setDeadIsLocked] = useState(false as boolean)
   const [deadToggle, setDeadToggle] = useState(false as boolean)
   const [miltingIsLocked, setMiltingIsLocked] = useState(false as boolean)
-  const [miltingToggle, setMiltingToggle] = useState(null as boolean | null)
+  const [miltingToggle, setMiltingToggle] = useState(false as boolean | null)
   const [eggsIsLocked, setEggsIsLocked] = useState(false as boolean)
-  const [eggsToggle, setEggsToggle] = useState(null as boolean | null)
+  const [eggsToggle, setEggsToggle] = useState(false as boolean | null)
   const [markToggle, setMarkToggle] = useState(false as boolean)
   const [FC1Toggle, setFC1Toggle] = useState(false as boolean)
   const [FC2Toggle, setFC2Toggle] = useState(false as boolean)
@@ -143,6 +143,20 @@ const BatchCount = ({
       'fieldName'
     )
     setProgramFormFieldsObj(formFieldsLookup)
+
+    console.log('fflookup', formFieldsLookup)
+
+    // if (formFieldsLookup?.['eggs']) {
+    //   console.log('set to false')
+    //   setEggsToggle(false)
+    // } else {
+    //   setEggsToggle(null)
+    // }
+    // if (formFieldsLookup?.['milting']) {
+    //   setMiltingToggle(false)
+    // } else {
+    //   setMiltingToggle(null)
+    // }
   }, [visitSetupState, visitSetupDefaults])
 
   const handlePressRemoveFish = () => {
@@ -212,12 +226,12 @@ const BatchCount = ({
         break
       case 'milting':
         if (miltingIsLocked) return
-        if (miltingToggle === null) return
+        // if (miltingToggle === null) return
         setMiltingToggle(!miltingToggle)
         break
       case 'eggs':
         if (eggsIsLocked) return
-        if (eggsToggle === null) return
+        // if (eggsToggle === null) return
         setEggsToggle(!eggsToggle)
         break
 
@@ -229,9 +243,9 @@ const BatchCount = ({
         if (deadIsLocked) return
         setDeadToggle(false)
         if (miltingIsLocked) return
-        setMiltingToggle(null)
+        setMiltingToggle(false)
         if (eggsIsLocked) return
-        setEggsToggle(null)
+        setEggsToggle(false)
         break
     }
   }
@@ -715,8 +729,12 @@ const BatchCount = ({
                   ignoreLifeStage={species !== 'Chinook salmon'}
                   deadToggle={deadToggle}
                   markToggle={markToggle}
-                  miltingToggle={miltingToggle}
-                  eggsToggle={eggsToggle}
+                  miltingToggle={
+                    programFormFieldsObj?.['milting'] ? miltingToggle : null
+                  }
+                  eggsToggle={
+                    programFormFieldsObj?.['eggs'] ? eggsToggle : null
+                  }
                   fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
                     .map((toggle, index) =>
                       toggle ? fishConditions[index] : null
