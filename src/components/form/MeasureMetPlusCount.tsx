@@ -136,6 +136,9 @@ const MeasureMetPlusCount = ({
                   mx='auto'
                   minWidth={250}
                   bgColor='gray.400'
+                  _pressed={{
+                    bg: 'gray.600',
+                  }}
                   onPress={closeModal}
                 >
                   <Text fontSize='xl' color='white'>
@@ -148,6 +151,9 @@ const MeasureMetPlusCount = ({
                   bgColor='primary'
                   colorScheme='coolGray'
                   onPress={handleSubmit}
+                  _pressed={{
+                    bg: 'secondary',
+                  }}
                 >
                   <Text fontSize='xl' color='white'>
                     Save Plus Count
