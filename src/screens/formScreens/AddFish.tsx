@@ -1221,7 +1221,6 @@ const AddFishContent = ({
                   const activeTabId = tabSlice.activeTabId
                   if (activeTabId) {
                     let payload = returnFormValues()
-                    console.log('🚀 ~ AddFish.tsx:1270 ~ payload:', payload)
 
                     saveIndividualFish({
                       tabId: activeTabId,
@@ -1272,11 +1271,6 @@ const AddFishContent = ({
 
                 const selectedTaxonCode = findTaxonCode(
                   species?.value as string
-                )
-                console.log('🚀 ~ AddFish.tsx:1316 ~ payload:', payload)
-                console.log(
-                  '🚀 ~ AddFish.tsx:1321 ~ selectedTaxonCode:',
-                  selectedTaxonCode
                 )
 
                 const activeTabId = tabSlice.activeTabId
