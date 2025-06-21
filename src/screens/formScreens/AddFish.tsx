@@ -46,12 +46,11 @@ import {
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import { FormValueI, ReleaseMarkI } from '../../utils/interfaces'
+import { FormValueI, ReleaseMarkI, Taxon } from '../../utils/interfaces'
 import {
   addFishErrorMessages,
   alphabeticalSort,
   createFormValueDefault,
-  groupAndFillTaxons,
   handleSpeciesSearchTextChange,
   QARanges,
   reorderTaxon,
@@ -84,27 +83,14 @@ const AddFishContent = ({
 
   const activeProgramId = visitSetupState?.[tabId]?.values?.programId
 
-  const taxonGroupedByProgramId = useMemo(
-    () =>
-      groupAndFillTaxons(
-        dropdownValues.programTaxonAbbreviation,
-        dropdownValues.taxon
-      ),
-    [dropdownValues.taxon, dropdownValues.programTaxonAbbreviation]
-  )
-  console.log(
-    '🚀 ~ AddFish.tsx:95 ~ taxonGroupedByProgramId:',
-    taxonGroupedByProgramId
-  )
+  const currentProgramTaxon = dropdownValues.programTaxonAbbreviation[
+    activeProgramId
+  ] as Taxon[]
 
-  const currentProgramTaxon = taxonGroupedByProgramId[activeProgramId]
+  const defaultTaxonList = dropdownValues?.taxon
 
   const reorderedTaxon = useMemo(
-    () =>
-      reorderTaxon(
-        currentProgramTaxon || dropdownValues.taxon,
-        activeProgramId
-      ),
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
     [currentProgramTaxon, activeProgramId]
   )
 

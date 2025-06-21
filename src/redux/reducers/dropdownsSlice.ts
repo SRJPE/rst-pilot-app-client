@@ -19,7 +19,7 @@ interface ValuesI {
   whyTrapNotFunctioning: any[]
   trapStatusAtEnd: any[]
   taxon: Taxon[]
-  programTaxonAbbreviation: ProgramTaxonAbbreviation[]
+  programTaxonAbbreviation: Record<string, unknown>
   fishProcessed: any[]
   whyFishNotProcessed: any[]
   lifeStage: any[]
@@ -51,7 +51,7 @@ const initialState: InitialStateI = {
     whyTrapNotFunctioning: [],
     trapStatusAtEnd: [],
     taxon: [],
-    programTaxonAbbreviation: [],
+    programTaxonAbbreviation: {},
     fishProcessed: [],
     whyFishNotProcessed: [],
     lifeStage: [],
@@ -96,7 +96,16 @@ export const dropdownsSlice = createSlice({
     // Below is just an example, here we could pass 'markType' to 'clearValuesFromDropdown' from the UI and
     // 'markType' would be recognized as the action.payload below
     clearValuesFromDropdown: (state, action) => {
-      state.values[action.payload as keyof typeof state.values] = []
+      // * This reducer isn't currently used in the app, but it could fail. All store values are initialized to empty arrays except for programTaxonAbbreviation, which is an empty object.
+      console.log('🚀 ~ dropdownsSlice.ts:99 ~ action:', action)
+
+      if (action.payload === 'programTaxonAbbreviation') {
+        // If the action payload is 'programTaxonAbbreviation', we need to reset it to an empty object
+        state.values.programTaxonAbbreviation = {}
+        return
+      }
+
+      state.values[action.payload as keyof typeof state.values] = [] as any
     },
   },
   extraReducers: {

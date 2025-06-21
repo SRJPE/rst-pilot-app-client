@@ -20,11 +20,10 @@ import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
-import { ReleaseMarkI } from '../../utils/interfaces'
+import { ReleaseMarkI, Taxon } from '../../utils/interfaces'
 import {
   alphabeticalSort,
   createFormValueDefault,
-  groupAndFillTaxons,
   handleSpeciesSearchTextChange,
   reorderTaxon,
 } from '../../utils/utils'
@@ -66,23 +65,14 @@ const PlusCountModalContent = ({
   )
   const tabId = tabSlice?.activeTabId || 'placeholderId'
   const activeProgramId = visitSetupState?.[tabId]?.values?.programId
-  const taxonGroupedByProgramId = useMemo(
-    () =>
-      groupAndFillTaxons(
-        dropdownValues.programTaxonAbbreviation,
-        dropdownValues.taxon
-      ),
-    [dropdownValues.taxon, dropdownValues.programTaxonAbbreviation]
-  )
+  const currentProgramTaxon = dropdownValues.programTaxonAbbreviation[
+    activeProgramId
+  ] as Taxon[]
 
-  const currentProgramTaxon = taxonGroupedByProgramId[activeProgramId]
+  const defaultTaxonList = dropdownValues?.taxon
 
   const reorderedTaxon = useMemo(
-    () =>
-      reorderTaxon(
-        currentProgramTaxon || dropdownValues.taxon,
-        activeProgramId
-      ),
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
     [currentProgramTaxon, activeProgramId]
   )
   const alphabeticalLifeStage = alphabeticalSort(lifeStage, 'definition')

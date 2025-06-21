@@ -59,7 +59,7 @@ export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   return alphabeticalArray
 }
 
-export const reorderTaxon = (taxonArray: Array<any>, programId: number) => {
+export const reorderTaxon = (taxonArray: any[]) => {
   //sort the taxon
   const alphabeticalTaxon = alphabeticalSort(taxonArray, 'commonname')
   //move chinook and steelhead to the front
@@ -82,41 +82,6 @@ export const reorderTaxon = (taxonArray: Array<any>, programId: number) => {
     }`,
     value: taxon?.commonname,
   }))
-}
-
-export const groupAndFillTaxons = (
-  programTaxonAbbreviations: any,
-  allTaxons: any
-) => {
-  const result: { [programId: string]: any[] } = {}
-
-  // Group taxons by programId, but skip adding to result if programId is null
-  for (const taxon of programTaxonAbbreviations) {
-    const { programId } = taxon
-
-    if (programId == null) {
-      // Don't create a null key, just skip adding this taxon to result
-      continue
-    }
-
-    if (!result[programId]) {
-      result[programId] = []
-    }
-    result[programId].push(taxon)
-  }
-
-  // Fill each group with missing taxons from allTaxons
-  for (const programId in result) {
-    const existingCodes = new Set(result[programId].map(taxon => taxon.code))
-
-    const missingTaxons = allTaxons.filter(
-      (taxon: Taxon) => !existingCodes.has(taxon.code)
-    )
-
-    result[programId] = result[programId].concat(missingTaxons)
-  }
-
-  return { ...result }
 }
 
 export const createArray = (start: number, end: number) => {

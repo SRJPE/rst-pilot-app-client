@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons'
+import { useNavigation } from '@react-navigation/native'
 import { Formik } from 'formik'
+import { startCase } from 'lodash'
 import {
   Button,
-  Divider,
   FormControl,
   HStack,
   Icon,
@@ -12,7 +13,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import React, { memo, useCallback, useState, useMemo } from 'react'
+import React, { memo, useCallback, useMemo, useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   addMarkToBatchCountExistingMarks,
@@ -21,23 +22,19 @@ import {
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
+import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
+import { ReleaseMarkI, Taxon } from '../../../utils/interfaces'
 import {
-  groupAndFillTaxons,
   handleSpeciesSearchTextChange,
   reorderTaxon,
 } from '../../../utils/utils'
-import CustomModalHeader from '../../Shared/CustomModalHeader'
 import MarkBadgeList from '../../markRecapture/MarkBadgeList'
-import CustomModal from '../../Shared/CustomModal'
 import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
-import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
-import { ReleaseMarkI } from '../../../utils/interfaces'
-import SpeciesDropDown from '../SpeciesDropDown'
-import FishConditionsDropDown from '../FishConditionsDropDown'
-import { startCase } from 'lodash'
-import { useNavigation } from '@react-navigation/native'
+import CustomModal from '../../Shared/CustomModal'
+import CustomModalHeader from '../../Shared/CustomModalHeader'
 import AddExistingMark from '../AddExistingMark'
-import { TouchableWithoutFeedback } from 'react-native'
+import FishConditionsDropDown from '../FishConditionsDropDown'
+import SpeciesDropDown from '../SpeciesDropDown'
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -56,23 +53,14 @@ const BatchCharacteristicsModalContent = ({
   )
   const tabId = tabSlice?.activeTabId || 'placeholderId'
   const activeProgramId = visitSetupState?.[tabId]?.values?.programId
-  const taxonGroupedByProgramId = useMemo(
-    () =>
-      groupAndFillTaxons(
-        dropdownValues.programTaxonAbbreviation,
-        dropdownValues.taxon
-      ),
-    [dropdownValues.taxon, dropdownValues.programTaxonAbbreviation]
-  )
+  const currentProgramTaxon = dropdownValues.programTaxonAbbreviation[
+    activeProgramId
+  ] as Taxon[]
 
-  const currentProgramTaxon = taxonGroupedByProgramId[activeProgramId]
+  const defaultTaxonList = dropdownValues?.taxon
 
   const reorderedTaxon = useMemo(
-    () =>
-      reorderTaxon(
-        currentProgramTaxon || dropdownValues.taxon,
-        activeProgramId
-      ),
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
     [currentProgramTaxon, activeProgramId]
   )
 
