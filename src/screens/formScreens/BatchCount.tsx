@@ -102,7 +102,8 @@ const BatchCount = ({
   const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
 
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
-  const { species, fishConditions, existingMarks } = batchCharacteristics
+  const { species, fishConditions, existingMarks, taxonCode } =
+    batchCharacteristics
 
   const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())

@@ -24,6 +24,7 @@ import { ReleaseMarkI, Taxon } from '../../utils/interfaces'
 import {
   alphabeticalSort,
   createFormValueDefault,
+  findTaxonCode,
   handleSpeciesSearchTextChange,
   reorderTaxon,
 } from '../../utils/utils'
@@ -114,6 +115,7 @@ const PlusCountModalContent = ({
   }
 
   const handleFormSubmit = (values: any) => {
+    const taxonCode = findTaxonCode(values.species, reorderedTaxon)
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
       dispatch(
@@ -121,6 +123,7 @@ const PlusCountModalContent = ({
           tabId: activeTabId,
           existingMarks: [...existingMarks.value, ...recentExistingMarks],
           ...values,
+          taxonCode,
         })
       )
       console.log('🚀 ~ Plus Count Values: ', values)

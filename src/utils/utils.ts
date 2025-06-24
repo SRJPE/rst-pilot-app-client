@@ -84,6 +84,10 @@ export const reorderTaxon = (taxonArray: any[]) => {
   }))
 }
 
+export const findTaxonCode = (speciesValue: string, taxonArray: any[]) => {
+  return taxonArray?.find(taxon => taxon.commonname === speciesValue)?.code
+}
+
 export const createArray = (start: number, end: number) => {
   var result = []
   for (var i = start; i <= start + end; i++) {

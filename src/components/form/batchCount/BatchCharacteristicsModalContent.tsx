@@ -25,6 +25,7 @@ import { AppDispatch, RootState } from '../../../redux/store'
 import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
 import { ReleaseMarkI, Taxon } from '../../../utils/interfaces'
 import {
+  findTaxonCode,
   handleSpeciesSearchTextChange,
   reorderTaxon,
 } from '../../../utils/utils'
@@ -94,6 +95,16 @@ const BatchCharacteristicsModalContent = ({
   const navigation = useNavigation() as any
 
   const handleFormSubmit = (values: any) => {
+    const selectedTaxonCode = findTaxonCode(
+      values.species as string,
+      reorderedTaxon
+    )
+
+    console.log(
+      '🚀 ~ BatchCharacteristicsModalContent.tsx:102 ~ handleFormSubmit ~ selectedTaxonCode:',
+      selectedTaxonCode
+    )
+
     delete values.existingMarks
     delete values.batchCountExistingMarks
     let activeTabId = tabSlice.activeTabId
@@ -102,6 +113,7 @@ const BatchCharacteristicsModalContent = ({
         dispatch(
           saveBatchCharacteristics({
             ...values,
+            taxonCode: selectedTaxonCode,
             tabId: activeTabId,
           })
         )
@@ -116,6 +128,7 @@ const BatchCharacteristicsModalContent = ({
           saveBatchCharacteristics({
             ...values,
 
+            taxonCode: selectedTaxonCode,
             tabId: activeTabId,
           })
         )
