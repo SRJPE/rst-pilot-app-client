@@ -11,7 +11,7 @@ import {
   VictoryZoomContainer,
   VictoryTooltip,
 } from 'victory-native'
-import { reformatBatchCountData } from '../../../utils/utils'
+import { reformatBatchCountData, calculateLastFish } from '../../../utils/utils'
 import { capitalize } from 'lodash'
 
 const BatchCountHistogram = ({
@@ -144,14 +144,6 @@ const BatchCountHistogram = ({
     return count
   }
 
-  const calculateLastFish = (): number | null => {
-    let forkLengthOfLastFish: number | null = null
-    if (!forkLengths) return null
-    Object.values(forkLengths).forEach((entry: any) => {
-      forkLengthOfLastFish = entry.forkLength
-    })
-    return forkLengthOfLastFish
-  }
   const [tickValues, setTickValues] = useState([] as number[])
   const [processedData, setProcessedData] = useState(
     [] as { forkLength: number; count: number }[]
@@ -164,12 +156,12 @@ const BatchCountHistogram = ({
   const [selectedBar, setSelectedBar] = useState<number | null>(null) // Track the selected bar
 
   const handleBarClick = (datum: { forkLength: number; count: number }) => {
-    if (selectedBar === datum.forkLength) {
+    if (selectedBar === datum?.forkLength) {
       // If the same bar is clicked again, deselect it
       setSelectedBar(null)
     } else {
       // Otherwise, set the clicked bar as selected
-      setSelectedBar(datum.forkLength)
+      setSelectedBar(datum?.forkLength)
     }
   }
 
@@ -213,17 +205,15 @@ const BatchCountHistogram = ({
               Mark Position: <Text bold>{existingMarks[0].markPosition} </Text>
             </Text>
           </VStack>
-        ) : (
-          <Text bold>N/A</Text>
-        )}
+        ) : null}
 
         <VStack>
           <Text>
-            Total: <Text bold>{calculateTotalCount()}</Text>
+            Last Fork Length Entered:{' '}
+            <Text bold>{calculateLastFish(forkLengths) ?? 'N/A'}</Text>
           </Text>
           <Text>
-            Last Fork Length Entered:{' '}
-            <Text bold>{calculateLastFish() ?? 'N/A'}</Text>
+            Current Batch Total: <Text bold>{calculateTotalCount()}</Text>
           </Text>
         </VStack>
       </HStack>

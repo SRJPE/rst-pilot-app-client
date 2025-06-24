@@ -17,6 +17,7 @@ import {
   findLengthAtDateRun,
   findRunDefinition,
 } from '../../../utils/helpers/helperFunctions'
+import { Vibration } from 'react-native'
 
 const BatchCountButtonGrid = ({
   firstButton,
@@ -31,6 +32,7 @@ const BatchCountButtonGrid = ({
   dropdownsStore,
   activeTabId,
   species,
+  selectedProgramObj,
 }: {
   firstButton: number
   numberOfAdditionalButtons: number
@@ -44,14 +46,30 @@ const BatchCountButtonGrid = ({
   dropdownsStore: any
   activeTabId: string | null
   species: string
+  selectedProgramObj: any
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
-  const [lengthAtDate, setLengthAtDate] = useState([] as number[])
+  const [lengthAtDateModel, setLengthAtDateModel] = useState([] as number[])
+  const [programLADModelName, setProgramLADModelName] = useState<string | null>(
+    null
+  )
   const dispatch = useDispatch<AppDispatch>()
   const [showPopover, setShowPopover] = useState<boolean>(false)
 
   useEffect(() => {
-    setLengthAtDate(dropdownsStore.values.lengthAtDate)
+    setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
+  }, [dropdownsStore.values])
+
+  useEffect(() => {
+    const programLadModelName = selectedProgramObj?.ladModel
+      ? selectedProgramObj.ladModel.toLowerCase()
+      : null
+    setProgramLADModelName(programLadModelName)
+    if (programLadModelName === 'river') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
+    } else if (programLadModelName === 'delta') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateDelta)
+    }
   }, [dropdownsStore.values])
 
   useEffect(() => {
@@ -62,7 +80,7 @@ const BatchCountButtonGrid = ({
     let runDefinition = null as string | null
     if (species === 'Chinook salmon' && activeTabId) {
       const ladObj = findLengthAtDateRun(
-        lengthAtDate,
+        lengthAtDateModel,
         trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
       )
 
@@ -122,21 +140,35 @@ const BatchCountButtonGrid = ({
         {numArray.length > 1 ? (
           numArray.map((num: number, idx: number) => {
             return (
-              <Pressable key={idx} onPress={() => handlePress(num)}>
-                <Box
-                  justifyContent='center'
-                  alignItems='center'
-                  bg='primary'
-                  h='55'
-                  w='60'
-                  margin='2'
-                  borderRadius='sm'
-                  shadow='3'
-                >
-                  <Text fontSize='lg' bold color='white'>
-                    {num}
-                  </Text>
-                </Box>
+              <Pressable
+                key={idx}
+                onPress={() => handlePress(num)}
+                // onPressIn={() => {
+                //   // Optional: Add haptic feedback on press
+                //   Vibration.vibrate(100)
+                // }}
+                _pressed={{
+                  bg: 'pink',
+                }}
+              >
+                {({ isPressed }) => {
+                  return (
+                    <Box
+                      justifyContent='center'
+                      alignItems='center'
+                      bg={isPressed ? 'secondary' : 'primary'}
+                      h='55'
+                      w='60'
+                      margin='2'
+                      borderRadius='sm'
+                      shadow='3'
+                    >
+                      <Text fontSize='lg' bold color='white'>
+                        {num}
+                      </Text>
+                    </Box>
+                  )
+                }}
               </Pressable>
             )
           })

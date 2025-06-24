@@ -260,7 +260,7 @@ const QCFishDataTable = ({
         <CustomModal
           isOpen={qcModalOpen}
           closeModal={closeQcModal}
-          height='full'
+          height='100%'
         >
           <QCFishModalContent
             closeModal={closeQcModal}
