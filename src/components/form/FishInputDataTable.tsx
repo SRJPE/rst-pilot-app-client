@@ -9,7 +9,6 @@ import { Entypo } from '@expo/vector-icons'
 import { generatePaginationRecordsLabel } from '../../utils/helpers/helperFunctions'
 
 const headers = [
-  'Code',
   'Species',
   'Count',
   'Fork Len.',
@@ -24,7 +23,6 @@ const headers = [
 ]
 
 const sortedDataByHeaders = [
-  'code',
   'species',
   'numFishCaught',
   'forkLength',
@@ -113,6 +111,7 @@ const FishInputDataTable = ({
       let dataObj: any = cloneDeep(obj[Number(key)])
       dataObj.existingMarks = dataObj.existingMarks.length
       delete dataObj.UID
+      delete dataObj.taxonCode
       delete dataObj.fishConditions
       delete dataObj.comments
       delete dataObj.appliedMarks
