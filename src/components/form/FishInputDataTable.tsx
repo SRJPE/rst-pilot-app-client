@@ -9,6 +9,7 @@ import { Entypo } from '@expo/vector-icons'
 import { generatePaginationRecordsLabel } from '../../utils/helpers/helperFunctions'
 
 const headers = [
+  'Code',
   'Species',
   'Count',
   'Fork Len.',
@@ -23,6 +24,7 @@ const headers = [
 ]
 
 const sortedDataByHeaders = [
+  'code',
   'species',
   'numFishCaught',
   'forkLength',
