@@ -698,7 +698,7 @@ export const renderRequiredOrOptionalLabel = ({
   if (validationSchema?.fields?.[fieldName]?.exclusiveTests?.required) {
     return '*'
   } else {
-    return ' (optional)'
+    return ''
   }
 }
 export const createFormValueDefault = ({
