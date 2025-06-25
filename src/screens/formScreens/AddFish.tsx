@@ -91,8 +91,6 @@ const AddFishContent = ({
   dropdownsStore: any
   trapOperationsStore: any
 }) => {
-  console.log('🚀 ~ AddFish.tsx:79 ~ fishStore:', fishStore)
-
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
@@ -109,7 +107,6 @@ const AddFishContent = ({
     () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
     [currentProgramTaxon, activeProgramId]
   )
-  console.log('🚀 ~ AddFish.tsx:97 ~ reorderedTaxon:', reorderedTaxon)
 
   const lastFishEntry = Object.values(fishStore).findLast(
     fishEntry => !fishEntry.plusCount
