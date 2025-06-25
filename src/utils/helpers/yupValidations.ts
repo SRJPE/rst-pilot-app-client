@@ -321,6 +321,10 @@ export const batchCharacteristicsSchema = yup.object().shape({
   species: yup.string().required('Species required'),
   // fishConditions: yup.any().required('Fish Condition required'),
 })
+export const multiSpeciesBatchCharacteristicsSchema = yup.object().shape({
+  species: yup.array(yup.string()).required('Species required'),
+  // fishConditions: yup.any().required('Fish Condition required'),
+})
 
 /*----------------------------------------------------------------
   CREATE NEW PROGRAM SCHEMAS

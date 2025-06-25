@@ -26,7 +26,7 @@ import CustomModalHeader from '../Shared/CustomModalHeader'
 import MarkBadgeList from '../markRecapture/MarkBadgeList'
 import CustomModal from '../Shared/CustomModal'
 import AddAnotherMarkModalContent from '../Shared/AddAnotherMarkModalContent'
-import { batchCharacteristicsSchema } from '../../utils/helpers/yupValidations'
+import { multiSpeciesBatchCharacteristicsSchema } from '../../utils/helpers/yupValidations'
 import { ReleaseMarkI } from '../../utils/interfaces'
 import MultiSpeciesDropDown from './MultiSpeciesDropDown'
 import FishConditionsDropDown from './FishConditionsDropDown'
@@ -133,7 +133,7 @@ const MultiSpeciesModalContent = ({
   return (
     <ScrollView>
       <Formik
-        validationSchema={batchCharacteristicsSchema}
+        validationSchema={multiSpeciesBatchCharacteristicsSchema}
         initialValues={batchCountStore.batchCharacteristics}
         onSubmit={values => handleFormSubmit(values)}
       >
@@ -173,7 +173,6 @@ const MultiSpeciesModalContent = ({
                 {/* //TODO: Add error logic for custom species dropdown */}
                 {/* //TODO: Replace with Custom Select component */}
                 <MultiSpeciesDropDown
-                  multiple={true}
                   open={speciesDropDownOpen}
                   onOpen={onSpeciesOpen}
                   setOpen={setSpeciesDropDownOpen}

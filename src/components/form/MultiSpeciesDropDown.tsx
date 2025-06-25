@@ -25,7 +25,6 @@ export default function MultiSpeciesDropDown({
   onChangeValue,
   editModeValue,
   onChangeSearchText,
-  multiple = false,
 }: {
   open: boolean
   onOpen?: any
@@ -38,12 +37,25 @@ export default function MultiSpeciesDropDown({
   onChangeValue?: any
   editModeValue?: string[]
   onChangeSearchText?: (text: string) => void
-  multiple?: boolean
 }) {
   const [values, setValues] = useState<string[]>(editModeValue || [])
 
   const formikProps = useFormikContext<{ species: string[] }>()
-  console.log('🚀 ~ SpeciesDropDown.tsx:37 ~ formikProps:', formikProps)
+
+  useEffect(() => {
+    //if using formik
+    if (setFieldTouched && setFieldValue) {
+      if (values.length > 0) {
+        setFieldTouched('species', true)
+      }
+      setFieldValue('species', values)
+    } else {
+      if (values.length > 0) {
+        setFieldTouched()
+      }
+      onChangeValue(values)
+    }
+  }, [values])
 
   const speciesError = formikProps?.errors.species
 
