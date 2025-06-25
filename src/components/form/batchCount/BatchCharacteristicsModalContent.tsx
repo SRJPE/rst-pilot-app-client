@@ -100,11 +100,6 @@ const BatchCharacteristicsModalContent = ({
       reorderedTaxon
     )
 
-    console.log(
-      '🚀 ~ BatchCharacteristicsModalContent.tsx:102 ~ handleFormSubmit ~ selectedTaxonCode:',
-      selectedTaxonCode
-    )
-
     delete values.existingMarks
     delete values.batchCountExistingMarks
     let activeTabId = tabSlice.activeTabId
