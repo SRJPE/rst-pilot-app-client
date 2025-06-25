@@ -452,6 +452,13 @@ const VisitSetup = ({
       )
       if (trapLocations.length === 1) {
         trapLocationId = trapLocations[0].id
+      } else if (!trapLocations.length) {
+        const trapLocationsAlt = visitSetupDefaultsState?.trapLocations?.filter(
+          (obj: any) => obj.siteName === trapName
+        )
+        if (trapLocationsAlt.length === 1) {
+          trapLocationId = trapLocationsAlt[0].id
+        }
       }
     }
 

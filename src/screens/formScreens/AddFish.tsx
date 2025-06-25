@@ -16,7 +16,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { use, useCallback, useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { Keyboard, TouchableNativeFeedback } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { uid } from 'uid'
@@ -45,7 +45,7 @@ import {
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import { FormValueI, ReleaseMarkI } from '../../utils/interfaces'
+import { FormValueI, ReleaseMarkI, Taxon } from '../../utils/interfaces'
 import {
   addFishErrorMessages,
   alphabeticalSort,
@@ -55,6 +55,7 @@ import {
   handleSpeciesSearchTextChange,
   QARanges,
   reorderTaxon,
+  findTaxonCode,
 } from '../../utils/utils'
 import { startCase, find, keyBy, partition } from 'lodash'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
@@ -92,6 +93,23 @@ const AddFishContent = ({
   dropdownsStore: any
   trapOperationsStore: any
 }) => {
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
+  const tabId = tabSlice?.activeTabId || 'placeholderId'
+
+  const activeProgramId = visitSetupState?.[tabId]?.values?.programId
+
+  const currentProgramTaxon = dropdownValues.programTaxonAbbreviation[
+    activeProgramId
+  ] as Taxon[]
+
+  const defaultTaxonList = dropdownValues?.taxon
+  const reorderedTaxon = useMemo(
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
+    [currentProgramTaxon, activeProgramId]
+  )
+
   const lastFishEntry = Object.values(fishStore).findLast(
     fishEntry => !fishEntry.plusCount
   )
@@ -130,12 +148,6 @@ const AddFishContent = ({
     false as boolean
   )
   const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
-
-  const dropdownValues = useSelector(
-    (state: RootState) => state.dropdowns.values
-  )
-
-  const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
   const [speciesList, setSpeciesList] =
     useState<{ label: string; value: string }[]>(reorderedTaxon)
@@ -197,6 +209,7 @@ const AddFishContent = ({
           required: false,
         })
   )
+
   const [count, setCount] = useState<FormValueI>(
     !route.params?.editModeData
       ? stateDefaults.whenSpeciesChinook.count
@@ -509,9 +522,15 @@ const AddFishContent = ({
       return fieldValue || null
     }
   }
+  const selectedTaxonCode = useMemo(
+    () => findTaxonCode(species.value as string, reorderedTaxon),
+    [species.value, reorderedTaxon]
+  )
+
   const returnFormValues = () => {
     let values = {
       species: species.value,
+      taxonCode: selectedTaxonCode || null,
       forkLength: forkLength.value,
       run: determineValueNotRecordedOrNull(species.value, 'run', run.value),
       fishConditions: Array.isArray(fishConditions.value)
@@ -1422,9 +1441,10 @@ const AddFishContent = ({
                   const activeTabId = tabSlice.activeTabId
                   if (activeTabId) {
                     let payload = returnFormValues()
+
                     saveIndividualFish({
                       tabId: activeTabId,
-                      formValues: payload,
+                      formValues: { ...payload, taxonCode: selectedTaxonCode },
                       UID: fishUID,
                     })
                     navigation.goBack()
@@ -1468,6 +1488,7 @@ const AddFishContent = ({
               isDisabled={route.params?.editModeData ? false : formHasError}
               onPress={() => {
                 let payload = returnFormValues()
+
                 const activeTabId = tabSlice.activeTabId
                 if (route.params?.editModeData) {
                   if (activeTabId) {
@@ -1475,6 +1496,7 @@ const AddFishContent = ({
                       tabId: activeTabId,
                       id: route.params?.editModeData?.id,
                       ...payload,
+                      taxonCode: selectedTaxonCode,
                       numFishCaught: count.value,
                     })
                     navigation.goBack()
@@ -1485,7 +1507,7 @@ const AddFishContent = ({
                   if (activeTabId) {
                     saveIndividualFish({
                       tabId: activeTabId,
-                      formValues: payload,
+                      formValues: { ...payload, taxonCode: selectedTaxonCode },
                     })
                     showSlideAlert(dispatch, 'Fish Input Saved')
                     if (

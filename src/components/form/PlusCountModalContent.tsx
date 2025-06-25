@@ -12,7 +12,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { TouchableWithoutFeedback } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
@@ -20,10 +20,11 @@ import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
-import { ReleaseMarkI } from '../../utils/interfaces'
+import { ReleaseMarkI, Taxon } from '../../utils/interfaces'
 import {
   alphabeticalSort,
   createFormValueDefault,
+  findTaxonCode,
   handleSpeciesSearchTextChange,
   reorderTaxon,
 } from '../../utils/utils'
@@ -64,20 +65,25 @@ const PlusCountModalContent = ({
   const { lifeStage, run, plusCountMethodology, taxon } = useSelector(
     (state: RootState) => state.dropdowns.values
   )
-  const reorderedTaxon = reorderTaxon(taxon)
+  const tabId = tabSlice?.activeTabId || 'placeholderId'
+  const activeProgramId = visitSetupState?.[tabId]?.values?.programId
+  const currentProgramTaxon = dropdownValues.programTaxonAbbreviation[
+    activeProgramId
+  ] as Taxon[]
+
+  const defaultTaxonList = dropdownValues?.taxon
+
+  const reorderedTaxon = useMemo(
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
+    [currentProgramTaxon, activeProgramId]
+  )
   const alphabeticalLifeStage = alphabeticalSort(lifeStage, 'definition')
 
   const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
     false as boolean
   )
-  const [speciesList, setSpeciesList] = useState<
-    { label: string; value: string }[]
-  >(
-    reorderedTaxon.map((taxon: any) => ({
-      label: taxon?.commonname,
-      value: taxon?.commonname,
-    }))
-  )
+  const [speciesList, setSpeciesList] =
+    useState<{ label: string; value: string }[]>(reorderedTaxon)
 
   //RECENT MARKS ADDITIONS
   const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
@@ -110,6 +116,7 @@ const PlusCountModalContent = ({
   }
 
   const handleFormSubmit = (values: any) => {
+    const taxonCode = findTaxonCode(values.species, reorderedTaxon)
     const activeTabId = tabSlice.activeTabId
     if (activeTabId) {
       dispatch(
@@ -117,6 +124,7 @@ const PlusCountModalContent = ({
           tabId: activeTabId,
           existingMarks: [...existingMarks.value, ...recentExistingMarks],
           ...values,
+          taxonCode,
         })
       )
       console.log('🚀 ~ Plus Count Values: ', values)

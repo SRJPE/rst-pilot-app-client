@@ -82,15 +82,25 @@ const BatchCountButtonGrid = ({
 
   const handlePress = (num: number) => {
     let runDefinition = null as string | null
+
+    let dateTimeValue = new Date()
+
     if (
-      species === 'Chinook salmon' &&
       activeTabId &&
       trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
     ) {
-      const ladObj = findLengthAtDateRun(
-        lengthAtDateModel,
+      dateTimeValue =
         trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
-      )
+    } else if (
+      activeTabId &&
+      trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+    ) {
+      dateTimeValue =
+        trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+    }
+
+    if (species === 'Chinook salmon' && activeTabId && dateTimeValue) {
+      const ladObj = findLengthAtDateRun(lengthAtDateModel, dateTimeValue)
 
       runDefinition = findRunDefinition(ladObj, num)
     }

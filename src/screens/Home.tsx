@@ -98,7 +98,7 @@ const Home = ({
     ) {
       try {
         dispatch(getVisitSetupDefaults(userCredentialsStore.id))
-        dispatch(getTrapVisitDropdownValues())
+        dispatch(getTrapVisitDropdownValues(userCredentialsStore.id))
         dispatch(fetchPreviousTrapAndCatch())
       } catch (error) {
         console.log('error from home screen: ', error)
@@ -116,7 +116,7 @@ const Home = ({
       if (userCredentialsStore?.id && !userCredentialsStore.userPrograms) {
         try {
           dispatch(getVisitSetupDefaults(userCredentialsStore.id))
-          dispatch(getTrapVisitDropdownValues())
+          dispatch(getTrapVisitDropdownValues(userCredentialsStore.id))
 
           dispatch(getUserPrograms(userCredentialsStore?.id))
         } catch (error) {

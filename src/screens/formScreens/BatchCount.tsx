@@ -118,7 +118,8 @@ const BatchCount = ({
     {} as Record<string, any>
   )
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
-  const { species, fishConditions, existingMarks } = batchCharacteristics
+  const { species, fishConditions, existingMarks, taxonCode } =
+    batchCharacteristics
 
   const [selectedProgramObj, setSelectedProgramObj] = useState({} as any)
 

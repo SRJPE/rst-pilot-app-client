@@ -1,7 +1,7 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
-import { every, some, sortBy, flatten, uniqBy, find, keyBy } from 'lodash'
 import { ReleaseMarkI } from './interfaces'
+import { every, some, sortBy, flatten, uniqBy, find, keyBy } from 'lodash'
 import { ObjectSchema } from 'yup'
 import type { InitialStateI as FishProcessingSliceState } from '../redux/reducers/formSlices/fishProcessingSlice'
 
@@ -59,9 +59,9 @@ export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   return alphabeticalArray
 }
 
-export const reorderTaxon = (taxon: Array<any>) => {
+export const reorderTaxon = (taxonArray: any[]) => {
   //sort the taxon
-  const alphabeticalTaxon = alphabeticalSort(taxon, 'commonname')
+  const alphabeticalTaxon = alphabeticalSort(taxonArray, 'commonname')
   //move chinook and steelhead to the front
   let chinook, steelhead
   for (var i = 0; i < alphabeticalTaxon.length; i++) {
@@ -77,9 +77,15 @@ export const reorderTaxon = (taxon: Array<any>) => {
   alphabeticalTaxon.unshift(chinook, steelhead)
   return alphabeticalTaxon?.map((taxon: any) => ({
     ...taxon,
-    label: taxon?.commonname,
+    label: `${taxon?.commonname} ${
+      taxon?.abbreviationCode ? `(${taxon?.abbreviationCode})` : ''
+    }`,
     value: taxon?.commonname,
   }))
+}
+
+export const findTaxonCode = (speciesValue: string, taxonArray: any[]) => {
+  return taxonArray?.find(taxon => taxon.commonname === speciesValue)?.code
 }
 
 export const createArray = (start: number, end: number) => {
@@ -119,11 +125,10 @@ export const handleSpeciesSearchTextChange = ({
 }) => {
   const filteredSpeciesList = reorderedTaxon.filter(
     (species: any) =>
-      species.label.toLowerCase().includes(searchValue.toLowerCase()) ||
-      // species.taxonAbbreviations.includes(searchValue.toUpperCase())
-      species.taxonAbbreviations.some((abbr: string) =>
-        abbr.toLowerCase().includes(searchValue.toLowerCase())
-      )
+      species.commonname.toLowerCase().includes(searchValue.toLowerCase()) ||
+      species.abbreviationCode
+        ?.toLowerCase()
+        .includes(searchValue.toLowerCase())
   )
 
   setSpeciesList(filteredSpeciesList)

@@ -108,18 +108,10 @@ const FishInputDataTable = ({
 
     const keys = Object.keys(obj)
     keys.forEach(key => {
-      let dataObj: any = cloneDeep(obj[Number(key)])
-      dataObj.existingMarks = dataObj.existingMarks.length
-      delete dataObj.UID
-      delete dataObj.fishConditions
-      delete dataObj.comments
-      delete dataObj.appliedMarks
-      delete dataObj.geneticSamples
-      delete dataObj.captureRunClassMethod
-      delete dataObj.fishObjId
-      delete dataObj.milting
-      delete dataObj.eggs
-      dataObj = pick(dataObj, sortedDataByHeaders)
+      const dataObj = pick(
+        cloneDeep(obj[Number(key)]),
+        sortedDataByHeaders
+      ) as any
       let dataObjPadded = { ...emptyTableData, ...dataObj }
 
       const dataObjKeys = Object.keys(dataObjPadded)

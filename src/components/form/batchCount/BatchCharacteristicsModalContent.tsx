@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons'
+import { useNavigation } from '@react-navigation/native'
 import { Formik } from 'formik'
+import { startCase } from 'lodash'
 import {
   Button,
-  Divider,
   FormControl,
   HStack,
   Icon,
@@ -12,7 +13,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import React, { memo, useCallback, useState, useMemo } from 'react'
+import React, { memo, useCallback, useMemo, useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   addMarkToBatchCountExistingMarks,
@@ -21,22 +22,20 @@ import {
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
+import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
+import { ReleaseMarkI, Taxon } from '../../../utils/interfaces'
 import {
+  findTaxonCode,
   handleSpeciesSearchTextChange,
   reorderTaxon,
 } from '../../../utils/utils'
-import CustomModalHeader from '../../Shared/CustomModalHeader'
 import MarkBadgeList from '../../markRecapture/MarkBadgeList'
-import CustomModal from '../../Shared/CustomModal'
 import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
-import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
-import { ReleaseMarkI } from '../../../utils/interfaces'
-import SpeciesDropDown from '../SpeciesDropDown'
-import FishConditionsDropDown from '../FishConditionsDropDown'
-import { startCase } from 'lodash'
-import { useNavigation } from '@react-navigation/native'
+import CustomModal from '../../Shared/CustomModal'
+import CustomModalHeader from '../../Shared/CustomModalHeader'
 import AddExistingMark from '../AddExistingMark'
-import { TouchableWithoutFeedback } from 'react-native'
+import FishConditionsDropDown from '../FishConditionsDropDown'
+import SpeciesDropDown from '../SpeciesDropDown'
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -53,9 +52,17 @@ const BatchCharacteristicsModalContent = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+  const tabId = tabSlice?.activeTabId || 'placeholderId'
+  const activeProgramId = visitSetupState?.[tabId]?.values?.programId
+  const currentProgramTaxon = dropdownValues.programTaxonAbbreviation[
+    activeProgramId
+  ] as Taxon[]
+
+  const defaultTaxonList = dropdownValues?.taxon
+
   const reorderedTaxon = useMemo(
-    () => reorderTaxon(dropdownValues.taxon),
-    [dropdownValues.taxon]
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
+    [currentProgramTaxon, activeProgramId]
   )
 
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
@@ -74,14 +81,9 @@ const BatchCharacteristicsModalContent = ({
   const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
     false as boolean
   )
-  const [speciesList, setSpeciesList] = useState<
-    { label: string; value: string }[]
-  >(
-    reorderedTaxon.map((taxon: any) => ({
-      label: taxon?.commonname,
-      value: taxon?.commonname,
-    }))
-  )
+
+  const [speciesList, setSpeciesList] =
+    useState<{ label: string; value: string }[]>(reorderedTaxon)
 
   const onSpeciesOpen = useCallback(() => {
     setFishConditionDropdownOpen(false)
@@ -93,6 +95,11 @@ const BatchCharacteristicsModalContent = ({
   const navigation = useNavigation() as any
 
   const handleFormSubmit = (values: any) => {
+    const selectedTaxonCode = findTaxonCode(
+      values.species as string,
+      reorderedTaxon
+    )
+
     delete values.existingMarks
     delete values.batchCountExistingMarks
     let activeTabId = tabSlice.activeTabId
@@ -101,6 +108,7 @@ const BatchCharacteristicsModalContent = ({
         dispatch(
           saveBatchCharacteristics({
             ...values,
+            taxonCode: selectedTaxonCode,
             tabId: activeTabId,
           })
         )
@@ -115,6 +123,7 @@ const BatchCharacteristicsModalContent = ({
           saveBatchCharacteristics({
             ...values,
 
+            taxonCode: selectedTaxonCode,
             tabId: activeTabId,
           })
         )
