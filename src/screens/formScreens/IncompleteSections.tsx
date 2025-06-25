@@ -492,7 +492,7 @@ const IncompleteSections = ({
             uid: tabId,
             programId,
             trapVisitId: null,
-            taxonCode: returnTaxonCode(fishValue),
+            taxonCode: fishValue.taxonCode,
             captureRunClass: returnNullableTableId(
               runValues.indexOf(fishValue.run)
             ),
