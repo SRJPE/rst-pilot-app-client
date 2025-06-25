@@ -101,7 +101,7 @@ const OnStartupProvider = (props: Props) => {
                   onPress={forceLogoutModelOnClose}
                 >
                   <Text color='white' fontWeight={500}>
-                    Ok
+                    OK
                   </Text>
                 </Button>
               </Button.Group>
