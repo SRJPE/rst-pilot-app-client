@@ -47,6 +47,7 @@ const TabBar = ({
     'Paper Entry',
     'Add Fish',
     'Batch Count',
+    'Multi Species',
     'Incomplete Sections',
   ]
   const formSlicesToValidateDict = {
@@ -166,6 +167,14 @@ const TabBar = ({
 
     dispatch(setActiveTab(fishInputDefaultTabId?.tabId))
   }
+  console.log(
+    '🚀 ~ TabBar.tsx:170 ~ setDefaultActiveTab ~ tabSlice.activeTabId :',
+    tabSlice.activeTabId
+  )
+  console.log(
+    '🚀 ~ TabBar.tsx:170 ~ setDefaultActiveTab ~         headerProps.route.name',
+    headerProps.route.name
+  )
 
   if (
     Object.keys(tabSlice.tabs).length &&
@@ -266,7 +275,7 @@ const TabBar = ({
       return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].trapSite}</Text>
     } else if (
       tabSlice.activeTabId != null &&
-      headerProps.route.name != 'Incomplete Sections'
+      !['Incomplete Sections', 'Multi Species'].includes(headerProps.route.name)
     ) {
       return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].name}</Text>
     } else {

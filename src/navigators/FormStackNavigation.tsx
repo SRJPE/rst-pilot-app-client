@@ -66,7 +66,11 @@ function FormStackNavigation() {
         component={BatchCount}
         options={{ headerShown: false }}
       />
-      <FormStack.Screen name='Multi Species' component={MultiSpecies} />
+      <FormStack.Screen
+        name='Multi Species'
+        component={MultiSpecies}
+        options={{ headerShown: false }}
+      />
       <FormStack.Screen
         name='Trap Post-Processing'
         component={TrapPostProcessing}
