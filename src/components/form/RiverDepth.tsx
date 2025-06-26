@@ -43,11 +43,12 @@ const RiverDepth = ({
           </Text>
         </FormControl.Label>
       </HStack>
-      <HStack space={8} flexWrap={'wrap'}>
+      <HStack flexWrap={'wrap'}>
         <Box
-          flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-          minWidth='30%' // Prevents shrinking too much
-          maxWidth='30%' // Prevents growing beyond this size
+          flexBasis='28%' // Ensures 3 items per row (adjust for spacing)
+          minWidth='28%' // Prevents shrinking too much
+          maxWidth='28%' // Prevents growing beyond this size
+          mr={8}
         >
           <FormInputComponent
             label={'River Left'}
@@ -69,9 +70,10 @@ const RiverDepth = ({
           />
         </Box>
         <Box
-          flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-          minWidth='30%' // Prevents shrinking too much
-          maxWidth='30%' // Prevents growing beyond this size
+          flexBasis='28%' // Ensures 3 items per row (adjust for spacing)
+          minWidth='28%' // Prevents shrinking too much
+          maxWidth='28%' // Prevents growing beyond this size
+          mr={8}
         >
           <FormInputComponent
             label={'River Center'}
@@ -93,9 +95,10 @@ const RiverDepth = ({
           />
         </Box>
         <Box
-          flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-          minWidth='30%' // Prevents shrinking too much
-          maxWidth='30%' // Prevents growing beyond this size
+          flexBasis='28%' // Ensures 3 items per row (adjust for spacing)
+          minWidth='28%' // Prevents shrinking too much
+          maxWidth='28%' // Prevents growing beyond this size
+          mr={8}
         >
           <FormInputComponent
             label={'River Right'}

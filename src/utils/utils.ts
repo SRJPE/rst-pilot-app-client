@@ -1057,3 +1057,25 @@ export const getProgramFormFieldsLookup = (
     : {}
   return programFormFieldsObj
 }
+
+export const shouldRenderField = ({
+  fieldName,
+  programFormFields,
+  sectionFields,
+}: {
+  fieldName: string
+  programFormFields: Array<any> | null
+  sectionFields: Array<any> | null
+}) => {
+  if (!programFormFields?.length) {
+    return true
+  }
+
+  if (programFormFields?.length && sectionFields) {
+    return sectionFields.some((field: any) => {
+      return field.fieldName === fieldName
+    })
+  }
+
+  return false
+}

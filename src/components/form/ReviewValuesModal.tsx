@@ -36,7 +36,9 @@ const getFilteredTrapOperationsState = (trapOperationsState: any) => {
     ...trapOperationsState,
   }
   delete filteredTrapOperationsState.trapVisitStartTime
-  if ('trapVisitTime' in filteredTrapOperationsState) {
+
+  const dateKeysToCheck = ['trapVisitTime', 'sampleTime']
+  if (dateKeysToCheck.some(key => key in filteredTrapOperationsState)) {
     delete filteredTrapOperationsState.trapVisitStopTime
   }
 
@@ -68,7 +70,11 @@ const getFilteredPostProcessingState = (
   }
   delete filteredTrapPostProcessingState.fishProcessedResult
 
-  if (visitSetupState?.stream === 'Toe Drain') {
+  if (
+    ['Toe Drain', 'Clear Creek', 'Battle Creek'].includes(
+      visitSetupState?.stream
+    )
+  ) {
     delete filteredTrapPostProcessingState.trapVisitStartTime
     delete filteredTrapPostProcessingState.endingTrapStatus
   }

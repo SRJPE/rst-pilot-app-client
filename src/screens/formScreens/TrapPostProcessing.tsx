@@ -11,6 +11,7 @@ import {
   Heading,
   Icon,
   IconButton,
+  KeyboardAvoidingView,
   Popover,
   Pressable,
   Radio,
@@ -38,9 +39,8 @@ import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
 } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
-import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
 import {
-  QARanges,
+  shouldRenderField,
   navigateHelper,
   navigateFlowRightButton,
   navigateFlowLeftButton,
@@ -131,7 +131,8 @@ const TrapPostProcessing = ({
   const [validationSchema, setValidationSchema] = useState<any>(
     trapPostProcessingSchema
   )
-  const [formFields, setFormFields] = useState<any>(null)
+  const [sectionFields, setSectionFields] = useState<any>(null)
+  const [programFormFields, setProgramFormFields] = useState<any>(null)
 
   const userPrograms = userCredentialsStore?.userPrograms || []
 
@@ -163,17 +164,20 @@ const TrapPostProcessing = ({
 
       // get fields for this section and equipment type, if applicable
       // null equipmentId indicates field displayed for all equipment types
-      const sectionFields = currentProgramInfo?.programFormFields.filter(
+      const sectionFormFields = currentProgramInfo?.programFormFields.filter(
         (field: any) =>
           field.formSection === activePage &&
           (field.equipmentId === null || field.equipmentId === trapEquimentType)
       )
-      setFormFields(sectionFields)
+      setSectionFields(sectionFormFields)
+      setProgramFormFields(currentProgramInfo?.programFormFields)
+
       const dynamicTrapPostProcessingSchema =
-        generateDynamicTrapPostProcessingSchema(sectionFields)
+        generateDynamicTrapPostProcessingSchema(sectionFormFields)
       setValidationSchema(dynamicTrapPostProcessingSchema)
     } else {
-      setFormFields(null)
+      setSectionFields(null)
+      setProgramFormFields(null)
       setValidationSchema(trapPostProcessingSchema)
     }
   }, [
@@ -365,21 +369,6 @@ const TrapPostProcessing = ({
     )
   }
 
-  const shouldRenderField = (fieldName: string) => {
-    // no dynamic fields set
-    // render default fields
-    if (!selectedProgramObj?.programFormFields?.length) {
-      return true
-    }
-
-    // if (selectedProgramObj?.programFormFields) {
-    //   return selectedProgramObj.programFormFields.some((field: any) => {
-    //     return field.fieldName === fieldName
-    //   })
-    // }
-    return false
-  }
-
   const renderTrappingDateAndTime = (
     values: any,
     setFieldValue: any,
@@ -387,9 +376,10 @@ const TrapPostProcessing = ({
   ) => {
     // no program form fields have been set
     // assume has not been customized
+
     if (
-      !formFields?.length ||
-      find(formFields, {
+      !programFormFields ||
+      find(sectionFields, {
         fieldName: 'trapVisitStartTime',
       })
     ) {
@@ -482,12 +472,12 @@ const TrapPostProcessing = ({
         </>
       )
     } else if (
-      formFields?.length &&
-      find(formFields, {
+      sectionFields?.length &&
+      find(sectionFields, {
         fieldName: 'trapVisitTime',
       })
     ) {
-      const item = find(selectedProgramObj?.programFormFields, {
+      const item = find(programFormFields, {
         fieldName: 'trapVisitTime',
       })
       const { displayName } = item
@@ -519,98 +509,103 @@ const TrapPostProcessing = ({
       )
     } else {
       setStartTime(null)
+      return null
     }
   }
 
   return (
-    <ScrollView>
-      <Formik
-        validationSchema={validationSchema}
-        enableReinitialize={true}
-        validateOnMount={false}
-        initialValues={initialValues}
-        initialTouched={
-          activeTabId && reduxState[activeTabId]
-            ? reduxState[activeTabId].touched
-            : null
-        }
-        initialErrors={
-          activeTabId && reduxState[activeTabId]
-            ? reduxState[activeTabId].errors
-            : null
-        }
-        onSubmit={() => {}}
-      >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          setFieldTouched,
-          setFieldValue,
-          touched,
-          errors,
-          values,
-          resetForm,
-          isValid,
-        }) => {
-          const checkOtherTabForms = () => {
-            const tabIds = Object.keys(tabSlice.tabs)
-            const fishProcessingOtherTabsValidity = tabIds.map(tabId => {
-              if (tabId !== activeTabId) {
-                const tabFormValues = reduxState[tabId]?.values
-                const formIsValid = validationSchema?.isValidSync(tabFormValues)
+    <Formik
+      validationSchema={validationSchema}
+      enableReinitialize={true}
+      validateOnMount={true}
+      initialValues={initialValues}
+      initialTouched={
+        activeTabId && reduxState[activeTabId]
+          ? reduxState[activeTabId].touched
+          : null
+      }
+      initialErrors={
+        activeTabId && reduxState[activeTabId]
+          ? reduxState[activeTabId].errors
+          : null
+      }
+      onSubmit={() => {}}
+    >
+      {({
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        setFieldTouched,
+        setFieldValue,
+        touched,
+        errors,
+        values,
+        resetForm,
+        isValid,
+      }) => {
+        const checkOtherTabForms = () => {
+          const tabIds = Object.keys(tabSlice.tabs)
+          const fishProcessingOtherTabsValidity = tabIds.map(tabId => {
+            if (tabId !== activeTabId) {
+              const tabFormValues = reduxState[tabId]?.values
+              const formIsValid = validationSchema?.isValidSync(tabFormValues)
 
-                return formIsValid
-              }
-
-              return
-            })
-
-            const tabIncomplete = fishProcessingOtherTabsValidity.some(
-              result => result === false
-            )
-
-            if (tabIncomplete) return false
-
-            return true
-          }
-
-          const otherTabFormsValid = checkOtherTabForms()
-
-          useEffect(() => {
-            if (previouslyActiveTabId && navigationSlice.activeStep === 5) {
-              onSubmit(values, previouslyActiveTabId)
-              resetForm()
+              return formIsValid
             }
-          }, [previouslyActiveTabId])
 
-          const navButtons = useMemo(
-            () => (
-              <NavButtons
-                navigation={navigation}
-                handleSubmit={(buttonDirection: 'left' | 'right') => {
-                  handleNavButtonClick(buttonDirection, values)
-                }}
-                errors={errors}
-                touched={touched}
-                shouldProceedToLoadingScreen={true}
-                isValid={isValid && otherTabFormsValid}
-              />
-            ),
-            [
-              navigation,
-              handleSubmit,
-              errors,
-              touched,
-              activePage,
-              values,
-              startTime,
-              isValid,
-              fishProcessingSlice,
-            ]
+            return
+          })
+
+          const tabIncomplete = fishProcessingOtherTabsValidity.some(
+            result => result === false
           )
-          return (
-            <>
+
+          if (tabIncomplete) return false
+
+          return true
+        }
+
+        const otherTabFormsValid = checkOtherTabForms()
+
+        useEffect(() => {
+          if (previouslyActiveTabId && navigationSlice.activeStep === 5) {
+            onSubmit(values, previouslyActiveTabId)
+            resetForm()
+          }
+        }, [previouslyActiveTabId])
+
+        const navButtons = useMemo(
+          () => (
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={(buttonDirection: 'left' | 'right') => {
+                handleNavButtonClick(buttonDirection, values)
+              }}
+              errors={errors}
+              touched={touched}
+              shouldProceedToLoadingScreen={true}
+              isValid={isValid && otherTabFormsValid}
+            />
+          ),
+          [
+            navigation,
+            handleSubmit,
+            errors,
+            touched,
+            activePage,
+            values,
+            startTime,
+            isValid,
+            fishProcessingSlice,
+          ]
+        )
+        return (
+          <KeyboardAvoidingView
+            flex={1}
+            // behavior='padding'
+            // keyboardVerticalOffset={100}
+          >
+            <ScrollView>
               <Pressable
                 flex={1}
                 bg='#fff'
@@ -618,12 +613,17 @@ const TrapPostProcessing = ({
                 py='3%'
                 borderColor='themeGrey'
                 borderWidth='15'
+                minHeight={'100%'}
                 onPress={Keyboard.dismiss}
               >
                 <VStack space={1}>
                   <Heading>Trap Post-Processing</Heading>
                   <HStack space={5}>
-                    {shouldRenderField('debrisVolume') && (
+                    {shouldRenderField({
+                      fieldName: 'debrisVolume',
+                      programFormFields,
+                      sectionFields,
+                    }) && (
                       <Box
                         flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
                         minWidth='30%' // Prevents shrinking too much
@@ -644,7 +644,11 @@ const TrapPostProcessing = ({
                         />
                       </Box>
                     )}
-                    {shouldRenderField('totalRevolutions') && (
+                    {shouldRenderField({
+                      fieldName: 'totalRevolutions',
+                      programFormFields,
+                      sectionFields,
+                    }) && (
                       <Box
                         flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
                         minWidth='30%' // Prevents shrinking too much
@@ -665,115 +669,123 @@ const TrapPostProcessing = ({
                       </Box>
                     )}
                     {/* {recordTurbidityInPostProcessing && (
-                      <FormInputComponent
-                        label=' Water Turbidity (optional)'
-                        placeholder='0'
-                        touched={touched}
-                        errors={errors}
-                        camelName='waterTurbidity'
-                        onChangeText={handleChange('waterTurbidity')}
-                        onBlur={() => setFieldTouched('waterTurbidity')}
-                        value={values.waterTurbidity}
-                      />
-                    )} */}
+                          <FormInputComponent
+                            label=' Water Turbidity (optional)'
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            camelName='waterTurbidity'
+                            onChangeText={handleChange('waterTurbidity')}
+                            onBlur={() => setFieldTouched('waterTurbidity')}
+                            value={values.waterTurbidity}
+                          />
+                        )} */}
                   </HStack>
-                  <FormControl>
-                    <HStack space={4} alignItems='center'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          RPM After Cleaning
-                        </Text>
-                      </FormControl.Label>
-                      <Popover
-                        placement='bottom left'
-                        trigger={triggerProps => {
-                          return (
-                            <IconButton
-                              {...triggerProps}
-                              icon={
-                                <Icon
-                                  as={MaterialIcons}
-                                  color='black'
-                                  name='info-outline'
-                                  size='lg'
-                                />
-                              }
-                            ></IconButton>
-                          )
-                        }}
-                      >
-                        <Popover.Content
-                          accessibilityLabel='RPM Info'
-                          w='600'
-                          mr='10'
+                  {shouldRenderField({
+                    fieldName: 'rpmAfter',
+                    programFormFields,
+                    sectionFields,
+                  }) && (
+                    <FormControl>
+                      <HStack space={4} alignItems='center'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            RPM After Cleaning
+                          </Text>
+                        </FormControl.Label>
+                        <Popover
+                          placement='bottom left'
+                          trigger={triggerProps => {
+                            return (
+                              <IconButton
+                                {...triggerProps}
+                                icon={
+                                  <Icon
+                                    as={MaterialIcons}
+                                    color='black'
+                                    name='info-outline'
+                                    size='lg'
+                                  />
+                                }
+                              ></IconButton>
+                            )
+                          }}
                         >
-                          <Popover.Arrow />
-                          <Popover.Header>
-                            Take up to three measurements of cone rotations. The
-                            averages of the entered values will be saved to the
-                            database.
-                          </Popover.Header>
-                        </Popover.Content>
-                      </Popover>
-                    </HStack>
-                    <HStack space={5} justifyContent='space-between'>
-                      <Box flex={1}>
-                        <FormInputComponent
-                          label={'Measure 1'}
-                          placeholder='0'
-                          touched={touched}
-                          errors={errors}
-                          value={values.rpm1 ? `${values.rpm1}` : ''}
-                          camelName={'rpm1'}
-                          onChangeText={newValue => {
-                            setFieldValue('rpm1', newValue)
-                            if (!newValue) {
-                              setFieldValue('rpm2', null)
-                              setFieldValue('rpm3', null)
+                          <Popover.Content
+                            accessibilityLabel='RPM Info'
+                            w='600'
+                            mr='10'
+                          >
+                            <Popover.Arrow />
+                            <Popover.Header>
+                              Take up to three measurements of cone rotations.
+                              The averages of the entered values will be saved
+                              to the database.
+                            </Popover.Header>
+                          </Popover.Content>
+                        </Popover>
+                      </HStack>
+                      <HStack space={5} justifyContent='space-between'>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            label={'Measure 1'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.rpm1 ? `${values.rpm1}` : ''}
+                            camelName={'rpm1'}
+                            onChangeText={newValue => {
+                              setFieldValue('rpm1', newValue)
+                              if (!newValue) {
+                                setFieldValue('rpm2', null)
+                                setFieldValue('rpm3', null)
+                              }
+                            }}
+                            onBlur={handleBlur('rpm1')}
+                            validationSchema={validationSchema}
+                            keyboardType='number-pad'
+                          />
+                        </Box>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            isDisabled={values.rpm1 ? false : true}
+                            label={'Measure 2'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.rpm2 ? `${values.rpm2}` : ''}
+                            camelName={'rpm2'}
+                            onChangeText={newValue => {
+                              setFieldValue('rpm2', newValue)
+                              if (!newValue) {
+                                setFieldValue('rpm3', null)
+                              }
+                            }}
+                            onBlur={handleBlur('rpm2')}
+                            validationSchema={validationSchema}
+                            keyboardType='number-pad'
+                          />
+                        </Box>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            isDisabled={
+                              values.rpm1 && values.rpm2 ? false : true
                             }
-                          }}
-                          onBlur={handleBlur('rpm1')}
-                          validationSchema={validationSchema}
-                          keyboardType='number-pad'
-                        />
-                      </Box>
-                      <Box flex={1}>
-                        <FormInputComponent
-                          isDisabled={values.rpm1 ? false : true}
-                          label={'Measure 2'}
-                          placeholder='0'
-                          touched={touched}
-                          errors={errors}
-                          value={values.rpm2 ? `${values.rpm2}` : ''}
-                          camelName={'rpm2'}
-                          onChangeText={newValue => {
-                            setFieldValue('rpm2', newValue)
-                            if (!newValue) {
-                              setFieldValue('rpm3', null)
-                            }
-                          }}
-                          onBlur={handleBlur('rpm2')}
-                          validationSchema={validationSchema}
-                          keyboardType='number-pad'
-                        />
-                      </Box>
-                      <Box flex={1}>
-                        <FormInputComponent
-                          isDisabled={values.rpm1 && values.rpm2 ? false : true}
-                          label={'Measure 3'}
-                          placeholder='0'
-                          touched={touched}
-                          errors={errors}
-                          value={values.rpm3 ? `${values.rpm3}` : ''}
-                          camelName={'rpm3'}
-                          onChangeText={handleChange('rpm3')}
-                          onBlur={handleBlur('rpm3')}
-                          validationSchema={validationSchema}
-                          keyboardType='number-pad'
-                        />
-                      </Box>
-                    </HStack>
-                  </FormControl>
+                            label={'Measure 3'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.rpm3 ? `${values.rpm3}` : ''}
+                            camelName={'rpm3'}
+                            onChangeText={handleChange('rpm3')}
+                            onBlur={handleBlur('rpm3')}
+                            validationSchema={validationSchema}
+                            keyboardType='number-pad'
+                          />
+                        </Box>
+                      </HStack>
+                    </FormControl>
+                  )}
                   <ConditionalTrapVisitFields
                     touched={touched}
                     errors={errors}
@@ -783,72 +795,72 @@ const TrapPostProcessing = ({
                     setFieldTouched={setFieldTouched}
                     dropdownValues={dropdownValues}
                     activePage={activePage}
-                    formFields={formFields}
+                    formFields={sectionFields}
                     setFieldValue={setFieldValue}
                     activeTabId={activeTabId}
                     trapOperationsStore={trapOperationsStore}
                     validationSchema={validationSchema}
                   />
-                  <HStack
-                    space={5}
-                    justifyContent='space-between'
-                    alignItems='center'
-                  >
-                    <Box flex={1}>
-                      <FormInputComponent
-                        label={'Latitude'}
-                        placeholder='0.00'
-                        touched={touched}
-                        errors={errors}
-                        value={values?.trapLatitude?.toString() || ''}
-                        camelName={'trapLatitude'}
-                        onChangeText={handleChange('trapLatitude')}
-                        onBlur={handleBlur('trapLatitude')}
-                        validationSchema={validationSchema}
-                        keyboardType='number-pad'
-                      />
-                    </Box>
-                    <Box flex={1}>
-                      <FormInputComponent
-                        label={'Longitude'}
-                        placeholder='0.00'
-                        touched={touched}
-                        errors={errors}
-                        value={values?.trapLongitude?.toString() || ''}
-                        camelName={'trapLongitude'}
-                        onChangeText={handleChange('trapLongitude')}
-                        onBlur={handleBlur('trapLongitude')}
-                        validationSchema={validationSchema}
-                        keyboardType='number-pad'
-                      />
-                    </Box>
-                    {nonFeatherYubaProgram && (
-                      <Box>
-                        <Button
-                          bg='primary'
-                          h={50}
-                          px={5}
-                          // isLoading={locationClicked}
-                          // isLoading
-                          isLoadingText='Retrieving Location'
-                          spinnerPlacement='end'
-                          _loading={{
-                            _text: {
-                              fontSize: 'xl',
-                            },
-                          }}
-                          onPress={() => {
-                            setLocationClicked(true)
-                            getCurrentLocation(setFieldTouched, setFieldValue)
-                          }}
-                        >
-                          <Text fontSize='xl' color='white'>
-                            Use Current Location
-                          </Text>
-                        </Button>
-                      </Box>
-                    )}
-                  </HStack>
+                  {/* <HStack
+                        space={5}
+                        justifyContent='space-between'
+                        alignItems='center'
+                      >
+                        <Box flex={1}>
+                          <FormInputComponent
+                            label={'Latitude'}
+                            placeholder='0.00'
+                            touched={touched}
+                            errors={errors}
+                            value={values?.trapLatitude?.toString() || ''}
+                            camelName={'trapLatitude'}
+                            onChangeText={handleChange('trapLatitude')}
+                            onBlur={handleBlur('trapLatitude')}
+                            validationSchema={validationSchema}
+                            keyboardType='number-pad'
+                          />
+                        </Box>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            label={'Longitude'}
+                            placeholder='0.00'
+                            touched={touched}
+                            errors={errors}
+                            value={values?.trapLongitude?.toString() || ''}
+                            camelName={'trapLongitude'}
+                            onChangeText={handleChange('trapLongitude')}
+                            onBlur={handleBlur('trapLongitude')}
+                            validationSchema={validationSchema}
+                            keyboardType='number-pad'
+                          />
+                        </Box>
+                        {nonFeatherYubaProgram && (
+                          <Box>
+                            <Button
+                              bg='primary'
+                              h={50}
+                              px={5}
+                              // isLoading={locationClicked}
+                              // isLoading
+                              isLoadingText='Retrieving Location'
+                              spinnerPlacement='end'
+                              _loading={{
+                                _text: {
+                                  fontSize: 'xl',
+                                },
+                              }}
+                              onPress={() => {
+                                setLocationClicked(true)
+                                getCurrentLocation(setFieldTouched, setFieldValue)
+                              }}
+                            >
+                              <Text fontSize='xl' color='white'>
+                                Use Current Location
+                              </Text>
+                            </Button>
+                          </Box>
+                        )}
+                      </HStack> */}
                   {renderTrappingDateAndTime(
                     values,
                     setFieldValue,
@@ -867,12 +879,12 @@ const TrapPostProcessing = ({
                   />
                 </VStack>
               </Pressable>
-              {navButtons}
-            </>
-          )
-        }}
-      </Formik>
-    </ScrollView>
+            </ScrollView>
+            {navButtons}
+          </KeyboardAvoidingView>
+        )
+      }}
+    </Formik>
   )
 }
 

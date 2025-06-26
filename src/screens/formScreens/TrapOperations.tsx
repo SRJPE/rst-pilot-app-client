@@ -44,6 +44,7 @@ import {
   navigateFlowRightButton,
   navigateFlowLeftButton,
   checkOtherTabForms,
+  shouldRenderField,
 } from '../../utils/utils'
 import {
   TabStateI,
@@ -130,7 +131,8 @@ const TrapOperations = ({
   const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
   const [validationSchema, setValidationSchema] = useState<any>(null)
-  const [formFields, setFormFields] = useState<any>(null)
+  const [programFormFields, setProgramFormFields] = useState<any>(null)
+  const [sectionFields, setSectionFields] = useState<any>(null)
   const inputRefs = useRef({}) // key: field name, value: ref
 
   const allTabIds: string[] = Object.keys(tabSlice.tabs)
@@ -172,11 +174,13 @@ const TrapOperations = ({
           (field.equipmentId === null || field.equipmentId === trapEquimentType)
       )
 
-      setFormFields(sectionFields)
+      setSectionFields(sectionFields)
+      setProgramFormFields(currentProgramInfo?.programFormFields)
       const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(sectionFields)
       setValidationSchema(dynamicTrapOpsSchema)
     } else {
-      setFormFields(null)
+      setSectionFields(null)
+      setProgramFormFields(null)
       setValidationSchema(trapOperationsSchema)
     }
   }, [
@@ -414,10 +418,10 @@ const TrapOperations = ({
 
   const resetNonExistentFields = useCallback(
     (values: any, setField: any) => {
-      if (!values || !formFields || !validationSchema) {
+      if (!values || !sectionFields || !validationSchema) {
         return
       }
-      const formFieldsToKeep = [
+      const sectionFieldsToKeep = [
         'flowMeasureUnit',
         'waterTemperatureUnit',
         'waterTurbidityUnit',
@@ -430,7 +434,7 @@ const TrapOperations = ({
         key =>
           values[key] !== null &&
           values[key] !== undefined &&
-          !formFieldsToKeep.includes(key) &&
+          !sectionFieldsToKeep.includes(key) &&
           !(
             validationSchema?.fields &&
             Object.prototype.hasOwnProperty.call(validationSchema.fields, key)
@@ -442,7 +446,7 @@ const TrapOperations = ({
         })
       }
     },
-    [formFields, validationSchema]
+    [sectionFields, validationSchema]
   )
 
   const renderTrappingDateAndTime = useCallback(
@@ -450,9 +454,9 @@ const TrapOperations = ({
       // no program form fields have been set
       // assume has not been customized
       if (
-        !selectedProgramObj?.programFormFields?.length ||
-        !formFields.length ||
-        find(formFields, {
+        !programFormFields?.length ||
+        !sectionFields.length ||
+        find(sectionFields, {
           fieldType: 'trapVisitStopTime',
         })
       ) {
@@ -465,13 +469,13 @@ const TrapOperations = ({
           />
         )
       } else if (
-        formFields?.length &&
-        find(formFields, {
+        sectionFields?.length &&
+        find(sectionFields, {
           fieldType: 'datetime',
           formSection: 'Trap Operations',
         })
       ) {
-        const dateFields = formFields?.filter((field: any) => {
+        const dateFields = sectionFields?.filter((field: any) => {
           return (
             field.fieldType === 'datetime' &&
             field.formSection === 'Trap Operations'
@@ -484,7 +488,6 @@ const TrapOperations = ({
         return dateFields.map((item: any) => {
           const { displayName, fieldName } = item
           if (!values[fieldName]) {
-            console.log('here??')
             setFieldValue(fieldName, new Date())
           }
           return (
@@ -502,9 +505,6 @@ const TrapOperations = ({
                     value={values?.[fieldName] || new Date()}
                     mode='datetime'
                     onChange={(event: any, selectedDate: any) => {
-                      console.log('fieldName', fieldName)
-                      console.log('selectedDate', selectedDate)
-                      console.log('values', values)
                       setFieldValue(fieldName, selectedDate || new Date())
                     }}
                     accentColor='#007C7C'
@@ -520,7 +520,7 @@ const TrapOperations = ({
     },
     [
       endTime,
-      formFields,
+      sectionFields,
       onEndTimeChange,
       popoverTrigger,
       selectedProgramObj,
@@ -545,7 +545,7 @@ const TrapOperations = ({
   }) => {
     // no program form fields have been set
     // assume has not been customized
-    if (!selectedProgramObj?.programFormFields?.length) {
+    if (!programFormFields?.length) {
       return (
         <RPMBefore
           touched={touched}
@@ -602,6 +602,7 @@ const TrapOperations = ({
         resetNonExistentFields(values, setFieldValue)
 
         const isValid = validationSchema?.isValidSync(values)
+
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -684,7 +685,6 @@ const TrapOperations = ({
         }
 
         const navButtons = useMemo(() => {
-          console.log(isValid, otherTabFormsValid)
           return (
             <NavButtons
               navigation={navigation}
@@ -916,64 +916,94 @@ const TrapOperations = ({
                         <Heading>Environmental Conditions</Heading>
                       </HStack>
 
-                      <HStack space={5}>
-                        <Box flex={1}>
-                          <FormInputComponent
-                            showWarning={warningResultFlow}
-                            label={'Flow Measure'}
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            value={values.flowMeasure || null}
-                            camelName={'flowMeasure'}
-                            onChangeText={handleChange('flowMeasure')}
-                            onBlur={handleBlur('flowMeasure')}
-                            RightElement={<TextInputAdornment text='cfs' />}
-                            validationSchema={validationSchema}
-                            keyboardType={'number-pad'}
-                            inputRefs={inputRefs}
-                          />
-                        </Box>
+                      <HStack space={5} flex={'wrap'}>
+                        {shouldRenderField({
+                          fieldName: 'flowMeasure',
+                          programFormFields,
+                          sectionFields,
+                        }) && (
+                          <Box
+                            flexBasis={'28%'}
+                            minWidth={'28%'}
+                            maxWidth={'28%'}
+                          >
+                            <FormInputComponent
+                              showWarning={warningResultFlow}
+                              label={'Flow Measure'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.flowMeasure || null}
+                              camelName={'flowMeasure'}
+                              onChangeText={handleChange('flowMeasure')}
+                              onBlur={handleBlur('flowMeasure')}
+                              RightElement={<TextInputAdornment text='cfs' />}
+                              validationSchema={validationSchema}
+                              keyboardType={'number-pad'}
+                              inputRefs={inputRefs}
+                            />
+                          </Box>
+                        )}
 
-                        <Box flex={1}>
-                          <FormInputComponent
-                            showWarning={warningResultTemp}
-                            label={'Water Temperature'}
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            value={values.waterTemperature || null}
-                            camelName={'waterTemperature'}
-                            onChangeText={handleChange('waterTemperature')}
-                            onBlur={handleBlur('waterTemperature')}
-                            validationSchema={validationSchema}
-                            keyboardType={'number-pad'}
-                            inputRefs={inputRefs}
-                            RightElement={
-                              <Button
-                                bg='warmGray.200'
-                                h={'full'}
-                                w={50}
-                                onPress={() => {
-                                  if (values.waterTemperatureUnit === '°C') {
-                                    setFieldValue('waterTemperatureUnit', '°F')
-                                  } else {
-                                    setFieldValue('waterTemperatureUnit', '°C')
-                                  }
-                                }}
-                              >
-                                <Text>{values.waterTemperatureUnit}</Text>
-                              </Button>
-                            }
-                          />
-                        </Box>
+                        {shouldRenderField({
+                          fieldName: 'waterTemperature',
+                          programFormFields,
+                          sectionFields,
+                        }) && (
+                          <Box
+                            flexBasis={'28%'}
+                            minWidth={'28%'}
+                            maxWidth={'28%'}
+                          >
+                            <FormInputComponent
+                              showWarning={warningResultTemp}
+                              label={'Water Temperature'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.waterTemperature || null}
+                              camelName={'waterTemperature'}
+                              onChangeText={handleChange('waterTemperature')}
+                              onBlur={handleBlur('waterTemperature')}
+                              validationSchema={validationSchema}
+                              keyboardType={'number-pad'}
+                              inputRefs={inputRefs}
+                              RightElement={
+                                <Button
+                                  bg='warmGray.200'
+                                  h={'full'}
+                                  w={50}
+                                  onPress={() => {
+                                    if (values.waterTemperatureUnit === '°C') {
+                                      setFieldValue(
+                                        'waterTemperatureUnit',
+                                        '°F'
+                                      )
+                                    } else {
+                                      setFieldValue(
+                                        'waterTemperatureUnit',
+                                        '°C'
+                                      )
+                                    }
+                                  }}
+                                >
+                                  <Text>{values.waterTemperatureUnit}</Text>
+                                </Button>
+                              }
+                            />
+                          </Box>
+                        )}
 
                         {values.recordTurbidityInPostProcessing === false &&
-                          (!selectedProgramObj?.programFormFields?.length ||
-                            find(selectedProgramObj?.programFormFields, {
+                          (!programFormFields?.length ||
+                            find(programFormFields, {
                               fieldName: 'waterTurbidity',
                             })) && (
-                            <Box flex={1}>
+                            <Box
+                              flexBasis={'28%'}
+                              minWidth={'28%'}
+                              maxWidth={'28%'}
+                            >
                               <FormInputComponent
                                 label={'Turbidity'}
                                 placeholder='0'
@@ -1029,7 +1059,7 @@ const TrapOperations = ({
                         setFieldTouched={setFieldTouched}
                         dropdownValues={dropdownValues}
                         activePage={activePage}
-                        formFields={formFields}
+                        formFields={sectionFields}
                         setFieldValue={setFieldValue}
                         activeTabId={activeTabId}
                         validationSchema={validationSchema}

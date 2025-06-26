@@ -145,8 +145,6 @@ const BatchCount = ({
     )
     setProgramFormFieldsObj(formFieldsLookup)
 
-    console.log('fflookup', formFieldsLookup)
-
     // if (formFieldsLookup?.['eggs']) {
     //   console.log('set to false')
     //   setEggsToggle(false)
@@ -392,12 +390,17 @@ const BatchCount = ({
               Object.keys(combinedFishMeasureCounts).length && (
                 <Box mb={4}>
                   <FishEntriesSummary
-                    lastFishEntry={{
-                      species: batchCountStore.batchCharacteristics.species,
-                      forkLength: calculateLastFish(
-                        batchCountStore.forkLengths
-                      ),
-                    }}
+                    lastFishEntry={
+                      Object.keys(batchCountStore.forkLengths).length
+                        ? {
+                            species:
+                              batchCountStore.batchCharacteristics.species,
+                            forkLength: calculateLastFish(
+                              batchCountStore.forkLengths
+                            ),
+                          }
+                        : {}
+                    }
                     totalCatchCount={totalCatchCount}
                     fishMeasureProtocol={
                       route.params?.fishMeasureProtocol || {}

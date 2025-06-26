@@ -6,22 +6,30 @@ const getValidator = (field: any) => {
   if (field.fieldType === 'email') {
     validator = yup.string().email('Invalid email format')
   } else if (field.fieldType === 'input') {
-    validator = yup.number()
-    validator = validator.positive(`Measurement required`)
-    if (field.minThreshold) {
-      validator = validator.min(
-        field.minThreshold,
-        `${field.displayName} must be >= ${field.minThreshold}`
-      )
-    }
-    if (field.maxThreshold) {
-      validator = validator.max(
-        field.maxThreshold,
-        `${field.displayName} must be at <= ${field.maxThreshold}`
-      )
+    if (field.inputType === 'float' || field.inputType === 'integer') {
+      validator = yup.number()
+      validator = validator.positive(`Measurement required`)
+      if (field.minThreshold) {
+        validator = validator.min(
+          field.minThreshold,
+          `${field.displayName} must be >= ${field.minThreshold}`
+        )
+      }
+      if (field.maxThreshold) {
+        validator = validator.max(
+          field.maxThreshold,
+          `${field.displayName} must be at <= ${field.maxThreshold}`
+        )
+      }
+    } else if (field.inputType === 'text') {
+      validator = yup.string()
     }
     if (field.required) {
       validator = validator.typeError('Must be a number')
+    } else {
+      validator = validator.transform((value: any, originalValue: string) => {
+        return originalValue === '' ? null : value
+      })
     }
   } else if (field.fieldType === 'boolean') {
     validator = yup.boolean()
@@ -105,6 +113,9 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
     flowMeasure: yup
       .number()
       .nullable()
+      .transform((value, originalValue) => {
+        return originalValue === '' ? null : value
+      })
       // .required('Flow measure is required')
       .typeError('Value must be a number'),
     waterTemperature: yup
@@ -112,6 +123,14 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
       .nullable()
       .typeError('Value must be a number')
       .required('Water temperature is required'),
+    waterTurbidity: yup
+      .number()
+      .nullable()
+      .transform((value, originalValue) => {
+        return originalValue === '' ? null : value
+      })
+      // .required('Flow measure is required')
+      .typeError('Value must be a number'),
   }
 
   sectionFields.forEach(field => {
@@ -167,7 +186,7 @@ export const trapOperationsSchema = yup.object().shape({
   waterTemperatureUnit: yup.string(),
   waterTurbidity: yup.lazy(value =>
     value === '' || value === null
-      ? yup.string().min(0)
+      ? yup.string().min(0).nullable()
       : yup
           .number()
           .nullable()
@@ -232,13 +251,20 @@ export const trapPostProcessingSchema = yup.object().shape({
     .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
-    .typeError('Value must be a number'),
+    .typeError('Value must be a number')
+    .transform((value, originalValue) => {
+      return originalValue === '' ? null : value
+    }),
   rpm3: yup
     .number()
     .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
+    .transform((value, originalValue) => {
+      return originalValue === '' ? null : value
+    })
     .typeError('Value must be a number'),
+
   trapLongitude: yup.number().nullable().typeError('Value must be a number'),
   trapLatitude: yup.number().nullable().typeError('Value must be a number'),
 })
@@ -254,18 +280,27 @@ export const generateDynamicTrapPostProcessingSchema = (fields: Array<any>) => {
       .positive('Measurement must be > 0')
       .nullable()
       .max(30, 'Measurement must be ≤ 30')
+      .transform((value, originalValue) => {
+        return originalValue === '' ? null : value
+      })
       .typeError('Value must be a number'),
     rpm2: yup
       .number()
       .positive('Measurement must be > 0')
       .max(30, 'Measurement must be ≤ 30')
       .nullable()
+      .transform((value, originalValue) => {
+        return originalValue === '' ? null : value
+      })
       .typeError('Value must be a number'),
     rpm3: yup
       .number()
       .positive('Measurement must be > 0')
       .max(30, 'Measurement must be ≤ 30')
       .nullable()
+      .transform((value, originalValue) => {
+        return originalValue === '' ? null : value
+      })
       .typeError('Value must be a number'),
   }
 

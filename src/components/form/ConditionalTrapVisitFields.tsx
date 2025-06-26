@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { act, useEffect, useState } from 'react'
 import {
   Text,
   HStack,
@@ -104,7 +104,18 @@ const ConditionalTrapVisitFields = ({
     const { fieldName, displayName, unitDefinition, fieldType } = item
     const unitAbbrev = unitDefinition?.match(/\(([^)]+)\)/)?.[1] || undefined
 
-    if (fieldName === 'waterTurbidity') {
+    // exisitng built in fields. prevents duplicate fields from being rendered
+    if (
+      activePage === 'Trap Post-Processing' &&
+      ['debrisVolume', 'totalRevolutions', 'rpmAfter'].includes(fieldName)
+    ) {
+      return null
+    }
+
+    if (
+      activePage === 'Trap Operations' &&
+      ['waterTemperature', 'waterTurbidity'].includes(fieldName)
+    ) {
       return null
     }
 
@@ -289,13 +300,17 @@ const ConditionalTrapVisitFields = ({
       )
     }
     if (fieldType === 'input') {
+      let inputWidth = '28%'
+      if (fieldName.toLowerCase().includes('flow')) {
+        inputWidth = '20%' // Wider for water temperature
+      }
       return (
         <Box
           key={index} // Always add a key when mapping
-          flexBasis='28%' // Ensures 3 items per row (adjust for spacing)
-          minWidth='28%' // Prevents shrinking too much
-          maxWidth='28%' // Prevents growing beyond this size>
-          mr={8} // Removes right margin from every 3rd item
+          flexBasis={inputWidth} // Ensures 3 items per row (adjust for spacing)
+          minWidth={inputWidth} // Prevents shrinking too much
+          maxWidth={inputWidth} // Prevents growing beyond this size>
+          mr={8}
         >
           <FormInputComponent
             label={displayName}

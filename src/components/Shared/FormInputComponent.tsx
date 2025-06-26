@@ -105,6 +105,15 @@ const FastInput = ({
         Keyboard.dismiss()
         return
       }
+    } else if (camelName?.includes('river')) {
+      if (camelName === 'riverLeft') {
+        inputRefs.current.riverCenter?.focus()
+      } else if (camelName === 'riverCenter') {
+        inputRefs.current.riverRight?.focus()
+      } else {
+        Keyboard.dismiss()
+        return
+      }
     } else {
       Keyboard.dismiss()
       return
