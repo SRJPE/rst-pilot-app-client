@@ -517,7 +517,7 @@ const TrapPostProcessing = ({
     <Formik
       validationSchema={validationSchema}
       enableReinitialize={true}
-      validateOnMount={true}
+      validateOnMount={false}
       initialValues={initialValues}
       initialTouched={
         activeTabId && reduxState[activeTabId]
@@ -568,11 +568,16 @@ const TrapPostProcessing = ({
         const otherTabFormsValid = checkOtherTabForms()
 
         useEffect(() => {
-          if (previouslyActiveTabId && navigationSlice.activeStep === 5) {
+          if (
+            Object.keys(tabSlice.tabs).length > 1 &&
+            previouslyActiveTabId &&
+            previouslyActiveTabId !== activeTabId &&
+            navigationSlice.activeStep === 5
+          ) {
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }
-        }, [previouslyActiveTabId])
+        }, [previouslyActiveTabId, activeTabId])
 
         const navButtons = useMemo(
           () => (

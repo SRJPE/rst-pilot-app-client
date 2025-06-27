@@ -76,10 +76,7 @@ const BatchCount = ({
   visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const currentProgramInfo = find(
-    visitSetupDefaults.programs,
-    (program: any) => program.id === selectedProgramId
-  )
+
   const navigation = useNavigation()
   const [firstButton, setFirstButton] = useState(0 as number)
   const [numberOfAdditionalButtons, setNumberOfAdditionalButtons] = useState(
@@ -393,11 +390,9 @@ const BatchCount = ({
                     lastFishEntry={
                       Object.keys(batchCountStore.forkLengths).length
                         ? {
+                            ...calculateLastFish(batchCountStore.forkLengths),
                             species:
                               batchCountStore.batchCharacteristics.species,
-                            forkLength: calculateLastFish(
-                              batchCountStore.forkLengths
-                            ),
                           }
                         : {}
                     }

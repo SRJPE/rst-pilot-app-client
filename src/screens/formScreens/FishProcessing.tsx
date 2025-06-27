@@ -215,7 +215,12 @@ const FishProcessing = ({
         isValid,
       }) => {
         useEffect(() => {
-          if (previouslyActiveTabId && navigationSlice.activeStep === 3) {
+          if (
+            Object.keys(tabSlice.tabs).length > 1 &&
+            previouslyActiveTabId &&
+            previouslyActiveTabId !== activeTabId &&
+            navigationSlice.activeStep === 3
+          ) {
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }

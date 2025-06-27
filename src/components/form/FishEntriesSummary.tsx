@@ -160,8 +160,8 @@ const FishEntriesSummary = ({
         <Text fontSize={'lg'}>
           <Text bold>Last Entry: </Text>
           {Object.keys(lastFishEntry).length
-            ? `${lastFishEntry.species} ${
-                lastFishEntry.lifeStage ? `(${lastFishEntry.lifeStage})` : ''
+            ? `${lastFishEntry.species}${
+                lastFishEntry.lifeStage ? ` (${lastFishEntry.lifeStage})` : ''
               } - FL: ${lastFishEntry.forkLength}mm`
             : ''}
         </Text>

@@ -1033,12 +1033,12 @@ export const checkFishMeasureProtocol = ({
 
 export const calculateLastFish = (
   forkLengths: Record<string, any> | null | undefined
-): number | null => {
+): any | null => {
   if (!forkLengths || !Object.values(forkLengths).length) return null
 
   const values = Object.values(forkLengths)
   const lastObject = values[values.length - 1] as any
-  return lastObject.forkLength || null
+  return lastObject || null
 }
 
 export const getProgramFormFieldsLookup = (
