@@ -956,6 +956,7 @@ const TrapOperations = ({
                             maxWidth={'28%'}
                           >
                             <FormInputComponent
+                              key={`waterTemperature-${values.waterTemperatureUnit}`}
                               showWarning={warningResultTemp}
                               label={'Water Temperature'}
                               placeholder='0'
