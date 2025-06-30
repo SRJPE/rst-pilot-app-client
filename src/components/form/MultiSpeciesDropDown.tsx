@@ -46,9 +46,9 @@ export default function MultiSpeciesDropDown({
     //if using formik
     if (setFieldTouched && setFieldValue) {
       if (values.length > 0) {
-        setFieldTouched('species', true)
+        setFieldTouched('multiSpecies', true)
       }
-      setFieldValue('species', values)
+      setFieldValue('multiSpecies', values)
     } else {
       if (values.length > 0) {
         setFieldTouched()
@@ -137,7 +137,7 @@ export default function MultiSpeciesDropDown({
         setOpen={setOpen}
         onClose={() => {
           onClose && onClose()
-          setFieldTouched('species', true)
+          setFieldTouched('multiSpecies', true)
         }}
         onChangeSearchText={onChangeSearchText}
         setValue={setValues}

@@ -322,7 +322,10 @@ export const batchCharacteristicsSchema = yup.object().shape({
   // fishConditions: yup.any().required('Fish Condition required'),
 })
 export const multiSpeciesBatchCharacteristicsSchema = yup.object().shape({
-  species: yup.array(yup.string()).required('Species required'),
+  multiSpecies: yup
+    .array(yup.string())
+    .required('Species required')
+    .min(1, 'At least one species required'),
   // fishConditions: yup.any().required('Fish Condition required'),
 })
 

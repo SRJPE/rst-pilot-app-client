@@ -12,7 +12,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import React, { memo, useCallback, useState, useMemo } from 'react'
+import { memo, useCallback, useState, useMemo } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   addMarkToBatchCountExistingMarks,
@@ -46,6 +46,11 @@ const MultiSpeciesModalContent = ({
   batchCountStore: any
   visitSetupState: any
 }) => {
+  console.log(
+    '🚀 ~ MultiSpeciesModalContent.tsx:49 ~ batchCountStore:',
+    batchCountStore
+  )
+
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -102,7 +107,7 @@ const MultiSpeciesModalContent = ({
           })
         )
         dispatch(addMarkToBatchCountExistingMarks(recentExistingMarks[0]))
-        console.log('🚀 ~handleFormSubmit BatchCount Values: ', {
+        console.log('🚀 ~handleFormSubmit BatchCount Values: STEP A ', {
           ...values,
           tabId: activeTabId,
         })
@@ -115,7 +120,7 @@ const MultiSpeciesModalContent = ({
             tabId: activeTabId,
           })
         )
-        console.log('🚀 ~handleFormSubmit BatchCount Values: ', {
+        console.log('🚀 ~handleFormSubmit BatchCount Values: STEP B', {
           ...values,
           tabId: activeTabId,
         })
@@ -134,7 +139,7 @@ const MultiSpeciesModalContent = ({
     <ScrollView>
       <Formik
         validationSchema={multiSpeciesBatchCharacteristicsSchema}
-        initialValues={batchCountStore.batchCharacteristics}
+        initialValues={{ ...batchCountStore.batchCharacteristics }}
         onSubmit={values => handleFormSubmit(values)}
       >
         {({
@@ -146,190 +151,198 @@ const MultiSpeciesModalContent = ({
           touched,
           errors,
           values,
-        }) => (
-          <>
-            <CustomModalHeader
-              headerText={'Batch Characteristics'}
-              showHeaderButton={false}
-              closeModal={() => {
-                closeModal()
-                if (
-                  !values.species &&
-                  !batchCountStore.batchCharacteristics.species
-                ) {
-                  navigation.preload('Fish Input')
-                  navigation.navigate('Trap Visit Form', {
-                    screen: 'Fish Input',
-                  })
-                }
-              }}
-            />
-            <VStack px='5%' space={4}>
-              <Text justifyContent='center' fontSize='lg'>
-                Please return to the individual fish input if you plan on
-                marking or sampling a fish.
-              </Text>
-              <VStack space={4}>
-                {/* //TODO: Add error logic for custom species dropdown */}
-                {/* //TODO: Replace with Custom Select component */}
-                <MultiSpeciesDropDown
-                  open={speciesDropDownOpen}
-                  onOpen={onSpeciesOpen}
-                  setOpen={setSpeciesDropDownOpen}
-                  list={speciesList}
-                  setList={setSpeciesList}
-                  setFieldValue={setFieldValue}
-                  setFieldTouched={setFieldTouched}
-                  onClose={() => {
-                    setSpeciesList(reorderedTaxon)
-                  }}
-                  onChangeSearchText={searchValue =>
-                    handleSpeciesSearchTextChange({
-                      reorderedTaxon,
-                      searchValue,
-                      setSpeciesList,
+        }) => {
+          return (
+            <>
+              <CustomModalHeader
+                headerText={'Batch Characteristics'}
+                showHeaderButton={false}
+                closeModal={() => {
+                  closeModal()
+                  if (
+                    //! Fix type Error for species
+                    //@ts-ignore
+                    !values.multiSpecies &&
+                    !batchCountStore.batchCharacteristics.multiSpecies
+                  ) {
+                    navigation.preload('Fish Input')
+                    navigation.navigate('Trap Visit Form', {
+                      screen: 'Fish Input',
                     })
                   }
-                />
-                <FormControl w='100%'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='md'>
-                      Fish Condition (optional)
-                    </Text>
-                  </FormControl.Label>
-                  {/* //TODO: Add error logic for custom fish conditions dropdown */}
-                  <FishConditionsDropDown
-                    open={fishConditionDropdownOpen}
-                    onOpen={onFishConditionOpen}
-                    setOpen={setFishConditionDropdownOpen}
-                    list={fishConditionList}
-                    setList={setFishConditionList}
+                }}
+              />
+              <VStack px='5%' space={4}>
+                <Text justifyContent='center' fontSize='lg'>
+                  Please return to the individual fish input if you plan on
+                  marking or sampling a fish.
+                </Text>
+                <VStack space={4}>
+                  {/* //TODO: Add error logic for custom species dropdown */}
+                  {/* //TODO: Replace with Custom Select component */}
+                  <MultiSpeciesDropDown
+                    open={speciesDropDownOpen}
+                    onOpen={onSpeciesOpen}
+                    setOpen={setSpeciesDropDownOpen}
+                    list={speciesList}
+                    setList={setSpeciesList}
                     setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
-                  />
-                </FormControl>
-              </VStack>
-              <VStack space={4} w={'20%'}>
-                <FormControl>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Adipose Clipped
-                    </Text>
-                  </FormControl.Label>
-                  <Radio.Group
-                    name='adiposeClipped'
-                    accessibilityLabel='adipose clipped'
-                    value={`${values.adiposeClipped}`}
-                    onChange={(value: any) => {
-                      if (value === 'true') {
-                        setFieldValue('adiposeClipped', true)
-                      } else {
-                        setFieldValue('adiposeClipped', false)
-                      }
+                    onClose={() => {
+                      setSpeciesList(reorderedTaxon)
                     }}
-                  >
-                    <Radio
-                      colorScheme='primary'
-                      value='true'
-                      my={1}
-                      _icon={{ color: 'primary' }}
-                    >
-                      True
-                    </Radio>
-                    <Radio
-                      colorScheme='primary'
-                      value='false'
-                      my={1}
-                      _icon={{ color: 'primary' }}
-                    >
-                      False
-                    </Radio>
-                  </Radio.Group>
-                </FormControl>
-              </VStack>
-              <VStack space={4} w={'80%'}>
-                {batchCountStore.batchCharacteristics.existingMarks.length <
-                  1 && (
-                  <AddExistingMark
-                    dropdownValues={dropdownValues}
-                    activeTabId={tabSlice.activeTabId}
-                    recentExistingMarks={recentExistingMarks}
-                    handlePressRecentExistingMarkButton={
-                      handlePressRecentExistingMarkButton
+                    editModeValue={values.multiSpecies}
+                    onChangeSearchText={searchValue =>
+                      handleSpeciesSearchTextChange({
+                        reorderedTaxon,
+                        searchValue,
+                        setSpeciesList,
+                      })
                     }
-                    visitSetupState={visitSetupState}
                   />
-                )}
-                <MarkBadgeList
-                  badgeListContent={
-                    batchCountStore.batchCharacteristics.existingMarks
-                  }
-                  setFieldValue={setFieldValue}
-                  setFieldTouched={setFieldTouched}
-                  field='batchCountExistingMarks'
-                />
-                {batchCountStore.batchCharacteristics.existingMarks.length <
-                  1 && (
-                  <Pressable
-                    isDisabled={
-                      batchCountStore.batchCharacteristics.existingMarks
-                        .length > 0
-                    }
-                    onPress={() => {
-                      setRecentExistingMarks([])
-                      setAddMarkModalOpen(true)
-                    }}
-                  >
-                    <HStack alignItems='center'>
-                      <Icon
-                        as={Ionicons}
-                        name={'add-circle'}
-                        size='3xl'
-                        color='primary'
-                        marginRight='1'
-                      />
-                      <Text color='primary' fontSize='lg'>
-                        Add Mark
+                  <FormControl w='100%'>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='md'>
+                        Fish Condition (optional)
                       </Text>
-                    </HStack>
-                  </Pressable>
-                )}
+                    </FormControl.Label>
+                    {/* //TODO: Add error logic for custom fish conditions dropdown */}
+                    <FishConditionsDropDown
+                      editModeValue={values.fishConditions}
+                      open={fishConditionDropdownOpen}
+                      onOpen={onFishConditionOpen}
+                      setOpen={setFishConditionDropdownOpen}
+                      list={fishConditionList}
+                      setList={setFishConditionList}
+                      setFieldValue={setFieldValue}
+                      setFieldTouched={setFieldTouched}
+                    />
+                  </FormControl>
+                </VStack>
+                <VStack space={4} w={'20%'}>
+                  <FormControl>
+                    <FormControl.Label>
+                      <Text color='black' fontSize='xl'>
+                        Adipose Clipped
+                      </Text>
+                    </FormControl.Label>
+                    <Radio.Group
+                      name='adiposeClipped'
+                      accessibilityLabel='adipose clipped'
+                      //! Fix type Error
+                      // @ts-ignore
+                      value={`${values.adiposeClipped}`}
+                      onChange={(value: any) => {
+                        if (value === 'true') {
+                          setFieldValue('adiposeClipped', true)
+                        } else {
+                          setFieldValue('adiposeClipped', false)
+                        }
+                      }}
+                    >
+                      <Radio
+                        colorScheme='primary'
+                        value='true'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        True
+                      </Radio>
+                      <Radio
+                        colorScheme='primary'
+                        value='false'
+                        my={1}
+                        _icon={{ color: 'primary' }}
+                      >
+                        False
+                      </Radio>
+                    </Radio.Group>
+                  </FormControl>
+                </VStack>
+                <VStack space={4} w={'80%'}>
+                  {batchCountStore.batchCharacteristics.existingMarks.length <
+                    1 && (
+                    <AddExistingMark
+                      dropdownValues={dropdownValues}
+                      activeTabId={tabSlice.activeTabId}
+                      recentExistingMarks={recentExistingMarks}
+                      handlePressRecentExistingMarkButton={
+                        handlePressRecentExistingMarkButton
+                      }
+                      visitSetupState={visitSetupState}
+                    />
+                  )}
+                  <MarkBadgeList
+                    badgeListContent={
+                      batchCountStore.batchCharacteristics.existingMarks
+                    }
+                    setFieldValue={setFieldValue}
+                    setFieldTouched={setFieldTouched}
+                    field='batchCountExistingMarks'
+                  />
+                  {batchCountStore.batchCharacteristics.existingMarks.length <
+                    1 && (
+                    <Pressable
+                      isDisabled={
+                        batchCountStore.batchCharacteristics.existingMarks
+                          .length > 0
+                      }
+                      onPress={() => {
+                        setRecentExistingMarks([])
+                        setAddMarkModalOpen(true)
+                      }}
+                    >
+                      <HStack alignItems='center'>
+                        <Icon
+                          as={Ionicons}
+                          name={'add-circle'}
+                          size='3xl'
+                          color='primary'
+                          marginRight='1'
+                        />
+                        <Text color='primary' fontSize='lg'>
+                          Add Mark
+                        </Text>
+                      </HStack>
+                    </Pressable>
+                  )}
+                </VStack>
+                <Button
+                  bg='primary'
+                  mx='2'
+                  px='10'
+                  shadow='3'
+                  isDisabled={
+                    (touched && Object.keys(touched).length === 0) ||
+                    (errors && Object.keys(errors).length > 0)
+                  }
+                  onPress={() => {
+                    handleSubmit()
+                    setFishConditionDropdownOpen(false)
+                    closeModal()
+                  }}
+                >
+                  <Text fontSize='xl' color='white'>
+                    Save
+                  </Text>
+                </Button>
               </VStack>
-              <Button
-                bg='primary'
-                mx='2'
-                px='10'
-                shadow='3'
-                isDisabled={
-                  (touched && Object.keys(touched).length === 0) ||
-                  (errors && Object.keys(errors).length > 0)
-                }
-                onPress={() => {
-                  handleSubmit()
-                  setFishConditionDropdownOpen(false)
-                  closeModal()
-                }}
-              >
-                <Text fontSize='xl' color='white'>
-                  Save
-                </Text>
-              </Button>
-            </VStack>
-            {/* --------- Modals --------- */}
-            {addMarkModalOpen && (
-              <CustomModal
-                isOpen={addMarkModalOpen}
-                closeModal={() => setAddMarkModalOpen(false)}
-                height='100%'
-              >
-                <AddAnotherMarkModalContent
+              {/* --------- Modals --------- */}
+              {addMarkModalOpen && (
+                <CustomModal
+                  isOpen={addMarkModalOpen}
                   closeModal={() => setAddMarkModalOpen(false)}
-                  screenName={'batchCount'}
-                />
-              </CustomModal>
-            )}
-          </>
-        )}
+                  height='100%'
+                >
+                  <AddAnotherMarkModalContent
+                    closeModal={() => setAddMarkModalOpen(false)}
+                    screenName={'batchCount'}
+                  />
+                </CustomModal>
+              )}
+            </>
+          )
+        }}
       </Formik>
     </ScrollView>
   )
