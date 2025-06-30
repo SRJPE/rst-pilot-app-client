@@ -10,7 +10,6 @@ import {
   Icon,
   IconButton,
   Pressable,
-  // Radio,
   ScrollView,
   Stack,
   Switch,
@@ -78,6 +77,7 @@ const MultiSpecies = ({
   const [showTableModal, setShowTableModal] = useState(false as boolean)
   const [showTable, setShowTable] = useState(false as boolean)
   const [lifeStageRadioValue, setLifeStageRadioValue] = useState('' as string)
+  const [speciesRadioValue, setSpeciesRadioValue] = useState<string>('')
 
   const [multiSpeciesModalOpen, setMultiSpeciesModalOpen] = useState(
     true as boolean
@@ -103,7 +103,7 @@ const MultiSpecies = ({
   const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
 
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
-  const { species, fishConditions, existingMarks } = batchCharacteristics
+  const { multiSpecies, fishConditions, existingMarks } = batchCharacteristics
 
   const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())
@@ -245,7 +245,7 @@ const MultiSpecies = ({
     const protocolResult = checkFishMeasureProtocol({
       fishMeasureCounts: combinedFishMeasureCountsObj,
       fishMeasureProtocol: route.params?.fishMeasureProtocol,
-      speciesValue: species as string,
+      speciesValue: speciesRadioValue as string,
       runValue: '' as string,
       lifeStageValue: '' as string,
     })
@@ -264,7 +264,7 @@ const MultiSpecies = ({
   }, [
     tabSlice.activeTabId,
     fishInputSlice,
-    species,
+    speciesRadioValue,
     batchCountStore.forkLengths,
   ])
 
@@ -291,15 +291,15 @@ const MultiSpecies = ({
               <CustomModalHeader
                 headerText={
                   tabSlice.activeTabId
-                    ? `Add Batch Count - ${
+                    ? `Multi Species Entry - ${
                         tabSlice.tabs[tabSlice.activeTabId].name
                       }`
-                    : 'Add Batch Count'
+                    : 'Multi Species Entry'
                 }
                 showHeaderButton={true}
                 navigateBack={true}
                 headerButton={AddFishModalHeaderButton({
-                  activeTab: 'Batch',
+                  activeTab: 'Multi Species',
                   buttonNav,
                 })}
               />
@@ -370,7 +370,56 @@ const MultiSpecies = ({
               </HStack>
 
               <>
-                <Divider />
+                <Box px='2%'>
+                  <Divider mb='1%' />
+                  <Text bold mb={2}>
+                    Species:
+                  </Text>
+                  <VStack>
+                    <RadioGroup
+                      // name='lifeStageRadioGroup'
+                      value={speciesRadioValue}
+                      onChange={nextValue => {
+                        setSpeciesRadioValue(nextValue)
+                      }}
+                    >
+                      <Box
+                        // direction={{
+                        //   base: 'column',
+                        //   md: 'row',
+                        // }}
+                        // alignItems={{
+                        //   base: 'flex-start',
+                        //   md: 'center',
+                        // }}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          flexWrap: 'wrap',
+                          gap: 25,
+                        }}
+
+                        // w='75%'
+                        // maxW='300px'
+                      >
+                        {multiSpecies?.map((spec: string, index: number) => (
+                          <Radio value={spec} key={index}>
+                            <RadioIndicator style={{ width: 25, height: 25 }}>
+                              <RadioIcon
+                                as={CircleIcon}
+                                style={{ width: 15, height: 15 }}
+                              />
+                            </RadioIndicator>
+                            <Text selectionColor='' fontSize='15'>
+                              {spec}
+                            </Text>
+                          </Radio>
+                        ))}
+                      </Box>
+                    </RadioGroup>
+                  </VStack>
+                  <Divider mt='1%' />
+                </Box>
 
                 <Box px='2%'>
                   <Text bold mb={2}>
@@ -457,7 +506,8 @@ const MultiSpecies = ({
                     </HStack>
                   </HStack>
                 </Box>
-                {species === 'Chinook salmon' && (
+
+                {speciesRadioValue === 'Chinook salmon' && (
                   <Box px='2%'>
                     <Divider mb='1%' />
                     <Text bold mb={2}>
@@ -568,13 +618,14 @@ const MultiSpecies = ({
                     setFirstButton={setFirstButton}
                     setLifeStageRadioValue={setLifeStageRadioValue}
                     setNumberOfAdditionalButtons={setNumberOfAdditionalButtons}
+                    disabled={speciesRadioValue === ''}
                   />
                 </VStack>
                 <BatchCountButtonGrid
                   firstButton={firstButton}
                   numberOfAdditionalButtons={numberOfAdditionalButtons}
                   selectedLifeStage={lifeStageRadioValue}
-                  ignoreLifeStage={species !== 'Chinook salmon'}
+                  ignoreLifeStage={speciesRadioValue !== 'Chinook salmon'}
                   deadToggle={deadToggle}
                   markToggle={markToggle}
                   fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
@@ -586,10 +637,12 @@ const MultiSpecies = ({
                   trapOperationsStore={trapOperationsStore}
                   dropdownsStore={dropdownsStore}
                   activeTabId={tabSlice.activeTabId}
-                  species={species}
+                  species={speciesRadioValue}
                   selectedProgramObj={route?.params?.selectedProgramObj}
                 />
-                {species !== 'Chinook salmon' && <View mb='65'></View>}
+                {speciesRadioValue !== 'Chinook salmon' && (
+                  <View mb='65'></View>
+                )}
               </>
 
               <HStack
@@ -665,7 +718,7 @@ const MultiSpecies = ({
           width={'80%'}
         >
           <MeasureMetPlusCount
-            species={{ value: species }}
+            species={{ value: speciesRadioValue }}
             closeModal={closeFishMeasureMetModal}
             activeTabId={tabSlice.activeTabId}
             protocolKeyMet={protocolKeyMet}
