@@ -22,6 +22,7 @@ interface FishEntry {
   existingMark: boolean
   fishConditions: string[]
   runDefinition?: string
+  species?: string
 }
 
 interface PreparedFishEntry {
@@ -176,8 +177,18 @@ export const saveFishSlice = createSlice({
 
     saveBatchCount: (state, action) => {
       const { tabId, batchCharacteristics, forkLengths } = action.payload
-      const { species, adiposeClipped, existingMarks, fishConditions } =
+      console.log(
+        '🚀 ~ fishInputSlice.ts:179 ~ batchCharacteristics:',
         batchCharacteristics
+      )
+
+      const {
+        species: batchSpecies,
+        multiSpecies,
+        adiposeClipped,
+        existingMarks,
+        fishConditions,
+      } = batchCharacteristics
       let fishStoreCopy = cloneDeep(
         state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
       )
@@ -186,6 +197,7 @@ export const saveFishSlice = createSlice({
 
       for (const value of Object.values(organizedFishEntriesResult)) {
         const {
+          species: speciesFromEntry,
           forkLength,
           lifeStage,
           dead,
@@ -193,6 +205,8 @@ export const saveFishSlice = createSlice({
           fishConditions,
           runDefinition,
         } = value.fishEntryData
+
+        const species = multiSpecies?.length ? speciesFromEntry : batchSpecies
 
         let run = null
         let captureRunClassMethod = null

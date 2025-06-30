@@ -15,6 +15,7 @@ export interface singleBatchRawI {
 }
 export interface batchCharacteristicsI {
   species: string
+  multiSpecies?: string[]
   adiposeClipped: boolean
   fishConditions: string[]
   existingMarks: Array<ReleaseMarkI>
@@ -28,6 +29,7 @@ export const initialState: batchCountI = {
   tabId: null,
   batchCharacteristics: {
     species: '',
+    multiSpecies: [],
     adiposeClipped: false,
     fishConditions: [],
     existingMarks: [],
@@ -41,10 +43,12 @@ export const batchCountSlice = createSlice({
   reducers: {
     resetBatchCountSlice: () => initialState,
     saveBatchCharacteristics: (state, action) => {
-      const { tabId, species, adiposeClipped, fishConditions } = action.payload
+      const { tabId, species, multiSpecies, adiposeClipped, fishConditions } =
+        action.payload
       const forkLengthsCopy = cloneDeep(state.forkLengths) as any
       state.tabId = tabId
       state.batchCharacteristics.species = species
+      state.batchCharacteristics.multiSpecies = multiSpecies
       state.batchCharacteristics.adiposeClipped = adiposeClipped
       state.batchCharacteristics.fishConditions = fishConditions
       state.forkLengths = forkLengthsCopy
@@ -63,6 +67,7 @@ export const batchCountSlice = createSlice({
         ...state.forkLengths,
       }
       const fishEntry = {
+        species: action.payload.species || '',
         forkLength: action.payload.forkLength,
         lifeStage: action.payload.lifeStage,
         dead: action.payload.dead,
@@ -70,6 +75,8 @@ export const batchCountSlice = createSlice({
         fishConditions: action.payload.fishConditions,
         runDefinition: action.payload.runDefinition,
       } as any
+      console.log('🚀 ~ batchCountSlice.ts:79 ~ fishEntry:', fishEntry)
+
       let id = null
       if (Object.keys(forkLengthsCopy).length) {
         // @ts-ignore
