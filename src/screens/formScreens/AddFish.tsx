@@ -543,7 +543,15 @@ const AddFishContent = ({
     }
   }, [existingMarks])
 
+  const navState = navigation?.getState()
+  const currentRoute = navState?.routes[navState?.index]
+
   useEffect(() => {
+    if (currentRoute?.name !== 'Add Fish') {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      return
+    }
     if (!tabSlice?.activeTabId || !fishInputSlice) return
 
     const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
