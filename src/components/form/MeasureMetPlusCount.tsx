@@ -154,6 +154,11 @@ const MeasureMetPlusCount = ({
                   _pressed={{
                     bg: 'secondary',
                   }}
+                  isDisabled={!inputValue || isNaN(Number(inputValue))}
+                  disabled={!inputValue || isNaN(Number(inputValue))}
+                  _disabled={{
+                    bg: 'gray.400',
+                  }}
                 >
                   <Text fontSize='xl' color='white'>
                     Save Plus Count
