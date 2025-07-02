@@ -186,6 +186,10 @@ const BatchCount = ({
     // @ts-ignore
     navigation.navigate('Trap Visit Form', {
       screen: 'Add Fish',
+      params: {
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        selectedProgramObj: route.params?.selectedProgramObj,
+      },
     })
 
     dispatch(resetBatchCountSlice())
