@@ -42,13 +42,13 @@ export default function SpeciesDropDown({
 }) {
   const [value, setValue] = useState(editModeValue || ('' as string))
 
-  const formikProps = useFormikContext<{ species: string[] }>()
+  // const formikProps = useFormikContext<{ species: string[] }>()
 
-  const speciesError = formikProps?.errors.species
+  // const speciesError = formikProps?.errors.species
 
-  const speciesTouched = formikProps?.touched.species
+  // const speciesTouched = formikProps?.touched.species
 
-  const speciesDropdownHasError = speciesError && speciesTouched
+  // const speciesDropdownHasError = speciesError && speciesTouched
 
   const handleOnChange = useCallback(
     (itemValue: any) => {
@@ -80,10 +80,7 @@ export default function SpeciesDropDown({
     <View>
       <HStack space={1} alignItems='center'>
         <FormControl.Label>
-          <Text
-            fontSize='md'
-            color={speciesDropdownHasError ? 'red.700' : 'black'}
-          >
+          <Text fontSize='md' color={'black'}>
             Species
           </Text>
         </FormControl.Label>
@@ -170,7 +167,7 @@ export default function SpeciesDropDown({
         closeAfterSelecting={true}
         style={{
           marginTop: 4,
-          borderColor: speciesDropdownHasError ? 'darkred' : '#d4d4d4d4',
+          borderColor: '#d4d4d4d4',
           borderRadius: 4,
           height: 50,
           backgroundColor: '#fafafa',
@@ -181,7 +178,7 @@ export default function SpeciesDropDown({
         }}
         dropDownContainerStyle={{
           backgroundColor: '#fafafa',
-          borderColor: speciesDropdownHasError ? 'darkred' : '#d4d4d4d4',
+          borderColor: '#d4d4d4d4',
           borderBottomLeftRadius: 4,
           borderBottomRightRadius: 4,
         }}
@@ -189,11 +186,11 @@ export default function SpeciesDropDown({
           fontSize: 16,
         }}
       />
-      {speciesDropdownHasError && (
+      {/* {speciesDropdownHasError && (
         <Text style={{ color: 'darkred', marginTop: 5 }}>
           {speciesError as string}
         </Text>
-      )}
+      )} */}
     </View>
   )
 }

@@ -373,7 +373,7 @@ const AddFishContent = ({
   }
 
   const resetSpecies = () => {
-    setSpecies(stateDefaults.whenSpeciesChinook.species)
+    setSpecies(stateDefaults.whenSpeciesOther.species)
     resetFormState('other')
     setFishMeasureMetModalOpen(false)
     setProtocolKeyMet(null)
@@ -429,7 +429,6 @@ const AddFishContent = ({
             return formField?.formSection === 'Fish Input'
           }
         )
-        console.log('fishInputFields', fishInputFields)
         setConditionalFishInputFields(keyBy(fishInputFields, 'fieldName'))
       } else {
         setConditionalFishInputFields({})
@@ -616,6 +615,12 @@ const AddFishContent = ({
       return
     }
 
+    if (species.value === '' || species.value === null) {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      return
+    }
+
     const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
       ?.fishMeasureCounts as Record<
       string,
@@ -643,8 +648,6 @@ const AddFishContent = ({
         runValue: run.value as string,
         lifeStageValue: lifeStage.value as string,
       })
-
-      console.log('species.value', species.value)
 
       if (protocolResult && protocolResult.protocolMet) {
         setFishMeasureMetModalOpen(true)
