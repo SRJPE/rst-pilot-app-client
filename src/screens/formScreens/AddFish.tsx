@@ -191,6 +191,10 @@ const AddFishContent = ({
     // @ts-ignore
     navigation?.navigate('Trap Visit Form', {
       screen: 'Batch Count',
+      params: {
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        selectedProgramObj: route.params?.selectedProgramObj,
+      },
     })
   }
 
@@ -1430,6 +1434,22 @@ const AddFishContent = ({
                       />
                     </FormControl>
                   </VStack>
+                  <CustomModal
+                    isOpen={fishMeasureMetModalOpen && !!protocolKeyMet}
+                    closeModal={closeFishMeasureMetModal}
+                    height='40%'
+                    width={'80%'}
+                  >
+                    <MeasureMetPlusCount
+                      species={species}
+                      closeModal={closeFishMeasureMetModal}
+                      activeTabId={tabSlice.activeTabId}
+                      onSaveCallback={resetSpecies}
+                      protocolKeyMet={protocolKeyMet}
+                      lifeStageValue={lifeStage.value}
+                      runValue={run.value}
+                    />
+                  </CustomModal>
                 </>
               )}
             </VStack>
@@ -1586,24 +1606,6 @@ const AddFishContent = ({
               setExistingMarks={setExistingMarks}
               existingMarks={existingMarks}
               existingMarksArray={existingMarks.value}
-            />
-          </CustomModal>
-        )}
-        {fishMeasureMetModalOpen && (
-          <CustomModal
-            isOpen={fishMeasureMetModalOpen}
-            closeModal={closeFishMeasureMetModal}
-            height='40%'
-            width={'80%'}
-          >
-            <MeasureMetPlusCount
-              species={species}
-              closeModal={closeFishMeasureMetModal}
-              activeTabId={tabSlice.activeTabId}
-              onSaveCallback={resetSpecies}
-              protocolKeyMet={protocolKeyMet}
-              lifeStageValue={lifeStage.value}
-              runValue={run.value}
             />
           </CustomModal>
         )}
