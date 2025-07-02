@@ -132,7 +132,14 @@ const BatchCount = ({
     // @ts-ignore
     navigation.navigate('Trap Visit Form', {
       screen: 'Add Fish',
+      params: {
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        selectedProgramObj: route.params?.selectedProgramObj,
+      },
     })
+
+    dispatch(resetBatchCountSlice())
+    closeFishMeasureMetModal()
   }
   const handleShowTableModal = (selectedRowData: any) => {
     const modalDataContainer = {} as any
