@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useIsFocused } from '@react-navigation/native'
 import {
   Box,
   Button,
@@ -125,6 +125,17 @@ const AddFishContent = ({
     null
   )
 
+  const isFocused = useIsFocused()
+
+  useEffect(() => {
+    if (!isFocused) {
+      console.log('🧹 Screen blurred — clearing form')
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      resetFormState('other')
+    }
+  }, [isFocused])
+
   useEffect(() => {
     const programLadModelName = route?.params?.selectedProgramObj?.ladModel
       ? route?.params?.selectedProgramObj.ladModel.toLowerCase()
@@ -196,6 +207,10 @@ const AddFishContent = ({
         selectedProgramObj: route.params?.selectedProgramObj,
       },
     })
+
+    closeFishMeasureMetModal()
+    resetFormState('other')
+    resetSpecies()
   }
 
   // ------------------------------------------------------------------------------------------------------------------------

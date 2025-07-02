@@ -59,7 +59,7 @@ const MeasureMetPlusCount = ({
       submittedLifeStage = lifeStageValue
     try {
       const plusCount = parseInt(inputValue, 10)
-      if (activeTabId) {
+      if (activeTabId && !isNaN(plusCount)) {
         dispatch(
           savePlusCount({
             tabId: activeTabId,

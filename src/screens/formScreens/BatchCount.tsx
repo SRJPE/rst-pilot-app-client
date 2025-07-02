@@ -187,6 +187,9 @@ const BatchCount = ({
     navigation.navigate('Trap Visit Form', {
       screen: 'Add Fish',
     })
+
+    dispatch(resetBatchCountSlice())
+    closeFishMeasureMetModal()
   }
   const handleShowTableModal = (selectedRowData: any) => {
     const modalDataContainer = {} as any
@@ -818,24 +821,22 @@ const BatchCount = ({
           modalInitialData={modalInitialData}
         />
       )}
-      {fishMeasureMetModalOpen && (
-        <CustomModal
-          isOpen={fishMeasureMetModalOpen}
+      <CustomModal
+        isOpen={fishMeasureMetModalOpen}
+        closeModal={closeFishMeasureMetModal}
+        height='40%'
+        width={'80%'}
+      >
+        <MeasureMetPlusCount
+          species={{ value: species }}
           closeModal={closeFishMeasureMetModal}
-          height='40%'
-          width={'80%'}
-        >
-          <MeasureMetPlusCount
-            species={{ value: species }}
-            closeModal={closeFishMeasureMetModal}
-            activeTabId={tabSlice.activeTabId}
-            protocolKeyMet={protocolKeyMet}
-            lifeStageValue={''}
-            runValue={''}
-            onSaveCallback={handlePressSaveBatchCount}
-          />
-        </CustomModal>
-      )}
+          activeTabId={tabSlice.activeTabId}
+          protocolKeyMet={protocolKeyMet}
+          lifeStageValue={''}
+          runValue={''}
+          onSaveCallback={handlePressSaveBatchCount}
+        />
+      </CustomModal>
     </>
   ) : (
     <></>
