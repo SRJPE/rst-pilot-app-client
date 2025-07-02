@@ -67,7 +67,7 @@ export default function SpeciesDropDown({
       }
       setFieldValue('species', value)
     } else {
-      if (value) {
+      if (setFieldTouched && value) {
         setFieldTouched()
       }
       if (onChangeValue) {
@@ -147,7 +147,9 @@ export default function SpeciesDropDown({
         setOpen={setOpen}
         onClose={() => {
           onClose && onClose()
-          setFieldTouched('species', true)
+          if (setFieldTouched) {
+            setFieldTouched('species', true)
+          }
         }}
         onChangeValue={handleOnChange}
         onChangeSearchText={onChangeSearchText}

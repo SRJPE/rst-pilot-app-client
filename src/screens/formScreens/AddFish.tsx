@@ -383,6 +383,15 @@ const AddFishContent = ({
     setProtocolKeyMet(null)
   }
 
+  const [justClosed, setJustClosed] = useState(false)
+
+  useEffect(() => {
+    if (justClosed) {
+      const timeout = setTimeout(() => setJustClosed(false), 500)
+      return () => clearTimeout(timeout)
+    }
+  }, [justClosed])
+
   const checkForFormError = () => {
     const formValues = [
       species,
@@ -608,6 +617,12 @@ const AddFishContent = ({
   const currentRoute = navState?.routes[navState?.index]
 
   useEffect(() => {
+    console.log('Species Ref:', species.value)
+    // if (justClosed) {
+    //   setFishMeasureMetModalOpen(false)
+    //   setProtocolKeyMet(null)
+    //   return
+    // }
     if (!tabSlice?.activeTabId || !fishInputSlice) {
       setFishMeasureMetModalOpen(false)
       setProtocolKeyMet(null)
@@ -653,28 +668,38 @@ const AddFishContent = ({
         lifeStageValue: lifeStage.value as string,
       })
 
-      if (protocolResult && protocolResult.protocolMet) {
-        setFishMeasureMetModalOpen(true)
-      } else {
-        setFishMeasureMetModalOpen(false)
-      }
+      console.log('Protocol Result:', protocolResult)
 
-      if (protocolResult && protocolResult.protocolKeyMet) {
+      if (
+        protocolResult &&
+        protocolResult.protocolMet &&
+        protocolResult.protocolKeyMet
+      ) {
+        setFishMeasureMetModalOpen(true)
         setProtocolKeyMet(protocolResult.protocolKeyMet)
       } else {
+        setFishMeasureMetModalOpen(false)
         setProtocolKeyMet(null)
       }
     } else {
-      setFishMeasureMetModalOpen(false)
       setProtocolKeyMet(null)
     }
   }, [
     tabSlice.activeTabId,
     fishInputSlice,
     species.value,
+    justClosed,
     lifeStage.value,
     run.value,
   ])
+
+  useEffect(() => {
+    console.log('State check:', {
+      fishMeasureMetModalOpen,
+      protocolKeyMet,
+      speciesValue: species.value,
+    })
+  }, [fishMeasureMetModalOpen, protocolKeyMet])
 
   const forkLengthRef = useRef(forkLength)
 
@@ -783,9 +808,9 @@ const AddFishContent = ({
                       }
                       setSpecies(payload)
                     }}
-                    setFieldTouched={() =>
-                      setSpecies({ ...species, touched: true })
-                    }
+                    // setFieldTouched={() =>
+                    //   setSpecies({ ...species, touched: true })
+                    // }
                   />
                 </FormControl>
               </HStack>
@@ -1434,22 +1459,6 @@ const AddFishContent = ({
                       />
                     </FormControl>
                   </VStack>
-                  <CustomModal
-                    isOpen={fishMeasureMetModalOpen && !!protocolKeyMet}
-                    closeModal={closeFishMeasureMetModal}
-                    height='40%'
-                    width={'80%'}
-                  >
-                    <MeasureMetPlusCount
-                      species={species}
-                      closeModal={closeFishMeasureMetModal}
-                      activeTabId={tabSlice.activeTabId}
-                      onSaveCallback={resetSpecies}
-                      protocolKeyMet={protocolKeyMet}
-                      lifeStageValue={lifeStage.value}
-                      runValue={run.value}
-                    />
-                  </CustomModal>
                 </>
               )}
             </VStack>
@@ -1609,6 +1618,27 @@ const AddFishContent = ({
             />
           </CustomModal>
         )}
+        <CustomModal
+          isOpen={
+            fishMeasureMetModalOpen &&
+            !!protocolKeyMet &&
+            typeof species.value === 'string' &&
+            protocolKeyMet.toLowerCase().includes(species.value.toLowerCase())
+          }
+          closeModal={closeFishMeasureMetModal}
+          height='40%'
+          width={'80%'}
+        >
+          <MeasureMetPlusCount
+            species={species}
+            closeModal={closeFishMeasureMetModal}
+            activeTabId={tabSlice.activeTabId}
+            onSaveCallback={resetSpecies}
+            protocolKeyMet={protocolKeyMet}
+            lifeStageValue={lifeStage.value}
+            runValue={run.value}
+          />
+        </CustomModal>
       </View>
     </TouchableNativeFeedback>
   )
