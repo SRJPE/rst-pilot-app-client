@@ -28,30 +28,31 @@ import { CircleIcon } from '@/components/ui/icon'
 import React, { useState, useEffect } from 'react'
 import { Keyboard } from 'react-native'
 import { batch, connect, useDispatch } from 'react-redux'
-import BatchCountButtonGrid from '../../components/form/batchCount/BatchCountButtonGrid'
-import BatchCountDataTable from '../../components/form/batchCount/BatchCountDataTable'
-import BatchCountHistogram from '../../components/form/batchCount/BatchCountHistogram'
-import BatchCountTableModal from '../../components/form/batchCount/BatchCountTableModal'
-import ForkLengthButtonGroup from '../../components/form/batchCount/ForkLengthButtonGroup'
-import MultiSpeciesModalContent from '../../components/form/MultiSpeciesModalContent'
-import CustomModal from '../../components/Shared/CustomModal'
+import BatchCountButtonGrid from '@/src/components/form/batchCount/BatchCountButtonGrid'
+import BatchCountDataTable from '@/src/components/form/batchCount/BatchCountDataTable'
+import BatchCountHistogram from '@/src/components/form/batchCount/BatchCountHistogram'
+import BatchCountTableModal from '@/src/components/form/batchCount/BatchCountTableModal'
+import ForkLengthButtonGroup from '@/src/components/form/batchCount/ForkLengthButtonGroup'
+import MultiSpeciesModalContent from '@/src/components/form/MultiSpeciesModalContent'
+import CustomModal from '@/src/components/Shared/CustomModal'
 import CustomModalHeader, {
   AddFishModalHeaderButton,
-} from '../../components/Shared/CustomModalHeader'
+} from '@/src/components/Shared/CustomModalHeader'
 import {
   removeLastForkLengthEntered,
   resetBatchCountSlice,
-} from '../../redux/reducers/formSlices/batchCountSlice'
+} from '@/src/redux/reducers/formSlices/batchCountSlice'
 import {
   saveBatchCount,
   getFishMeasureCounts,
-} from '../../redux/reducers/formSlices/fishInputSlice'
-import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { AppDispatch, RootState } from '../../redux/store'
-import { calculateLastFish, checkFishMeasureProtocol } from '../../utils/utils'
-import FishEntriesSummary from '../../components/form/FishEntriesSummary'
-import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
+} from '@/src/redux/reducers/formSlices/fishInputSlice'
+import { TabStateI } from '@/src/redux/reducers/formSlices/tabSlice'
+import { showSlideAlert } from '@/src/redux/reducers/slideAlertSlice'
+import { AppDispatch, RootState } from '@/src/redux/store'
+import { calculateLastFish, checkFishMeasureProtocol } from '@/src/utils/utils'
+import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
+import MeasureMetPlusCount from '@/src/components/form/MeasureMetPlusCount'
+import MultiSpeciesBatchChart from '@/src/components/form/batchCount/MultiSpeciesBatchChart'
 
 const MultiSpecies = ({
   route,
@@ -119,13 +120,6 @@ const MultiSpecies = ({
         screen: 'Fish Input',
       })
     }
-  }
-  const handlePressSaveAndStartNewBatchCount = () => {
-    dispatch(saveBatchCount({ ...batchCountStore }))
-    dispatch(resetBatchCountSlice())
-
-    showSlideAlert(dispatch, 'Batch Count Saved')
-    setMultiSpeciesModalOpen(true)
   }
 
   const buttonNav = () => {
@@ -332,43 +326,8 @@ const MultiSpecies = ({
                 </Box>
               )}
 
-            {showTable ? (
-              <ScrollView height='369'>
-                <BatchCountDataTable
-                  handleShowTableModal={handleShowTableModal}
-                />
-              </ScrollView>
-            ) : (
-              <Box
-                w='5/6'
-                alignSelf='center'
-                alignItems='center'
-                justifyContent='center'
-                bg='secondary'
-              >
-                <BatchCountHistogram />
-              </Box>
-            )}
+            <MultiSpeciesBatchChart />
             <VStack space={3}>
-              <HStack
-                alignItems='center'
-                justifyContent='center'
-                my={2}
-                space={4}
-                mt={5}
-              >
-                <Text fontSize='16'>Show Histogram</Text>
-                <Switch
-                  shadow='3'
-                  offTrackColor='primary'
-                  onTrackColor='primary'
-                  size='md'
-                  isChecked={showTable}
-                  onToggle={() => setShowTable(!showTable)}
-                />
-                <Text fontSize='16'>Show Table</Text>
-              </HStack>
-
               <>
                 <Box px='2%'>
                   <Divider mb='1%' />
@@ -377,30 +336,18 @@ const MultiSpecies = ({
                   </Text>
                   <VStack>
                     <RadioGroup
-                      // name='lifeStageRadioGroup'
                       value={speciesRadioValue}
                       onChange={nextValue => {
                         setSpeciesRadioValue(nextValue)
                       }}
                     >
                       <Box
-                        // direction={{
-                        //   base: 'column',
-                        //   md: 'row',
-                        // }}
-                        // alignItems={{
-                        //   base: 'flex-start',
-                        //   md: 'center',
-                        // }}
                         style={{
                           display: 'flex',
                           flexDirection: 'row',
                           flexWrap: 'wrap',
                           gap: 25,
                         }}
-
-                        // w='75%'
-                        // maxW='300px'
                       >
                         {multiSpecies?.map((spec: string, index: number) => (
                           <Radio value={spec} key={index}>
@@ -521,19 +468,7 @@ const MultiSpecies = ({
                           setLifeStageRadioValue(nextValue)
                         }}
                       >
-                        <HStack
-                          // direction={{
-                          //   base: 'column',
-                          //   md: 'row',
-                          // }}
-                          // alignItems={{
-                          //   base: 'flex-start',
-                          //   md: 'center',
-                          // }}
-                          space={10}
-                          // w='75%'
-                          // maxW='300px'
-                        >
+                        <HStack space={10}>
                           <Radio value='Yolk Sac Fry'>
                             <RadioIndicator style={{ width: 25, height: 25 }}>
                               <RadioIcon
@@ -545,12 +480,7 @@ const MultiSpecies = ({
                               Yolk Sac Fry
                             </RadioLabel>
                           </Radio>
-                          <Radio
-                            // colorScheme='primary'
-                            value='Fry'
-                            // my={1}
-                            // _icon={{ color: 'primary' }}
-                          >
+                          <Radio value='Fry'>
                             <RadioIndicator style={{ width: 25, height: 25 }}>
                               <RadioIcon
                                 as={CircleIcon}
@@ -559,12 +489,7 @@ const MultiSpecies = ({
                             </RadioIndicator>
                             <RadioLabel>Fry</RadioLabel>
                           </Radio>
-                          <Radio
-                            // colorScheme='primary'
-                            value='Parr'
-                            // my={1}
-                            // _icon={{ color: 'primary' }}
-                          >
+                          <Radio value='Parr'>
                             <RadioIndicator style={{ width: 25, height: 25 }}>
                               <RadioIcon
                                 as={CircleIcon}
@@ -573,12 +498,7 @@ const MultiSpecies = ({
                             </RadioIndicator>
                             <RadioLabel>Parr</RadioLabel>
                           </Radio>
-                          <Radio
-                            // colorScheme='primary'
-                            value='Silvery Parr'
-                            // my={1}
-                            // _icon={{ color: 'primary' }}
-                          >
+                          <Radio value='Silvery Parr'>
                             <RadioIndicator style={{ width: 25, height: 25 }}>
                               <RadioIcon
                                 as={CircleIcon}
@@ -587,12 +507,7 @@ const MultiSpecies = ({
                             </RadioIndicator>
                             <RadioLabel>Silvery Parr</RadioLabel>
                           </Radio>
-                          <Radio
-                            // colorScheme='primary'
-                            value='Smolt'
-                            // my={1}
-                            // _icon={{ color: 'primary' }}
-                          >
+                          <Radio value='Smolt'>
                             <RadioIndicator style={{ width: 25, height: 25 }}>
                               <RadioIcon
                                 as={CircleIcon}
@@ -653,6 +568,7 @@ const MultiSpecies = ({
                 pt={5}
               >
                 <Button
+                  flex={1}
                   bg={'transparent'}
                   onPress={() => handlePressRemoveFish()}
                   isDisabled={calculateTotalCount() === 0}
@@ -662,6 +578,7 @@ const MultiSpecies = ({
                   </Text>
                 </Button>
                 <Button
+                  flex={2}
                   bg={'transparent'}
                   onPress={() => setMultiSpeciesModalOpen(true)}
                 >
@@ -671,16 +588,10 @@ const MultiSpecies = ({
                 </Button>
 
                 <Button
-                  bg='transparent'
-                  borderColor='primary'
-                  borderWidth={1}
-                  onPress={handlePressSaveAndStartNewBatchCount}
+                  flex={1}
+                  bg='primary'
+                  onPress={handlePressSaveBatchCount}
                 >
-                  <Text fontSize='lg' bold color='primary'>
-                    Save & Start New
-                  </Text>
-                </Button>
-                <Button bg='primary' onPress={handlePressSaveBatchCount}>
                   <Text fontSize='lg' bold color='white'>
                     Save & Exit
                   </Text>
