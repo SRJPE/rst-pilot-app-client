@@ -632,7 +632,6 @@ const AddFishContent = ({
   const currentRoute = navState?.routes[navState?.index]
 
   useEffect(() => {
-    console.log('Species Ref:', species.value)
     // if (justClosed) {
     //   setFishMeasureMetModalOpen(false)
     //   setProtocolKeyMet(null)
@@ -707,14 +706,6 @@ const AddFishContent = ({
     lifeStage.value,
     run.value,
   ])
-
-  useEffect(() => {
-    console.log('State check:', {
-      fishMeasureMetModalOpen,
-      protocolKeyMet,
-      speciesValue: species.value,
-    })
-  }, [fishMeasureMetModalOpen, protocolKeyMet])
 
   const forkLengthRef = useRef(forkLength)
 

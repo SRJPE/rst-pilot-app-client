@@ -34,6 +34,7 @@ import { StackActions } from '@react-navigation/native'
 import { navigateHelper } from '../../utils/utils'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { find, keyBy, mapValues } from 'lodash'
+import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
@@ -92,6 +93,7 @@ const FishInput = ({
       ? ([...speciesCaptured] as Array<string>)
       : (['YOY Chinook'] as Array<string>)
   )
+  const [lastFishEntry, setLastFishEntry] = useState<any>(null)
 
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
   const errorMessage =
@@ -107,7 +109,7 @@ const FishInput = ({
     if (!tabSlice?.activeTabId || !fishInputSlice) return
 
     const fishStore = fishInputSlice?.[tabSlice.activeTabId]?.fishStore as {
-      [key: string]: number
+      [key: string]: any
     }
 
     if (!fishStore) return
@@ -119,6 +121,10 @@ const FishInput = ({
     ) as number
 
     setTotalCatchCount(total)
+    const lastFishEntry = Object.values(fishStore).findLast(
+      fishEntry => !fishEntry.plusCount
+    )
+    setLastFishEntry(lastFishEntry || null)
   }, [tabSlice.activeTabId, fishInputSlice])
 
   useEffect(() => {
@@ -204,7 +210,7 @@ const FishInput = ({
           Record catch data using the individual fish input, the batch entry, or
           plus count.
         </Text>
-        <VStack space={6}>
+        <VStack space={4}>
           <HStack space={10} px='4'>
             <Button
               bg='primary'
@@ -263,17 +269,22 @@ const FishInput = ({
               {errorMessage}
             </Text>
           </HStack>
-
+          {lastFishEntry && tabSlice.activeTabId && fishMeasureProtocol && (
+            <Box px='4'>
+              <Heading mb={0}>Catch Summary</Heading>
+              <FishEntriesSummary
+                lastFishEntry={lastFishEntry}
+                totalCatchCount={totalCatchCount}
+                fishMeasureProtocol={fishMeasureProtocol || {}}
+                fishMeasureCounts={
+                  fishInputSlice?.[tabSlice.activeTabId]?.fishMeasureCounts
+                }
+              />
+            </Box>
+          )}
           <Box px='4'>
             <HStack space={2} alignItems='center'>
               <Heading mb={0}>Catch Table</Heading>
-              <Text
-                fontSize='xl'
-                mb={0}
-                style={{ textAlignVertical: 'center' }}
-              >
-                (Total Catch Count: {totalCatchCount})
-              </Text>
             </HStack>
             <FishInputDataTable navigation={navigation} />
           </Box>
