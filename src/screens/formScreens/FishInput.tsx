@@ -34,7 +34,7 @@ import { StackActions } from '@react-navigation/native'
 import { navigateHelper } from '../../utils/utils'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { find, keyBy, mapValues } from 'lodash'
-import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
+import FishEntriesSummary from '../../components/form/FishEntriesSummary'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
