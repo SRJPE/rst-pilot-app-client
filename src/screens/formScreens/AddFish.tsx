@@ -57,6 +57,7 @@ import {
   QARanges,
   reorderTaxon,
   findTaxonCode,
+  calculateLifeStage,
 } from '../../utils/utils'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
 import FishEntriesSummary from '../../components/form/FishEntriesSummary'
@@ -630,6 +631,53 @@ const AddFishContent = ({
     forkLengthRef.current = forkLength
   }, [forkLength.value])
 
+  const handleForkLengthBlur = () => {
+    setTimeout(() => {
+      if (species.value === 'Chinook salmon' && tabSlice.activeTabId) {
+        if (!forkLengthRef.current.value) {
+          setRun(stateDefaults.whenSpeciesChinook.run)
+          setLifeStage(stateDefaults.whenSpeciesChinook.lifeStage)
+          return
+        }
+
+        const ladObj = findLengthAtDateRun(
+          lengthAtDateModel,
+          trapOperationsStore?.[tabSlice.activeTabId]?.values?.trapVisitStopTime
+        )
+
+        const runDefinition = findRunDefinition(
+          ladObj,
+          Number(forkLengthRef.current.value)
+        )
+
+        if (runDefinition) {
+          setRun({
+            ...run,
+            value: runDefinition,
+            touched: true,
+          })
+        } else {
+          setRun(stateDefaults.whenSpeciesChinook.run)
+        }
+
+        const calculatedlifeStage = calculateLifeStage(
+          Number(forkLengthRef.current.value)
+        )
+
+        if (calculatedlifeStage) {
+          setLifeStage({
+            ...lifeStage,
+            value: calculatedlifeStage,
+            error: '',
+            touched: true,
+          })
+        } else {
+          setLifeStage(stateDefaults.whenSpeciesChinook.lifeStage)
+        }
+      }
+    }, 1000)
+  }
+
   return (
     <TouchableNativeFeedback
       onPress={() => {
@@ -788,40 +836,7 @@ const AddFishContent = ({
                             }
                             setForkLength(payload)
                           }}
-                          onBlur={() => {
-                            setTimeout(() => {
-                              if (
-                                species.value === 'Chinook salmon' &&
-                                tabSlice.activeTabId
-                              ) {
-                                if (!forkLengthRef.current.value) {
-                                  setRun(stateDefaults.whenSpeciesChinook.run)
-                                  return
-                                }
-
-                                const ladObj = findLengthAtDateRun(
-                                  lengthAtDateModel,
-                                  trapOperationsStore?.[tabSlice.activeTabId]
-                                    ?.values?.trapVisitStopTime
-                                )
-
-                                const runDefinition = findRunDefinition(
-                                  ladObj,
-                                  Number(forkLengthRef.current.value)
-                                )
-
-                                if (runDefinition) {
-                                  setRun({
-                                    ...run,
-                                    value: runDefinition,
-                                    touched: true,
-                                  })
-                                } else {
-                                  setRun(stateDefaults.whenSpeciesChinook.run)
-                                }
-                              }
-                            }, 1000)
-                          }}
+                          onBlur={handleForkLengthBlur}
                           value={forkLength.value as string}
                         />
                         <Text
@@ -1466,6 +1481,7 @@ const AddFishContent = ({
               protocolKeyMet={protocolKeyMet}
               lifeStageValue={lifeStage.value}
               runValue={run.value}
+              dropdownValues={dropdownsStore.values}
             />
           </CustomModal>
         )}
