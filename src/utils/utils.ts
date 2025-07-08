@@ -981,9 +981,9 @@ export const checkFishMeasureProtocol = ({
             continue
           }
           // Extract the species part from the protocol key
-          const speciesParts = protoKey.split(' - ')
-          const protoRunOrLifestageName = speciesParts[1] || ''
-          const protoLifeStageName = speciesParts[2] || ''
+          const protocolParts = protoKey.split(' - ')
+          const protoRunOrLifestageName = protocolParts[1] || ''
+          const protoLifeStageName = protocolParts[2] || ''
 
           if (
             protoRunOrLifestageName &&

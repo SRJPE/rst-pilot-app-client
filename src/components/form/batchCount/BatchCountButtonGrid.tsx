@@ -13,10 +13,7 @@ import { useDispatch } from 'react-redux'
 import { addForkLengthToBatchStore } from '../../../redux/reducers/formSlices/batchCountSlice'
 import { AppDispatch } from '../../../redux/store'
 import { createArray } from '../../../utils/utils'
-import {
-  findLengthAtDateRun,
-  findRunDefinition,
-} from '../../../utils/helpers/helperFunctions'
+import { findRunDefinition } from '../../../utils/helpers/helperFunctions'
 import { Vibration } from 'react-native'
 
 const BatchCountButtonGrid = ({
@@ -30,11 +27,9 @@ const BatchCountButtonGrid = ({
   eggsToggle,
   fishConditions,
   handleToggles,
-  trapOperationsStore,
-  dropdownsStore,
   activeTabId,
   species,
-  selectedProgramObj,
+  ladObject,
 }: {
   firstButton: number
   numberOfAdditionalButtons: number
@@ -46,35 +41,14 @@ const BatchCountButtonGrid = ({
   eggsToggle: boolean | null
   fishConditions: string[]
   handleToggles: any
-  trapOperationsStore: any
-  dropdownsStore: any
   activeTabId: string | null
   species: string
-  selectedProgramObj: any
+  ladObject: any
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
-  const [lengthAtDateModel, setLengthAtDateModel] = useState([] as number[])
-  const [programLADModelName, setProgramLADModelName] = useState<string | null>(
-    null
-  )
+
   const dispatch = useDispatch<AppDispatch>()
   const [showPopover, setShowPopover] = useState<boolean>(false)
-
-  useEffect(() => {
-    setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
-  }, [dropdownsStore.values])
-
-  useEffect(() => {
-    const programLadModelName = selectedProgramObj?.ladModel
-      ? selectedProgramObj.ladModel.toLowerCase()
-      : null
-    setProgramLADModelName(programLadModelName)
-    if (programLadModelName === 'river') {
-      setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
-    } else if (programLadModelName === 'delta') {
-      setLengthAtDateModel(dropdownsStore.values.lengthAtDateDelta)
-    }
-  }, [dropdownsStore.values])
 
   useEffect(() => {
     setNumArray(createArray(firstButton, numberOfAdditionalButtons))
@@ -82,27 +56,8 @@ const BatchCountButtonGrid = ({
 
   const handlePress = (num: number) => {
     let runDefinition = null as string | null
-
-    let dateTimeValue = new Date()
-
-    if (
-      activeTabId &&
-      trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
-    ) {
-      dateTimeValue =
-        trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
-    } else if (
-      activeTabId &&
-      trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
-    ) {
-      dateTimeValue =
-        trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
-    }
-
-    if (species === 'Chinook salmon' && activeTabId && dateTimeValue) {
-      const ladObj = findLengthAtDateRun(lengthAtDateModel, dateTimeValue)
-
-      runDefinition = findRunDefinition(ladObj, num)
+    if (species === 'Chinook salmon' && activeTabId && ladObject) {
+      runDefinition = findRunDefinition(ladObject, num)
     }
     dispatch(
       addForkLengthToBatchStore({

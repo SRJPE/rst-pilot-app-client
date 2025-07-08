@@ -50,9 +50,17 @@ import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { find, keyBy } from 'lodash'
-import { calculateLastFish, checkFishMeasureProtocol } from '../../utils/utils'
+import {
+  calculateLastFish,
+  checkFishMeasureProtocol,
+  calculateLifeStage,
+} from '../../utils/utils'
 import FishEntriesSummary from '../../components/form/FishEntriesSummary'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
+import {
+  findLengthAtDateRun,
+  findRunDefinition,
+} from '../../utils/helpers/helperFunctions'
 
 const BatchCount = ({
   route,
@@ -114,6 +122,64 @@ const BatchCount = ({
   const [programFormFieldsObj, setProgramFormFieldsObj] = useState(
     {} as Record<string, any>
   )
+  const [protocolKeyMetRun, setProtocolKeyMetRun] = useState('' as string)
+  const [protocolKeyMetLifeStage, setProtocolKeyMetLifeStage] = useState(
+    '' as string
+  )
+
+  const [lengthAtDateModel, setLengthAtDateModel] = useState([] as number[])
+  const [programLADModelName, setProgramLADModelName] = useState<string | null>(
+    null
+  )
+  const [ladObject, setLadObject] = useState<any>(null)
+
+  useEffect(() => {
+    setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
+  }, [dropdownsStore.values])
+
+  useEffect(() => {
+    const selectedProgramObj = route?.params?.selectedProgramObj
+    const programLadModelName = selectedProgramObj?.ladModel
+      ? selectedProgramObj?.ladModel.toLowerCase()
+      : null
+    setProgramLADModelName(programLadModelName)
+    if (programLadModelName === 'river') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
+    } else if (programLadModelName === 'delta') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateDelta)
+    }
+  }, [dropdownsStore.values])
+
+  useEffect(() => {
+    if (lengthAtDateModel && tabSlice.activeTabId) {
+      let dateTimeValue = new Date()
+
+      const activeTabId = tabSlice.activeTabId
+
+      if (
+        activeTabId &&
+        trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
+      ) {
+        dateTimeValue =
+          trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
+      } else if (
+        activeTabId &&
+        trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+      ) {
+        dateTimeValue =
+          trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+      }
+      const ladObjectForTrapDate = findLengthAtDateRun(
+        lengthAtDateModel,
+        dateTimeValue
+      )
+
+      setLadObject(ladObjectForTrapDate)
+    } else {
+      setLadObject(null)
+    }
+  }, [lengthAtDateModel, tabSlice.activeTabId])
+
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
   const { species, fishConditions, existingMarks, taxonCode } =
     batchCharacteristics
@@ -322,13 +388,23 @@ const BatchCount = ({
     )
 
     setTotalCatchCount(total)
+    const lastFish = calculateLastFish(batchCountStore.forkLengths)
+
+    let lastFishRunValue = ''
+    let lastFishLifeStageValue = ''
+    if (lastFish && species === 'Chinook salmon' && ladObject) {
+      const run = findRunDefinition(ladObject, lastFish?.forkLength)
+      lastFishRunValue = run || ''
+      const lifeStage = calculateLifeStage(Number(lastFish?.forkLength))
+      lastFishLifeStageValue = lifeStage || ''
+    }
 
     const protocolResult = checkFishMeasureProtocol({
       fishMeasureCounts: combinedFishMeasureCountsObj,
       fishMeasureProtocol: route.params?.fishMeasureProtocol,
-      speciesValue: batchCountStore?.batchCharacteristics?.species as string,
-      runValue: '' as string,
-      lifeStageValue: '' as string,
+      speciesValue: species as string,
+      runValue: lastFishRunValue,
+      lifeStageValue: lastFishLifeStageValue,
     })
 
     if (protocolResult && protocolResult.protocolMet) {
@@ -339,8 +415,12 @@ const BatchCount = ({
 
     if (protocolResult && protocolResult.protocolKeyMet) {
       setProtocolKeyMet(protocolResult.protocolKeyMet)
+      setProtocolKeyMetRun(lastFishRunValue || '')
+      setProtocolKeyMetLifeStage(lastFishLifeStageValue || '')
     } else {
       setProtocolKeyMet(null)
+      setProtocolKeyMetRun('')
+      setProtocolKeyMetLifeStage('')
     }
   }, [
     tabSlice.activeTabId,
@@ -751,11 +831,9 @@ const BatchCount = ({
                     )
                     .filter(condition => condition !== null)}
                   handleToggles={handleToggles}
-                  trapOperationsStore={trapOperationsStore}
-                  dropdownsStore={dropdownsStore}
                   activeTabId={tabSlice.activeTabId}
                   species={species}
-                  selectedProgramObj={route?.params?.selectedProgramObj}
+                  ladObject={ladObject}
                 />
                 {species !== 'Chinook salmon' && <View mb='65'></View>}
               </>
@@ -836,9 +914,10 @@ const BatchCount = ({
           closeModal={closeFishMeasureMetModal}
           activeTabId={tabSlice.activeTabId}
           protocolKeyMet={protocolKeyMet}
-          lifeStageValue={''}
-          runValue={''}
+          lifeStageValue={protocolKeyMetLifeStage}
+          runValue={protocolKeyMetRun}
           onSaveCallback={handlePressSaveBatchCount}
+          dropdownValues={dropdownsStore.values}
         />
       </CustomModal>
     </>
