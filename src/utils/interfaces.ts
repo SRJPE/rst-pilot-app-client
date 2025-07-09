@@ -115,6 +115,11 @@ export interface Taxon {
   value: string
 }
 
+export type ProgramTaxonAbbreviation = Taxon & {
+  abbreviationCode?: string
+  programId: number
+}
+
 export type TrapVisitResponse = {
   createdTrapVisitResponse: {
     id: number

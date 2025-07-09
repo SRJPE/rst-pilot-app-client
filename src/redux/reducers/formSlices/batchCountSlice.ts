@@ -19,6 +19,7 @@ export interface batchCharacteristicsI {
   adiposeClipped: boolean
   fishConditions: string[]
   existingMarks: Array<ReleaseMarkI>
+  taxonCode?: string
 }
 export interface batchCountI {
   tabId: string | null
@@ -43,12 +44,19 @@ export const batchCountSlice = createSlice({
   reducers: {
     resetBatchCountSlice: () => initialState,
     saveBatchCharacteristics: (state, action) => {
-      const { tabId, species, multiSpecies, adiposeClipped, fishConditions } =
-        action.payload
+      const {
+        tabId,
+        species,
+        multiSpecies,
+        adiposeClipped,
+        fishConditions,
+        taxonCode,
+      } = action.payload
       const forkLengthsCopy = cloneDeep(state.forkLengths) as any
       state.tabId = tabId
       state.batchCharacteristics.species = species
       state.batchCharacteristics.multiSpecies = multiSpecies
+      state.batchCharacteristics.taxonCode = taxonCode
       state.batchCharacteristics.adiposeClipped = adiposeClipped
       state.batchCharacteristics.fishConditions = fishConditions
       state.forkLengths = forkLengthsCopy

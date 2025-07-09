@@ -15,7 +15,7 @@ import {
   FormControlLabelText,
 } from '@/components/ui/form-control'
 import { HStack } from '@/components/ui/hstack'
-
+import { reorderTaxon, findTaxonCode } from '../../utils/utils'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
@@ -23,13 +23,10 @@ import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
-    addAnotherMarkValues: state.addAnotherMark.values,
+    // addAnotherMarkValues: state.addAnotherMark.values,
   }
 }
-/*
-Make sure to take BisMark Brown into account 
-  => {values.markType !== 'Bismark Brown' && ( <render other dropdowns> )
-*/
+
 const MeasureMetPlusCount = ({
   species,
   closeModal,
@@ -38,6 +35,7 @@ const MeasureMetPlusCount = ({
   protocolKeyMet,
   lifeStageValue,
   runValue,
+  dropdownValues,
 }: {
   species: any
   closeModal: any
@@ -46,6 +44,7 @@ const MeasureMetPlusCount = ({
   protocolKeyMet: string
   lifeStageValue: string
   runValue: string
+  dropdownValues: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
@@ -54,12 +53,16 @@ const MeasureMetPlusCount = ({
   const handleSubmit = () => {
     let submittedRun = ''
     let submittedLifeStage = ''
-    if (protocolKeyMet.includes(runValue)) submittedRun = runValue
-    if (protocolKeyMet.includes(lifeStageValue))
+    if (runValue && protocolKeyMet.includes(runValue)) submittedRun = runValue
+    if (lifeStageValue && protocolKeyMet.includes(lifeStageValue))
       submittedLifeStage = lifeStageValue
+
     try {
       const plusCount = parseInt(inputValue, 10)
+
       if (activeTabId) {
+        const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
+        const taxonCode = findTaxonCode(species.value, reorderedTaxon)
         dispatch(
           savePlusCount({
             tabId: activeTabId,
@@ -70,6 +73,7 @@ const MeasureMetPlusCount = ({
             plusCountMethod: 'none',
             run: submittedRun,
             species: species.value,
+            taxonCode,
           })
         )
         closeModal()
@@ -148,6 +152,14 @@ const MeasureMetPlusCount = ({
                   bgColor='primary'
                   colorScheme='coolGray'
                   onPress={handleSubmit}
+                  isDisabled={!inputValue || isNaN(Number(inputValue))}
+                  disabled={!inputValue || isNaN(Number(inputValue))}
+                  _pressed={{
+                    bg: 'primary.600',
+                  }}
+                  _disabled={{
+                    bg: 'gray.400',
+                  }}
                 >
                   <Text fontSize='xl' color='white'>
                     Save Plus Count

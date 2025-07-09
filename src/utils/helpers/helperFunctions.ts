@@ -49,8 +49,8 @@ export const findLengthAtDateRun = (array: Array<any>, targetDate: Date) => {
   return array.find(item => {
     const ladDate = new Date(item.ladDate)
     return (
-      ladDate.getMonth() === targetDate.getMonth() &&
-      ladDate.getDate() === targetDate.getDate()
+      ladDate.getMonth() === targetDate?.getMonth() &&
+      ladDate.getDate() === targetDate?.getDate()
     )
   })
 }

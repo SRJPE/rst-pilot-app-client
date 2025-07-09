@@ -188,6 +188,7 @@ export const saveFishSlice = createSlice({
         adiposeClipped,
         existingMarks,
         fishConditions,
+        taxonCode,
       } = batchCharacteristics
       let fishStoreCopy = cloneDeep(
         state[tabId] ? state[tabId].fishStore : state['placeholderId'].fishStore
@@ -220,6 +221,7 @@ export const saveFishSlice = createSlice({
 
         const batchCountEntry = {
           species: species,
+          taxonCode,
           numFishCaught: value.count,
           forkLength: forkLength,
           run,
@@ -296,6 +298,7 @@ export const saveFishSlice = createSlice({
         plusCountMethod,
         dead,
         existingMarks,
+        taxonCode,
       } = action.payload
 
       const plusCountEntry = {
@@ -313,6 +316,7 @@ export const saveFishSlice = createSlice({
         willBeUsedInRecapture: null,
         plusCountMethod,
         plusCount: true,
+        taxonCode,
       } as IndividualFishValuesI
 
       let fishStoreCopy = cloneDeep(

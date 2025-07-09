@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useIsFocused } from '@react-navigation/native'
 import { partition, startCase } from 'lodash'
 import {
   Box,
@@ -17,7 +17,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { use, useCallback, useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { Keyboard, TouchableNativeFeedback } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { uid } from 'uid'
@@ -46,7 +46,7 @@ import {
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import { FormValueI, ReleaseMarkI } from '../../utils/interfaces'
+import { FormValueI, ReleaseMarkI, Taxon } from '../../utils/interfaces'
 import {
   addFishErrorMessages,
   alphabeticalSort,
@@ -56,6 +56,8 @@ import {
   handleSpeciesSearchTextChange,
   QARanges,
   reorderTaxon,
+  findTaxonCode,
+  calculateLifeStage,
 } from '../../utils/utils'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
 import FishEntriesSummary from '../../components/form/FishEntriesSummary'
@@ -90,6 +92,23 @@ const AddFishContent = ({
   dropdownsStore: any
   trapOperationsStore: any
 }) => {
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
+  const tabId = tabSlice?.activeTabId || 'placeholderId'
+
+  const activeProgramId = visitSetupState?.[tabId]?.values?.programId
+
+  const currentProgramTaxon = dropdownValues.programTaxonAbbreviation[
+    activeProgramId
+  ] as Taxon[]
+
+  const defaultTaxonList = dropdownValues?.taxon
+  const reorderedTaxon = useMemo(
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
+    [currentProgramTaxon, activeProgramId]
+  )
+
   const lastFishEntry = Object.values(fishStore).findLast(
     fishEntry => !fishEntry.plusCount
   )
@@ -101,6 +120,17 @@ const AddFishContent = ({
   const [programLADModelName, setProgramLADModelName] = useState<string | null>(
     null
   )
+
+  const isFocused = useIsFocused()
+
+  useEffect(() => {
+    if (!isFocused) {
+      console.log('🧹 Screen blurred — clearing form')
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      resetFormState('other')
+    }
+  }, [isFocused])
 
   useEffect(() => {
     const programLadModelName = route?.params?.selectedProgramObj?.ladModel
@@ -125,12 +155,6 @@ const AddFishContent = ({
     false as boolean
   )
   const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
-
-  const dropdownValues = useSelector(
-    (state: RootState) => state.dropdowns.values
-  )
-
-  const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
 
   const [speciesList, setSpeciesList] =
     useState<{ label: string; value: string }[]>(reorderedTaxon)
@@ -174,7 +198,15 @@ const AddFishContent = ({
     // @ts-ignore
     navigation?.navigate('Trap Visit Form', {
       screen: 'Batch Count',
+      params: {
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        selectedProgramObj: route.params?.selectedProgramObj,
+      },
     })
+
+    closeFishMeasureMetModal()
+    resetFormState('other')
+    resetSpecies()
   }
 
   // ------------------------------------------------------------------------------------------------------------------------
@@ -192,6 +224,7 @@ const AddFishContent = ({
           required: false,
         })
   )
+
   const [count, setCount] = useState<FormValueI>(
     !route.params?.editModeData
       ? stateDefaults.whenSpeciesChinook.count
@@ -453,9 +486,15 @@ const AddFishContent = ({
       return fieldValue || null
     }
   }
+  const selectedTaxonCode = useMemo(
+    () => findTaxonCode(species.value as string, reorderedTaxon),
+    [species.value, reorderedTaxon]
+  )
+
   const returnFormValues = () => {
     let values = {
       species: species.value,
+      taxonCode: selectedTaxonCode || null,
       forkLength: forkLength.value,
       run: determineValueNotRecordedOrNull(species.value, 'run', run.value),
       fishConditions: Array.isArray(fishConditions.value)
@@ -524,7 +563,15 @@ const AddFishContent = ({
     }
   }, [existingMarks])
 
+  const navState = navigation?.getState()
+  const currentRoute = navState?.routes[navState?.index]
+
   useEffect(() => {
+    if (currentRoute?.name !== 'Add Fish') {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      return
+    }
     if (!tabSlice?.activeTabId || !fishInputSlice) return
 
     const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
@@ -583,6 +630,53 @@ const AddFishContent = ({
   useEffect(() => {
     forkLengthRef.current = forkLength
   }, [forkLength.value])
+
+  const handleForkLengthBlur = () => {
+    setTimeout(() => {
+      if (species.value === 'Chinook salmon' && tabSlice.activeTabId) {
+        if (!forkLengthRef.current.value) {
+          setRun(stateDefaults.whenSpeciesChinook.run)
+          setLifeStage(stateDefaults.whenSpeciesChinook.lifeStage)
+          return
+        }
+
+        const ladObj = findLengthAtDateRun(
+          lengthAtDateModel,
+          trapOperationsStore?.[tabSlice.activeTabId]?.values?.trapVisitStopTime
+        )
+
+        const runDefinition = findRunDefinition(
+          ladObj,
+          Number(forkLengthRef.current.value)
+        )
+
+        if (runDefinition) {
+          setRun({
+            ...run,
+            value: runDefinition,
+            touched: true,
+          })
+        } else {
+          setRun(stateDefaults.whenSpeciesChinook.run)
+        }
+
+        const calculatedlifeStage = calculateLifeStage(
+          Number(forkLengthRef.current.value)
+        )
+
+        if (calculatedlifeStage) {
+          setLifeStage({
+            ...lifeStage,
+            value: calculatedlifeStage,
+            error: '',
+            touched: true,
+          })
+        } else {
+          setLifeStage(stateDefaults.whenSpeciesChinook.lifeStage)
+        }
+      }
+    }, 1000)
+  }
 
   return (
     <TouchableNativeFeedback
@@ -742,40 +836,7 @@ const AddFishContent = ({
                             }
                             setForkLength(payload)
                           }}
-                          onBlur={() => {
-                            setTimeout(() => {
-                              if (
-                                species.value === 'Chinook salmon' &&
-                                tabSlice.activeTabId
-                              ) {
-                                if (!forkLengthRef.current.value) {
-                                  setRun(stateDefaults.whenSpeciesChinook.run)
-                                  return
-                                }
-
-                                const ladObj = findLengthAtDateRun(
-                                  lengthAtDateModel,
-                                  trapOperationsStore?.[tabSlice.activeTabId]
-                                    ?.values?.trapVisitStopTime
-                                )
-
-                                const runDefinition = findRunDefinition(
-                                  ladObj,
-                                  Number(forkLengthRef.current.value)
-                                )
-
-                                if (runDefinition) {
-                                  setRun({
-                                    ...run,
-                                    value: runDefinition,
-                                    touched: true,
-                                  })
-                                } else {
-                                  setRun(stateDefaults.whenSpeciesChinook.run)
-                                }
-                              }
-                            }, 1000)
-                          }}
+                          onBlur={handleForkLengthBlur}
                           value={forkLength.value as string}
                         />
                         <Text
@@ -1268,9 +1329,10 @@ const AddFishContent = ({
                   const activeTabId = tabSlice.activeTabId
                   if (activeTabId) {
                     let payload = returnFormValues()
+
                     saveIndividualFish({
                       tabId: activeTabId,
-                      formValues: payload,
+                      formValues: { ...payload, taxonCode: selectedTaxonCode },
                       UID: fishUID,
                     })
                     navigation.goBack()
@@ -1314,6 +1376,7 @@ const AddFishContent = ({
               isDisabled={route.params?.editModeData ? false : formHasError}
               onPress={() => {
                 let payload = returnFormValues()
+
                 const activeTabId = tabSlice.activeTabId
                 if (route.params?.editModeData) {
                   if (activeTabId) {
@@ -1321,6 +1384,7 @@ const AddFishContent = ({
                       tabId: activeTabId,
                       id: route.params?.editModeData?.id,
                       ...payload,
+                      taxonCode: selectedTaxonCode,
                       numFishCaught: count.value,
                     })
                     navigation.goBack()
@@ -1331,7 +1395,7 @@ const AddFishContent = ({
                   if (activeTabId) {
                     saveIndividualFish({
                       tabId: activeTabId,
-                      formValues: payload,
+                      formValues: { ...payload, taxonCode: selectedTaxonCode },
                     })
                     showSlideAlert(dispatch, 'Fish Input Saved')
                     if (
@@ -1417,6 +1481,7 @@ const AddFishContent = ({
               protocolKeyMet={protocolKeyMet}
               lifeStageValue={lifeStage.value}
               runValue={run.value}
+              dropdownValues={dropdownsStore.values}
             />
           </CustomModal>
         )}
