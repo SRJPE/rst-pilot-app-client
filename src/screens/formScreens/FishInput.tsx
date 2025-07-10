@@ -106,13 +106,21 @@ const FishInput = ({
   }, [checkboxGroupValue])
 
   useEffect(() => {
-    if (!tabSlice?.activeTabId || !fishInputSlice) return
+    if (!tabSlice?.activeTabId || !fishInputSlice) {
+      setTotalCatchCount(0)
+      setLastFishEntry(null)
+      return
+    }
 
     const fishStore = fishInputSlice?.[tabSlice.activeTabId]?.fishStore as {
       [key: string]: any
     }
 
-    if (!fishStore) return
+    if (!fishStore) {
+      setTotalCatchCount(0)
+      setLastFishEntry(null)
+      return
+    }
 
     const total = Object.values(fishStore).reduce(
       (sum: number, fishObj: any) =>
