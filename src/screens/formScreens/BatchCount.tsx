@@ -452,10 +452,10 @@ const BatchCount = ({
               <CustomModalHeader
                 headerText={
                   tabSlice.activeTabId
-                    ? `Add Batch Count - ${
+                    ? `Batch Count - ${
                         tabSlice.tabs[tabSlice.activeTabId].name
                       }`
-                    : 'Add Batch Count'
+                    : 'Batch Count'
                 }
                 showHeaderButton={true}
                 navigateBack={true}
