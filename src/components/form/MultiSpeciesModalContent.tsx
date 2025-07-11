@@ -34,20 +34,23 @@ import { startCase } from 'lodash'
 import { useNavigation } from '@react-navigation/native'
 import AddExistingMark from './AddExistingMark'
 import { TouchableWithoutFeedback } from 'react-native'
+import { batchCountI } from '../../redux/reducers/formSlices/batchCountSlice'
 
 const MultiSpeciesModalContent = ({
   closeModal,
   tabSlice,
   batchCountStore,
   visitSetupState,
+  fishInputSlice,
 }: {
   closeModal: any
   tabSlice: TabStateI
-  batchCountStore: any
+  batchCountStore: batchCountI
   visitSetupState: any
+  fishInputSlice: any
 }) => {
   console.log(
-    '🚀 ~ MultiSpeciesModalContent.tsx:49 ~ batchCountStore:',
+    '🚀 ~ MultiSpeciesModalContent.tsx:51 ~ batchCountStore:',
     batchCountStore
   )
 
@@ -59,6 +62,20 @@ const MultiSpeciesModalContent = ({
     () => reorderTaxon(dropdownValues.taxon),
     [dropdownValues.taxon]
   )
+
+  const activeTabId = tabSlice.activeTabId
+  const { batchCharacteristics, forkLengths } = batchCountStore
+
+  const speciesInFishStore = useMemo(() => {
+    if (!activeTabId) return []
+    const species = Object.values(
+      fishInputSlice[activeTabId]?.fishStore || {}
+    ).map((fish: any) => fish.species)
+
+    const uniqueSpecies = Array.from(new Set(species))
+
+    return uniqueSpecies
+  }, [activeTabId, fishInputSlice])
 
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
   const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
@@ -97,7 +114,6 @@ const MultiSpeciesModalContent = ({
   const handleFormSubmit = (values: any) => {
     delete values.existingMarks
     delete values.batchCountExistingMarks
-    let activeTabId = tabSlice.activeTabId
     if (activeTabId) {
       if (recentExistingMarks.length === 1) {
         dispatch(
@@ -107,10 +123,6 @@ const MultiSpeciesModalContent = ({
           })
         )
         dispatch(addMarkToBatchCountExistingMarks(recentExistingMarks[0]))
-        console.log('🚀 ~handleFormSubmit BatchCount Values: STEP A ', {
-          ...values,
-          tabId: activeTabId,
-        })
         showSlideAlert(dispatch, 'Batch characteristics')
       } else {
         dispatch(
@@ -120,10 +132,6 @@ const MultiSpeciesModalContent = ({
             tabId: activeTabId,
           })
         )
-        console.log('🚀 ~handleFormSubmit BatchCount Values: STEP B', {
-          ...values,
-          tabId: activeTabId,
-        })
         showSlideAlert(dispatch, 'Batch characteristics')
       }
     }
@@ -139,7 +147,10 @@ const MultiSpeciesModalContent = ({
     <ScrollView>
       <Formik
         validationSchema={multiSpeciesBatchCharacteristicsSchema}
-        initialValues={{ ...batchCountStore.batchCharacteristics }}
+        initialValues={{
+          ...batchCharacteristics,
+          multiSpecies: [...speciesInFishStore],
+        }}
         onSubmit={values => handleFormSubmit(values)}
       >
         {({
@@ -155,16 +166,11 @@ const MultiSpeciesModalContent = ({
           return (
             <>
               <CustomModalHeader
-                headerText={'Batch Characteristics'}
+                headerText={'Multi-Species Batch Characteristics'}
                 showHeaderButton={false}
                 closeModal={() => {
                   closeModal()
-                  if (
-                    //! Fix type Error for species
-                    //@ts-ignore
-                    !values.multiSpecies &&
-                    !batchCountStore.batchCharacteristics.multiSpecies
-                  ) {
+                  if (!batchCharacteristics?.multiSpecies?.length) {
                     navigation.preload('Fish Input')
                     navigation.navigate('Trap Visit Form', {
                       screen: 'Fish Input',
@@ -353,6 +359,7 @@ const mapStateToProps = (state: RootState) => {
     tabSlice: state.tabSlice,
     batchCountStore: state.batchCount,
     visitSetupState: state.visitSetup,
+    fishInputSlice: state.fishInput,
   }
 }
 
