@@ -140,9 +140,6 @@ const FishEntriesSummary = ({
       return
     }
 
-    console.log('fishMeasureProtocol', fishMeasureProtocol)
-    console.log('fishMeasureCounts', fishMeasureCounts)
-
     const finalSums = sumCountsWithFallback(
       fishMeasureProtocol,
       fishMeasureCounts
@@ -190,8 +187,6 @@ const FishEntriesSummary = ({
 
     return entryText
   }
-
-  console.log('protocolCounts', protocolCounts)
 
   return (
     <Box

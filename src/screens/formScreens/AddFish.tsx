@@ -545,9 +545,9 @@ const AddFishContent = ({
       species === 'Chinook salmon' ||
       (species === 'Steelhead / rainbow trout' && fieldName === 'lifeStage')
     ) {
-      return fieldValue || 'not recorded'
+      return fieldValue.toLowerCase() || 'not recorded'
     } else {
-      return fieldValue || null
+      return fieldValue.toLowerCase() || null
     }
   }
   const selectedTaxonCode = useMemo(
@@ -682,8 +682,6 @@ const AddFishContent = ({
         runValue: run.value as string,
         lifeStageValue: lifeStage.value as string,
       })
-
-      console.log('Protocol Result:', protocolResult)
 
       if (
         protocolResult &&

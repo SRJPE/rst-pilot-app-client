@@ -200,8 +200,6 @@ const FishInput = ({
     }, 1000)
   }
 
-  console.log('fishStore', fishInputSlice?.[activeTabId]?.fishStore)
-
   return (
     <>
       <ScrollView
