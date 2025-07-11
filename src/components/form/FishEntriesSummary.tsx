@@ -157,12 +157,18 @@ const FishEntriesSummary = ({
       mt={2}
     >
       <VStack space={1}>
-        <Text fontSize={'lg'}>
-          <Text bold>Last Entry: </Text>
-          {`${lastFishEntry.species} ${
-            lastFishEntry.lifeStage ? `(${lastFishEntry.lifeStage})` : ''
-          } - FL: ${lastFishEntry.forkLength}mm`}
-        </Text>
+        {lastFishEntry.forkLength && (
+          <>
+            <Text fontSize={'lg'}>
+              <Text bold>Last Entry: </Text>
+              <Text>
+                {`${lastFishEntry.species} ${
+                  lastFishEntry.lifeStage ? `(${lastFishEntry.lifeStage})` : ''
+                } - FL: ${lastFishEntry.forkLength}mm`}
+              </Text>
+            </Text>
+          </>
+        )}
         <Text fontSize={'lg'}>
           <Text bold>Total Catch Count Entered: </Text>
           {totalCatchCount}
