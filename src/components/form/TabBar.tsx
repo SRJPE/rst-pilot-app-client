@@ -167,14 +167,6 @@ const TabBar = ({
 
     dispatch(setActiveTab(fishInputDefaultTabId?.tabId))
   }
-  console.log(
-    '🚀 ~ TabBar.tsx:170 ~ setDefaultActiveTab ~ tabSlice.activeTabId :',
-    tabSlice.activeTabId
-  )
-  console.log(
-    '🚀 ~ TabBar.tsx:170 ~ setDefaultActiveTab ~         headerProps.route.name',
-    headerProps.route.name
-  )
 
   if (
     Object.keys(tabSlice.tabs).length &&
