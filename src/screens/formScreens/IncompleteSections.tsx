@@ -747,7 +747,7 @@ const IncompleteSections = ({
             trapVisitId: null,
             taxonCode: fishValue.taxonCode,
             captureRunClass: returnNullableTableId(
-              runValues.indexOf(fishValue?.run?.toLowerCase())
+              runValues.indexOf(fishValue.run.toLowerCase() || '')
             ),
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
             captureRunClassMethod: getRunClassMethod(fishValue),
@@ -761,7 +761,7 @@ const IncompleteSections = ({
             eggs: typeof fishValue.eggs === 'boolean' ? fishValue.eggs : null,
             fishCondition: getCatchFishConditions(fishValue.fishCondition),
             lifeStage: returnNullableTableId(
-              lifeStageValues.indexOf(fishValue?.lifeStage?.toLowerCase())
+              lifeStageValues.indexOf(fishValue.lifeStage.toLowerCase() || '')
             ),
             forkLength:
               fishValue.forkLength != null
