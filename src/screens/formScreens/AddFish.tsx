@@ -545,9 +545,9 @@ const AddFishContent = ({
       species === 'Chinook salmon' ||
       (species === 'Steelhead / rainbow trout' && fieldName === 'lifeStage')
     ) {
-      return fieldValue.toLowerCase() || 'not recorded'
+      return fieldValue?.toLowerCase() || 'not recorded'
     } else {
-      return fieldValue.toLowerCase() || null
+      return fieldValue?.toLowerCase() || null
     }
   }
   const selectedTaxonCode = useMemo(
