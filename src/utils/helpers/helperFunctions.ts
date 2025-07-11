@@ -56,6 +56,7 @@ export const findLengthAtDateRun = (array: Array<any>, targetDate: Date) => {
 }
 
 export const findRunDefinition = (ladObj: any, number: number) => {
+  if (!ladObj || !number) return
   const buckets = [
     { definition: 'fall', min: ladObj.fallMin1, max: ladObj.fallMax1 },
     { definition: 'fall', min: ladObj.fallMin2, max: ladObj.fallMax2 },

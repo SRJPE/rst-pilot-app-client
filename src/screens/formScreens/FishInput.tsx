@@ -27,7 +27,6 @@ import {
 } from '../../redux/reducers/formSlices/navigationSlice'
 import FishInputDataTable from '../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../components/form/PlusCountModalContent'
-import { Ionicons } from '@expo/vector-icons'
 import { DeviceEventEmitter, useWindowDimensions } from 'react-native'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { StackActions } from '@react-navigation/native'
@@ -200,6 +199,8 @@ const FishInput = ({
       showSlideAlert(dispatch)
     }, 1000)
   }
+
+  console.log('fishStore', fishInputSlice?.[activeTabId]?.fishStore)
 
   return (
     <>

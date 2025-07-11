@@ -722,11 +722,25 @@ const AddFishContent = ({
           setLifeStage(stateDefaults.whenSpeciesChinook.lifeStage)
           return
         }
+        let dateTimeValue = new Date()
 
-        const ladObj = findLengthAtDateRun(
-          lengthAtDateModel,
-          trapOperationsStore?.[tabSlice.activeTabId]?.values?.trapVisitStopTime
-        )
+        const activeTabId = tabSlice.activeTabId
+
+        if (
+          activeTabId &&
+          trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
+        ) {
+          dateTimeValue =
+            trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
+        } else if (
+          activeTabId &&
+          trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+        ) {
+          dateTimeValue =
+            trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+        }
+
+        const ladObj = findLengthAtDateRun(lengthAtDateModel, dateTimeValue)
 
         const runDefinition = findRunDefinition(
           ladObj,
