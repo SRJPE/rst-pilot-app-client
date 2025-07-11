@@ -34,6 +34,7 @@ import {
   EXPO_PUBLIC_CLIENT_ID,
 } from '@env'
 import MonitoringProgramInfoModalContent from '../../components/profile/MonitoringProgramModalContent'
+import ConfirmationModalContent from '@/src/components/Shared/ConfirmationModalContent'
 
 const Profile = ({
   userCredentialsStore,
@@ -335,56 +336,34 @@ const Profile = ({
       <CustomModal
         isOpen={logoutModalOpen}
         closeModal={() => setLogoutModalOpen(false)}
-        height='175'
+        height={175}
+        width={500}
         size='md'
         style={{
           marginTop: 'auto',
           marginBottom: 'auto',
+          borderRadius: 5,
         }}
       >
-        <Box display='flex' height='175' paddingX={10} paddingY={5}>
-          <Text textAlign='center' fontSize='lg' bold marginBottom={1}>
-            Are you sure you want to log out?
-          </Text>
-          <Text textAlign='center' marginBottom={5}>
-            When logged out you will not have access to saved content when
-            offline.
-          </Text>
-          <HStack justifyContent='center'>
-            <Button
-              marginRight={2}
-              borderWidth={1}
-              flexGrow={1}
-              backgroundColor='transparent'
-              borderColor='error'
-              color='error'
-              onPress={() => setLogoutModalOpen(false)}
-            >
-              <Text color='error'>Cancel</Text>
-            </Button>
-            <Button
-              background='primary'
-              onPress={() => {
-                // clear cache on sign out to ensure no data from previous user is cached
-                persistor.purge()
-                dispatch(resetTrapVisitFormPostBundler())
-                dispatch(resetVisitSetupDefaultSlice())
+        <ConfirmationModalContent
+          modalHeader=' Are you sure you want to log out?'
+          modalText='When logged out you will not have access to saved content when offline.'
+          handlePressCancel={() => setLogoutModalOpen(false)}
+          handlePressConfirm={() => {
+            // clear cache on sign out to ensure no data from previous user is cached
+            persistor.purge()
+            dispatch(resetTrapVisitFormPostBundler())
+            dispatch(resetVisitSetupDefaultSlice())
 
-                setLogoutModalOpen(false)
-                dispatch(clearUserCredentials())
-                // reset navigation
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'Home' }],
-                })
-              }}
-              flexGrow={1}
-              marginLeft={3}
-            >
-              Confirm
-            </Button>
-          </HStack>
-        </Box>
+            setLogoutModalOpen(false)
+            dispatch(clearUserCredentials())
+            // reset navigation
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Home' }],
+            })
+          }}
+        />
       </CustomModal>
 
       {/* Add New User Modal */}
