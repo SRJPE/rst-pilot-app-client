@@ -1,5 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useIsFocused } from '@react-navigation/native'
 import {
   Box,
   Button,
@@ -53,6 +53,8 @@ import { calculateLastFish, checkFishMeasureProtocol } from '@/src/utils/utils'
 import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
 import MeasureMetPlusCount from '@/src/components/form/MeasureMetPlusCount'
 import MultiSpeciesBatchChart from '@/src/components/form/batchCount/MultiSpeciesBatchChart'
+import { findLengthAtDateRun } from '../../utils/helpers/helperFunctions'
+import { set } from 'lodash'
 
 const MultiSpecies = ({
   route,
@@ -71,7 +73,9 @@ const MultiSpecies = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
-  const [firstButton, setFirstButton] = useState(0 as number)
+  const [firstButton, setFirstButton] = useState<number>(0)
+  const [tabIndex, setTabIndex] = React.useState<number>(0)
+
   const [numberOfAdditionalButtons, setNumberOfAdditionalButtons] = useState(
     0 as number
   )
@@ -79,6 +83,10 @@ const MultiSpecies = ({
   const [showTable, setShowTable] = useState(false as boolean)
   const [lifeStageRadioValue, setLifeStageRadioValue] = useState('' as string)
   const [speciesRadioValue, setSpeciesRadioValue] = useState<string>('')
+  console.log(
+    '🚀 ~ MultiSpecies.tsx:87 ~ speciesRadioValue:',
+    speciesRadioValue
+  )
 
   const [multiSpeciesModalOpen, setMultiSpeciesModalOpen] = useState(
     true as boolean
@@ -101,10 +109,76 @@ const MultiSpecies = ({
   const [fishMeasureMetModalOpen, setFishMeasureMetModalOpen] = useState(
     false as boolean
   )
+  const [showAddPlusCountButton, setShowAddPlusCountButton] =
+    useState<boolean>(false)
   const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
+  const [protocolKeyMetRun, setProtocolKeyMetRun] = useState('' as string)
+  const [protocolKeyMetLifeStage, setProtocolKeyMetLifeStage] = useState(
+    '' as string
+  )
+
+  const [lengthAtDateModel, setLengthAtDateModel] = useState([] as number[])
+  const [programLADModelName, setProgramLADModelName] = useState<string | null>(
+    null
+  )
+  const [ladObject, setLadObject] = useState<any>(null)
+
+  const isFocused = useIsFocused()
 
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
   const { multiSpecies, fishConditions, existingMarks } = batchCharacteristics
+
+  useEffect(() => {
+    if (!isFocused) {
+      console.log('🧹 Screen blurred — clearing form')
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      setProtocolKeyMetRun('')
+      setProtocolKeyMetLifeStage('')
+      setSpeciesRadioValue('')
+      setLifeStageRadioValue('')
+    }
+  }, [isFocused])
+
+  useEffect(() => {
+    console.log(
+      '🚀 ~ MultiSpecies.tsx:143 ~ useEffect ~  batchCountStore.batchCharacteristics?.multiSpecies?.[0]:',
+      batchCountStore.batchCharacteristics?.multiSpecies
+    )
+    const defaultSpeciesRadioValue =
+      batchCountStore.batchCharacteristics?.multiSpecies?.[0]
+
+    setSpeciesRadioValue(defaultSpeciesRadioValue || '')
+  }, [batchCountStore.batchCharacteristics?.multiSpecies[0]])
+
+  useEffect(() => {
+    setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
+  }, [dropdownsStore.values])
+
+  useEffect(() => {
+    const selectedProgramObj = route?.params?.selectedProgramObj
+    const programLadModelName = selectedProgramObj?.ladModel
+      ? selectedProgramObj?.ladModel.toLowerCase()
+      : null
+    setProgramLADModelName(programLadModelName)
+    if (programLadModelName === 'river') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
+    } else if (programLadModelName === 'delta') {
+      setLengthAtDateModel(dropdownsStore.values.lengthAtDateDelta)
+    }
+  }, [dropdownsStore.values])
+
+  useEffect(() => {
+    if (lengthAtDateModel && tabSlice.activeTabId) {
+      const ladObjectForTrapDate = findLengthAtDateRun(
+        lengthAtDateModel,
+        trapOperationsStore?.[tabSlice.activeTabId]?.values?.trapVisitStopTime
+      )
+      setLadObject(ladObjectForTrapDate)
+    } else {
+      setLadObject(null)
+    }
+  }, [lengthAtDateModel, tabSlice.activeTabId])
 
   const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())
@@ -114,7 +188,7 @@ const MultiSpecies = ({
     if (tabId) {
       dispatch(saveBatchCount({ ...batchCountStore }))
       dispatch(resetBatchCountSlice())
-      showSlideAlert(dispatch, 'Batch Count Saved')
+      showSlideAlert(dispatch, 'Multi Species Batch Count Saved')
       // @ts-ignore
       navigation.navigate('Trap Visit Form', {
         screen: 'Fish Input',
@@ -181,7 +255,7 @@ const MultiSpecies = ({
   }
 
   useEffect(() => {
-    if (currentRoute?.name !== 'Batch Count') {
+    if (currentRoute?.name !== 'Multi Species') {
       setFishMeasureMetModalOpen(false)
       setProtocolKeyMet(null)
       return
@@ -203,7 +277,7 @@ const MultiSpecies = ({
           forkLength: flObj.forkLength,
           run: flObj?.runDefinition,
           lifeStage: flObj?.lifeStage?.toLowerCase(),
-          species: batchCountStore?.batchCharacteristics?.species,
+          species: flObj?.species,
           numFishCaught: 1,
         }
       }
@@ -243,10 +317,31 @@ const MultiSpecies = ({
       runValue: '' as string,
       lifeStageValue: '' as string,
     })
+    console.log(
+      `🚀 ~ MultiSpecies.tsx:248 ~ useEffect ~ fishMeasureProtocol:`,
+      route.params?.fishMeasureProtocol
+    )
+    console.log(
+      `🚀 ~ MultiSpecies.tsx:248 ~ useEffect ~ route.params?.fishMeasureProtocol: ${speciesRadioValue}`,
+      route.params?.fishMeasureProtocol[speciesRadioValue]
+    )
+
+    console.log(
+      '🚀 ~ MultiSpecies.tsx:202 ~ useEffect ~ protocolResult:',
+      protocolResult
+    )
+    console.log(
+      '🚀 ~ MultiSpecies.tsx:202 ~ useEffect ~ combinedFishStoreObj:',
+      combinedFishStoreObj
+    )
+
+    console.log('speciesRadioValue', speciesRadioValue)
 
     if (protocolResult && protocolResult.protocolMet) {
+      setShowAddPlusCountButton(true)
       setFishMeasureMetModalOpen(true)
     } else {
+      setShowAddPlusCountButton(false)
       setFishMeasureMetModalOpen(false)
     }
 
@@ -269,6 +364,8 @@ const MultiSpecies = ({
 
   const navState = navigation?.getState()
   const currentRoute = navState?.routes[navState?.index]
+  const currentSpeciesFishMeasureProtocol =
+    route.params?.fishMeasureProtocol[speciesRadioValue]
 
   return currentRoute?.name === 'Multi Species' ? (
     <>
@@ -283,6 +380,7 @@ const MultiSpecies = ({
           <Pressable onPress={Keyboard.dismiss}>
             <HStack space={10}>
               <CustomModalHeader
+                closeModal={() => dispatch(resetBatchCountSlice())}
                 headerText={
                   tabSlice.activeTabId
                     ? `Multi Species Entry - ${
@@ -290,6 +388,7 @@ const MultiSpecies = ({
                       }`
                     : 'Multi Species Entry'
                 }
+                showConfirmationModal={true}
                 showHeaderButton={true}
                 navigateBack={true}
                 headerButton={AddFishModalHeaderButton({
@@ -312,7 +411,7 @@ const MultiSpecies = ({
                 <Box mb={4}>
                   <FishEntriesSummary
                     lastFishEntry={{
-                      species: batchCountStore.batchCharacteristics.species,
+                      species: speciesRadioValue,
                       forkLength: calculateLastFish(
                         batchCountStore.forkLengths
                       ),
@@ -326,7 +425,12 @@ const MultiSpecies = ({
                 </Box>
               )}
 
-            <MultiSpeciesBatchChart />
+            <MultiSpeciesBatchChart
+              tabIndex={tabIndex}
+              setTabIndex={setTabIndex}
+              speciesRadioValue={speciesRadioValue}
+              setSpeciesRadioValue={setSpeciesRadioValue}
+            />
             <VStack space={3}>
               <>
                 <Box px='2%'>
@@ -523,38 +627,58 @@ const MultiSpecies = ({
                   </Box>
                 )}
 
-                <VStack alignItems='center' justifyContent='center'>
-                  <Heading size='sm' pb='2%'>
-                    {showTable
-                      ? 'Record count for each fork length: '
-                      : 'Select size range for fork length buttons: '}
-                  </Heading>
-                  <ForkLengthButtonGroup
-                    setFirstButton={setFirstButton}
-                    setLifeStageRadioValue={setLifeStageRadioValue}
-                    setNumberOfAdditionalButtons={setNumberOfAdditionalButtons}
-                    disabled={speciesRadioValue === ''}
-                  />
-                </VStack>
-                <BatchCountButtonGrid
-                  firstButton={firstButton}
-                  numberOfAdditionalButtons={numberOfAdditionalButtons}
-                  selectedLifeStage={lifeStageRadioValue}
-                  ignoreLifeStage={speciesRadioValue !== 'Chinook salmon'}
-                  deadToggle={deadToggle}
-                  markToggle={markToggle}
-                  fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
-                    .map((toggle, index) =>
-                      toggle ? fishConditions[index] : null
-                    )
-                    .filter(condition => condition !== null)}
-                  handleToggles={handleToggles}
-                  trapOperationsStore={trapOperationsStore}
-                  dropdownsStore={dropdownsStore}
-                  activeTabId={tabSlice.activeTabId}
-                  species={speciesRadioValue}
-                  selectedProgramObj={route?.params?.selectedProgramObj}
-                />
+                {showAddPlusCountButton ? (
+                  <>
+                    <Divider mb='1%' />
+
+                    <Button
+                      leftIcon={<Icon as={FontAwesome} name={'plus'} />}
+                      background='primary'
+                      mr='auto'
+                      px={5}
+                      onPress={() => setFishMeasureMetModalOpen(true)}
+                    >
+                      <Text color='white' fontSize={18}>
+                        Add Plus Cunt
+                      </Text>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <VStack alignItems='center' justifyContent='center'>
+                      <Heading size='sm' pb='2%'>
+                        {showTable
+                          ? 'Record count for each fork length: '
+                          : 'Select size range for fork length buttons: '}
+                      </Heading>
+                      <ForkLengthButtonGroup
+                        setFirstButton={setFirstButton}
+                        setLifeStageRadioValue={setLifeStageRadioValue}
+                        setNumberOfAdditionalButtons={
+                          setNumberOfAdditionalButtons
+                        }
+                        disabled={speciesRadioValue === ''}
+                      />
+                    </VStack>
+                    <BatchCountButtonGrid
+                      firstButton={firstButton}
+                      numberOfAdditionalButtons={numberOfAdditionalButtons}
+                      selectedLifeStage={lifeStageRadioValue}
+                      ignoreLifeStage={speciesRadioValue !== 'Chinook salmon'}
+                      deadToggle={deadToggle}
+                      markToggle={markToggle}
+                      fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
+                        .map((toggle, index) =>
+                          toggle ? fishConditions[index] : null
+                        )
+                        .filter(condition => condition !== null)}
+                      handleToggles={handleToggles}
+                      activeTabId={tabSlice.activeTabId}
+                      species={speciesRadioValue}
+                      ladObject={ladObject}
+                    />
+                  </>
+                )}
                 {speciesRadioValue !== 'Chinook salmon' && (
                   <View mb='65'></View>
                 )}
@@ -635,7 +759,11 @@ const MultiSpecies = ({
             protocolKeyMet={protocolKeyMet}
             lifeStageValue={''}
             runValue={''}
-            onSaveCallback={handlePressSaveBatchCount}
+            //TODO: Originally the function being walled was saveBatchCount. The plus count should be added to the batch count but not closed out.
+            //? Does the plus count need to be editable after entry?
+            // onSaveCallback={handlePressSaveBatchCount}
+            onSaveCallback={closeFishMeasureMetModal}
+            dropdownValues={dropdownsStore.values}
           />
         </CustomModal>
       )}
