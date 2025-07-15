@@ -350,8 +350,6 @@ const IncompleteSections = ({
       },
     ] as Array<any>
 
-    console.log('values', values)
-
     def.forEach((field: string) => {
       if (values[field]) {
         if (formFieldsLookup[field].fieldType === 'dropdown') {
@@ -383,7 +381,7 @@ const IncompleteSections = ({
         measureName: 'meanFNU',
         measureValueNumeric: meanFNU,
         measureValueText: meanFNU?.toString(),
-        measureUnit: null,
+        measureUnit: 38, //fnu
       })
     }
 
@@ -410,7 +408,6 @@ const IncompleteSections = ({
       )
     }
 
-    console.log('baseEnvValues', baseEnvValues)
     return baseEnvValues
   }
 
