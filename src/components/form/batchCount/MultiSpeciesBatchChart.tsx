@@ -26,6 +26,8 @@ import type { NavigationState, SceneRendererProps } from 'react-native-tab-view'
 import { SceneMap, TabView } from 'react-native-tab-view'
 import { batch, connect, useDispatch } from 'react-redux'
 import { Sign } from 'crypto'
+import { startLocationUpdatesAsync } from 'expo-location'
+import { border } from 'native-base/lib/typescript/theme/styled-system'
 
 type TabNavigationRoute = { key: string; title: string }
 type TabAcc = {
@@ -119,15 +121,15 @@ const MultiSpeciesBatchChart = ({
 
   function groupForkLengthsBySpecies(
     data: Record<string, any>
-  ): Record<string, number[]> {
-    const result: Record<string, number[]> = {}
+  ): Record<string, any[]> {
+    const result: Record<string, any[]> = {}
 
     Object.values(data).forEach((item: any) => {
       if (!item.species || typeof item.forkLength !== 'number') return
       if (!result[item.species]) {
         result[item.species] = []
       }
-      result[item.species].push(item.forkLength)
+      result[item.species].push(item)
     })
 
     return result
@@ -138,6 +140,34 @@ const MultiSpeciesBatchChart = ({
   )
 
   const groupedForkLengths = groupForkLengthsBySpecies(forkLengths)
+
+  const generateCellStyles = ({
+    dead,
+    existingMark,
+    fishConditions,
+  }: {
+    dead: boolean
+    existingMark: boolean
+    fishConditions: string[]
+  }) => {
+    let deadStyle = {}
+    let existingMarkStyle = {}
+    let fishConditionsStyle = {}
+
+    if (dead) {
+      deadStyle = {
+        borderWidth: 3,
+        borderRadius: '50%',
+        borderColor: 'red.500',
+        px: 3,
+      }
+    }
+    return {
+      ...deadStyle,
+      ...existingMarkStyle,
+      ...fishConditionsStyle,
+    }
+  }
 
   const renderScene = () => {
     const scenes = selectedSpecies.reduce<TabAcc>((acc, species, index) => {
@@ -170,37 +200,51 @@ const MultiSpeciesBatchChart = ({
           ))}
           {Array.from({
             length: groupedPreviouslyEnteredFish[activeSpeciesTab]?.length,
-          }).map((_, i) => (
-            <Box key={i} flex={1} flexBasis={'9.5%'} h={50}>
-              <Center borderWidth={1} h={'full'} w={'full'}>
-                <Text fontSize={18}>
-                  {groupedPreviouslyEnteredFish[activeSpeciesTab]?.at(i) || ''}
-                </Text>
-              </Center>
-            </Box>
-          ))}
+          }).map((_, i) => {
+            const cellData = groupedPreviouslyEnteredFish[activeSpeciesTab]?.at(
+              i
+            ) || {
+              dead: false,
+              existingMark: false,
+              fishConditions: [],
+            }
+            return (
+              <Box key={i} flex={1} flexBasis={'9.5%'} h={50}>
+                <Center borderWidth={1} h={'full'} w={'full'}>
+                  <Text fontSize={18} {...generateCellStyles(cellData)}>
+                    {groupedPreviouslyEnteredFish[activeSpeciesTab]?.at(i)
+                      ?.forkLength || ''}
+                  </Text>
+                </Center>
+              </Box>
+            )
+          })}
           {Array.from({
             length:
               50 -
               (groupedPreviouslyEnteredFish[activeSpeciesTab]?.length || 0),
-          }).map((_, i) => (
-            <Box key={i} flex={1} flexBasis={'9.5%'} h={50}>
-              <Center
-                borderWidth={1}
-                h={'full'}
-                w={'full'}
-                background={
-                  groupedForkLengths[activeSpeciesTab]?.at(i)
-                    ? 'green.50'
-                    : 'white'
-                }
-              >
-                <Text fontSize={18}>
-                  {groupedForkLengths[activeSpeciesTab]?.at(i) || ''}
-                </Text>
-              </Center>
-            </Box>
-          ))}
+          }).map((_, i) => {
+            const cellData = groupedForkLengths[activeSpeciesTab]?.at(i) || {
+              dead: false,
+              existingMark: false,
+              fishConditions: [],
+            }
+            return (
+              <Box key={i} flex={1} flexBasis={'9.5%'} h={50}>
+                <Center
+                  borderWidth={1}
+                  h={'full'}
+                  w={'full'}
+                  background={'white'}
+                >
+                  <Text fontSize={18} {...generateCellStyles(cellData)}>
+                    {groupedForkLengths[activeSpeciesTab]?.at(i)?.forkLength ||
+                      ''}
+                  </Text>
+                </Center>
+              </Box>
+            )
+          })}
           <HStack w='full' background='gray.200'>
             <Text fontSize={18} p={3} display='flex'>
               <Text bold>Species:</Text>
@@ -322,18 +366,14 @@ const MultiSpeciesBatchChart = ({
         />
         <HStack space={5} justifyContent='center' mb={3}>
           <HStack space={2}>
-            <Box h={5} w={10} borderWidth={1} borderRadius={5} />
-            <Text>Previous Entries</Text>
-          </HStack>
-          <HStack space={2}>
             <Box
               h={5}
-              w={10}
-              borderWidth={1}
-              borderRadius={5}
-              background='green.50'
+              w={8}
+              borderWidth={2}
+              borderRadius='50%'
+              borderColor='red.500'
             />
-            <Text>Current Batch</Text>
+            <Text>Dead</Text>
           </HStack>
         </HStack>
       </Center>
