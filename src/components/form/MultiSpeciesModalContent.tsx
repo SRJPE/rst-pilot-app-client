@@ -49,11 +49,6 @@ const MultiSpeciesModalContent = ({
   visitSetupState: any
   fishInputSlice: any
 }) => {
-  console.log(
-    '🚀 ~ MultiSpeciesModalContent.tsx:51 ~ batchCountStore:',
-    batchCountStore
-  )
-
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -65,17 +60,18 @@ const MultiSpeciesModalContent = ({
 
   const activeTabId = tabSlice.activeTabId
   const { batchCharacteristics, forkLengths } = batchCountStore
-
   const speciesInFishStore = useMemo(() => {
     if (!activeTabId) return []
     const species = Object.values(
       fishInputSlice[activeTabId]?.fishStore || {}
     ).map((fish: any) => fish.species)
 
-    const uniqueSpecies = Array.from(new Set(species))
+    const uniqueSpecies = Array.from(
+      new Set([...species, ...(batchCharacteristics?.multiSpecies || [])])
+    )
 
     return uniqueSpecies
-  }, [activeTabId, fishInputSlice])
+  }, [activeTabId, fishInputSlice, batchCharacteristics?.multiSpecies])
 
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
   const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
@@ -293,16 +289,25 @@ const MultiSpeciesModalContent = ({
                         batchCountStore.batchCharacteristics.existingMarks
                           .length > 0
                       }
+                      w={250}
                       onPress={() => {
                         setRecentExistingMarks([])
                         setAddMarkModalOpen(true)
                       }}
                     >
-                      <HStack alignItems='center'>
+                      <HStack
+                        alignItems='center'
+                        justifyContent='center'
+                        borderWidth={1}
+                        borderColor='primary'
+                        borderRadius={5}
+                        px={2}
+                        py={2}
+                      >
                         <Icon
                           as={Ionicons}
-                          name={'add-circle'}
-                          size='3xl'
+                          name={'add'}
+                          size='lg'
                           color='primary'
                           marginRight='1'
                         />
@@ -315,7 +320,8 @@ const MultiSpeciesModalContent = ({
                 </VStack>
                 <Button
                   bg='primary'
-                  mx='2'
+                  mt={300}
+                  my='5'
                   px='10'
                   shadow='3'
                   isDisabled={
