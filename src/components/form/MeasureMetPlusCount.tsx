@@ -20,6 +20,7 @@ import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
+import { addPlusCountToBatchStore } from '../../redux/reducers/formSlices/batchCountSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -29,6 +30,7 @@ const mapStateToProps = (state: RootState) => {
 
 const MeasureMetPlusCount = ({
   species,
+  mode = 'default',
   closeModal,
   activeTabId,
   onSaveCallback,
@@ -38,6 +40,7 @@ const MeasureMetPlusCount = ({
   dropdownValues,
 }: {
   species: any
+  mode?: 'default' | 'multiSpecies'
   closeModal: any
   activeTabId: string
   onSaveCallback?: () => void
@@ -63,19 +66,28 @@ const MeasureMetPlusCount = ({
       if (activeTabId) {
         const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
         const taxonCode = findTaxonCode(species.value, reorderedTaxon)
-        dispatch(
-          savePlusCount({
-            tabId: activeTabId,
-            existingMarks: [],
-            count: plusCount,
-            dead: false,
-            lifeStage: submittedLifeStage,
-            plusCountMethod: 'none',
-            run: submittedRun,
-            species: species.value,
-            taxonCode,
-          })
-        )
+        const plusCountData = {
+          tabId: activeTabId,
+          existingMarks: [],
+          count: plusCount,
+          dead: false,
+          lifeStage: submittedLifeStage,
+          plusCountMethod: 'none',
+          run: submittedRun,
+          species: species.value,
+          taxonCode,
+        }
+
+        switch (mode) {
+          case 'multiSpecies':
+            dispatch(addPlusCountToBatchStore(plusCountData))
+            break
+          case 'default':
+          default:
+            dispatch(savePlusCount(plusCountData))
+            break
+        }
+
         closeModal()
         if (onSaveCallback) {
           onSaveCallback() // Reset species after submission

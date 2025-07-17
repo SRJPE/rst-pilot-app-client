@@ -45,11 +45,17 @@ import {
 import {
   saveBatchCount,
   getFishMeasureCounts,
+  savePlusCount,
 } from '@/src/redux/reducers/formSlices/fishInputSlice'
 import { TabStateI } from '@/src/redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '@/src/redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '@/src/redux/store'
-import { calculateLastFish, checkFishMeasureProtocol } from '@/src/utils/utils'
+import {
+  calculateLastFish,
+  checkFishMeasureProtocol,
+  findTaxonCode,
+  reorderTaxon,
+} from '@/src/utils/utils'
 import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
 import MeasureMetPlusCount from '@/src/components/form/MeasureMetPlusCount'
 import MultiSpeciesBatchChart from '@/src/components/form/batchCount/MultiSpeciesBatchChart'
@@ -83,10 +89,6 @@ const MultiSpecies = ({
   const [showTable, setShowTable] = useState(false as boolean)
   const [lifeStageRadioValue, setLifeStageRadioValue] = useState('' as string)
   const [speciesRadioValue, setSpeciesRadioValue] = useState<string>('')
-  console.log(
-    '🚀 ~ MultiSpecies.tsx:87 ~ speciesRadioValue:',
-    speciesRadioValue
-  )
 
   const [multiSpeciesModalOpen, setMultiSpeciesModalOpen] = useState(
     true as boolean
@@ -125,6 +127,8 @@ const MultiSpecies = ({
 
   const isFocused = useIsFocused()
 
+  const reorderedTaxon = reorderTaxon(dropdownsStore.values.taxon)
+
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
   const { multiSpecies, fishConditions, existingMarks } = batchCharacteristics
 
@@ -141,10 +145,6 @@ const MultiSpecies = ({
   }, [isFocused])
 
   useEffect(() => {
-    console.log(
-      '🚀 ~ MultiSpecies.tsx:143 ~ useEffect ~  batchCountStore.batchCharacteristics?.multiSpecies?.[0]:',
-      batchCountStore.batchCharacteristics?.multiSpecies
-    )
     const defaultSpeciesRadioValue =
       batchCountStore.batchCharacteristics?.multiSpecies?.[0]
 
@@ -186,9 +186,45 @@ const MultiSpecies = ({
 
   const handlePressSaveBatchCount = () => {
     if (tabId) {
-      dispatch(saveBatchCount({ ...batchCountStore }))
+      // dispatch(saveBatchCount({ ...batchCountStore }))
+      const forkLengthsArray = Object.values(batchCountStore.forkLengths)
+
+      const groupedForkLengths = {
+        individualFish: forkLengthsArray.filter(
+          (flObj: any) => flObj.forkLength && !flObj.plusCount
+        ),
+        plusCounts: forkLengthsArray.filter(
+          (flObj: any) => flObj.numFishCaught && flObj.plusCount
+        ),
+      }
+
+      const formattedForkLengths = groupedForkLengths.individualFish.reduce<
+        Record<any, unknown>
+      >((acc, item, idx) => {
+        acc[idx] = item
+
+        return acc
+      }, {} as Record<number, string>)
+
+      const batchCountData = {
+        tabId,
+        batchCharacteristics,
+        forkLengths: formattedForkLengths,
+      }
+
+      const plusCountData = groupedForkLengths.plusCounts
+
+      dispatch(saveBatchCount(batchCountData))
+
+      if (plusCountData.length > 0) {
+        plusCountData.forEach((plusCountObj: any) => {
+          dispatch(savePlusCount(plusCountObj))
+        })
+      }
+
       dispatch(resetBatchCountSlice())
       showSlideAlert(dispatch, 'Multi Species Batch Count Saved')
+
       // @ts-ignore
       navigation.navigate('Trap Visit Form', {
         screen: 'Fish Input',
@@ -269,8 +305,10 @@ const MultiSpecies = ({
     if (multiSpeciesModalOpen) {
       setFishMeasureMetModalOpen(false)
       setProtocolKeyMet(null)
+
       return
     }
+
     const batchCountFishStore = Object.values(batchCountStore?.forkLengths).map(
       (flObj: any) => {
         return {
@@ -278,7 +316,8 @@ const MultiSpecies = ({
           run: flObj?.runDefinition,
           lifeStage: flObj?.lifeStage?.toLowerCase(),
           species: flObj?.species,
-          numFishCaught: 1,
+          numFishCaught: flObj?.numFishCaught || 1,
+          plusCount: flObj?.plusCount || false,
         }
       }
     )
@@ -298,6 +337,7 @@ const MultiSpecies = ({
 
     const combinedFishMeasureCountsObj =
       getFishMeasureCounts(combinedFishStoreObj)
+
     setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
 
     if (!combinedFishStoreObj) return
@@ -310,6 +350,22 @@ const MultiSpecies = ({
 
     setTotalCatchCount(total)
 
+    const checkPlusCountExists = (
+      fishObjectArray: Array<Record<string, any>>,
+      species: string
+    ) => {
+      const currentSpeciesFishCounts = fishObjectArray.filter(
+        fishObj => fishObj.species === species && fishObj.plusCount
+      )
+
+      return currentSpeciesFishCounts.length > 0
+    }
+
+    const plusCountExists = checkPlusCountExists(
+      batchCountFishStore,
+      speciesRadioValue
+    )
+
     const protocolResult = checkFishMeasureProtocol({
       fishMeasureCounts: combinedFishMeasureCountsObj,
       fishMeasureProtocol: route.params?.fishMeasureProtocol,
@@ -317,29 +373,11 @@ const MultiSpecies = ({
       runValue: '' as string,
       lifeStageValue: '' as string,
     })
-    console.log(
-      `🚀 ~ MultiSpecies.tsx:248 ~ useEffect ~ fishMeasureProtocol:`,
-      route.params?.fishMeasureProtocol
-    )
-    console.log(
-      `🚀 ~ MultiSpecies.tsx:248 ~ useEffect ~ route.params?.fishMeasureProtocol: ${speciesRadioValue}`,
-      route.params?.fishMeasureProtocol[speciesRadioValue]
-    )
-
-    console.log(
-      '🚀 ~ MultiSpecies.tsx:202 ~ useEffect ~ protocolResult:',
-      protocolResult
-    )
-    console.log(
-      '🚀 ~ MultiSpecies.tsx:202 ~ useEffect ~ combinedFishStoreObj:',
-      combinedFishStoreObj
-    )
-
-    console.log('speciesRadioValue', speciesRadioValue)
 
     if (protocolResult && protocolResult.protocolMet) {
       setShowAddPlusCountButton(true)
-      setFishMeasureMetModalOpen(true)
+
+      !plusCountExists && setFishMeasureMetModalOpen(true)
     } else {
       setShowAddPlusCountButton(false)
       setFishMeasureMetModalOpen(false)
@@ -376,7 +414,7 @@ const MultiSpecies = ({
         borderWidth='10'
         borderColor='themeGrey'
       >
-        <View style={{ paddingBottom: 100 }}>
+        <View style={{ paddingBottom: 50 }}>
           <Pressable onPress={Keyboard.dismiss}>
             <HStack space={10}>
               <CustomModalHeader
@@ -639,7 +677,7 @@ const MultiSpecies = ({
                       onPress={() => setFishMeasureMetModalOpen(true)}
                     >
                       <Text color='white' fontSize={18}>
-                        Add Plus Cunt
+                        Add Plus Count
                       </Text>
                     </Button>
                   </>
@@ -675,6 +713,10 @@ const MultiSpecies = ({
                       handleToggles={handleToggles}
                       activeTabId={tabSlice.activeTabId}
                       species={speciesRadioValue}
+                      taxonCode={findTaxonCode(
+                        speciesRadioValue,
+                        reorderedTaxon
+                      )}
                       ladObject={ladObject}
                     />
                   </>
@@ -753,6 +795,7 @@ const MultiSpecies = ({
           width={'80%'}
         >
           <MeasureMetPlusCount
+            mode={'multiSpecies'}
             species={{ value: speciesRadioValue }}
             closeModal={closeFishMeasureMetModal}
             activeTabId={tabSlice.activeTabId}
@@ -761,9 +804,9 @@ const MultiSpecies = ({
             runValue={''}
             //TODO: Originally the function being walled was saveBatchCount. The plus count should be added to the batch count but not closed out.
             //? Does the plus count need to be editable after entry?
-            // onSaveCallback={handlePressSaveBatchCount}
             onSaveCallback={closeFishMeasureMetModal}
             dropdownValues={dropdownsStore.values}
+            multiSpecies={true}
           />
         </CustomModal>
       )}
