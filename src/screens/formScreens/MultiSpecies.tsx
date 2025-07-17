@@ -468,6 +468,7 @@ const MultiSpecies = ({
               setTabIndex={setTabIndex}
               speciesRadioValue={speciesRadioValue}
               setSpeciesRadioValue={setSpeciesRadioValue}
+              fishMeasureCounts={combinedFishMeasureCounts}
             />
             <VStack space={3}>
               <>

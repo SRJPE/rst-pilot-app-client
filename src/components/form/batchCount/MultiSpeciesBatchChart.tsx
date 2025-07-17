@@ -46,6 +46,7 @@ const MultiSpeciesBatchChart = ({
   tabIndex,
   setTabIndex,
   fishInputSlice,
+  fishMeasureCounts = {}, // Default to empty object if not provided
 }: {
   tabIndex: number
   setTabIndex: (index: number) => void
@@ -54,12 +55,8 @@ const MultiSpeciesBatchChart = ({
   batchCountStore: batchCountI
   tabSlice: TabStateI
   fishInputSlice: InitialStateI
+  fishMeasureCounts?: Record<string, any>
 }) => {
-  console.log(
-    '🚀 ~ MultiSpeciesBatchChart.tsx:55 ~ batchCountStore:',
-    batchCountStore
-  )
-
   const activeTabId = tabSlice?.activeTabId || 'placeholderId'
 
   const previouslyEnteredFish = useMemo(() => {
@@ -87,25 +84,29 @@ const MultiSpeciesBatchChart = ({
       }, [])
   }, [fishInputSlice, activeTabId, speciesRadioValue, tabIndex])
 
-  // const fishMeasureCounts = fishInputSlice[activeTabId]?.fishMeasureCounts || {}
   const currentSpeciesPlusCount = useMemo(() => {
     const plusCountValues = Object.values(
       batchCountStore.forkLengths || []
     ).filter(fish => fish.species === speciesRadioValue && fish.plusCount)
 
-    const plusCountTotal = plusCountValues.reduce(
+    const existingPlusCountTotal =
+      fishMeasureCounts[speciesRadioValue]?.plusCount || 0
+    console.log(
+      '🚀 ~ MultiSpeciesBatchChart.tsx:107 ~ currentSpeciesPlusCount ~ existingPlusCountTotal:',
+      existingPlusCountTotal
+    )
+
+    const currentPlusCountTotal = plusCountValues.reduce(
       (acc, fish) => acc + (fish.numFishCaught || 0),
       0
     )
-    if (plusCountTotal > 0) return plusCountTotal
+
+    if (currentPlusCountTotal + existingPlusCountTotal > 0) {
+      return `${existingPlusCountTotal}`
+    }
 
     return 'Not Entered Yet'
   }, [batchCountStore.forkLengths, speciesRadioValue])
-
-  console.log(
-    `BatchChart.tsx:77 ~ currentSpeciesPlusCount: ${speciesRadioValue}`,
-    currentSpeciesPlusCount
-  )
 
   const [routes, setRoutes] = useState<Array<TabNavigationRoute>>([])
 
