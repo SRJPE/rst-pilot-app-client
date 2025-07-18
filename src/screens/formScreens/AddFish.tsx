@@ -1426,20 +1426,18 @@ const AddFishContent = ({
                             <Text color='primary'>Tag Fish</Text>
                           </Button>
                         )}
-                        {species.value === 'Chinook salmon' && (
-                          <Button
-                            bg='secondary'
-                            color='#007C7C'
-                            py='1'
-                            px='12'
-                            shadow='3'
-                            borderRadius='5'
-                            maxWidth='40%'
-                            onPress={() => setAddGeneticModalOpen(true)}
-                          >
-                            <Text color='primary'>Take Genetic Sample</Text>
-                          </Button>
-                        )}
+                        <Button
+                          bg='secondary'
+                          color='#007C7C'
+                          py='1'
+                          px='12'
+                          shadow='3'
+                          borderRadius='5'
+                          maxWidth='40%'
+                          onPress={() => setAddGeneticModalOpen(true)}
+                        >
+                          <Text color='primary'>Take Genetic Sample</Text>
+                        </Button>
                       </HStack>
                     )}
                     {Array.isArray(appliedMarks?.value) &&
@@ -1632,6 +1630,8 @@ const AddFishContent = ({
             <AddGeneticsModalContent
               handleGeneticSampleFormSubmit={handleGeneticSamplesFormSubmit}
               closeModal={() => setAddGeneticModalOpen(false)}
+              species={species}
+              reorderedTaxon={reorderedTaxon}
             />
           </CustomModal>
         )}

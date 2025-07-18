@@ -8,7 +8,6 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import React from 'react'
 import { Alert, Linking } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -17,26 +16,82 @@ import { addGeneticsSampleSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 import FormInputComponent from '../Shared/FormInputComponent'
-
-const initialFormValues = {
-  sampleId: '',
-  mucusSwab: false,
-  finClip: false,
-  crewMember: '',
-  comments: '',
-}
+import { formatGeneticsSampleId } from '../../utils/utils'
+import { useEffect, useState } from 'react'
 
 const AddGeneticsModalContent = ({
   handleGeneticSampleFormSubmit,
   closeModal,
   crewMembers,
+  previousGeneticSamples,
+  species,
+  reorderedTaxon,
+  fishStore,
 }: {
   handleGeneticSampleFormSubmit: any
   closeModal: any
   crewMembers: Array<any>
+  previousGeneticSamples: Array<any>
+  species: any
+  reorderedTaxon: any
+  fishStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const connectivityState = useSelector((state: any) => state.connectivity)
+
+  const [defaultSampleIDNumber, setDefaultSampleIDNumber] = useState(
+    '' as string
+  )
+  const [initialFormValues, setInitialFormValues] = useState({
+    sampleId: '',
+    mucusSwab: false,
+    finClip: false,
+    crewMember: '',
+    comments: '',
+  })
+
+  useEffect(() => {
+    console.log('previousGeneticSamples', previousGeneticSamples)
+    console.log('current,', fishStore)
+
+    const fishStoreGeneticSamples = [] as any[]
+    if (fishStore && Object.keys(fishStore).length > 0) {
+      Object.keys(fishStore).forEach(key => {
+        const fishData = fishStore[key]
+        console.log('fishData', fishData)
+        if (
+          fishData &&
+          fishData.geneticSamples &&
+          fishData.geneticSamples.length > 0
+        ) {
+          fishStoreGeneticSamples.push(...fishData.geneticSamples)
+        }
+      })
+    }
+
+    const combinedGeneticSamples = [
+      ...previousGeneticSamples,
+      ...fishStoreGeneticSamples,
+    ]
+
+    console.log('CGS', combinedGeneticSamples)
+
+    if (combinedGeneticSamples.length > 0 && species.value) {
+      const defaultSampleIDNumber = formatGeneticsSampleId({
+        programName: 'yolo',
+        geneticSamplesArray: combinedGeneticSamples,
+        species: species.value,
+        taxonArray: reorderedTaxon,
+      })
+      console.log('🚀 ~ defaultSampleIDNumber', defaultSampleIDNumber)
+      if (defaultSampleIDNumber) {
+        setInitialFormValues({
+          ...initialFormValues,
+          sampleId: defaultSampleIDNumber,
+        })
+      }
+    }
+  }, [previousGeneticSamples, species])
 
   const handleFormSubmit = (values: any) => {
     handleGeneticSampleFormSubmit(values)
@@ -56,6 +111,7 @@ const AddGeneticsModalContent = ({
       <Formik
         validationSchema={addGeneticsSampleSchema}
         initialValues={initialFormValues}
+        enableReinitialize={true}
         onSubmit={values => {
           console.log('🚀 ~  Genetic Sample values', values)
           handleFormSubmit(values)
@@ -205,8 +261,13 @@ const AddGeneticsModalContent = ({
                       errors={errors}
                       selectedValue={values.crewMember}
                       placeholder={'Select Crew Member'}
-                      onValueChange={handleChange('crewMember')}
-                      setFieldTouched={() => setFieldTouched('crewMember')}
+                      // onValueChange={handleChange('crewMember')}
+                      onValueChange={(itemValue: string) => {
+                        setFieldValue('crewMember', itemValue).then(() => {
+                          setFieldTouched('crewMember', true)
+                        })
+                      }}
+                      // setFieldTouched={() => setFieldTouched('crewMember')}
                       selectOptions={
                         crewMembers.length
                           ? crewMembers.map((item: any) => ({
@@ -272,11 +333,30 @@ const AddGeneticsModalContent = ({
   )
 }
 const mapStateToProps = (state: RootState) => {
-  const activeTabId = state.tabSlice.activeTabId
+  const activeTabId = state.tabSlice.activeTabId || 'placeholderId'
+  let filteredResponses = [] as any[]
+
+  if (activeTabId) {
+    const programId = state.visitSetup[activeTabId].values.programId
+    const responses = [] as any[]
+
+    state.trapVisitFormPostBundler.previousCatchRawSubmissions.forEach(
+      (item: any) => {
+        if (item?.createdGeneticSamplingDataResponse) {
+          responses.push(...item?.createdGeneticSamplingDataResponse)
+        }
+      }
+    )
+    filteredResponses = responses.filter((response: any) => {
+      return response?.programId === programId
+    })
+  }
+
   return {
-    crewMembers: activeTabId
-      ? state.visitSetup[activeTabId].values.crew
-      : state.visitSetup['placeholderId'].values.crew,
+    crewMembers: state.visitSetup?.[activeTabId]?.values.crew,
+    previousGeneticSamples: filteredResponses,
+    addGeneticSamples: state.addGeneticSamples,
+    fishStore: state.fishInput?.[activeTabId]?.fishStore,
   }
 }
 

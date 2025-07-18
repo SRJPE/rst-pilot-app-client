@@ -1079,3 +1079,70 @@ export const shouldRenderField = ({
 
   return false
 }
+
+const getNextSampleSuffix = (
+  arr: { sampleId?: string }[],
+  taxonAbbreviation: string
+) => {
+  const filtered = arr.filter(item =>
+    (item.sampleId ?? '').includes(taxonAbbreviation)
+  )
+
+  if (filtered.length === 0) {
+    return '001' // No existing samples for this taxon, start from 001
+  }
+
+  const currentHighestSampleSuffix = filtered.reduce((max, curr) => {
+    const getSuffix = (sampleId: string | undefined) =>
+      parseInt((sampleId ?? '').split('_').pop() ?? '', 10)
+
+    return getSuffix(curr.sampleId) > getSuffix(max.sampleId) ? curr : max
+  })
+
+  const test = (currentHighestSampleSuffix.sampleId ?? '').split('_').pop()
+  const nextSampleSuffixNumber = test ? parseInt(test, 10) + 1 : 1
+
+  // Pad with leading zeros to at least 3 digits
+  const nextSampleSuffix = nextSampleSuffixNumber.toString().padStart(3, '0')
+
+  return nextSampleSuffix
+}
+
+export const formatGeneticsSampleId = ({
+  programName,
+  species,
+  geneticSamplesArray,
+  taxonArray = [],
+}: {
+  programName: string
+  species: string
+  geneticSamplesArray: any[]
+  taxonArray?: any[]
+}) => {
+  let sampleId = ''
+
+  if (programName.toLowerCase().includes('yolo')) {
+    const currentYear = new Date().getFullYear()
+
+    if (species.toLowerCase().includes('chinook')) {
+    } else {
+      const taxonObj = taxonArray.find(
+        (item: any) => item.commonname === species
+      )
+      const taxonAbbreviation = taxonObj?.abbreviationCode
+      console.log('taxonAbbreviation', taxonAbbreviation)
+
+      if (!taxonAbbreviation) {
+        return sampleId
+      }
+
+      const sampleIdSuffix = getNextSampleSuffix(
+        geneticSamplesArray,
+        taxonAbbreviation
+      )
+      console.log('sampleIdSuffix', sampleIdSuffix)
+      sampleId = `${currentYear}_${taxonAbbreviation}_${sampleIdSuffix}`
+    }
+    return sampleId
+  }
+}
