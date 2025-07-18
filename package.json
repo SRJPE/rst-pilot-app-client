@@ -81,6 +81,7 @@
     "react-native-dotenv": "^3.4.8",
     "react-native-dropdown-picker": "^5.4.2",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-mmkv": "^3.3.0",
     "react-native-pager-view": "6.7.1",
     "react-native-paper": "^5.14.0",
     "react-native-pdf": "^6.7.6",

@@ -7,7 +7,7 @@ export default ({ config }) => {
     slug: 'rst-pilot-app',
     owner: 'flowwest',
     runtimeVersion: {
-      policy: 'sdkVersion',
+      policy: '1.0.0',
     },
     ios: {
       bundleIdentifier: 'com.flowwest.datatackle',

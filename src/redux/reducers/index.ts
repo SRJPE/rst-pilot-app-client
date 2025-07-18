@@ -36,28 +36,29 @@ import monitoringProgramPostBundler from './postSlices/monitoringProgramPostBund
 import markRecaptureCacheSlice from './markRecaptureSlices/markRecaptureCache'
 import userAuthSlice from './userAuthSlice'
 import personnelSlice from './personnelSlice'
+import { reduxStorage } from './mmkvReduxStorage'
 
 const dropdownsPersistConfig = {
   key: 'dropdowns',
   version: 1,
-  storage: AsyncStorage,
+  storage: reduxStorage,
 }
 
 const visitSetupDefaultsPersistConfig = {
   key: 'visitSetupDefaults',
   version: 1,
-  storage: AsyncStorage,
+  storage: reduxStorage,
 }
 const markRecaptureCachePersistConfig = {
   key: 'markRecaptureCachePersistConfig',
   version: 1,
-  storage: AsyncStorage,
+  storage: reduxStorage,
 }
 
 const trapVisitPostPersistConfig = {
   key: 'trapVisitPostPersistConfig',
   version: 1,
-  storage: AsyncStorage,
+  storage: reduxStorage,
 }
 // SHOULD POSSIBLY USE SECURE STORE INSTEAD OF ASYNC STORAGE
 //import SecureStore from 'expo-secure-store'
@@ -105,18 +106,18 @@ export interface Options {
 const userCredentialsPersistConfig = {
   key: 'userCredentialsPersistConfig',
   version: 1,
-  storage: AsyncStorage,
+  storage: reduxStorage,
 }
 
 const markRecaptureFormPostPersistConfig = {
   key: 'markRecaptureFormPostPersistConfig',
   version: 1,
-  storage: AsyncStorage,
+  storage: reduxStorage,
 }
 const monitoringProgramPostPersistConfig = {
   key: 'monitoringProgramPostPersistConfig',
   version: 1,
-  storage: AsyncStorage,
+  storage: reduxStorage,
 }
 
 export default combineReducers({
