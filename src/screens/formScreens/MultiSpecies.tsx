@@ -1,5 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useIsFocused } from '@react-navigation/native'
 import {
   Box,
   Button,
@@ -10,7 +10,6 @@ import {
   Icon,
   IconButton,
   Pressable,
-  // Radio,
   ScrollView,
   Stack,
   Switch,
@@ -29,40 +28,41 @@ import { CircleIcon } from '@/components/ui/icon'
 import React, { useState, useEffect } from 'react'
 import { Keyboard } from 'react-native'
 import { batch, connect, useDispatch } from 'react-redux'
-import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
-import BatchCountButtonGrid from '../../components/form/batchCount/BatchCountButtonGrid'
-import BatchCountDataTable from '../../components/form/batchCount/BatchCountDataTable'
-import BatchCountHistogram from '../../components/form/batchCount/BatchCountHistogram'
-import BatchCountTableModal from '../../components/form/batchCount/BatchCountTableModal'
-import ForkLengthButtonGroup from '../../components/form/batchCount/ForkLengthButtonGroup'
-import CustomModal from '../../components/Shared/CustomModal'
+import BatchCountButtonGrid from '@/src/components/form/batchCount/BatchCountButtonGrid'
+import BatchCountDataTable from '@/src/components/form/batchCount/BatchCountDataTable'
+import BatchCountHistogram from '@/src/components/form/batchCount/BatchCountHistogram'
+import BatchCountTableModal from '@/src/components/form/batchCount/BatchCountTableModal'
+import ForkLengthButtonGroup from '@/src/components/form/batchCount/ForkLengthButtonGroup'
+import MultiSpeciesModalContent from '@/src/components/form/MultiSpeciesModalContent'
+import CustomModal from '@/src/components/Shared/CustomModal'
 import CustomModalHeader, {
   AddFishModalHeaderButton,
-} from '../../components/Shared/CustomModalHeader'
+} from '@/src/components/Shared/CustomModalHeader'
 import {
   removeLastForkLengthEntered,
   resetBatchCountSlice,
-} from '../../redux/reducers/formSlices/batchCountSlice'
+} from '@/src/redux/reducers/formSlices/batchCountSlice'
 import {
   saveBatchCount,
   getFishMeasureCounts,
-} from '../../redux/reducers/formSlices/fishInputSlice'
-import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { AppDispatch, RootState } from '../../redux/store'
+  savePlusCount,
+} from '@/src/redux/reducers/formSlices/fishInputSlice'
+import { TabStateI } from '@/src/redux/reducers/formSlices/tabSlice'
+import { showSlideAlert } from '@/src/redux/reducers/slideAlertSlice'
+import { AppDispatch, RootState } from '@/src/redux/store'
 import {
   calculateLastFish,
   checkFishMeasureProtocol,
-  calculateLifeStage,
-} from '../../utils/utils'
-import FishEntriesSummary from '../../components/form/FishEntriesSummary'
-import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
-import {
-  findLengthAtDateRun,
-  findRunDefinition,
-} from '../../utils/helpers/helperFunctions'
+  findTaxonCode,
+  reorderTaxon,
+} from '@/src/utils/utils'
+import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
+import MeasureMetPlusCount from '@/src/components/form/MeasureMetPlusCount'
+import MultiSpeciesBatchChart from '@/src/components/form/batchCount/MultiSpeciesBatchChart'
+import { findLengthAtDateRun } from '../../utils/helpers/helperFunctions'
+import { set } from 'lodash'
 
-const BatchCount = ({
+const MultiSpecies = ({
   route,
   tabSlice,
   batchCountStore,
@@ -79,16 +79,20 @@ const BatchCount = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
-  const [firstButton, setFirstButton] = useState(0 as number)
+  const [firstButton, setFirstButton] = useState<number>(0)
+  const [tabIndex, setTabIndex] = React.useState<number>(0)
+
   const [numberOfAdditionalButtons, setNumberOfAdditionalButtons] = useState(
     0 as number
   )
   const [showTableModal, setShowTableModal] = useState(false as boolean)
   const [showTable, setShowTable] = useState(false as boolean)
   const [lifeStageRadioValue, setLifeStageRadioValue] = useState('' as string)
+  const [speciesRadioValue, setSpeciesRadioValue] = useState<string>('')
 
-  const [batchCharacteristicsModalOpen, setBatchCharacteristicsModalOpen] =
-    useState(true as boolean)
+  const [multiSpeciesModalOpen, setMultiSpeciesModalOpen] = useState(
+    true as boolean
+  )
   const [modalInitialData, setModalInitialData] = useState({
     forkLength: '',
     count: '',
@@ -107,6 +111,8 @@ const BatchCount = ({
   const [fishMeasureMetModalOpen, setFishMeasureMetModalOpen] = useState(
     false as boolean
   )
+  const [showAddPlusCountButton, setShowAddPlusCountButton] =
+    useState<boolean>(false)
   const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
   const [protocolKeyMetRun, setProtocolKeyMetRun] = useState('' as string)
   const [protocolKeyMetLifeStage, setProtocolKeyMetLifeStage] = useState(
@@ -118,6 +124,32 @@ const BatchCount = ({
     null
   )
   const [ladObject, setLadObject] = useState<any>(null)
+
+  const isFocused = useIsFocused()
+
+  const reorderedTaxon = reorderTaxon(dropdownsStore.values.taxon)
+
+  const { tabId, batchCharacteristics, forkLengths } = batchCountStore
+  const { multiSpecies, fishConditions, existingMarks } = batchCharacteristics
+
+  useEffect(() => {
+    if (!isFocused) {
+      console.log('🧹 Screen blurred — clearing form')
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      setProtocolKeyMetRun('')
+      setProtocolKeyMetLifeStage('')
+      setSpeciesRadioValue('')
+      setLifeStageRadioValue('')
+    }
+  }, [isFocused])
+
+  useEffect(() => {
+    const defaultSpeciesRadioValue =
+      batchCountStore.batchCharacteristics?.multiSpecies?.[0]
+
+    setSpeciesRadioValue(defaultSpeciesRadioValue || '')
+  }, [batchCountStore.batchCharacteristics?.multiSpecies[0]])
 
   useEffect(() => {
     setLengthAtDateModel(dropdownsStore.values.lengthAtDateRiver)
@@ -148,45 +180,63 @@ const BatchCount = ({
     }
   }, [lengthAtDateModel, tabSlice.activeTabId])
 
-  const { tabId, batchCharacteristics, forkLengths } = batchCountStore
-  const { species, fishConditions, existingMarks, taxonCode } =
-    batchCharacteristics
-
   const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())
   }
 
   const handlePressSaveBatchCount = () => {
     if (tabId) {
-      dispatch(saveBatchCount({ ...batchCountStore }))
+      // dispatch(saveBatchCount({ ...batchCountStore }))
+      const forkLengthsArray = Object.values(batchCountStore.forkLengths)
+
+      const groupedForkLengths = {
+        individualFish: forkLengthsArray.filter(
+          (flObj: any) => flObj.forkLength && !flObj.plusCount
+        ),
+        plusCounts: forkLengthsArray.filter(
+          (flObj: any) => flObj.numFishCaught && flObj.plusCount
+        ),
+      }
+
+      const formattedForkLengths = groupedForkLengths.individualFish.reduce<
+        Record<any, unknown>
+      >((acc, item, idx) => {
+        acc[idx] = item
+
+        return acc
+      }, {} as Record<number, string>)
+
+      const batchCountData = {
+        tabId,
+        batchCharacteristics,
+        forkLengths: formattedForkLengths,
+      }
+
+      const plusCountData = groupedForkLengths.plusCounts
+
+      dispatch(saveBatchCount(batchCountData))
+
+      if (plusCountData.length > 0) {
+        plusCountData.forEach((plusCountObj: any) => {
+          dispatch(savePlusCount(plusCountObj))
+        })
+      }
+
       dispatch(resetBatchCountSlice())
-      showSlideAlert(dispatch, 'Batch Count Saved')
+      showSlideAlert(dispatch, 'Multi Species Batch Count Saved')
+
       // @ts-ignore
       navigation.navigate('Trap Visit Form', {
         screen: 'Fish Input',
       })
     }
   }
-  const handlePressSaveAndStartNewBatchCount = () => {
-    dispatch(saveBatchCount({ ...batchCountStore }))
-    dispatch(resetBatchCountSlice())
-
-    showSlideAlert(dispatch, 'Batch Count Saved')
-    setBatchCharacteristicsModalOpen(true)
-  }
 
   const buttonNav = () => {
     // @ts-ignore
     navigation.navigate('Trap Visit Form', {
       screen: 'Add Fish',
-      params: {
-        fishMeasureProtocol: route.params?.fishMeasureProtocol,
-        selectedProgramObj: route.params?.selectedProgramObj,
-      },
     })
-
-    dispatch(resetBatchCountSlice())
-    closeFishMeasureMetModal()
   }
   const handleShowTableModal = (selectedRowData: any) => {
     const modalDataContainer = {} as any
@@ -241,7 +291,7 @@ const BatchCount = ({
   }
 
   useEffect(() => {
-    if (currentRoute?.name !== 'Batch Count') {
+    if (currentRoute?.name !== 'Multi Species') {
       setFishMeasureMetModalOpen(false)
       setProtocolKeyMet(null)
       return
@@ -252,19 +302,22 @@ const BatchCount = ({
       return
     }
 
-    if (batchCharacteristicsModalOpen) {
+    if (multiSpeciesModalOpen) {
       setFishMeasureMetModalOpen(false)
       setProtocolKeyMet(null)
+
       return
     }
+
     const batchCountFishStore = Object.values(batchCountStore?.forkLengths).map(
       (flObj: any) => {
         return {
           forkLength: flObj.forkLength,
           run: flObj?.runDefinition,
           lifeStage: flObj?.lifeStage?.toLowerCase(),
-          species: batchCountStore?.batchCharacteristics?.species,
-          numFishCaught: 1,
+          species: flObj?.species,
+          numFishCaught: flObj?.numFishCaught || 1,
+          plusCount: flObj?.plusCount || false,
         }
       }
     )
@@ -284,6 +337,7 @@ const BatchCount = ({
 
     const combinedFishMeasureCountsObj =
       getFishMeasureCounts(combinedFishStoreObj)
+
     setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
 
     if (!combinedFishStoreObj) return
@@ -295,44 +349,49 @@ const BatchCount = ({
     )
 
     setTotalCatchCount(total)
-    const lastFishFL = calculateLastFish(batchCountStore.forkLengths)
 
-    let lastFishRunValue = ''
-    let lastFishLifeStageValue = ''
-    if (lastFishFL && species === 'Chinook salmon' && ladObject) {
-      const run = findRunDefinition(ladObject, lastFishFL)
-      lastFishRunValue = run || ''
-      const lifeStage = calculateLifeStage(Number(lastFishFL))
-      lastFishLifeStageValue = lifeStage || ''
+    const checkPlusCountExists = (
+      fishObjectArray: Array<Record<string, any>>,
+      species: string
+    ) => {
+      const currentSpeciesFishCounts = fishObjectArray.filter(
+        fishObj => fishObj.species === species && fishObj.plusCount
+      )
+
+      return currentSpeciesFishCounts.length > 0
     }
+
+    const plusCountExists = checkPlusCountExists(
+      batchCountFishStore,
+      speciesRadioValue
+    )
 
     const protocolResult = checkFishMeasureProtocol({
       fishMeasureCounts: combinedFishMeasureCountsObj,
       fishMeasureProtocol: route.params?.fishMeasureProtocol,
-      speciesValue: species as string,
-      runValue: lastFishRunValue,
-      lifeStageValue: lastFishLifeStageValue,
+      speciesValue: speciesRadioValue as string,
+      runValue: '' as string,
+      lifeStageValue: '' as string,
     })
 
     if (protocolResult && protocolResult.protocolMet) {
-      setFishMeasureMetModalOpen(true)
+      setShowAddPlusCountButton(true)
+
+      !plusCountExists && setFishMeasureMetModalOpen(true)
     } else {
+      setShowAddPlusCountButton(false)
       setFishMeasureMetModalOpen(false)
     }
 
     if (protocolResult && protocolResult.protocolKeyMet) {
       setProtocolKeyMet(protocolResult.protocolKeyMet)
-      setProtocolKeyMetRun(lastFishRunValue || '')
-      setProtocolKeyMetLifeStage(lastFishLifeStageValue || '')
     } else {
       setProtocolKeyMet(null)
-      setProtocolKeyMetRun('')
-      setProtocolKeyMetLifeStage('')
     }
   }, [
     tabSlice.activeTabId,
     fishInputSlice,
-    species,
+    speciesRadioValue,
     batchCountStore.forkLengths,
   ])
 
@@ -343,8 +402,10 @@ const BatchCount = ({
 
   const navState = navigation?.getState()
   const currentRoute = navState?.routes[navState?.index]
+  const currentSpeciesFishMeasureProtocol =
+    route.params?.fishMeasureProtocol[speciesRadioValue]
 
-  return currentRoute?.name === 'Batch Count' ? (
+  return currentRoute?.name === 'Multi Species' ? (
     <>
       <ScrollView
         scrollEnabled
@@ -353,23 +414,23 @@ const BatchCount = ({
         borderWidth='10'
         borderColor='themeGrey'
       >
-        <View style={{ paddingBottom: 100 }}>
+        <View style={{ paddingBottom: 50 }}>
           <Pressable onPress={Keyboard.dismiss}>
             <HStack space={10}>
               <CustomModalHeader
                 closeModal={() => dispatch(resetBatchCountSlice())}
                 headerText={
                   tabSlice.activeTabId
-                    ? `Add Batch Count - ${
+                    ? `Multi Species Entry - ${
                         tabSlice.tabs[tabSlice.activeTabId].name
                       }`
-                    : 'Add Batch Count'
+                    : 'Multi Species Entry'
                 }
-                showHeaderButton={true}
                 showConfirmationModal={true}
+                showHeaderButton={true}
                 navigateBack={true}
                 headerButton={AddFishModalHeaderButton({
-                  activeTab: 'Batch',
+                  activeTab: 'Multi Species',
                   buttonNav,
                 })}
               />
@@ -388,7 +449,7 @@ const BatchCount = ({
                 <Box mb={4}>
                   <FishEntriesSummary
                     lastFishEntry={{
-                      species: batchCountStore.batchCharacteristics.species,
+                      species: speciesRadioValue,
                       forkLength: calculateLastFish(
                         batchCountStore.forkLengths
                       ),
@@ -402,45 +463,53 @@ const BatchCount = ({
                 </Box>
               )}
 
-            {showTable ? (
-              <ScrollView height='369'>
-                <BatchCountDataTable
-                  handleShowTableModal={handleShowTableModal}
-                />
-              </ScrollView>
-            ) : (
-              <Box
-                w='5/6'
-                alignSelf='center'
-                alignItems='center'
-                justifyContent='center'
-                bg='secondary'
-              >
-                <BatchCountHistogram />
-              </Box>
-            )}
+            <MultiSpeciesBatchChart
+              tabIndex={tabIndex}
+              setTabIndex={setTabIndex}
+              speciesRadioValue={speciesRadioValue}
+              setSpeciesRadioValue={setSpeciesRadioValue}
+              fishMeasureCounts={combinedFishMeasureCounts}
+            />
             <VStack space={3}>
-              <HStack
-                alignItems='center'
-                justifyContent='center'
-                my={2}
-                space={4}
-                mt={5}
-              >
-                <Text fontSize='16'>Show Histogram</Text>
-                <Switch
-                  shadow='3'
-                  offTrackColor='primary'
-                  onTrackColor='primary'
-                  size='md'
-                  isChecked={showTable}
-                  onToggle={() => setShowTable(!showTable)}
-                />
-                <Text fontSize='16'>Show Table</Text>
-              </HStack>
-
               <>
-                <Divider />
+                <Box px='2%'>
+                  <Divider mb='1%' />
+                  <Text bold mb={2}>
+                    Species:
+                  </Text>
+                  <VStack>
+                    <RadioGroup
+                      value={speciesRadioValue}
+                      onChange={nextValue => {
+                        setSpeciesRadioValue(nextValue)
+                      }}
+                    >
+                      <Box
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          flexWrap: 'wrap',
+                          gap: 25,
+                        }}
+                      >
+                        {multiSpecies?.map((spec: string, index: number) => (
+                          <Radio value={spec} key={index}>
+                            <RadioIndicator style={{ width: 25, height: 25 }}>
+                              <RadioIcon
+                                as={CircleIcon}
+                                style={{ width: 15, height: 15 }}
+                              />
+                            </RadioIndicator>
+                            <Text selectionColor='' fontSize='15'>
+                              {spec}
+                            </Text>
+                          </Radio>
+                        ))}
+                      </Box>
+                    </RadioGroup>
+                  </VStack>
+                  <Divider mt='1%' />
+                </Box>
 
                 <Box px='2%'>
                   <Text bold mb={2}>
@@ -527,7 +596,8 @@ const BatchCount = ({
                     </HStack>
                   </HStack>
                 </Box>
-                {species === 'Chinook salmon' && (
+
+                {speciesRadioValue === 'Chinook salmon' && (
                   <Box px='2%'>
                     <Divider mb='1%' />
                     <Text bold mb={2}>
@@ -541,19 +611,7 @@ const BatchCount = ({
                           setLifeStageRadioValue(nextValue)
                         }}
                       >
-                        <HStack
-                          // direction={{
-                          //   base: 'column',
-                          //   md: 'row',
-                          // }}
-                          // alignItems={{
-                          //   base: 'flex-start',
-                          //   md: 'center',
-                          // }}
-                          space={10}
-                          // w='75%'
-                          // maxW='300px'
-                        >
+                        <HStack space={10}>
                           <Radio value='Yolk Sac Fry'>
                             <RadioIndicator style={{ width: 25, height: 25 }}>
                               <RadioIcon
@@ -565,12 +623,7 @@ const BatchCount = ({
                               Yolk Sac Fry
                             </RadioLabel>
                           </Radio>
-                          <Radio
-                            // colorScheme='primary'
-                            value='Fry'
-                            // my={1}
-                            // _icon={{ color: 'primary' }}
-                          >
+                          <Radio value='Fry'>
                             <RadioIndicator style={{ width: 25, height: 25 }}>
                               <RadioIcon
                                 as={CircleIcon}
@@ -579,12 +632,7 @@ const BatchCount = ({
                             </RadioIndicator>
                             <RadioLabel>Fry</RadioLabel>
                           </Radio>
-                          <Radio
-                            // colorScheme='primary'
-                            value='Parr'
-                            // my={1}
-                            // _icon={{ color: 'primary' }}
-                          >
+                          <Radio value='Parr'>
                             <RadioIndicator style={{ width: 25, height: 25 }}>
                               <RadioIcon
                                 as={CircleIcon}
@@ -593,12 +641,7 @@ const BatchCount = ({
                             </RadioIndicator>
                             <RadioLabel>Parr</RadioLabel>
                           </Radio>
-                          <Radio
-                            // colorScheme='primary'
-                            value='Silvery Parr'
-                            // my={1}
-                            // _icon={{ color: 'primary' }}
-                          >
+                          <Radio value='Silvery Parr'>
                             <RadioIndicator style={{ width: 25, height: 25 }}>
                               <RadioIcon
                                 as={CircleIcon}
@@ -607,12 +650,7 @@ const BatchCount = ({
                             </RadioIndicator>
                             <RadioLabel>Silvery Parr</RadioLabel>
                           </Radio>
-                          <Radio
-                            // colorScheme='primary'
-                            value='Smolt'
-                            // my={1}
-                            // _icon={{ color: 'primary' }}
-                          >
+                          <Radio value='Smolt'>
                             <RadioIndicator style={{ width: 25, height: 25 }}>
                               <RadioIcon
                                 as={CircleIcon}
@@ -628,36 +666,65 @@ const BatchCount = ({
                   </Box>
                 )}
 
-                <VStack alignItems='center' justifyContent='center'>
-                  <Heading size='sm' pb='2%'>
-                    {showTable
-                      ? 'Record count for each fork length: '
-                      : 'Select size range for fork length buttons: '}
-                  </Heading>
-                  <ForkLengthButtonGroup
-                    setFirstButton={setFirstButton}
-                    setLifeStageRadioValue={setLifeStageRadioValue}
-                    setNumberOfAdditionalButtons={setNumberOfAdditionalButtons}
-                  />
-                </VStack>
-                <BatchCountButtonGrid
-                  firstButton={firstButton}
-                  numberOfAdditionalButtons={numberOfAdditionalButtons}
-                  selectedLifeStage={lifeStageRadioValue}
-                  ignoreLifeStage={species !== 'Chinook salmon'}
-                  deadToggle={deadToggle}
-                  markToggle={markToggle}
-                  fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
-                    .map((toggle, index) =>
-                      toggle ? fishConditions[index] : null
-                    )
-                    .filter(condition => condition !== null)}
-                  handleToggles={handleToggles}
-                  activeTabId={tabSlice.activeTabId}
-                  species={species}
-                  ladObject={ladObject}
-                />
-                {species !== 'Chinook salmon' && <View mb='65'></View>}
+                {showAddPlusCountButton ? (
+                  <>
+                    <Divider mb='1%' />
+
+                    <Button
+                      leftIcon={<Icon as={FontAwesome} name={'plus'} />}
+                      background='primary'
+                      mr='auto'
+                      px={5}
+                      onPress={() => setFishMeasureMetModalOpen(true)}
+                    >
+                      <Text color='white' fontSize={18}>
+                        Add Plus Count
+                      </Text>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <VStack alignItems='center' justifyContent='center'>
+                      <Heading size='sm' pb='2%'>
+                        {showTable
+                          ? 'Record count for each fork length: '
+                          : 'Select size range for fork length buttons: '}
+                      </Heading>
+                      <ForkLengthButtonGroup
+                        setFirstButton={setFirstButton}
+                        setLifeStageRadioValue={setLifeStageRadioValue}
+                        setNumberOfAdditionalButtons={
+                          setNumberOfAdditionalButtons
+                        }
+                        disabled={speciesRadioValue === ''}
+                      />
+                    </VStack>
+                    <BatchCountButtonGrid
+                      firstButton={firstButton}
+                      numberOfAdditionalButtons={numberOfAdditionalButtons}
+                      selectedLifeStage={lifeStageRadioValue}
+                      ignoreLifeStage={speciesRadioValue !== 'Chinook salmon'}
+                      deadToggle={deadToggle}
+                      markToggle={markToggle}
+                      fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
+                        .map((toggle, index) =>
+                          toggle ? fishConditions[index] : null
+                        )
+                        .filter(condition => condition !== null)}
+                      handleToggles={handleToggles}
+                      activeTabId={tabSlice.activeTabId}
+                      species={speciesRadioValue}
+                      taxonCode={findTaxonCode(
+                        speciesRadioValue,
+                        reorderedTaxon
+                      )}
+                      ladObject={ladObject}
+                    />
+                  </>
+                )}
+                {speciesRadioValue !== 'Chinook salmon' && (
+                  <View mb='65'></View>
+                )}
               </>
 
               <HStack
@@ -668,6 +735,7 @@ const BatchCount = ({
                 pt={5}
               >
                 <Button
+                  flex={1}
                   bg={'transparent'}
                   onPress={() => handlePressRemoveFish()}
                   isDisabled={calculateTotalCount() === 0}
@@ -677,8 +745,9 @@ const BatchCount = ({
                   </Text>
                 </Button>
                 <Button
+                  flex={2}
                   bg={'transparent'}
-                  onPress={() => setBatchCharacteristicsModalOpen(true)}
+                  onPress={() => setMultiSpeciesModalOpen(true)}
                 >
                   <Text fontSize='lg' bold color='primary'>
                     Update Batch Characteristics
@@ -686,16 +755,10 @@ const BatchCount = ({
                 </Button>
 
                 <Button
-                  bg='transparent'
-                  borderColor='primary'
-                  borderWidth={1}
-                  onPress={handlePressSaveAndStartNewBatchCount}
+                  flex={1}
+                  bg='primary'
+                  onPress={handlePressSaveBatchCount}
                 >
-                  <Text fontSize='lg' bold color='primary'>
-                    Save & Start New
-                  </Text>
-                </Button>
-                <Button bg='primary' onPress={handlePressSaveBatchCount}>
                   <Text fontSize='lg' bold color='white'>
                     Save & Exit
                   </Text>
@@ -706,14 +769,14 @@ const BatchCount = ({
         </View>
       </ScrollView>
       {/* --------- Modals --------- */}
-      {batchCharacteristicsModalOpen && (
+      {multiSpeciesModalOpen && (
         <CustomModal
-          isOpen={batchCharacteristicsModalOpen}
-          closeModal={() => setBatchCharacteristicsModalOpen(false)}
+          isOpen={multiSpeciesModalOpen}
+          closeModal={() => setMultiSpeciesModalOpen(false)}
           height='100%'
         >
-          <BatchCharacteristicsModalContent
-            closeModal={() => setBatchCharacteristicsModalOpen(false)}
+          <MultiSpeciesModalContent
+            closeModal={() => setMultiSpeciesModalOpen(false)}
           />
         </CustomModal>
       )}
@@ -733,14 +796,18 @@ const BatchCount = ({
           width={'80%'}
         >
           <MeasureMetPlusCount
-            species={{ value: species }}
+            mode={'multiSpecies'}
+            species={{ value: speciesRadioValue }}
             closeModal={closeFishMeasureMetModal}
             activeTabId={tabSlice.activeTabId}
             protocolKeyMet={protocolKeyMet}
-            lifeStageValue={protocolKeyMetLifeStage}
-            runValue={protocolKeyMetRun}
-            onSaveCallback={handlePressSaveBatchCount}
+            lifeStageValue={''}
+            runValue={''}
+            //TODO: Originally the function being walled was saveBatchCount. The plus count should be added to the batch count but not closed out.
+            //? Does the plus count need to be editable after entry?
+            onSaveCallback={closeFishMeasureMetModal}
             dropdownValues={dropdownsStore.values}
+            multiSpecies={true}
           />
         </CustomModal>
       )}
@@ -759,4 +826,4 @@ const mapStateToProps = (state: RootState) => {
     fishInputSlice: state.fishInput,
   }
 }
-export default connect(mapStateToProps)(BatchCount)
+export default connect(mapStateToProps)(MultiSpecies)

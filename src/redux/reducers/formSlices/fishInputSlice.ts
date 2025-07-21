@@ -3,7 +3,7 @@ import { cloneDeep, get, isEqual } from 'lodash'
 import { reformatBatchCountData } from '../../../utils/utils'
 import { ReleaseMarkI } from '../addAnotherMarkSlice'
 
-interface InitialStateI {
+export interface InitialStateI {
   [tabId: string]: FishInputStateI
 }
 
@@ -22,6 +22,8 @@ interface FishEntry {
   existingMark: boolean
   fishConditions: string[]
   runDefinition?: string
+  species?: string
+  taxonCode?: string
 }
 
 interface PreparedFishEntry {
@@ -176,8 +178,14 @@ export const saveFishSlice = createSlice({
 
     saveBatchCount: (state, action) => {
       const { tabId, batchCharacteristics, forkLengths } = action.payload
+      console.log(
+        '🚀 ~ fishInputSlice.ts:179 ~ batchCharacteristics:',
+        batchCharacteristics
+      )
+
       const {
-        species,
+        species: batchSpecies,
+        multiSpecies,
         adiposeClipped,
         existingMarks,
         fishConditions,
@@ -191,13 +199,17 @@ export const saveFishSlice = createSlice({
 
       for (const value of Object.values(organizedFishEntriesResult)) {
         const {
+          species: speciesFromEntry,
           forkLength,
           lifeStage,
           dead,
           existingMark,
           fishConditions,
           runDefinition,
+          taxonCode: taxonCodeFromEntry,
         } = value.fishEntryData
+
+        const species = multiSpecies?.length ? speciesFromEntry : batchSpecies
 
         let run = null
         let captureRunClassMethod = null
@@ -211,7 +223,7 @@ export const saveFishSlice = createSlice({
 
         const batchCountEntry = {
           species: species,
-          taxonCode,
+          taxonCode: taxonCodeFromEntry || taxonCode,
           numFishCaught: value.count,
           forkLength: forkLength,
           run,
@@ -283,6 +295,7 @@ export const saveFishSlice = createSlice({
         tabId,
         species,
         count,
+        numFishCaught,
         run,
         lifeStage,
         plusCountMethod,
@@ -294,7 +307,7 @@ export const saveFishSlice = createSlice({
       const plusCountEntry = {
         UID: null,
         species,
-        numFishCaught: count,
+        numFishCaught: count || numFishCaught,
         forkLength: null,
         run: getRun(species, run),
         weight: null,
@@ -333,6 +346,7 @@ export const saveFishSlice = createSlice({
       fishStoreCopy[id] = plusCountEntry
       state[tabId].fishStore = fishStoreCopy
       const fishMeasureCounts = getFishMeasureCounts(state[tabId].fishStore)
+
       state[tabId].fishMeasureCounts = fishMeasureCounts
     },
     updateFishEntry: (state, action) => {

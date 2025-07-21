@@ -16,6 +16,7 @@ import TrapPostProcessing from '../screens/formScreens/TrapPostProcessing'
 import AddFish from '../screens/formScreens/AddFish'
 import StartedTrapping from '../screens/formScreens/StartedTrapping'
 import BatchCount from '../screens/formScreens/BatchCount'
+import MultiSpecies from '../screens/formScreens/MultiSpecies'
 import { VStack } from 'native-base'
 import FishHolding from '../screens/formScreens/FishHolding'
 import TabBar from '../components/form/TabBar'
@@ -63,6 +64,11 @@ function FormStackNavigation() {
       <FormStack.Screen
         name='Batch Count'
         component={BatchCount}
+        options={{ headerShown: false }}
+      />
+      <FormStack.Screen
+        name='Multi Species'
+        component={MultiSpecies}
         options={{ headerShown: false }}
       />
       <FormStack.Screen

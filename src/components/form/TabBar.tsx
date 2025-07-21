@@ -47,6 +47,7 @@ const TabBar = ({
     'Paper Entry',
     'Add Fish',
     'Batch Count',
+    'Multi Species',
     'Incomplete Sections',
   ]
   const formSlicesToValidateDict = {
@@ -266,7 +267,7 @@ const TabBar = ({
       return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].trapSite}</Text>
     } else if (
       tabSlice.activeTabId != null &&
-      headerProps.route.name != 'Incomplete Sections'
+      !['Incomplete Sections', 'Multi Species'].includes(headerProps.route.name)
     ) {
       return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].name}</Text>
     } else {

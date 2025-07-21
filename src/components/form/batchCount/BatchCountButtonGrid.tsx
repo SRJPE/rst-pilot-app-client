@@ -28,6 +28,7 @@ const BatchCountButtonGrid = ({
   activeTabId,
   species,
   ladObject,
+  taxonCode,
 }: {
   firstButton: number
   numberOfAdditionalButtons: number
@@ -39,6 +40,7 @@ const BatchCountButtonGrid = ({
   handleToggles: any
   activeTabId: string | null
   species: string
+  taxonCode?: string
   ladObject: any
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
@@ -57,12 +59,14 @@ const BatchCountButtonGrid = ({
     }
     dispatch(
       addForkLengthToBatchStore({
+        species: species,
         forkLength: num,
         lifeStage: ignoreLifeStage ? null : selectedLifeStage,
         dead: deadToggle,
         existingMark: markToggle,
         fishConditions,
         runDefinition: runDefinition,
+        taxonCode,
       })
     )
     handleToggles('reset')

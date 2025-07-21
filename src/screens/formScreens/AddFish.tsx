@@ -99,7 +99,7 @@ const AddFishContent = ({
 
   const activeProgramId = visitSetupState?.[tabId]?.values?.programId
 
-  const currentProgramTaxon = dropdownValues.programTaxonAbbreviation[
+  const currentProgramTaxon = dropdownValues?.programTaxonAbbreviation?.[
     activeProgramId
   ] as Taxon[]
 
