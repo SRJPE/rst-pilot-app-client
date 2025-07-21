@@ -459,6 +459,7 @@ const MultiSpecies = ({
                       route.params?.fishMeasureProtocol || {}
                     }
                     fishMeasureCounts={combinedFishMeasureCounts}
+                    showSpeciesCounts={false}
                   />
                 </Box>
               )}

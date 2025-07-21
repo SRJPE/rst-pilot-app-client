@@ -23,11 +23,13 @@ const FishEntriesSummary = ({
   totalCatchCount,
   fishMeasureProtocol,
   fishMeasureCounts,
+  showSpeciesCounts = true,
 }: {
   lastFishEntry: any
   totalCatchCount: number
   fishMeasureProtocol: Record<any, any>
   fishMeasureCounts: Record<string, any>
+  showSpeciesCounts?: boolean
 }) => {
   const [protocolCounts, setProtocolCounts] = useState<Record<string, number>>(
     {}
@@ -173,7 +175,7 @@ const FishEntriesSummary = ({
           <Text bold>Total Catch Count Entered: </Text>
           {totalCatchCount}
         </Text>
-        {fishMeasureCounts && (
+        {fishMeasureCounts && showSpeciesCounts && (
           <>
             <Accordion
               size='lg'
