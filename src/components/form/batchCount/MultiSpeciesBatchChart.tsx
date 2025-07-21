@@ -159,7 +159,7 @@ const MultiSpeciesBatchChart = ({
       deadStyle = {
         borderWidth: 3,
         borderRadius: '50%',
-        borderColor: 'red.500',
+        borderColor: 'black',
         px: 3,
       }
     }
