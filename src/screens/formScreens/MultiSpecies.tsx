@@ -35,9 +35,7 @@ import BatchCountTableModal from '@/src/components/form/batchCount/BatchCountTab
 import ForkLengthButtonGroup from '@/src/components/form/batchCount/ForkLengthButtonGroup'
 import MultiSpeciesModalContent from '@/src/components/form/MultiSpeciesModalContent'
 import CustomModal from '@/src/components/Shared/CustomModal'
-import CustomModalHeader, {
-  AddFishModalHeaderButton,
-} from '@/src/components/Shared/CustomModalHeader'
+import CustomModalHeader from '@/src/components/Shared/CustomModalHeader'
 import {
   removeLastForkLengthEntered,
   resetBatchCountSlice,
@@ -429,10 +427,6 @@ const MultiSpecies = ({
                 showConfirmationModal={true}
                 showHeaderButton={true}
                 navigateBack={true}
-                headerButton={AddFishModalHeaderButton({
-                  activeTab: 'Multi Species',
-                  buttonNav,
-                })}
               />
             </HStack>
             <Box px='2%'>

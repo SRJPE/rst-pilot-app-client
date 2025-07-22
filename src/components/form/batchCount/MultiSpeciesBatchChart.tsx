@@ -372,7 +372,7 @@ const MultiSpeciesBatchChart = ({
               w={8}
               borderWidth={2}
               borderRadius='50%'
-              borderColor='red.500'
+              borderColor='black'
             />
             <Text>Dead</Text>
           </HStack>
