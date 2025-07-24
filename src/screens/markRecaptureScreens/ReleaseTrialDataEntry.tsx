@@ -386,8 +386,11 @@ const ReleaseDataEntry = ({
                 touched={touched}
                 errors={errors}
                 placeholder='Select Location'
-                onValueChange={handleChange('releaseLocation')}
-                setFieldTouched={() => setFieldTouched('releaseLocation')}
+                onValueChange={(itemValue: string) => {
+                  setFieldValue('releaseLocation', itemValue).then(() => {
+                    setFieldTouched('releaseLocation', true)
+                  })
+                }}
                 selectOptions={preparedReleaseSites?.map(
                   (releaseSite: any) => ({
                     label: releaseSite?.releaseSiteName,
