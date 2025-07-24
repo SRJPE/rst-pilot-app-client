@@ -40,7 +40,7 @@ const initialState: InitialStateI = {
       waterTemperatureUnit: '°C',
       waterTurbidity: null,
       waterTurbidityUnit: 'ntu',
-      recordTurbidityInPostProcessing: false,
+      recordTurbidityInPostProcessing: true,
       coneSetting: 'full',
       rpm1: null,
       rpm2: null,

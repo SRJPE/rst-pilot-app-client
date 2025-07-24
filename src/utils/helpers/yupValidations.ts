@@ -8,7 +8,7 @@ const getValidator = (field: any) => {
   } else if (field.fieldType === 'input') {
     if (field.inputType === 'float' || field.inputType === 'integer') {
       validator = yup.number()
-      validator = validator.positive(`Measurement required`)
+      validator = validator.min(0, `Measurement required`)
       if (field.minThreshold) {
         validator = validator.min(
           field.minThreshold,

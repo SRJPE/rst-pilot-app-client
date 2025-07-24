@@ -60,7 +60,6 @@ import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVis
 import TrapEndDateAndTime from '../../components/form/TrapEndDateAndTime'
 import RPMBefore from '../../components/form/RPMBefore'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import * as yup from 'yup'
 
 const mapStateToProps = (state: RootState) => {
   return {
