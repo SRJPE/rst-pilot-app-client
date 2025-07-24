@@ -43,6 +43,10 @@ interface FieldInterface {
   orderIndex: number
 }
 
+const defaultValues: { [key: string]: any } = {
+  counterStart: '0',
+}
+
 const ConditionalTrapVisitFields = ({
   touched,
   errors,
@@ -117,6 +121,13 @@ const ConditionalTrapVisitFields = ({
       ['waterTemperature', 'waterTurbidity'].includes(fieldName)
     ) {
       return null
+    }
+
+    if (
+      defaultValues[fieldName] !== undefined &&
+      values[fieldName] === undefined
+    ) {
+      setFieldValue(fieldName, defaultValues[fieldName])
     }
 
     if (fieldName === 'conditionCode') {
