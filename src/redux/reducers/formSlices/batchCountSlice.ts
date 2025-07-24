@@ -1,8 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
-import { reformatBatchCountData } from '../../../utils/utils'
 import { ReleaseMarkI } from '../addAnotherMarkSlice'
-import { getFishMeasureCounts, IndividualFishValuesI } from './fishInputSlice'
 
 export interface BatchStoreI {
   [id: number]: singleBatchRawI
@@ -13,6 +11,10 @@ export interface singleBatchRawI {
   dead: boolean
   fishConditions: boolean
   existingMark: boolean
+  species?: string
+  uid?: string | null
+  runDefinition?: string | null
+  taxonCode?: string
 }
 export interface batchCharacteristicsI {
   species: string
@@ -92,9 +94,11 @@ export const batchCountSlice = createSlice({
         ...state.forkLengths,
       }
       const {
+        uid,
         species,
         forkLength,
         existingMark,
+        adiposeClipped,
         fishConditions,
         runDefinition,
         lifeStage,
@@ -103,7 +107,9 @@ export const batchCountSlice = createSlice({
       } = action.payload
 
       const fishEntry = {
+        uid: uid || null,
         species: species || '',
+        adiposeClipped: adiposeClipped,
         forkLength: forkLength,
         lifeStage: lifeStage,
         dead: dead,
@@ -171,6 +177,22 @@ export const batchCountSlice = createSlice({
       forkLengthsCopy[id] = plusCountEntry
       state.forkLengths = forkLengthsCopy
     },
+    removeForkLengthByUID: (state, action) => {
+      const forkLengthsCopy = cloneDeep(state.forkLengths) as any
+
+      const newForkLengthsArray = (
+        Object.values(forkLengthsCopy) as singleBatchRawI[]
+      ).filter(fishEntry => fishEntry.uid !== action.payload)
+
+      const updatedForkLengthsObj = newForkLengthsArray.reduce<
+        Record<number, any>
+      >((acc, item, idx) => {
+        acc[idx] = item
+        return acc
+      }, {} as Record<number, (typeof newForkLengthsArray)[0]>)
+
+      state.forkLengths = updatedForkLengthsObj
+    },
     removeLastForkLengthEntered: state => {
       const forkLengthsCopy = cloneDeep(state.forkLengths) as any
       if (Object.keys(forkLengthsCopy).length) {
@@ -233,6 +255,7 @@ export const {
   addMarkToBatchCountExistingMarks,
   removeMarkFromBatchCountExistingMarks,
   removeLastForkLengthEntered,
+  removeForkLengthByUID,
   updateSingleForkLengthCount,
   addForkLengthToBatchStore,
   addPlusCountToBatchStore,

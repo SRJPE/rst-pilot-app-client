@@ -1,38 +1,17 @@
-import { FontAwesome } from '@expo/vector-icons'
-import { useNavigation, useIsFocused } from '@react-navigation/native'
-import {
-  Box,
-  Button,
-  Checkbox,
-  Divider,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  Pressable,
-  ScrollView,
-  Stack,
-  Switch,
-  Text,
-  View,
-  VStack,
-} from 'native-base'
+import { CircleIcon } from '@/components/ui/icon'
 import {
   Radio,
   RadioGroup,
+  RadioIcon,
   RadioIndicator,
   RadioLabel,
-  RadioIcon,
 } from '@/components/ui/radio'
-import { CircleIcon } from '@/components/ui/icon'
-import React, { useState, useEffect } from 'react'
-import { Keyboard } from 'react-native'
-import { batch, connect, useDispatch } from 'react-redux'
 import BatchCountButtonGrid from '@/src/components/form/batchCount/BatchCountButtonGrid'
-import BatchCountDataTable from '@/src/components/form/batchCount/BatchCountDataTable'
-import BatchCountHistogram from '@/src/components/form/batchCount/BatchCountHistogram'
 import BatchCountTableModal from '@/src/components/form/batchCount/BatchCountTableModal'
 import ForkLengthButtonGroup from '@/src/components/form/batchCount/ForkLengthButtonGroup'
+import MultiSpeciesBatchChart from '@/src/components/form/batchCount/MultiSpeciesBatchChart'
+import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
+import MeasureMetPlusCount from '@/src/components/form/MeasureMetPlusCount'
 import MultiSpeciesModalContent from '@/src/components/form/MultiSpeciesModalContent'
 import CustomModal from '@/src/components/Shared/CustomModal'
 import CustomModalHeader from '@/src/components/Shared/CustomModalHeader'
@@ -41,8 +20,8 @@ import {
   resetBatchCountSlice,
 } from '@/src/redux/reducers/formSlices/batchCountSlice'
 import {
-  saveBatchCount,
   getFishMeasureCounts,
+  saveBatchCount,
   savePlusCount,
 } from '@/src/redux/reducers/formSlices/fishInputSlice'
 import { TabStateI } from '@/src/redux/reducers/formSlices/tabSlice'
@@ -54,11 +33,27 @@ import {
   findTaxonCode,
   reorderTaxon,
 } from '@/src/utils/utils'
-import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
-import MeasureMetPlusCount from '@/src/components/form/MeasureMetPlusCount'
-import MultiSpeciesBatchChart from '@/src/components/form/batchCount/MultiSpeciesBatchChart'
+import { FontAwesome } from '@expo/vector-icons'
+import { useIsFocused, useNavigation } from '@react-navigation/native'
+import {
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+  VStack,
+} from 'native-base'
+import React, { useEffect, useState } from 'react'
+import { Keyboard } from 'react-native'
+import { connect, useDispatch } from 'react-redux'
 import { findLengthAtDateRun } from '../../utils/helpers/helperFunctions'
-import { set } from 'lodash'
 
 const MultiSpecies = ({
   route,
@@ -99,6 +94,9 @@ const MultiSpecies = ({
   const [deadIsLocked, setDeadIsLocked] = useState(false as boolean)
   const [deadToggle, setDeadToggle] = useState(false as boolean)
   const [markToggle, setMarkToggle] = useState(false as boolean)
+  const [adiposeClippedToggle, setAdiposeClippedToggle] = useState(
+    false as boolean
+  )
   const [FC1Toggle, setFC1Toggle] = useState(false as boolean)
   const [FC2Toggle, setFC2Toggle] = useState(false as boolean)
   const [FC3Toggle, setFC3Toggle] = useState(false as boolean)
@@ -128,7 +126,8 @@ const MultiSpecies = ({
   const reorderedTaxon = reorderTaxon(dropdownsStore.values.taxon)
 
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
-  const { multiSpecies, fishConditions, existingMarks } = batchCharacteristics
+  const { multiSpecies, fishConditions, existingMarks, adiposeClipped } =
+    batchCharacteristics
 
   useEffect(() => {
     if (!isFocused) {
@@ -230,21 +229,6 @@ const MultiSpecies = ({
     }
   }
 
-  const buttonNav = () => {
-    // @ts-ignore
-    navigation.navigate('Trap Visit Form', {
-      screen: 'Add Fish',
-    })
-  }
-  const handleShowTableModal = (selectedRowData: any) => {
-    const modalDataContainer = {} as any
-    Object.keys(selectedRowData).forEach((key: string) => {
-      modalDataContainer[key] = selectedRowData[key].toString()
-    })
-    setModalInitialData(modalDataContainer)
-    setShowTableModal(true)
-  }
-
   const calculateTotalCount = () => {
     let count: number = 0
     if (!forkLengths) return count
@@ -263,6 +247,9 @@ const MultiSpecies = ({
       case 'mark':
         setMarkToggle(!markToggle)
         break
+      case 'adiposeClipped':
+        setAdiposeClippedToggle(!adiposeClippedToggle)
+        break
       case 'FC1':
         setFC1Toggle(!FC1Toggle)
         break
@@ -278,6 +265,7 @@ const MultiSpecies = ({
         setFC1Toggle(false)
         setFC2Toggle(false)
         setFC3Toggle(false)
+        setAdiposeClippedToggle(false)
         if (deadIsLocked) return
         setDeadToggle(false)
         break
@@ -545,6 +533,22 @@ const MultiSpecies = ({
                           />
                         </HStack>
                       </HStack>
+
+                      <HStack space={2}>
+                        <Checkbox
+                          value='mark'
+                          isChecked={adiposeClippedToggle}
+                          shadow='3'
+                          _checked={{
+                            bg: 'primary',
+                            borderColor: 'primary',
+                          }}
+                          size='md'
+                          onChange={() => handleToggles('adiposeClipped')}
+                        />
+                        <Text fontSize='16'>Adipose Clipped</Text>
+                      </HStack>
+
                       {existingMarks && existingMarks.length > 0 && (
                         <HStack space={2}>
                           <Checkbox
@@ -701,6 +705,7 @@ const MultiSpecies = ({
                       ignoreLifeStage={speciesRadioValue !== 'Chinook salmon'}
                       deadToggle={deadToggle}
                       markToggle={markToggle}
+                      adiposeClippedToggle={adiposeClippedToggle}
                       fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
                         .map((toggle, index) =>
                           toggle ? fishConditions[index] : null

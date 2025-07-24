@@ -1,9 +1,9 @@
 import type { batchCountI } from '@/src/redux/reducers/formSlices/batchCountSlice'
-import { TabStateI } from '@/src/redux/reducers/formSlices/tabSlice'
 import { InitialStateI } from '@/src/redux/reducers/formSlices/fishInputSlice'
+import { TabStateI } from '@/src/redux/reducers/formSlices/tabSlice'
 
+import { removeForkLengthByUID } from '@/src/redux/reducers/formSlices/batchCountSlice'
 import { AppDispatch, RootState } from '@/src/redux/store'
-import { set } from 'lodash'
 import {
   Box,
   Center,
@@ -13,21 +13,12 @@ import {
   Text,
   useColorModeValue,
 } from 'native-base'
-import React, {
-  ComponentType,
-  memo,
-  use,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import React, { ComponentType, memo, useEffect, useMemo, useState } from 'react'
 import { Animated, Dimensions, Pressable, StatusBar } from 'react-native'
 import type { NavigationState, SceneRendererProps } from 'react-native-tab-view'
 import { SceneMap, TabView } from 'react-native-tab-view'
-import { batch, connect, useDispatch } from 'react-redux'
-import { Sign } from 'crypto'
-import { startLocationUpdatesAsync } from 'expo-location'
-import { border } from 'native-base/lib/typescript/theme/styled-system'
+import { connect, useDispatch } from 'react-redux'
+import { FishDetailPopover } from './FishDetailPopover'
 
 type TabNavigationRoute = { key: string; title: string }
 type TabAcc = {
@@ -91,10 +82,6 @@ const MultiSpeciesBatchChart = ({
 
     const existingPlusCountTotal =
       fishMeasureCounts[speciesRadioValue]?.plusCount || 0
-    console.log(
-      '🚀 ~ MultiSpeciesBatchChart.tsx:107 ~ currentSpeciesPlusCount ~ existingPlusCountTotal:',
-      existingPlusCountTotal
-    )
 
     const currentPlusCountTotal = plusCountValues.reduce(
       (acc, fish) => acc + (fish.numFishCaught || 0),
@@ -141,33 +128,20 @@ const MultiSpeciesBatchChart = ({
   )
 
   const groupedForkLengths = groupForkLengthsBySpecies(forkLengths)
-
-  const generateCellStyles = ({
-    dead,
-    existingMark,
-    fishConditions,
-  }: {
-    dead: boolean
-    existingMark: boolean
-    fishConditions: string[]
-  }) => {
-    let deadStyle = {}
-    let existingMarkStyle = {}
-    let fishConditionsStyle = {}
-
-    if (dead) {
-      deadStyle = {
-        borderWidth: 3,
-        borderRadius: '50%',
-        borderColor: 'black',
-        px: 3,
-      }
-    }
-    return {
-      ...deadStyle,
-      ...existingMarkStyle,
-      ...fishConditionsStyle,
-    }
+  console.log(
+    '🚀 ~ MultiSpeciesBatchChart.tsx:141 ~ groupedForkLengths:',
+    groupedForkLengths
+  )
+  const DEFAULT_CELL = {
+    forkLength: null,
+    dead: false,
+    existingMark: false,
+    fishConditions: [],
+    lifeStage: null,
+    runDefinition: null,
+    species: '',
+    taxonCode: null,
+    uid: null,
   }
 
   const renderScene = () => {
@@ -181,7 +155,7 @@ const MultiSpeciesBatchChart = ({
           borderWidth={1}
           flexWrap={'wrap'}
           borderRadius={15}
-          overflow='hidden'
+          // overflow='hidden'
         >
           {Array.from({ length: 10 }).map((_, i) => (
             <Box
@@ -202,35 +176,42 @@ const MultiSpeciesBatchChart = ({
           {Array.from({
             length: groupedPreviouslyEnteredFish[activeSpeciesTab]?.length,
           }).map((_, i) => {
-            const cellData = groupedPreviouslyEnteredFish[activeSpeciesTab]?.at(
-              i
-            ) || {
-              dead: false,
-              existingMark: false,
-              fishConditions: [],
-            }
+            const existingFishCellData =
+              groupedPreviouslyEnteredFish[activeSpeciesTab]?.at(i) ||
+              DEFAULT_CELL
+
             return (
               <Box key={i} flex={1} flexBasis={'9.5%'} h={50}>
-                <Center borderWidth={1} h={'full'} w={'full'}>
-                  <Text fontSize={18} {...generateCellStyles(cellData)}>
-                    {groupedPreviouslyEnteredFish[activeSpeciesTab]?.at(i)
-                      ?.forkLength || ''}
-                  </Text>
-                </Center>
+                <FishDetailPopover
+                  cellData={existingFishCellData}
+                  // onRemove={() => dispatch(removeForkLengthByUID(cellData.uid))}
+                />
               </Box>
             )
           })}
+
           {Array.from({
             length:
               50 -
               (groupedPreviouslyEnteredFish[activeSpeciesTab]?.length || 0),
           }).map((_, i) => {
-            const cellData = groupedForkLengths[activeSpeciesTab]?.at(i) || {
-              dead: false,
-              existingMark: false,
-              fishConditions: [],
-            }
-            return (
+            const cellData =
+              groupedForkLengths[activeSpeciesTab]?.at(i) || DEFAULT_CELL
+
+            return cellData.uid ? (
+              <Box
+                key={cellData.uid}
+                flex={1}
+                flexBasis={'9.5%'}
+                h={50}
+                position='relative'
+              >
+                <FishDetailPopover
+                  cellData={cellData}
+                  onRemove={() => dispatch(removeForkLengthByUID(cellData.uid))}
+                />
+              </Box>
+            ) : (
               <Box key={i} flex={1} flexBasis={'9.5%'} h={50}>
                 <Center
                   borderWidth={1}
@@ -238,10 +219,7 @@ const MultiSpeciesBatchChart = ({
                   w={'full'}
                   background={'white'}
                 >
-                  <Text fontSize={18} {...generateCellStyles(cellData)}>
-                    {groupedForkLengths[activeSpeciesTab]?.at(i)?.forkLength ||
-                      ''}
-                  </Text>
+                  <Text fontSize={18}>{''}</Text>
                 </Center>
               </Box>
             )
@@ -292,18 +270,11 @@ const MultiSpeciesBatchChart = ({
       navigationState: NavigationState<TabNavigationRoute>
     }
   ) => {
-    // const inputRange = props.navigationState.routes.map((x, i) => i)
     return (
       <Box flexDirection='row'>
         <ScrollView horizontal>
           {props.navigationState.routes.map(
             (route: TabNavigationRoute, i: number) => {
-              // const opacity = props.position.interpolate({
-              //   inputRange,
-              //   outputRange: inputRange.map((inputIndex: number) =>
-              //     inputIndex === i ? 1 : 0.5
-              //   ),
-              // })
               const color =
                 tabIndex === i
                   ? useColorModeValue('#000', '#e5e5e5')

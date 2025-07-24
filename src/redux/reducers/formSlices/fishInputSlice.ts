@@ -24,6 +24,7 @@ interface FishEntry {
   runDefinition?: string
   species?: string
   taxonCode?: string
+  adiposeClipped?: boolean
 }
 
 interface PreparedFishEntry {
@@ -178,10 +179,6 @@ export const saveFishSlice = createSlice({
 
     saveBatchCount: (state, action) => {
       const { tabId, batchCharacteristics, forkLengths } = action.payload
-      console.log(
-        '🚀 ~ fishInputSlice.ts:179 ~ batchCharacteristics:',
-        batchCharacteristics
-      )
 
       const {
         species: batchSpecies,
@@ -206,6 +203,7 @@ export const saveFishSlice = createSlice({
           existingMark,
           fishConditions,
           runDefinition,
+          adiposeClipped: adiposeClippedFromEntry = false,
           taxonCode: taxonCodeFromEntry,
         } = value.fishEntryData
 
@@ -230,7 +228,7 @@ export const saveFishSlice = createSlice({
           captureRunClassMethod,
           weight: null,
           lifeStage: getLifeStage(species, lifeStage),
-          adiposeClipped: adiposeClipped,
+          adiposeClipped: adiposeClippedFromEntry || adiposeClipped,
           existingMarks: existingMark ? existingMarks : [],
           dead: dead,
           fishConditions: fishConditions,
