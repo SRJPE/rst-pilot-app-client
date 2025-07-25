@@ -1080,13 +1080,22 @@ export const shouldRenderField = ({
   return false
 }
 
-const getNextSampleSuffix = (
-  arr: { sampleId?: string }[],
-  taxonAbbreviation: string
-) => {
-  const filtered = arr.filter(item =>
-    (item.sampleId ?? '').includes(taxonAbbreviation)
-  )
+const getNextSampleSuffix = ({
+  arr,
+  taxonAbbreviation,
+  suffixPadding = 3,
+}: {
+  arr: { sampleId?: string }[]
+  taxonAbbreviation?: string
+  suffixPadding?: number
+}) => {
+  let filtered = arr
+
+  if (taxonAbbreviation) {
+    filtered = arr.filter(item =>
+      (item.sampleId ?? '').includes(taxonAbbreviation)
+    )
+  }
 
   if (filtered.length === 0) {
     return '001' // No existing samples for this taxon, start from 001
@@ -1121,7 +1130,9 @@ export const formatGeneticsSampleId = ({
 }) => {
   let sampleId = ''
 
-  if (programName.toLowerCase().includes('yolo')) {
+  const programNameLower = programName.toLowerCase()
+
+  if (programNameLower.includes('yolo')) {
     const currentYear = new Date().getFullYear()
 
     if (species.toLowerCase().includes('chinook')) {
@@ -1136,13 +1147,30 @@ export const formatGeneticsSampleId = ({
         return sampleId
       }
 
-      const sampleIdSuffix = getNextSampleSuffix(
-        geneticSamplesArray,
-        taxonAbbreviation
-      )
+      const sampleIdSuffix = getNextSampleSuffix({
+        arr: geneticSamplesArray,
+        taxonAbbreviation,
+        suffixPadding: 3,
+      })
       console.log('sampleIdSuffix', sampleIdSuffix)
       sampleId = `${currentYear}_${taxonAbbreviation}_${sampleIdSuffix}`
     }
-    return sampleId
+  } else if (
+    programNameLower.includes('battle') ||
+    programNameLower.includes('clear')
+  ) {
+    // get last two digits of the current year
+    const currentYear = new Date().getFullYear().toString().slice(-2)
+
+    const sampleIdSuffix = getNextSampleSuffix({
+      arr: geneticSamplesArray,
+      suffixPadding: 4,
+    })
+
+    console.log('sampleIdSuffix', sampleIdSuffix)
+
+    sampleId = `${currentYear}_${sampleIdSuffix}`
   }
+
+  return sampleId
 }

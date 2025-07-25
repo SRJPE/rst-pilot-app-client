@@ -41,7 +41,7 @@ const initialState: InitialStateI = {
       waterTurbidity: null,
       waterTurbidityUnit: 'ntu',
       recordTurbidityInPostProcessing: true,
-      coneSetting: 'full',
+      coneSetting: null,
       rpm1: null,
       rpm2: null,
       rpm3: null,

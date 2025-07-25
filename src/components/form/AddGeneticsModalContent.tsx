@@ -27,6 +27,7 @@ const AddGeneticsModalContent = ({
   species,
   reorderedTaxon,
   fishStore,
+  visitSetupState,
 }: {
   handleGeneticSampleFormSubmit: any
   closeModal: any
@@ -35,13 +36,10 @@ const AddGeneticsModalContent = ({
   species: any
   reorderedTaxon: any
   fishStore: any
+  visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const connectivityState = useSelector((state: any) => state.connectivity)
-
-  const [defaultSampleIDNumber, setDefaultSampleIDNumber] = useState(
-    '' as string
-  )
   const [initialFormValues, setInitialFormValues] = useState({
     sampleId: '',
     mucusSwab: false,
@@ -75,10 +73,11 @@ const AddGeneticsModalContent = ({
     ]
 
     console.log('CGS', combinedGeneticSamples)
+    console.log('visitSetupState', visitSetupState)
 
-    if (combinedGeneticSamples.length > 0 && species.value) {
+    if (species.value) {
       const defaultSampleIDNumber = formatGeneticsSampleId({
-        programName: 'yolo',
+        programName: visitSetupState.stream,
         geneticSamplesArray: combinedGeneticSamples,
         species: species.value,
         taxonArray: reorderedTaxon,
@@ -357,6 +356,7 @@ const mapStateToProps = (state: RootState) => {
     previousGeneticSamples: filteredResponses,
     addGeneticSamples: state.addGeneticSamples,
     fishStore: state.fishInput?.[activeTabId]?.fishStore,
+    visitSetupState: state.visitSetup?.[activeTabId]?.values,
   }
 }
 

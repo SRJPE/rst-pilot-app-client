@@ -466,6 +466,9 @@ const IncompleteSections = ({
         trapVisitTimeEnd = trapPostProcessingState?.[id]?.values?.trapVisitTime
         trapVisitTimeStart =
           trapPostProcessingState?.[id]?.values?.trapVisitTime
+      } else if (trapOperationsState?.[id]?.values?.sampleTime) {
+        trapVisitTimeEnd = trapOperationsState?.[id]?.values?.startTime
+        trapVisitTimeStart = trapOperationsState?.[id]?.values?.sampleTime
       }
 
       const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']

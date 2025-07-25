@@ -37,7 +37,7 @@ const getFilteredTrapOperationsState = (trapOperationsState: any) => {
   }
   delete filteredTrapOperationsState.trapVisitStartTime
 
-  const dateKeysToCheck = ['trapVisitTime', 'sampleTime']
+  const dateKeysToCheck = ['trapVisitTime', 'sampleTime', 'startTime']
   if (dateKeysToCheck.some(key => key in filteredTrapOperationsState)) {
     delete filteredTrapOperationsState.trapVisitStopTime
   }
