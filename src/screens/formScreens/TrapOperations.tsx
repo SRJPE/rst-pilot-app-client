@@ -204,11 +204,11 @@ const TrapOperations = ({
           selectedTrapLocationId
         )
       })
-      .map((visit: any) => visit.createdTrapVisitResponse)
+      // .map((visit: any) => visit.createdTrapVisitResponse)
       .sort(
         (a: any, b: any) =>
-          new Date(b.trapVisitTimeStart).getTime() -
-          new Date(a.trapVisitTimeStart).getTime()
+          new Date(b.createdTrapVisitResponse.trapVisitTimeStart).getTime() -
+          new Date(a.createdTrapVisitResponse.trapVisitTimeStart).getTime()
       )
     console.log('selectedTrapLocationId', selectedTrapLocationId)
     console.log('previousTrapVisitsForLocation', previousTrapVisitsForLocation)
@@ -517,7 +517,9 @@ const TrapOperations = ({
             if (fieldName === 'startTime' && mostRecentTrapVisit) {
               setFieldValue(
                 fieldName,
-                new Date(mostRecentTrapVisit.trapVisitTimeStart)
+                new Date(
+                  mostRecentTrapVisit.createdTrapVisitResponse.trapVisitTimeStart
+                )
               )
             } else {
               setFieldValue(fieldName, new Date())
@@ -754,6 +756,36 @@ const TrapOperations = ({
             resetForm()
           }
         }, [previouslyActiveTabId, activeTabId])
+
+        // setting flow meter serial number from previosu trap visit
+        useEffect(() => {
+          if (
+            find(sectionFields, {
+              fieldName: 'flowMeterSerialNumber',
+              formSection: 'Trap Operations',
+            }) &&
+            !values.flowMeterSerialNumber &&
+            mostRecentTrapVisit?.createdTrapVisitEnvironmentalResponse?.length >
+              0
+          ) {
+            const environmentalValuesObj =
+              mostRecentTrapVisit.createdTrapVisitEnvironmentalResponse.reduce(
+                (
+                  acc: { [x: string]: any },
+                  { measureName, measureValueText }: any
+                ) => {
+                  acc[measureName] = measureValueText
+                  return acc
+                },
+                {}
+              )
+
+            setFieldValue(
+              'flowMeterSerialNumber',
+              environmentalValuesObj?.flowMeterSerialNumber || ''
+            )
+          }
+        }, [mostRecentTrapVisit, mostRecentTrapVisit])
 
         const handleTurbidityToggle = (newValue: boolean) => {
           if (newValue === true) {
