@@ -717,7 +717,6 @@ const AddFishContent = ({
       if (species.value === 'Chinook salmon' && tabSlice.activeTabId) {
         if (!forkLengthRef.current.value) {
           setRun(stateDefaults.whenSpeciesChinook.run)
-          setLifeStage(stateDefaults.whenSpeciesChinook.lifeStage)
           return
         }
         let dateTimeValue = new Date()
@@ -753,21 +752,6 @@ const AddFishContent = ({
           })
         } else {
           setRun(stateDefaults.whenSpeciesChinook.run)
-        }
-
-        const calculatedlifeStage = calculateLifeStage(
-          Number(forkLengthRef.current.value)
-        )
-
-        if (calculatedlifeStage) {
-          setLifeStage({
-            ...lifeStage,
-            value: calculatedlifeStage,
-            error: '',
-            touched: true,
-          })
-        } else {
-          setLifeStage(stateDefaults.whenSpeciesChinook.lifeStage)
         }
       }
     }, 1000)

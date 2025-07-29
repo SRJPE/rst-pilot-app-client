@@ -1112,7 +1112,9 @@ const getNextSampleSuffix = ({
   const nextSampleSuffixNumber = test ? parseInt(test, 10) + 1 : 1
 
   // Pad with leading zeros to at least 3 digits
-  const nextSampleSuffix = nextSampleSuffixNumber.toString().padStart(3, '0')
+  const nextSampleSuffix = nextSampleSuffixNumber
+    .toString()
+    .padStart(suffixPadding, '0')
 
   return nextSampleSuffix
 }

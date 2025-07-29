@@ -346,6 +346,7 @@ const mapStateToProps = (state: RootState) => {
         }
       }
     )
+    // Filter responses by programId
     filteredResponses = responses.filter((response: any) => {
       return response?.programId === programId
     })
