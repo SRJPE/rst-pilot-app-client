@@ -71,7 +71,6 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
     weight,
     willBeUsedInRecapture,
   } = cellData
-  console.log('🚀 ~ FishDetailPopover.tsx:74 ~ fishConditions:', fishConditions)
 
   const formattedSpecies =
     species === 'Chinook salmon' && lifeStage && runDefinition
