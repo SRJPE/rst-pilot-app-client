@@ -45,6 +45,7 @@ interface FieldInterface {
 
 const defaultValues: { [key: string]: any } = {
   counterStart: '0',
+  trapInThalweg: false,
 }
 
 const ConditionalTrapVisitFields = ({
@@ -192,6 +193,22 @@ const ConditionalTrapVisitFields = ({
     }
 
     if (fieldName === 'coneSetting') {
+      if (
+        !values.coneSetting &&
+        activeTabId &&
+        visitSetupState &&
+        visitSetupState[activeTabId] &&
+        visitSetupState[activeTabId].values
+      ) {
+        const { stream } = visitSetupState[activeTabId].values
+        if (stream && stream.toLowerCase().includes('battle')) {
+          setFieldValue('coneSetting', 'full')
+        } else if (stream && stream.toLowerCase().includes('clear')) {
+          setFieldValue('coneSetting', 'half')
+        } else {
+          setFieldValue('coneSetting', 'full')
+        }
+      }
       return (
         <FormControl w='100%'>
           <FormControl.Label>

@@ -513,6 +513,47 @@ const TrapPostProcessing = ({
     }
   }
 
+  const renderEndingTrapStatus = (
+    values: any,
+    setFieldValue: any,
+    setFieldTouched: any
+  ) => {
+    return (
+      <FormControl w='30%'>
+        <FormControl.Label>
+          <Text color='black' fontSize='xl'>
+            Trap Status at End
+          </Text>
+        </FormControl.Label>
+        <Radio.Group
+          name='endingTrapStatus'
+          accessibilityLabel='Ending Trap Status'
+          value={`${values.endingTrapStatus}`}
+          onChange={(newValue: any) => {
+            handleTrapStatusAtEndRadio(newValue, setFieldTouched, setFieldValue)
+          }}
+        >
+          <Radio
+            colorScheme='primary'
+            value='Restart Trap'
+            my={1}
+            _icon={{ color: 'primary' }}
+          >
+            Continue Trapping
+          </Radio>
+          <Radio
+            colorScheme='primary'
+            value='End Trapping'
+            my={1}
+            _icon={{ color: 'primary' }}
+          >
+            End Trapping
+          </Radio>
+        </Radio.Group>
+      </FormControl>
+    )
+  }
+
   return (
     <Formik
       validationSchema={validationSchema}
@@ -867,6 +908,11 @@ const TrapPostProcessing = ({
                         )}
                       </HStack> */}
                   {renderTrappingDateAndTime(
+                    values,
+                    setFieldValue,
+                    setFieldTouched
+                  )}
+                  {renderEndingTrapStatus(
                     values,
                     setFieldValue,
                     setFieldTouched

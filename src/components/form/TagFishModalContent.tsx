@@ -1,22 +1,9 @@
-import Ionicons from '@expo/vector-icons/Ionicons'
 import { Formik } from 'formik'
-import {
-  FormControl,
-  HStack,
-  Icon,
-  Input,
-  ScrollView,
-  VStack,
-  Text,
-  Button,
-  Divider,
-} from 'native-base'
-import React from 'react'
+import { ScrollView, VStack, Text, Button } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addMarksOrTagsSchema } from '../../utils/helpers/yupValidations'
-import { QARanges } from '../../utils/utils'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 import FormInputComponent from '../Shared/FormInputComponent'

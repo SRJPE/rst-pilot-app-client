@@ -1079,3 +1079,100 @@ export const shouldRenderField = ({
 
   return false
 }
+
+const getNextSampleSuffix = ({
+  arr,
+  taxonAbbreviation,
+  suffixPadding = 3,
+}: {
+  arr: { sampleId?: string }[]
+  taxonAbbreviation?: string
+  suffixPadding?: number
+}) => {
+  let filtered = arr
+
+  if (taxonAbbreviation) {
+    filtered = arr.filter(item =>
+      (item.sampleId ?? '').includes(taxonAbbreviation)
+    )
+  }
+
+  if (filtered.length === 0) {
+    return '001' // No existing samples for this taxon, start from 001
+  }
+
+  const currentHighestSampleSuffix = filtered.reduce((max, curr) => {
+    const getSuffix = (sampleId: string | undefined) =>
+      parseInt((sampleId ?? '').split('_').pop() ?? '', 10)
+
+    return getSuffix(curr.sampleId) > getSuffix(max.sampleId) ? curr : max
+  })
+
+  const test = (currentHighestSampleSuffix.sampleId ?? '').split('_').pop()
+  const nextSampleSuffixNumber = test ? parseInt(test, 10) + 1 : 1
+
+  // Pad with leading zeros to at least 3 digits
+  const nextSampleSuffix = nextSampleSuffixNumber
+    .toString()
+    .padStart(suffixPadding, '0')
+
+  return nextSampleSuffix
+}
+
+export const formatGeneticsSampleId = ({
+  programName,
+  species,
+  geneticSamplesArray,
+  taxonArray = [],
+}: {
+  programName: string
+  species: string
+  geneticSamplesArray: any[]
+  taxonArray?: any[]
+}) => {
+  let sampleId = ''
+
+  const programNameLower = programName.toLowerCase()
+
+  if (programNameLower.includes('yolo')) {
+    const currentYear = new Date().getFullYear()
+
+    if (species.toLowerCase().includes('chinook')) {
+    } else {
+      const taxonObj = taxonArray.find(
+        (item: any) => item.commonname === species
+      )
+      const taxonAbbreviation = taxonObj?.abbreviationCode
+      console.log('taxonAbbreviation', taxonAbbreviation)
+
+      if (!taxonAbbreviation) {
+        return sampleId
+      }
+
+      const sampleIdSuffix = getNextSampleSuffix({
+        arr: geneticSamplesArray,
+        taxonAbbreviation,
+        suffixPadding: 3,
+      })
+      console.log('sampleIdSuffix', sampleIdSuffix)
+      sampleId = `${currentYear}_${taxonAbbreviation}_${sampleIdSuffix}`
+    }
+  } else if (
+    programNameLower.includes('battle') ||
+    programNameLower.includes('clear')
+  ) {
+    // get last two digits of the current year
+    const currentYear = new Date().getFullYear().toString().slice(-2)
+
+    const sampleIdSuffix = getNextSampleSuffix({
+      arr: geneticSamplesArray,
+      suffixPadding: 4,
+    })
+
+    console.log('sampleIdSuffix', sampleIdSuffix)
+
+    sampleId = `${currentYear}_${sampleIdSuffix}`
+  }
+
+  return sampleId
+}

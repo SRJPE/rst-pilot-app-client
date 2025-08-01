@@ -717,7 +717,6 @@ const AddFishContent = ({
       if (species.value === 'Chinook salmon' && tabSlice.activeTabId) {
         if (!forkLengthRef.current.value) {
           setRun(stateDefaults.whenSpeciesChinook.run)
-          setLifeStage(stateDefaults.whenSpeciesChinook.lifeStage)
           return
         }
         let dateTimeValue = new Date()
@@ -753,21 +752,6 @@ const AddFishContent = ({
           })
         } else {
           setRun(stateDefaults.whenSpeciesChinook.run)
-        }
-
-        const calculatedlifeStage = calculateLifeStage(
-          Number(forkLengthRef.current.value)
-        )
-
-        if (calculatedlifeStage) {
-          setLifeStage({
-            ...lifeStage,
-            value: calculatedlifeStage,
-            error: '',
-            touched: true,
-          })
-        } else {
-          setLifeStage(stateDefaults.whenSpeciesChinook.lifeStage)
         }
       }
     }, 1000)
@@ -1426,20 +1410,18 @@ const AddFishContent = ({
                             <Text color='primary'>Tag Fish</Text>
                           </Button>
                         )}
-                        {species.value === 'Chinook salmon' && (
-                          <Button
-                            bg='secondary'
-                            color='#007C7C'
-                            py='1'
-                            px='12'
-                            shadow='3'
-                            borderRadius='5'
-                            maxWidth='40%'
-                            onPress={() => setAddGeneticModalOpen(true)}
-                          >
-                            <Text color='primary'>Take Genetic Sample</Text>
-                          </Button>
-                        )}
+                        <Button
+                          bg='secondary'
+                          color='#007C7C'
+                          py='1'
+                          px='12'
+                          shadow='3'
+                          borderRadius='5'
+                          maxWidth='40%'
+                          onPress={() => setAddGeneticModalOpen(true)}
+                        >
+                          <Text color='primary'>Take Genetic Sample</Text>
+                        </Button>
                       </HStack>
                     )}
                     {Array.isArray(appliedMarks?.value) &&
@@ -1632,6 +1614,8 @@ const AddFishContent = ({
             <AddGeneticsModalContent
               handleGeneticSampleFormSubmit={handleGeneticSamplesFormSubmit}
               closeModal={() => setAddGeneticModalOpen(false)}
+              species={species}
+              reorderedTaxon={reorderedTaxon}
             />
           </CustomModal>
         )}

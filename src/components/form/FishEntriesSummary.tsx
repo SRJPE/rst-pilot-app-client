@@ -148,13 +148,16 @@ const FishEntriesSummary = ({
   }, [fishMeasureProtocol, fishMeasureCounts])
 
   const formatFishMeasureProtocolText = (fishName: string) => {
-    const result = fishName
-      .split('-')
-      .map(part => startCase(part.trim()))
+    return fishName
+      .split(' - ')
+      .map(part =>
+        part
+          .split('/')
+          .map(sub => startCase(sub.trim()))
+          .join(' / ')
+      )
       .join(' - ')
-    return result
   }
-
   const formatLastEntryText = (lastFishEntry: any) => {
     let entryText = ''
 
