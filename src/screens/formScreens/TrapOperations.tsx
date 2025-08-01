@@ -18,7 +18,6 @@ import {
   KeyboardAvoidingView,
   Switch,
   Box,
-  Radio,
   Button,
 } from 'native-base'
 import CopyFormValuesDialog from '../../components/form/CopyFormValuesDialog'
@@ -756,6 +755,16 @@ const TrapOperations = ({
             resetForm()
           }
         }, [previouslyActiveTabId, activeTabId])
+
+        useEffect(() => {
+          if (
+            selectedProgramObj &&
+            (selectedProgramObj.streamName.toLowerCase().includes('clear') ||
+              selectedProgramObj.streamName.toLowerCase().includes('battle'))
+          ) {
+            setFieldValue('waterTemperatureUnit', '°F')
+          }
+        }, [selectedProgramObj])
 
         // setting flow meter serial number from previosu trap visit
         useEffect(() => {
