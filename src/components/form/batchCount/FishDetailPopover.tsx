@@ -42,7 +42,7 @@ const generateCellStyles = ({
 
   if (dead) {
     deadStyle = {
-      borderWidth: 3,
+      borderWidth: 2,
       borderRadius: '50%',
       borderColor: 'black',
       px: 3,
