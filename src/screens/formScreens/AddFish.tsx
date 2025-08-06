@@ -101,7 +101,7 @@ const AddFishContent = ({
 
   const activeProgramId = visitSetupState?.[tabId]?.values?.programId
 
-  const currentProgramTaxon = dropdownValues.programTaxonAbbreviation[
+  const currentProgramTaxon = dropdownValues?.programTaxonAbbreviation?.[
     activeProgramId
   ] as Taxon[]
 
@@ -649,12 +649,6 @@ const AddFishContent = ({
       return
     }
 
-    if (species.value === '' || species.value === null) {
-      setFishMeasureMetModalOpen(false)
-      setProtocolKeyMet(null)
-      return
-    }
-
     const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
       ?.fishMeasureCounts as Record<
       string,
@@ -671,8 +665,13 @@ const AddFishContent = ({
         sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
       0
     )
-
     setTotalCatchCount(total)
+
+    if (species.value === '' || species.value === null) {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      return
+    }
 
     if (!speciesDropDownOpen) {
       const protocolResult = checkFishMeasureProtocol({

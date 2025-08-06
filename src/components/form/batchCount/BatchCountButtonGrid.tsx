@@ -1,20 +1,20 @@
 import {
   Box,
-  Pressable,
-  Text,
-  ScrollView,
-  Popover,
+  Button,
   FormControl,
   Input,
-  Button,
+  Popover,
+  Pressable,
+  ScrollView,
+  Text,
 } from 'native-base'
-import React, { useEffect, useState, useMemo, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import { uid } from 'uid'
 import { addForkLengthToBatchStore } from '../../../redux/reducers/formSlices/batchCountSlice'
 import { AppDispatch } from '../../../redux/store'
-import { createArray } from '../../../utils/utils'
 import { findRunDefinition } from '../../../utils/helpers/helperFunctions'
-import { Vibration } from 'react-native'
+import { createArray } from '../../../utils/utils'
 
 const BatchCountButtonGrid = ({
   firstButton,
@@ -25,11 +25,13 @@ const BatchCountButtonGrid = ({
   markToggle,
   miltingToggle,
   eggsToggle,
+  adiposeClippedToggle,
   fishConditions,
   handleToggles,
   activeTabId,
   species,
   ladObject,
+  taxonCode,
 }: {
   firstButton: number
   numberOfAdditionalButtons: number
@@ -39,10 +41,12 @@ const BatchCountButtonGrid = ({
   markToggle: boolean
   miltingToggle: boolean | null
   eggsToggle: boolean | null
+  adiposeClippedToggle?: boolean
   fishConditions: string[]
   handleToggles: any
   activeTabId: string | null
   species: string
+  taxonCode?: string
   ladObject: any
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
@@ -55,20 +59,24 @@ const BatchCountButtonGrid = ({
   }, [firstButton])
 
   const handlePress = (num: number) => {
-    let runDefinition = null as string | null
+    let runDefinition = null as string | null | undefined
     if (species === 'Chinook salmon' && activeTabId && ladObject) {
       runDefinition = findRunDefinition(ladObject, num)
     }
     dispatch(
       addForkLengthToBatchStore({
+        uid: uid(),
+        species: species,
         forkLength: num,
         lifeStage: ignoreLifeStage ? null : selectedLifeStage,
         dead: deadToggle,
         existingMark: markToggle,
         milting: miltingToggle,
         eggs: eggsToggle,
+        adiposeClipped: adiposeClippedToggle || false,
         fishConditions,
         runDefinition: runDefinition,
+        taxonCode,
       })
     )
     handleToggles('reset')

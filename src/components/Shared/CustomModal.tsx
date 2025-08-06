@@ -51,6 +51,7 @@ const CustomModal = (props: ModalPropsI) => {
             // alignItems: 'center',
             alignSelf: 'center',
             // display: 'flex',
+            ...props.style,
           }}
         >
           {props.children}

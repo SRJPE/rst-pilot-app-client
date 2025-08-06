@@ -450,6 +450,7 @@ const BatchCount = ({
           <Pressable onPress={Keyboard.dismiss}>
             <HStack space={10}>
               <CustomModalHeader
+                closeModal={() => dispatch(resetBatchCountSlice())}
                 headerText={
                   tabSlice.activeTabId
                     ? `Batch Count - ${
@@ -458,6 +459,7 @@ const BatchCount = ({
                     : 'Batch Count'
                 }
                 showHeaderButton={true}
+                showConfirmationModal={true}
                 navigateBack={true}
                 headerButton={AddFishModalHeaderButton({
                   activeTab: 'Batch',
