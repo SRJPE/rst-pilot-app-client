@@ -102,7 +102,7 @@ const MeasureMetPlusCount = ({
   return (
     <>
       <CustomModalHeader
-        headerText={`Enter Plus Count for ${protocolKeyMet}`}
+        headerText={`Enter Plus Count for ${protocolKeyMet || species.value}`}
         headerFontSize={24}
         showHeaderButton={true}
         closeModal={closeModal}
