@@ -256,7 +256,24 @@ const FishInput = ({
                 Batch Count
               </Text>
             </Button>
-
+            <Button
+              bg='primary'
+              p='3'
+              borderRadius='5'
+              flex='1'
+              shadow='3'
+              onPress={() => {
+                navigation.navigate('Multi Species', {
+                  // Add any props you want to pass here, for example:
+                  fishMeasureProtocol,
+                  selectedProgramObj,
+                })
+              }}
+            >
+              <Text fontSize='sm' fontWeight='bold' color='white'>
+                Multi-Species
+              </Text>
+            </Button>
             <Button
               bg='primary'
               p='3'

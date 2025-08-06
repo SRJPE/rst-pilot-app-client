@@ -6,10 +6,12 @@ const ForkLengthButtonGroup = ({
   setFirstButton,
   setLifeStageRadioValue,
   setNumberOfAdditionalButtons,
+  disabled = false,
 }: {
   setFirstButton: any
   setLifeStageRadioValue: any
   setNumberOfAdditionalButtons: any
+  disabled?: boolean
 }) => {
   const handlePressGroupButton = (key: string) => {
     setFirstButton(buttonLookup[key].firstButton)
@@ -19,6 +21,7 @@ const ForkLengthButtonGroup = ({
 
   return (
     <Button.Group
+      isDisabled={disabled}
       isAttached
       variant='subtle'
       colorScheme='muted'
