@@ -96,6 +96,14 @@ const MultiSpeciesBatchChart = ({
   }, [batchCountStore.forkLengths, speciesRadioValue])
 
   const [routes, setRoutes] = useState<Array<TabNavigationRoute>>([])
+  const [combinedFishObj, setCombinedFishObj] = useState<Record<string, any[]>>(
+    {}
+  )
+  const [groupedForkLengths, setGroupedForkLengths] = useState<
+    Record<string, any[]>
+  >({})
+  const [groupedPreviouslyEnteredFish, setGroupedPreviouslyEnteredFish] =
+    useState<Record<string, any[]>>({})
 
   const activeSpeciesTab = routes[tabIndex]?.title
 
@@ -123,15 +131,28 @@ const MultiSpeciesBatchChart = ({
     return result
   }
 
-  const groupedPreviouslyEnteredFish = groupForkLengthsBySpecies(
-    previouslyEnteredFish
-  )
+  useEffect(() => {
+    const groupedPreviouslyEnteredFish = groupForkLengthsBySpecies(
+      previouslyEnteredFish
+    )
+    setGroupedPreviouslyEnteredFish(groupedPreviouslyEnteredFish)
+    const groupedForkLengths = groupForkLengthsBySpecies(forkLengths)
+    setGroupedForkLengths(groupedForkLengths)
 
-  const groupedForkLengths = groupForkLengthsBySpecies(forkLengths)
-  console.log(
-    '🚀 ~ MultiSpeciesBatchChart.tsx:141 ~ groupedForkLengths:',
-    groupedForkLengths
-  )
+    const combinedEnteredFish: Record<string, any[]> = {}
+    for (const key in groupedForkLengths) {
+      combinedEnteredFish[key] = groupedForkLengths[key].slice() // shallow copy to avoid mutation
+    }
+
+    for (const key in groupedPreviouslyEnteredFish) {
+      combinedEnteredFish[key] = (combinedEnteredFish[key] || []).concat(
+        groupedPreviouslyEnteredFish[key]
+      )
+    }
+
+    setCombinedFishObj(combinedEnteredFish)
+  }, [previouslyEnteredFish, forkLengths])
+
   const DEFAULT_CELL = {
     forkLength: null,
     dead: false,
@@ -233,7 +254,7 @@ const MultiSpeciesBatchChart = ({
             <Text fontSize={18} p={3} display='flex'>
               <Text bold>Measured Count:</Text>
               <Text> </Text>
-              <Text>{groupedForkLengths[activeSpeciesTab]?.length || 0}</Text>
+              <Text>{combinedFishObj[activeSpeciesTab]?.length || 0}</Text>
             </Text>
             <Text fontSize={18} p={3} display='flex'>
               <Text bold>Plus Count:</Text>
@@ -287,7 +308,6 @@ const MultiSpeciesBatchChart = ({
                 <Pressable
                   key={route.key}
                   onPress={() => {
-                    console.log(i)
                     setTabIndex(i)
                     setSpeciesRadioValue(route.title)
                   }}
