@@ -109,3 +109,34 @@ export const retrieveTrapVisitsRequiringTurbidity = (
 
   return formattedTrapVisits
 }
+
+export const getLadObject = ({
+  activeTabId,
+  trapOperationsStore,
+  lengthAtDateModel,
+}: {
+  activeTabId: string
+  trapOperationsStore: any
+  lengthAtDateModel: any
+}) => {
+  let dateTimeValue = new Date()
+
+  if (
+    activeTabId &&
+    trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
+  ) {
+    dateTimeValue =
+      trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
+  } else if (
+    activeTabId &&
+    trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+  ) {
+    dateTimeValue =
+      trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+  }
+  const ladObjectForTrapDate = findLengthAtDateRun(
+    lengthAtDateModel,
+    dateTimeValue
+  )
+  return ladObjectForTrapDate || null
+}

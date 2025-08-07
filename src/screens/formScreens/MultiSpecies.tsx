@@ -53,7 +53,7 @@ import {
 import React, { useEffect, useState } from 'react'
 import { Keyboard } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
-import { findLengthAtDateRun } from '../../utils/helpers/helperFunctions'
+import { getLadObject } from '../../utils/helpers/helperFunctions'
 
 const MultiSpecies = ({
   route,
@@ -166,11 +166,12 @@ const MultiSpecies = ({
   }, [dropdownsStore.values])
 
   useEffect(() => {
-    if (lengthAtDateModel && tabSlice.activeTabId) {
-      const ladObjectForTrapDate = findLengthAtDateRun(
+    if (tabSlice.activeTabId) {
+      const ladObjectForTrapDate = getLadObject({
+        activeTabId: tabSlice.activeTabId,
+        trapOperationsStore,
         lengthAtDateModel,
-        trapOperationsStore?.[tabSlice.activeTabId]?.values?.trapVisitStopTime
-      )
+      })
       setLadObject(ladObjectForTrapDate)
     } else {
       setLadObject(null)
@@ -693,6 +694,7 @@ const MultiSpecies = ({
                         setNumberOfAdditionalButtons={
                           setNumberOfAdditionalButtons
                         }
+                        selectedProgramObj={route?.params?.selectedProgramObj}
                         disabled={speciesRadioValue === ''}
                       />
                     </VStack>
@@ -717,6 +719,8 @@ const MultiSpecies = ({
                         reorderedTaxon
                       )}
                       ladObject={ladObject}
+                      miltingToggle={null}
+                      eggsToggle={null}
                     />
                   </>
                 )}

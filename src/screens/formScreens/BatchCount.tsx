@@ -58,7 +58,7 @@ import {
 import FishEntriesSummary from '../../components/form/FishEntriesSummary'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
 import {
-  findLengthAtDateRun,
+  getLadObject,
   findRunDefinition,
 } from '../../utils/helpers/helperFunctions'
 
@@ -151,35 +151,17 @@ const BatchCount = ({
   }, [dropdownsStore.values])
 
   useEffect(() => {
-    if (lengthAtDateModel && tabSlice.activeTabId) {
-      let dateTimeValue = new Date()
-
-      const activeTabId = tabSlice.activeTabId
-
-      if (
-        activeTabId &&
-        trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
-      ) {
-        dateTimeValue =
-          trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
-      } else if (
-        activeTabId &&
-        trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
-      ) {
-        dateTimeValue =
-          trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
-      }
-      const ladObjectForTrapDate = findLengthAtDateRun(
+    if (tabSlice.activeTabId) {
+      const ladObjectForTrapDate = getLadObject({
+        activeTabId: tabSlice.activeTabId,
+        trapOperationsStore,
         lengthAtDateModel,
-        dateTimeValue
-      )
-
+      })
       setLadObject(ladObjectForTrapDate)
     } else {
       setLadObject(null)
     }
   }, [lengthAtDateModel, tabSlice.activeTabId])
-
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
   const { species, fishConditions, existingMarks, taxonCode } =
     batchCharacteristics
