@@ -1,5 +1,5 @@
 import { View, Text, Button, Input, HStack, VStack } from 'native-base'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, JSX } from 'react'
 import { DataTable } from 'react-native-paper'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import moment from 'moment'
@@ -141,9 +141,10 @@ const GraphModalContent = ({
                     fontWeight={'light'}
                   >
                     Selected Point Date:{' '}
-                    {moment(pointClicked.pointDateTimestamp).format(
-                      'MMMM Do, YYYY'
-                    )}
+                    {moment(
+                      pointClicked.pointDateTimestamp ||
+                        new Date(pointClicked.x)
+                    ).format('MMMM Do, YYYY')}
                   </Text>
                   {pointClicked.speciesCommonName && (
                     <Text

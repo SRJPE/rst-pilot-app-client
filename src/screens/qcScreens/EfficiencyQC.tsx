@@ -468,6 +468,7 @@ function EfficiencyQC({
                 height={400}
                 width={600}
                 onPointClick={datum => handlePointClick(datum)}
+                key={`effieciency-${Math.random()}`}
               />
             </ScrollView>
           ) : (

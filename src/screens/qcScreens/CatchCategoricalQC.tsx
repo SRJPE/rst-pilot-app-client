@@ -896,7 +896,7 @@ function CatchCategoricalQC({
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
                   yLabel={axisLabelDictionary[buttonName]['yLabel']}
-                  key={buttonName}
+                  key={`${buttonName}-${Math.random()}`}
                   chartType={buttonNameToChartType[buttonName] as any}
                   showDates
                   onPointClick={datum => handlePointClick(datum)}

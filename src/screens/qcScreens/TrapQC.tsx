@@ -354,15 +354,19 @@ function TrapQC({
 
           <ScrollView>
             {activeButtons.map(buttonName => {
+              console.log('rendering graph for: ', buttonName)
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
                   yLabel={axisLabelDictionary[buttonName]['yLabel']}
-                  key={buttonName}
+                  key={`${buttonName}-${Math.random()}`}
                   chartType='bar'
                   data={graphData[buttonName]}
                   showDates={true}
-                  onPointClick={datum => handlePointClicked(datum)}
+                  onPointClick={datum => {
+                    console.log('opc')
+                    handlePointClicked(datum)
+                  }}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'

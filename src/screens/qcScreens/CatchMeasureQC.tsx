@@ -406,7 +406,7 @@ function CatchMeasureQC({
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
                   yLabel={axisLabelDictionary[buttonName]['yLabel']}
-                  key={buttonName}
+                  key={`${buttonName}-${Math.random()}`}
                   chartType='linewithplot'
                   data={graphData[buttonName]}
                   subData={graphSubData[buttonName]}

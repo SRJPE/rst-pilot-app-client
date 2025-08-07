@@ -650,6 +650,7 @@ function CatchFishCountQC({
                   selectedBarColor='green'
                   height={400}
                   width={600}
+                  key={`total-daily-catch-${Math.random()}`}
                 />
               </ScrollView>
             ) : (
