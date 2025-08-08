@@ -104,6 +104,7 @@ export const retrieveTrapVisitsRequiringTurbidity = (
         (response: any) => response.measureName === 'water turbidity'
       )?.measureValueNumeric,
       trapVisitEndTime: trapVisit.createdTrapVisitResponse.trapVisitTimeEnd,
+      trapVisitStartTime: trapVisit.createdTrapVisitResponse.trapVisitTimeStart,
     }
   })
 
