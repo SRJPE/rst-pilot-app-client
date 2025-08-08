@@ -49,9 +49,13 @@ export const connectionChanged = createAsyncThunk(
   'connectivitySlice/connectionChanged',
   async (connectionState: ConnectivityInfoI, thunkAPI) => {
     const payload = connectionState
-    console.log('connection changed...', connectionState)
+    const state: any = thunkAPI.getState() // Access Redux state
     try {
-      if (connectionState.isConnected && connectionState.isInternetReachable) {
+      if (
+        connectionState.isConnected &&
+        connectionState.isInternetReachable &&
+        state.userCredentials.id
+      ) {
         thunkAPI.dispatch(postTrapVisitFormSubmissions())
         thunkAPI.dispatch(postQCSubmissions())
         thunkAPI.dispatch(postMarkRecaptureSubmissions())

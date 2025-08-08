@@ -3,6 +3,7 @@ import api from '../../../api/axiosConfig'
 import { RootState } from '../../store'
 import { generateErrorMessage } from '../../../utils/helpers/helperFunctions'
 import { showSlideAlert } from '../slideAlertSlice'
+import { getTrapVisitDropdownValues } from '../dropdownsSlice'
 
 interface InitialStateI {
   submissionStatus:
@@ -106,6 +107,7 @@ export const postMarkRecaptureSubmissions = createAsyncThunk(
               'success',
               5000
             )
+            thunkAPI.dispatch(getTrapVisitDropdownValues())
             // if rejected, keep the non duplicates in the submissions for reattempts
           } else {
             // showSlideAlert(thunkAPI.dispatch, result, 'error', 5000)
@@ -149,7 +151,7 @@ export const fetchExistingMarks = createAsyncThunk(
     const allUserExistingMarks: any[] = []
     try {
       const state = thunkAPI.getState() as RootState
-      const userPrograms = state.visitSetupDefaults.programs
+      const userPrograms = state.userCredentials.userPrograms
       if (
         state.connectivity.isConnected &&
         state.connectivity.isInternetReachable

@@ -620,6 +620,8 @@ function CatchFishCountQC({
             <CustomSelect
               selectedValue={selectedSpecies}
               placeholder={'Species'}
+              label='Species'
+              camelName='species'
               style={{ width: '100%' }}
               onValueChange={(value: string) => {
                 setSelectedSpecies(value)
@@ -679,7 +681,7 @@ function CatchFishCountQC({
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Save
+                Submit QC
               </Text>
             </Button>
           </HStack>
@@ -1125,7 +1127,7 @@ function CatchFishCountQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height='3/4'
+          height='100%'
         >
           <>
             <CustomModalHeader

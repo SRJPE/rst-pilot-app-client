@@ -17,8 +17,9 @@ import { getTrapVisitDropdownValues } from '../redux/reducers/dropdownsSlice'
 import { fetchPreviousTrapAndCatch } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { RootState, AppDispatch } from '../redux/store'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { find } from 'lodash'
 import { getUserPrograms } from '../redux/reducers/userCredentialsSlice'
+import AlertDialog from '../components/Shared/AlertDialog'
+import { retrieveTrapVisitsRequiringTurbidity } from '../utils/helpers/helperFunctions'
 
 const styles = StyleSheet.create({
   recentItemsContainer: {
@@ -67,48 +68,27 @@ const Home = ({
   previousTrapVisits: any
   visitSetupDefaultState: any
 }) => {
+  // const visitsRequiringTurbidity =
+  //   retrieveTrapVisitsRequiringTurbidity(previousTrapVisits)
+
   const [staggerOpen, setStaggerOpen] = useState(false as boolean)
   const [opacity, setOpacity] = useState(1 as number)
-  const [recentTrapVisits, setRecentTrapVisits] = useState([] as Array<any>)
+  const [visitsRequiringTurbidity, setVisitsRequiringTurbidity] = useState(
+    [] as any[]
+  )
   const dispatch = useDispatch<AppDispatch>()
 
   const connectivityState = useSelector((state: any) => state.connectivity)
 
   useEffect(() => {
-    staggerOpen ? setOpacity(0.25) : setOpacity(1)
-  }, [staggerOpen])
+    setVisitsRequiringTurbidity(
+      retrieveTrapVisitsRequiringTurbidity(previousTrapVisits)
+    )
+  }, [previousTrapVisits])
 
   useEffect(() => {
-    let filteredTrapVisits = previousTrapVisits?.filter((trapVisit: any) =>
-      trapVisit.createdTrapVisitEnvironmentalResponse?.some(
-        (response: any) =>
-          response.measureName === 'water turbidity' &&
-          response.measureValueNumeric === null
-      )
-    )
-    console.log('filteredTrapVisits', filteredTrapVisits)
-    let sortedTrapVisits = filteredTrapVisits
-    sortedTrapVisits.sort(
-      (a: any, b: any) =>
-        new Date(b.createdTrapVisitResponse.trapVisitTimeEnd).getTime() -
-        new Date(a.createdTrapVisitResponse.trapVisitTimeEnd).getTime()
-    )
-    sortedTrapVisits = sortedTrapVisits.map((trapVisit: any) => {
-      return {
-        date: new Date(
-          trapVisit.createdTrapVisitResponse.trapVisitTimeEnd
-        )?.toLocaleDateString('en-US'),
-        streamName: find(visitSetupDefaultState.programs, {
-          id: trapVisit.createdTrapVisitResponse.programId,
-        })?.streamName,
-        trapName: find(visitSetupDefaultState.trapLocations, {
-          id: trapVisit.createdTrapVisitResponse.trapLocationId,
-        })?.trapName,
-      }
-    })
-
-    setRecentTrapVisits(sortedTrapVisits.slice(0, 3))
-  }, [previousTrapVisits, visitSetupDefaultState])
+    staggerOpen ? setOpacity(0.25) : setOpacity(1)
+  }, [staggerOpen])
 
   useEffect(() => {
     if (
@@ -118,7 +98,7 @@ const Home = ({
     ) {
       try {
         dispatch(getVisitSetupDefaults(userCredentialsStore.id))
-        dispatch(getTrapVisitDropdownValues())
+        dispatch(getTrapVisitDropdownValues(userCredentialsStore.id))
         dispatch(fetchPreviousTrapAndCatch())
       } catch (error) {
         console.log('error from home screen: ', error)
@@ -136,7 +116,7 @@ const Home = ({
       if (userCredentialsStore?.id && !userCredentialsStore.userPrograms) {
         try {
           dispatch(getVisitSetupDefaults(userCredentialsStore.id))
-          dispatch(getTrapVisitDropdownValues())
+          dispatch(getTrapVisitDropdownValues(userCredentialsStore.id))
 
           dispatch(getUserPrograms(userCredentialsStore?.id))
         } catch (error) {
@@ -192,16 +172,22 @@ const Home = ({
       <Text fontWeight={300} fontSize={23}>
         Select the action you would like to perform.
       </Text>
-      <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
-        {/* <Text fontWeight={300} fontSize={20} marginBottom={5}>
-          Actions
-        </Text> */}
-        {/* <View style={styles.recentItemsCardRow}>
-          {recentItemsCard({
-            text: 'Input Turbidity',
-          })}
-        </View> */}
-      </View>
+      {visitsRequiringTurbidity.length > 0 && (
+        <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
+          <AlertDialog
+            title='Action Required: Add Turbidity Values'
+            description={`There ${
+              visitsRequiringTurbidity.length === 1
+                ? 'is 1 trap visit'
+                : `are ${visitsRequiringTurbidity.length} trap visits`
+            } missing turbidity values. Please add the missing data to complete your records.`}
+            onPress={() => {
+              navigation.navigate('Input Turbidity')
+              setStaggerOpen(false)
+            }}
+          />
+        </View>
+      )}
 
       <BottomNavigation
         navigation={navigation}

@@ -1,3 +1,5 @@
+import type { TrapVisitResponse } from '../interfaces'
+
 export const generateErrorMessage = (errorCode: string) => {
   let errorMessage
   switch (errorCode) {
@@ -47,8 +49,8 @@ export const findLengthAtDateRun = (array: Array<any>, targetDate: Date) => {
   return array.find(item => {
     const ladDate = new Date(item.ladDate)
     return (
-      ladDate.getMonth() === targetDate.getMonth() &&
-      ladDate.getDate() === targetDate.getDate()
+      ladDate.getMonth() === targetDate?.getMonth() &&
+      ladDate.getDate() === targetDate?.getDate()
     )
   })
 }
@@ -77,4 +79,32 @@ export const findRunDefinition = (ladObj: any, number: number) => {
     buckets.find(bucket => number >= bucket.min && number <= bucket.max)
       ?.definition || 'not recorded'
   )
+}
+
+export const retrieveTrapVisitsRequiringTurbidity = (
+  previousTrapVisits: any[]
+) => {
+  const filteredTrapVisits = previousTrapVisits?.filter((trapVisit: any) => {
+    return trapVisit.createdTrapVisitEnvironmentalResponse?.some(
+      (response: any) =>
+        response.measureName === 'water turbidity' &&
+        response.measureValueNumeric === null
+    )
+    //? Copilot suggested this line, would this be a good idea?
+    //&& trapVisit.createdTrapVisitResponse.trapVisitTimeEnd
+  })
+
+  const formattedTrapVisits = filteredTrapVisits.map((trapVisit: any) => {
+    return {
+      trapVisitId: trapVisit.createdTrapVisitResponse.id,
+      programId: trapVisit.createdTrapVisitResponse.programId,
+      trapLocationId: trapVisit.createdTrapVisitResponse.trapLocationId,
+      waterTurbidity: trapVisit.createdTrapVisitEnvironmentalResponse.find(
+        (response: any) => response.measureName === 'water turbidity'
+      )?.measureValueNumeric,
+      trapVisitEndTime: trapVisit.createdTrapVisitResponse.trapVisitTimeEnd,
+    }
+  })
+
+  return formattedTrapVisits
 }

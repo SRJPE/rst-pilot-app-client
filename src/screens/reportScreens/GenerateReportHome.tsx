@@ -24,6 +24,11 @@ const GenerateReportHome = ({ navigation }: { navigation: any }) => {
               description='Preliminary daily estimates of passage, 90% confidence intervals, and fork length ranges of unmarked juvenile salmonids sampled at specified program site.'
               onPress={() => navigateTo('Share Report')}
             />
+            <ReportCard
+              title='EDI Publish'
+              description='Publish datasets to EDI Repository.'
+              onPress={() => navigateTo('Share Report')}
+            />
           </HStack>
         </VStack>
       </View>

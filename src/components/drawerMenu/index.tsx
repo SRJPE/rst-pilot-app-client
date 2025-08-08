@@ -7,6 +7,7 @@ import {
   HStack,
   IconButton,
   Pressable,
+  ScrollView,
   Text,
   VStack,
 } from 'native-base'
@@ -20,24 +21,38 @@ import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptur
 import { AppDispatch, RootState } from '../../redux/store'
 import AppLogo from '../Shared/AppLogo'
 import MenuButton from './MenuButton'
+import { setActiveTab } from '../../redux/reducers/formSlices/tabSlice'
+import { showFishInputButton } from '@/src/utils/utils'
 
 interface ExtendedDrawerProps extends DrawerContentComponentProps {
   userCredentialsStore: any
+  tabSlice: any
 }
 
 const DrawerMenu = ({
   userCredentialsStore,
+  tabSlice,
   ...props
 }: ExtendedDrawerProps) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
-  const reduxState = useSelector((state: any) => state)
+  const fishProcessingState = useSelector((state: any) => state.fishProcessing)
+
   const { steps, activeStep } = navigationState
+  const { activeTabId, tabs } = tabSlice
+
+  const tabIds = Object.keys(tabs)
+
   const { state, navigation } = props
   const currentRoute = state?.routeNames[state.index]
+
   //unsliced Array for dev
   // const stepsArray = Object.values(steps) as Array<any>
-  const stepsArray = Object.values(steps).slice(0, numOfFormSteps) as Array<any>
+  const stepsArray = Object.values(steps).slice(0, numOfFormSteps) as Array<{
+    completed?: boolean
+    name: string
+    propName: string
+  }>
 
   //mark recapture steps
   const markRecaptureSteps = useSelector(
@@ -48,6 +63,30 @@ const DrawerMenu = ({
     2
   ) as Array<any>
 
+  const showStepNavigationButton = useCallback(
+    (stepIndex: number) => {
+      if (stepsArray[stepIndex].propName === 'visitSetup') {
+        return true
+      }
+
+      if (stepsArray[stepIndex].propName === 'fishInput') {
+        return showFishInputButton({
+          fishProcessing: fishProcessingState,
+          tabIds,
+        })
+      }
+
+      if (stepsArray[stepIndex].completed) {
+        return true
+      }
+
+      if (stepsArray[stepIndex - 1].completed) {
+        return true
+      }
+    },
+    [activeStep, stepsArray]
+  )
+
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {
       navigation?.navigate(buttonTitle)
@@ -55,24 +94,28 @@ const DrawerMenu = ({
     [navigation]
   )
 
-  const handlePressFormButton = useCallback((buttonTitle: string) => {
-    navigation?.navigate('Trap Visit Form', { screen: buttonTitle })
-    //for each object in the steps Array
-    //if the Object contain the name property that matched button title
-    //assign the index top stepPayload
-    //navigate to the index + 1
-    let stepPayload
-    for (let i = 0; i < stepsArray.length; i++) {
-      if (stepsArray[i].name === buttonTitle) {
-        stepPayload = i + 1
+  const handlePressFormButton = useCallback(
+    (buttonTitle: string) => {
+      navigation?.navigate('Trap Visit Form', { screen: buttonTitle })
+      //for each object in the steps Array
+      //if the Object contain the name property that matched button title
+      //assign the index top stepPayload
+      //navigate to the index + 1
+      let stepPayload
+      for (let i = 0; i < stepsArray.length; i++) {
+        if (stepsArray[i].name === buttonTitle) {
+          stepPayload = i + 1
+        }
       }
-    }
-    dispatch({
-      type: updateActiveStep,
-      payload: stepPayload,
-      // payload: steps[buttonTitle],
-    })
-  }, [])
+      dispatch(setActiveTab(tabSlice.activeTabId))
+      dispatch({
+        type: updateActiveStep,
+        payload: stepPayload,
+        // payload: steps[buttonTitle],
+      })
+    },
+    [tabSlice]
+  )
 
   const handlePressMarkRecaptureButton = useCallback((buttonTitle: string) => {
     navigation.navigate('Mark Recapture', { screen: buttonTitle })
@@ -89,7 +132,7 @@ const DrawerMenu = ({
   }, [])
 
   return (
-    <>
+    <ScrollView>
       <VStack bg='primary' pt={8}>
         <AppLogo imageSize={175} />
         <IconButton
@@ -195,9 +238,6 @@ const DrawerMenu = ({
                     icon='ellipse'
                     listItem={true}
                     title={step.name}
-                    // isDisabled={
-                    //   reduxState[step.propName]?.completed ? false : true
-                    // }
                     onPress={() => handlePressMarkRecaptureButton(step.name)}
                   />
                 </VStack>
@@ -215,22 +255,20 @@ const DrawerMenu = ({
         {stepsArray && currentRoute === 'Trap Visit Form' && (
           <>
             <Divider mt='2' />
-            {stepsArray.map((step: any, index: any) => {
-              return (
-                <VStack ml='4' key={index}>
-                  <MenuButton
-                    active={currentRoute === step.name}
-                    // isDisabled={
-                    //   reduxState[step.propName]?.completed ? false : true
-                    // }
-                    completed={step.completed}
-                    onPress={() => handlePressFormButton(step.name)}
-                    icon='ellipse'
-                    listItem={true}
-                    title={step.name}
-                  />
-                </VStack>
-              )
+            {stepsArray.map((step: any, index: number) => {
+              if (showStepNavigationButton(index))
+                return (
+                  <VStack ml='4' key={index}>
+                    <MenuButton
+                      active={activeStep - 1 === index}
+                      completed={step.completed}
+                      onPress={() => handlePressFormButton(step.name)}
+                      icon='ellipse'
+                      listItem={true}
+                      title={step.name}
+                    />
+                  </VStack>
+                )
             })}
           </>
         )}
@@ -241,13 +279,14 @@ const DrawerMenu = ({
           title='Input Turbidity'
         />
       </VStack>
-    </>
+    </ScrollView>
   )
 }
 
 const mapStateToProps = (state: RootState) => {
   return {
     userCredentialsStore: state.userCredentials,
+    tabSlice: state.tabSlice,
   }
 }
 

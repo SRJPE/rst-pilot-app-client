@@ -37,28 +37,41 @@ export const trapOperationsSchema = yup.object().shape({
 
   flowMeasureUnit: yup.string(),
   waterTemperatureUnit: yup.string(),
-  waterTurbidity: yup
-    .number()
-    .nullable()
-    // .required('Water Turbidity Required')
-    .typeError('Value must be a number'),
+  waterTurbidity: yup.lazy(value =>
+    value === ''
+      ? yup.string().min(0)
+      : yup
+          .number()
+          .nullable()
+          .typeError('Value must be a number')
+          .positive('Value should be positive')
+  ),
+  // waterTurbidity: yup
+  //   .number()
+  //   .nullable()
+  //   .typeError('Value must be a number'),
+  // waterTurbidity: yup
+  //   .mixed()
+  //   .test('is-empty-or-number', 'Value must be a number', value => {
+  //     return value === '' || value === null || !isNaN(value)
+  //   }),
   waterTurbidityUnit: yup.string(),
   rpm1: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .nullable()
     .max(30, 'Measurement must be ≤ 30')
     .typeError('Value must be a number')
     .required('Enter at least one measurement'),
   rpm2: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
     .typeError('Value must be a number'),
   rpm3: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
     .typeError('Value must be a number'),
@@ -72,32 +85,32 @@ export const trapPostProcessingSchema = yup.object().shape({
     .required('Debris volume required'),
   totalRevolutions: yup.number().nullable().typeError('Value must be a number'),
   // .required('Total revolutions required'),
-  isWaterTurbidityPresent: yup.boolean(),
-  waterTurbidity: yup.number().when('isWaterTurbidityPresent', {
-    is: true,
-    then: yup
-      .number()
-      .typeError('Value must be a number')
-      .required('Water Turbidity Required'),
-    otherwise: yup.number().nullable(),
-  }),
+  // waterTurbidity: yup
+  //   .number()
+  //   .typeError('Value must be a number')
+  //   .required('Water Turbidity Required'),
+  // waterTurbidity: yup
+  //   .mixed()
+  //   .test('is-empty-or-number', 'Value must be a number', value => {
+  //     return value === '' || value === null || !isNaN(value)
+  //   }),
   comments: yup.string(),
   rpm1: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .nullable()
     .max(30, 'Measurement must be ≤ 30')
     .typeError('Value must be a number')
     .required('Enter at least one measurement'),
   rpm2: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
     .typeError('Value must be a number'),
   rpm3: yup
     .number()
-    .positive('Measurement must be > 0')
+    .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
     .typeError('Value must be a number'),
@@ -306,6 +319,13 @@ export const addAnotherMarkSchema = yup.object().shape({
 })
 export const batchCharacteristicsSchema = yup.object().shape({
   species: yup.string().required('Species required'),
+  // fishConditions: yup.any().required('Fish Condition required'),
+})
+export const multiSpeciesBatchCharacteristicsSchema = yup.object().shape({
+  multiSpecies: yup
+    .array(yup.string())
+    .required('Species required')
+    .min(1, 'At least one species required'),
   // fishConditions: yup.any().required('Fish Condition required'),
 })
 

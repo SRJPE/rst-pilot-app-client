@@ -21,6 +21,7 @@ import {
   Box,
   Button,
 } from 'native-base'
+import CopyFormValuesDialog from '../../components/form/CopyFormValuesDialog'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
 import {
@@ -39,19 +40,20 @@ import {
   navigateHelper,
   navigateFlowRightButton,
   navigateFlowLeftButton,
+  checkOtherTabForms,
 } from '../../utils/utils'
-import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import OptimizedInput from '../../components/Shared/OptimizedInput'
-import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import {
+  TabStateI,
+  setActiveTab,
+} from '../../redux/reducers/formSlices/tabSlice'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { find } from 'lodash'
+import { find, flow } from 'lodash'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
-import * as Yup from 'yup'
-import { getAllTabProcessingResults } from '../../redux/reducers/formSlices/fishProcessingSlice'
+import * as yup from 'yup'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -127,6 +129,8 @@ const TrapOperations = ({
   const permitTempThreshold = waterTempUnitC
     ? trapPermitInfo?.temperatureThreshold
     : convertCtoF(trapPermitInfo?.temperatureThreshold)
+
+  const allTabIds: string[] = Object.keys(tabSlice.tabs)
 
   useEffect(() => {
     // flow threshold on trap location
@@ -234,14 +238,15 @@ const TrapOperations = ({
   const onSubmit = (values: any, tabId: string | null) => {
     if (tabId) {
       const errors = checkForErrors(values)
-      if (values.recordTurbidityInPostProcessing) {
-        values.waterTurbidity = null
-      }
+
       dispatch(
         saveTrapOperations({
           tabId,
           values: {
             ...values,
+            waterTurbidity: values.recordTurbidityInPostProcessing
+              ? null
+              : values.waterTurbidity,
             trapVisitStopTime: endTime, //refactor needed
             trapVisitStartTime: new Date(),
           },
@@ -250,7 +255,6 @@ const TrapOperations = ({
       )
       dispatch(markTrapOperationsCompleted({ tabId, value: true }))
       let stepCompletedCheck = true
-      const allTabIds: string[] = Object.keys(tabSlice.tabs)
       allTabIds.forEach(allTabId => {
         if (!Object.keys(reduxState).includes(allTabId)) {
           if (Object.keys(reduxState).length < allTabIds.length) {
@@ -269,36 +273,13 @@ const TrapOperations = ({
         }
       })
 
-      if (stepCompletedCheck)
-        dispatch(markStepCompleted({ propName: 'trapOperations' }))
-      showSlideAlert(dispatch)
-      console.log('🚀 ~ handleSubmit ~ Status', values)
-    }
-  }
+      if (stepCompletedCheck) {
+        showSlideAlert(dispatch)
+      }
 
-  const inputUnit = (text: string, setFieldValue?: any) => {
-    return (
-      <Text
-        color='#A1A1A1'
-        position='absolute'
-        top={50}
-        right={4}
-        fontSize={16}
-        onPress={() => {
-          if (setFieldValue) {
-            if (text === '°C') {
-              setWaterTempUnitC(true)
-              setFieldValue('waterTemperatureUnit', '°F')
-            } else {
-              setWaterTempUnitC(false)
-              setFieldValue('waterTemperatureUnit', '°C')
-            }
-          }
-        }}
-      >
-        {text}
-      </Text>
-    )
+      if (otherTabFormsValid)
+        dispatch(markStepCompleted({ propName: 'trapOperations' }))
+    }
   }
 
   const popoverTrigger = (triggerProps: any) => {
@@ -322,6 +303,13 @@ const TrapOperations = ({
     const currentDate = selectedDate
     setEndTime(currentDate)
   }
+
+  const otherTabFormsValid = checkOtherTabForms({
+    tabSlice,
+    activeTabId,
+    reduxState,
+    schema: trapOperationsSchema,
+  })
 
   useEffect(() => {
     if (activeTabId) {
@@ -378,6 +366,7 @@ const TrapOperations = ({
   return (
     <Formik
       validationSchema={trapOperationsSchema}
+      validateOnChange={true}
       enableReinitialize={true}
       initialValues={
         activeTabId
@@ -390,6 +379,11 @@ const TrapOperations = ({
         activeTabId && reduxState[activeTabId]
           ? reduxState[activeTabId].errors
           : null
+      }
+      initialTouched={
+        activeTabId && reduxState[activeTabId]?.errors
+          ? reduxState[activeTabId].errors
+          : {}
       }
       // only create initial error when form is not completed
       onSubmit={() => {}}
@@ -404,8 +398,8 @@ const TrapOperations = ({
         errors,
         values,
         resetForm,
-        isValid,
       }) => {
+        const isValid = trapOperationsSchema.isValidSync(values)
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -414,30 +408,56 @@ const TrapOperations = ({
           values.waterTemperatureUnit
         )
 
-        const checkOtherTabForms = () => {
+        const handleValuesCopy = () => {
           const tabIds = Object.keys(tabSlice.tabs)
 
-          const trapOperationsOtherTabsValidity = tabIds.map(tabId => {
-            if (tabId !== activeTabId) {
-              const tabFormValues = reduxState[tabId]?.values
-              const formIsValid =
-                trapOperationsSchema.isValidSync(tabFormValues)
-              return formIsValid
+          tabIds.map(tabId => {
+            const tabIdValues = reduxState[tabId]?.values
+
+            if (tabId === activeTabId) {
+              dispatch(
+                saveTrapOperations({
+                  tabId,
+                  values: {
+                    ...values,
+                    trapVisitStopTime: endTime, //refactor needed
+                    trapVisitStartTime: new Date(),
+                  },
+                  errors,
+                })
+              )
+            } else {
+              dispatch(
+                saveTrapOperations({
+                  tabId,
+                  values: {
+                    ...tabIdValues,
+                    coneSetting: tabIdValues?.coneSetting,
+                    reasonNotFunc: tabIdValues?.reasonNotFunc,
+                    recordTurbidityInPostProcessing:
+                      values.recordTurbidityInPostProcessing,
+                    rpm1: tabIdValues?.rpm1,
+                    rpm2: tabIdValues?.rpm2,
+                    rpm3: tabIdValues?.rpm3,
+                    trapStatus: tabIdValues?.trapStatus,
+                    trapVisitStartTime: tabIdValues?.trapVisitStartTime,
+                    flowMeasure: values.flowMeasure,
+                    flowMeasureUnit: values.flowMeasureUnit,
+                    waterTurbidity: values.waterTurbidity,
+                    waterTurbidityUnit: values.waterTurbidityUnit,
+                    waterTemperature: values.waterTemperature,
+                    waterTemperatureUnit: values.waterTemperatureUnit,
+                    trapVisitStopTime:
+                      tabId === activeTabId
+                        ? endTime
+                        : tabIdValues?.trapVisitStopTime,
+                  },
+                  errors,
+                })
+              )
             }
-
-            return
           })
-
-          const tabIncomplete = trapOperationsOtherTabsValidity.some(
-            result => result === false
-          )
-
-          if (tabIncomplete) return false
-
-          return true
         }
-
-        const otherTabFormsValid = checkOtherTabForms()
 
         const navButtons = useMemo(() => {
           return (
@@ -450,6 +470,7 @@ const TrapOperations = ({
                   warningResultFlow,
                   warningResultTemp
                 )
+                dispatch(setActiveTab(activeTabId))
               }}
               errors={errors}
               touched={touched}
@@ -467,12 +488,28 @@ const TrapOperations = ({
           isValid,
           endTime,
         ])
+
         useEffect(() => {
           if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }
         }, [previouslyActiveTabId, activeTabId])
+
+        const handleTurbidityToggle = (newValue: boolean) => {
+          if (newValue === true) {
+            setFieldValue('waterTurbidity', null)
+            setFieldValue('recordTurbidityInPostProcessing', true)
+          }
+
+          if (newValue === false) {
+            setFieldValue('recordTurbidityInPostProcessing', false)
+            setFieldValue('waterTurbidity', '')
+          }
+
+          setTurbidityToggle(newValue)
+        }
+
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
@@ -486,66 +523,8 @@ const TrapOperations = ({
               my='15'
             >
               <Pressable onPress={Keyboard.dismiss}>
-                <VStack space={4}>
+                <VStack space={1}>
                   <Heading>Trap Operations</Heading>
-                  <FormControl>
-                    <VStack space={2}>
-                      <HStack space={2}>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Trapping End Date and Time:
-                          </Text>
-                          <Popover
-                            placement='bottom left'
-                            trigger={popoverTrigger}
-                          >
-                            <Popover.Content
-                              accessibilityLabel='Trap Visit End Info'
-                              w='600'
-                              mr='10'
-                            >
-                              <Popover.Arrow />
-                              <Popover.CloseButton />
-                              <Popover.Header>
-                                Please set the Date and Time of when you removed
-                                the trap to collect data and ended the current
-                                trapping period.
-                              </Popover.Header>
-                              <Popover.Body p={4}>
-                                <VStack space={2}>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Text fontSize='md'>
-                                      This value is used to record the date and
-                                      time of ending the current trapping period
-                                      and removing the trap from the water to
-                                      collect data.
-                                    </Text>
-                                  </HStack>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Text fontSize='md'>
-                                      At the end of this form during the Post
-                                      Processing step, if you continue trapping,
-                                      you will set the "Trapping Start Date and
-                                      Time" to record the time of starting the
-                                      trap again.
-                                    </Text>
-                                  </HStack>
-                                </VStack>
-                              </Popover.Body>
-                            </Popover.Content>
-                          </Popover>
-                        </FormControl.Label>
-                      </HStack>
-                      <Box alignSelf='flex-start' ml='-2'>
-                        <DateTimePicker
-                          value={endTime}
-                          mode='datetime'
-                          onChange={onEndTimeChange}
-                          accentColor='#007C7C'
-                        />
-                      </Box>
-                    </VStack>
-                  </FormControl>
                   <FormControl>
                     <HStack space={2} alignItems='center'>
                       <FormControl.Label>
@@ -607,10 +586,14 @@ const TrapOperations = ({
                       label='Trap Status'
                       placeholder='Select Trap Status'
                       camelName='trapStatus'
-                      onValueChange={handleChange('trapStatus')}
+                      onValueChange={(itemValue: string) => {
+                        setFieldValue('trapStatus', itemValue).then(() => {
+                          setFieldTouched('trapStatus', true)
+                        })
+                      }}
                       touched={touched}
                       errors={errors}
-                      setFieldTouched={() => setFieldTouched('trapStatus')}
+                      // setFieldTouched={() => setFieldTouched('trapStatus')}
                       selectOptions={dropdownValues.trapFunctionality.map(
                         (item: any) => {
                           if (item.definition == 'trap not in service') {
@@ -628,6 +611,70 @@ const TrapOperations = ({
                       )}
                     />
                   </FormControl>
+                  {values.trapStatus?.length > 0 && (
+                    <FormControl>
+                      <VStack>
+                        <HStack space={2}>
+                          <FormControl.Label>
+                            <Text color='black' fontSize='xl'>
+                              Trapping{' '}
+                              {values.trapStatus === trapNotInServiceIdentifier
+                                ? 'Start'
+                                : 'End'}{' '}
+                              Date and Time:
+                            </Text>
+                            <Popover
+                              placement='bottom left'
+                              trigger={popoverTrigger}
+                            >
+                              <Popover.Content
+                                accessibilityLabel='Trap Visit End Info'
+                                w='600'
+                                mr='10'
+                              >
+                                <Popover.Arrow />
+                                <Popover.CloseButton />
+                                <Popover.Header>
+                                  Please set the Date and Time of when you
+                                  removed the trap to collect data and ended the
+                                  current trapping period.
+                                </Popover.Header>
+                                <Popover.Body p={4}>
+                                  <VStack space={2}>
+                                    <HStack space={2} alignItems='flex-start'>
+                                      <Text fontSize='md'>
+                                        This value is used to record the date
+                                        and time of ending the current trapping
+                                        period and removing the trap from the
+                                        water to collect data.
+                                      </Text>
+                                    </HStack>
+                                    <HStack space={2} alignItems='flex-start'>
+                                      <Text fontSize='md'>
+                                        At the end of this form during the Post
+                                        Processing step, if you continue
+                                        trapping, you will set the "Trapping
+                                        Start Date and Time" to record the time
+                                        of starting the trap again.
+                                      </Text>
+                                    </HStack>
+                                  </VStack>
+                                </Popover.Body>
+                              </Popover.Content>
+                            </Popover>
+                          </FormControl.Label>
+                        </HStack>
+                        <Box alignSelf='flex-start' ml='-2' mb={1}>
+                          <DateTimePicker
+                            value={endTime}
+                            mode='datetime'
+                            onChange={onEndTimeChange}
+                            accentColor='#007C7C'
+                          />
+                        </Box>
+                      </VStack>
+                    </FormControl>
+                  )}
                   {(values.trapStatus === 'trap functioning but not normally' ||
                     values.trapStatus === 'trap not functioning') && (
                     <CustomSelect
@@ -642,7 +689,7 @@ const TrapOperations = ({
                       selectOptions={whyTrapNotFunctioning}
                     />
                   )}
-                  {values.trapStatus.length > 0 && (
+                  {values.trapStatus?.length > 0 && (
                     <>
                       <FormControl w='30%'>
                         <HStack space={4} alignItems='center'>
@@ -689,7 +736,11 @@ const TrapOperations = ({
                         <HStack space={4} alignItems='center'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
-                              RPM Before Cleaning
+                              RPM{' '}
+                              {values.trapStatus === trapNotInServiceIdentifier
+                                ? 'After'
+                                : 'Before'}{' '}
+                              Cleaning
                             </Text>
                           </FormControl.Label>
                           <Popover
@@ -780,42 +831,11 @@ const TrapOperations = ({
                       </FormControl>
 
                       <HStack
-                        space={5}
+                        space={4}
                         width='100%'
                         justifyContent='space-between'
                       >
                         <Heading>Environmental Conditions</Heading>
-                        <FormControl w='30%'>
-                          <HStack space={2} alignItems='center'>
-                            <FormControl.Label>
-                              <Text fontSize='14'>
-                                Record Turbidity in Post Processing
-                              </Text>
-                            </FormControl.Label>
-                            <Switch
-                              name='recordTurbidityInPostProcessing'
-                              shadow='3'
-                              offTrackColor='secondary'
-                              onTrackColor='primary'
-                              size='md'
-                              isChecked={turbidityToggle}
-                              value={values.recordTurbidityInPostProcessing}
-                              onToggle={() => {
-                                setFieldValue('waterTurbidity', null)
-                                !turbidityToggle
-                                  ? setFieldValue(
-                                      'recordTurbidityInPostProcessing',
-                                      true
-                                    )
-                                  : setFieldValue(
-                                      'recordTurbidityInPostProcessing',
-                                      false
-                                    )
-                                setTurbidityToggle(!turbidityToggle)
-                              }}
-                            />
-                          </HStack>
-                        </FormControl>
                       </HStack>
 
                       <HStack space={5}>
@@ -833,6 +853,7 @@ const TrapOperations = ({
                             RightElement={<TextInputAdornment text='cfs' />}
                           />
                         </Box>
+
                         <Box flex={1}>
                           <FormInputComponent
                             showWarning={warningResultTemp}
@@ -863,20 +884,55 @@ const TrapOperations = ({
                           />
                         </Box>
 
-                        <Box flex={1}>
-                          <FormInputComponent
-                            label={'Water Turbidity (via CDEC)'}
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            value={values.waterTurbidity}
-                            camelName={'waterTurbidity'}
-                            onChangeText={handleChange('waterTurbidity')}
-                            onBlur={handleBlur('waterTurbidity')}
-                            RightElement={<TextInputAdornment text='ntu' />}
-                          />
-                        </Box>
+                        {values.recordTurbidityInPostProcessing === false && (
+                          <Box flex={1}>
+                            <FormInputComponent
+                              label={'Water Turbidity (via CDEC)'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.waterTurbidity}
+                              camelName={'waterTurbidity'}
+                              onChangeText={handleChange('waterTurbidity')}
+                              onBlur={handleBlur('waterTurbidity')}
+                              RightElement={<TextInputAdornment text='ntu' />}
+                            />
+                          </Box>
+                        )}
                       </HStack>
+
+                      <Box flex={1} h={'full'}>
+                        <FormControl width={'100%'}>
+                          <HStack space={4} alignItems='center'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl' mb={2}>
+                                Record Turbidity After Trap Visit Save
+                              </Text>
+                            </FormControl.Label>
+                          </HStack>
+
+                          <HStack space={3}>
+                            <Text fontSize='16'>No</Text>
+                            <Switch
+                              name='recordTurbidityInPostProcessing'
+                              shadow='3'
+                              offTrackColor='secondary'
+                              onTrackColor='primary'
+                              size='md'
+                              isChecked={turbidityToggle}
+                              value={values.recordTurbidityInPostProcessing}
+                              onToggle={handleTurbidityToggle}
+                            />
+                            <Text fontSize='16'>Yes</Text>
+                          </HStack>
+                        </FormControl>
+                      </Box>
+                      {allTabIds.length > 1 && (
+                        <CopyFormValuesDialog
+                          valueType='environmental'
+                          onSubmit={handleValuesCopy}
+                        />
+                      )}
                       <Text
                         color='black'
                         fontSize='xl'

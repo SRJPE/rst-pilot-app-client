@@ -1,7 +1,53 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
-import { every, some, sortBy } from 'lodash'
-import { ReleaseMarkI } from './interfaces'
+import { every, some, sortBy, flatten, uniqBy } from 'lodash'
+import { ReleaseMarkI, Taxon } from './interfaces'
+import { ObjectSchema } from 'yup'
+import type { InitialStateI as FishProcessingSliceState } from '../redux/reducers/formSlices/fishProcessingSlice'
+
+export const checkOtherTabForms = ({
+  tabSlice,
+  activeTabId,
+  reduxState,
+  schema,
+}: {
+  tabSlice: any
+  activeTabId: string | null
+  reduxState: any
+  schema: ObjectSchema<any>
+}) => {
+  const tabIds = Object.keys(tabSlice.tabs)
+
+  const otherTabsValidity = tabIds.map(tabId => {
+    if (tabId !== activeTabId) {
+      const tabFormValues = reduxState[tabId]?.values
+      const formIsValid = schema.isValidSync(tabFormValues)
+      return formIsValid
+    }
+
+    return
+  })
+
+  const tabIncomplete = otherTabsValidity.some(result => result === false)
+
+  if (tabIncomplete) return false
+  return true
+}
+
+export const showFishInputButton = ({
+  fishProcessing,
+  tabIds,
+}: {
+  fishProcessing: FishProcessingSliceState
+  tabIds: Array<string>
+}) => {
+  const fishInputRequired = tabIds.some(
+    (tabId: any) =>
+      fishProcessing[tabId]?.values?.fishProcessedResult === 'processed fish'
+  )
+
+  return fishInputRequired
+}
 
 export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   //returns an alphabetically sorted copy of the original array
@@ -13,9 +59,9 @@ export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   return alphabeticalArray
 }
 
-export const reorderTaxon = (taxon: Array<any>) => {
+export const reorderTaxon = (taxonArray: any[]) => {
   //sort the taxon
-  const alphabeticalTaxon = alphabeticalSort(taxon, 'commonname')
+  const alphabeticalTaxon = alphabeticalSort(taxonArray, 'commonname')
   //move chinook and steelhead to the front
   let chinook, steelhead
   for (var i = 0; i < alphabeticalTaxon.length; i++) {
@@ -29,7 +75,17 @@ export const reorderTaxon = (taxon: Array<any>) => {
     }
   }
   alphabeticalTaxon.unshift(chinook, steelhead)
-  return alphabeticalTaxon
+  return alphabeticalTaxon?.map((taxon: any) => ({
+    ...taxon,
+    label: `${taxon?.commonname} ${
+      taxon?.abbreviationCode ? `(${taxon?.abbreviationCode})` : ''
+    }`,
+    value: taxon?.commonname,
+  }))
+}
+
+export const findTaxonCode = (speciesValue: string, taxonArray: any[]) => {
+  return taxonArray?.find(taxon => taxon.commonname === speciesValue)?.code
 }
 
 export const createArray = (start: number, end: number) => {
@@ -49,6 +105,33 @@ interface FormattedFishData {
   [forkLength: number]: {
     [lifeStage: string]: number
   }
+}
+
+export const handleSpeciesSearchTextChange = ({
+  reorderedTaxon,
+  searchValue,
+  setSpeciesList,
+}: {
+  reorderedTaxon: any[]
+  searchValue: string
+  setSpeciesList: React.Dispatch<
+    React.SetStateAction<
+      {
+        label: string
+        value: string
+      }[]
+    >
+  >
+}) => {
+  const filteredSpeciesList = reorderedTaxon.filter(
+    (species: any) =>
+      species.commonname.toLowerCase().includes(searchValue.toLowerCase()) ||
+      species.abbreviationCode
+        ?.toLowerCase()
+        .includes(searchValue.toLowerCase())
+  )
+
+  setSpeciesList(filteredSpeciesList)
 }
 
 export const reformatBatchCountData = (
@@ -81,7 +164,7 @@ export const buttonLookup: any = {
     additionalButtons: 29,
     lifeStage: 'Silvery Parr',
   },
-  '90-120': { firstButton: 90, additionalButtons: 30, lifeStage: 'Smolt' },
+  '90-117+': { firstButton: 90, additionalButtons: 27, lifeStage: 'Smolt' },
 }
 
 export const calculateLifeStage = (forkLength: number) => {
@@ -345,14 +428,15 @@ export const navigateFlowRightButton = ({
         } else if (
           every(tabValues, { fishProcessedResult: 'no fish caught' })
         ) {
-          return 'No Fish Caught'
+          return 'Trap Post-Processing'
+          // return 'No Fish Caught'
         } else {
           return 'Trap Post-Processing'
         }
       }
 
       if (values?.fishProcessedResult === 'no fish caught') {
-        return 'No Fish Caught'
+        return 'Trap Post-Processing'
       } else if (
         values?.fishProcessedResult ===
           'no catch data, fish left in live box' ||
@@ -576,8 +660,14 @@ export const decodedRecentReleaseMarks = (
   const markColorValues = returnDefinitionArray(dropdownValues.markColor)
   const bodyPartValues = returnDefinitionArray(dropdownValues.bodyPart)
 
+  const currentYear = new Date().getFullYear()
+
   return releaseMarks
-    .filter((mark: ReleaseMarkI) => mark.programId === programId)
+    .filter(
+      (mark: ReleaseMarkI) =>
+        mark.programId === programId &&
+        new Date(mark.releasedAt).getFullYear() === currentYear
+    )
     .slice(0, 2)
     .map((mark: ReleaseMarkI) => {
       return {
@@ -587,4 +677,298 @@ export const decodedRecentReleaseMarks = (
         markPosition: bodyPartValues[mark.markPosition - 1],
       }
     })
+}
+
+export const createFormValueDefault = ({
+  value,
+  required = false,
+  error = '',
+  touched = false,
+}: {
+  value: Array<any> | string | boolean | null
+  required?: boolean
+  error?: string
+  touched?: boolean
+}) => {
+  return { value, touched, error, required }
+}
+
+export const groupBySpeciesForkLength = (data: Array<any>) => {
+  const result = {} as any
+  let totalCount = 0 as number
+
+  Object.values(data).forEach((fish: any) => {
+    const { species, forkLength, numFishCaught, run } = fish
+
+    totalCount += Number(numFishCaught)
+
+    if (fish.plusCount) {
+      const key = `${species} - ${
+        run && run !== 'not recorded' ? run : ''
+      } Plus Count`
+      if (!result[key]) {
+        result[key] = Number(numFishCaught)
+      } else {
+        result[key] += Number(numFishCaught)
+      }
+      return
+    }
+
+    if (!result[species]) {
+      result[species] = []
+    }
+
+    // Add `forkLength` repeated `numFishCaught` times
+    for (let i = 0; i < numFishCaught; i++) {
+      if (forkLength) {
+        result[species].push(forkLength)
+      }
+    }
+  })
+
+  // Sort the result object by its keys alphabetically
+  const sortedResult = Object.keys(result)
+    .sort()
+    .reduce((acc, key) => {
+      acc[key] = result[key]
+      return acc
+    }, {} as any)
+
+  Object.assign(result, sortedResult)
+
+  sortedResult['totalCount'] = totalCount
+
+  return sortedResult
+}
+
+export const calculateRpmAvg = (rpms: (string | null)[]) => {
+  const validRpms = rpms.filter(n => n)
+  if (!validRpms.length) {
+    return null
+  }
+  const numericRpms = validRpms.map((str: any) => parseFloat(str))
+  let counter = 0
+  numericRpms.forEach((num: number) => {
+    counter += num
+  })
+  return counter / numericRpms.length
+}
+
+export const getCrewValue = ({
+  visitSetupValues,
+  visitSetupDefaultState,
+  fieldCheckValue,
+}: {
+  visitSetupValues: {
+    crew: string[]
+    dataRecorder?: string
+  }
+  visitSetupDefaultState: { crewMembers: any[] }
+  fieldCheckValue?: string | null
+}) => {
+  const selectedCrewNames: string[] = [...visitSetupValues.crew] // ['james', 'steve']
+
+  const allCrewObjects = flatten(visitSetupDefaultState.crewMembers) // [{..., name: 'james', programId: 1},]
+
+  const selectedCrewNamesMap: any = selectedCrewNames.reduce(
+    (acc, name: string) => ({
+      ...acc,
+      [name]: true,
+    }),
+    {}
+  )
+
+  const filteredCrewIds = uniqBy(
+    allCrewObjects
+      .filter(
+        (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
+      )
+      .map((obj: any) => {
+        let dataRecorder = null
+        if (visitSetupValues.dataRecorder) {
+          dataRecorder =
+            `${obj.firstName} ${obj.lastName}` === visitSetupValues.dataRecorder
+        }
+
+        let fieldCheck = null
+        if (fieldCheckValue) {
+          fieldCheck = `${obj.firstName} ${obj.lastName}` === fieldCheckValue
+        }
+
+        return {
+          personnelId: Number(obj.personnelId),
+          dataRecorder,
+          fieldCheck,
+        }
+      }),
+    'personnelId'
+  )
+  return filteredCrewIds
+}
+
+export const getAddFishStateDefaults = () => {
+  return {
+    whenSpeciesChinook: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null, required: true }),
+      adiposeClipped: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+      fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
+    },
+    whenSpeciesSteelhead: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null, required: true }),
+      adiposeClipped: createFormValueDefault({
+        value: null,
+        touched: true,
+      }),
+      existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+      fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
+    },
+    whenSpeciesOther: {
+      species: createFormValueDefault({ value: null, required: true }),
+      count: createFormValueDefault({ value: null }),
+      forkLength: createFormValueDefault({ value: null, required: true }),
+      run: createFormValueDefault({ value: null }),
+      weight: createFormValueDefault({ value: null }),
+      lifeStage: createFormValueDefault({ value: null }),
+      adiposeClipped: createFormValueDefault({
+        value: null,
+        touched: true,
+        required: false,
+      }),
+      existingMarks: createFormValueDefault({ value: [] }),
+      appliedMarks: createFormValueDefault({ value: [] }),
+      geneticSamples: createFormValueDefault({ value: [] }),
+      dead: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: true,
+      }),
+      plusCountMethod: createFormValueDefault({ value: null }),
+      fishConditions: createFormValueDefault({ value: [] }),
+      comments: createFormValueDefault({ value: null }),
+    },
+  }
+}
+
+export const checkFishMeasureProtocol = ({
+  fishMeasureCounts,
+  fishMeasureProtocol,
+  speciesValue,
+  runValue,
+  lifeStageValue,
+}: {
+  fishMeasureCounts: any
+  fishMeasureProtocol: Record<string, number>
+  speciesValue: string
+  runValue: string
+  lifeStageValue: string
+}) => {
+  // This function is a placeholder for future implementation
+  // It currently does nothing and returns undefined
+  // You can add your logic here when needed
+  const protocol = fishMeasureProtocol
+
+  if (typeof speciesValue === 'string' && speciesValue && protocol) {
+    // Sum all counts that match any protocol key beginning with the current species
+    let protocolMet = false
+    let protocolKeyMet = null as string | null
+
+    for (const protoKey of Object.keys(protocol)) {
+      if (protoKey.startsWith(speciesValue)) {
+        if (protoKey.includes(' - ')) {
+          if (!runValue && !lifeStageValue) {
+            // protocol has run or lifestage but form values do not match. not met
+            continue
+          }
+          // Extract the species part from the protocol key
+          const protocolParts = protoKey.split(' - ')
+          const protoRunOrLifestageName = protocolParts[1] || ''
+          const protoLifeStageName = protocolParts[2] || ''
+
+          if (
+            protoRunOrLifestageName &&
+            protoRunOrLifestageName !== lifeStageValue &&
+            protoRunOrLifestageName !== runValue
+          ) {
+            // protocol has run or lifestage but form values do not match. not met
+            continue
+          } else if (
+            protoRunOrLifestageName &&
+            protoRunOrLifestageName !== runValue &&
+            protoLifeStageName &&
+            protoLifeStageName !== lifeStageValue
+          ) {
+            //protocol has run and life stage but form values do not match. not met
+            continue
+          }
+        }
+
+        const threshold = protocol[protoKey]
+
+        // Sum individualCounts of all matching fishMeasureCounts keys
+        const matchingSum = Object.entries(fishMeasureCounts).reduce(
+          (sum, [key, count]) => {
+            return key.startsWith(protoKey)
+              ? sum +
+                  ((count as { individualCount?: number }).individualCount || 0)
+              : sum
+          },
+          0
+        )
+
+        if (matchingSum >= threshold) {
+          protocolMet = true
+
+          protocolKeyMet = protoKey
+          break
+        }
+      }
+    }
+    return {
+      protocolMet,
+      protocolKeyMet,
+    }
+  }
+}
+
+export const calculateLastFish = (
+  forkLengths: Record<string, any> | null | undefined
+): number | null => {
+  if (!forkLengths || !Object.values(forkLengths).length) return null
+
+  const values = Object.values(forkLengths)
+  const lastObject = values[values.length - 1] as any
+  return lastObject.forkLength || null
 }

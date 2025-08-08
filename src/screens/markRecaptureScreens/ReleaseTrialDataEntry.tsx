@@ -35,7 +35,7 @@ import {
 } from '../../redux/reducers/postSlices/markRecapturePostBundler'
 import { flatten, uniq, findIndex, find } from 'lodash'
 import { ReleaseMarkI } from '../../redux/reducers/addAnotherMarkSlice'
-import { returnDefinitionArray } from '../../utils/utils'
+import { returnDefinitionArray, returnNullableTableId } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -51,7 +51,7 @@ const mapStateToProps = (state: RootState) => {
 
 export interface MarkRecaptureSubmissionI {
   programId: number
-  releasePurposeId?: null | null
+  releasePurposeId?: number | null
   releaseSiteId: number
   releasedAt: Date
   markedAt: Date
@@ -133,8 +133,6 @@ const ReleaseDataEntry = ({
     setMarkedTime(currentDate)
   }
 
-  const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
-
   const runValues = returnDefinitionArray(dropdownValues.run)
   const markTypeValues = returnDefinitionArray(dropdownValues.markType)
   const markColorValues = returnDefinitionArray(dropdownValues.markColor)
@@ -205,8 +203,8 @@ const ReleaseDataEntry = ({
 
       const markRecaptureSubmission: MarkRecaptureSubmissionI = {
         programId:
-          releaseTrialDataEntryState.programId || programIdOfReleaseLocation,
-        // releasePurposeId: null, //left as null
+          programIdOfReleaseLocation || releaseTrialDataEntryState.programId,
+        releasePurposeId: 1, //left as null
         releaseSiteId:
           find(releaseSiteValues, [
             'releaseSiteName',
@@ -388,8 +386,11 @@ const ReleaseDataEntry = ({
                 touched={touched}
                 errors={errors}
                 placeholder='Select Location'
-                onValueChange={handleChange('releaseLocation')}
-                setFieldTouched={() => setFieldTouched('releaseLocation')}
+                onValueChange={(itemValue: string) => {
+                  setFieldValue('releaseLocation', itemValue).then(() => {
+                    setFieldTouched('releaseLocation', true)
+                  })
+                }}
                 selectOptions={preparedReleaseSites?.map(
                   (releaseSite: any) => ({
                     label: releaseSite?.releaseSiteName,
@@ -402,7 +403,7 @@ const ReleaseDataEntry = ({
                 <Text color='black' fontSize='xl'>
                   Confirm Marked Date and Time:
                 </Text>
-                <Box alignSelf='flex-start' minWidth='320'>
+                <Box alignSelf='flex-start'>
                   <DateTimePicker
                     value={markedTime}
                     mode='datetime'
@@ -415,7 +416,7 @@ const ReleaseDataEntry = ({
                 <Text color='black' fontSize='xl'>
                   Confirm Release Date and Time:
                 </Text>
-                <Box alignSelf='flex-start' minWidth='320'>
+                <Box alignSelf='flex-start'>
                   <DateTimePicker
                     value={releaseTime}
                     mode='datetime'
@@ -431,12 +432,13 @@ const ReleaseDataEntry = ({
             handleSubmit={handleSubmit}
             errors={errors}
             touched={touched}
+            appliedMarks={releaseTrialDataEntryState.values.appliedMarks}
           />
           {/* --------- Modals --------- */}
           <CustomModal
             isOpen={addMarkModalOpen}
             closeModal={() => setAddMarkModalOpen(false)}
-            height='1/2'
+            height='100%'
           >
             <AddAnotherMarkModalContent
               closeModal={() => setAddMarkModalOpen(false)}

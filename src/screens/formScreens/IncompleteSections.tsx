@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Heading, View, VStack } from 'native-base'
+import { Box, Divider, Heading, ScrollView, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import navigationSlice, {
@@ -28,7 +28,6 @@ import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetup
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
 import { cloneDeep, flatten, uniq } from 'lodash'
-import { uid } from 'uid'
 import {
   setIncompleteSectionTouched,
   TabStateI,
@@ -39,9 +38,15 @@ import {
   combinePlusCounts,
   navigateHelper,
   returnDefinitionArray,
+  calculateRpmAvg,
+  returnNullableTableId,
+  getCrewValue,
+  showFishInputButton,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import ReviewValuesModal from '../../components/form/ReviewValuesModal'
+import ReviewValuesButton from '../../components/form/ReviewValuesButton'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -54,7 +59,6 @@ const mapStateToProps = (state: RootState) => {
     dropdownsState: state.dropdowns,
     connectivityState: state.connectivity,
     fishInputState: state.fishInput,
-    paperEntryState: state.paperEntry,
     tabState: state.tabSlice,
     addGeneticSamplesState: state.addGeneticSamples,
     appliedMarksState: state.addMarksOrTags,
@@ -73,7 +77,6 @@ const IncompleteSections = ({
   dropdownsState,
   connectivityState,
   fishInputState,
-  paperEntryState,
   tabState,
   addGeneticSamplesState,
   appliedMarksState,
@@ -89,7 +92,6 @@ const IncompleteSections = ({
   dropdownsState: any
   connectivityState: any
   fishInputState: any
-  paperEntryState: any
   tabState: TabStateI
   addGeneticSamplesState: any
   appliedMarksState: any
@@ -101,7 +103,11 @@ const IncompleteSections = ({
     numOfFormSteps - 1
   ) as Array<any>
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [reviewValuesModalIsOpen, setReviewValuesModalIsOpen] = useState(
+    false as boolean
+  )
   const hasSubmittedRef = useRef(false)
+  const tabIds = Object.keys(tabState?.tabs)
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
@@ -185,7 +191,6 @@ const IncompleteSections = ({
     return container
   }
 
-  const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
   const findCrewIdsFromSelectedCrewNames = (
     selectedCrewNames: Array<string>
   ) => {
@@ -227,21 +232,12 @@ const IncompleteSections = ({
     const trapStatusAtEndValues = returnDefinitionArray(
       dropdownsState.values.trapStatusAtEnd
     )
-    const calculateRpmAvg = (rpms: (string | null)[]) => {
-      const validRpms = rpms.filter(n => n)
-      if (!validRpms.length) {
-        return null
-      }
-      const numericRpms = validRpms.map((str: any) => parseFloat(str))
-      let counter = 0
-      numericRpms.forEach((num: number) => {
-        counter += num
-      })
-      return counter / numericRpms.length
-    }
 
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
+      const waterTurbidityIsPresent =
+        trapOperationsState[id].values.waterTurbidity !== '' &&
+        trapOperationsState[id].values.waterTurbidity !== null
       const {
         rpm1: startRpm1,
         rpm2: startRpm2,
@@ -258,7 +254,10 @@ const IncompleteSections = ({
         findCrewIdsFromSelectedCrewNames(selectedCrewNames)
       const trapVisitSubmission = {
         trapVisitUid: id,
-        crew: selectedCrewIds,
+        crew: getCrewValue({
+          visitSetupValues: visitSetupState[id].values,
+          visitSetupDefaultState,
+        }),
         programId: visitSetupState[id].values.programId,
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
@@ -322,14 +321,16 @@ const IncompleteSections = ({
           },
           {
             measureName: 'water turbidity',
-            measureValueNumeric:
-              trapOperationsState[id].values.waterTurbidity ||
-              trapPostProcessingState[id].values.waterTurbidity ||
-              null,
-            measureValueText:
-              trapOperationsState[id].values?.waterTurbidity?.toString() ||
-              trapPostProcessingState[id].values?.waterTurbidity?.toString() ||
-              '',
+            measureValueNumeric: waterTurbidityIsPresent
+              ? trapOperationsState[id].values.waterTurbidity
+              : trapOperationsState[id]?.values?.recordTurbidityInPostProcessing
+              ? null
+              : undefined,
+            measureValueText: waterTurbidityIsPresent
+              ? trapOperationsState[id].values.waterTurbidity?.toString()
+              : trapOperationsState[id]?.values?.recordTurbidityInPostProcessing
+              ? ''
+              : 'undefined',
             measureUnit: 25,
           },
         ],
@@ -491,9 +492,9 @@ const IncompleteSections = ({
             uid: tabId,
             programId,
             trapVisitId: null,
-            taxonCode: returnTaxonCode(fishValue),
+            taxonCode: fishValue.taxonCode,
             captureRunClass: returnNullableTableId(
-              runValues.indexOf(fishValue.run)
+              runValues.indexOf(fishValue?.run?.toLowerCase() || '')
             ),
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
             captureRunClassMethod: getRunClassMethod(fishValue),
@@ -505,7 +506,7 @@ const IncompleteSections = ({
 
             fishCondition: getCatchFishConditions(fishValue.fishCondition),
             lifeStage: returnNullableTableId(
-              lifeStageValues.indexOf(fishValue.lifeStage)
+              lifeStageValues.indexOf(fishValue?.lifeStage?.toLowerCase() || '')
             ),
             forkLength:
               fishValue.forkLength != null
@@ -558,17 +559,29 @@ const IncompleteSections = ({
       }
     })
 
-    console.log('crs', catchRawSubmissions)
-
     if (catchRawSubmissions.length) {
       const catchRawPlusCountCombined = combinePlusCounts(catchRawSubmissions)
       dispatch(saveCatchRawSubmissions(catchRawPlusCountCombined))
     }
   }
 
+  const handleOpenReviewValuesModal = () => {
+    setReviewValuesModalIsOpen(true)
+  }
+
+  const handleCloseReviewValuesModal = () => {
+    setReviewValuesModalIsOpen(false)
+  }
+
+  const renderFishInputButton = showFishInputButton({
+    fishProcessing: fishProcessingState,
+    tabIds,
+  })
+
   return (
     <>
-      <View
+      <ScrollView
+        height={'800px'}
         flex={1}
         bg='#fff'
         // justifyContent='center'
@@ -576,24 +589,46 @@ const IncompleteSections = ({
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={10} p='15%'>
-          <Heading textAlign='center'>
+        <VStack space={8} p='25px'>
+          <Heading textAlign='center' padding={0}>
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>
           {stepsArray.map((step: any, idx: number) => {
-            return (
-              <IncompleteSectionButton
-                name={step.name}
-                completed={step.completed}
-                navigation={navigation}
-                key={idx}
-                step={idx + 1}
-                tabState={tabState}
-              />
+            if (
+              (step.name === 'Fish Input' && renderFishInputButton) ||
+              step.name !== 'Fish Input'
             )
+              return (
+                <IncompleteSectionButton
+                  name={step.name}
+                  completed={step.completed}
+                  navigation={navigation}
+                  key={idx}
+                  step={idx + 1}
+                  tabState={tabState}
+                />
+              )
           })}
+          <Divider />
+          <ReviewValuesButton
+            handleOpenReviewValuesModal={handleOpenReviewValuesModal}
+          />
         </VStack>
-      </View>
+      </ScrollView>
+      {reviewValuesModalIsOpen && (
+        <ReviewValuesModal
+          handleCloseReviewValuesModal={handleCloseReviewValuesModal}
+          isOpen={reviewValuesModalIsOpen}
+          formValues={{
+            visitSetupState,
+            trapOperationsState,
+            fishProcessingState,
+            fishInputState,
+            trapPostProcessingState,
+          }}
+          tabState={tabState}
+        />
+      )}
       <NavButtons
         navigation={navigation}
         handleSubmit={emitSubmission}

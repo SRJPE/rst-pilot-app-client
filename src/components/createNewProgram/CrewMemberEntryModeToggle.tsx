@@ -1,7 +1,6 @@
 import { Button, HStack, Text } from 'native-base'
 import React from 'react'
 import { CrewMemberEntryMode } from './AddCrewMemberModalContent'
-import { reset } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { FormikState } from 'formik'
 import { IndividualCrewMemberValuesI } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
 

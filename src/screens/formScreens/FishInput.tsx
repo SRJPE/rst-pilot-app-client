@@ -33,6 +33,8 @@ import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { StackActions } from '@react-navigation/native'
 import { navigateHelper } from '../../utils/utils'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { find, keyBy, mapValues } from 'lodash'
+import FishEntriesSummary from '../../components/form/FishEntriesSummary'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
@@ -50,6 +52,8 @@ const mapStateToProps = (state: RootState) => {
     tabSlice: state.tabSlice,
     fishInputSlice: state.fishInput,
     navigationSlice: state.navigation,
+    visitSetupState: state.visitSetup,
+    visitSetupDefaultsState: state.visitSetupDefaults,
   }
 }
 
@@ -60,6 +64,8 @@ const FishInput = ({
   tabSlice,
   fishInputSlice,
   navigationSlice,
+  visitSetupState,
+  visitSetupDefaultsState,
 }: {
   navigation: any
   activeTabId: string
@@ -67,12 +73,18 @@ const FishInput = ({
   tabSlice: TabStateI
   fishInputSlice: any
   navigationSlice: any
+  visitSetupState: any
+  visitSetupDefaultsState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addPlusCountModalOpen, setAddPlusCountModalOpen] = useState(
     false as boolean
   )
   const [showError, setShowError] = useState(false as boolean)
+  const [fishMeasureProtocol, setFishMeasureProtocol] = useState(
+    {} as Record<string, number>
+  )
+  const [totalCatchCount, setTotalCatchCount] = useState(0)
   const [addFishModalTab, setAddFishModalTab] = useState<
     'Individual' | 'Batch'
   >('Individual')
@@ -81,10 +93,73 @@ const FishInput = ({
       ? ([...speciesCaptured] as Array<string>)
       : (['YOY Chinook'] as Array<string>)
   )
+  const [lastFishEntry, setLastFishEntry] = useState<any>(null)
+
+  const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
+  const errorMessage =
+    tabSlice.tabs[tabSlice.activeTabId || activeTabId]?.errorDetails[
+      'Fish Input'
+    ]?.fishStore
 
   useEffect(() => {
     checkboxGroupValue.length < 1 ? setShowError(true) : setShowError(false)
   }, [checkboxGroupValue])
+
+  useEffect(() => {
+    if (!tabSlice?.activeTabId || !fishInputSlice) {
+      setTotalCatchCount(0)
+      setLastFishEntry(null)
+      return
+    }
+
+    const fishStore = fishInputSlice?.[tabSlice.activeTabId]?.fishStore as {
+      [key: string]: any
+    }
+
+    if (!fishStore) {
+      setTotalCatchCount(0)
+      setLastFishEntry(null)
+      return
+    }
+
+    const total = Object.values(fishStore).reduce(
+      (sum: number, fishObj: any) =>
+        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
+      0
+    ) as number
+
+    setTotalCatchCount(total)
+    const lastFishEntry = Object.values(fishStore).findLast(
+      fishEntry => !fishEntry.plusCount
+    )
+    setLastFishEntry(lastFishEntry || null)
+  }, [tabSlice.activeTabId, fishInputSlice])
+
+  useEffect(() => {
+    const activeTabId = tabSlice.activeTabId || 'placeholderId'
+
+    const selectedProgramId = visitSetupState[activeTabId]?.values?.programId
+    const selectedProgramObj = find(visitSetupDefaultsState.programs, {
+      programId: selectedProgramId,
+    })
+    if (!selectedProgramObj) return
+    setSelectedProgramObj(selectedProgramObj)
+
+    const fishMeasureProtocolObj = mapValues(
+      keyBy(selectedProgramObj?.fishMeasureProtocol, function (obj) {
+        let keyName = obj.commonname
+        if (obj.runName) {
+          keyName += ` - ${obj.runName}`
+        }
+        if (obj.lifeStageName) {
+          keyName += ` - ${obj.lifeStageName}`
+        }
+        return keyName
+      }),
+      (obj: any) => Number(obj.numberMeasured) || 0
+    )
+    setFishMeasureProtocol(fishMeasureProtocolObj)
+  }, [visitSetupState, tabSlice, visitSetupDefaultsState])
 
   const handleSubmit = () => {
     dispatch(
@@ -143,7 +218,7 @@ const FishInput = ({
           Record catch data using the individual fish input, the batch entry, or
           plus count.
         </Text>
-        <VStack space={6}>
+        <VStack space={4}>
           <HStack space={10} px='4'>
             <Button
               bg='primary'
@@ -152,7 +227,11 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Add Fish')
+                navigation.navigate('Add Fish', {
+                  // Add any props you want to pass here, for example:
+                  fishMeasureProtocol,
+                  selectedProgramObj,
+                })
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>
@@ -166,14 +245,35 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Batch Count')
+                navigation.navigate('Batch Count', {
+                  // Add any props you want to pass here, for example:
+                  fishMeasureProtocol,
+                  selectedProgramObj,
+                })
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>
                 Batch Count
               </Text>
             </Button>
-
+            <Button
+              bg='primary'
+              p='3'
+              borderRadius='5'
+              flex='1'
+              shadow='3'
+              onPress={() => {
+                navigation.navigate('Multi Species', {
+                  // Add any props you want to pass here, for example:
+                  fishMeasureProtocol,
+                  selectedProgramObj,
+                })
+              }}
+            >
+              <Text fontSize='sm' fontWeight='bold' color='white'>
+                Multi-Species
+              </Text>
+            </Button>
             <Button
               bg='primary'
               p='3'
@@ -189,9 +289,28 @@ const FishInput = ({
               </Text>
             </Button>
           </HStack>
-
+          <HStack>
+            <Text style={{ color: 'red', paddingHorizontal: 20 }}>
+              {errorMessage}
+            </Text>
+          </HStack>
+          {lastFishEntry && tabSlice.activeTabId && fishMeasureProtocol && (
+            <Box px='4'>
+              <Heading mb={0}>Catch Summary</Heading>
+              <FishEntriesSummary
+                lastFishEntry={lastFishEntry}
+                totalCatchCount={totalCatchCount}
+                fishMeasureProtocol={fishMeasureProtocol || {}}
+                fishMeasureCounts={
+                  fishInputSlice?.[tabSlice.activeTabId]?.fishMeasureCounts
+                }
+              />
+            </Box>
+          )}
           <Box px='4'>
-            <Heading>Catch Table</Heading>
+            <HStack space={2} alignItems='center'>
+              <Heading mb={0}>Catch Table</Heading>
+            </HStack>
             <FishInputDataTable navigation={navigation} />
           </Box>
         </VStack>
@@ -207,7 +326,7 @@ const FishInput = ({
                 )
               }
             }}
-            height='3/4'
+            height='100%'
           >
             <PlusCountModalContent
               closeModal={() => {

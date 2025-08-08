@@ -1,25 +1,27 @@
-import { Formik, yupToFormErrors, FormikProps } from 'formik'
-import { connect, useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
+import { MaterialIcons } from '@expo/vector-icons'
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { StackActions } from '@react-navigation/native'
+import * as Location from 'expo-location'
+import { Formik, yupToFormErrors } from 'formik'
 import {
-  Text,
-  FormControl,
-  Heading,
-  Input,
-  VStack,
-  HStack,
-  Radio,
-  Icon,
-  Button,
-  Pressable,
-  Popover,
   Box,
+  Button,
+  FormControl,
+  HStack,
+  Heading,
+  Icon,
   IconButton,
+  Popover,
+  Pressable,
+  Radio,
   ScrollView,
+  Text,
+  VStack,
 } from 'native-base'
-import NavButtons from '../../components/formContainer/NavButtons'
-import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DeviceEventEmitter, Keyboard } from 'react-native'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import NavButtons from '../../components/formContainer/NavButtons'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
@@ -32,19 +34,15 @@ import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
 } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
-import * as Location from 'expo-location'
-import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import {
-  QARanges,
-  navigateHelper,
-  navigateFlowRightButton,
-  navigateFlowLeftButton,
-} from '../../utils/utils'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { StackActions } from '@react-navigation/native'
-import DateTimePicker from '@react-native-community/datetimepicker'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { AppDispatch, RootState } from '../../redux/store'
+import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
+import {
+  navigateFlowLeftButton,
+  navigateFlowRightButton,
+  navigateHelper,
+  showFishInputButton,
+} from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = state.tabSlice.activeTabId
@@ -66,6 +64,7 @@ const mapStateToProps = (state: RootState) => {
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
     userCredentialsStore: state.userCredentials,
+    fishProcessingSlice: state.fishProcessing,
   }
 }
 
@@ -78,6 +77,7 @@ const TrapPostProcessing = ({
   previouslyActiveTabId,
   navigationSlice,
   userCredentialsStore,
+  fishProcessingSlice,
 }: {
   navigation: any
   reduxState: any
@@ -86,6 +86,7 @@ const TrapPostProcessing = ({
   willBeHoldingFishForMarkRecapture: boolean
   previouslyActiveTabId: string | null
   navigationSlice: any
+  fishProcessingSlice: any
   userCredentialsStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -94,7 +95,7 @@ const TrapPostProcessing = ({
   const activePage = navigationState.steps[activeStep]?.name
   const recordTurbidityInPostProcessing = useSelector(
     (state: any) =>
-      state.trapOperations?.[tabSlice.activeTabId]?.values
+      !state.trapOperations?.[tabSlice.activeTabId]?.values
         ?.recordTurbidityInPostProcessing
   )
 
@@ -108,6 +109,12 @@ const TrapPostProcessing = ({
     const currentDate = selectedDate
     setStartTime(currentDate)
   }
+
+  const tabIds = Object.keys(tabSlice.tabs)
+  const shouldNavigateToFishInput = showFishInputButton({
+    fishProcessing: fishProcessingSlice,
+    tabIds,
+  })
 
   useEffect(() => {
     if (activeTabId) {
@@ -164,7 +171,6 @@ const TrapPostProcessing = ({
   }
 
   const onSubmit = (values: any, tabId: string) => {
-    console.log('🚀 ~ onSubmit ~ values', values)
     let trapVisitStartTime = null
     if (values.endingTrapStatus == 'Restart Trap') {
       trapVisitStartTime = startTime || new Date()
@@ -230,20 +236,24 @@ const TrapPostProcessing = ({
 
   const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
     if (activeTabId && activeTabId != 'placeholderId') {
-      const destination =
-        direction === 'left'
+      let destination = navigateFlowRightButton({
+        values,
+        activePage,
+        holdingForMarkRecap: willBeHoldingFishForMarkRecapture,
+        navigation,
+      })
+
+      if (direction === 'left') {
+        destination = shouldNavigateToFishInput
           ? navigateFlowLeftButton(
               activePage,
               willBeHoldingFishForMarkRecapture,
               navigation,
               values
             )
-          : navigateFlowRightButton({
-              values,
-              activePage,
-              holdingForMarkRecap: willBeHoldingFishForMarkRecapture,
-              navigation,
-            })
+          : 'Fish Processing'
+      }
+
       const callback = () => {
         navigateHelper(
           destination,
@@ -289,7 +299,11 @@ const TrapPostProcessing = ({
         validationSchema={trapPostProcessingSchema}
         enableReinitialize={true}
         initialValues={initialValues}
-        initialTouched={{ debrisVolume: true }}
+        initialTouched={
+          activeTabId && reduxState[activeTabId]
+            ? reduxState[activeTabId].errors
+            : null
+        }
         initialErrors={
           activeTabId && reduxState[activeTabId]
             ? reduxState[activeTabId].errors
@@ -400,40 +414,19 @@ const TrapPostProcessing = ({
                       onBlur={() => setFieldTouched('totalRevolutions')}
                       value={values.totalRevolutions}
                     />
-
+                    {/* 
                     {recordTurbidityInPostProcessing && (
-                      <FormControl w='30%'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Water Turbidity
-                          </Text>
-                        </FormControl.Label>
-                        <Input
-                          height='50px'
-                          fontSize='16'
-                          placeholder='Numeric Value'
-                          keyboardType='numeric'
-                          onChangeText={handleChange('waterTurbidity')}
-                          onBlur={handleBlur('waterTurbidity')}
-                          value={values.waterTurbidity}
-                        />
-
-                        <Text
-                          color='#A1A1A1'
-                          position='absolute'
-                          top={50}
-                          right={4}
-                          fontSize={16}
-                        >
-                          {'ntu'}
-                        </Text>
-
-                        {Number(values.waterTurbidity) >
-                          QARanges.waterTurbidity.max && (
-                          <RenderWarningMessage />
-                        )}
-                      </FormControl>
-                    )}
+                      <FormInputComponent
+                        label=' Water Turbidity (optional)'
+                        placeholder='0'
+                        touched={touched}
+                        errors={errors}
+                        camelName='totalRevolutions'
+                        onChangeText={handleChange('waterTurbidity')}
+                        onBlur={() => setFieldTouched('totalRevolutions')}
+                        value={values.waterTurbidity}
+                      />
+                    )} */}
                   </HStack>
                   <FormControl>
                     <HStack space={4} alignItems='center'>

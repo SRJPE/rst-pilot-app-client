@@ -304,7 +304,7 @@ const PermittingInformationInput = ({
         <CustomModal
           isOpen={addTakeAndMortalityModalOpen}
           closeModal={() => setAddTakeAndMortalityModalOpen(false)}
-          height='1/2'
+          height='100%'
         >
           <AddTakeAndMortalityModalContent
             addTakeAndMortalityModalContent={addTakeAndMortalityModalContent}

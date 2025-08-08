@@ -32,33 +32,25 @@ const OnStartupProvider = (props: Props) => {
         isInternetReachable != connectionState.isInternetReachable
       ) {
         dispatch(connectionChanged(connectionState as any))
-      } else {
-        const userOnStart = userCredentialsStore.azureUid
-        if (userOnStart) {
-          const tokenRefreshResponse = await refreshUserToken(dispatch)
+      }
 
-          if (
-            tokenRefreshResponse &&
-            [
-              'No refresh token found',
-              'Tokens could not be refreshed',
-            ].includes(tokenRefreshResponse) &&
-            isConnected
-          ) {
-            dispatch(setForcedLogoutModalOpen(true))
-            return
-          }
+      const userOnStart = userCredentialsStore.azureUid
+      if (userOnStart) {
+        const tokenRefreshResponse = await refreshUserToken(dispatch)
 
-          if (tokenRefreshResponse === 'Tokens refreshed') {
-            console.log(
-              '🚀 ~ file: onStartupProvider.tsx:47 ~ Tokens refreshed on application launch'
-            )
-            return
-          }
+        if (
+          tokenRefreshResponse &&
+          ['No refresh token found', 'Tokens could not be refreshed'].includes(
+            tokenRefreshResponse
+          ) &&
+          isConnected
+        ) {
+          dispatch(setForcedLogoutModalOpen(true))
+          return
+        }
 
-          console.log(
-            '🚀 ~ file: onStartupProvider.tsx:54 ~ Tokens still valid on application launch'
-          )
+        if (tokenRefreshResponse === 'Tokens refreshed') {
+          return
         }
       }
     })

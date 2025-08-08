@@ -10,6 +10,8 @@ import {
   resetNavigationSlice,
   updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
+import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
+import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
@@ -80,7 +82,7 @@ const NavButtons = ({
     return false
   }
   function useDeepCompareMemoize(value: any) {
-    const ref = useRef()
+    const ref = useRef<any>(null)
 
     if (!isEqual(value, ref.current)) {
       ref.current = value
@@ -136,7 +138,7 @@ const NavButtons = ({
         break
       case 'Fish Processing':
         if (values?.fishProcessedResult === 'no fish caught') {
-          navigateHelper('No Fish Caught')
+          navigateHelper('Trap Post-Processing')
         } else if (
           values?.fishProcessedResult ===
             'no catch data, fish left in live box' ||
@@ -261,9 +263,12 @@ const NavButtons = ({
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen
     if (activePage === 'Visit Setup') {
+      console.log('resetting form', resetForm)
       //If the left button the form is being reset to clear errors and input styles
       if (resetForm) resetForm()
       dispatch(resetNavigationSlice())
+      dispatch(resetVisitSetupSlice())
+      dispatch(resetTabsSlice())
       navigation.reset({
         index: 0,
         routes: [{ name: 'Visit Setup' }],
@@ -272,14 +277,15 @@ const NavButtons = ({
       return
     }
 
-    if (activePage === 'No Fish Caught') {
+    if (
+      activePage === 'No Fish Caught' ||
+      activePage === 'High Flows' ||
+      activePage === 'Started Trapping'
+    ) {
       navigateFlowLeftButton()
       return
     }
-    if (activePage === 'High Flows') {
-      navigateFlowLeftButton()
-      return
-    }
+
     if (handleSubmit) {
       // if function truthy, submit form to save to redux
       //do not submit when going back from incomplete sections page (prevents early submission errors)
@@ -311,7 +317,7 @@ const NavButtons = ({
         buttonText = 'End Trap Visit'
         break
       case 'Started Trapping':
-        buttonText = 'Home'
+        buttonText = 'Save Trap Visit'
         break
       case 'High Temperatures':
         buttonText = 'Move on to Fish Processing'

@@ -2,13 +2,14 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "jsxImportSource": "nativewind",
     "allowSyntheticDefaultImports": true,
     "jsx": "react-native",
-    "typeRoots": ["./src/types"]
-    // "lib": ["dom", "esnext"],
-    // "moduleResolution": "node",
-    // "noEmit": true,
-    // "skipLibCheck": true,
-    // "resolveJsonModule": true
-  }
+    "typeRoots": ["./src/types"],
+    "paths": {
+      "@/*": ["./*"],
+      "tailwind.config": ["./tailwind.config.js"]
+    }
+  },
+  "exclude": ["node_modules"]
 }

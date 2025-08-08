@@ -445,7 +445,7 @@ function CatchMeasureQC({
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Save
+                Submit QC
               </Text>
             </Button>
           </HStack>
@@ -455,7 +455,7 @@ function CatchMeasureQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height='1/2'
+          height='100%'
         >
           <GraphModalContent
             closeModal={() => handleCloseModal()}

@@ -1,6 +1,14 @@
 import React from 'react'
 import { Formik, useFormikContext } from 'formik'
-import { FormControl, View, VStack, Text, Button, Divider } from 'native-base'
+import {
+  FormControl,
+  View,
+  VStack,
+  Text,
+  Button,
+  Divider,
+  ScrollView,
+} from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { addMarkToAppliedMarks } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { addMarkToBatchCountExistingMarks } from '../../redux/reducers/formSlices/batchCountSlice'
@@ -57,7 +65,10 @@ const AddAnotherMarkModalContent = ({
     } else if (screenName === 'markRecaptureRelease') {
       //if the modal is opened in mark recapture / release
       dispatch(addMarkToAppliedMarks(values))
-    } else if (screenName === 'addIndividualFish') {
+    } else if (
+      screenName === 'addIndividualFish' ||
+      screenName === 'plusCount'
+    ) {
       setExistingMarks({
         ...existingMarks,
         value: [...existingMarksArray, values],
@@ -82,6 +93,7 @@ const AddAnotherMarkModalContent = ({
         touched,
         errors,
         values,
+        setFieldValue,
       }) => (
         <>
           <CustomModalHeader
@@ -89,13 +101,16 @@ const AddAnotherMarkModalContent = ({
             showHeaderButton={false}
             closeModal={closeModal}
           />
-          <View>
+          <ScrollView>
             <VStack space={6} paddingX='10' paddingTop='7' paddingBottom='3'>
               <CustomSelect
                 selectedValue={values.markType}
                 placeholder='Select Mark Type'
-                onValueChange={handleChange('markType')}
-                setFieldTouched={() => setFieldTouched('markType')}
+                onValueChange={(itemValue: string) => {
+                  setFieldValue('markType', itemValue).then(() => {
+                    setFieldTouched('markType', true)
+                  })
+                }}
                 selectOptions={sortedDropdownValues}
                 errors={errors}
                 touched={touched}
@@ -106,8 +121,11 @@ const AddAnotherMarkModalContent = ({
               <CustomSelect
                 selectedValue={values.markColor}
                 placeholder='Color'
-                onValueChange={handleChange('markColor')}
-                setFieldTouched={() => setFieldTouched('markColor')}
+                onValueChange={(itemValue: string) => {
+                  setFieldValue('markColor', itemValue).then(() => {
+                    setFieldTouched('markColor', true)
+                  })
+                }}
                 selectOptions={markColor}
                 errors={errors}
                 touched={touched}
@@ -118,8 +136,11 @@ const AddAnotherMarkModalContent = ({
               <CustomSelect
                 selectedValue={values.markPosition}
                 placeholder='Position'
-                onValueChange={handleChange('markPosition')}
-                setFieldTouched={() => setFieldTouched('markPosition')}
+                onValueChange={(itemValue: string) => {
+                  setFieldValue('markPosition', itemValue).then(() => {
+                    setFieldTouched('markPosition', true)
+                  })
+                }}
                 selectOptions={bodyPart}
                 errors={errors}
                 touched={touched}
@@ -143,7 +164,7 @@ const AddAnotherMarkModalContent = ({
                 </Text>
               </Button>
             </VStack>
-          </View>
+          </ScrollView>
         </>
       )}
     </Formik>

@@ -1,30 +1,12 @@
 import * as React from 'react'
-import { Dimensions, StyleSheet, View } from 'react-native'
+import { Dimensions } from 'react-native'
 import { SceneMap, TabBar, TabBarProps, TabView } from 'react-native-tab-view'
 import CatchFishCountQC from './CatchFishCountQC'
 import CatchFishCountByDateQC from './CatchFishCountByDateQC'
 import CustomModalHeader from '../../components/Shared/CustomModalHeader'
-import {
-  Button,
-  HStack,
-  View as NativeBaseView,
-  VStack,
-  Text,
-  ScrollView,
-  Icon,
-  Input,
-  Box,
-  Heading,
-  Radio,
-} from 'native-base'
+import { View as NativeBaseView } from 'native-base'
 
 const initialLayout = { width: Dimensions.get('window').width }
-
-export const TabPanelWrapper = ({
-  children,
-}: {
-  children: React.ReactNode
-}) => <View style={styles.tabPanel}>{children}</View>
 
 const TotalDailyCountMain = ({
   navigation,
@@ -53,7 +35,7 @@ const TotalDailyCountMain = ({
       {...props}
       indicatorStyle={{ backgroundColor: '#007C7C' }}
       style={{ backgroundColor: 'white' }}
-      labelStyle={{ color: '#007C7C' }}
+      // tabStyle={{ color: '#007C7C' }}
     />
   )
 
@@ -78,17 +60,11 @@ const TotalDailyCountMain = ({
           renderTabBar={renderTabBar}
           onIndexChange={setIndex}
           initialLayout={initialLayout}
+          commonOptions={{ labelStyle: { color: '#007C7C' } }}
         />
       </NativeBaseView>
     </>
   )
 }
-
-const styles = StyleSheet.create({
-  tabPanel: {
-    flex: 1,
-    padding: 25,
-  },
-})
 
 export default TotalDailyCountMain

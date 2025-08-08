@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons'
+import { useNavigation } from '@react-navigation/native'
 import { Formik } from 'formik'
+import { startCase } from 'lodash'
 import {
   Button,
-  Divider,
   FormControl,
   HStack,
   Icon,
@@ -11,9 +12,8 @@ import {
   ScrollView,
   Text,
   VStack,
-  View,
 } from 'native-base'
-import React, { memo, useCallback, useState } from 'react'
+import React, { memo, useCallback, useMemo, useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   addMarkToBatchCountExistingMarks,
@@ -22,21 +22,20 @@ import {
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../../redux/store'
-import {
-  reorderTaxon,
-  returnDefinitionArray,
-  decodedRecentReleaseMarks,
-} from '../../../utils/utils'
-import CustomModalHeader from '../../Shared/CustomModalHeader'
-import CustomSelect from '../../Shared/CustomSelect'
-import MarkBadgeList from '../../markRecapture/MarkBadgeList'
-import CustomModal from '../../Shared/CustomModal'
-import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
 import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
-import { ReleaseMarkI } from '../../../utils/interfaces'
-import SpeciesDropDown from '../SpeciesDropDown'
+import { ReleaseMarkI, Taxon } from '../../../utils/interfaces'
+import {
+  findTaxonCode,
+  handleSpeciesSearchTextChange,
+  reorderTaxon,
+} from '../../../utils/utils'
+import MarkBadgeList from '../../markRecapture/MarkBadgeList'
+import AddAnotherMarkModalContent from '../../Shared/AddAnotherMarkModalContent'
+import CustomModal from '../../Shared/CustomModal'
+import CustomModalHeader from '../../Shared/CustomModalHeader'
+import AddExistingMark from '../AddExistingMark'
 import FishConditionsDropDown from '../FishConditionsDropDown'
-import { startCase } from 'lodash'
+import SpeciesDropDown from '../SpeciesDropDown'
 
 const BatchCharacteristicsModalContent = ({
   closeModal,
@@ -50,15 +49,24 @@ const BatchCharacteristicsModalContent = ({
   visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-  const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
-  const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
-
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+  const tabId = tabSlice?.activeTabId || 'placeholderId'
+  const activeProgramId = visitSetupState?.[tabId]?.values?.programId
+  const currentProgramTaxon = dropdownValues?.programTaxonAbbreviation?.[
+    activeProgramId
+  ] as Taxon[]
 
-  const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
+  const defaultTaxonList = dropdownValues?.taxon
 
+  const reorderedTaxon = useMemo(
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
+    [currentProgramTaxon, activeProgramId]
+  )
+
+  const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
+  const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
   const [fishConditionDropdownOpen, setFishConditionDropdownOpen] = useState(
     false as boolean
   )
@@ -70,18 +78,13 @@ const BatchCharacteristicsModalContent = ({
       value: condition?.definition,
     }))
   )
-
   const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
     false as boolean
   )
-  const [speciesList, setSpeciesList] = useState<
-    { label: string; value: string }[]
-  >(
-    reorderedTaxon.map((taxon: any) => ({
-      label: taxon?.commonname,
-      value: taxon?.commonname,
-    }))
-  )
+
+  const [speciesList, setSpeciesList] =
+    useState<{ label: string; value: string }[]>(reorderedTaxon)
+
   const onSpeciesOpen = useCallback(() => {
     setFishConditionDropdownOpen(false)
   }, [])
@@ -89,7 +92,14 @@ const BatchCharacteristicsModalContent = ({
     setSpeciesDropDownOpen(false)
   }, [])
 
+  const navigation = useNavigation() as any
+
   const handleFormSubmit = (values: any) => {
+    const selectedTaxonCode = findTaxonCode(
+      values.species as string,
+      reorderedTaxon
+    )
+
     delete values.existingMarks
     delete values.batchCountExistingMarks
     let activeTabId = tabSlice.activeTabId
@@ -98,6 +108,7 @@ const BatchCharacteristicsModalContent = ({
         dispatch(
           saveBatchCharacteristics({
             ...values,
+            taxonCode: selectedTaxonCode,
             tabId: activeTabId,
           })
         )
@@ -112,6 +123,7 @@ const BatchCharacteristicsModalContent = ({
           saveBatchCharacteristics({
             ...values,
 
+            taxonCode: selectedTaxonCode,
             tabId: activeTabId,
           })
         )
@@ -151,7 +163,18 @@ const BatchCharacteristicsModalContent = ({
             <CustomModalHeader
               headerText={'Batch Characteristics'}
               showHeaderButton={false}
-              closeModal={closeModal}
+              closeModal={() => {
+                closeModal()
+                if (
+                  !values.species &&
+                  !batchCountStore.batchCharacteristics.species
+                ) {
+                  navigation.preload('Fish Input')
+                  navigation.navigate('Trap Visit Form', {
+                    screen: 'Fish Input',
+                  })
+                }
+              }}
             />
             <VStack px='5%' space={4}>
               <Text justifyContent='center' fontSize='lg'>
@@ -159,36 +182,33 @@ const BatchCharacteristicsModalContent = ({
                 marking or sampling a fish.
               </Text>
               <VStack space={4}>
-                <FormControl pr='5' mb={speciesDropDownOpen ? 180 : 0}>
+                {/* //TODO: Add error logic for custom species dropdown */}
+                {/* //TODO: Replace with Custom Select component */}
+                <SpeciesDropDown
+                  open={speciesDropDownOpen}
+                  onOpen={onSpeciesOpen}
+                  setOpen={setSpeciesDropDownOpen}
+                  list={speciesList}
+                  setList={setSpeciesList}
+                  setFieldValue={setFieldValue}
+                  setFieldTouched={setFieldTouched}
+                  onClose={() => {
+                    setSpeciesList(reorderedTaxon)
+                  }}
+                  onChangeSearchText={searchValue =>
+                    handleSpeciesSearchTextChange({
+                      reorderedTaxon,
+                      searchValue,
+                      setSpeciesList,
+                    })
+                  }
+                />
+                <FormControl w='100%'>
                   <FormControl.Label>
                     <Text color='black' fontSize='md'>
-                      Species
+                      Fish Condition (optional)
                     </Text>
                   </FormControl.Label>
-
-                  {/* //TODO: Add error logic for custom species dropdown */}
-                  {/* //TODO: Replace with Custom Select component */}
-                  <SpeciesDropDown
-                    open={speciesDropDownOpen}
-                    onOpen={onSpeciesOpen}
-                    setOpen={setSpeciesDropDownOpen}
-                    list={speciesList}
-                    setList={setSpeciesList}
-                    setFieldValue={setFieldValue}
-                    setFieldTouched={setFieldTouched}
-                  />
-                </FormControl>
-                <FormControl
-                  w='100%'
-                  pr='5'
-                  mb={fishConditionDropdownOpen ? 160 : 0}
-                >
-                  <FormControl.Label>
-                    <Text color='black' fontSize='md'>
-                      Fish Condition
-                    </Text>
-                  </FormControl.Label>
-
                   {/* //TODO: Add error logic for custom fish conditions dropdown */}
                   <FishConditionsDropDown
                     open={fishConditionDropdownOpen}
@@ -201,7 +221,6 @@ const BatchCharacteristicsModalContent = ({
                   />
                 </FormControl>
               </VStack>
-
               <VStack space={4} w={'20%'}>
                 <FormControl>
                   <FormControl.Label>
@@ -240,62 +259,18 @@ const BatchCharacteristicsModalContent = ({
                   </Radio.Group>
                 </FormControl>
               </VStack>
-
               <VStack space={4} w={'80%'}>
-                <Text color='black' fontSize='xl'>
-                  Add Existing Mark
-                </Text>
                 {batchCountStore.batchCharacteristics.existingMarks.length <
                   1 && (
-                  <VStack space={5}>
-                    {dropdownValues?.releaseMarks?.length > 0 &&
-                      decodedRecentReleaseMarks(
-                        dropdownValues,
-                        tabSlice?.activeTabId
-                          ? visitSetupState?.[tabSlice.activeTabId]?.values
-                              ?.programId
-                          : null
-                      ).map((recentReleaseMark: any, index: number) => {
-                        const { id, markType, markColor, markPosition } =
-                          recentReleaseMark
-                        return (
-                          <Button
-                            key={index}
-                            bg={
-                              recentExistingMarks.some(
-                                (mark: ReleaseMarkI) => mark.id === id
-                              )
-                                ? 'primary'
-                                : 'secondary'
-                            }
-                            shadow='3'
-                            borderRadius='5'
-                            w='90%'
-                            onPress={() => {
-                              handlePressRecentExistingMarkButton(
-                                recentReleaseMark
-                              )
-                            }}
-                          >
-                            <Text
-                              color={
-                                recentExistingMarks.some(
-                                  (mark: ReleaseMarkI) => mark.id === id
-                                )
-                                  ? 'white'
-                                  : 'primary'
-                              }
-                              fontWeight='500'
-                              fontSize='md'
-                            >
-                              {`${markType}${
-                                markColor ? `- ${markColor}` : ''
-                              } ${markPosition ? `- ${markPosition}` : ''}`}
-                            </Text>
-                          </Button>
-                        )
-                      })}
-                  </VStack>
+                  <AddExistingMark
+                    dropdownValues={dropdownValues}
+                    activeTabId={tabSlice.activeTabId}
+                    recentExistingMarks={recentExistingMarks}
+                    handlePressRecentExistingMarkButton={
+                      handlePressRecentExistingMarkButton
+                    }
+                    visitSetupState={visitSetupState}
+                  />
                 )}
                 <MarkBadgeList
                   badgeListContent={
@@ -344,7 +319,6 @@ const BatchCharacteristicsModalContent = ({
                 onPress={() => {
                   handleSubmit()
                   setFishConditionDropdownOpen(false)
-
                   closeModal()
                 }}
               >
@@ -354,17 +328,18 @@ const BatchCharacteristicsModalContent = ({
               </Button>
             </VStack>
             {/* --------- Modals --------- */}
-
-            <CustomModal
-              isOpen={addMarkModalOpen}
-              closeModal={() => setAddMarkModalOpen(false)}
-              height='1/2'
-            >
-              <AddAnotherMarkModalContent
+            {addMarkModalOpen && (
+              <CustomModal
+                isOpen={addMarkModalOpen}
                 closeModal={() => setAddMarkModalOpen(false)}
-                screenName={'batchCount'}
-              />
-            </CustomModal>
+                height='100%'
+              >
+                <AddAnotherMarkModalContent
+                  closeModal={() => setAddMarkModalOpen(false)}
+                  screenName={'batchCount'}
+                />
+              </CustomModal>
+            )}
           </>
         )}
       </Formik>
