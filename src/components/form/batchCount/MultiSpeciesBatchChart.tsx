@@ -245,7 +245,11 @@ const MultiSpeciesBatchChart = ({
               </Box>
             )
           })}
-          <HStack w='full' background='gray.200'>
+          <HStack
+            w='full'
+            background='gray.200'
+            style={{ borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}
+          >
             <Text fontSize={18} p={3} display='flex'>
               <Text bold>Species:</Text>
               <Text> </Text>
