@@ -186,6 +186,10 @@ const MultiSpeciesBatchChart = ({
               h={41}
               borderWidth={1}
               background='gray.200'
+              style={{
+                borderTopLeftRadius: i === 0 ? 15 : 0,
+                borderTopRightRadius: i === 9 ? 15 : 0,
+              }}
             >
               <Center h={'full'} w={'full'}>
                 <Text fontSize={18} bold>
