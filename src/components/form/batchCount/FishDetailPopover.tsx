@@ -89,6 +89,7 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
             h={'full'}
             w={'full'}
             background={'white'}
+            borderRadius={0}
           >
             <Text fontSize={18} {...generateCellStyles(cellData)}>
               {forkLength || ''}

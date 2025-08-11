@@ -51,8 +51,6 @@ const BatchCountButtonGrid = ({
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
 
-  console.log('ladObject', ladObject)
-
   const dispatch = useDispatch<AppDispatch>()
   const [showPopover, setShowPopover] = useState<boolean>(false)
 
