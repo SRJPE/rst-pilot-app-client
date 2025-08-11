@@ -33,6 +33,7 @@ import efficiencyTrialProtocolsSlice from './createNewProgramSlices/efficiencyTr
 import permitInformationSlice from './createNewProgramSlices/permitInformationSlice'
 import multipleTrapsSlice from './createNewProgramSlices/multipleTrapsSlice'
 import monitoringProgramPostBundler from './postSlices/monitoringProgramPostBundler'
+import generateReportsSlice from './generateReportSlice'
 import markRecaptureCacheSlice from './markRecaptureSlices/markRecaptureCache'
 import userAuthSlice from './userAuthSlice'
 import personnelSlice from './personnelSlice'
@@ -170,6 +171,7 @@ export default combineReducers({
   efficiencyTrialProtocols: efficiencyTrialProtocolsSlice,
   permitInformation: permitInformationSlice,
   multipleTraps: multipleTrapsSlice,
+  generateReports: generateReportsSlice,
   userAuth: userAuthSlice,
   personnel: personnelSlice,
 })

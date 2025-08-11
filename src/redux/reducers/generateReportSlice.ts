@@ -1,0 +1,185 @@
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { cloneDeep } from 'lodash'
+import yup from 'yup'
+import api from '../../api/axiosConfig'
+import { shareReportSchema } from '../../utils/helpers/yupValidations'
+import { RootState } from '../store'
+
+const uninitializedStatus = 'uninitialized'
+const pendingStatus = 'pending'
+const fulfilledStatus = 'fulfilled'
+const rejectedStatus = 'rejected'
+
+export interface ProgramI {
+  id: number
+  personnelId: number
+  programId: number
+  programName: string | null
+  streamName: string | null
+  personnelLead: number | null
+  fundingAgency: number | null
+  efficiencyProtocolsDocumentLink: string | null
+  trappingProtocolsDocumentLink: string | null
+  createdAt: string | null
+  updatedAt: string | null
+}
+
+export interface PersonnelI {
+  id: number
+  firstName?: string
+  lastName?: string
+  email?: string
+  phone?: string
+  agencyId?: number
+  role?: string
+  orcidId?: string
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+// interface InitialStateI {
+//   program: ProgramI
+//   personnelLead: PersonnelI
+//   fundingAgency: {}
+// }
+
+interface APIResponseI {
+  data: unknown
+  status: number
+}
+
+const initialState: any = {
+  status: uninitializedStatus,
+  submissionStatus: 'not-submitted',
+  mostRecentReportFilePath: null,
+  previousEmailSubmissions: [],
+  reportType: null,
+  emailValues: {
+    emailSubject: 'testSubject',
+    emailBody: 'test body',
+    emailRecipients: ['jhoang@flowwest.com'],
+    // emailAttachments: [],
+  },
+  values: {
+    program: {},
+    personnelLead: {},
+    fundingAgency: {},
+    catchBiWeekly: {},
+    environmentalBiWeekly: {},
+    releaseBiWeekly: {},
+  },
+}
+
+// Async actions API calls
+export const getBiWeeklyPassageSummary = createAsyncThunk(
+  'generateReportsSlice/getBiWeeklyPassageSummary',
+  async (values: yup.InferType<typeof shareReportSchema>) => {
+    const programId = values.programId
+    const response: APIResponseI = await api.get(
+      `reports/bi-weekly-passage-summary/${programId}`
+    )
+    return response.data
+  }
+)
+
+type ShareReportProps = yup.InferType<typeof shareReportSchema>
+
+export const sendBiWeeklyPassageSummary = createAsyncThunk(
+  'generateReportsSlice/getBiWeeklyPassageSummary',
+  async ({
+    values,
+    sender,
+  }: {
+    values: ShareReportProps
+    sender: { senderName: string | null; senderEmail: string | null }
+  }) => {
+    const programId = values.programId
+    const response: APIResponseI = await api.post(
+      `reports/bi-weekly-passage-summary/${programId}`,
+      { values, sender }
+    )
+    return response.status
+  }
+)
+
+export const postBiWeeklyPassageSummaryEmail = createAsyncThunk(
+  'generateReportsSlice/postBiWeeklyPassageSummaryEmail',
+
+  async (_, thunkAPI) => {
+    const state = thunkAPI.getState() as RootState
+    let payload: {
+      biWeeklyPassageSummaryEmailResponse: any[]
+    } = {
+      biWeeklyPassageSummaryEmailResponse: [],
+    }
+    //get submissions
+    const emailSubmissionValues = state.generateReports.emailValues
+    const emailSubmissionValuesCopy = cloneDeep(emailSubmissionValues)
+    console.log('🚀 ~ emailSubmissionValuesCopy:', emailSubmissionValuesCopy)
+    const apiResponse: APIResponseI = await api.post(
+      'report/email',
+      emailSubmissionValuesCopy
+    )
+    // get response from server
+
+    console.log('🚀 ~ apiResponse.data:', apiResponse.data)
+    payload.biWeeklyPassageSummaryEmailResponse.push(apiResponse.data)
+
+    return payload
+  }
+)
+
+export const generateReportsSlice = createSlice({
+  name: 'generateReports',
+  initialState: initialState,
+  reducers: {
+    updateMostRecentReportFilePath: (state, action) => {
+      state.mostRecentReportFilePath = action.payload
+    },
+  },
+  extraReducers: builder => {
+    builder
+      //get cases
+      .addCase(getBiWeeklyPassageSummary.pending.type, state => {
+        state.status = pendingStatus
+      })
+      .addCase(
+        getBiWeeklyPassageSummary.fulfilled.type,
+        (state, action: any) => {
+          state.status = fulfilledStatus
+          state.values.program = action.payload.program[0]
+          state.values.personnelLead = action.payload.personnelLead[0]
+          state.values.fundingAgency = action.payload.fundingAgency[0]
+          state.values.environmentalBiWeekly =
+            action.payload.environmentalBiWeekly
+          state.values.catchBiWeekly = action.payload.catchBiWeekly
+          state.values.releaseBiWeekly = action.payload.releaseBiWeekly
+        }
+      )
+      .addCase(getBiWeeklyPassageSummary.rejected.type, state => {
+        state.status = rejectedStatus
+      })
+      //post cases
+      .addCase(postBiWeeklyPassageSummaryEmail.pending.type, state => {
+        state.submissionStatus = 'submitting...'
+      })
+      .addCase(
+        postBiWeeklyPassageSummaryEmail.fulfilled.type,
+        (state, action: any) => {
+          const biWeeklyPassageSummaryEmailResponse = action.payload
+          state.submissionStatus = 'submission-successful'
+          state.emailResponses = [
+            ...state.emailResponses,
+            ...biWeeklyPassageSummaryEmailResponse,
+          ]
+        }
+      )
+      .addCase(postBiWeeklyPassageSummaryEmail.rejected.type, state => {
+        state.submissionStatus = 'submission-failed'
+      })
+  },
+})
+
+export const { updateMostRecentReportFilePath } = generateReportsSlice.actions
+
+export default generateReportsSlice.reducer

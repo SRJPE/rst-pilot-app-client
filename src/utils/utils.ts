@@ -571,6 +571,13 @@ export const normalizeDate = (date: Date) => {
   return date.getTime()
 }
 
+export const getTwoWeeksPriorDate = () => {
+  const currentDate = new Date()
+  const twoWeeksPriorDate = new Date(currentDate)
+  twoWeeksPriorDate.setDate(currentDate.getDate() - 14)
+  return twoWeeksPriorDate.toLocaleDateString()
+}
+
 export const groupArrayItems = (array: any, size: number) => {
   const groupedItems = []
   for (let i = 0; i < array.length; i += size) {

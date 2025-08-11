@@ -44,6 +44,7 @@
     "@reduxjs/toolkit": "^1.8.5",
     "@types/react": "~18.0.27",
     "axios": "^0.27.2",
+    "docx": "^8.5.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "expo": "^53.0.7",
     "expo-auth-session": "~6.1.5",
