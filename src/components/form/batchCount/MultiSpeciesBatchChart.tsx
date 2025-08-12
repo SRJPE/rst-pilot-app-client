@@ -92,7 +92,7 @@ const MultiSpeciesBatchChart = ({
       return `${existingPlusCountTotal}`
     }
 
-    return 'Not Entered Yet'
+    return '0'
   }, [batchCountStore.forkLengths, speciesRadioValue])
 
   const [routes, setRoutes] = useState<Array<TabNavigationRoute>>([])
