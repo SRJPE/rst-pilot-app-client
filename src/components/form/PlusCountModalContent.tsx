@@ -314,7 +314,7 @@ const PlusCountModalContent = ({
                         )}
                         validationSchema={addPlusCountsSchema}
                       />
-                      <VStack space={4} w={'80%'}>
+                      <VStack space={4} w={'100%'}>
                         <AddExistingMark
                           dropdownValues={dropdownValues}
                           activeTabId={tabSlice.activeTabId}
