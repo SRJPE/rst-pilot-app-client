@@ -12,7 +12,6 @@ import {
 import { ChevronUpIcon, ChevronDownIcon } from '@/components/ui/icon'
 import { useEffect, useState } from 'react'
 import { startCase } from 'lodash'
-import { count } from 'console'
 
 type FishParts = {
   species: string
@@ -78,8 +77,8 @@ const FishEntriesSummary = ({
    */
   function makeKey({ species, run, lifeStage }: FishParts): string {
     let key = species
-    if (run) key += ` - ${run}`
-    if (lifeStage) key += ` - ${lifeStage}`
+    if (run && run !== 'not recorded') key += ` - ${run}`
+    if (lifeStage && lifeStage !== 'not recorded') key += ` - ${lifeStage}`
     return key
   }
 
