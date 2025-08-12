@@ -8,6 +8,9 @@ import {
   saveVisitSetup,
   resetVisitSetupSlice,
 } from '../../redux/reducers/formSlices/visitSetupSlice'
+import { resetFishProcessingSlice } from '@/src/redux/reducers/formSlices/fishProcessingSlice'
+import { resetTrapPostProcessingSlice } from '@/src/redux/reducers/formSlices/trapPostProcessingSlice'
+import { resetTrapOperationsSlice } from '@/src/redux/reducers/formSlices/trapOperationsSlice'
 import {
   FormControl,
   Heading,
@@ -285,9 +288,11 @@ const VisitSetup = ({
   }
 
   const updateSelectedProgram = (streamName: string) => {
-    console.log('updateSelectedProgram', streamName)
     dispatch(resetTabsSlice())
     dispatch(resetVisitSetupSlice())
+    dispatch(resetFishProcessingSlice())
+    dispatch(resetTrapPostProcessingSlice())
+    dispatch(resetTrapOperationsSlice())
     let programId = null
     visitSetupDefaultsState?.programs.forEach((program: any) => {
       if (program.streamName === streamName) programId = program.id
