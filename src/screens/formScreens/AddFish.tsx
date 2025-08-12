@@ -15,6 +15,7 @@ import {
   Text,
   View,
   VStack,
+  KeyboardAvoidingView,
 } from 'native-base'
 import { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { Keyboard, TouchableNativeFeedback } from 'react-native'
@@ -769,7 +770,7 @@ const AddFishContent = ({
         }
       }}
     >
-      <View flex={1}>
+      <KeyboardAvoidingView flex='1' behavior='padding'>
         <ScrollView
           scrollEnabled
           flex={1}
@@ -1656,7 +1657,7 @@ const AddFishContent = ({
             dropdownValues={dropdownsStore.values}
           />
         </CustomModal>
-      </View>
+      </KeyboardAvoidingView>
     </TouchableNativeFeedback>
   )
 }
