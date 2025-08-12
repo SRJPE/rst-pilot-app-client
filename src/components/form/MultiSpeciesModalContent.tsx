@@ -175,10 +175,10 @@ const MultiSpeciesModalContent = ({
                 }}
               />
               <VStack px='5%' space={4}>
-                <Text justifyContent='center' fontSize='lg'>
+                {/* <Text justifyContent='center' fontSize='lg'>
                   Please return to the individual fish input if you plan on
                   marking or sampling a fish.
-                </Text>
+                </Text> */}
                 <VStack space={4}>
                   {/* //TODO: Add error logic for custom species dropdown */}
                   {/* //TODO: Replace with Custom Select component */}
@@ -320,7 +320,7 @@ const MultiSpeciesModalContent = ({
                 </VStack>
                 <Button
                   bg='primary'
-                  mt={300}
+                  // mt={300}
                   my='5'
                   px='10'
                   shadow='3'
