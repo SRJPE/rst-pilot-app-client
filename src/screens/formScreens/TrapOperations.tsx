@@ -128,7 +128,7 @@ const TrapOperations = ({
   const trapNotInServiceLabel = '- restart trapping'
   const trapNotInServiceIdentifier = 'trap not in service - restart trapping'
   const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
-  const [endTime, setEndTime] = useState(new Date() as any)
+  const [endTime, setEndTime] = useState(null as any)
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
   const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
@@ -392,8 +392,12 @@ const TrapOperations = ({
         reduxState[activeTabId]?.values?.trapVisitStopTime !== 'Invalid Date'
       ) {
         setEndTime(
-          reduxState[activeTabId]?.values?.trapVisitStopTime || new Date()
+          reduxState[activeTabId]?.values?.trapVisitStopTime
+            ? new Date(reduxState[activeTabId]?.values?.trapVisitStopTime)
+            : new Date()
         )
+      } else {
+        setEndTime(new Date())
       }
     }
   }, [activeTabId, reduxState])
@@ -476,6 +480,7 @@ const TrapOperations = ({
     (values: any, setFieldValue: any) => {
       // no program form fields have been set
       // assume has not been customized
+      if (!endTime) return
       if (
         !programFormFields?.length ||
         !sectionFields.length ||
@@ -536,7 +541,11 @@ const TrapOperations = ({
                 </HStack>
                 <Box alignSelf='flex-start' ml='-2'>
                   <DateTimePicker
-                    value={values?.[fieldName] || new Date()}
+                    value={
+                      values?.[fieldName]
+                        ? new Date(values?.[fieldName])
+                        : new Date()
+                    }
                     mode='datetime'
                     onChange={(event: any, selectedDate: any) => {
                       setFieldValue(fieldName, selectedDate || new Date())

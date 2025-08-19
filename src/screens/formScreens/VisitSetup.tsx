@@ -617,7 +617,6 @@ const VisitSetup = ({
             />
           )
         }, [navigation, handleSubmit, errors, touched, values])
-        console.log('values', values)
         useEffect(() => {
           // if (
           //   tabSlice.previouslyActiveTabId &&
