@@ -1178,7 +1178,6 @@ export const formatGeneticsSampleId = ({
 export const findTrapLocationIds = (visitSetupState: any) => {
   let container = [] as any
   for (let tabId in visitSetupState) {
-    console.log('tabId', tabId)
     if (tabId === 'placeholderId' || tabId === '_persist') continue
     container.push(visitSetupState[tabId].values.trapLocationId)
   }
