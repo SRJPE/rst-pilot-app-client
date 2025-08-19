@@ -330,7 +330,7 @@ const ConditionalTrapVisitFields = ({
     if (fieldType === 'input') {
       let inputWidth = '28%'
       if (fieldName.toLowerCase().includes('flow')) {
-        inputWidth = '20%' // Wider for water temperature
+        inputWidth = '20%'
       }
       return (
         <Box

@@ -66,6 +66,7 @@ const MultiSpecies = ({
   fishInputSlice,
   visitSetupDefaults,
   selectedProgramId,
+  visitSetupState,
 }: {
   route: any
   tabSlice: TabStateI
@@ -75,6 +76,7 @@ const MultiSpecies = ({
   fishInputSlice: any
   visitSetupDefaults: any
   selectedProgramId: number | null
+  visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
@@ -818,6 +820,7 @@ const MultiSpecies = ({
                       ladObject={ladObject}
                       miltingToggle={miltingToggle}
                       eggsToggle={eggsToggle}
+                      visitSetupState={visitSetupState}
                     />
                   </>
                 )}
@@ -927,6 +930,7 @@ const mapStateToProps = (state: RootState) => {
     selectedProgramId:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.programId,
+    visitSetupState: state.visitSetup,
   }
 }
 export default connect(mapStateToProps)(MultiSpecies)

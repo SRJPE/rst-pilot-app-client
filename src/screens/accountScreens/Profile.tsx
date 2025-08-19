@@ -14,6 +14,7 @@ import {
   HStack,
   Icon,
   Pressable,
+  ScrollView,
   Text,
   VStack,
 } from 'native-base'
@@ -139,173 +140,175 @@ const Profile = ({
 
   return (
     <>
-      <Box overflow='hidden'>
-        <HStack justifyContent='flex-end' margin={5}>
-          <Button onPress={() => navigation.navigate('Home')}>
-            <Icon
-              as={Ionicons}
-              name={'home'}
-              size={'xl'}
-              opacity={0.75}
-              color={'primary'}
-              mr='1'
-            />
-          </Button>
-        </HStack>
-        <VStack alignItems='center' marginBottom='8'>
-          <Text fontSize={'3xl'}>{userCredentialsStore.displayName}</Text>
-          <Text fontSize={'lg'}>{userCredentialsStore.emailAddress}</Text>
-          <Text fontSize={'xl'} mb={5}>
-            {userCredentialsStore.role === 'lead' ? 'Lead' : 'Non-Lead'}
-          </Text>
-          <Button
-            alignSelf='center'
-            bg='transparent'
-            borderWidth={1}
-            borderColor='primary'
-            onPress={() => setEditAccountInfoModalOpen(true)}
-          >
-            <Text fontWeight='bold' color='primary'>
-              EDIT PROFILE
+      <ScrollView>
+        <Box overflow='hidden'>
+          <HStack justifyContent='flex-end' margin={5}>
+            <Button onPress={() => navigation.navigate('Home')}>
+              <Icon
+                as={Ionicons}
+                name={'home'}
+                size={'xl'}
+                opacity={0.75}
+                color={'primary'}
+                mr='1'
+              />
+            </Button>
+          </HStack>
+          <VStack alignItems='center' marginBottom='8'>
+            <Text fontSize={'3xl'}>{userCredentialsStore.displayName}</Text>
+            <Text fontSize={'lg'}>{userCredentialsStore.emailAddress}</Text>
+            <Text fontSize={'xl'} mb={5}>
+              {userCredentialsStore.role === 'lead' ? 'Lead' : 'Non-Lead'}
             </Text>
-          </Button>
-        </VStack>
-        <VStack
-          py='2%'
-          px='4%'
-          pt='4'
-          overflow='hidden'
-          height={'100%'}
-          roundedBottom='xl'
-        >
-          <HStack justifyContent='space-between' alignItems='center'>
-            <VStack py='7'>
-              <HStack
-                justifyContent='space-between'
-                alignItems='center'
-                width='100%'
-              >
-                <Text fontSize='2xl' bold mb={5}>
-                  {userPrograms.length === 1
-                    ? 'Monitoring Program'
-                    : 'Monitoring Programs'}
+            <Button
+              alignSelf='center'
+              bg='transparent'
+              borderWidth={1}
+              borderColor='primary'
+              onPress={() => setEditAccountInfoModalOpen(true)}
+            >
+              <Text fontWeight='bold' color='primary'>
+                EDIT PROFILE
+              </Text>
+            </Button>
+          </VStack>
+          <VStack
+            py='2%'
+            px='4%'
+            pt='4'
+            overflow='hidden'
+            height={'100%'}
+            roundedBottom='xl'
+          >
+            <HStack justifyContent='space-between' alignItems='center'>
+              <VStack py='7'>
+                <HStack
+                  justifyContent='space-between'
+                  alignItems='center'
+                  width='100%'
+                >
+                  <Text fontSize='2xl' bold mb={5}>
+                    {userPrograms.length === 1
+                      ? 'Monitoring Program'
+                      : 'Monitoring Programs'}
+                  </Text>
+                  <Button
+                    mb={15}
+                    alignSelf='center'
+                    bg='transparent'
+                    onPress={() => {
+                      if (deviceIsConnected) {
+                        navigation?.navigate('Monitoring Program')
+                      } else {
+                        showSlideAlert(
+                          dispatch,
+                          'Please connect to the internet to create a new program',
+                          'error',
+                          3000
+                        )
+                      }
+                    }}
+                  >
+                    <HStack alignItems='center'>
+                      <Icon
+                        as={Ionicons}
+                        name={'add'}
+                        size={'lg'}
+                        opacity={0.75}
+                        color={'primary'}
+                        mr='1'
+                      />
+                      <Text fontSize='lg' fontWeight='bold' color='primary'>
+                        Create New Program
+                      </Text>
+                    </HStack>
+                  </Button>
+                </HStack>
+                <HStack
+                  // space={5}
+                  style={{ columnGap: 10 }}
+                  flexWrap={'wrap'}
+                >
+                  {userPrograms.length === 0 ? (
+                    <Text fontSize='xl'>No Monitoring Programs Available</Text>
+                  ) : (
+                    userPrograms.map((program: any) => (
+                      <Button
+                        key={program.id}
+                        borderWidth={1}
+                        borderColor='dark.500'
+                        mb={5}
+                        onPress={() => {
+                          setSelectedMonitoringProgramInfo(program)
+                          setMonitoringProgramInfoModalOpen(true)
+                        }}
+                      >
+                        <Text fontSize='lg'>{program.programName}</Text>
+                      </Button>
+                    ))
+                  )}
+                </HStack>
+              </VStack>
+            </HStack>
+            <Divider bg='#414141' />
+            <Pressable my='7'>
+              <HStack justifyContent='space-between' alignItems='center'>
+                <Text fontSize='2xl' bold>
+                  View Permit
                 </Text>
-                <Button
-                  mb={15}
-                  alignSelf='center'
-                  bg='transparent'
-                  onPress={() => {
-                    if (deviceIsConnected) {
-                      navigation?.navigate('Monitoring Program')
-                    } else {
-                      showSlideAlert(
-                        dispatch,
-                        'Please connect to the internet to create a new program',
-                        'error',
-                        3000
-                      )
-                    }
+                <Icon
+                  as={Entypo}
+                  name='chevron-right'
+                  color='black'
+                  size={8}
+                  marginX={3}
+                />
+              </HStack>
+            </Pressable>
+            <Divider bg='#414141' />
+            <Pressable
+              my='7'
+              onPress={async () => await handleChangePasswordButtonAsync()}
+            >
+              <HStack justifyContent='space-between' alignItems='center'>
+                <Text fontSize='2xl' bold>
+                  Change Password
+                </Text>
+              </HStack>
+            </Pressable>
+            <Divider bg='#414141' />
+            {userIsLead && (
+              <>
+                <Pressable
+                  my='7'
+                  onPress={async () => {
+                    setAddNewUserModalOpen(true)
                   }}
                 >
-                  <HStack alignItems='center'>
-                    <Icon
-                      as={Ionicons}
-                      name={'add'}
-                      size={'lg'}
-                      opacity={0.75}
-                      color={'primary'}
-                      mr='1'
-                    />
-                    <Text fontSize='lg' fontWeight='bold' color='primary'>
-                      Create New Program
+                  <HStack justifyContent='space-between' alignItems='center'>
+                    <Text fontSize='2xl' bold>
+                      Create New User
                     </Text>
                   </HStack>
-                </Button>
-              </HStack>
-              <HStack
-                // space={5}
-                style={{ columnGap: 10 }}
-                flexWrap={'wrap'}
-              >
-                {userPrograms.length === 0 ? (
-                  <Text fontSize='xl'>No Monitoring Programs Available</Text>
-                ) : (
-                  userPrograms.map((program: any) => (
-                    <Button
-                      key={program.id}
-                      borderWidth={1}
-                      borderColor='dark.500'
-                      mb={5}
-                      onPress={() => {
-                        setSelectedMonitoringProgramInfo(program)
-                        setMonitoringProgramInfoModalOpen(true)
-                      }}
-                    >
-                      <Text fontSize='lg'>{program.programName}</Text>
-                    </Button>
-                  ))
-                )}
-              </HStack>
-            </VStack>
-          </HStack>
-          <Divider bg='#414141' />
-          <Pressable my='7'>
-            <HStack justifyContent='space-between' alignItems='center'>
-              <Text fontSize='2xl' bold>
-                View Permit
-              </Text>
-              <Icon
-                as={Entypo}
-                name='chevron-right'
-                color='black'
-                size={8}
-                marginX={3}
-              />
-            </HStack>
-          </Pressable>
-          <Divider bg='#414141' />
-          <Pressable
-            my='7'
-            onPress={async () => await handleChangePasswordButtonAsync()}
-          >
-            <HStack justifyContent='space-between' alignItems='center'>
-              <Text fontSize='2xl' bold>
-                Change Password
-              </Text>
-            </HStack>
-          </Pressable>
-          <Divider bg='#414141' />
-          {userIsLead && (
-            <>
-              <Pressable
-                my='7'
-                onPress={async () => {
-                  setAddNewUserModalOpen(true)
-                }}
-              >
-                <HStack justifyContent='space-between' alignItems='center'>
-                  <Text fontSize='2xl' bold>
-                    Create New User
-                  </Text>
-                </HStack>
-              </Pressable>
-              <Divider bg='#414141' />
-            </>
-          )}
+                </Pressable>
+                <Divider bg='#414141' />
+              </>
+            )}
 
-          <Pressable
-            my='7'
-            onPress={() => {
-              ///////
-              setLogoutModalOpen(true)
-            }}
-          >
-            <Text fontSize='2xl' fontWeight='bold' color='#FF0000'>
-              Sign out
-            </Text>
-          </Pressable>
-        </VStack>
-      </Box>
+            <Pressable
+              my='7'
+              onPress={() => {
+                ///////
+                setLogoutModalOpen(true)
+              }}
+            >
+              <Text fontSize='2xl' fontWeight='bold' color='#FF0000'>
+                Sign out
+              </Text>
+            </Pressable>
+          </VStack>
+        </Box>
+      </ScrollView>
       {/* --------- Modals --------- */}
 
       {/* Edit Account Info Modal */}
