@@ -192,10 +192,6 @@ const MultiSpecies = ({
       currentProgramInfo?.programFormFields,
       'fieldName'
     )
-    console.log(
-      '🚀 ~ MultiSpecies.tsx:206 ~ MultiSpecies ~ formFieldsLookup:',
-      formFieldsLookup
-    )
 
     setProgramFormFieldsObj(formFieldsLookup)
   }, [visitSetupDefaults])
@@ -219,7 +215,6 @@ const MultiSpecies = ({
 
   const handlePressSaveBatchCount = () => {
     if (tabId) {
-      // dispatch(saveBatchCount({ ...batchCountStore }))
       const forkLengthsArray = Object.values(batchCountStore.forkLengths)
 
       const groupedForkLengths = {
@@ -275,10 +270,6 @@ const MultiSpecies = ({
   }
 
   const handleToggles = (toggleName: string) => {
-    console.log(
-      '🚀 ~ MultiSpecies.tsx:246 ~ handleToggles ~ toggleName:',
-      toggleName
-    )
     switch (toggleName) {
       case 'dead':
         if (deadIsLocked) break
