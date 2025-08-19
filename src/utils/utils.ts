@@ -1169,10 +1169,17 @@ export const formatGeneticsSampleId = ({
       suffixPadding: 4,
     })
 
-    console.log('sampleIdSuffix', sampleIdSuffix)
-
     sampleId = `${currentYear}_${sampleIdSuffix}`
   }
 
   return sampleId
+}
+
+export const findTrapLocationIds = (visitSetupState: any) => {
+  let container = [] as any
+  for (let tabId in visitSetupState) {
+    if (tabId === 'placeholderId' || tabId === '_persist') continue
+    container.push(visitSetupState[tabId].values.trapLocationId)
+  }
+  return container
 }

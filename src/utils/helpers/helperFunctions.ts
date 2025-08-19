@@ -48,6 +48,8 @@ export const convertUTCToLocalTime = (utcTime: string) => {
 export const findLengthAtDateRun = (array: Array<any>, targetDate: Date) => {
   return array.find(item => {
     const ladDate = new Date(item.ladDate)
+
+    if (!targetDate) return false
     return (
       ladDate.getMonth() === targetDate?.getMonth() &&
       ladDate.getDate() === targetDate?.getDate()
@@ -135,9 +137,10 @@ export const getLadObject = ({
     dateTimeValue =
       trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
   }
+
   const ladObjectForTrapDate = findLengthAtDateRun(
     lengthAtDateModel,
-    dateTimeValue
+    dateTimeValue ? new Date(dateTimeValue) : new Date()
   )
   return ladObjectForTrapDate || null
 }

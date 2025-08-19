@@ -459,7 +459,7 @@ const TrapPostProcessing = ({
                 <Box alignSelf='flex-start' ml='-2'>
                   {startTime ? (
                     <DateTimePicker
-                      value={startTime}
+                      value={startTime ? new Date(startTime) : new Date()}
                       mode='datetime'
                       onChange={onStartTimeChange}
                       accentColor='#007C7C'
@@ -496,7 +496,11 @@ const TrapPostProcessing = ({
             </HStack>
             <Box alignSelf='flex-start' ml='-2'>
               <DateTimePicker
-                value={values?.trapVisitTime || new Date()}
+                value={
+                  values?.trapVisitTime
+                    ? new Date(values?.trapVisitTime)
+                    : new Date()
+                }
                 mode='datetime'
                 onChange={(event: any, selectedDate: any) => {
                   setFieldValue('trapVisitTime', selectedDate || new Date())

@@ -27,7 +27,7 @@ import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOp
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
-import { cloneDeep, find, flatten, keyBy, uniq, map } from 'lodash'
+import { cloneDeep, find, flatten, keyBy, uniq } from 'lodash'
 import {
   setIncompleteSectionTouched,
   TabStateI,
@@ -43,6 +43,7 @@ import {
   calcAvgValue,
   mergePreserveNonNull,
   showFishInputButton,
+  findTrapLocationIds,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -203,15 +204,6 @@ const IncompleteSections = ({
     dispatch(resetVisitSetupSlice())
     dispatch(resetPaperEntrySlice())
     dispatch(resetTabsSlice())
-  }
-
-  const findTrapLocationIds = () => {
-    let container = [] as any
-    for (let tabId in visitSetupState) {
-      if (tabId === 'placeholderId') continue
-      container.push(visitSetupState[tabId].values.trapLocationId)
-    }
-    return container
   }
 
   useEffect(() => {
@@ -612,7 +604,7 @@ const IncompleteSections = ({
         saveTrapVisitInformation({
           crew: visitSetupState[tabIds[0]].values.crew,
           programId: visitSetupState[tabIds[0]].values.programId,
-          trapLocationIds: findTrapLocationIds(),
+          trapLocationIds: findTrapLocationIds(visitSetupState),
         })
       )
     })
@@ -654,7 +646,10 @@ const IncompleteSections = ({
 
     const catchRawSubmissions: any[] = []
 
-    Object.keys(fishInputState).forEach(tabId => {
+    // skips the "Unused variable" warning
+    let { _persist: _, ...fishInputStateClean } = fishInputState
+
+    Object.keys(fishInputStateClean).forEach(tabId => {
       if (tabId != 'placeholderId') {
         const fishStoreKeys = Object.keys(fishInputState[tabId].fishStore)
         const programId = Object.keys(visitSetupState).includes(tabId)

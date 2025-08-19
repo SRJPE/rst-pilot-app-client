@@ -29,6 +29,7 @@ import {
   returnDefinitionArray,
   calcAvgValue,
   returnNullableTableId,
+  findTrapLocationIds,
 } from '../../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
@@ -118,15 +119,6 @@ const HighFlows = ({
     dispatch(resetVisitSetupSlice())
     dispatch(resetPaperEntrySlice())
     dispatch(resetTabsSlice())
-  }
-
-  const findTrapLocationIds = () => {
-    let container = [] as any
-    for (let tabId in visitSetupState) {
-      if (tabId === 'placeholderId') continue
-      container.push(visitSetupState[tabId].values.trapLocationId)
-    }
-    return container
   }
 
   const findCrewIdsFromSelectedCrewNames = (
@@ -288,7 +280,7 @@ const HighFlows = ({
         saveTrapVisitInformation({
           crew: visitSetupState[tabIds[0]].values.crew,
           programId: visitSetupState[tabIds[0]].values.programId,
-          trapLocationIds: findTrapLocationIds(),
+          trapLocationIds: findTrapLocationIds(visitSetupState),
         })
       )
     })

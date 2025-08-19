@@ -119,6 +119,48 @@ const monitoringProgramPostPersistConfig = {
   storage: AsyncStorage,
 }
 
+const trapVisitTabSlicePersistConfig = {
+  key: 'trapVisitTabSlicePersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
+const trapVisitSetupPersistConfig = {
+  key: 'trapVisitSetupPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
+const trapVisitTrapOperationsPersistConfig = {
+  key: 'trapVisitTrapOperationsPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
+const trapVisitFishProcessingPersistConfig = {
+  key: 'trapVisitFishProcessingPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
+const trapVisitFishInputPersistConfig = {
+  key: 'trapVisitFishInputPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
+const trapVisitBatchCountPersistConfig = {
+  key: 'trapVisitBatchCountPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
+const trapVisitPostProcessingPersistConfig = {
+  key: 'trapVisitPostProcessingPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
 export default combineReducers({
   dropdowns: persistReducer(dropdownsPersistConfig, dropdownsSlice),
   visitSetupDefaults: persistReducer(
@@ -127,13 +169,22 @@ export default combineReducers({
   ),
   slideAlert: slideAlertSlice,
   navigation: navigationSlice,
-  visitSetup: visitSetupSlice,
-  trapOperations: trapOperationsSlice,
-  fishProcessing: fishProcessingSlice,
-  fishInput: fishInputSlice,
+  visitSetup: persistReducer(trapVisitSetupPersistConfig, visitSetupSlice),
+  trapOperations: persistReducer(
+    trapVisitTrapOperationsPersistConfig,
+    trapOperationsSlice
+  ),
+  fishProcessing: persistReducer(
+    trapVisitFishProcessingPersistConfig,
+    fishProcessingSlice
+  ),
+  fishInput: persistReducer(trapVisitFishInputPersistConfig, fishInputSlice),
   addMarksOrTags: addMarksOrTagsSlice,
   addGeneticSamples: addGeneticSamplesSlice,
-  trapPostProcessing: trapPostProcessingSlice,
+  trapPostProcessing: persistReducer(
+    trapVisitPostProcessingPersistConfig,
+    trapPostProcessingSlice
+  ),
   markRecaptureNavigation: markRecaptureNavigationSlice,
   markRecaptureCache: persistReducer(
     markRecaptureCachePersistConfig,
@@ -163,8 +214,8 @@ export default combineReducers({
   ),
   trappingSites: trappingSitesSlice,
   crewMembers: crewMembersSlice,
-  tabSlice: tabSlice,
-  batchCount: batchCountSlice,
+  tabSlice: persistReducer(trapVisitTabSlicePersistConfig, tabSlice),
+  batchCount: persistReducer(trapVisitBatchCountPersistConfig, batchCountSlice),
   createNewProgramHome: createNewProgramHomeSlice,
   trappingProtocols: trappingProtocolsSlice,
   efficiencyTrialProtocols: efficiencyTrialProtocolsSlice,

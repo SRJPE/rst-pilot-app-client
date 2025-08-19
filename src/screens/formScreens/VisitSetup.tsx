@@ -553,6 +553,26 @@ const VisitSetup = ({
     }
   }
 
+  const handleNavButtonClick = (values: any) => {
+    const callback = () => {
+      navigateHelper(
+        'Trap Operations',
+        navigationSlice,
+        navigation,
+        dispatch,
+        updateActiveStep
+      )
+    }
+    navigation.dispatch(StackActions.replace('Loading...'))
+    setTimeout(() => {
+      DeviceEventEmitter.emit('event.load', {
+        process: () => onSubmit(values, tabSlice?.activeTabId),
+        callback,
+      })
+      showSlideAlert(dispatch)
+    }, 1000)
+  }
+
   return (
     <Formik
       validationSchema={trapVisitSchema}
@@ -568,25 +588,7 @@ const VisitSetup = ({
       // maybe this is not needed for first step in form?
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
-      onSubmit={values => {
-        const callback = () => {
-          navigateHelper(
-            'Trap Operations',
-            navigationSlice,
-            navigation,
-            dispatch,
-            updateActiveStep
-          )
-        }
-        navigation.dispatch(StackActions.replace('Loading...'))
-        setTimeout(() => {
-          DeviceEventEmitter.emit('event.load', {
-            process: () => onSubmit(values, tabSlice?.activeTabId),
-            callback,
-          })
-          showSlideAlert(dispatch)
-        }, 1000)
-      }}
+      onSubmit={() => {}}
     >
       {({
         handleSubmit,
@@ -600,6 +602,21 @@ const VisitSetup = ({
         handleChange,
         handleBlur,
       }) => {
+        const navButtons = useMemo(() => {
+          return (
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={(buttonDirection: 'left' | 'right') => {
+                handleNavButtonClick(values)
+              }}
+              errors={errors}
+              touched={touched}
+              values={values}
+              shouldProceedToLoadingScreen={true}
+              // isValid={isValid && otherTabFormsValid}
+            />
+          )
+        }, [navigation, handleSubmit, errors, touched, values])
         useEffect(() => {
           // if (
           //   tabSlice.previouslyActiveTabId &&
@@ -799,19 +816,7 @@ const VisitSetup = ({
                   )}
                 </VStack>
               </View>
-              <NavButtons
-                resetForm={resetForm}
-                navigation={navigation}
-                handleSubmit={handleSubmit}
-                errors={
-                  values.crew.length
-                    ? errors
-                    : { ...errors, crew: Boolean(values.crew.length) }
-                }
-                touched={touched}
-                isPaperEntry={isPaperEntry}
-                shouldProceedToLoadingScreen={true}
-              />
+              {navButtons}
             </View>
           </TouchableWithoutFeedback>
         )

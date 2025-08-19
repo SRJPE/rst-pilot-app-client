@@ -247,7 +247,9 @@ const NavButtons = ({
 
   const handleRightButton = () => {
     //if handleSubmit truthy, submit form to save to redux
-    if (handleSubmit) {
+    if (handleSubmit && activePage === 'Visit Setup') {
+      handleSubmit()
+    } else if (handleSubmit) {
       handleSubmit('right')
     }
 

@@ -22,7 +22,7 @@ import {
   SelectedFishStoreI,
 } from '../../redux/reducers/markRecaptureSlices/fishHoldingSlice'
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
-import { navigateHelper } from '../../utils/utils'
+import { navigateHelper, findTrapLocationIds } from '../../utils/utils'
 import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 
 const mapStateToProps = (state: RootState) => {
@@ -213,14 +213,6 @@ const FishHolding = ({
     setSelectedLifeStagesAndRuns()
     calculateTotalFish()
   }
-  const findTrapLocationIds = () => {
-    let container = [] as any
-    for (let tabId in visitSetupState) {
-      if (tabId === 'placeholderId') continue
-      container.push(visitSetupState[tabId].values.trapLocationId)
-    }
-    return container
-  }
 
   const tabIds = Object.keys(tabState.tabs)
   const handleSubmit = (tabId: string, buttonDirection?: string) => {
@@ -233,7 +225,7 @@ const FishHolding = ({
         saveTrapVisitInformation({
           crew: visitSetupState[tabIds[0]].values.crew,
           programId: visitSetupState[tabIds[0]].values.programId,
-          trapLocationIds: findTrapLocationIds(),
+          trapLocationIds: findTrapLocationIds(visitSetupState),
         })
       )
       // saves to fish holding
