@@ -443,11 +443,11 @@ const MultiSpecies = ({
 
   const showMiltingToggle =
     programFormFieldsObj?.['milting'] &&
-    speciesRadioValue.toLocaleLowerCase().includes('shrimp')
+    !speciesRadioValue.toLocaleLowerCase().includes('shrimp')
 
   const showEggsToggle =
     programFormFieldsObj?.['eggs'] &&
-    !speciesRadioValue.toLocaleLowerCase().includes('shrimp')
+    speciesRadioValue.toLocaleLowerCase().includes('shrimp')
 
   return currentRoute?.name === 'Multi Species' ? (
     <>
