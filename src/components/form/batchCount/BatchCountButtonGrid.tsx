@@ -32,6 +32,7 @@ const BatchCountButtonGrid = ({
   species,
   ladObject,
   taxonCode,
+  visitSetupState,
 }: {
   firstButton: number
   numberOfAdditionalButtons: number
@@ -48,6 +49,7 @@ const BatchCountButtonGrid = ({
   species: string
   taxonCode?: string
   ladObject: any
+  visitSetupState: any
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
 
@@ -61,7 +63,11 @@ const BatchCountButtonGrid = ({
   const handlePress = (num: number) => {
     let runDefinition = null as string | null | undefined
     if (species === 'Chinook salmon' && activeTabId && ladObject) {
-      runDefinition = findRunDefinition(ladObject, num)
+      runDefinition = findRunDefinition({
+        ladObject,
+        number: num,
+        trapSite: visitSetupState?.[activeTabId]?.values?.trapSite,
+      })
     }
     dispatch(
       addForkLengthToBatchStore({

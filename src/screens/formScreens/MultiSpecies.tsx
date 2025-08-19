@@ -62,6 +62,7 @@ const MultiSpecies = ({
   trapOperationsStore,
   dropdownsStore,
   fishInputSlice,
+  visitSetupState,
 }: {
   route: any
   tabSlice: TabStateI
@@ -69,6 +70,7 @@ const MultiSpecies = ({
   trapOperationsStore: any
   dropdownsStore: any
   fishInputSlice: any
+  visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
@@ -721,6 +723,7 @@ const MultiSpecies = ({
                       ladObject={ladObject}
                       miltingToggle={null}
                       eggsToggle={null}
+                      visitSetupState={visitSetupState}
                     />
                   </>
                 )}
@@ -826,6 +829,7 @@ const mapStateToProps = (state: RootState) => {
     trapOperationsStore: state.trapOperations,
     dropdownsStore: state.dropdowns,
     fishInputSlice: state.fishInput,
+    visitSetupState: state.visitSetup,
   }
 }
 export default connect(mapStateToProps)(MultiSpecies)

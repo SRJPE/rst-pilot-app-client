@@ -375,7 +375,11 @@ const BatchCount = ({
     let lastFishRunValue = ''
     let lastFishLifeStageValue = ''
     if (lastFish && species === 'Chinook salmon' && ladObject) {
-      const run = findRunDefinition(ladObject, lastFish?.forkLength)
+      const run = findRunDefinition({
+        ladObject,
+        number: lastFish?.forkLength,
+        trapSite: visitSetupState?.[tabSlice.activeTabId]?.values?.trapSite,
+      })
       lastFishRunValue = run || ''
       const lifeStage = calculateLifeStage(Number(lastFish?.forkLength))
       lastFishLifeStageValue = lifeStage || ''
@@ -818,6 +822,7 @@ const BatchCount = ({
                   activeTabId={tabSlice.activeTabId}
                   species={species}
                   ladObject={ladObject}
+                  visitSetupState={visitSetupState}
                 />
                 {species !== 'Chinook salmon' && <View mb='65'></View>}
               </>

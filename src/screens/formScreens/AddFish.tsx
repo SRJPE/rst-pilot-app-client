@@ -737,12 +737,13 @@ const AddFishContent = ({
             trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
         }
 
-        const ladObj = findLengthAtDateRun(lengthAtDateModel, dateTimeValue)
+        const ladObject = findLengthAtDateRun(lengthAtDateModel, dateTimeValue)
 
-        const runDefinition = findRunDefinition(
-          ladObj,
-          Number(forkLengthRef.current.value)
-        )
+        const runDefinition = findRunDefinition({
+          ladObject,
+          number: Number(forkLengthRef.current.value),
+          trapSite: visitSetupState?.[tabId]?.values?.trapSite,
+        })
 
         if (runDefinition) {
           setRun({
