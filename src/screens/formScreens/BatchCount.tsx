@@ -61,6 +61,7 @@ import {
   getLadObject,
   findRunDefinition,
 } from '../../utils/helpers/helperFunctions'
+import ToggleLockButton from '@/src/components/Shared/ToggleLockButton'
 
 const BatchCount = ({
   route,
@@ -545,21 +546,9 @@ const BatchCount = ({
                           />
                           <HStack space={1} alignItems={'center'}>
                             <Text fontSize='16'>Dead</Text>
-                            <IconButton
-                              onPress={() => handlePressLockDead()}
-                              icon={
-                                <Icon
-                                  as={FontAwesome}
-                                  name={deadIsLocked ? 'lock' : 'unlock'}
-                                />
-                              }
-                              borderRadius='full'
-                              _icon={{
-                                size: 5,
-                              }}
-                              _pressed={{
-                                bg: '#FFF',
-                              }}
+                            <ToggleLockButton
+                              isLocked={deadIsLocked}
+                              onPress={handlePressLockDead}
                             />
                           </HStack>
                         </HStack>
@@ -579,21 +568,9 @@ const BatchCount = ({
                             />
                             <HStack space={1} alignItems={'center'}>
                               <Text fontSize='16'>Milting</Text>
-                              <IconButton
-                                onPress={() => handlePressLockMilting()}
-                                icon={
-                                  <Icon
-                                    as={FontAwesome}
-                                    name={miltingIsLocked ? 'lock' : 'unlock'}
-                                  />
-                                }
-                                borderRadius='full'
-                                _icon={{
-                                  size: 5,
-                                }}
-                                _pressed={{
-                                  bg: '#FFF',
-                                }}
+                              <ToggleLockButton
+                                isLocked={miltingIsLocked}
+                                onPress={handlePressLockMilting}
                               />
                             </HStack>
                           </HStack>
@@ -614,21 +591,9 @@ const BatchCount = ({
                             />
                             <HStack space={1} alignItems={'center'}>
                               <Text fontSize='16'>Eggs</Text>
-                              <IconButton
-                                onPress={() => handlePressLockEggs()}
-                                icon={
-                                  <Icon
-                                    as={FontAwesome}
-                                    name={eggsIsLocked ? 'lock' : 'unlock'}
-                                  />
-                                }
-                                borderRadius='full'
-                                _icon={{
-                                  size: 5,
-                                }}
-                                _pressed={{
-                                  bg: '#FFF',
-                                }}
+                              <ToggleLockButton
+                                isLocked={eggsIsLocked}
+                                onPress={handlePressLockEggs}
                               />
                             </HStack>
                           </HStack>
