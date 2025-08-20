@@ -54,6 +54,8 @@ import React, { useEffect, useState } from 'react'
 import { Keyboard } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
 import { getLadObject } from '../../utils/helpers/helperFunctions'
+import ToggleLockButton from '@/src/components/Shared/ToggleLockButton'
+import { find, keyBy } from 'lodash'
 
 const MultiSpecies = ({
   route,
@@ -62,6 +64,8 @@ const MultiSpecies = ({
   trapOperationsStore,
   dropdownsStore,
   fishInputSlice,
+  visitSetupDefaults,
+  selectedProgramId,
   visitSetupState,
 }: {
   route: any
@@ -70,6 +74,8 @@ const MultiSpecies = ({
   trapOperationsStore: any
   dropdownsStore: any
   fishInputSlice: any
+  visitSetupDefaults: any
+  selectedProgramId: number | null
   visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -96,6 +102,10 @@ const MultiSpecies = ({
   const [deadIsLocked, setDeadIsLocked] = useState(false as boolean)
   const [deadToggle, setDeadToggle] = useState(false as boolean)
   const [markToggle, setMarkToggle] = useState(false as boolean)
+  const [miltingIsLocked, setMiltingIsLocked] = useState(false as boolean)
+  const [miltingToggle, setMiltingToggle] = useState(false as boolean)
+  const [eggsIsLocked, setEggsIsLocked] = useState(false as boolean)
+  const [eggsToggle, setEggsToggle] = useState(false as boolean)
   const [adiposeClippedToggle, setAdiposeClippedToggle] = useState(
     false as boolean
   )
@@ -111,6 +121,9 @@ const MultiSpecies = ({
   )
   const [showAddPlusCountButton, setShowAddPlusCountButton] =
     useState<boolean>(false)
+  const [programFormFieldsObj, setProgramFormFieldsObj] = useState(
+    {} as Record<string, any>
+  )
   const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
   const [protocolKeyMetRun, setProtocolKeyMetRun] = useState('' as string)
   const [protocolKeyMetLifeStage, setProtocolKeyMetLifeStage] = useState(
@@ -168,6 +181,22 @@ const MultiSpecies = ({
   }, [dropdownsStore.values])
 
   useEffect(() => {
+    const currentProgramInfo = find(
+      visitSetupDefaults.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+
+    if (!currentProgramInfo) return
+
+    const formFieldsLookup = keyBy(
+      currentProgramInfo?.programFormFields,
+      'fieldName'
+    )
+
+    setProgramFormFieldsObj(formFieldsLookup)
+  }, [visitSetupDefaults])
+
+  useEffect(() => {
     if (tabSlice.activeTabId) {
       const ladObjectForTrapDate = getLadObject({
         activeTabId: tabSlice.activeTabId,
@@ -186,7 +215,6 @@ const MultiSpecies = ({
 
   const handlePressSaveBatchCount = () => {
     if (tabId) {
-      // dispatch(saveBatchCount({ ...batchCountStore }))
       const forkLengthsArray = Object.values(batchCountStore.forkLengths)
 
       const groupedForkLengths = {
@@ -244,7 +272,7 @@ const MultiSpecies = ({
   const handleToggles = (toggleName: string) => {
     switch (toggleName) {
       case 'dead':
-        if (deadIsLocked) return
+        if (deadIsLocked) break
         setDeadToggle(!deadToggle)
         break
       case 'mark':
@@ -262,14 +290,26 @@ const MultiSpecies = ({
       case 'FC3':
         setFC3Toggle(!FC3Toggle)
         break
+      case 'milting':
+        if (miltingIsLocked) return
+
+        setMiltingToggle(!miltingToggle)
+        break
+      case 'eggs':
+        if (eggsIsLocked) return
+
+        setEggsToggle(!eggsToggle)
+        break
 
       default:
         setMarkToggle(false)
+        setEggsToggle(false)
+        setMiltingToggle(false)
         setFC1Toggle(false)
         setFC2Toggle(false)
         setFC3Toggle(false)
         setAdiposeClippedToggle(false)
-        if (deadIsLocked) return
+        if (deadIsLocked) break
         setDeadToggle(false)
         break
     }
@@ -277,6 +317,13 @@ const MultiSpecies = ({
 
   const handlePressLockDead = () => {
     setDeadIsLocked(!deadIsLocked)
+  }
+
+  const handlePressLockMilting = () => {
+    setMiltingIsLocked(!miltingIsLocked)
+  }
+  const handlePressLockEggs = () => {
+    setEggsIsLocked(!eggsIsLocked)
   }
 
   useEffect(() => {
@@ -379,7 +426,7 @@ const MultiSpecies = ({
     }
   }, [
     tabSlice.activeTabId,
-    fishInputSlice,
+    // fishInputSlice,
     speciesRadioValue,
     batchCountStore.forkLengths,
   ])
@@ -393,6 +440,14 @@ const MultiSpecies = ({
   const currentRoute = navState?.routes[navState?.index]
   const currentSpeciesFishMeasureProtocol =
     route.params?.fishMeasureProtocol[speciesRadioValue]
+
+  const showMiltingToggle =
+    programFormFieldsObj?.['milting'] &&
+    !speciesRadioValue.toLocaleLowerCase().includes('shrimp')
+
+  const showEggsToggle =
+    programFormFieldsObj?.['eggs'] &&
+    speciesRadioValue.toLocaleLowerCase().includes('shrimp')
 
   return currentRoute?.name === 'Multi Species' ? (
     <>
@@ -501,7 +556,7 @@ const MultiSpecies = ({
                   </Text>
                   <HStack space={3} alignItems='center'>
                     <HStack alignItems='center' space={4}>
-                      <HStack space={2} alignItems={'center'}>
+                      <HStack space={1} alignItems={'center'}>
                         <Checkbox
                           value='dead'
                           isChecked={deadToggle}
@@ -513,27 +568,60 @@ const MultiSpecies = ({
                           size='md'
                           isDisabled={deadIsLocked}
                           onChange={() => handleToggles(`dead`)}
+                          mr={1}
                         />
-                        <HStack space={1} alignItems={'center'}>
-                          <Text fontSize='16'>Dead</Text>
-                          <IconButton
-                            onPress={() => handlePressLockDead()}
-                            icon={
-                              <Icon
-                                as={FontAwesome}
-                                name={deadIsLocked ? 'lock' : 'unlock'}
-                              />
-                            }
-                            borderRadius='full'
-                            _icon={{
-                              size: 5,
-                            }}
-                            _pressed={{
-                              bg: '#FFF',
-                            }}
-                          />
-                        </HStack>
+                        <Text fontSize='16'>Dead</Text>
+                        <ToggleLockButton
+                          isLocked={deadIsLocked}
+                          onPress={handlePressLockDead}
+                        />
                       </HStack>
+                      {showMiltingToggle && (
+                        <HStack space={2} alignItems={'center'}>
+                          <Checkbox
+                            value='milting'
+                            isChecked={miltingToggle || false}
+                            shadow='3'
+                            _checked={{
+                              bg: 'primary',
+                              borderColor: 'primary',
+                            }}
+                            size='md'
+                            isDisabled={miltingIsLocked}
+                            onChange={() => handleToggles(`milting`)}
+                          />
+                          <HStack space={1} alignItems={'center'}>
+                            <Text fontSize='16'>Milting</Text>
+                            <ToggleLockButton
+                              isLocked={miltingIsLocked}
+                              onPress={handlePressLockMilting}
+                            />
+                          </HStack>
+                        </HStack>
+                      )}
+                      {showEggsToggle && (
+                        <HStack space={2} alignItems={'center'}>
+                          <Checkbox
+                            value='eggs'
+                            isChecked={eggsToggle || false}
+                            shadow='3'
+                            _checked={{
+                              bg: 'primary',
+                              borderColor: 'primary',
+                            }}
+                            size='md'
+                            isDisabled={eggsIsLocked}
+                            onChange={() => handleToggles(`eggs`)}
+                          />
+                          <HStack space={1} alignItems={'center'}>
+                            <Text fontSize='16'>Eggs</Text>
+                            <ToggleLockButton
+                              isLocked={eggsIsLocked}
+                              onPress={handlePressLockEggs}
+                            />
+                          </HStack>
+                        </HStack>
+                      )}
 
                       <HStack space={2}>
                         <Checkbox
@@ -721,8 +809,8 @@ const MultiSpecies = ({
                         reorderedTaxon
                       )}
                       ladObject={ladObject}
-                      miltingToggle={null}
-                      eggsToggle={null}
+                      miltingToggle={miltingToggle}
+                      eggsToggle={eggsToggle}
                       visitSetupState={visitSetupState}
                     />
                   </>
@@ -829,6 +917,10 @@ const mapStateToProps = (state: RootState) => {
     trapOperationsStore: state.trapOperations,
     dropdownsStore: state.dropdowns,
     fishInputSlice: state.fishInput,
+    visitSetupDefaults: state.visitSetupDefaults,
+    selectedProgramId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.programId,
     visitSetupState: state.visitSetup,
   }
 }

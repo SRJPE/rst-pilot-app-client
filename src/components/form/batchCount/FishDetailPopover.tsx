@@ -18,6 +18,8 @@ interface FishDetailPopoverProps {
     lifeStage: string | null
     runDefinition: string | null
     species: string
+    eggs?: boolean
+    milting?: boolean
     taxonCode: string | null
     uid: string | null
     adiposeClipped?: boolean
@@ -45,13 +47,16 @@ const generateCellStyles = ({
       borderWidth: 2,
       borderRadius: '50%',
       borderColor: 'black',
-      px: 3,
+      // px: 3,
     }
   }
   return {
     ...deadStyle,
     ...existingMarkStyle,
     ...fishConditionsStyle,
+
+    w: 70,
+    h: 10,
   }
 }
 
@@ -70,6 +75,8 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
     adiposeClipped,
     weight,
     willBeUsedInRecapture,
+    eggs,
+    milting,
   } = cellData
 
   const formattedSpecies =
@@ -90,10 +97,27 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
             w={'full'}
             background={'white'}
             borderRadius={0}
+            display={'flex'}
           >
-            <Text fontSize={18} {...generateCellStyles(cellData)}>
-              {forkLength || ''}
-            </Text>
+            <Box
+              display='flex'
+              flexDirection='row'
+              alignItems='center'
+              justifyContent='center'
+              {...generateCellStyles(cellData)}
+            >
+              <Text fontSize={18}>{forkLength || ''}</Text>
+              {eggs && (
+                <Text fontSize={12} color='black' mb='auto' ml={1} mt={1}>
+                  E
+                </Text>
+              )}
+              {milting && (
+                <Text fontSize={12} color='black' mb='auto' ml={1} mt={1}>
+                  M
+                </Text>
+              )}
+            </Box>
           </Button>
         )
       }}
@@ -132,6 +156,9 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
               'Existing Mark',
               'Fish Conditions',
               'Adipose Clipped',
+              species.toLocaleLowerCase().includes('shrimp')
+                ? 'Eggs'
+                : 'Milting',
             ].map(label => (
               <Text key={label} bold fontSize={18} mb={2}>
                 {label}:
@@ -157,6 +184,15 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
             </Text>
             <Text fontSize={18} mb={2}>
               {adiposeClipped ? 'Yes' : 'No'}
+            </Text>
+            <Text fontSize={18} mb={2}>
+              {species.toLocaleLowerCase().includes('shrimp')
+                ? eggs
+                  ? 'Yes'
+                  : 'No'
+                : milting
+                ? 'Yes'
+                : 'No'}
             </Text>
           </VStack>
         </HStack>
