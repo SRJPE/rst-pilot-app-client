@@ -5,7 +5,7 @@ import CustomModalHeader from '../Shared/CustomModalHeader'
 import { Text, Button, ScrollView, Divider, HStack, View } from 'native-base'
 import { List } from 'react-native-paper'
 import { SceneMap, TabBar, TabBarProps, TabView } from 'react-native-tab-view'
-import { startCase } from 'lodash'
+import { startCase, snakeCase } from 'lodash'
 import {
   groupBySpeciesForkLength,
   calcAvgValue,
@@ -13,6 +13,13 @@ import {
 } from '../../utils/utils'
 import * as Print from 'expo-print'
 import { shareAsync } from 'expo-sharing'
+import * as FileSystem from 'expo-file-system'
+import * as Sharing from 'expo-sharing'
+import JSZip from 'jszip'
+import {
+  formatDateString_MM_DD_YY,
+  getTimeProperty,
+} from '../../utils/helpers/helperFunctions'
 
 const initialLayout = { width: Dimensions.get('window').width }
 
@@ -499,6 +506,118 @@ const ReviewValuesModal = ({
     }
   }
 
+  // helper: convert array of objects to CSV
+  function arrayToCSV(rows: any[]) {
+    if (rows.length === 0) return ''
+    let headers = Object.keys(rows[0])
+    headers = headers.filter(h => !h.includes('Id') && !h.includes('Unit'))
+    const csv = [
+      headers.join(','), // header row
+      ...rows.map(row =>
+        headers.map(h => JSON.stringify(row[h] ?? '')).join(',')
+      ),
+    ]
+    return csv.join('\n')
+  }
+
+  // helper: flatten nested objects into single-level row, skip nulls
+  function flattenObject(obj: any) {
+    return Object.keys(obj).reduce((acc: any, key) => {
+      const value = obj[key]
+      const newKey = key
+
+      if (value === null || value === undefined || value === '') {
+        // skip null/undefined
+        return acc
+      }
+
+      if (typeof value === 'object' && !Array.isArray(value)) {
+        // recurse into nested objects
+        Object.assign(acc, flattenObject(value))
+      } else if (Array.isArray(value)) {
+        // collapse array into comma-separated string
+        if (value.length > 0) {
+          acc[newKey] = value.join(', ')
+        }
+      } else {
+        acc[newKey] = value
+      }
+
+      return acc
+    }, {})
+  }
+  const exportDataZip = async () => {
+    try {
+      const zip = new JSZip()
+
+      routes.forEach((route: any) => {
+        const visitSetupState = {
+          ...formValues?.visitSetupState?.[route.key]?.values,
+          fieldCheck,
+        }
+        const trapOperationsState = getFilteredTrapOperationsState(
+          formValues?.trapOperationsState?.[route.key]?.values
+        )
+        const fishProcessingState =
+          formValues?.fishProcessingState?.[route.key]?.values
+        const fishInputState =
+          formValues?.fishInputState?.[route.key]?.fishStore
+        const trapPostProcessingState = getFilteredPostProcessingState(
+          formValues?.trapPostProcessingState?.[route.key]?.values,
+          formValues?.visitSetupState?.[route.key]?.values
+        )
+
+        const timeProperty = getTimeProperty(trapOperationsState)
+
+        const formattedTrapSite = snakeCase(visitSetupState.trapSite)
+        const formattedSampleTime = formatDateString_MM_DD_YY(
+          timeProperty ? trapOperationsState[timeProperty] : new Date()
+        )
+
+        // --- 1. fish_input.csv ---
+        const fishCSV = arrayToCSV(Object.values(fishInputState))
+        zip.file(
+          `catch_${formattedTrapSite}_${formattedSampleTime}.csv`,
+          fishCSV
+        )
+
+        // --- 2. visit_summary.csv ---
+        const wideRow = {
+          ...flattenObject(visitSetupState),
+          ...flattenObject(trapOperationsState),
+          ...flattenObject(fishProcessingState),
+          ...flattenObject(trapPostProcessingState),
+        }
+        const visitCSV = arrayToCSV([wideRow])
+        zip.file(
+          `trap_visit_${formattedTrapSite}_${formattedSampleTime}.csv`,
+          visitCSV
+        )
+      })
+
+      // --- 3. Generate zip ---
+      const base64zip = await zip.generateAsync({ type: 'base64' })
+      const zipUri =
+        FileSystem.cacheDirectory + `visit_summary_${Date.now()}.zip`
+      await FileSystem.writeAsStringAsync(zipUri, base64zip, {
+        encoding: FileSystem.EncodingType.Base64,
+      })
+
+      // --- 4. Share zip ---
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(zipUri, {
+          mimeType: 'application/zip',
+          UTI: 'public.zip-archive',
+        })
+      } else {
+        alert('Sharing not available on this device')
+      }
+    } catch (err) {
+      console.error('Error exporting ZIP:', err)
+      alert('Error exporting data. Please try again.')
+    }
+  }
+
   return (
     <SafeAreaView style={{ height: '100%' }}>
       <CustomModal
@@ -527,7 +646,7 @@ const ReviewValuesModal = ({
             <Button
               my={5}
               mx='auto'
-              minWidth={300}
+              minWidth={200}
               bgColor='gray.400'
               onPress={handleCloseReviewValuesModal}
             >
@@ -538,13 +657,25 @@ const ReviewValuesModal = ({
             <Button
               my={5}
               mx='auto'
-              minWidth={300}
+              minWidth={200}
               bgColor='primary'
               colorScheme='coolGray'
               onPress={printToFile}
             >
               <Text fontSize='xl' color='white'>
-                Export as File
+                Export as PDF
+              </Text>
+            </Button>
+            <Button
+              my={5}
+              mx='auto'
+              minWidth={200}
+              bgColor='primary'
+              colorScheme='coolGray'
+              onPress={exportDataZip}
+            >
+              <Text fontSize='xl' color='white'>
+                Export as CSV ZIP
               </Text>
             </Button>
           </HStack>

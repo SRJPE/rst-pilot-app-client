@@ -157,7 +157,13 @@ export const getLadObject = ({
 }) => {
   let dateTimeValue = new Date()
 
-  if (
+  const timeProperty = getTimeProperty(
+    trapOperationsStore?.[activeTabId]?.values
+  )
+
+  if (timeProperty) {
+    dateTimeValue = trapOperationsStore?.[activeTabId]?.values?.[timeProperty]
+  } else if (
     activeTabId &&
     trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
   ) {
@@ -169,6 +175,11 @@ export const getLadObject = ({
   ) {
     dateTimeValue =
       trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+  } else if (
+    activeTabId &&
+    trapOperationsStore?.[activeTabId]?.values?.sampleTime
+  ) {
+    dateTimeValue = trapOperationsStore?.[activeTabId]?.values?.sampleTime
   }
 
   const ladObjectForTrapDate = findLengthAtDateRun(
@@ -176,4 +187,26 @@ export const getLadObject = ({
     dateTimeValue ? new Date(dateTimeValue) : new Date()
   )
   return ladObjectForTrapDate || null
+}
+
+export const getTimeProperty = (trapOperationsValues: any) => {
+  if (trapOperationsValues.trapVisitStopTime) {
+    return 'trapVisitStopTime'
+  } else if (trapOperationsValues.trapVisitStartTime) {
+    return 'trapVisitStartTime'
+  } else if (trapOperationsValues.sampleTime) {
+    return 'sampleTime'
+  }
+
+  return null
+}
+
+export function formatDateString_MM_DD_YY(date: Date | string) {
+  const d = date instanceof Date ? date : new Date(date)
+
+  const month = d.getMonth() + 1 // months are 0-based
+  const day = d.getDate()
+  const year = d.getFullYear().toString().slice(-2) // last 2 digits
+
+  return `${month}_${day}_${year}`
 }
