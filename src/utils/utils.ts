@@ -59,29 +59,63 @@ export const alphabeticalSort = (arrayToSort: Array<any>, name: string) => {
   return alphabeticalArray
 }
 
-export const reorderTaxon = (taxonArray: any[]) => {
+export const reorderTaxon = (taxonArray: any[], reverse?: boolean) => {
   //sort the taxon
   const alphabeticalTaxon = alphabeticalSort(taxonArray, 'commonname')
+
   //move chinook and steelhead to the front
   let chinook, steelhead
   for (var i = 0; i < alphabeticalTaxon.length; i++) {
-    if (alphabeticalTaxon[i].commonname === 'Chinook salmon') {
+    if (alphabeticalTaxon[i]?.commonname === 'Chinook salmon') {
       chinook = alphabeticalTaxon[i]
       alphabeticalTaxon.splice(i, 1)
     }
-    if (alphabeticalTaxon[i].commonname === 'Steelhead / rainbow trout') {
+    if (alphabeticalTaxon[i]?.commonname === 'Steelhead / rainbow trout') {
       steelhead = alphabeticalTaxon[i]
       alphabeticalTaxon.splice(i, 1)
     }
   }
   alphabeticalTaxon.unshift(chinook, steelhead)
+
+  // // implemented bc of issue with react-native-dropdown-picker sorting
+  if (reverse) {
+    alphabeticalTaxon.reverse()
+  }
+
   return alphabeticalTaxon?.map((taxon: any) => ({
     ...taxon,
     label: `${taxon?.commonname} ${
       taxon?.abbreviationCode ? `(${taxon?.abbreviationCode})` : ''
     }`,
     value: taxon?.commonname,
+    parent: 'allSpecies',
   }))
+}
+
+export const fetchRecentlyUsedSpecies = ({
+  siteId,
+  trapLocations,
+}: {
+  siteId: number
+  trapLocations: any[]
+}) => {
+  const [trapSiteData] = trapLocations.filter(ml => ml.id === siteId)
+
+  if (trapSiteData.recentSpecies?.length) {
+    const recentlyUsedSpecies = trapSiteData.recentSpecies
+    const formattedRecentlyUsedSpecies = recentlyUsedSpecies.map((rs: any) => ({
+      label: rs.commonname,
+      value: `recent_${rs.commonname}`,
+      parent: 'recentlyUsed',
+    }))
+
+    return [
+      { label: 'Recently Used', value: 'recentlyUsed' },
+      ...formattedRecentlyUsedSpecies,
+    ]
+  }
+
+  return []
 }
 
 export const findTaxonCode = (speciesValue: string, taxonArray: any[]) => {
@@ -111,8 +145,10 @@ export const handleSpeciesSearchTextChange = ({
   reorderedTaxon,
   searchValue,
   setSpeciesList,
+  defaultSpeciesList,
 }: {
   reorderedTaxon: any[]
+  defaultSpeciesList: any[]
   searchValue: string
   setSpeciesList: React.Dispatch<
     React.SetStateAction<
@@ -125,13 +161,25 @@ export const handleSpeciesSearchTextChange = ({
 }) => {
   const filteredSpeciesList = reorderedTaxon.filter(
     (species: any) =>
-      species.commonname.toLowerCase().includes(searchValue.toLowerCase()) ||
+      species.commonname?.toLowerCase().includes(searchValue.toLowerCase()) ||
       species.abbreviationCode
         ?.toLowerCase()
         .includes(searchValue.toLowerCase())
   )
+  // .map(({ parent, ...species }) => species)
+  console.log(
+    '🚀 ~ utils.ts:171 ~ handleSpeciesSearchTextChange ~ filteredSpeciesList:',
+    filteredSpeciesList
+  )
 
-  setSpeciesList(filteredSpeciesList)
+  if (searchValue) {
+    setSpeciesList([
+      { label: 'Search Results', value: 'allSpecies' },
+      ...filteredSpeciesList,
+    ])
+  } else {
+    setSpeciesList(defaultSpeciesList)
+  }
 }
 
 export const reformatBatchCountData = (
