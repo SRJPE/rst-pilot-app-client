@@ -58,6 +58,7 @@ import {
   reorderTaxon,
   findTaxonCode,
   calculateLifeStage,
+  getDBValue,
 } from '../../utils/utils'
 import { startCase, find, keyBy, partition } from 'lodash'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
@@ -508,11 +509,22 @@ const AddFishContent = ({
   }
 
   const handleGeneticSamplesFormSubmit = (values: any) => {
+    console.log('values', values)
+    const formattedValues = {
+      ...values,
+      condition: values.condition
+        ? getDBValue(values.condition, 'condition', dropdownsStore)
+        : null,
+      take: values.take
+        ? getDBValue(values.take, 'take', dropdownsStore)
+        : null,
+      // Add any additional formatting logic here
+    }
     setGeneticSamples({
       ...geneticSamples,
       value: Array.isArray(geneticSamples.value)
-        ? [...geneticSamples.value, values]
-        : [values],
+        ? [...geneticSamples.value, formattedValues]
+        : [formattedValues],
     })
   }
 
@@ -1617,6 +1629,9 @@ const AddFishContent = ({
               closeModal={() => setAddGeneticModalOpen(false)}
               species={species}
               reorderedTaxon={reorderedTaxon}
+              selectedProgramObj={route.params?.selectedProgramObj}
+              dropdownValues={dropdownValues}
+              activeTabId={tabSlice.activeTabId}
             />
           </CustomModal>
         )}

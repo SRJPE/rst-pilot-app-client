@@ -515,6 +515,8 @@ const TrapOperations = ({
           return null
         }
 
+        console.log('df', dateFields)
+
         return dateFields.map((item: any) => {
           const { displayName, fieldName } = item
           if (!values[fieldName]) {
@@ -922,7 +924,7 @@ const TrapOperations = ({
                       )}
                     />
                   </FormControl>
-                  {values.trapStatus.length > 0 ? (
+                  {values?.trapStatus?.length > 0 ? (
                     <>{renderTrappingDateAndTime(values, setFieldValue)}</>
                   ) : null}
                   {(values.trapStatus === 'trap functioning but not normally' ||

@@ -1183,3 +1183,14 @@ export const findTrapLocationIds = (visitSetupState: any) => {
   }
   return container
 }
+
+export const getDBValue = (
+  value: any,
+  dropdownName: string,
+  dropdownsState: any
+) => {
+  const dropdownValues = dropdownsState.values[dropdownName]
+
+  const id = find(dropdownValues, { code: value })?.id || null
+  return id
+}

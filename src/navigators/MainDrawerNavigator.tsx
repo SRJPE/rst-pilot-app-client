@@ -20,6 +20,7 @@ import React, { useEffect } from 'react'
 import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
 import type { InitialStateI as UserCredentialStopeProps } from '../redux/reducers/userCredentialsSlice'
 import type { InitialStateI as ConnectivityStoreProps } from '../redux/reducers/connectivitySlice'
+import Genetics from '../screens/miscScreens/Genetics'
 const Drawer = createDrawerNavigator()
 
 const DrawerNavigator = ({
@@ -122,6 +123,7 @@ const DrawerNavigator = ({
             component={MonitoringProgram}
           />
           <Drawer.Screen name='Input Turbidity' component={InputTurbidity} />
+          <Drawer.Screen name='Genetics' component={Genetics} />
         </>
       )}
     </Drawer.Navigator>

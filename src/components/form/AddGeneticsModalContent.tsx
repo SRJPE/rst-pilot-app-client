@@ -18,6 +18,7 @@ import CustomSelect from '../Shared/CustomSelect'
 import FormInputComponent from '../Shared/FormInputComponent'
 import { formatGeneticsSampleId } from '../../utils/utils'
 import { useEffect, useState } from 'react'
+import ConditionalGeneticsFields from './ConditionalGeneticsFields'
 
 const AddGeneticsModalContent = ({
   handleGeneticSampleFormSubmit,
@@ -28,6 +29,13 @@ const AddGeneticsModalContent = ({
   reorderedTaxon,
   fishStore,
   visitSetupState,
+  selectedProgramObj,
+  dropdownValues,
+  formFields,
+  setFieldValue,
+  activeTabId,
+  validationSchema,
+  onOpenCallback,
 }: {
   handleGeneticSampleFormSubmit: any
   closeModal: any
@@ -37,6 +45,13 @@ const AddGeneticsModalContent = ({
   reorderedTaxon: any
   fishStore: any
   visitSetupState: any
+  selectedProgramObj: any
+  dropdownValues: any
+  formFields: any
+  setFieldValue: any
+  activeTabId: string
+  validationSchema: any
+  onOpenCallback: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const connectivityState = useSelector((state: any) => state.connectivity)
@@ -48,15 +63,28 @@ const AddGeneticsModalContent = ({
     comments: '',
   })
 
-  useEffect(() => {
-    console.log('previousGeneticSamples', previousGeneticSamples)
-    console.log('current,', fishStore)
+  const [sectionFormFields, setSectionFormFields] = useState<any[]>([])
 
+  useEffect(() => {
+    if (selectedProgramObj) {
+      if (selectedProgramObj?.programFormFields?.length) {
+        const geneticsFields = selectedProgramObj?.programFormFields.filter(
+          (formField: any) => {
+            return formField?.formSection === 'Genetics'
+          }
+        )
+        setSectionFormFields(geneticsFields)
+      } else {
+        setSectionFormFields([])
+      }
+    }
+  }, [selectedProgramObj.programFormFields])
+
+  useEffect(() => {
     const fishStoreGeneticSamples = [] as any[]
     if (fishStore && Object.keys(fishStore).length > 0) {
       Object.keys(fishStore).forEach(key => {
         const fishData = fishStore[key]
-        console.log('fishData', fishData)
         if (
           fishData &&
           fishData.geneticSamples &&
@@ -71,9 +99,6 @@ const AddGeneticsModalContent = ({
       ...previousGeneticSamples,
       ...fishStoreGeneticSamples,
     ]
-
-    console.log('CGS', combinedGeneticSamples)
-    console.log('visitSetupState', visitSetupState)
 
     if (species.value) {
       const defaultSampleIDNumber = formatGeneticsSampleId({
@@ -167,7 +192,7 @@ const AddGeneticsModalContent = ({
                 </HStack>
 
                 <HStack>
-                  <VStack space={4} w='1/2' paddingRight='5'>
+                  <VStack space={4} w='100%' paddingRight='5'>
                     <FormInputComponent
                       camelName='sampleId'
                       value={values.sampleId}
@@ -177,6 +202,21 @@ const AddGeneticsModalContent = ({
                       label='Sample ID Number'
                       onChangeText={handleChange('sampleId')}
                       onBlur={handleBlur('sampleId')}
+                    />
+
+                    <ConditionalGeneticsFields
+                      touched={touched}
+                      errors={errors}
+                      values={values}
+                      handleChange={handleChange}
+                      handleBlur={handleBlur}
+                      setFieldTouched={setFieldTouched}
+                      dropdownValues={dropdownValues}
+                      activePage={'Genetics'}
+                      formFields={sectionFormFields}
+                      setFieldValue={setFieldValue}
+                      activeTabId={activeTabId}
+                      validationSchema={addGeneticsSampleSchema}
                     />
 
                     <FormControl>
