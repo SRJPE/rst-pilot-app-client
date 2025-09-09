@@ -188,6 +188,7 @@ export default function SpeciesDropDown({
         textStyle={{
           fontSize: 16,
         }}
+        categorySelectable={false}
       />
       {speciesDropdownHasError && (
         <Text style={{ color: 'darkred', marginTop: 5 }}>
