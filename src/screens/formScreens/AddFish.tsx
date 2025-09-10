@@ -59,6 +59,7 @@ import {
   reorderTaxon,
   findTaxonCode,
   calculateLifeStage,
+  fetchRecentlyUsedSpecies,
 } from '../../utils/utils'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
 import FishEntriesSummary from '../../components/form/FishEntriesSummary'
@@ -79,6 +80,7 @@ const AddFishContent = ({
   fishInputSlice,
   dropdownsStore,
   trapOperationsStore,
+  visitSetupDefaultsSlice,
 }: {
   route?: any
   saveIndividualFish: any
@@ -92,6 +94,7 @@ const AddFishContent = ({
   fishInputSlice: any
   dropdownsStore: any
   trapOperationsStore: any
+  visitSetupDefaultsSlice: any
 }) => {
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -104,9 +107,15 @@ const AddFishContent = ({
     activeProgramId
   ] as Taxon[]
 
+  const recentlyUsedSpecies = fetchRecentlyUsedSpecies({
+    siteId: visitSetupState?.[tabId || 'placeholderId']?.values.trapLocationId,
+    trapLocations: visitSetupDefaultsSlice?.trapLocations,
+  })
+
   const defaultTaxonList = dropdownValues?.taxon
   const reorderedTaxon = useMemo(
-    () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList, true),
+
     [currentProgramTaxon, activeProgramId]
   )
 
@@ -157,8 +166,14 @@ const AddFishContent = ({
   )
   const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
 
+  const defaultSpeciesList = [
+    ...recentlyUsedSpecies,
+    { label: 'All Species', value: 'allSpecies' },
+    ...reorderedTaxon,
+  ]
+
   const [speciesList, setSpeciesList] =
-    useState<{ label: string; value: string }[]>(reorderedTaxon)
+    useState<{ label: string; value: string }[]>(defaultSpeciesList)
 
   const alphabeticalLifeStage = alphabeticalSort(
     dropdownValues.lifeStage,
@@ -684,7 +699,7 @@ const AddFishContent = ({
       onPress={() => {
         if (speciesDropDownOpen) {
           setSpeciesDropDownOpen(false)
-          setSpeciesList(reorderedTaxon)
+          setSpeciesList(defaultSpeciesList)
           setSpecies(prevState => ({
             ...prevState,
             touched: true,
@@ -757,19 +772,30 @@ const AddFishContent = ({
                     setList={setSpeciesList}
                     speciesValue={species.value as string}
                     onClose={() => {
-                      setSpeciesList(reorderedTaxon)
+                      setSpeciesList(defaultSpeciesList)
                     }}
                     onChangeSearchText={searchValue =>
                       handleSpeciesSearchTextChange({
                         reorderedTaxon,
                         searchValue,
                         setSpeciesList,
+                        defaultSpeciesList,
                       })
                     }
                     onChangeValue={(value: string) => {
-                      let payload = { ...species, value, touched: true }
+                      const formattedValue = value.includes('recent')
+                        ? value.split('_')[1]
+                        : value
+                      let payload = {
+                        ...species,
+                        value: formattedValue,
+                        touched: true,
+                      }
+
+                      setSpecies(payload)
                       //if in edit mode, do not reset form state based on species
                       if (route.params?.editModeData !== undefined) return
+
                       //if not in edit mode, reset form state based on species
                       if (value.toLowerCase().includes('chinook')) {
                         resetFormState('chinook')
@@ -778,7 +804,6 @@ const AddFishContent = ({
                       } else {
                         resetFormState('other')
                       }
-                      setSpecies(payload)
                     }}
                     setFieldTouched={() =>
                       setSpecies({ ...species, touched: true })
@@ -1385,6 +1410,8 @@ const AddFishContent = ({
                       tabId: activeTabId,
                       id: route.params?.editModeData?.id,
                       ...payload,
+                      // species: species.value,
+
                       taxonCode: selectedTaxonCode,
                       numFishCaught: count.value,
                     })
@@ -1396,7 +1423,11 @@ const AddFishContent = ({
                   if (activeTabId) {
                     saveIndividualFish({
                       tabId: activeTabId,
-                      formValues: { ...payload, taxonCode: selectedTaxonCode },
+                      formValues: {
+                        ...payload,
+                        // species: species.value,
+                        taxonCode: selectedTaxonCode,
+                      },
                     })
                     showSlideAlert(dispatch, 'Fish Input Saved')
                     if (
@@ -1504,7 +1535,7 @@ const mapStateToProps = (state: RootState) => {
     fishStore: state.fishInput[activeTabId].fishStore,
     tabSlice: state.tabSlice,
     visitSetupState: state.visitSetup,
-    visitSetupDefaultsState: state.visitSetupDefaults,
+    visitSetupDefaultsSlice: state.visitSetupDefaults,
     fishInputSlice: state.fishInput,
     dropdownsStore: state.dropdowns,
     trapOperationsStore: state.trapOperations,

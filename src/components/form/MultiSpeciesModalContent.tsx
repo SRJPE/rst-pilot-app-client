@@ -21,7 +21,11 @@ import {
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import { handleSpeciesSearchTextChange, reorderTaxon } from '../../utils/utils'
+import {
+  fetchRecentlyUsedSpecies,
+  handleSpeciesSearchTextChange,
+  reorderTaxon,
+} from '../../utils/utils'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import MarkBadgeList from '../markRecapture/MarkBadgeList'
 import CustomModal from '../Shared/CustomModal'
@@ -35,6 +39,7 @@ import { useNavigation } from '@react-navigation/native'
 import AddExistingMark from './AddExistingMark'
 import { TouchableWithoutFeedback } from 'react-native'
 import { batchCountI } from '../../redux/reducers/formSlices/batchCountSlice'
+import { visitSetupDefaultsSlice } from '@/src/redux/reducers/visitSetupDefaults'
 
 const MultiSpeciesModalContent = ({
   closeModal,
@@ -42,7 +47,9 @@ const MultiSpeciesModalContent = ({
   batchCountStore,
   visitSetupState,
   fishInputSlice,
+  visitSetupDefaultsSlice,
 }: {
+  visitSetupDefaultsSlice: any
   closeModal: any
   tabSlice: TabStateI
   batchCountStore: batchCountI
@@ -54,7 +61,7 @@ const MultiSpeciesModalContent = ({
     (state: RootState) => state.dropdowns.values
   )
   const reorderedTaxon = useMemo(
-    () => reorderTaxon(dropdownValues.taxon),
+    () => reorderTaxon(dropdownValues.taxon, true),
     [dropdownValues.taxon]
   )
 
@@ -72,7 +79,11 @@ const MultiSpeciesModalContent = ({
 
     return uniqueSpecies
   }, [activeTabId, fishInputSlice, batchCharacteristics?.multiSpecies])
-
+  const recentlyUsedSpecies = fetchRecentlyUsedSpecies({
+    siteId:
+      visitSetupState?.[activeTabId || 'placeholderId']?.values.trapLocationId,
+    trapLocations: visitSetupDefaultsSlice.trapLocations,
+  })
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
   const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
   const [fishConditionDropdownOpen, setFishConditionDropdownOpen] = useState(
@@ -89,14 +100,22 @@ const MultiSpeciesModalContent = ({
   const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
     false as boolean
   )
-  const [speciesList, setSpeciesList] = useState<
-    { label: string; value: string }[]
-  >(
-    reorderedTaxon.map((taxon: any) => ({
-      label: taxon?.commonname,
-      value: taxon?.commonname,
-    }))
-  )
+
+  const defaultSpeciesList = [
+    ...recentlyUsedSpecies,
+    { label: 'All Species', value: 'allSpecies' },
+    ...reorderedTaxon,
+  ]
+
+  const [speciesList, setSpeciesList] =
+    useState<{ label: string; value: string; parent?: string }[]>(
+      defaultSpeciesList
+    )
+
+  // const [speciesList, setSpeciesList] =
+  //   useState<{ label: string; value: string; parent?: string }[]>(
+  //     reorderedTaxon
+  //   )
 
   const onSpeciesOpen = useCallback(() => {
     setFishConditionDropdownOpen(false)
@@ -108,6 +127,15 @@ const MultiSpeciesModalContent = ({
   const navigation = useNavigation() as any
 
   const handleFormSubmit = (values: any) => {
+    const multiSpecies = values.multiSpecies.map((species: string) => {
+      if (species.includes('recent')) {
+        const formattedSpecies = species.split('_')[1]
+        return formattedSpecies
+      }
+
+      return species
+    })
+
     delete values.existingMarks
     delete values.batchCountExistingMarks
     if (activeTabId) {
@@ -115,6 +143,7 @@ const MultiSpeciesModalContent = ({
         dispatch(
           saveBatchCharacteristics({
             ...values,
+            multiSpecies,
             tabId: activeTabId,
           })
         )
@@ -124,7 +153,7 @@ const MultiSpeciesModalContent = ({
         dispatch(
           saveBatchCharacteristics({
             ...values,
-
+            multiSpecies,
             tabId: activeTabId,
           })
         )
@@ -187,11 +216,16 @@ const MultiSpeciesModalContent = ({
                     onOpen={onSpeciesOpen}
                     setOpen={setSpeciesDropDownOpen}
                     list={speciesList}
+                    // list={[
+                    //   ...recentlyUsedSpecies,
+                    //   { label: 'All Species', value: 'allSpecies' },
+                    //   ...reorderTaxon(speciesList, true),
+                    // ]}
                     setList={setSpeciesList}
                     setFieldValue={setFieldValue}
                     setFieldTouched={setFieldTouched}
                     onClose={() => {
-                      setSpeciesList(reorderedTaxon)
+                      setSpeciesList(defaultSpeciesList)
                     }}
                     editModeValue={values.multiSpecies}
                     onChangeSearchText={searchValue =>
@@ -199,6 +233,7 @@ const MultiSpeciesModalContent = ({
                         reorderedTaxon,
                         searchValue,
                         setSpeciesList,
+                        defaultSpeciesList,
                       })
                     }
                   />
@@ -362,6 +397,7 @@ const MultiSpeciesModalContent = ({
 
 const mapStateToProps = (state: RootState) => {
   return {
+    visitSetupDefaultsSlice: state.visitSetupDefaults,
     tabSlice: state.tabSlice,
     batchCountStore: state.batchCount,
     visitSetupState: state.visitSetup,
