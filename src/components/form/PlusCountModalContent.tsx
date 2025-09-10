@@ -21,11 +21,13 @@ import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addPlusCountsSchema } from '../../utils/helpers/yupValidations'
-import { ReleaseMarkI, Taxon } from '../../utils/interfaces'
+import { FormValueI, ReleaseMarkI, Taxon } from '../../utils/interfaces'
 import {
   alphabeticalSort,
   createFormValueDefault,
+  fetchRecentlyUsedSpecies,
   findTaxonCode,
+  getAddFishStateDefaults,
   handleSpeciesSearchTextChange,
   reorderTaxon,
 } from '../../utils/utils'
@@ -53,11 +55,15 @@ const PlusCountModalContent = ({
   tabSlice,
   batchCountStore,
   visitSetupState,
+  visitSetupDefaultsSlice,
+  route,
 }: {
+  route?: any
   closeModal: any
   tabSlice: TabStateI
   batchCountStore: any
   visitSetupState: any
+  visitSetupDefaultsSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
@@ -72,19 +78,44 @@ const PlusCountModalContent = ({
     activeProgramId
   ] as Taxon[]
 
+  const recentlyUsedSpecies = fetchRecentlyUsedSpecies({
+    siteId: visitSetupState?.[tabId || 'placeholderId']?.values.trapLocationId,
+    trapLocations: visitSetupDefaultsSlice?.trapLocations,
+  })
+
   const defaultTaxonList = dropdownValues?.taxon
 
   const reorderedTaxon = useMemo(
-    () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList, true),
+
     [currentProgramTaxon, activeProgramId]
   )
+
   const alphabeticalLifeStage = alphabeticalSort(lifeStage, 'definition')
 
   const [speciesDropDownOpen, setSpeciesDropDownOpen] = useState(
     false as boolean
   )
+  const defaultSpeciesList = [
+    ...recentlyUsedSpecies,
+    { label: 'All Species', value: 'allSpecies' },
+    ...reorderedTaxon,
+  ]
+
+  const stateDefaults = getAddFishStateDefaults()
+
   const [speciesList, setSpeciesList] =
-    useState<{ label: string; value: string }[]>(reorderedTaxon)
+    useState<{ label: string; value: string }[]>(defaultSpeciesList)
+
+  const [species, setSpecies] = useState<FormValueI>(
+    route?.params?.editModeData
+      ? createFormValueDefault({
+          value: route.params?.editModeData.species,
+          touched: true,
+          required: false,
+        })
+      : stateDefaults.whenSpeciesChinook.species
+  )
 
   //RECENT MARKS ADDITIONS
   const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])
@@ -142,7 +173,8 @@ const PlusCountModalContent = ({
             enableReinitialize
             initialValues={{ ...initialFormValues, plusCountMethod: 'none' }}
             onSubmit={(values, { resetForm }) => {
-              handleFormSubmit(values)
+              console.log('species', species)
+              handleFormSubmit({ ...values, species: species.value })
               resetForm()
             }}
           >
@@ -157,17 +189,12 @@ const PlusCountModalContent = ({
               setFieldValue,
               resetForm,
             }) => {
-              console.log(
-                '🚀 ~ PlusCountModalContent.tsx:149 ~ values:',
-                values
-              )
-
               return (
                 <TouchableWithoutFeedback
                   onPress={() => {
                     if (speciesDropDownOpen) {
                       setSpeciesDropDownOpen(false)
-                      setSpeciesList(reorderedTaxon)
+                      setSpeciesList(defaultSpeciesList)
                       setFieldTouched('species', true)
                     }
                   }}
@@ -185,22 +212,43 @@ const PlusCountModalContent = ({
                       paddingBottom='3'
                     >
                       <SpeciesDropDown
+                        editModeValue={route?.params?.editModeData?.species}
                         open={speciesDropDownOpen}
                         setOpen={setSpeciesDropDownOpen}
                         list={speciesList}
                         setList={setSpeciesList}
                         setFieldValue={setFieldValue}
                         setFieldTouched={setFieldTouched}
+                        speciesValue={species.value as string}
                         onClose={() => {
-                          setSpeciesList(reorderedTaxon)
+                          setSpeciesList(defaultSpeciesList)
                         }}
                         onChangeSearchText={searchValue =>
                           handleSpeciesSearchTextChange({
                             reorderedTaxon,
                             searchValue,
                             setSpeciesList,
+                            defaultSpeciesList,
                           })
                         }
+                        onChangeValue={(value: string) => {
+                          const formattedValue = value.includes('recent')
+                            ? value.split('_')[1]
+                            : value
+
+                          let payload = {
+                            ...species,
+                            value: formattedValue,
+                            touched: true,
+                          }
+
+                          setFieldValue('species', formattedValue)
+
+                          //if in edit mode, do not reset form state based on species
+                          if (route?.params?.editModeData !== undefined) return
+
+                          setSpecies(payload)
+                        }}
                       />
                       {(values.species === 'Chinook salmon' ||
                         values.species === 'Steelhead / rainbow trout' ||
@@ -410,6 +458,7 @@ const mapStateToProps = (state: RootState) => {
     tabSlice: state.tabSlice,
     batchCountStore: state.batchCount,
     visitSetupState: state.visitSetup,
+    visitSetupDefaultsSlice: state.visitSetupDefaults,
   }
 }
 export default connect(mapStateToProps)(PlusCountModalContent)

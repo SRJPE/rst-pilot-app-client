@@ -25,6 +25,7 @@ import { AppDispatch, RootState } from '../../../redux/store'
 import { batchCharacteristicsSchema } from '../../../utils/helpers/yupValidations'
 import { ReleaseMarkI, Taxon } from '../../../utils/interfaces'
 import {
+  fetchRecentlyUsedSpecies,
   findTaxonCode,
   handleSpeciesSearchTextChange,
   reorderTaxon,
@@ -42,11 +43,13 @@ const BatchCharacteristicsModalContent = ({
   tabSlice,
   batchCountStore,
   visitSetupState,
+  visitSetupDefaultsSlice,
 }: {
   closeModal: any
   tabSlice: TabStateI
   batchCountStore: any
   visitSetupState: any
+  visitSetupDefaultsSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
@@ -60,8 +63,13 @@ const BatchCharacteristicsModalContent = ({
 
   const defaultTaxonList = dropdownValues?.taxon
 
+  const recentlyUsedSpecies = fetchRecentlyUsedSpecies({
+    siteId: visitSetupState?.[tabId || 'placeholderId']?.values.trapLocationId,
+    trapLocations: visitSetupDefaultsSlice.trapLocations,
+  })
+
   const reorderedTaxon = useMemo(
-    () => reorderTaxon(currentProgramTaxon || defaultTaxonList),
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList, true),
     [currentProgramTaxon, activeProgramId]
   )
 
@@ -82,8 +90,13 @@ const BatchCharacteristicsModalContent = ({
     false as boolean
   )
 
+  const defaultSpeciesList = [
+    ...recentlyUsedSpecies,
+    { label: 'All Species', value: 'allSpecies' },
+    ...reorderedTaxon,
+  ]
   const [speciesList, setSpeciesList] =
-    useState<{ label: string; value: string }[]>(reorderedTaxon)
+    useState<{ label: string; value: string }[]>(defaultSpeciesList)
 
   const onSpeciesOpen = useCallback(() => {
     setFishConditionDropdownOpen(false)
@@ -100,6 +113,10 @@ const BatchCharacteristicsModalContent = ({
       reorderedTaxon
     )
 
+    const formattedSpecies = values.species.includes('recent')
+      ? values.species.split('_')[1]
+      : values.species
+
     delete values.existingMarks
     delete values.batchCountExistingMarks
     let activeTabId = tabSlice.activeTabId
@@ -108,21 +125,20 @@ const BatchCharacteristicsModalContent = ({
         dispatch(
           saveBatchCharacteristics({
             ...values,
+            species: formattedSpecies,
             taxonCode: selectedTaxonCode,
             tabId: activeTabId,
           })
         )
         dispatch(addMarkToBatchCountExistingMarks(recentExistingMarks[0]))
-        console.log('🚀 ~handleFormSubmit BatchCount Values: ', {
-          ...values,
-          tabId: activeTabId,
-        })
+
         showSlideAlert(dispatch, 'Batch characteristics')
       } else {
         dispatch(
           saveBatchCharacteristics({
             ...values,
 
+            species: formattedSpecies,
             taxonCode: selectedTaxonCode,
             tabId: activeTabId,
           })
@@ -193,13 +209,14 @@ const BatchCharacteristicsModalContent = ({
                   setFieldValue={setFieldValue}
                   setFieldTouched={setFieldTouched}
                   onClose={() => {
-                    setSpeciesList(reorderedTaxon)
+                    setSpeciesList(defaultSpeciesList)
                   }}
                   onChangeSearchText={searchValue =>
                     handleSpeciesSearchTextChange({
                       reorderedTaxon,
                       searchValue,
                       setSpeciesList,
+                      defaultSpeciesList,
                     })
                   }
                 />
@@ -352,6 +369,7 @@ const mapStateToProps = (state: RootState) => {
     tabSlice: state.tabSlice,
     batchCountStore: state.batchCount,
     visitSetupState: state.visitSetup,
+    visitSetupDefaultsSlice: state.visitSetupDefaults,
   }
 }
 

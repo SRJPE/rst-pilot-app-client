@@ -190,11 +190,11 @@ export const getLadObject = ({
 }
 
 export const getTimeProperty = (trapOperationsValues: any) => {
-  if (trapOperationsValues.trapVisitStopTime) {
+  if (trapOperationsValues?.trapVisitStopTime) {
     return 'trapVisitStopTime'
-  } else if (trapOperationsValues.trapVisitStartTime) {
+  } else if (trapOperationsValues?.trapVisitStartTime) {
     return 'trapVisitStartTime'
-  } else if (trapOperationsValues.sampleTime) {
+  } else if (trapOperationsValues?.sampleTime) {
     return 'sampleTime'
   }
 
