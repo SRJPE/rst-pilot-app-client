@@ -149,6 +149,7 @@ export default function MultiSpeciesDropDown({
         setItems={setList}
         disableLocalSearch={true} // required for remote search
         multiple={true}
+        dropDownDirection='BOTTOM'
         mode='BADGE'
         badgeDotColors={['#007C7C']}
         placeholder='Select your species'
