@@ -31,7 +31,7 @@ import MarkBadgeList from '../markRecapture/MarkBadgeList'
 import CustomModal from '../Shared/CustomModal'
 import AddAnotherMarkModalContent from '../Shared/AddAnotherMarkModalContent'
 import { multiSpeciesBatchCharacteristicsSchema } from '../../utils/helpers/yupValidations'
-import { ReleaseMarkI } from '../../utils/interfaces'
+import { ReleaseMarkI, Taxon } from '../../utils/interfaces'
 import MultiSpeciesDropDown from './MultiSpeciesDropDown'
 import FishConditionsDropDown from './FishConditionsDropDown'
 import { startCase } from 'lodash'
@@ -60,12 +60,23 @@ const MultiSpeciesModalContent = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+
+  const activeTabId = tabSlice.activeTabId || 'placeholderId'
+
+  const activeProgramId = visitSetupState?.[activeTabId]?.values?.programId
+
+  const defaultTaxonList = dropdownValues?.taxon
+
+  const currentProgramTaxon = dropdownValues?.programTaxonAbbreviation?.[
+    activeProgramId
+  ] as Taxon[]
+
   const reorderedTaxon = useMemo(
-    () => reorderTaxon(dropdownValues.taxon, true),
-    [dropdownValues.taxon]
+    () => reorderTaxon(currentProgramTaxon || defaultTaxonList, true),
+
+    [currentProgramTaxon, activeProgramId]
   )
 
-  const activeTabId = tabSlice.activeTabId
   const { batchCharacteristics, forkLengths } = batchCountStore
   const speciesInFishStore = useMemo(() => {
     if (!activeTabId) return []
