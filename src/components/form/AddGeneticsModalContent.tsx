@@ -31,11 +31,9 @@ const AddGeneticsModalContent = ({
   visitSetupState,
   selectedProgramObj,
   dropdownValues,
-  formFields,
-  setFieldValue,
   activeTabId,
-  validationSchema,
-  onOpenCallback,
+  fishRunValue,
+  fishAdiposeClippedValue,
 }: {
   handleGeneticSampleFormSubmit: any
   closeModal: any
@@ -47,11 +45,9 @@ const AddGeneticsModalContent = ({
   visitSetupState: any
   selectedProgramObj: any
   dropdownValues: any
-  formFields: any
-  setFieldValue: any
   activeTabId: string
-  validationSchema: any
-  onOpenCallback: any
+  fishRunValue?: string
+  fishAdiposeClippedValue?: boolean
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const connectivityState = useSelector((state: any) => state.connectivity)
@@ -62,6 +58,9 @@ const AddGeneticsModalContent = ({
     crewMember: '',
     comments: '',
   })
+
+  console.log('fishRunValue', fishRunValue)
+  console.log('fishAdiposeClippedValue', fishAdiposeClippedValue)
 
   const [sectionFormFields, setSectionFormFields] = useState<any[]>([])
 
@@ -101,11 +100,14 @@ const AddGeneticsModalContent = ({
     ]
 
     if (species.value) {
+      console.log('visitSetupState', visitSetupState)
       const defaultSampleIDNumber = formatGeneticsSampleId({
         programName: visitSetupState.stream,
         geneticSamplesArray: combinedGeneticSamples,
         species: species.value,
         taxonArray: reorderedTaxon,
+        fishRunValue: fishRunValue,
+        fishAdiposeClippedValue: fishAdiposeClippedValue,
       })
       console.log('🚀 ~ defaultSampleIDNumber', defaultSampleIDNumber)
       if (defaultSampleIDNumber) {

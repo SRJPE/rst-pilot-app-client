@@ -1124,21 +1124,32 @@ export const shouldRenderField = ({
   return false
 }
 
+const getRunInitials = (run: string) => {
+  11
+  return run
+    .split(' ') // split into words
+    .map(word => word[0]) // take first letter of each
+    .join('') // join them back together
+    .toUpperCase() // make sure they’re uppercase
+}
+
 const getNextSampleSuffix = ({
   arr,
-  taxonAbbreviation,
+  targetString,
   suffixPadding = 3,
+  adiposeFish,
 }: {
   arr: { sampleId?: string }[]
-  taxonAbbreviation?: string
+  targetString?: string
   suffixPadding?: number
+  adiposeFish?: boolean
 }) => {
   let filtered = arr
 
-  if (taxonAbbreviation) {
-    filtered = arr.filter(item =>
-      (item.sampleId ?? '').includes(taxonAbbreviation)
-    )
+  if (adiposeFish) {
+    filtered = arr.filter(item => item.sampleId?.startsWith(targetString ?? ''))
+  } else if (targetString) {
+    filtered = arr.filter(item => (item.sampleId ?? '').includes(targetString))
   }
 
   if (filtered.length === 0) {
@@ -1152,8 +1163,12 @@ const getNextSampleSuffix = ({
     return getSuffix(curr.sampleId) > getSuffix(max.sampleId) ? curr : max
   })
 
-  const test = (currentHighestSampleSuffix.sampleId ?? '').split('_').pop()
-  const nextSampleSuffixNumber = test ? parseInt(test, 10) + 1 : 1
+  const previousSampleIdSuffix = (currentHighestSampleSuffix.sampleId ?? '')
+    .split('_')
+    .pop()
+  const nextSampleSuffixNumber = previousSampleIdSuffix
+    ? parseInt(previousSampleIdSuffix, 10) + 1
+    : 1
 
   // Pad with leading zeros to at least 3 digits
   const nextSampleSuffix = nextSampleSuffixNumber
@@ -1168,20 +1183,36 @@ export const formatGeneticsSampleId = ({
   species,
   geneticSamplesArray,
   taxonArray = [],
+  fishRunValue,
+  fishAdiposeClippedValue,
 }: {
   programName: string
   species: string
   geneticSamplesArray: any[]
   taxonArray?: any[]
+  fishRunValue?: string
+  fishAdiposeClippedValue?: boolean
 }) => {
   let sampleId = ''
 
   const programNameLower = programName.toLowerCase()
 
-  if (programNameLower.includes('yolo')) {
+  if (programNameLower.includes('yolo') || programNameLower.includes('flow')) {
     const currentYear = new Date().getFullYear()
 
     if (species.toLowerCase().includes('chinook')) {
+      const runAbbreviation = fishRunValue ? getRunInitials(fishRunValue) : ''
+      const adiposeString = fishAdiposeClippedValue ? 'Ad_plus' : 'Ad_minus'
+
+      const yearAdiposeRun = `${currentYear}${adiposeString}-${runAbbreviation}`
+
+      const sampleIdSuffix = getNextSampleSuffix({
+        arr: geneticSamplesArray,
+        targetString: yearAdiposeRun,
+        suffixPadding: 3,
+        adiposeFish: true,
+      })
+      sampleId = `${yearAdiposeRun}_${sampleIdSuffix}`
     } else {
       const taxonObj = taxonArray.find(
         (item: any) => item.commonname === species
@@ -1195,10 +1226,9 @@ export const formatGeneticsSampleId = ({
 
       const sampleIdSuffix = getNextSampleSuffix({
         arr: geneticSamplesArray,
-        taxonAbbreviation,
+        targetString: taxonAbbreviation,
         suffixPadding: 3,
       })
-      console.log('sampleIdSuffix', sampleIdSuffix)
       sampleId = `${currentYear}_${taxonAbbreviation}_${sampleIdSuffix}`
     }
   } else if (

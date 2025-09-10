@@ -1661,6 +1661,8 @@ const AddFishContent = ({
               selectedProgramObj={route.params?.selectedProgramObj}
               dropdownValues={dropdownValues}
               activeTabId={tabSlice.activeTabId}
+              fishRunValue={run.value}
+              fishAdiposeClippedValue={adiposeClipped.value}
             />
           </CustomModal>
         )}
