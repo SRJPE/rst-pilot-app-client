@@ -1402,8 +1402,6 @@ const AddFishContent = ({
               isDisabled={route.params?.editModeData ? false : formHasError}
               onPress={() => {
                 let payload = returnFormValues()
-                console.log('🚀 ~ AddFish.tsx:1410 ~ payload:', payload)
-                console.log('🚀 ~ AddFish.tsx:1420 ~ species:', species)
 
                 const activeTabId = tabSlice.activeTabId
                 if (route.params?.editModeData) {

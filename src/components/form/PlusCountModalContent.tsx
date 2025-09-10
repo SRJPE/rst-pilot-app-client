@@ -115,10 +115,6 @@ const PlusCountModalContent = ({
         })
       : stateDefaults.whenSpeciesChinook.species
   )
-  console.log(
-    '🚀 ~ PlusCountModalContent.tsx:119 ~ PlusCountModalContent ~ species:',
-    species
-  )
 
   //RECENT MARKS ADDITIONS
   const [recentExistingMarks, setRecentExistingMarks] = useState<any[]>([])

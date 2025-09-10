@@ -106,10 +106,6 @@ const MultiSpeciesModalContent = ({
     { label: 'All Species', value: 'allSpecies' },
     ...reorderedTaxon,
   ]
-  console.log(
-    '🚀 ~ MultiSpeciesModalContent.tsx:109 ~ MultiSpeciesModalContent ~ defaultSpeciesList:',
-    defaultSpeciesList
-  )
 
   const [speciesList, setSpeciesList] =
     useState<{ label: string; value: string; parent?: string }[]>(
@@ -129,11 +125,6 @@ const MultiSpeciesModalContent = ({
   }, [])
 
   const navigation = useNavigation() as any
-
-  console.log(
-    '🚀 ~ MultiSpeciesModalContent.tsx:128 ~ MultiSpeciesModalContent ~ recentlyUsedSpecies:',
-    recentlyUsedSpecies
-  )
 
   const handleFormSubmit = (values: any) => {
     const multiSpecies = values.multiSpecies.map((species: string) => {

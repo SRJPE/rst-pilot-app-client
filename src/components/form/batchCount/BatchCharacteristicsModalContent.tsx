@@ -108,11 +108,6 @@ const BatchCharacteristicsModalContent = ({
   const navigation = useNavigation() as any
 
   const handleFormSubmit = (values: any) => {
-    console.log(
-      '🚀 ~ BatchCharacteristicsModalContent.tsx:111 ~ handleFormSubmit ~ values:',
-      values
-    )
-
     const selectedTaxonCode = findTaxonCode(
       values.species as string,
       reorderedTaxon
@@ -121,10 +116,6 @@ const BatchCharacteristicsModalContent = ({
     const formattedSpecies = values.species.includes('recent')
       ? values.species.split('_')[1]
       : values.species
-    console.log(
-      '🚀 ~ BatchCharacteristicsModalContent.tsx:124 ~ handleFormSubmit ~ formattedSpecies:',
-      formattedSpecies
-    )
 
     delete values.existingMarks
     delete values.batchCountExistingMarks
@@ -140,11 +131,7 @@ const BatchCharacteristicsModalContent = ({
           })
         )
         dispatch(addMarkToBatchCountExistingMarks(recentExistingMarks[0]))
-        console.log('🚀 ~handleFormSubmit BatchCount Values: ', {
-          ...values,
-          species: formattedSpecies,
-          tabId: activeTabId,
-        })
+
         showSlideAlert(dispatch, 'Batch characteristics')
       } else {
         dispatch(

@@ -167,10 +167,6 @@ export const handleSpeciesSearchTextChange = ({
         .includes(searchValue.toLowerCase())
   )
   // .map(({ parent, ...species }) => species)
-  console.log(
-    '🚀 ~ utils.ts:171 ~ handleSpeciesSearchTextChange ~ filteredSpeciesList:',
-    filteredSpeciesList
-  )
 
   if (searchValue) {
     setSpeciesList([
