@@ -101,7 +101,7 @@ export const fetchRecentlyUsedSpecies = ({
 }) => {
   const [trapSiteData] = trapLocations.filter(ml => ml.id === siteId)
 
-  if (trapSiteData.recentSpecies?.length) {
+  if (trapSiteData?.recentSpecies?.length) {
     const recentlyUsedSpecies = trapSiteData.recentSpecies
     const formattedRecentlyUsedSpecies = recentlyUsedSpecies.map((rs: any) => ({
       label: rs.commonname,
