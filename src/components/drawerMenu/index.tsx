@@ -27,11 +27,13 @@ import { showFishInputButton } from '@/src/utils/utils'
 interface ExtendedDrawerProps extends DrawerContentComponentProps {
   userCredentialsStore: any
   tabSlice: any
+  visitSetupSlice: any
 }
 
 const DrawerMenu = ({
   userCredentialsStore,
   tabSlice,
+  visitSetupSlice,
   ...props
 }: ExtendedDrawerProps) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -40,6 +42,17 @@ const DrawerMenu = ({
 
   const { steps, activeStep } = navigationState
   const { activeTabId, tabs } = tabSlice
+
+  const isFormNavigationUnlocked = () => {
+    const programId =
+      visitSetupSlice[activeTabId]?.values?.programId || 'placeholderId'
+
+    const unrestrictedIds = [7, 8]
+
+    return unrestrictedIds.includes(programId)
+  }
+
+  const hasUnrestrictedFormNavigation = isFormNavigationUnlocked()
 
   const tabIds = Object.keys(tabs)
 
@@ -256,7 +269,10 @@ const DrawerMenu = ({
           <>
             <Divider mt='2' />
             {stepsArray.map((step: any, index: number) => {
-              if (showStepNavigationButton(index))
+              if (
+                showStepNavigationButton(index) ||
+                hasUnrestrictedFormNavigation === true
+              )
                 return (
                   <VStack ml='4' key={index}>
                     <MenuButton
@@ -293,6 +309,7 @@ const mapStateToProps = (state: RootState) => {
   return {
     userCredentialsStore: state.userCredentials,
     tabSlice: state.tabSlice,
+    visitSetupSlice: state.visitSetup,
   }
 }
 

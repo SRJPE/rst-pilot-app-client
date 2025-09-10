@@ -6,6 +6,7 @@ import { PURGE } from 'redux-persist'
 import { showSlideAlert } from '../slideAlertSlice'
 import { generateErrorMessage } from '../../../utils/helpers/helperFunctions'
 import { AxiosError } from 'axios'
+import { getVisitSetupDefaults } from '../visitSetupDefaults'
 
 interface InitialStateI {
   fetchStatus: 'initial-state' | 'fetch-failed' | 'fetch-successful'
@@ -217,6 +218,10 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           5000
         )
         await fetchWithPostParams(thunkAPI.dispatch, payload)
+        const state = thunkAPI.getState() as any
+        if (state?.userCredentials?.id) {
+          thunkAPI.dispatch(getVisitSetupDefaults(state.userCredentials.id))
+        }
       }
     }
 
@@ -426,7 +431,6 @@ const fetchWithPostParams = async (dispatch: any, postResults: any) => {
   let fetchResults = null
   try {
     fetchResults = await dispatch(fetchPreviousTrapAndCatch())
-
     if (fetchResults.meta.requestStatus === 'fulfilled') {
       const fetchPayload = fetchResults.payload
       if (!fetchPayload) {

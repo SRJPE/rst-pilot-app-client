@@ -323,7 +323,7 @@ const MultiSpeciesBatchChart = ({
                   <Box
                     borderBottomWidth='3'
                     borderColor={borderColor}
-                    width={200}
+                    minWidth={200}
                     alignItems='center'
                     p='3'
                   >

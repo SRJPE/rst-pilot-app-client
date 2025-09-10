@@ -130,6 +130,7 @@ export default function MultiSpeciesDropDown({
         </Popover>
       </HStack>
       <DropDownPicker
+        categorySelectable={false}
         open={open}
         onOpen={onOpen}
         value={values}
@@ -153,7 +154,7 @@ export default function MultiSpeciesDropDown({
         placeholder='Select your species'
         searchPlaceholder='Search...'
         listMode='SCROLLVIEW'
-        maxHeight={180}
+        maxHeight={250}
         scrollViewProps={{ keyboardShouldPersistTaps: 'always' }}
         closeAfterSelecting={true}
         style={{
