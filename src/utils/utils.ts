@@ -1153,7 +1153,7 @@ const getNextSampleSuffix = ({
   }
 
   if (filtered.length === 0) {
-    return '001' // No existing samples for this taxon, start from 001
+    return '1'.padStart(suffixPadding, '0') // No existing samples for this taxon, start from 001
   }
 
   const currentHighestSampleSuffix = filtered.reduce((max, curr) => {
@@ -1205,6 +1205,8 @@ export const formatGeneticsSampleId = ({
       const adiposeString = fishAdiposeClippedValue ? 'Ad_plus' : 'Ad_minus'
 
       const yearAdiposeRun = `${currentYear}${adiposeString}-${runAbbreviation}`
+
+      console.log('yearAdiposeRun', yearAdiposeRun)
 
       const sampleIdSuffix = getNextSampleSuffix({
         arr: geneticSamplesArray,

@@ -100,9 +100,8 @@ const AddGeneticsModalContent = ({
     ]
 
     if (species.value) {
-      console.log('visitSetupState', visitSetupState)
       const defaultSampleIDNumber = formatGeneticsSampleId({
-        programName: visitSetupState.stream,
+        programName: selectedProgramObj.programName,
         geneticSamplesArray: combinedGeneticSamples,
         species: species.value,
         taxonArray: reorderedTaxon,
