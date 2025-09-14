@@ -1202,7 +1202,7 @@ export const formatGeneticsSampleId = ({
 
     if (species.toLowerCase().includes('chinook')) {
       const runAbbreviation = fishRunValue ? getRunInitials(fishRunValue) : ''
-      const adiposeString = fishAdiposeClippedValue ? 'Ad_plus' : 'Ad_minus'
+      const adiposeString = fishAdiposeClippedValue ? 'Ad_minus' : 'Ad_plus'
 
       const yearAdiposeRun = `${currentYear}${adiposeString}-${runAbbreviation}`
 
