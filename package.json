@@ -21,7 +21,7 @@
     "@expo/webpack-config": "^19.0.0",
     "@gluestack-ui/accordion": "^1.0.14",
     "@gluestack-ui/actionsheet": "^0.2.53",
-    "@gluestack-ui/core": "^3.0.6",
+    "@gluestack-ui/core": "^3.0.10",
     "@gluestack-ui/form-control": "^0.1.19",
     "@gluestack-ui/icon": "^0.1.27",
     "@gluestack-ui/input": "^0.1.38",

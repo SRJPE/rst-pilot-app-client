@@ -31,9 +31,13 @@ const DrawerNavigator = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
-  const currentRouteIndex = useNavigationState(state => state?.index)
+  // const currentRouteIndex = useNavigationState
+  //   ? useNavigationState(state => state?.index)
+  //   : 0
 
-  const isSignInScreen = currentRouteIndex === 0
+  const isSignInScreen = !userCredentialsStore.azureUid
+
+  // const isSignInScreen = currentRouteIndex === 0
 
   const { isConnected: connectivityStoreIsConnected, isInternetReachable } =
     connectivityStore
