@@ -46,7 +46,7 @@ const DrawerNavigator = ({
     connectivityStoreIsConnected && isInternetReachable !== false
 
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected && isInternetReachable && !isSignInScreen) {
       refreshUserToken(dispatch).then(tokenRefreshResponse => {
         if (
           tokenRefreshResponse &&
@@ -76,17 +76,7 @@ const DrawerNavigator = ({
         isConnected
       )
     }
-  }, [isSignInScreen, isConnected])
-
-  async function getValueFor(key: string) {
-    let result = await SecureStore.getItemAsync(key)
-    if (result) {
-      return result
-    } else {
-      console.log('No values stored under that key.')
-      return null
-    }
-  }
+  }, [isSignInScreen, isConnected, isInternetReachable])
 
   return (
     <Drawer.Navigator

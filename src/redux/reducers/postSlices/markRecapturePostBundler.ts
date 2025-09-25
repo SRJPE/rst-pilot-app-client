@@ -107,7 +107,12 @@ export const postMarkRecaptureSubmissions = createAsyncThunk(
               'success',
               5000
             )
-            thunkAPI.dispatch(getTrapVisitDropdownValues())
+            const state = thunkAPI.getState() as RootState
+            const userId = state.userCredentials.id
+            if (!userId) break
+            // Refresh dropdown values to get new release sites, purposes, etc
+            // await
+            thunkAPI.dispatch(getTrapVisitDropdownValues(userId.toString()))
             // if rejected, keep the non duplicates in the submissions for reattempts
           } else {
             // showSlideAlert(thunkAPI.dispatch, result, 'error', 5000)
