@@ -25,6 +25,7 @@ import type { NavigationState, SceneRendererProps } from 'react-native-tab-view'
 import { SceneMap, TabView } from 'react-native-tab-view'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { FishDetailPopover } from './FishDetailPopover'
+import MultiSpeciesChartTab from './MultiSpeciesChartTab'
 
 type TabNavigationRoute = { key: string; title: string }
 type TabAcc = {
@@ -239,146 +240,21 @@ const MultiSpeciesBatchChart = ({
     slots
   )
 
-  const renderScene = () => {
+  const renderScene = useMemo(() => {
     const scenes = selectedSpecies.reduce<TabAcc>((acc, species, index) => {
       acc[`tab-${index}`] = () => (
-        <Box
-          flex={1}
-          my='4'
-          display={'flex'}
-          flexDirection={'row'}
-          borderWidth={1}
-          flexWrap={'wrap'}
-          borderRadius={15}
-          // overflow='hidden'
-        >
-          {Array.from({ length: 10 }).map((_, i) => (
-            <Box
-              key={i}
-              flex={1}
-              flexBasis={'9.5%'}
-              h={41}
-              borderWidth={1}
-              background='gray.200'
-              style={{
-                borderTopLeftRadius: i === 0 ? 15 : 0,
-                borderTopRightRadius: i === 9 ? 15 : 0,
-              }}
-            >
-              <Center h={'full'} w={'full'}>
-                <Text fontSize={18} bold>
-                  {i + 1}
-                </Text>
-              </Center>
-            </Box>
-          ))}
-          {/* {Array.from({
-            length: groupedPreviouslyEnteredFish[activeSpeciesTab]?.length,
-          }).map((_, i) => {
-            const existingFishCellData =
-              groupedPreviouslyEnteredFish[activeSpeciesTab]?.at(i) ||
-              DEFAULT_CELL
-
-            return (
-              <Box key={i} flex={1} flexBasis={'9.5%'} h={50}>
-                <FishDetailPopover
-                  cellData={existingFishCellData}
-                  // onRemove={() => dispatch(removeForkLengthByUID(cellData.uid))}
-                />
-              </Box>
-            )
-          })} */}
-          <FlatList
-            data={slots}
-            keyExtractor={item => item.cellData.uid ?? `slot-${item.index}`}
-            numColumns={10} // ✅ each row 10 cells (adjust flexBasis to match)
-            scrollEnabled={false} // ✅ let parent container scroll
-            renderItem={({ item }) => {
-              const { cellData, index } = item
-              return cellData.forkLength ? (
-                <Box flex={1} flexBasis={'9.5%'} h={50} position='relative'>
-                  <FishDetailPopover
-                    cellData={cellData}
-                    onRemove={
-                      cellData.uid
-                        ? () => dispatch(removeForkLengthByUID(cellData.uid))
-                        : undefined
-                    }
-                  />
-                </Box>
-              ) : (
-                <Box flex={1} flexBasis={'9.5%'} h={50}>
-                  <Center borderWidth={1} h='full' w='full' background='white'>
-                    <Text fontSize={18}>{''}</Text>
-                  </Center>
-                </Box>
-              )
-            }}
-          />
-          {/* <Box flex={1} flexBasis={'9.5%'} h={50} />
-
-          {Array.from({
-            length:
-              50 -
-              (groupedPreviouslyEnteredFish[activeSpeciesTab]?.length || 0),
-          }).map((_, i) => {
-            const cellData =
-              groupedForkLengths[activeSpeciesTab]?.at(i) || DEFAULT_CELL
-
-            return cellData.uid ? (
-              <Box
-                key={cellData.uid}
-                flex={1}
-                flexBasis={'9.5%'}
-                h={50}
-                position='relative'
-              >
-                <FishDetailPopover
-                  cellData={cellData}
-                  onRemove={() => dispatch(removeForkLengthByUID(cellData.uid))}
-                />
-              </Box>
-            ) : (
-              <Box key={i} flex={1} flexBasis={'9.5%'} h={50}>
-                <Center
-                  borderWidth={1}
-                  h={'full'}
-                  w={'full'}
-                  background={'white'}
-                >
-                  <Text fontSize={18}>{''}</Text>
-                </Center>
-              </Box>
-            )
-          })} */}
-          <HStack
-            w='full'
-            background='gray.200'
-            style={{ borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}
-          >
-            <Text fontSize={18} p={3} display='flex'>
-              <Text bold>Species:</Text>
-              <Text> </Text>
-              <Text>{activeSpeciesTab}</Text>
-            </Text>
-            <Text fontSize={18} p={3} display='flex'>
-              <Text bold>Measured Count:</Text>
-              <Text> </Text>
-              <Text>{combinedFishObj[activeSpeciesTab]?.length || 0}</Text>
-            </Text>
-            <Text fontSize={18} p={3} display='flex'>
-              <Text bold>Plus Count:</Text>
-              <Text> </Text>
-              <Text>{currentSpeciesPlusCount}</Text>
-            </Text>
-          </HStack>
-        </Box>
+        <MultiSpeciesChartTab
+          activeSpeciesTab={species}
+          slots={slots}
+          currentSpeciesPlusCount={currentSpeciesPlusCount}
+          combinedFishObj={combinedFishObj}
+        />
       )
       return acc
     }, {})
 
     return SceneMap(scenes)
-  }
+  }, [selectedSpecies, slots, combinedFishObj, currentSpeciesPlusCount])
 
   useEffect(() => {
     const newRoutes = selectedSpecies.map((species: string, i: number) => ({
@@ -456,7 +332,7 @@ const MultiSpeciesBatchChart = ({
             index: tabIndex,
             routes,
           }}
-          renderScene={renderScene()}
+          renderScene={renderScene}
           renderTabBar={renderTabBar}
           onIndexChange={setTabIndex}
           initialLayout={initialLayout}
