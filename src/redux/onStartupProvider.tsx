@@ -43,7 +43,8 @@ const OnStartupProvider = (props: Props) => {
           ['No refresh token found', 'Tokens could not be refreshed'].includes(
             tokenRefreshResponse
           ) &&
-          isConnected
+          isConnected &&
+          isInternetReachable
         ) {
           dispatch(setForcedLogoutModalOpen(true))
           return

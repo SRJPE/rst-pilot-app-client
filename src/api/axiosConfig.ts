@@ -81,18 +81,25 @@ const api = axios.create({
 // Axios middleware to retrieve and add authorization token
 api.interceptors.request.use(
   async (config: AxiosRequestConfig) => {
-    const { isConnected, isInternetReachable } = store.getState().connectivity
+    try {
+      const { isConnected, isInternetReachable } = store.getState().connectivity
 
-    //Attempt to refresh token only if there is a network connection
-    if (isConnected) {
-      const accessToken = await SecureStore.getItemAsync('userAccessToken')
-      const idToken = await SecureStore.getItemAsync('userIdToken')
-      const tokenExpiresAt = await SecureStore.getItemAsync(
-        'userAccessTokenExpiresAt'
-      )
-      const tokenIsExpired = moment().isAfter(tokenExpiresAt)
-      try {
-        if (tokenIsExpired) {
+      //Attempt to refresh token only if there is a network connection
+      if (isConnected) {
+        const accessToken = await SecureStore.getItemAsync('userAccessToken')
+        const idToken = await SecureStore.getItemAsync('userIdToken')
+        const tokenExpiresAt = await SecureStore.getItemAsync(
+          'userAccessTokenExpiresAt'
+        )
+        const tokenIsExpired = moment().isAfter(tokenExpiresAt)
+        if (!tokenIsExpired && accessToken && idToken) {
+          const newConfig = config as any
+          newConfig.headers['Authorization'] = `Bearer ${accessToken}`
+          newConfig.headers['idToken'] = idToken
+          return newConfig
+        }
+
+        try {
           //refreshAsync to exchange for new token
           const existingRefreshToken =
             (await SecureStore.getItemAsync('userRefreshToken')) || undefined
@@ -104,52 +111,64 @@ api.interceptors.request.use(
           const tokenEndpoint =
             'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_signin'
 
-          const refreshResponse = await refreshAsync(
-            {
-              clientId: EXPO_PUBLIC_CLIENT_ID,
-              refreshToken: existingRefreshToken,
-            },
-            { tokenEndpoint }
-          )
+          try {
+            const refreshResponse = await refreshAsync(
+              {
+                clientId: EXPO_PUBLIC_CLIENT_ID,
+                refreshToken: existingRefreshToken,
+              },
+              { tokenEndpoint }
+            )
 
-          if (refreshResponse.accessToken) {
-            const { accessToken, refreshToken, idToken, issuedAt, expiresIn } =
-              refreshResponse
+            if (refreshResponse.accessToken) {
+              const {
+                accessToken,
+                refreshToken,
+                idToken,
+                issuedAt,
+                expiresIn,
+              } = refreshResponse
 
-            await storeAccessTokens({
-              accessToken,
-              refreshToken,
-              idToken,
-              expiresIn,
-              issuedAt,
-            })
+              await storeAccessTokens({
+                accessToken,
+                refreshToken,
+                idToken,
+                expiresIn,
+                issuedAt,
+              })
 
-            const newConfig = config as AxiosRequestConfig<any>
+              const newConfig = config as AxiosRequestConfig<any>
 
-            //@ts-ignore - this is a hack to add the headers to the config
+              //@ts-ignore - this is a hack to add the headers to the config
+              newConfig.headers['Authorization'] = `Bearer ${accessToken}`
+              //@ts-ignore - see above
+              newConfig.headers['idToken'] = idToken as string
+
+              return newConfig
+            }
+          } catch (error) {
+            console.error('Error refreshing token:', error)
+          }
+
+          if (accessToken && idToken) {
+            const newConfig = config as any
             newConfig.headers['Authorization'] = `Bearer ${accessToken}`
-            //@ts-ignore - see above
-            newConfig.headers['idToken'] = idToken as string
-
+            newConfig.headers['idToken'] = idToken
             return newConfig
           }
-        }
 
-        if (accessToken && idToken) {
-          const newConfig = config as any
-          newConfig.headers['Authorization'] = `Bearer ${accessToken}`
-          newConfig.headers['idToken'] = idToken
-          return newConfig
-        }
+          // if (!tokenIsExpired) {
+          //   return config
+          // }
 
-        if (!tokenIsExpired) {
+          throw new Error('No tokens found')
+        } catch (error) {
           return config
         }
-
-        throw new Error('No tokens found')
-      } catch (error) {
-        return config
       }
+    } catch (error) {
+      console.error('Error in Axios request interceptor:', error)
+      return Promise.reject(error)
     }
   },
   error => {
