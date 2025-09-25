@@ -7,14 +7,16 @@ import { removeForkLengthByUID } from '@/src/redux/reducers/formSlices/batchCoun
 
 type Props = {
   slots: Array<{ index: number; cellData: any }>
-  activeSpeciesTab: string
+  species: string
+  activeTab: string
   combinedFishObj: Record<string, any[]>
   currentSpeciesPlusCount: string
 }
 
 const MultiSpeciesChartTab = ({
   slots,
-  activeSpeciesTab,
+  activeTab,
+  species,
   combinedFishObj,
   currentSpeciesPlusCount,
 }: Props) => {
@@ -87,12 +89,12 @@ const MultiSpeciesChartTab = ({
         <Text fontSize={18} p={3} display='flex'>
           <Text bold>Species:</Text>
           <Text> </Text>
-          <Text>{activeSpeciesTab}</Text>
+          <Text>{species}</Text>
         </Text>
         <Text fontSize={18} p={3} display='flex'>
           <Text bold>Measured Count:</Text>
           <Text> </Text>
-          <Text>{combinedFishObj[activeSpeciesTab]?.length || 0}</Text>
+          <Text>{combinedFishObj[species]?.length || 0}</Text>
         </Text>
         <Text fontSize={18} p={3} display='flex'>
           <Text bold>Plus Count:</Text>

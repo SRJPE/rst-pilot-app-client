@@ -149,29 +149,46 @@ const MultiSpeciesBatchChart = ({
   }
 
   const totalSlots = 50
-  const fishCount = groupedPreviouslyEnteredFish[activeSpeciesTab]?.length || 0
-  const remainingSlots = totalSlots - fishCount
+  const fishCount = combinedFishObj[activeSpeciesTab]?.length || 0
 
   const slots = Array.from({ length: totalSlots }, (_, i) => {
     const cellData = combinedFishObj[activeSpeciesTab]?.[i] || DEFAULT_CELL
     return { index: i, cellData }
   })
 
-  const renderScene = useMemo(() => {
-    const scenes = selectedSpecies.reduce<TabAcc>((acc, species, index) => {
-      acc[`tab-${index}`] = () => (
-        <MultiSpeciesChartTab
-          activeSpeciesTab={species}
-          slots={slots}
-          currentSpeciesPlusCount={currentSpeciesPlusCount}
-          combinedFishObj={combinedFishObj}
-        />
-      )
-      return acc
-    }, {})
+  // const renderScene = useMemo(() => {
+  //   const scenes = selectedSpecies.reduce<TabAcc>((acc, species, index) => {
+  //     acc[`tab-${index}`] = () => (
+  //       <MultiSpeciesChartTab
+  //         activeSpeciesTab={species}
+  //         slots={slots}
+  //         currentSpeciesPlusCount={currentSpeciesPlusCount}
+  //         combinedFishObj={combinedFishObj}
+  //       />
+  //     )
+  //     return acc
+  //   }, {})
 
-    return SceneMap(scenes)
-  }, [selectedSpecies, slots, combinedFishObj, currentSpeciesPlusCount])
+  //   return SceneMap(scenes)
+  // }, [selectedSpecies, slots, combinedFishObj, currentSpeciesPlusCount])
+
+  const renderScene = ({
+    route,
+  }: {
+    route: { key: string; title: string }
+  }) => {
+    const { key: activeSpeciesTab, title: species } = route
+
+    return (
+      <MultiSpeciesChartTab
+        species={species}
+        activeTab={activeSpeciesTab}
+        slots={slots}
+        currentSpeciesPlusCount={currentSpeciesPlusCount}
+        combinedFishObj={combinedFishObj}
+      />
+    )
+  }
 
   useEffect(() => {
     const newRoutes = selectedSpecies.map((species: string, i: number) => ({
