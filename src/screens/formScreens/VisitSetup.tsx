@@ -161,10 +161,10 @@ const VisitSetup = ({
           (field.equipmentId === null || field.equipmentId === trapEquimentType)
       )
       setFormFields(sectionFields)
-      const dynamicTrapOpsSchema = generateTrapVisitSchema(
+      const trapVisitSetupSchema = generateTrapVisitSchema(
         currentProgramInfo?.programFormFields
       )
-      setValidationSchema(dynamicTrapOpsSchema)
+      setValidationSchema(trapVisitSetupSchema)
     } else {
       setFormFields(null)
       setValidationSchema(trapVisitSchema)
@@ -575,7 +575,7 @@ const VisitSetup = ({
 
   return (
     <Formik
-      validationSchema={trapVisitSchema}
+      validationSchema={validationSchema}
       enableReinitialize={true}
       initialValues={
         tabSlice?.activeTabId
@@ -602,7 +602,11 @@ const VisitSetup = ({
         handleChange,
         handleBlur,
         isValid,
+        validateForm,
       }) => {
+        console.log('errors', errors)
+        console.log('values', values)
+
         const navButtons = useMemo(() => {
           return (
             <NavButtons
@@ -711,6 +715,9 @@ const VisitSetup = ({
                       updateSelectedProgram(itemValue)
                       setFieldValue('crew', []).then(() => {
                         setFieldTouched('crew', false)
+                      })
+                      setFieldValue('dataRecorder', undefined).then(() => {
+                        setFieldTouched('dataRecorder', false)
                       })
                       // setFieldValue('crew', [])
                       // setFieldTouched('crew', false)
