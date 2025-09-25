@@ -14,10 +14,16 @@ import {
   useColorModeValue,
 } from 'native-base'
 import React, { ComponentType, memo, useEffect, useMemo, useState } from 'react'
-import { Animated, Dimensions, Pressable, StatusBar } from 'react-native'
+import {
+  Animated,
+  Dimensions,
+  FlatList,
+  Pressable,
+  StatusBar,
+} from 'react-native'
 import type { NavigationState, SceneRendererProps } from 'react-native-tab-view'
 import { SceneMap, TabView } from 'react-native-tab-view'
-import { connect, useDispatch } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { FishDetailPopover } from './FishDetailPopover'
 
 type TabNavigationRoute = { key: string; title: string }
@@ -50,30 +56,44 @@ const MultiSpeciesBatchChart = ({
 }) => {
   const activeTabId = tabSlice?.activeTabId || 'placeholderId'
 
-  const previouslyEnteredFish = useMemo(() => {
+  const filterStoreBySpecies = (fishValues: any[], species: string) => {
+    return fishValues.filter(fish => fish.species === species)
+  }
+
+  //! Previously entered fish original implementation
+  // const previouslyEnteredFish = useMemo(() => {
+  //   if (!activeTabId) return []
+
+  //   return Object.values(fishInputSlice[activeTabId]?.fishStore || [])
+  //     .filter(fishRecord => fishRecord.species === speciesRadioValue)
+  //     .reduce((acc: any[], fishRecord) => {
+  //       if (fishRecord.numFishCaught === 1) {
+  //         acc.push(fishRecord)
+  //       }
+
+  //       if (fishRecord.numFishCaught > 1) {
+  //         const updatedFishEntries = Array.from(
+  //           { length: fishRecord.numFishCaught },
+  //           (fishRecordValues, i) => ({
+  //             ...fishRecord,
+  //             numFishCaught: 1,
+  //           })
+  //         )
+  //         acc.push(...updatedFishEntries)
+  //       }
+
+  //       return acc
+  //     }, [])
+  // }, [fishInputSlice, activeTabId, speciesRadioValue, tabIndex])
+
+  const previouslyEnteredFish = useSelector((state: RootState) => {
     if (!activeTabId) return []
+    const fishStore = state.fishInput[activeTabId]?.fishStore || {}
+    const fishArray = Object.values(fishStore)
+    const filteredFish = filterStoreBySpecies(fishArray, speciesRadioValue)
 
-    return Object.values(fishInputSlice[activeTabId]?.fishStore || [])
-      .filter(fishRecord => fishRecord.species === speciesRadioValue)
-      .reduce((acc: any[], fishRecord) => {
-        if (fishRecord.numFishCaught === 1) {
-          acc.push(fishRecord)
-        }
-
-        if (fishRecord.numFishCaught > 1) {
-          const updatedFishEntries = Array.from(
-            { length: fishRecord.numFishCaught },
-            (fishRecordValues, i) => ({
-              ...fishRecord,
-              numFishCaught: 1,
-            })
-          )
-          acc.push(...updatedFishEntries)
-        }
-
-        return acc
-      }, [])
-  }, [fishInputSlice, activeTabId, speciesRadioValue, tabIndex])
+    return filteredFish
+  })
 
   const currentSpeciesPlusCount = useMemo(() => {
     const plusCountValues = Object.values(
@@ -96,14 +116,16 @@ const MultiSpeciesBatchChart = ({
   }, [batchCountStore.forkLengths, speciesRadioValue])
 
   const [routes, setRoutes] = useState<Array<TabNavigationRoute>>([])
-  const [combinedFishObj, setCombinedFishObj] = useState<Record<string, any[]>>(
-    {}
-  )
-  const [groupedForkLengths, setGroupedForkLengths] = useState<
-    Record<string, any[]>
-  >({})
-  const [groupedPreviouslyEnteredFish, setGroupedPreviouslyEnteredFish] =
-    useState<Record<string, any[]>>({})
+  //! Previous implementation with useState and useEffect
+  // const [combinedFishObj, setCombinedFishObj] = useState<Record<string, any[]>>(
+  //   {}
+  // )
+  // const [groupedForkLengths, setGroupedForkLengths] = useState<
+  //   Record<string, any[]>
+  // >({})
+
+  // const [groupedPreviouslyEnteredFish, setGroupedPreviouslyEnteredFish] =
+  //   useState<Record<string, any[]>>({})
 
   const activeSpeciesTab = routes[tabIndex]?.title
 
@@ -131,27 +153,66 @@ const MultiSpeciesBatchChart = ({
     return result
   }
 
-  useEffect(() => {
-    const groupedPreviouslyEnteredFish = groupForkLengthsBySpecies(
-      previouslyEnteredFish
-    )
-    setGroupedPreviouslyEnteredFish(groupedPreviouslyEnteredFish)
-    const groupedForkLengths = groupForkLengthsBySpecies(forkLengths)
-    setGroupedForkLengths(groupedForkLengths)
+  const groupedPreviouslyEnteredFish = useMemo(() => {
+    return groupForkLengthsBySpecies(previouslyEnteredFish)
+  }, [previouslyEnteredFish])
 
+  const groupedForkLengths = useMemo(() => {
+    return groupForkLengthsBySpecies(forkLengths)
+  }, [forkLengths])
+
+  const combinedFishObj = useMemo(() => {
     const combinedEnteredFish: Record<string, any[]> = {}
-    for (const key in groupedForkLengths) {
-      combinedEnteredFish[key] = groupedForkLengths[key].slice() // shallow copy to avoid mutation
-    }
 
+    console.log(
+      '🚀 ~ MultiSpeciesBatchChart.tsx:168 ~ MultiSpeciesBatchChart ~ groupedPreviouslyEnteredFish:',
+      groupedPreviouslyEnteredFish
+    )
     for (const key in groupedPreviouslyEnteredFish) {
       combinedEnteredFish[key] = (combinedEnteredFish[key] || []).concat(
         groupedPreviouslyEnteredFish[key]
       )
     }
 
-    setCombinedFishObj(combinedEnteredFish)
-  }, [previouslyEnteredFish, forkLengths])
+    console.log(
+      '🚀 ~ MultiSpeciesBatchChart.tsx:176 ~ MultiSpeciesBatchChart ~ groupedForkLengths:',
+      groupedForkLengths
+    )
+    for (const key in groupedForkLengths) {
+      combinedEnteredFish[key] = (combinedEnteredFish[key] || []).concat(
+        groupedForkLengths[key]
+      )
+    }
+
+    return combinedEnteredFish
+  }, [groupedForkLengths, groupedPreviouslyEnteredFish])
+  console.log(
+    '🚀 ~ MultiSpeciesBatchChart.tsx:182 ~ MultiSpeciesBatchChart ~ combinedFishObj:',
+    combinedFishObj
+  )
+
+  //! Previous implementation with useState and useEffect
+  // useEffect(() => {
+  //   // const groupedPreviouslyEnteredFish = groupForkLengthsBySpecies(
+  //   //   previouslyEnteredFish
+  //   // )
+  //   // setGroupedPreviouslyEnteredFish(groupedPreviouslyEnteredFish)
+  //   // const groupedForkLengths = groupForkLengthsBySpecies(forkLengths)
+  //   // setGroupedForkLengths(groupedForkLengths)
+
+  //   const combinedEnteredFish: Record<string, any[]> = {}
+  //   for (const key in groupedForkLengths) {
+  //     combinedEnteredFish[key] = groupedForkLengths[key].slice() // shallow copy to avoid mutation
+  //   }
+
+  //   for (const key in groupedPreviouslyEnteredFish) {
+  //     combinedEnteredFish[key] = (combinedEnteredFish[key] || []).concat(
+  //       groupedPreviouslyEnteredFish[key]
+  //     )
+  //   }
+
+  //   setCombinedFishObj(combinedEnteredFish)
+  // }, [previouslyEnteredFish, forkLengths])
 
   const DEFAULT_CELL = {
     forkLength: null,
@@ -164,6 +225,19 @@ const MultiSpeciesBatchChart = ({
     taxonCode: null,
     uid: null,
   }
+
+  const totalSlots = 50
+  const fishCount = groupedPreviouslyEnteredFish[activeSpeciesTab]?.length || 0
+  const remainingSlots = totalSlots - fishCount
+
+  const slots = Array.from({ length: totalSlots }, (_, i) => {
+    const cellData = combinedFishObj[activeSpeciesTab]?.[i] || DEFAULT_CELL
+    return { index: i, cellData }
+  })
+  console.log(
+    '🚀 ~ MultiSpeciesBatchChart.tsx:223 ~ MultiSpeciesBatchChart ~ slots:',
+    slots
+  )
 
   const renderScene = () => {
     const scenes = selectedSpecies.reduce<TabAcc>((acc, species, index) => {
@@ -198,7 +272,7 @@ const MultiSpeciesBatchChart = ({
               </Center>
             </Box>
           ))}
-          {Array.from({
+          {/* {Array.from({
             length: groupedPreviouslyEnteredFish[activeSpeciesTab]?.length,
           }).map((_, i) => {
             const existingFishCellData =
@@ -213,7 +287,35 @@ const MultiSpeciesBatchChart = ({
                 />
               </Box>
             )
-          })}
+          })} */}
+          <FlatList
+            data={slots}
+            keyExtractor={item => item.cellData.uid ?? `slot-${item.index}`}
+            numColumns={10} // ✅ each row 10 cells (adjust flexBasis to match)
+            scrollEnabled={false} // ✅ let parent container scroll
+            renderItem={({ item }) => {
+              const { cellData, index } = item
+              return cellData.forkLength ? (
+                <Box flex={1} flexBasis={'9.5%'} h={50} position='relative'>
+                  <FishDetailPopover
+                    cellData={cellData}
+                    onRemove={
+                      cellData.uid
+                        ? () => dispatch(removeForkLengthByUID(cellData.uid))
+                        : undefined
+                    }
+                  />
+                </Box>
+              ) : (
+                <Box flex={1} flexBasis={'9.5%'} h={50}>
+                  <Center borderWidth={1} h='full' w='full' background='white'>
+                    <Text fontSize={18}>{''}</Text>
+                  </Center>
+                </Box>
+              )
+            }}
+          />
+          {/* <Box flex={1} flexBasis={'9.5%'} h={50} />
 
           {Array.from({
             length:
@@ -248,7 +350,7 @@ const MultiSpeciesBatchChart = ({
                 </Center>
               </Box>
             )
-          })}
+          })} */}
           <HStack
             w='full'
             background='gray.200'
