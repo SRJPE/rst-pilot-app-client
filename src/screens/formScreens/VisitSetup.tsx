@@ -601,6 +601,7 @@ const VisitSetup = ({
         resetForm,
         handleChange,
         handleBlur,
+        isValid,
       }) => {
         const navButtons = useMemo(() => {
           return (
@@ -613,10 +614,10 @@ const VisitSetup = ({
               touched={touched}
               values={values}
               shouldProceedToLoadingScreen={true}
-              // isValid={isValid && otherTabFormsValid}
+              isValid={isValid}
             />
           )
-        }, [navigation, handleSubmit, errors, touched, values])
+        }, [navigation, handleSubmit, errors, touched, values, isValid])
         useEffect(() => {
           // if (
           //   tabSlice.previouslyActiveTabId &&

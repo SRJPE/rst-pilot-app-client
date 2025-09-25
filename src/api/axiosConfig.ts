@@ -92,6 +92,13 @@ api.interceptors.request.use(
           'userAccessTokenExpiresAt'
         )
         const tokenIsExpired = moment().isAfter(tokenExpiresAt)
+        if (!tokenIsExpired && accessToken && idToken) {
+          const newConfig = config as any
+          newConfig.headers['Authorization'] = `Bearer ${accessToken}`
+          newConfig.headers['idToken'] = idToken
+          return newConfig
+        }
+
         try {
           //refreshAsync to exchange for new token
           const existingRefreshToken =

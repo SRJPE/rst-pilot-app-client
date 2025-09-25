@@ -32,6 +32,9 @@ export const refreshUserToken = async (
   if (isConnected) {
     try {
       const accessTokenIsExpired = moment().isAfter(tokenExpiresAt)
+      if (!accessTokenIsExpired) {
+        return 'Tokens still valid' as TokenResponse
+      }
 
       //refreshAsync to exchave for new token
       const existingRefreshToken = await SecureStore.getItemAsync(

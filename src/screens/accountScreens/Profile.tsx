@@ -29,6 +29,9 @@ import { MonitoringProgram } from '../../utils/interfaces'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { resetTrapVisitFormPostBundler } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { resetVisitSetupDefaultSlice } from '../../redux/reducers/visitSetupDefaults'
+import { resetNavigationSlice } from '../../redux/reducers/formSlices/navigationSlice'
+import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
+import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 
 import {
   // @ts-ignore
@@ -357,6 +360,9 @@ const Profile = ({
             persistor.purge()
             dispatch(resetTrapVisitFormPostBundler())
             dispatch(resetVisitSetupDefaultSlice())
+            dispatch(resetNavigationSlice())
+            dispatch(resetVisitSetupSlice())
+            dispatch(resetTabsSlice())
 
             setLogoutModalOpen(false)
             dispatch(clearUserCredentials())
