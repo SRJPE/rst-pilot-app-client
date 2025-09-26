@@ -119,9 +119,12 @@ export const fetchRecentlyUsedSpecies = ({
 }
 
 export const findTaxonCode = (speciesValue: string, taxonArray: any[]) => {
-  return taxonArray?.find(taxon => taxon.commonname === speciesValue)?.code
-}
+  const speciesText = speciesValue.includes('recent')
+    ? speciesValue.split('_')[1]
+    : speciesValue
 
+  return taxonArray?.find(taxon => taxon.commonname === speciesText)?.code
+}
 export const createArray = (start: number, end: number) => {
   var result = []
   for (var i = start; i <= start + end; i++) {
