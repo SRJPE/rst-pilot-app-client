@@ -131,7 +131,7 @@ api.interceptors.request.use(
 
               await storeAccessTokens({
                 accessToken,
-                refreshToken,
+                refreshToken: refreshToken || existingRefreshToken,
                 idToken,
                 expiresIn,
                 issuedAt,
