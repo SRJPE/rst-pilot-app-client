@@ -589,6 +589,7 @@ const VisitSetup = ({
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
       onSubmit={() => {}}
+      validateOnMount={true}
     >
       {({
         handleSubmit,
@@ -604,6 +605,13 @@ const VisitSetup = ({
         isValid,
         validateForm,
       }) => {
+        useEffect(() => {
+          if (typeof values.trapName === 'string') {
+            setFieldValue('trapName', [values.trapName]).then(() => {
+              validateForm()
+            })
+          }
+        }, [values.trapName])
         const navButtons = useMemo(() => {
           return (
             <NavButtons
