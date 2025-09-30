@@ -20,6 +20,7 @@ import React, { useEffect } from 'react'
 import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
 import type { InitialStateI as UserCredentialStopeProps } from '../redux/reducers/userCredentialsSlice'
 import type { InitialStateI as ConnectivityStoreProps } from '../redux/reducers/connectivitySlice'
+import { showSlideAlert } from '../redux/reducers/slideAlertSlice'
 const Drawer = createDrawerNavigator()
 
 const DrawerNavigator = ({
@@ -47,29 +48,44 @@ const DrawerNavigator = ({
 
   useEffect(() => {
     if (isConnected && isInternetReachable && !isSignInScreen) {
-      refreshUserToken(dispatch).then(tokenRefreshResponse => {
-        if (
-          tokenRefreshResponse &&
-          ['No refresh token found', 'Tokens could not be refreshed'].includes(
-            tokenRefreshResponse
-          )
-        ) {
+      refreshUserToken(dispatch)
+        .then(tokenRefreshResponse => {
+          if (
+            tokenRefreshResponse &&
+            [
+              'No refresh token found',
+              'Tokens could not be refreshed',
+            ].includes(tokenRefreshResponse)
+          ) {
+            dispatch(setForcedLogoutModalOpen(true))
+            showSlideAlert(
+              dispatch,
+              'Tokens could not be refreshed.',
+              'error',
+              5000
+            )
+            return
+          }
+
+          if (tokenRefreshResponse === 'Tokens refreshed') {
+            console.log(
+              '🚀 ~ file: MainDrawerNavigator.tsx:42 ~ Tokens refreshed from main drawer navigation provider'
+            )
+            return
+          }
+
+          if (tokenRefreshResponse === 'Tokens still valid') {
+            console.log(
+              '🚀 ~ file: MainDrawerNavigator.tsx:49 ~ Tokens still valid from main drawer navigation provider'
+            )
+          }
+        })
+        .catch(error => {
+          console.error('Error refreshing token:', error)
+          showSlideAlert(dispatch, 'Error refreshing token', 'error', 5000)
           dispatch(setForcedLogoutModalOpen(true))
-        }
-
-        if (tokenRefreshResponse === 'Tokens refreshed') {
-          console.log(
-            '🚀 ~ file: MainDrawerNavigator.tsx:42 ~ Tokens refreshed from main drawer navigation provider'
-          )
           return
-        }
-
-        if (tokenRefreshResponse === 'Tokens still valid') {
-          console.log(
-            '🚀 ~ file: MainDrawerNavigator.tsx:49 ~ Tokens still valid from main drawer navigation provider'
-          )
-        }
-      })
+        })
     } else {
       console.log(
         '🚀 ~ file: MainDrawerNavigator.tsx:72 ~ useEffect ~ isConnected:',

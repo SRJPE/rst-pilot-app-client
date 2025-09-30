@@ -119,7 +119,7 @@ export const fetchRecentlyUsedSpecies = ({
 }
 
 export const findTaxonCode = (speciesValue: string, taxonArray: any[]) => {
-  const speciesText = speciesValue.includes('recent')
+  const speciesText = speciesValue?.includes('recent')
     ? speciesValue.split('_')[1]
     : speciesValue
 

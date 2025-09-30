@@ -106,10 +106,11 @@ api.interceptors.request.use(
 
           if (!existingRefreshToken) {
             store.dispatch(setForcedLogoutModalOpen(true))
+            return
           }
 
           const tokenEndpoint =
-            'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_signin'
+            'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/b2c_1_signin/oauth2/v2.0/token'
 
           try {
             const refreshResponse = await refreshAsync(
