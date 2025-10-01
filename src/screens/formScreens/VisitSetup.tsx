@@ -609,9 +609,6 @@ const VisitSetup = ({
         validateForm,
       }) => {
         const navButtons = useMemo(() => {
-          console.log('isValid:', isValid)
-          console.log('errors:', errors)
-          console.log('values:', values)
           return (
             <NavButtons
               navigation={navigation}
