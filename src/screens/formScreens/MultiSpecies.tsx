@@ -333,6 +333,7 @@ const MultiSpecies = ({
 
   useFocusEffect(
     React.useCallback(() => {
+      console.log('focused, ', speciesRadioValue)
       // Run your existing logic only when screen is focused
       if (currentRoute?.name !== 'Multi Species') {
         setFishMeasureMetModalOpen(false)

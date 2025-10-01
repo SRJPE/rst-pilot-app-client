@@ -206,7 +206,7 @@ const MultiSpeciesModalContent = ({
                   closeModal()
                   if (!batchCharacteristics?.multiSpecies?.length) {
                     navigation.preload('Fish Input')
-                    navigation.replace('Fish Input')
+                    navigation.navigate('Fish Input')
                   }
                 }}
               />
