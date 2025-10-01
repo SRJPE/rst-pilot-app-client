@@ -409,6 +409,57 @@ const MultiSpecies = ({
     ])
   )
 
+  const handleAddPlusCountClick = () => {
+    setFishMeasureMetModalOpen(true)
+    if (tabSlice?.activeTabId && speciesRadioValue) {
+      // Build batch store (memoized outside)
+      const batchCountFishStore = Object.values(
+        batchCountStore?.forkLengths || {}
+      ).map((flObj: any) => ({
+        forkLength: flObj.forkLength,
+        run: flObj?.runDefinition,
+        lifeStage: flObj?.lifeStage?.toLowerCase(),
+        species: flObj?.species,
+        numFishCaught: flObj?.numFishCaught || 1,
+        plusCount: flObj?.plusCount || false,
+      }))
+
+      const existingFishStore =
+        fishInputSlice[tabSlice.activeTabId]?.fishStore ?? {}
+      const combinedFishStoreObj: Record<string, any> = { ...existingFishStore }
+
+      let total = Object.values(existingFishStore).reduce(
+        (sum, fishObj) => sum + ((fishObj as any).numFishCaught || 0),
+        0
+      ) as number
+
+      let nextIndex = Object.keys(combinedFishStoreObj).length
+      batchCountFishStore.forEach(fish => {
+        combinedFishStoreObj[nextIndex++] = fish
+        total += fish.numFishCaught || 0
+      })
+      const combinedFishMeasureCountsObj =
+        getFishMeasureCounts(combinedFishStoreObj)
+      setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
+      const protocolResult = checkFishMeasureProtocol({
+        fishMeasureCounts: combinedFishMeasureCountsObj,
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        speciesValue: speciesRadioValue,
+        runValue: '',
+        lifeStageValue: '',
+      })
+
+      if (protocolResult?.protocolMet) {
+        setShowAddPlusCountButton(true)
+      } else {
+        setShowAddPlusCountButton(false)
+        setFishMeasureMetModalOpen(false)
+      }
+
+      setProtocolKeyMet(protocolResult?.protocolKeyMet ?? null)
+    }
+  }
+
   const closeFishMeasureMetModal = () => {
     setFishMeasureMetModalOpen(false)
     setProtocolKeyMet(null)
@@ -743,7 +794,7 @@ const MultiSpecies = ({
                       background='primary'
                       mr='auto'
                       px={5}
-                      onPress={() => setFishMeasureMetModalOpen(true)}
+                      onPress={handleAddPlusCountClick}
                     >
                       <Text color='white' fontSize={18}>
                         Add Plus Count

@@ -89,15 +89,10 @@ const MultiSpeciesBatchChart = ({
 
   // ✅ Efficient calculation (no intermediate arrays)
   const currentSpeciesPlusCount = useMemo(() => {
-    let currentPlusCountTotal = 0
-    for (const fish of Object.values(batchCountStore.forkLengths || {})) {
-      if (fish.species === speciesRadioValue && fish.plusCount) {
-        currentPlusCountTotal += fish.numFishCaught || 0
-      }
-    }
-    const existingPlusCountTotal =
+    const combinedPlusCountTotal =
       fishMeasureCounts[speciesRadioValue]?.plusCount || 0
-    return String(currentPlusCountTotal + existingPlusCountTotal || 0)
+
+    return String(combinedPlusCountTotal || 0)
   }, [batchCountStore.forkLengths, speciesRadioValue, fishMeasureCounts])
 
   const [routes, setRoutes] = useState<Array<TabNavigationRoute>>([])
