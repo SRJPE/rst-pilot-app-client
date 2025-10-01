@@ -593,6 +593,7 @@ const VisitSetup = ({
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
       onSubmit={() => {}}
+      validateOnMount={true}
     >
       {({
         handleSubmit,
