@@ -608,6 +608,13 @@ const VisitSetup = ({
         isValid,
         validateForm,
       }) => {
+        useEffect(() => {
+          if (typeof values.trapName === 'string') {
+            setFieldValue('trapName', [values.trapName]).then(() => {
+              validateForm()
+            })
+          }
+        }, [values.trapName])
         const navButtons = useMemo(() => {
           return (
             <NavButtons
