@@ -50,6 +50,8 @@ import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
 import { generateTrapVisitSchema } from '../../utils/helpers/yupValidations'
 import { InferType } from 'yup'
+import { resetFishInputSlice } from '@/src/redux/reducers/formSlices/fishInputSlice'
+import { resetBatchCountSlice } from '@/src/redux/reducers/formSlices/batchCountSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -414,6 +416,8 @@ const VisitSetup = ({
     dispatch(resetTabsSlice())
     dispatch(resetVisitSetupSlice())
     dispatch(resetFishProcessingSlice())
+    dispatch(resetFishInputSlice())
+    dispatch(resetBatchCountSlice())
     dispatch(resetTrapPostProcessingSlice())
     dispatch(resetTrapOperationsSlice())
     let programId = null
@@ -605,6 +609,9 @@ const VisitSetup = ({
         validateForm,
       }) => {
         const navButtons = useMemo(() => {
+          console.log('isValid:', isValid)
+          console.log('errors:', errors)
+          console.log('values:', values)
           return (
             <NavButtons
               navigation={navigation}
