@@ -1,8 +1,8 @@
 import type { batchCountI } from '@/src/redux/reducers/formSlices/batchCountSlice'
 import { InitialStateI } from '@/src/redux/reducers/formSlices/fishInputSlice'
 import { TabStateI } from '@/src/redux/reducers/formSlices/tabSlice'
-
 import { RootState } from '@/src/redux/store'
+
 import {
   Box,
   Center,
@@ -12,20 +12,49 @@ import {
   Text,
   useColorModeValue,
 } from 'native-base'
-import React, { ComponentType, memo, useEffect, useMemo, useState } from 'react'
+import React, {
+  ComponentType,
+  memo,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+} from 'react'
 import { Animated, Dimensions, Pressable, StatusBar } from 'react-native'
 import type { NavigationState, SceneRendererProps } from 'react-native-tab-view'
-import { SceneMap, TabView } from 'react-native-tab-view'
-import { connect, useSelector } from 'react-redux'
+import { TabView } from 'react-native-tab-view'
+import { connect, useSelector, shallowEqual } from 'react-redux'
 import MultiSpeciesChartTab from './MultiSpeciesChartTab'
 
 type TabNavigationRoute = { key: string; title: string }
-type TabAcc = {
-  [key: string]: ComponentType<unknown>
-}
+type TabAcc = { [key: string]: ComponentType<unknown> }
 
 const initialLayout = {
   width: Dimensions.get('window').width,
+}
+
+const DEFAULT_CELL = {
+  forkLength: null,
+  dead: false,
+  existingMark: false,
+  fishConditions: [],
+  lifeStage: null,
+  runDefinition: null,
+  species: '',
+  taxonCode: null,
+  uid: null,
+}
+
+function groupForkLengthsBySpecies(
+  data: Record<string, any>
+): Record<string, any[]> {
+  const result: Record<string, any[]> = {}
+  for (const item of Object.values(data)) {
+    if (!item?.species || typeof item.forkLength !== 'number') continue
+    if (!result[item.species]) result[item.species] = []
+    result[item.species].push(item)
+  }
+  return result
 }
 
 const MultiSpeciesBatchChart = ({
@@ -36,7 +65,7 @@ const MultiSpeciesBatchChart = ({
   tabIndex,
   setTabIndex,
   fishInputSlice,
-  fishMeasureCounts = {}, // Default to empty object if not provided
+  fishMeasureCounts = {},
 }: {
   tabIndex: number
   setTabIndex: (index: number) => void
@@ -49,169 +78,93 @@ const MultiSpeciesBatchChart = ({
 }) => {
   const activeTabId = tabSlice?.activeTabId || 'placeholderId'
 
-  const filterStoreBySpecies = (fishValues: any[], species: string) => {
-    return fishValues.filter(fish => fish.species === species)
-  }
-
+  // ✅ Redux selector optimized with shallowEqual
   const previouslyEnteredFish = useSelector((state: RootState) => {
     if (!activeTabId) return []
     const fishStore = state.fishInput[activeTabId]?.fishStore || {}
-    const fishArray = Object.values(fishStore)
-    const filteredFish = filterStoreBySpecies(fishArray, speciesRadioValue)
+    return Object.values(fishStore).filter(
+      (fish: any) => fish.species === speciesRadioValue
+    )
+  }, shallowEqual)
 
-    return filteredFish
-  })
-
+  // ✅ Efficient calculation (no intermediate arrays)
   const currentSpeciesPlusCount = useMemo(() => {
-    const plusCountValues = Object.values(
-      batchCountStore.forkLengths || []
-    ).filter(fish => fish.species === speciesRadioValue && fish.plusCount)
-
+    let currentPlusCountTotal = 0
+    for (const fish of Object.values(batchCountStore.forkLengths || {})) {
+      if (fish.species === speciesRadioValue && fish.plusCount) {
+        currentPlusCountTotal += fish.numFishCaught || 0
+      }
+    }
     const existingPlusCountTotal =
       fishMeasureCounts[speciesRadioValue]?.plusCount || 0
-
-    const currentPlusCountTotal = plusCountValues.reduce(
-      (acc, fish) => acc + (fish.numFishCaught || 0),
-      0
-    )
-
-    if (currentPlusCountTotal + existingPlusCountTotal > 0) {
-      return `${existingPlusCountTotal}`
-    }
-
-    return '0'
-  }, [batchCountStore.forkLengths, speciesRadioValue])
+    return String(currentPlusCountTotal + existingPlusCountTotal || 0)
+  }, [batchCountStore.forkLengths, speciesRadioValue, fishMeasureCounts])
 
   const [routes, setRoutes] = useState<Array<TabNavigationRoute>>([])
 
-  const activeSpeciesTab = routes[tabIndex]?.title
+  const forkLengths = useMemo(
+    () => batchCountStore?.forkLengths || {},
+    [batchCountStore?.forkLengths]
+  )
+  const selectedSpecies = useMemo(
+    () => batchCountStore?.batchCharacteristics?.multiSpecies || [],
+    [batchCountStore?.batchCharacteristics?.multiSpecies]
+  )
 
-  const forkLengths = useMemo(() => {
-    return batchCountStore?.forkLengths || {}
-  }, [batchCountStore?.forkLengths])
+  const groupedPreviouslyEnteredFish = useMemo(
+    () => groupForkLengthsBySpecies(previouslyEnteredFish),
+    [previouslyEnteredFish]
+  )
 
-  const selectedSpecies = useMemo(() => {
-    return batchCountStore?.batchCharacteristics?.multiSpecies || []
-  }, [batchCountStore?.batchCharacteristics?.multiSpecies])
-
-  function groupForkLengthsBySpecies(
-    data: Record<string, any>
-  ): Record<string, any[]> {
-    const result: Record<string, any[]> = {}
-
-    Object.values(data).forEach((item: any) => {
-      if (!item.species || typeof item.forkLength !== 'number') return
-      if (!result[item.species]) {
-        result[item.species] = []
-      }
-      result[item.species].push(item)
-    })
-
-    return result
-  }
-
-  const groupedPreviouslyEnteredFish = useMemo(() => {
-    return groupForkLengthsBySpecies(previouslyEnteredFish)
-  }, [previouslyEnteredFish])
-
-  const groupedForkLengths = useMemo(() => {
-    return groupForkLengthsBySpecies(forkLengths)
-  }, [forkLengths])
+  const groupedForkLengths = useMemo(
+    () => groupForkLengthsBySpecies(forkLengths),
+    [forkLengths]
+  )
 
   const combinedFishObj = useMemo(() => {
-    const combinedEnteredFish: Record<string, any[]> = {}
-
+    const combined: Record<string, any[]> = {}
     for (const key in groupedPreviouslyEnteredFish) {
-      combinedEnteredFish[key] = (combinedEnteredFish[key] || []).concat(
+      combined[key] = (combined[key] || []).concat(
         groupedPreviouslyEnteredFish[key]
       )
     }
-
     for (const key in groupedForkLengths) {
-      combinedEnteredFish[key] = (combinedEnteredFish[key] || []).concat(
-        groupedForkLengths[key]
-      )
+      combined[key] = (combined[key] || []).concat(groupedForkLengths[key])
     }
-
-    return combinedEnteredFish
+    return combined
   }, [groupedForkLengths, groupedPreviouslyEnteredFish])
 
-  const DEFAULT_CELL = {
-    forkLength: null,
-    dead: false,
-    existingMark: false,
-    fishConditions: [],
-    lifeStage: null,
-    runDefinition: null,
-    species: '',
-    taxonCode: null,
-    uid: null,
-  }
-
+  const activeSpeciesTab = routes[tabIndex]?.title
   const totalSlots = 50
-  const fishCount = combinedFishObj[activeSpeciesTab]?.length || 0
 
-  const slots = Array.from({ length: totalSlots }, (_, i) => {
-    const cellData = combinedFishObj[activeSpeciesTab]?.[i] || DEFAULT_CELL
-    return { index: i, cellData }
-  })
+  const slots = useMemo(() => {
+    return Array.from({ length: totalSlots }, (_, i) => {
+      const cellData = combinedFishObj[activeSpeciesTab]?.[i] || DEFAULT_CELL
+      return { index: i, cellData }
+    })
+  }, [combinedFishObj, activeSpeciesTab])
 
-  // const renderScene = useMemo(() => {
-  //   const scenes = selectedSpecies.reduce<TabAcc>((acc, species, index) => {
-  //     acc[`tab-${index}`] = () => (
-  //       <MultiSpeciesChartTab
-  //         activeSpeciesTab={species}
-  //         slots={slots}
-  //         currentSpeciesPlusCount={currentSpeciesPlusCount}
-  //         combinedFishObj={combinedFishObj}
-  //       />
-  //     )
-  //     return acc
-  //   }, {})
-
-  //   return SceneMap(scenes)
-  // }, [selectedSpecies, slots, combinedFishObj, currentSpeciesPlusCount])
-
-  const renderScene = ({
-    route,
-  }: {
-    route: { key: string; title: string }
-  }) => {
-    const { key: activeSpeciesTab, title: species } = route
-
-    return (
+  // ✅ Memoized renderScene
+  const renderScene = useCallback(
+    ({ route }: { route: TabNavigationRoute }) => (
       <MultiSpeciesChartTab
-        species={species}
-        activeTab={activeSpeciesTab}
+        species={route.title}
+        activeTab={route.key}
         slots={slots}
         currentSpeciesPlusCount={currentSpeciesPlusCount}
         combinedFishObj={combinedFishObj}
       />
-    )
-  }
+    ),
+    [slots, currentSpeciesPlusCount, combinedFishObj]
+  )
 
-  useEffect(() => {
-    const newRoutes = selectedSpecies.map((species: string, i: number) => ({
-      key: `tab-${i}`,
-      title: species,
-    }))
-    setRoutes(newRoutes)
-  }, [selectedSpecies])
-
-  useEffect(() => {
-    const spvTabIndex = routes.findIndex(
-      route => route.title === speciesRadioValue
-    )
-
-    setTabIndex(spvTabIndex >= 0 ? spvTabIndex : 0)
-  }, [speciesRadioValue])
-
-  const renderTabBar = (
-    props: SceneRendererProps & {
-      navigationState: NavigationState<TabNavigationRoute>
-    }
-  ) => {
-    return (
+  // ✅ Memoized renderTabBar
+  const renderTabBar = useCallback(
+    (
+      props: SceneRendererProps & {
+        navigationState: NavigationState<TabNavigationRoute>
+      }
+    ) => (
       <Box flexDirection='row'>
         <ScrollView horizontal>
           {props.navigationState.routes.map(
@@ -239,11 +192,7 @@ const MultiSpeciesBatchChart = ({
                     alignItems='center'
                     p='3'
                   >
-                    <Animated.Text
-                      style={{
-                        color,
-                      }}
-                    >
+                    <Animated.Text style={{ color }}>
                       {route.title}
                     </Animated.Text>
                   </Box>
@@ -253,17 +202,32 @@ const MultiSpeciesBatchChart = ({
           )}
         </ScrollView>
       </Box>
+    ),
+    [tabIndex, setTabIndex, setSpeciesRadioValue]
+  )
+
+  // Build routes once per species change
+  useEffect(() => {
+    const newRoutes = selectedSpecies.map((species: string, i: number) => ({
+      key: `tab-${i}`,
+      title: species,
+    }))
+    setRoutes(newRoutes)
+  }, [selectedSpecies])
+
+  // Update tab index when speciesRadioValue changes
+  useEffect(() => {
+    const spvTabIndex = routes.findIndex(
+      route => route.title === speciesRadioValue
     )
-  }
+    setTabIndex(spvTabIndex >= 0 ? spvTabIndex : 0)
+  }, [speciesRadioValue, routes, setTabIndex])
 
   return (
     <NativeBaseProvider>
       <Center flex={1} px='3'>
         <TabView
-          navigationState={{
-            index: tabIndex,
-            routes,
-          }}
+          navigationState={{ index: tabIndex, routes }}
           renderScene={renderScene}
           renderTabBar={renderTabBar}
           onIndexChange={setTabIndex}
@@ -273,6 +237,12 @@ const MultiSpeciesBatchChart = ({
             height: 420,
             width: '100%',
           }}
+          lazy
+          renderLazyPlaceholder={() => (
+            <Center flex={1}>
+              <Text>Loading...</Text>
+            </Center>
+          )}
         />
         <HStack space={5} justifyContent='center' mb={3}>
           <HStack space={2}>
@@ -291,12 +261,10 @@ const MultiSpeciesBatchChart = ({
   )
 }
 
-const mapStateToProps = (state: RootState) => {
-  return {
-    tabSlice: state.tabSlice,
-    batchCountStore: state.batchCount,
-    fishInputSlice: state.fishInput,
-  }
-}
+const mapStateToProps = (state: RootState) => ({
+  tabSlice: state.tabSlice,
+  batchCountStore: state.batchCount,
+  fishInputSlice: state.fishInput,
+})
 
 export default connect(mapStateToProps)(memo(MultiSpeciesBatchChart))
