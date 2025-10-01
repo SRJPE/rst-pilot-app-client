@@ -5,10 +5,7 @@ import {
   // @ts-ignore
   EXPO_PUBLIC_CLIENT_ID,
 } from '@env'
-import { error } from 'console'
 import { AppDispatch, store } from '../redux/store'
-import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
-import { access } from 'fs'
 
 type TokenResponse =
   | 'Tokens refreshed'
@@ -42,7 +39,7 @@ export const refreshUserToken = async (
       )
 
       const tokenEndpoint =
-        'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_signin'
+        'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/b2c_1_signin/oauth2/v2.0/token'
 
       const refreshResponse = await refreshAsync(
         {
@@ -67,12 +64,11 @@ export const refreshUserToken = async (
         })
         return 'Tokens refreshed'
       } else {
-        throw new Error('Tokens could not be refreshed')
+        throw new Error('No access token in refresh response')
       }
     } catch (responseError) {
       if (responseError instanceof Error) {
-        dispatch(setForcedLogoutModalOpen(true))
-        return responseError.message as TokenResponse
+        throw new Error('Error during token refresh')
       }
     }
   } else {

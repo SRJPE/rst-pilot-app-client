@@ -20,6 +20,7 @@ import { resetTrapOperationsSlice } from '../../../redux/reducers/formSlices/tra
 import { resetVisitSetupSlice } from '../../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../../redux/reducers/formSlices/paperEntrySlice'
 import { resetTabsSlice } from '../../../redux/reducers/formSlices/tabSlice'
+import { resetBatchCountSlice } from '../../../redux/reducers/formSlices/batchCountSlice'
 import { flatten, uniq } from 'lodash'
 import { TabStateI } from '../../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
@@ -119,6 +120,7 @@ const NoFishCaught = ({
     dispatch(resetGeneticSamplesSlice())
     dispatch(resetMarksOrTagsSlice())
     dispatch(resetFishInputSlice())
+    dispatch(resetBatchCountSlice())
     dispatch(resetFishProcessingSlice())
     dispatch(resetTrapPostProcessingSlice())
     dispatch(resetTrapOperationsSlice())

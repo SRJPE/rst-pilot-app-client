@@ -34,7 +34,11 @@ import {
   reorderTaxon,
 } from '@/src/utils/utils'
 import { FontAwesome } from '@expo/vector-icons'
-import { useIsFocused, useNavigation } from '@react-navigation/native'
+import {
+  useIsFocused,
+  useNavigation,
+  useFocusEffect,
+} from '@react-navigation/native'
 import {
   Box,
   Button,
@@ -50,12 +54,12 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Keyboard } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
 import { getLadObject } from '../../utils/helpers/helperFunctions'
 import ToggleLockButton from '@/src/components/Shared/ToggleLockButton'
-import { find, keyBy } from 'lodash'
+import { find, keyBy, merge } from 'lodash'
 
 const MultiSpecies = ({
   route,
@@ -254,9 +258,7 @@ const MultiSpecies = ({
       showSlideAlert(dispatch, 'Multi Species Batch Count Saved')
 
       // @ts-ignore
-      navigation.navigate('Trap Visit Form', {
-        screen: 'Fish Input',
-      })
+      navigation.replace('Fish Input')
     }
   }
 
@@ -326,118 +328,126 @@ const MultiSpecies = ({
     setEggsIsLocked(!eggsIsLocked)
   }
 
-  useEffect(() => {
-    if (currentRoute?.name !== 'Multi Species') {
-      setFishMeasureMetModalOpen(false)
-      setProtocolKeyMet(null)
-      return
-    }
-    if (!tabSlice?.activeTabId || !fishInputSlice) {
-      setFishMeasureMetModalOpen(false)
-      setProtocolKeyMet(null)
-      return
-    }
+  const navState = navigation?.getState()
+  const currentRoute = navState?.routes[navState?.index]
 
-    if (multiSpeciesModalOpen) {
-      setFishMeasureMetModalOpen(false)
-      setProtocolKeyMet(null)
-
-      return
-    }
-
-    const batchCountFishStore = Object.values(batchCountStore?.forkLengths).map(
-      (flObj: any) => {
-        return {
-          forkLength: flObj.forkLength,
-          run: flObj?.runDefinition,
-          lifeStage: flObj?.lifeStage?.toLowerCase(),
-          species: flObj?.species,
-          numFishCaught: flObj?.numFishCaught || 1,
-          plusCount: flObj?.plusCount || false,
-        }
+  useFocusEffect(
+    React.useCallback(() => {
+      // Run your existing logic only when screen is focused
+      if (currentRoute?.name !== 'Multi Species') {
+        setFishMeasureMetModalOpen(false)
+        setProtocolKeyMet(null)
+        return
       }
-    )
 
-    const existingFishStore = fishInputSlice?.[tabSlice.activeTabId]
-      ?.fishStore as Record<string, { numFishCaught: number }>
+      if (!tabSlice?.activeTabId || !fishInputSlice) {
+        setFishMeasureMetModalOpen(false)
+        setProtocolKeyMet(null)
+        return
+      }
 
-    const combinedFishStoreObj = {
-      ...existingFishStore,
-    } as Record<string, any>
+      if (multiSpeciesModalOpen) {
+        setFishMeasureMetModalOpen(false)
+        setProtocolKeyMet(null)
+        return
+      }
 
-    let nextIndex = Object.keys(combinedFishStoreObj).length
-    batchCountFishStore.forEach(fish => {
-      combinedFishStoreObj[nextIndex] = fish
-      nextIndex++
-    })
+      const batchCountFishStore = Object.values(
+        batchCountStore?.forkLengths
+      ).map((flObj: any) => ({
+        forkLength: flObj.forkLength,
+        run: flObj?.runDefinition,
+        lifeStage: flObj?.lifeStage?.toLowerCase(),
+        species: flObj?.species,
+        numFishCaught: flObj?.numFishCaught || 1,
+        plusCount: flObj?.plusCount || false,
+      }))
 
-    const combinedFishMeasureCountsObj =
-      getFishMeasureCounts(combinedFishStoreObj)
+      const existingFishStore = fishInputSlice?.[tabSlice.activeTabId]
+        ?.fishStore as Record<string, { numFishCaught: number }>
 
-    setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
+      const combinedFishStoreObj = { ...existingFishStore } as Record<
+        string,
+        any
+      >
 
-    if (!combinedFishStoreObj) return
+      let nextIndex = Object.keys(combinedFishStoreObj).length
+      batchCountFishStore.forEach(fish => {
+        combinedFishStoreObj[nextIndex] = fish
+        nextIndex++
+      })
 
-    const total = Object.values(combinedFishStoreObj).reduce(
-      (sum, fishObj) =>
-        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
-      0
-    )
+      const combinedFishMeasureCountsObj =
+        getFishMeasureCounts(combinedFishStoreObj)
 
-    setTotalCatchCount(total)
+      setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
 
-    const checkPlusCountExists = (
-      fishObjectArray: Array<Record<string, any>>,
-      species: string
-    ) => {
-      const currentSpeciesFishCounts = fishObjectArray.filter(
-        fishObj => fishObj.species === species && fishObj.plusCount
+      if (!combinedFishStoreObj) return
+
+      const total = Object.values(combinedFishStoreObj).reduce(
+        (sum, fishObj) =>
+          sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
+        0
       )
 
-      return currentSpeciesFishCounts.length > 0
-    }
+      setTotalCatchCount(total)
 
-    const plusCountExists = checkPlusCountExists(
-      batchCountFishStore,
-      speciesRadioValue
-    )
+      const checkPlusCountExists = (
+        fishObjectArray: Array<Record<string, any>>,
+        species: string
+      ) =>
+        fishObjectArray.filter(
+          fishObj => fishObj.species === species && fishObj.plusCount
+        ).length > 0
 
-    const protocolResult = checkFishMeasureProtocol({
-      fishMeasureCounts: combinedFishMeasureCountsObj,
-      fishMeasureProtocol: route.params?.fishMeasureProtocol,
-      speciesValue: speciesRadioValue as string,
-      runValue: '' as string,
-      lifeStageValue: '' as string,
-    })
+      const plusCountExists = checkPlusCountExists(
+        batchCountFishStore,
+        speciesRadioValue
+      )
 
-    if (protocolResult && protocolResult.protocolMet) {
-      setShowAddPlusCountButton(true)
+      const protocolResult = checkFishMeasureProtocol({
+        fishMeasureCounts: combinedFishMeasureCountsObj,
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        speciesValue: speciesRadioValue as string,
+        runValue: '' as string,
+        lifeStageValue: '' as string,
+      })
 
-      !plusCountExists && setFishMeasureMetModalOpen(true)
-    } else {
-      setShowAddPlusCountButton(false)
-      setFishMeasureMetModalOpen(false)
-    }
+      if (protocolResult && protocolResult.protocolMet) {
+        setShowAddPlusCountButton(true)
+        if (!plusCountExists) setFishMeasureMetModalOpen(true)
+      } else {
+        setShowAddPlusCountButton(false)
+        setFishMeasureMetModalOpen(false)
+      }
 
-    if (protocolResult && protocolResult.protocolKeyMet) {
-      setProtocolKeyMet(protocolResult.protocolKeyMet)
-    } else {
-      setProtocolKeyMet(null)
-    }
-  }, [
-    tabSlice.activeTabId,
-    // fishInputSlice,
-    speciesRadioValue,
-    batchCountStore.forkLengths,
-  ])
+      if (protocolResult && protocolResult.protocolKeyMet) {
+        setProtocolKeyMet(protocolResult.protocolKeyMet)
+      } else {
+        setProtocolKeyMet(null)
+      }
+
+      // Optional cleanup when screen is blurred
+      return () => {
+        // Any cleanup you want to do when the screen is hidden
+        // e.g., cancel timers, subscriptions, or reset modal flags if needed
+      }
+    }, [
+      tabSlice.activeTabId,
+      speciesRadioValue,
+      batchCountStore.forkLengths,
+      currentRoute?.name,
+      multiSpeciesModalOpen,
+      fishInputSlice,
+      route.params?.fishMeasureProtocol,
+    ])
+  )
 
   const closeFishMeasureMetModal = () => {
     setFishMeasureMetModalOpen(false)
     setProtocolKeyMet(null)
   }
 
-  const navState = navigation?.getState()
-  const currentRoute = navState?.routes[navState?.index]
   const currentSpeciesFishMeasureProtocol =
     route.params?.fishMeasureProtocol[speciesRadioValue]
 
@@ -448,6 +458,10 @@ const MultiSpecies = ({
   const showEggsToggle =
     programFormFieldsObj?.['eggs'] &&
     speciesRadioValue.toLocaleLowerCase().includes('shrimp')
+
+  if (!isFocused) {
+    return null
+  }
 
   return currentRoute?.name === 'Multi Species' ? (
     <>
@@ -883,7 +897,13 @@ const MultiSpecies = ({
       )}
       {fishMeasureMetModalOpen && (
         <CustomModal
-          isOpen={fishMeasureMetModalOpen}
+          isOpen={
+            fishMeasureMetModalOpen &&
+            !!protocolKeyMet &&
+            protocolKeyMet
+              .toLowerCase()
+              .includes(speciesRadioValue.toLowerCase())
+          }
           closeModal={closeFishMeasureMetModal}
           height='40%'
           width={'80%'}

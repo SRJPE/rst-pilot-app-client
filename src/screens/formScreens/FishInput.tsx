@@ -226,7 +226,7 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Add Fish', {
+                navigation.replace('Add Fish', {
                   // Add any props you want to pass here, for example:
                   fishMeasureProtocol,
                   selectedProgramObj,
@@ -244,7 +244,7 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Batch Count', {
+                navigation.replace('Batch Count', {
                   // Add any props you want to pass here, for example:
                   fishMeasureProtocol,
                   selectedProgramObj,
@@ -262,7 +262,7 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Multi Species', {
+                navigation.replace('Multi Species', {
                   // Add any props you want to pass here, for example:
                   fishMeasureProtocol,
                   selectedProgramObj,

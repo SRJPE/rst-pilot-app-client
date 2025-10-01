@@ -122,7 +122,7 @@ const AddFishContent = ({
   const lastFishEntry = Object.values(fishStore).findLast(
     fishEntry => !fishEntry.plusCount
   )
-  const navigation = useNavigation()
+  const navigation = useNavigation() as any
   const dispatch = useDispatch<AppDispatch>()
   // @ts-ignore
   const [fishUID, setFishUID] = useState(uid() as string)
@@ -769,6 +769,9 @@ const AddFishContent = ({
         }
       }
     }, 1000)
+  }
+  if (!isFocused) {
+    return null
   }
 
   return (
@@ -1514,7 +1517,8 @@ const AddFishContent = ({
               isDisabled={route.params?.editModeData ? false : formHasError}
               onPress={() => {
                 if (route.params?.editModeData) {
-                  navigation.goBack()
+                  navigation.replace('Fish Input')
+
                   showSlideAlert(dispatch, 'Fish Input Saved')
                 } else {
                   const activeTabId = tabSlice.activeTabId
@@ -1526,7 +1530,7 @@ const AddFishContent = ({
                       formValues: { ...payload, taxonCode: selectedTaxonCode },
                       UID: fishUID,
                     })
-                    navigation.goBack()
+                    navigation.replace('Fish Input')
                     showSlideAlert(dispatch, 'Fish Input Saved')
                   }
                 }
@@ -1547,7 +1551,7 @@ const AddFishContent = ({
                       tabId: activeTabId,
                       id: route.params?.editModeData?.id,
                     })
-                    navigation.goBack()
+                    navigation.replace('Fish Input')
                   }
                 }}
               >
@@ -1580,7 +1584,7 @@ const AddFishContent = ({
                       taxonCode: selectedTaxonCode,
                       numFishCaught: count.value,
                     })
-                    navigation.goBack()
+                    navigation.replace('Fish Input')
                     showSlideAlert(dispatch, 'Fish Input Updated')
                   }
                 } else {

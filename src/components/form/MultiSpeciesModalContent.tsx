@@ -37,9 +37,7 @@ import FishConditionsDropDown from './FishConditionsDropDown'
 import { startCase } from 'lodash'
 import { useNavigation } from '@react-navigation/native'
 import AddExistingMark from './AddExistingMark'
-import { TouchableWithoutFeedback } from 'react-native'
 import { batchCountI } from '../../redux/reducers/formSlices/batchCountSlice'
-import { visitSetupDefaultsSlice } from '@/src/redux/reducers/visitSetupDefaults'
 
 const MultiSpeciesModalContent = ({
   closeModal,
@@ -208,9 +206,7 @@ const MultiSpeciesModalContent = ({
                   closeModal()
                   if (!batchCharacteristics?.multiSpecies?.length) {
                     navigation.preload('Fish Input')
-                    navigation.navigate('Trap Visit Form', {
-                      screen: 'Fish Input',
-                    })
+                    navigation.replace('Fish Input')
                   }
                 }}
               />
