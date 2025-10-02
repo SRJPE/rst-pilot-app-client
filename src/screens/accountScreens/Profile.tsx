@@ -39,6 +39,13 @@ import {
 } from '@env'
 import MonitoringProgramInfoModalContent from '../../components/profile/MonitoringProgramModalContent'
 import ConfirmationModalContent from '@/src/components/Shared/ConfirmationModalContent'
+import { resetTrapOperationsSlice } from '@/src/redux/reducers/formSlices/trapOperationsSlice'
+import { resetTrapPostProcessingSlice } from '@/src/redux/reducers/formSlices/trapPostProcessingSlice'
+import { resetFishProcessingSlice } from '@/src/redux/reducers/formSlices/fishProcessingSlice'
+import { resetFishInputSlice } from '@/src/redux/reducers/formSlices/fishInputSlice'
+import { resetMarksOrTagsSlice } from '@/src/redux/reducers/formSlices/addMarksOrTagsSlice'
+import { resetGeneticSamplesSlice } from '@/src/redux/reducers/formSlices/addGeneticSamplesSlice'
+import { resetBatchCountSlice } from '@/src/redux/reducers/formSlices/batchCountSlice'
 
 const Profile = ({
   userCredentialsStore,
@@ -363,6 +370,13 @@ const Profile = ({
             dispatch(resetNavigationSlice())
             dispatch(resetVisitSetupSlice())
             dispatch(resetTabsSlice())
+            dispatch(resetGeneticSamplesSlice())
+            dispatch(resetMarksOrTagsSlice())
+            dispatch(resetFishInputSlice())
+            dispatch(resetBatchCountSlice())
+            dispatch(resetFishProcessingSlice())
+            dispatch(resetTrapPostProcessingSlice())
+            dispatch(resetTrapOperationsSlice())
 
             setLogoutModalOpen(false)
             dispatch(clearUserCredentials())
