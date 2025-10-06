@@ -50,6 +50,8 @@ import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
 import { generateTrapVisitSchema } from '../../utils/helpers/yupValidations'
 import { InferType } from 'yup'
+import { resetFishInputSlice } from '@/src/redux/reducers/formSlices/fishInputSlice'
+import { resetBatchCountSlice } from '@/src/redux/reducers/formSlices/batchCountSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -161,10 +163,10 @@ const VisitSetup = ({
           (field.equipmentId === null || field.equipmentId === trapEquimentType)
       )
       setFormFields(sectionFields)
-      const dynamicTrapOpsSchema = generateTrapVisitSchema(
+      const trapVisitSetupSchema = generateTrapVisitSchema(
         currentProgramInfo?.programFormFields
       )
-      setValidationSchema(dynamicTrapOpsSchema)
+      setValidationSchema(trapVisitSetupSchema)
     } else {
       setFormFields(null)
       setValidationSchema(trapVisitSchema)
@@ -414,6 +416,8 @@ const VisitSetup = ({
     dispatch(resetTabsSlice())
     dispatch(resetVisitSetupSlice())
     dispatch(resetFishProcessingSlice())
+    dispatch(resetFishInputSlice())
+    dispatch(resetBatchCountSlice())
     dispatch(resetTrapPostProcessingSlice())
     dispatch(resetTrapOperationsSlice())
     let programId = null
@@ -575,7 +579,7 @@ const VisitSetup = ({
 
   return (
     <Formik
-      validationSchema={trapVisitSchema}
+      validationSchema={validationSchema}
       enableReinitialize={true}
       initialValues={
         tabSlice?.activeTabId
@@ -589,6 +593,7 @@ const VisitSetup = ({
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
       onSubmit={() => {}}
+      validateOnMount={true}
     >
       {({
         handleSubmit,
@@ -601,7 +606,16 @@ const VisitSetup = ({
         resetForm,
         handleChange,
         handleBlur,
+        isValid,
+        validateForm,
       }) => {
+        useEffect(() => {
+          if (typeof values.trapName === 'string') {
+            setFieldValue('trapName', [values.trapName]).then(() => {
+              validateForm()
+            })
+          }
+        }, [values.trapName])
         const navButtons = useMemo(() => {
           return (
             <NavButtons
@@ -613,10 +627,10 @@ const VisitSetup = ({
               touched={touched}
               values={values}
               shouldProceedToLoadingScreen={true}
-              // isValid={isValid && otherTabFormsValid}
+              isValid={isValid}
             />
           )
-        }, [navigation, handleSubmit, errors, touched, values])
+        }, [navigation, handleSubmit, errors, touched, values, isValid])
         useEffect(() => {
           // if (
           //   tabSlice.previouslyActiveTabId &&
@@ -710,6 +724,9 @@ const VisitSetup = ({
                       updateSelectedProgram(itemValue)
                       setFieldValue('crew', []).then(() => {
                         setFieldTouched('crew', false)
+                      })
+                      setFieldValue('dataRecorder', undefined).then(() => {
+                        setFieldTouched('dataRecorder', false)
                       })
                       // setFieldValue('crew', [])
                       // setFieldTouched('crew', false)

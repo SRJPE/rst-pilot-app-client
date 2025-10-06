@@ -34,7 +34,11 @@ import {
   reorderTaxon,
 } from '@/src/utils/utils'
 import { FontAwesome } from '@expo/vector-icons'
-import { useIsFocused, useNavigation } from '@react-navigation/native'
+import {
+  useIsFocused,
+  useNavigation,
+  useFocusEffect,
+} from '@react-navigation/native'
 import {
   Box,
   Button,
@@ -50,7 +54,7 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { Keyboard } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
 import { getLadObject } from '../../utils/helpers/helperFunctions'
@@ -254,9 +258,7 @@ const MultiSpecies = ({
       showSlideAlert(dispatch, 'Multi Species Batch Count Saved')
 
       // @ts-ignore
-      navigation.navigate('Trap Visit Form', {
-        screen: 'Fish Input',
-      })
+      navigation.replace('Fish Input')
     }
   }
 
@@ -326,118 +328,143 @@ const MultiSpecies = ({
     setEggsIsLocked(!eggsIsLocked)
   }
 
-  useEffect(() => {
-    if (currentRoute?.name !== 'Multi Species') {
-      setFishMeasureMetModalOpen(false)
-      setProtocolKeyMet(null)
-      return
-    }
-    if (!tabSlice?.activeTabId || !fishInputSlice) {
-      setFishMeasureMetModalOpen(false)
-      setProtocolKeyMet(null)
-      return
-    }
-
-    if (multiSpeciesModalOpen) {
-      setFishMeasureMetModalOpen(false)
-      setProtocolKeyMet(null)
-
-      return
-    }
-
-    const batchCountFishStore = Object.values(batchCountStore?.forkLengths).map(
-      (flObj: any) => {
-        return {
-          forkLength: flObj.forkLength,
-          run: flObj?.runDefinition,
-          lifeStage: flObj?.lifeStage?.toLowerCase(),
-          species: flObj?.species,
-          numFishCaught: flObj?.numFishCaught || 1,
-          plusCount: flObj?.plusCount || false,
-        }
+  const navState = navigation?.getState()
+  const currentRoute = navState?.routes[navState?.index]
+  useFocusEffect(
+    useCallback(() => {
+      // Early exits
+      if (
+        currentRoute?.name !== 'Multi Species' ||
+        !tabSlice?.activeTabId ||
+        !fishInputSlice ||
+        multiSpeciesModalOpen
+      ) {
+        setFishMeasureMetModalOpen(false)
+        setProtocolKeyMet(null)
+        return
       }
-    )
 
-    const existingFishStore = fishInputSlice?.[tabSlice.activeTabId]
-      ?.fishStore as Record<string, { numFishCaught: number }>
+      // Build batch store (memoized outside)
+      const batchCountFishStore = Object.values(
+        batchCountStore?.forkLengths || {}
+      ).map((flObj: any) => ({
+        forkLength: flObj.forkLength,
+        run: flObj?.runDefinition,
+        lifeStage: flObj?.lifeStage?.toLowerCase(),
+        species: flObj?.species,
+        numFishCaught: flObj?.numFishCaught || 1,
+        plusCount: flObj?.plusCount || false,
+      }))
 
-    const combinedFishStoreObj = {
-      ...existingFishStore,
-    } as Record<string, any>
+      const existingFishStore =
+        fishInputSlice[tabSlice.activeTabId]?.fishStore ?? {}
+      const combinedFishStoreObj: Record<string, any> = { ...existingFishStore }
 
-    let nextIndex = Object.keys(combinedFishStoreObj).length
-    batchCountFishStore.forEach(fish => {
-      combinedFishStoreObj[nextIndex] = fish
-      nextIndex++
-    })
+      let total = Object.values(existingFishStore).reduce(
+        (sum, fishObj) => sum + ((fishObj as any).numFishCaught || 0),
+        0
+      ) as number
 
-    const combinedFishMeasureCountsObj =
-      getFishMeasureCounts(combinedFishStoreObj)
+      let nextIndex = Object.keys(combinedFishStoreObj).length
+      batchCountFishStore.forEach(fish => {
+        combinedFishStoreObj[nextIndex++] = fish
+        total += fish.numFishCaught || 0
+      })
 
-    setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
+      setTotalCatchCount(total)
 
-    if (!combinedFishStoreObj) return
+      const combinedFishMeasureCountsObj =
+        getFishMeasureCounts(combinedFishStoreObj)
+      setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
 
-    const total = Object.values(combinedFishStoreObj).reduce(
-      (sum, fishObj) =>
-        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
-      0
-    )
-
-    setTotalCatchCount(total)
-
-    const checkPlusCountExists = (
-      fishObjectArray: Array<Record<string, any>>,
-      species: string
-    ) => {
-      const currentSpeciesFishCounts = fishObjectArray.filter(
-        fishObj => fishObj.species === species && fishObj.plusCount
+      const plusCountExists = batchCountFishStore.some(
+        fishObj => fishObj.species === speciesRadioValue && fishObj.plusCount
       )
 
-      return currentSpeciesFishCounts.length > 0
+      const protocolResult = checkFishMeasureProtocol({
+        fishMeasureCounts: combinedFishMeasureCountsObj,
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        speciesValue: speciesRadioValue,
+        runValue: '',
+        lifeStageValue: '',
+      })
+
+      if (protocolResult?.protocolMet) {
+        setShowAddPlusCountButton(true)
+        if (!plusCountExists) setFishMeasureMetModalOpen(true)
+      } else {
+        setShowAddPlusCountButton(false)
+        setFishMeasureMetModalOpen(false)
+      }
+
+      setProtocolKeyMet(protocolResult?.protocolKeyMet ?? null)
+    }, [
+      tabSlice.activeTabId,
+      speciesRadioValue,
+      batchCountStore.forkLengths,
+      currentRoute?.name,
+      multiSpeciesModalOpen,
+      fishInputSlice,
+      route.params?.fishMeasureProtocol,
+    ])
+  )
+
+  const handleAddPlusCountClick = () => {
+    setFishMeasureMetModalOpen(true)
+    if (tabSlice?.activeTabId && speciesRadioValue) {
+      // Build batch store (memoized outside)
+      const batchCountFishStore = Object.values(
+        batchCountStore?.forkLengths || {}
+      ).map((flObj: any) => ({
+        forkLength: flObj.forkLength,
+        run: flObj?.runDefinition,
+        lifeStage: flObj?.lifeStage?.toLowerCase(),
+        species: flObj?.species,
+        numFishCaught: flObj?.numFishCaught || 1,
+        plusCount: flObj?.plusCount || false,
+      }))
+
+      const existingFishStore =
+        fishInputSlice[tabSlice.activeTabId]?.fishStore ?? {}
+      const combinedFishStoreObj: Record<string, any> = { ...existingFishStore }
+
+      let total = Object.values(existingFishStore).reduce(
+        (sum, fishObj) => sum + ((fishObj as any).numFishCaught || 0),
+        0
+      ) as number
+
+      let nextIndex = Object.keys(combinedFishStoreObj).length
+      batchCountFishStore.forEach(fish => {
+        combinedFishStoreObj[nextIndex++] = fish
+        total += fish.numFishCaught || 0
+      })
+      const combinedFishMeasureCountsObj =
+        getFishMeasureCounts(combinedFishStoreObj)
+      setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
+      const protocolResult = checkFishMeasureProtocol({
+        fishMeasureCounts: combinedFishMeasureCountsObj,
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        speciesValue: speciesRadioValue,
+        runValue: '',
+        lifeStageValue: '',
+      })
+
+      if (protocolResult?.protocolMet) {
+        setShowAddPlusCountButton(true)
+      } else {
+        setShowAddPlusCountButton(false)
+        setFishMeasureMetModalOpen(false)
+      }
+
+      setProtocolKeyMet(protocolResult?.protocolKeyMet ?? null)
     }
-
-    const plusCountExists = checkPlusCountExists(
-      batchCountFishStore,
-      speciesRadioValue
-    )
-
-    const protocolResult = checkFishMeasureProtocol({
-      fishMeasureCounts: combinedFishMeasureCountsObj,
-      fishMeasureProtocol: route.params?.fishMeasureProtocol,
-      speciesValue: speciesRadioValue as string,
-      runValue: '' as string,
-      lifeStageValue: '' as string,
-    })
-
-    if (protocolResult && protocolResult.protocolMet) {
-      setShowAddPlusCountButton(true)
-
-      !plusCountExists && setFishMeasureMetModalOpen(true)
-    } else {
-      setShowAddPlusCountButton(false)
-      setFishMeasureMetModalOpen(false)
-    }
-
-    if (protocolResult && protocolResult.protocolKeyMet) {
-      setProtocolKeyMet(protocolResult.protocolKeyMet)
-    } else {
-      setProtocolKeyMet(null)
-    }
-  }, [
-    tabSlice.activeTabId,
-    // fishInputSlice,
-    speciesRadioValue,
-    batchCountStore.forkLengths,
-  ])
+  }
 
   const closeFishMeasureMetModal = () => {
     setFishMeasureMetModalOpen(false)
     setProtocolKeyMet(null)
   }
 
-  const navState = navigation?.getState()
-  const currentRoute = navState?.routes[navState?.index]
   const currentSpeciesFishMeasureProtocol =
     route.params?.fishMeasureProtocol[speciesRadioValue]
 
@@ -448,6 +475,10 @@ const MultiSpecies = ({
   const showEggsToggle =
     programFormFieldsObj?.['eggs'] &&
     speciesRadioValue.toLocaleLowerCase().includes('shrimp')
+
+  if (!isFocused) {
+    return null
+  }
 
   return currentRoute?.name === 'Multi Species' ? (
     <>
@@ -763,7 +794,7 @@ const MultiSpecies = ({
                       background='primary'
                       mr='auto'
                       px={5}
-                      onPress={() => setFishMeasureMetModalOpen(true)}
+                      onPress={handleAddPlusCountClick}
                     >
                       <Text color='white' fontSize={18}>
                         Add Plus Count
@@ -883,7 +914,13 @@ const MultiSpecies = ({
       )}
       {fishMeasureMetModalOpen && (
         <CustomModal
-          isOpen={fishMeasureMetModalOpen}
+          isOpen={
+            fishMeasureMetModalOpen &&
+            !!protocolKeyMet &&
+            protocolKeyMet
+              .toLowerCase()
+              .includes(speciesRadioValue.toLowerCase())
+          }
           closeModal={closeFishMeasureMetModal}
           height='40%'
           width={'80%'}

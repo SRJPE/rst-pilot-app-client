@@ -916,11 +916,11 @@ const TrapPostProcessing = ({
                     setFieldValue,
                     setFieldTouched
                   )}
-                  {renderEndingTrapStatus(
+                  {/* {renderEndingTrapStatus(
                     values,
                     setFieldValue,
                     setFieldTouched
-                  )}
+                  )} */}
                   <FormInputComponent
                     multiline={true}
                     label={'Comments'}

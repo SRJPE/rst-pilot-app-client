@@ -775,6 +775,14 @@ const TrapOperations = ({
           ) {
             setFieldValue('waterTemperatureUnit', '°F')
           }
+          if (
+            selectedProgramObj &&
+            (selectedProgramObj.streamName.toLowerCase().includes('mill') ||
+              selectedProgramObj.streamName.toLowerCase().includes('deer'))
+          ) {
+            setFieldValue('recordTurbidityInPostProcessing', false)
+            setFieldValue('waterTurbidity', '')
+          }
         }, [selectedProgramObj])
 
         // setting flow meter serial number from previosu trap visit

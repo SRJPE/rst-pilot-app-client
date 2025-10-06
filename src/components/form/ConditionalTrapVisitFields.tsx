@@ -316,10 +316,10 @@ const ConditionalTrapVisitFields = ({
               selectedValue={values.dataRecorder}
               placeholder='Select Data Recorder'
               onValueChange={(itemValue: string) => {
-                setFieldValue('dataRecorder', itemValue)
-                setFieldTouched('dataRecorder', true)
+                setFieldValue('dataRecorder', itemValue).then(() => {
+                  setFieldTouched('dataRecorder', true)
+                })
               }}
-              setFieldTouched={() => setFieldTouched('dataRecorder')}
               selectOptions={values?.crew?.map((crewMember: any) => ({
                 label: crewMember,
                 value: crewMember,

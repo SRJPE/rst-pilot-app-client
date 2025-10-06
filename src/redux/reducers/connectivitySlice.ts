@@ -24,6 +24,7 @@ interface ConnectivityInfoI {
   type: string
   isConnected: boolean
   isInternetReachable: boolean
+  timestamp?: string
 }
 
 // Connection Types:
@@ -96,10 +97,10 @@ export const connectivitySlice = createSlice({
       const receipt = { type, isConnected, isInternetReachable }
       const historyCopy = state.history
       if (historyCopy.length < historyLengthLimit) {
-        historyCopy.push(receipt)
+        historyCopy.push({ ...receipt, timestamp: new Date().toISOString() })
       } else {
         historyCopy.shift()
-        historyCopy.push(receipt)
+        historyCopy.push({ ...receipt, timestamp: new Date().toISOString() })
       }
       state.type = type
       state.isConnected = isConnected
