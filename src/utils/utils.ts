@@ -1129,8 +1129,14 @@ export const shouldRenderField = ({
 }
 
 const getRunInitials = (run: string) => {
-  11
-  return run
+  let runToUse = run
+  if (run.toLowerCase() === 'not recorded') {
+    runToUse = ''
+  } else if (run.toLowerCase() === 'late fall') {
+    runToUse = 'fall'
+  }
+
+  return runToUse
     .split(' ') // split into words
     .map(word => word[0]) // take first letter of each
     .join('') // join them back together

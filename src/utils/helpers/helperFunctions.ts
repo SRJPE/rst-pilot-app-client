@@ -223,7 +223,7 @@ export const retrieveGeneticSamplesRequiringLabData = (
       (geneticObj: any) =>
         geneticObj !== null &&
         geneticObj.labWeight === null &&
-        geneticObj.takeCode === 'D'
+        ['D', 'I'].includes(geneticObj.takeCode)
     )
 
   return geneticsRequiringData
