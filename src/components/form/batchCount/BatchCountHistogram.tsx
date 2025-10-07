@@ -210,7 +210,9 @@ const BatchCountHistogram = ({
         <VStack>
           <Text>
             Last Fork Length Entered:{' '}
-            <Text bold>{calculateLastFish(forkLengths) ?? 'N/A'}</Text>
+            <Text bold>
+              {calculateLastFish(forkLengths)?.forkLength || 'N/A'}
+            </Text>
           </Text>
           <Text>
             Current Batch Total: <Text bold>{calculateTotalCount()}</Text>

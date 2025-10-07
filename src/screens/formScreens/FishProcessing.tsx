@@ -128,6 +128,14 @@ const FishProcessing = ({
         }
       })
 
+      // if (stepCompletedCheck) {
+      //   dispatch(markStepCompleted({ propName: 'fishProcessing' }))
+      // }
+
+      if (setFishInputCompleted) {
+        dispatch(markStepCompleted({ propName: 'fishInput' }))
+      }
+      console.log('🚀 ~ handleSubmit~ FishProcessing', values)
       if (stepCompletedCheck && otherTabFormsValid) {
         dispatch(markStepCompleted({ propName: 'fishProcessing' }))
       }
@@ -207,7 +215,12 @@ const FishProcessing = ({
         isValid,
       }) => {
         useEffect(() => {
-          if (previouslyActiveTabId && navigationSlice.activeStep === 3) {
+          if (
+            Object.keys(tabSlice.tabs).length > 1 &&
+            previouslyActiveTabId &&
+            previouslyActiveTabId !== activeTabId &&
+            navigationSlice.activeStep === 3
+          ) {
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }
@@ -238,10 +251,8 @@ const FishProcessing = ({
 
         const otherTabFormsValid = checkOtherTabForms()
 
-        const noCatchData = [
-          'no catch data, fish left in live box',
-          'no catch data, fish released',
-        ].includes(values.fishProcessedResult)
+        const noCatchData =
+          values?.fishProcessedResult.includes('no catch data')
         const navButtons = useMemo(
           () => (
             <NavButtons

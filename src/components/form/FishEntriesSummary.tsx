@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/accordion'
 import { ChevronUpIcon, ChevronDownIcon } from '@/components/ui/icon'
 import { useEffect, useState } from 'react'
+import { startCase } from 'lodash'
 
 type FishParts = {
   species: string
@@ -76,8 +77,8 @@ const FishEntriesSummary = ({
    */
   function makeKey({ species, run, lifeStage }: FishParts): string {
     let key = species
-    if (run) key += ` - ${run}`
-    if (lifeStage) key += ` - ${lifeStage}`
+    if (run && run !== 'not recorded') key += ` - ${run}`
+    if (lifeStage && lifeStage !== 'not recorded') key += ` - ${lifeStage}`
     return key
   }
 
@@ -147,6 +148,50 @@ const FishEntriesSummary = ({
     setProtocolCounts(finalSums)
   }, [fishMeasureProtocol, fishMeasureCounts])
 
+  const formatFishMeasureProtocolText = (fishName: string) => {
+    return fishName
+      .split(' - ')
+      .map(part =>
+        part
+          .split('/')
+          .map(sub => startCase(sub.trim()))
+          .join(' / ')
+      )
+      .join(' - ')
+  }
+  const formatLastEntryText = (lastFishEntry: any) => {
+    let entryText = ''
+
+    if (!lastFishEntry || !Object.keys(lastFishEntry).length) {
+      return entryText
+    }
+
+    entryText += startCase(lastFishEntry.species)
+
+    if (
+      lastFishEntry.lifeStage &&
+      lastFishEntry.lifeStage.toLowerCase() !== 'not recorded'
+    ) {
+      entryText += ' - ' + startCase(lastFishEntry.lifeStage)
+    }
+
+    if (
+      lastFishEntry.runDefinition &&
+      lastFishEntry.runDefinition.toLowerCase() !== 'not recorded'
+    ) {
+      entryText += ' - ' + startCase(lastFishEntry.runDefinition)
+    } else if (
+      lastFishEntry.run &&
+      lastFishEntry.run.toLowerCase() !== 'not recorded'
+    ) {
+      entryText += ' - ' + startCase(lastFishEntry.run)
+    }
+
+    entryText += ` - ${lastFishEntry.forkLength}mm`
+
+    return entryText
+  }
+
   return (
     <Box
       py={3}
@@ -163,11 +208,7 @@ const FishEntriesSummary = ({
           <>
             <Text fontSize={'lg'}>
               <Text bold>Last Entry: </Text>
-              <Text>
-                {`${lastFishEntry.species} ${
-                  lastFishEntry.lifeStage ? `(${lastFishEntry.lifeStage})` : ''
-                } - FL: ${lastFishEntry.forkLength}mm`}
-              </Text>
+              {formatLastEntryText(lastFishEntry) || 'No entries recorded yet.'}
             </Text>
           </>
         )}
@@ -247,9 +288,16 @@ const FishEntriesSummary = ({
                           }
                           return a.localeCompare(b)
                         })
-                        .map(([fishName, countObj]) => (
-                          <Text key={fishName} fontSize={'lg'}>
-                            {fishName}:{' '}
+                        .map(([fishName, countObj]: [string, any]) => (
+                          <Text
+                            key={fishName}
+                            fontSize={'lg'}
+                            bold={
+                              countObj?.individualCount >=
+                              fishMeasureProtocol[fishName]
+                            }
+                          >
+                            {formatFishMeasureProtocolText(fishName)}:{' '}
                             {String(
                               (countObj as { individualCount?: number })
                                 ?.individualCount

@@ -1,4 +1,4 @@
-import React, { useCallback, memo } from 'react'
+import React, { useCallback, memo, useMemo } from 'react'
 import { Box, Icon, IconButton, Popover } from 'native-base'
 import {
   FormControl,
@@ -24,7 +24,7 @@ import { StyleProp, ViewStyle } from 'react-native'
 import RenderErrorMessage from './RenderErrorMessage'
 import { FormikErrors, FormikTouched } from 'formik'
 import { MaterialIcons } from '@expo/vector-icons'
-import { color } from 'native-base/lib/typescript/theme/styled-system'
+import { renderRequiredOrOptionalLabel } from '../../utils/utils'
 
 interface CustomSelectI {
   selectedValue: string
@@ -40,6 +40,8 @@ interface CustomSelectI {
   camelName?: string
   touched?: FormikTouched<any>
   tooltip?: React.ReactNode
+  validationSchema?: any
+  onOpenCallback?: () => void
 }
 
 const itemStyle = { style: { fontSize: 16, height: 24, color: 'black' } }
@@ -58,6 +60,8 @@ const CustomSelect: React.FC<CustomSelectI> = ({
   touched = {},
   label = 'No label provided',
   tooltip,
+  validationSchema,
+  onOpenCallback,
 }) => {
   const handleOnChange = useCallback(
     (itemValue: any) => {
@@ -72,15 +76,38 @@ const CustomSelect: React.FC<CustomSelectI> = ({
   const showError = hasError && isTouched
 
   const itemLabelModifier = (label: string) => {
-    // console.log('label', label)
     if (typeof label !== 'string') return ''
-    if (placeholder === 'Species') {
+    if (
+      placeholder === 'Species' ||
+      camelName === 'dataRecorder' ||
+      camelName === 'fieldCheck'
+    ) {
       return label
     } else if (placeholder === 'Funding Agency' && label !== 'not recorded') {
       return label.toLocaleUpperCase()
-    }
-    return label.replace(/\w+/g, capitalize)
+    } else if (camelName === 'trapSite') {
+      return label
+    } else return label.replace(/\w+/g, capitalize)
   }
+
+  const sortedOptions = useMemo(() => {
+    return selectOptions
+      ? [...selectOptions].sort((a: any, b: any) => {
+          const aValue = a.definition || a.code || ''
+          const bValue = b.definition || b.code || ''
+
+          if (aValue === 'processed fish') return -1
+          if (bValue === 'processed fish') return 1
+
+          if (aValue === 'not recorded') return 1
+          if (bValue === 'not recorded') return -1
+
+          if (aValue < bValue) return -1
+          if (aValue > bValue) return 1
+          return 0
+        })
+      : []
+  }, [selectOptions])
 
   return (
     <Box minH={100}>
@@ -96,7 +123,13 @@ const CustomSelect: React.FC<CustomSelectI> = ({
           <FormControlLabelText
             style={{ color: showError ? 'red.700' : 'black', fontSize: 16 }}
           >
-            {label}
+            {label}{' '}
+            {validationSchema
+              ? renderRequiredOrOptionalLabel({
+                  fieldName: camelName,
+                  validationSchema,
+                })
+              : ''}
           </FormControlLabelText>
           {tooltip && (
             <Popover
@@ -130,7 +163,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
           style={[
             {
               borderColor: showError ? 'darkred' : '#d4d4d4d4',
-              borderWidth: 1,
+              borderWidth: 0,
               minWidth: 100,
               marginTop: 1,
               borderRadius: 4,
@@ -144,6 +177,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
           onClose={() => {
             if (setFieldTouched) setFieldTouched()
           }}
+          onOpen={onOpenCallback}
           isDisabled={disabled}
         >
           <SelectTrigger
@@ -152,6 +186,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
             style={[
               {
                 height: '100%',
+                // borderWidth: 0,
               },
             ]}
           >
@@ -170,8 +205,8 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                 <SelectDragIndicator />
               </SelectDragIndicatorWrapper>
               <SelectScrollView>
-                {selectOptions ? (
-                  selectOptions.map((item, idx) => {
+                {sortedOptions ? (
+                  sortedOptions.map((item, idx) => {
                     if (dataType === 'fundingAgency') {
                       return (
                         <SelectItem
@@ -230,7 +265,13 @@ const CustomSelect: React.FC<CustomSelectI> = ({
           }}
         >
           <Text color={showError ? 'red.700' : 'black'} fontSize='md'>
-            {label}
+            {label}{' '}
+            {validationSchema
+              ? renderRequiredOrOptionalLabel({
+                  fieldName: camelName,
+                  validationSchema,
+                })
+              : ''}
           </Text>
           {tooltip && (
             <Popover
@@ -272,6 +313,7 @@ const CustomSelect: React.FC<CustomSelectI> = ({
           selectedValue={selectedValue ?? ''}
           minWidth='100'
           style={style}
+          onOpen={onOpenCallback}
           accessibilityLabel={placeholder}
           placeholder={placeholder}
           _selectedItem={{
@@ -285,8 +327,8 @@ const CustomSelect: React.FC<CustomSelectI> = ({
           }}
           isDisabled={disabled}
         >
-          {selectOptions ? (
-            selectOptions.map((item, idx) => {
+          {sortedOptions ? (
+            sortedOptions.map((item, idx) => {
               if (dataType === 'fundingAgency') {
                 return (
                   <Select.Item
@@ -309,6 +351,14 @@ const CustomSelect: React.FC<CustomSelectI> = ({
                     key={item.id}
                     label={itemLabelModifier(item.definition)}
                     value={item.definition}
+                  />
+                )
+              } else if (item.code) {
+                return (
+                  <Select.Item
+                    key={item.id}
+                    label={`${item.code.toUpperCase()} - ${item.description}`}
+                    value={item.code}
                   />
                 )
               }

@@ -48,7 +48,7 @@ const NumberInput = ({ trappingSites, setSelectedItems }: any) => {
         height='50px'
         fontSize='16'
         width={50}
-        keyboardType='numeric'
+        keyboardType={'number-pad'}
         value={`${values.numberOfTrapSites}`}
         isDisabled
         _disabled={{

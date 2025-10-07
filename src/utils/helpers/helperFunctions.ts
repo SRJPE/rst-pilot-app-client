@@ -48,6 +48,8 @@ export const convertUTCToLocalTime = (utcTime: string) => {
 export const findLengthAtDateRun = (array: Array<any>, targetDate: Date) => {
   return array.find(item => {
     const ladDate = new Date(item.ladDate)
+
+    if (!targetDate) return false
     return (
       ladDate.getMonth() === targetDate?.getMonth() &&
       ladDate.getDate() === targetDate?.getDate()
@@ -55,30 +57,64 @@ export const findLengthAtDateRun = (array: Array<any>, targetDate: Date) => {
   })
 }
 
-export const findRunDefinition = (ladObj: any, number: number) => {
+export const findRunDefinition = ({
+  ladObject,
+  number,
+  trapSite,
+}: {
+  ladObject: any
+  number: number
+  trapSite?: string
+}) => {
+  if (!ladObject || !number) return
   const buckets = [
-    { definition: 'fall', min: ladObj.fallMin1, max: ladObj.fallMax1 },
-    { definition: 'fall', min: ladObj.fallMin2, max: ladObj.fallMax2 },
-    { definition: 'spring', min: ladObj.springMin1, max: ladObj.springMax1 },
-    { definition: 'spring', min: ladObj.springMin2, max: ladObj.springMax2 },
-    { definition: 'winter', min: ladObj.winterMin1, max: ladObj.winterMax1 },
-    { definition: 'winter', min: ladObj.winterMin2, max: ladObj.winterMax2 },
+    { definition: 'fall', min: ladObject.fallMin1, max: ladObject.fallMax1 },
+    { definition: 'fall', min: ladObject.fallMin2, max: ladObject.fallMax2 },
     {
-      definition: 'late fall',
-      min: ladObj.lateFallMin1,
-      max: ladObj.lateFallMax1,
+      definition: 'spring',
+      min: ladObject.springMin1,
+      max: ladObject.springMax1,
+    },
+    {
+      definition: 'spring',
+      min: ladObject.springMin2,
+      max: ladObject.springMax2,
+    },
+    {
+      definition: 'winter',
+      min: ladObject.winterMin1,
+      max: ladObject.winterMax1,
+    },
+    {
+      definition: 'winter',
+      min: ladObject.winterMin2,
+      max: ladObject.winterMax2,
     },
     {
       definition: 'late fall',
-      min: ladObj.lateFallMin2,
-      max: ladObj.lateFallMax2,
+      min: ladObject.lateFallMin1,
+      max: ladObject.lateFallMax1,
+    },
+    {
+      definition: 'late fall',
+      min: ladObject.lateFallMin2,
+      max: ladObject.lateFallMax2,
     },
   ]
 
-  return (
-    buckets.find(bucket => number >= bucket.min && number <= bucket.max)
-      ?.definition || 'not recorded'
+  const runObj = buckets.find(
+    bucket => number >= bucket.min && number <= bucket.max
   )
+
+  if (
+    trapSite &&
+    (trapSite.toLowerCase().includes('battle') ||
+      trapSite.toLowerCase().includes('upper clear'))
+  ) {
+    if (runObj?.definition === 'fall') return 'spring'
+  }
+
+  return runObj?.definition || 'not recorded'
 }
 
 export const retrieveTrapVisitsRequiringTurbidity = (
@@ -103,8 +139,74 @@ export const retrieveTrapVisitsRequiringTurbidity = (
         (response: any) => response.measureName === 'water turbidity'
       )?.measureValueNumeric,
       trapVisitEndTime: trapVisit.createdTrapVisitResponse.trapVisitTimeEnd,
+      trapVisitStartTime: trapVisit.createdTrapVisitResponse.trapVisitTimeStart,
     }
   })
 
   return formattedTrapVisits
+}
+
+export const getLadObject = ({
+  activeTabId,
+  trapOperationsStore,
+  lengthAtDateModel,
+}: {
+  activeTabId: string
+  trapOperationsStore: any
+  lengthAtDateModel: any
+}) => {
+  let dateTimeValue = new Date()
+
+  const timeProperty = getTimeProperty(
+    trapOperationsStore?.[activeTabId]?.values
+  )
+
+  if (timeProperty) {
+    dateTimeValue = trapOperationsStore?.[activeTabId]?.values?.[timeProperty]
+  } else if (
+    activeTabId &&
+    trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
+  ) {
+    dateTimeValue =
+      trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
+  } else if (
+    activeTabId &&
+    trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+  ) {
+    dateTimeValue =
+      trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+  } else if (
+    activeTabId &&
+    trapOperationsStore?.[activeTabId]?.values?.sampleTime
+  ) {
+    dateTimeValue = trapOperationsStore?.[activeTabId]?.values?.sampleTime
+  }
+
+  const ladObjectForTrapDate = findLengthAtDateRun(
+    lengthAtDateModel,
+    dateTimeValue ? new Date(dateTimeValue) : new Date()
+  )
+  return ladObjectForTrapDate || null
+}
+
+export const getTimeProperty = (trapOperationsValues: any) => {
+  if (trapOperationsValues?.trapVisitStopTime) {
+    return 'trapVisitStopTime'
+  } else if (trapOperationsValues?.trapVisitStartTime) {
+    return 'trapVisitStartTime'
+  } else if (trapOperationsValues?.sampleTime) {
+    return 'sampleTime'
+  }
+
+  return null
+}
+
+export function formatDateString_MM_DD_YY(date: Date | string) {
+  const d = date instanceof Date ? date : new Date(date)
+
+  const month = d.getMonth() + 1 // months are 0-based
+  const day = d.getDate()
+  const year = d.getFullYear().toString().slice(-2) // last 2 digits
+
+  return `${month}_${day}_${year}`
 }

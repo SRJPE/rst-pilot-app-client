@@ -27,7 +27,6 @@ import {
 } from '../../redux/reducers/formSlices/navigationSlice'
 import FishInputDataTable from '../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../components/form/PlusCountModalContent'
-import { Ionicons } from '@expo/vector-icons'
 import { DeviceEventEmitter, useWindowDimensions } from 'react-native'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { StackActions } from '@react-navigation/native'
@@ -227,7 +226,7 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Add Fish', {
+                navigation.replace('Add Fish', {
                   // Add any props you want to pass here, for example:
                   fishMeasureProtocol,
                   selectedProgramObj,
@@ -245,7 +244,7 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Batch Count', {
+                navigation.replace('Batch Count', {
                   // Add any props you want to pass here, for example:
                   fishMeasureProtocol,
                   selectedProgramObj,
@@ -263,7 +262,7 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Multi Species', {
+                navigation.replace('Multi Species', {
                   // Add any props you want to pass here, for example:
                   fishMeasureProtocol,
                   selectedProgramObj,

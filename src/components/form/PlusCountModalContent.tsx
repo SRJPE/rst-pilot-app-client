@@ -47,6 +47,7 @@ const initialFormValues = {
   count: '',
   plusCountMethod: '',
   dead: false,
+  comments: '',
 }
 
 const PlusCountModalContent = ({
@@ -253,7 +254,7 @@ const PlusCountModalContent = ({
                         values.species === 'Steelhead / rainbow trout' ||
                         !values.species) && (
                         <CustomSelect
-                          label='Life Stage (optional)'
+                          label='Life Stage'
                           camelName='lifeStage'
                           errors={errors}
                           touched={touched}
@@ -261,6 +262,7 @@ const PlusCountModalContent = ({
                           placeholder={'Select Life stage'}
                           onValueChange={handleChange('lifeStage')}
                           setFieldTouched={() => setFieldTouched('lifeStage')}
+                          validationSchema={addPlusCountsSchema}
                           selectOptions={alphabeticalLifeStage.map(
                             (item: any) => ({
                               label: item.definition,
@@ -272,7 +274,7 @@ const PlusCountModalContent = ({
                       {(values.species === 'Chinook salmon' ||
                         !values.species) && (
                         <CustomSelect
-                          label='Run (optional)'
+                          label='Run'
                           camelName='run'
                           errors={errors}
                           touched={touched}
@@ -284,6 +286,7 @@ const PlusCountModalContent = ({
                             label: item.definition,
                             value: item.definition,
                           }))}
+                          validationSchema={addPlusCountsSchema}
                         />
                       )}
                       <FormInputComponent
@@ -295,6 +298,8 @@ const PlusCountModalContent = ({
                         onBlur={handleBlur('count')}
                         value={values.count}
                         onChangeText={handleChange('count')}
+                        validationSchema={addPlusCountsSchema}
+                        keyboardType='number-pad'
                       />
                       {/* //TODO: Fix bug where input won't blur unless dropdown is clicked ^ */}
                       <FormControl w='48.5%'>
@@ -355,6 +360,7 @@ const PlusCountModalContent = ({
                             value: item.definition,
                           })
                         )}
+                        validationSchema={addPlusCountsSchema}
                       />
                       <VStack space={4} w={'100%'}>
                         <AddExistingMark
@@ -390,6 +396,18 @@ const PlusCountModalContent = ({
                             </Text>
                           </HStack>
                         </Pressable>
+                        <FormInputComponent
+                          camelName='comments'
+                          value={values.comments}
+                          touched={touched}
+                          errors={errors}
+                          placeholder='Write a comment'
+                          label='Comments'
+                          multiline={true}
+                          onChangeText={handleChange('comments')}
+                          onBlur={handleBlur('comments')}
+                          validationSchema={addPlusCountsSchema}
+                        />
                       </VStack>
                       <Button
                         bg='primary'

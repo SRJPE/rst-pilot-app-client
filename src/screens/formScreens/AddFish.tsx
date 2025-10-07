@@ -1,6 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation, useIsFocused } from '@react-navigation/native'
-import { partition, startCase } from 'lodash'
 import {
   Box,
   Button,
@@ -61,6 +60,7 @@ import {
   calculateLifeStage,
   fetchRecentlyUsedSpecies,
 } from '../../utils/utils'
+import { startCase, find, keyBy, partition } from 'lodash'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
 import FishEntriesSummary from '../../components/form/FishEntriesSummary'
 import {
@@ -77,10 +77,10 @@ const AddFishContent = ({
   fishStore,
   tabSlice,
   visitSetupState,
+  visitSetupDefaults,
   fishInputSlice,
   dropdownsStore,
   trapOperationsStore,
-  visitSetupDefaultsSlice,
 }: {
   route?: any
   saveIndividualFish: any
@@ -91,10 +91,10 @@ const AddFishContent = ({
   fishStore: FishStoreI
   tabSlice: TabStateI
   visitSetupState: any
+  visitSetupDefaults: any
   fishInputSlice: any
   dropdownsStore: any
   trapOperationsStore: any
-  visitSetupDefaultsSlice: any
 }) => {
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -109,7 +109,7 @@ const AddFishContent = ({
 
   const recentlyUsedSpecies = fetchRecentlyUsedSpecies({
     siteId: visitSetupState?.[tabId || 'placeholderId']?.values.trapLocationId,
-    trapLocations: visitSetupDefaultsSlice?.trapLocations,
+    trapLocations: visitSetupDefaults?.trapLocations,
   })
 
   const defaultTaxonList = dropdownValues?.taxon
@@ -122,10 +122,13 @@ const AddFishContent = ({
   const lastFishEntry = Object.values(fishStore).findLast(
     fishEntry => !fishEntry.plusCount
   )
-  const navigation = useNavigation()
+  const navigation = useNavigation() as any
   const dispatch = useDispatch<AppDispatch>()
   // @ts-ignore
   const [fishUID, setFishUID] = useState(uid() as string)
+  const [conditionalFishInputFields, setConditionalFishInputFields] = useState(
+    {} as any
+  )
   const [lengthAtDateModel, setLengthAtDateModel] = useState([] as any[])
   const [programLADModelName, setProgramLADModelName] = useState<string | null>(
     null
@@ -341,6 +344,26 @@ const AddFishContent = ({
         })
   )
 
+  const [milting, setMilting] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.milting
+      : createFormValueDefault({
+          value: route.params?.editModeData.milting,
+          touched: true,
+          required: false,
+        })
+  )
+
+  const [eggs, setEggs] = useState<FormValueI>(
+    !route.params?.editModeData
+      ? stateDefaults.whenSpeciesChinook.eggs
+      : createFormValueDefault({
+          value: route.params?.editModeData.eggs,
+          touched: true,
+          required: false,
+        })
+  )
+
   const [plusCountMethod, setPlusCountMethod] = useState<FormValueI>(
     !route.params?.editModeData
       ? stateDefaults.whenSpeciesChinook.plusCountMethod
@@ -373,6 +396,8 @@ const AddFishContent = ({
     adiposeClipped,
     existingMarks,
     dead,
+    milting,
+    eggs,
     plusCountMethod,
   ])
 
@@ -382,11 +407,20 @@ const AddFishContent = ({
   }
 
   const resetSpecies = () => {
-    setSpecies(stateDefaults.whenSpeciesChinook.species)
+    setSpecies(stateDefaults.whenSpeciesOther.species)
     resetFormState('other')
     setFishMeasureMetModalOpen(false)
     setProtocolKeyMet(null)
   }
+
+  const [justClosed, setJustClosed] = useState(false)
+
+  useEffect(() => {
+    if (justClosed) {
+      const timeout = setTimeout(() => setJustClosed(false), 500)
+      return () => clearTimeout(timeout)
+    }
+  }, [justClosed])
 
   const checkForFormError = () => {
     const formValues = [
@@ -400,6 +434,8 @@ const AddFishContent = ({
       adiposeClipped,
       existingMarks,
       dead,
+      milting,
+      eggs,
       plusCountMethod,
     ]
     let hasError = false
@@ -418,6 +454,30 @@ const AddFishContent = ({
     })
     if (hasError !== formHasError) setFormHasError(hasError)
   }
+
+  useEffect(() => {
+    const selectedProgramId = tabSlice?.activeTabId
+      ? visitSetupState?.[tabSlice.activeTabId]?.values?.programId
+      : null
+
+    if (selectedProgramId) {
+      const currentProgramInfo = find(
+        visitSetupDefaults.programs,
+        (program: any) => program.id === selectedProgramId
+      )
+
+      if (currentProgramInfo?.programFormFields?.length) {
+        const fishInputFields = currentProgramInfo?.programFormFields.filter(
+          (formField: any) => {
+            return formField?.formSection === 'Fish Input'
+          }
+        )
+        setConditionalFishInputFields(keyBy(fishInputFields, 'fieldName'))
+      } else {
+        setConditionalFishInputFields({})
+      }
+    }
+  }, [visitSetupDefaults.programs])
 
   const resetFormState = (resetType: 'chinook' | 'steelhead' | 'other') => {
     let identifier:
@@ -440,6 +500,8 @@ const AddFishContent = ({
     setAdiposeClipped(stateDefaults[identifier].adiposeClipped)
     setExistingMarks(stateDefaults[identifier].existingMarks)
     setDead(stateDefaults[identifier].dead)
+    setMilting(stateDefaults[identifier].milting)
+    setEggs(stateDefaults[identifier].eggs)
     setPlusCountMethod(stateDefaults[identifier].plusCountMethod)
     setFormHasError(true)
     setFishUID(uid())
@@ -531,6 +593,8 @@ const AddFishContent = ({
         ]),
       ],
       dead: dead.value,
+      milting: conditionalFishInputFields?.['milting'] ? milting.value : null,
+      eggs: conditionalFishInputFields?.['eggs'] ? eggs.value : null,
       plusCountMethod: plusCountMethod.value,
       comments: comments.value,
       appliedMarks: Array.isArray(appliedMarks?.value)
@@ -583,12 +647,21 @@ const AddFishContent = ({
   const currentRoute = navState?.routes[navState?.index]
 
   useEffect(() => {
+    // if (justClosed) {
+    //   setFishMeasureMetModalOpen(false)
+    //   setProtocolKeyMet(null)
+    //   return
+    // }
+    if (!tabSlice?.activeTabId || !fishInputSlice) {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      return
+    }
     if (currentRoute?.name !== 'Add Fish') {
       setFishMeasureMetModalOpen(false)
       setProtocolKeyMet(null)
       return
     }
-    if (!tabSlice?.activeTabId || !fishInputSlice) return
 
     const fishMeasureCounts = fishInputSlice?.[tabSlice.activeTabId]
       ?.fishMeasureCounts as Record<
@@ -606,8 +679,13 @@ const AddFishContent = ({
         sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
       0
     )
-
     setTotalCatchCount(total)
+
+    if (species.value === '' || species.value === null) {
+      setFishMeasureMetModalOpen(false)
+      setProtocolKeyMet(null)
+      return
+    }
 
     if (!speciesDropDownOpen) {
       const protocolResult = checkFishMeasureProtocol({
@@ -618,25 +696,25 @@ const AddFishContent = ({
         lifeStageValue: lifeStage.value as string,
       })
 
-      if (protocolResult && protocolResult.protocolMet) {
+      if (
+        protocolResult &&
+        protocolResult.protocolMet &&
+        protocolResult.protocolKeyMet
+      ) {
         setFishMeasureMetModalOpen(true)
-      } else {
-        setFishMeasureMetModalOpen(false)
-      }
-
-      if (protocolResult && protocolResult.protocolKeyMet) {
         setProtocolKeyMet(protocolResult.protocolKeyMet)
       } else {
+        setFishMeasureMetModalOpen(false)
         setProtocolKeyMet(null)
       }
     } else {
-      setFishMeasureMetModalOpen(false)
       setProtocolKeyMet(null)
     }
   }, [
     tabSlice.activeTabId,
     fishInputSlice,
     species.value,
+    justClosed,
     lifeStage.value,
     run.value,
   ])
@@ -652,19 +730,33 @@ const AddFishContent = ({
       if (species.value === 'Chinook salmon' && tabSlice.activeTabId) {
         if (!forkLengthRef.current.value) {
           setRun(stateDefaults.whenSpeciesChinook.run)
-          setLifeStage(stateDefaults.whenSpeciesChinook.lifeStage)
           return
         }
+        let dateTimeValue = new Date()
 
-        const ladObj = findLengthAtDateRun(
-          lengthAtDateModel,
-          trapOperationsStore?.[tabSlice.activeTabId]?.values?.trapVisitStopTime
-        )
+        const activeTabId = tabSlice.activeTabId
 
-        const runDefinition = findRunDefinition(
-          ladObj,
-          Number(forkLengthRef.current.value)
-        )
+        if (
+          activeTabId &&
+          trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
+        ) {
+          dateTimeValue =
+            trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
+        } else if (
+          activeTabId &&
+          trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+        ) {
+          dateTimeValue =
+            trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
+        }
+
+        const ladObject = findLengthAtDateRun(lengthAtDateModel, dateTimeValue)
+
+        const runDefinition = findRunDefinition({
+          ladObject,
+          number: Number(forkLengthRef.current.value),
+          trapSite: visitSetupState?.[tabId]?.values?.trapSite,
+        })
 
         if (runDefinition) {
           setRun({
@@ -675,23 +767,11 @@ const AddFishContent = ({
         } else {
           setRun(stateDefaults.whenSpeciesChinook.run)
         }
-
-        const calculatedlifeStage = calculateLifeStage(
-          Number(forkLengthRef.current.value)
-        )
-
-        if (calculatedlifeStage) {
-          setLifeStage({
-            ...lifeStage,
-            value: calculatedlifeStage,
-            error: '',
-            touched: true,
-          })
-        } else {
-          setLifeStage(stateDefaults.whenSpeciesChinook.lifeStage)
-        }
       }
     }, 1000)
+  }
+  if (!isFocused) {
+    return null
   }
 
   return (
@@ -805,9 +885,9 @@ const AddFishContent = ({
                         resetFormState('other')
                       }
                     }}
-                    setFieldTouched={() =>
-                      setSpecies({ ...species, touched: true })
-                    }
+                    // setFieldTouched={() =>
+                    //   setSpecies({ ...species, touched: true })
+                    // }
                   />
                 </FormControl>
               </HStack>
@@ -845,7 +925,7 @@ const AddFishContent = ({
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
-                          keyboardType='numeric'
+                          keyboardType={'number-pad'}
                           onChangeText={value => {
                             let payload: FormValueI = {
                               ...forkLength,
@@ -901,7 +981,7 @@ const AddFishContent = ({
                           height='50px'
                           fontSize='16'
                           placeholder='Numeric Value'
-                          keyboardType='numeric'
+                          keyboardType={'number-pad'}
                           onChangeText={value => {
                             let payload: FormValueI = {
                               ...weight,
@@ -942,7 +1022,7 @@ const AddFishContent = ({
                             height='50px'
                             fontSize='16'
                             placeholder='Numeric Value'
-                            keyboardType='numeric'
+                            keyboardType={'number-pad'}
                             onChangeText={value =>
                               setCount({ ...count, value })
                             }
@@ -1163,6 +1243,96 @@ const AddFishContent = ({
                         </FormControl>
                       )}
                     </HStack>
+                    <HStack>
+                      {conditionalFishInputFields?.['milting'] && (
+                        <FormControl w='1/3'>
+                          <HStack space={4} alignItems='center'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                Milting
+                              </Text>
+                            </FormControl.Label>
+
+                            <Radio.Group
+                              name='milting'
+                              accessibilityLabel='milting'
+                              value={`${milting.value}`}
+                              onChange={(value: any) => {
+                                if (value === 'true') {
+                                  setMilting({ ...milting, value: true })
+                                } else {
+                                  setMilting({ ...milting, value: false })
+                                }
+                              }}
+                            >
+                              <HStack space={4}>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='true'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  Yes
+                                </Radio>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='false'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  No
+                                </Radio>
+                              </HStack>
+                            </Radio.Group>
+                          </HStack>
+                        </FormControl>
+                      )}
+                    </HStack>
+                    <HStack>
+                      {conditionalFishInputFields?.['eggs'] && (
+                        <FormControl w='1/3'>
+                          <HStack space={4} alignItems='center'>
+                            <FormControl.Label>
+                              <Text color='black' fontSize='xl'>
+                                Eggs
+                              </Text>
+                            </FormControl.Label>
+
+                            <Radio.Group
+                              name='eggs'
+                              accessibilityLabel='eggs'
+                              value={`${eggs.value}`}
+                              onChange={(value: any) => {
+                                if (value === 'true') {
+                                  setEggs({ ...eggs, value: true })
+                                } else {
+                                  setEggs({ ...eggs, value: false })
+                                }
+                              }}
+                            >
+                              <HStack space={4}>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='true'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  Yes
+                                </Radio>
+                                <Radio
+                                  colorScheme='primary'
+                                  value='false'
+                                  my={1}
+                                  _icon={{ color: 'primary' }}
+                                >
+                                  No
+                                </Radio>
+                              </HStack>
+                            </Radio.Group>
+                          </HStack>
+                        </FormControl>
+                      )}
+                    </HStack>
                     <HStack space={4} w='80%'>
                       {(species.value == 'Chinook salmon' ||
                         species.value == 'Steelhead / rainbow trout') && (
@@ -1267,20 +1437,18 @@ const AddFishContent = ({
                             <Text color='primary'>Tag Fish</Text>
                           </Button>
                         )}
-                        {species.value === 'Chinook salmon' && (
-                          <Button
-                            bg='secondary'
-                            color='#007C7C'
-                            py='1'
-                            px='12'
-                            shadow='3'
-                            borderRadius='5'
-                            maxWidth='40%'
-                            onPress={() => setAddGeneticModalOpen(true)}
-                          >
-                            <Text color='primary'>Take Genetic Sample</Text>
-                          </Button>
-                        )}
+                        <Button
+                          bg='secondary'
+                          color='#007C7C'
+                          py='1'
+                          px='12'
+                          shadow='3'
+                          borderRadius='5'
+                          maxWidth='40%'
+                          onPress={() => setAddGeneticModalOpen(true)}
+                        >
+                          <Text color='primary'>Take Genetic Sample</Text>
+                        </Button>
                       </HStack>
                     )}
                     {Array.isArray(appliedMarks?.value) &&
@@ -1349,7 +1517,8 @@ const AddFishContent = ({
               isDisabled={route.params?.editModeData ? false : formHasError}
               onPress={() => {
                 if (route.params?.editModeData) {
-                  navigation.goBack()
+                  navigation.replace('Fish Input')
+
                   showSlideAlert(dispatch, 'Fish Input Saved')
                 } else {
                   const activeTabId = tabSlice.activeTabId
@@ -1361,7 +1530,7 @@ const AddFishContent = ({
                       formValues: { ...payload, taxonCode: selectedTaxonCode },
                       UID: fishUID,
                     })
-                    navigation.goBack()
+                    navigation.replace('Fish Input')
                     showSlideAlert(dispatch, 'Fish Input Saved')
                   }
                 }
@@ -1382,7 +1551,7 @@ const AddFishContent = ({
                       tabId: activeTabId,
                       id: route.params?.editModeData?.id,
                     })
-                    navigation.goBack()
+                    navigation.replace('Fish Input')
                   }
                 }}
               >
@@ -1415,7 +1584,7 @@ const AddFishContent = ({
                       taxonCode: selectedTaxonCode,
                       numFishCaught: count.value,
                     })
-                    navigation.goBack()
+                    navigation.replace('Fish Input')
                     showSlideAlert(dispatch, 'Fish Input Updated')
                   }
                 } else {
@@ -1479,6 +1648,8 @@ const AddFishContent = ({
             <AddGeneticsModalContent
               handleGeneticSampleFormSubmit={handleGeneticSamplesFormSubmit}
               closeModal={() => setAddGeneticModalOpen(false)}
+              species={species}
+              reorderedTaxon={reorderedTaxon}
             />
           </CustomModal>
         )}
@@ -1498,25 +1669,28 @@ const AddFishContent = ({
             />
           </CustomModal>
         )}
-        {fishMeasureMetModalOpen && (
-          <CustomModal
-            isOpen={fishMeasureMetModalOpen}
+        <CustomModal
+          isOpen={
+            fishMeasureMetModalOpen &&
+            !!protocolKeyMet &&
+            typeof species.value === 'string' &&
+            protocolKeyMet.toLowerCase().includes(species.value.toLowerCase())
+          }
+          closeModal={closeFishMeasureMetModal}
+          height='40%'
+          width={'80%'}
+        >
+          <MeasureMetPlusCount
+            species={species}
             closeModal={closeFishMeasureMetModal}
-            height='40%'
-            width={'80%'}
-          >
-            <MeasureMetPlusCount
-              species={species}
-              closeModal={closeFishMeasureMetModal}
-              activeTabId={tabSlice.activeTabId}
-              onSaveCallback={resetSpecies}
-              protocolKeyMet={protocolKeyMet}
-              lifeStageValue={lifeStage.value}
-              runValue={run.value}
-              dropdownValues={dropdownsStore.values}
-            />
-          </CustomModal>
-        )}
+            activeTabId={tabSlice.activeTabId}
+            onSaveCallback={resetSpecies}
+            protocolKeyMet={protocolKeyMet}
+            lifeStageValue={lifeStage.value}
+            runValue={run.value}
+            dropdownValues={dropdownsStore.values}
+          />
+        </CustomModal>
       </KeyboardAvoidingView>
     </TouchableNativeFeedback>
   )
@@ -1535,7 +1709,7 @@ const mapStateToProps = (state: RootState) => {
     fishStore: state.fishInput[activeTabId].fishStore,
     tabSlice: state.tabSlice,
     visitSetupState: state.visitSetup,
-    visitSetupDefaultsSlice: state.visitSetupDefaults,
+    visitSetupDefaults: state.visitSetupDefaults,
     fishInputSlice: state.fishInput,
     dropdownsStore: state.dropdowns,
     trapOperationsStore: state.trapOperations,

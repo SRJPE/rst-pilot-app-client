@@ -34,7 +34,11 @@ import {
   reorderTaxon,
 } from '@/src/utils/utils'
 import { FontAwesome } from '@expo/vector-icons'
-import { useIsFocused, useNavigation } from '@react-navigation/native'
+import {
+  useIsFocused,
+  useNavigation,
+  useFocusEffect,
+} from '@react-navigation/native'
 import {
   Box,
   Button,
@@ -50,10 +54,12 @@ import {
   View,
   VStack,
 } from 'native-base'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { Keyboard } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
-import { findLengthAtDateRun } from '../../utils/helpers/helperFunctions'
+import { getLadObject } from '../../utils/helpers/helperFunctions'
+import ToggleLockButton from '@/src/components/Shared/ToggleLockButton'
+import { find, keyBy } from 'lodash'
 
 const MultiSpecies = ({
   route,
@@ -62,6 +68,9 @@ const MultiSpecies = ({
   trapOperationsStore,
   dropdownsStore,
   fishInputSlice,
+  visitSetupDefaults,
+  selectedProgramId,
+  visitSetupState,
 }: {
   route: any
   tabSlice: TabStateI
@@ -69,6 +78,9 @@ const MultiSpecies = ({
   trapOperationsStore: any
   dropdownsStore: any
   fishInputSlice: any
+  visitSetupDefaults: any
+  selectedProgramId: number | null
+  visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
@@ -94,6 +106,10 @@ const MultiSpecies = ({
   const [deadIsLocked, setDeadIsLocked] = useState(false as boolean)
   const [deadToggle, setDeadToggle] = useState(false as boolean)
   const [markToggle, setMarkToggle] = useState(false as boolean)
+  const [miltingIsLocked, setMiltingIsLocked] = useState(false as boolean)
+  const [miltingToggle, setMiltingToggle] = useState(false as boolean)
+  const [eggsIsLocked, setEggsIsLocked] = useState(false as boolean)
+  const [eggsToggle, setEggsToggle] = useState(false as boolean)
   const [adiposeClippedToggle, setAdiposeClippedToggle] = useState(
     false as boolean
   )
@@ -109,6 +125,9 @@ const MultiSpecies = ({
   )
   const [showAddPlusCountButton, setShowAddPlusCountButton] =
     useState<boolean>(false)
+  const [programFormFieldsObj, setProgramFormFieldsObj] = useState(
+    {} as Record<string, any>
+  )
   const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
   const [protocolKeyMetRun, setProtocolKeyMetRun] = useState('' as string)
   const [protocolKeyMetLifeStage, setProtocolKeyMetLifeStage] = useState(
@@ -166,11 +185,28 @@ const MultiSpecies = ({
   }, [dropdownsStore.values])
 
   useEffect(() => {
-    if (lengthAtDateModel && tabSlice.activeTabId) {
-      const ladObjectForTrapDate = findLengthAtDateRun(
+    const currentProgramInfo = find(
+      visitSetupDefaults.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+
+    if (!currentProgramInfo) return
+
+    const formFieldsLookup = keyBy(
+      currentProgramInfo?.programFormFields,
+      'fieldName'
+    )
+
+    setProgramFormFieldsObj(formFieldsLookup)
+  }, [visitSetupDefaults])
+
+  useEffect(() => {
+    if (tabSlice.activeTabId) {
+      const ladObjectForTrapDate = getLadObject({
+        activeTabId: tabSlice.activeTabId,
+        trapOperationsStore,
         lengthAtDateModel,
-        trapOperationsStore?.[tabSlice.activeTabId]?.values?.trapVisitStopTime
-      )
+      })
       setLadObject(ladObjectForTrapDate)
     } else {
       setLadObject(null)
@@ -183,7 +219,6 @@ const MultiSpecies = ({
 
   const handlePressSaveBatchCount = () => {
     if (tabId) {
-      // dispatch(saveBatchCount({ ...batchCountStore }))
       const forkLengthsArray = Object.values(batchCountStore.forkLengths)
 
       const groupedForkLengths = {
@@ -223,9 +258,7 @@ const MultiSpecies = ({
       showSlideAlert(dispatch, 'Multi Species Batch Count Saved')
 
       // @ts-ignore
-      navigation.navigate('Trap Visit Form', {
-        screen: 'Fish Input',
-      })
+      navigation.replace('Fish Input')
     }
   }
 
@@ -241,7 +274,7 @@ const MultiSpecies = ({
   const handleToggles = (toggleName: string) => {
     switch (toggleName) {
       case 'dead':
-        if (deadIsLocked) return
+        if (deadIsLocked) break
         setDeadToggle(!deadToggle)
         break
       case 'mark':
@@ -259,14 +292,26 @@ const MultiSpecies = ({
       case 'FC3':
         setFC3Toggle(!FC3Toggle)
         break
+      case 'milting':
+        if (miltingIsLocked) return
+
+        setMiltingToggle(!miltingToggle)
+        break
+      case 'eggs':
+        if (eggsIsLocked) return
+
+        setEggsToggle(!eggsToggle)
+        break
 
       default:
         setMarkToggle(false)
+        setEggsToggle(false)
+        setMiltingToggle(false)
         setFC1Toggle(false)
         setFC2Toggle(false)
         setFC3Toggle(false)
         setAdiposeClippedToggle(false)
-        if (deadIsLocked) return
+        if (deadIsLocked) break
         setDeadToggle(false)
         break
     }
@@ -276,120 +321,164 @@ const MultiSpecies = ({
     setDeadIsLocked(!deadIsLocked)
   }
 
-  useEffect(() => {
-    if (currentRoute?.name !== 'Multi Species') {
-      setFishMeasureMetModalOpen(false)
-      setProtocolKeyMet(null)
-      return
-    }
-    if (!tabSlice?.activeTabId || !fishInputSlice) {
-      setFishMeasureMetModalOpen(false)
-      setProtocolKeyMet(null)
-      return
-    }
+  const handlePressLockMilting = () => {
+    setMiltingIsLocked(!miltingIsLocked)
+  }
+  const handlePressLockEggs = () => {
+    setEggsIsLocked(!eggsIsLocked)
+  }
 
-    if (multiSpeciesModalOpen) {
-      setFishMeasureMetModalOpen(false)
-      setProtocolKeyMet(null)
-
-      return
-    }
-
-    const batchCountFishStore = Object.values(batchCountStore?.forkLengths).map(
-      (flObj: any) => {
-        return {
-          forkLength: flObj.forkLength,
-          run: flObj?.runDefinition,
-          lifeStage: flObj?.lifeStage?.toLowerCase(),
-          species: flObj?.species,
-          numFishCaught: flObj?.numFishCaught || 1,
-          plusCount: flObj?.plusCount || false,
-        }
+  const navState = navigation?.getState()
+  const currentRoute = navState?.routes[navState?.index]
+  useFocusEffect(
+    useCallback(() => {
+      // Early exits
+      if (
+        currentRoute?.name !== 'Multi Species' ||
+        !tabSlice?.activeTabId ||
+        !fishInputSlice ||
+        multiSpeciesModalOpen
+      ) {
+        setFishMeasureMetModalOpen(false)
+        setProtocolKeyMet(null)
+        return
       }
-    )
 
-    const existingFishStore = fishInputSlice?.[tabSlice.activeTabId]
-      ?.fishStore as Record<string, { numFishCaught: number }>
+      // Build batch store (memoized outside)
+      const batchCountFishStore = Object.values(
+        batchCountStore?.forkLengths || {}
+      ).map((flObj: any) => ({
+        forkLength: flObj.forkLength,
+        run: flObj?.runDefinition,
+        lifeStage: flObj?.lifeStage?.toLowerCase(),
+        species: flObj?.species,
+        numFishCaught: flObj?.numFishCaught || 1,
+        plusCount: flObj?.plusCount || false,
+      }))
 
-    const combinedFishStoreObj = {
-      ...existingFishStore,
-    } as Record<string, any>
+      const existingFishStore =
+        fishInputSlice[tabSlice.activeTabId]?.fishStore ?? {}
+      const combinedFishStoreObj: Record<string, any> = { ...existingFishStore }
 
-    let nextIndex = Object.keys(combinedFishStoreObj).length
-    batchCountFishStore.forEach(fish => {
-      combinedFishStoreObj[nextIndex] = fish
-      nextIndex++
-    })
+      let total = Object.values(existingFishStore).reduce(
+        (sum, fishObj) => sum + ((fishObj as any).numFishCaught || 0),
+        0
+      ) as number
 
-    const combinedFishMeasureCountsObj =
-      getFishMeasureCounts(combinedFishStoreObj)
+      let nextIndex = Object.keys(combinedFishStoreObj).length
+      batchCountFishStore.forEach(fish => {
+        combinedFishStoreObj[nextIndex++] = fish
+        total += fish.numFishCaught || 0
+      })
 
-    setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
+      setTotalCatchCount(total)
 
-    if (!combinedFishStoreObj) return
+      const combinedFishMeasureCountsObj =
+        getFishMeasureCounts(combinedFishStoreObj)
+      setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
 
-    const total = Object.values(combinedFishStoreObj).reduce(
-      (sum, fishObj) =>
-        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
-      0
-    )
-
-    setTotalCatchCount(total)
-
-    const checkPlusCountExists = (
-      fishObjectArray: Array<Record<string, any>>,
-      species: string
-    ) => {
-      const currentSpeciesFishCounts = fishObjectArray.filter(
-        fishObj => fishObj.species === species && fishObj.plusCount
+      const plusCountExists = batchCountFishStore.some(
+        fishObj => fishObj.species === speciesRadioValue && fishObj.plusCount
       )
 
-      return currentSpeciesFishCounts.length > 0
+      const protocolResult = checkFishMeasureProtocol({
+        fishMeasureCounts: combinedFishMeasureCountsObj,
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        speciesValue: speciesRadioValue,
+        runValue: '',
+        lifeStageValue: '',
+      })
+
+      if (protocolResult?.protocolMet) {
+        setShowAddPlusCountButton(true)
+        if (!plusCountExists) setFishMeasureMetModalOpen(true)
+      } else {
+        setShowAddPlusCountButton(false)
+        setFishMeasureMetModalOpen(false)
+      }
+
+      setProtocolKeyMet(protocolResult?.protocolKeyMet ?? null)
+    }, [
+      tabSlice.activeTabId,
+      speciesRadioValue,
+      batchCountStore.forkLengths,
+      currentRoute?.name,
+      multiSpeciesModalOpen,
+      fishInputSlice,
+      route.params?.fishMeasureProtocol,
+    ])
+  )
+
+  const handleAddPlusCountClick = () => {
+    setFishMeasureMetModalOpen(true)
+    if (tabSlice?.activeTabId && speciesRadioValue) {
+      // Build batch store (memoized outside)
+      const batchCountFishStore = Object.values(
+        batchCountStore?.forkLengths || {}
+      ).map((flObj: any) => ({
+        forkLength: flObj.forkLength,
+        run: flObj?.runDefinition,
+        lifeStage: flObj?.lifeStage?.toLowerCase(),
+        species: flObj?.species,
+        numFishCaught: flObj?.numFishCaught || 1,
+        plusCount: flObj?.plusCount || false,
+      }))
+
+      const existingFishStore =
+        fishInputSlice[tabSlice.activeTabId]?.fishStore ?? {}
+      const combinedFishStoreObj: Record<string, any> = { ...existingFishStore }
+
+      let total = Object.values(existingFishStore).reduce(
+        (sum, fishObj) => sum + ((fishObj as any).numFishCaught || 0),
+        0
+      ) as number
+
+      let nextIndex = Object.keys(combinedFishStoreObj).length
+      batchCountFishStore.forEach(fish => {
+        combinedFishStoreObj[nextIndex++] = fish
+        total += fish.numFishCaught || 0
+      })
+      const combinedFishMeasureCountsObj =
+        getFishMeasureCounts(combinedFishStoreObj)
+      setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
+      const protocolResult = checkFishMeasureProtocol({
+        fishMeasureCounts: combinedFishMeasureCountsObj,
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        speciesValue: speciesRadioValue,
+        runValue: '',
+        lifeStageValue: '',
+      })
+
+      if (protocolResult?.protocolMet) {
+        setShowAddPlusCountButton(true)
+      } else {
+        setShowAddPlusCountButton(false)
+        setFishMeasureMetModalOpen(false)
+      }
+
+      setProtocolKeyMet(protocolResult?.protocolKeyMet ?? null)
     }
-
-    const plusCountExists = checkPlusCountExists(
-      batchCountFishStore,
-      speciesRadioValue
-    )
-
-    const protocolResult = checkFishMeasureProtocol({
-      fishMeasureCounts: combinedFishMeasureCountsObj,
-      fishMeasureProtocol: route.params?.fishMeasureProtocol,
-      speciesValue: speciesRadioValue as string,
-      runValue: '' as string,
-      lifeStageValue: '' as string,
-    })
-
-    if (protocolResult && protocolResult.protocolMet) {
-      setShowAddPlusCountButton(true)
-
-      !plusCountExists && setFishMeasureMetModalOpen(true)
-    } else {
-      setShowAddPlusCountButton(false)
-      setFishMeasureMetModalOpen(false)
-    }
-
-    if (protocolResult && protocolResult.protocolKeyMet) {
-      setProtocolKeyMet(protocolResult.protocolKeyMet)
-    } else {
-      setProtocolKeyMet(null)
-    }
-  }, [
-    tabSlice.activeTabId,
-    fishInputSlice,
-    speciesRadioValue,
-    batchCountStore.forkLengths,
-  ])
+  }
 
   const closeFishMeasureMetModal = () => {
     setFishMeasureMetModalOpen(false)
     setProtocolKeyMet(null)
   }
 
-  const navState = navigation?.getState()
-  const currentRoute = navState?.routes[navState?.index]
   const currentSpeciesFishMeasureProtocol =
     route.params?.fishMeasureProtocol[speciesRadioValue]
+
+  const showMiltingToggle =
+    programFormFieldsObj?.['milting'] &&
+    !speciesRadioValue.toLocaleLowerCase().includes('shrimp')
+
+  const showEggsToggle =
+    programFormFieldsObj?.['eggs'] &&
+    speciesRadioValue.toLocaleLowerCase().includes('shrimp')
+
+  if (!isFocused) {
+    return null
+  }
 
   return currentRoute?.name === 'Multi Species' ? (
     <>
@@ -432,9 +521,7 @@ const MultiSpecies = ({
                   <FishEntriesSummary
                     lastFishEntry={{
                       species: speciesRadioValue,
-                      forkLength: calculateLastFish(
-                        batchCountStore.forkLengths
-                      ),
+                      ...calculateLastFish(batchCountStore.forkLengths),
                     }}
                     totalCatchCount={totalCatchCount}
                     fishMeasureProtocol={
@@ -500,7 +587,7 @@ const MultiSpecies = ({
                   </Text>
                   <HStack space={3} alignItems='center'>
                     <HStack alignItems='center' space={4}>
-                      <HStack space={2} alignItems={'center'}>
+                      <HStack space={1} alignItems={'center'}>
                         <Checkbox
                           value='dead'
                           isChecked={deadToggle}
@@ -512,27 +599,60 @@ const MultiSpecies = ({
                           size='md'
                           isDisabled={deadIsLocked}
                           onChange={() => handleToggles(`dead`)}
+                          mr={1}
                         />
-                        <HStack space={1} alignItems={'center'}>
-                          <Text fontSize='16'>Dead</Text>
-                          <IconButton
-                            onPress={() => handlePressLockDead()}
-                            icon={
-                              <Icon
-                                as={FontAwesome}
-                                name={deadIsLocked ? 'lock' : 'unlock'}
-                              />
-                            }
-                            borderRadius='full'
-                            _icon={{
-                              size: 5,
-                            }}
-                            _pressed={{
-                              bg: '#FFF',
-                            }}
-                          />
-                        </HStack>
+                        <Text fontSize='16'>Dead</Text>
+                        <ToggleLockButton
+                          isLocked={deadIsLocked}
+                          onPress={handlePressLockDead}
+                        />
                       </HStack>
+                      {showMiltingToggle && (
+                        <HStack space={2} alignItems={'center'}>
+                          <Checkbox
+                            value='milting'
+                            isChecked={miltingToggle || false}
+                            shadow='3'
+                            _checked={{
+                              bg: 'primary',
+                              borderColor: 'primary',
+                            }}
+                            size='md'
+                            isDisabled={miltingIsLocked}
+                            onChange={() => handleToggles(`milting`)}
+                          />
+                          <HStack space={1} alignItems={'center'}>
+                            <Text fontSize='16'>Milting</Text>
+                            <ToggleLockButton
+                              isLocked={miltingIsLocked}
+                              onPress={handlePressLockMilting}
+                            />
+                          </HStack>
+                        </HStack>
+                      )}
+                      {showEggsToggle && (
+                        <HStack space={2} alignItems={'center'}>
+                          <Checkbox
+                            value='eggs'
+                            isChecked={eggsToggle || false}
+                            shadow='3'
+                            _checked={{
+                              bg: 'primary',
+                              borderColor: 'primary',
+                            }}
+                            size='md'
+                            isDisabled={eggsIsLocked}
+                            onChange={() => handleToggles(`eggs`)}
+                          />
+                          <HStack space={1} alignItems={'center'}>
+                            <Text fontSize='16'>Eggs</Text>
+                            <ToggleLockButton
+                              isLocked={eggsIsLocked}
+                              onPress={handlePressLockEggs}
+                            />
+                          </HStack>
+                        </HStack>
+                      )}
 
                       <HStack space={2}>
                         <Checkbox
@@ -674,7 +794,7 @@ const MultiSpecies = ({
                       background='primary'
                       mr='auto'
                       px={5}
-                      onPress={() => setFishMeasureMetModalOpen(true)}
+                      onPress={handleAddPlusCountClick}
                     >
                       <Text color='white' fontSize={18}>
                         Add Plus Count
@@ -695,6 +815,7 @@ const MultiSpecies = ({
                         setNumberOfAdditionalButtons={
                           setNumberOfAdditionalButtons
                         }
+                        selectedProgramObj={route?.params?.selectedProgramObj}
                         disabled={speciesRadioValue === ''}
                       />
                     </VStack>
@@ -719,6 +840,9 @@ const MultiSpecies = ({
                         reorderedTaxon
                       )}
                       ladObject={ladObject}
+                      miltingToggle={miltingToggle}
+                      eggsToggle={eggsToggle}
+                      visitSetupState={visitSetupState}
                     />
                   </>
                 )}
@@ -790,7 +914,13 @@ const MultiSpecies = ({
       )}
       {fishMeasureMetModalOpen && (
         <CustomModal
-          isOpen={fishMeasureMetModalOpen}
+          isOpen={
+            fishMeasureMetModalOpen &&
+            !!protocolKeyMet &&
+            protocolKeyMet
+              .toLowerCase()
+              .includes(speciesRadioValue.toLowerCase())
+          }
           closeModal={closeFishMeasureMetModal}
           height='40%'
           width={'80%'}
@@ -824,6 +954,11 @@ const mapStateToProps = (state: RootState) => {
     trapOperationsStore: state.trapOperations,
     dropdownsStore: state.dropdowns,
     fishInputSlice: state.fishInput,
+    visitSetupDefaults: state.visitSetupDefaults,
+    selectedProgramId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.programId,
+    visitSetupState: state.visitSetup,
   }
 }
 export default connect(mapStateToProps)(MultiSpecies)

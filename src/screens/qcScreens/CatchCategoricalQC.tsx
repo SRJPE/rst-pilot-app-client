@@ -184,13 +184,18 @@ function CatchCategoricalQC({
           createdAt,
           qcCompleted,
           trapVisitTimeEnd,
+          trapVisitTimeStart,
         } = catchResponse.createdCatchRawResponse
         const qcNotStarted = !qcCompleted
 
         const createdExistingMarksResponse =
           catchResponse.createdExistingMarksResponse ?? []
 
-        const date = new Date(trapVisitTimeEnd)
+        let date = new Date(trapVisitTimeEnd)
+        let qcTrapVisitTime = new Date(trapVisitTimeEnd)
+        if (!trapVisitTimeEnd) {
+          qcTrapVisitTime = new Date(trapVisitTimeStart)
+        }
         date.setHours(0)
         date.setMinutes(0)
         date.setSeconds(0)
@@ -721,7 +726,7 @@ function CatchCategoricalQC({
               width='350px'
               fontSize='16'
               placeholder='fork length...'
-              keyboardType='numeric'
+              keyboardType={'number-pad'}
               onChangeText={value => {
                 setNestedModalInputValue({ fieldClicked: 'forkLength', value })
               }}
@@ -891,7 +896,7 @@ function CatchCategoricalQC({
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
                   yLabel={axisLabelDictionary[buttonName]['yLabel']}
-                  key={buttonName}
+                  key={`${buttonName}-${Math.random()}`}
                   chartType={buttonNameToChartType[buttonName] as any}
                   showDates
                   onPointClick={datum => handlePointClick(datum)}

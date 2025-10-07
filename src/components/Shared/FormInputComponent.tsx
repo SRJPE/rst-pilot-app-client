@@ -1,11 +1,14 @@
-import React, { ChangeEvent, JSX, memo } from 'react'
-import { Box, FormControl, HStack, Input, Text } from 'native-base'
+import React, { ChangeEvent, JSX, memo, useCallback } from 'react'
+import { Box, FormControl, Input, Text } from 'native-base'
 import RenderErrorMessage from '../Shared/RenderErrorMessage'
 import {
   KeyboardTypeOptions,
   NativeSyntheticEvent,
   TextInputFocusEventData,
+  Keyboard,
 } from 'react-native'
+import { FastField } from 'formik'
+import { renderRequiredOrOptionalLabel } from '../../utils/utils'
 
 interface FormInputComponentI {
   label: string
@@ -23,6 +26,11 @@ interface FormInputComponentI {
   multiline?: boolean
   showWarning?: boolean
   warningMessage?: string
+  validationSchema?: any
+  inputRefs?: any
+  isLast?: boolean
+  formFields?: any
+  orderIndex?: number
 }
 
 export const TextInputAdornment = ({ text }: { text: string }) => {
@@ -30,6 +38,116 @@ export const TextInputAdornment = ({ text }: { text: string }) => {
     <Text px={5} color='warmGray.400'>
       {text}
     </Text>
+  )
+}
+
+const FastInput = ({
+  field,
+  form,
+  value,
+  keyboardType,
+  placeholder,
+  onChangeText,
+  onBlur,
+  RightElement = undefined,
+  isDisabled = false,
+  multiline = false,
+  showWarning = false,
+  inputRefs,
+  isLast,
+  formFields,
+  orderIndex,
+  camelName,
+}: {
+  field: any
+  form: any
+  value: any
+  keyboardType: any
+  placeholder: any
+  onChangeText: any
+  onBlur: any
+  RightElement: any
+  isDisabled: any
+  multiline: any
+  showWarning: any
+  inputRefs: any
+  isLast: any
+  formFields?: any
+  orderIndex?: number
+  camelName?: string
+}) => {
+  const handleSubmitEditing = useCallback(() => {
+    if (formFields && !isLast && orderIndex !== undefined) {
+      const nextField = formFields.find(
+        (field: any) =>
+          field.orderIndex === orderIndex + 1 && field.fieldType === 'input'
+      )?.fieldName
+
+      if (nextField && inputRefs.current[nextField]) {
+        inputRefs.current[nextField]?.focus()
+      } else {
+        Keyboard.dismiss()
+      }
+    } else if (
+      camelName === 'flowMeasure' &&
+      inputRefs.current.waterTemperature
+    ) {
+      inputRefs.current.waterTemperature?.focus()
+    } else if (camelName?.includes('turbidity')) {
+      // Focus on the next turbidity input
+      const nextTurbidityIndex =
+        parseInt(camelName.replace('turbidity', '')) + 1
+      const nextTurbidityField = `turbidity${nextTurbidityIndex}`
+      const nextTurbidityInput = inputRefs.current[nextTurbidityField]
+      if (nextTurbidityInput) {
+        nextTurbidityInput.focus()
+      } else {
+        Keyboard.dismiss()
+        return
+      }
+    } else if (camelName?.includes('river')) {
+      if (camelName === 'riverLeft') {
+        inputRefs.current.riverCenter?.focus()
+      } else if (camelName === 'riverCenter') {
+        inputRefs.current.riverRight?.focus()
+      } else {
+        Keyboard.dismiss()
+        return
+      }
+    } else {
+      Keyboard.dismiss()
+      return
+    }
+  }, [formFields, isLast, orderIndex, inputRefs, camelName])
+
+  return (
+    <Input
+      {...field} // Includes value and onChangeText automatically
+      multiline={multiline}
+      readOnly={isDisabled}
+      height={multiline ? 100 : 50}
+      fontSize='16'
+      keyboardType={keyboardType ? keyboardType : 'default'}
+      placeholder={placeholder || 'No placeholder entered'}
+      onChangeText={onChangeText} // Update correctly
+      onBlur={onBlur}
+      value={field.value}
+      _focus={{
+        borderColor: showWarning ? 'amber.700' : 'muted.300',
+        _invalid: { borderColor: 'red.700' },
+      }}
+      borderColor={showWarning ? 'amber.700' : 'muted.300'}
+      _invalid={{ borderColor: 'red.700' }}
+      rightElement={RightElement}
+      ref={ref => {
+        if (inputRefs && camelName) {
+          inputRefs.current[camelName] = ref
+        } else return
+      }}
+      returnKeyType={inputRefs ? 'next' : 'default'}
+      submitBehavior={isLast ? 'blurAndSubmit' : 'submit'} // 👈 NEW PROP
+      onSubmitEditing={handleSubmitEditing}
+    />
   )
 }
 
@@ -48,6 +166,11 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   multiline = false,
   showWarning = false,
   warningMessage = 'Value is out of range',
+  validationSchema,
+  inputRefs,
+  isLast,
+  formFields,
+  orderIndex,
 }) => {
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
@@ -71,28 +194,32 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
             fontSize='16'
           >
             {label}
+            {validationSchema
+              ? renderRequiredOrOptionalLabel({
+                  fieldName: camelName,
+                  validationSchema,
+                })
+              : ''}
           </Text>
         </FormControl.Label>
-        <Box bg='white'>
-          <Input
-            multiline={multiline}
-            readOnly={isDisabled}
-            height={multiline ? 100 : 50}
-            fontSize='16'
-            keyboardType={keyboardType ? keyboardType : 'default'}
-            placeholder={placeholder || 'No placeholder entered'}
-            onChangeText={onChangeText}
-            onBlur={onBlur}
-            value={value}
-            _focus={{
-              borderColor: showWarning ? 'amber.700' : 'muted.300',
-              _invalid: { borderColor: 'red.700' },
-            }}
-            borderColor={showWarning ? 'amber.700' : 'muted.300'}
-            _invalid={{ borderColor: 'red.700' }}
-            rightElement={RightElement}
-          />
-        </Box>
+        <FastField
+          name={camelName}
+          component={FastInput}
+          value={value}
+          keyboardType={keyboardType}
+          placeholder={placeholder}
+          onChangeText={onChangeText}
+          onBlur={onBlur}
+          RightElement={RightElement}
+          isDisabled={isDisabled}
+          multiline={multiline}
+          showWarning={showWarning}
+          inputRefs={inputRefs}
+          isLast={isLast}
+          formFields={formFields}
+          orderIndex={orderIndex}
+          camelName={camelName}
+        />
         <Box mt={2} h={25}>
           {showError && (
             <RenderErrorMessage errors={errors} inputName={camelName} />

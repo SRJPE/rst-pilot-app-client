@@ -378,7 +378,7 @@ function EfficiencyQC({
             width='350px'
             fontSize='16'
             placeholder='Enter Number'
-            keyboardType='numeric'
+            keyboardType={'number-pad'}
             onChangeText={value => {
               setNestedModalInputValue(value)
             }}
@@ -392,7 +392,7 @@ function EfficiencyQC({
             width='350px'
             fontSize='16'
             placeholder='Enter Number'
-            keyboardType='numeric'
+            keyboardType={'number-pad'}
             onChangeText={value => {
               setNestedModalInputValue(value)
             }}
@@ -406,7 +406,7 @@ function EfficiencyQC({
             width='350px'
             fontSize='16'
             placeholder='Enter Number'
-            keyboardType='numeric'
+            keyboardType={'number-pad'}
             onChangeText={value => {
               setNestedModalInputValue(value)
             }}
@@ -420,7 +420,7 @@ function EfficiencyQC({
             width='350px'
             fontSize='16'
             placeholder='Enter Fork Length'
-            keyboardType='numeric'
+            keyboardType={'number-pad'}
             onChangeText={value => {
               console.log('fork length: ', value)
               setNestedModalInputValue(value)
@@ -468,6 +468,7 @@ function EfficiencyQC({
                 height={400}
                 width={600}
                 onPointClick={datum => handlePointClick(datum)}
+                key={`effieciency-${Math.random()}`}
               />
             </ScrollView>
           ) : (

@@ -10,7 +10,7 @@ const ReviewValuesButton = ({
       <Button
         rounded='xs'
         alignSelf='center'
-        w='80%'
+        w='100%'
         h='100%'
         borderRadius='5'
         variant={'outline'}
@@ -19,7 +19,7 @@ const ReviewValuesButton = ({
         // justifyContent='space-between'
         onPress={handleOpenReviewValuesModal}
         textAlign={'center'}
-        marginBottom={100}
+        // marginBottom={100}
       >
         <Text
           fontSize='xl'

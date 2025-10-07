@@ -149,8 +149,11 @@ function CatchFishCountQC({
       const catchRaw = catchResponse.createdCatchRawResponse
       const numFishCaught: number = catchRaw?.numFishCaught
       const plusCount: boolean = catchRaw?.plusCount
-      const trapVisitTimeEnd = new Date(catchRaw.trapVisitTimeEnd)
-      const normalizedDate = normalizeDate(trapVisitTimeEnd)
+      let qcTrapVisitTime = new Date(catchRaw.trapVisitTimeEnd)
+      if (!catchRaw.trapVisitTimeEnd) {
+        qcTrapVisitTime = new Date(catchRaw.trapVisitTimeStart)
+      }
+      const normalizedDate = normalizeDate(qcTrapVisitTime)
       const qcCompleted = catchResponse.createdCatchRawResponse.qcCompleted
 
       if (Object.keys(datesFormatted).includes(String(normalizedDate))) {
@@ -413,7 +416,7 @@ function CatchFishCountQC({
               width='350px'
               fontSize='16'
               placeholder='plus count...'
-              keyboardType='numeric'
+              keyboardType={'number-pad'}
               onChangeText={value => {
                 setNestedModalInputValue({
                   fieldClicked: 'numFishCaught',
@@ -451,7 +454,7 @@ function CatchFishCountQC({
               width='350px'
               fontSize='16'
               placeholder='fork length...'
-              keyboardType='numeric'
+              keyboardType={'number-pad'}
               onChangeText={value => {
                 onChangeTextCallback({
                   fieldClicked: 'forkLength',
@@ -472,7 +475,7 @@ function CatchFishCountQC({
               width='350px'
               fontSize='16'
               placeholder='weight...'
-              keyboardType='numeric'
+              keyboardType={'number-pad'}
               onChangeText={value => {
                 onChangeTextCallback({
                   fieldClicked: 'weight',
@@ -647,6 +650,7 @@ function CatchFishCountQC({
                   selectedBarColor='green'
                   height={400}
                   width={600}
+                  key={`total-daily-catch-${Math.random()}`}
                 />
               </ScrollView>
             ) : (

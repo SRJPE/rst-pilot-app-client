@@ -23,6 +23,8 @@ const BatchCountButtonGrid = ({
   ignoreLifeStage,
   deadToggle,
   markToggle,
+  miltingToggle,
+  eggsToggle,
   adiposeClippedToggle,
   fishConditions,
   handleToggles,
@@ -30,6 +32,7 @@ const BatchCountButtonGrid = ({
   species,
   ladObject,
   taxonCode,
+  visitSetupState,
 }: {
   firstButton: number
   numberOfAdditionalButtons: number
@@ -37,6 +40,8 @@ const BatchCountButtonGrid = ({
   ignoreLifeStage?: boolean
   deadToggle: boolean
   markToggle: boolean
+  miltingToggle: boolean | null
+  eggsToggle: boolean | null
   adiposeClippedToggle?: boolean
   fishConditions: string[]
   handleToggles: any
@@ -44,6 +49,7 @@ const BatchCountButtonGrid = ({
   species: string
   taxonCode?: string
   ladObject: any
+  visitSetupState: any
 }) => {
   const [numArray, setNumArray] = useState([] as number[])
 
@@ -55,9 +61,13 @@ const BatchCountButtonGrid = ({
   }, [firstButton])
 
   const handlePress = (num: number) => {
-    let runDefinition = null as string | null
+    let runDefinition = null as string | null | undefined
     if (species === 'Chinook salmon' && activeTabId && ladObject) {
-      runDefinition = findRunDefinition(ladObject, num)
+      runDefinition = findRunDefinition({
+        ladObject,
+        number: num,
+        trapSite: visitSetupState?.[activeTabId]?.values?.trapSite,
+      })
     }
     dispatch(
       addForkLengthToBatchStore({
@@ -67,6 +77,8 @@ const BatchCountButtonGrid = ({
         lifeStage: ignoreLifeStage ? null : selectedLifeStage,
         dead: deadToggle,
         existingMark: markToggle,
+        milting: miltingToggle,
+        eggs: eggsToggle,
         adiposeClipped: adiposeClippedToggle || false,
         fishConditions,
         runDefinition: runDefinition,

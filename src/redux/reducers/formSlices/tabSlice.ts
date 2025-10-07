@@ -80,11 +80,15 @@ export const tabsSlice = createSlice({
     },
     updateErrorCount: (state, action) => {
       const { tabId, errorCount } = action.payload
-      state.tabs[tabId].errorCount = errorCount
+      if (tabId && state?.tabs?.[tabId]) {
+        state.tabs[tabId].errorCount = errorCount
+      }
     },
     updateErrorDetails: (state, action) => {
       const { tabId, errorDetails } = action.payload
-      state.tabs[tabId].errorDetails = errorDetails
+      if (tabId && state?.tabs?.[tabId]) {
+        state.tabs[tabId].errorDetails = errorDetails
+      }
     },
     setIncompleteSectionTouched: (state, action) => {
       state.incompleteSectionTouched = action.payload

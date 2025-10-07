@@ -44,6 +44,7 @@ const TabBar = ({
 
   const dispatch = useDispatch<AppDispatch>()
   const nonTabBarScreens = [
+    'Visit Setup',
     'Paper Entry',
     'Add Fish',
     'Batch Count',
@@ -267,7 +268,9 @@ const TabBar = ({
       return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].trapSite}</Text>
     } else if (
       tabSlice.activeTabId != null &&
-      !['Incomplete Sections', 'Multi Species'].includes(headerProps.route.name)
+      !['Incomplete Sections', 'Visit Setup', 'Multi Species'].includes(
+        headerProps.route.name
+      )
     ) {
       return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].name}</Text>
     } else {

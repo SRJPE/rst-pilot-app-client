@@ -100,7 +100,7 @@ const BatchCountTableModal = ({
                     size='2xl'
                     value={modalDataTemp[key]}
                     isFocused
-                    keyboardType='numeric'
+                    keyboardType={'number-pad'}
                     onChangeText={(value: any) => {
                       setModalDataTemp({
                         ...modalDataTemp,

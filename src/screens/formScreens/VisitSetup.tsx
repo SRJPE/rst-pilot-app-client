@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Formik } from 'formik'
-import { connect, useDispatch } from 'react-redux'
+import { Formik, FormikErrors } from 'formik'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import {
   markTrapVisitPaperEntry,
@@ -36,14 +36,22 @@ import {
   TabStateI,
   resetTabsSlice,
 } from '../../redux/reducers/formSlices/tabSlice'
-import { uniqBy, sortBy, find } from 'lodash'
+import { uniqBy, sortBy, find, set } from 'lodash'
 import { DeviceEventEmitter, TouchableWithoutFeedback } from 'react-native'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import { uid } from 'uid'
 import TrapNameDropDown from '../../components/form/TrapNameDropDown'
-import { navigateHelper } from '../../utils/utils'
+import {
+  navigateHelper,
+  capitalizeFirstLetterOfEachWord,
+} from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
+import { generateTrapVisitSchema } from '../../utils/helpers/yupValidations'
+import { InferType } from 'yup'
+import { resetFishInputSlice } from '@/src/redux/reducers/formSlices/fishInputSlice'
+import { resetBatchCountSlice } from '@/src/redux/reducers/formSlices/batchCountSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -69,6 +77,12 @@ const VisitSetup = ({
 }) => {
   // try {
   const dispatch = useDispatch<AppDispatch>()
+  const navigationState = useSelector((state: any) => state.navigation)
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
+  const activeStep = navigationState.activeStep
+  const activePage = navigationState.steps[activeStep]?.name
   const [isPaperEntry, setIsPaperEntry] = useState(false as boolean)
   const [selectedProgramId, setSelectedProgramId] = useState<number | null>(
     null
@@ -82,6 +96,19 @@ const VisitSetup = ({
   )
   const [trapDropDownOpen, setTrapDropDownOpen] = useState(false as boolean)
   const [crewDropDownOpen, setCrewDropDownOpen] = useState(false as boolean)
+  const [validationSchema, setValidationSchema] = useState<any>(trapVisitSchema)
+  const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
+  const [formFields, setFormFields] = useState<any>(null)
+
+  const isSiteAndTrapNameEqual = useCallback(
+    (visitSetupValues: InferType<typeof trapVisitSchema>) => {
+      const siteAndTrapNameEqual =
+        visitSetupValues?.trapSite === visitSetupValues?.trapName?.join('')
+
+      return siteAndTrapNameEqual || false
+    },
+    []
+  )
 
   const onTrapOpen = useCallback(() => {
     setCrewDropDownOpen(false)
@@ -112,10 +139,48 @@ const VisitSetup = ({
     }
   }, [tabSlice?.activeTabId])
 
+  useEffect(() => {
+    const currentProgramInfo = find(
+      visitSetupDefaultsState.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+    setSelectedProgramObj(currentProgramInfo)
+
+    if (currentProgramInfo?.programFormFields?.length) {
+      const trapEquimentType =
+        find(
+          visitSetupDefaultsState?.trapLocations,
+          (trapLocation: any) =>
+            trapLocation.id ===
+            visitSetupState[tabSlice.activeTabId ?? 'placeholderId']?.values
+              ?.trapLocationId
+        )?.equipmentId || null
+      // get fields for this section and equipment type, if applicable
+      // null equipmentId indicates field displayed for all equipment types
+      const sectionFields = currentProgramInfo?.programFormFields.filter(
+        (field: any) =>
+          field.formSection === activePage &&
+          (field.equipmentId === null || field.equipmentId === trapEquimentType)
+      )
+      setFormFields(sectionFields)
+      const trapVisitSetupSchema = generateTrapVisitSchema(
+        currentProgramInfo?.programFormFields
+      )
+      setValidationSchema(trapVisitSetupSchema)
+    } else {
+      setFormFields(null)
+      setValidationSchema(trapVisitSchema)
+    }
+  }, [selectedProgramId, activePage, visitSetupDefaultsState])
+
   const onSubmit = (values: any, tabId: string | null) => {
     const programId = selectedProgramId
     const payload = {
       ...values,
+      trapName:
+        typeof values.trapName === 'string'
+          ? [values.trapName]
+          : values.trapName,
       programId,
     }
     // if no current tabs, create all new tabs
@@ -130,7 +195,10 @@ const VisitSetup = ({
               values: {
                 ...payload,
                 trapName,
-                trapLocationId: getTrapLocationId({ trapName }),
+                trapLocationId: getTrapLocationId({
+                  trapName,
+                  trapSite: values.trapSite,
+                }),
               },
               isPaperEntry,
             })
@@ -182,33 +250,90 @@ const VisitSetup = ({
 
       // if trapNames, iterate through all trap names and create / overwrite / delete tabs
       if (values.trapName && Array.isArray(values?.trapName)) {
-        // remove any tabs that are not in values.trapName
-        if (values.trapName.length < currentTabsTrapNames.length) {
+        const missingFromTrapNames = currentTabsTrapNames.filter(
+          name => !values.trapName.includes(name)
+        )
+
+        if (missingFromTrapNames.length && showTrapNameField) {
           Object.keys(tabSlice.tabs).forEach(tabId => {
             const tabTrapName = tabSlice.tabs[tabId].name
 
-            if (!values.trapName.includes(tabTrapName)) {
+            if (missingFromTrapNames.includes(tabTrapName)) {
               dispatch(deleteTab(tabId))
             }
           })
         }
 
+        // if going trap site with multiple trap names to single trap site
+        if (
+          missingFromTrapNames.length &&
+          currentTabsTrapNames.length > 1 &&
+          !showTrapNameField
+        ) {
+          Object.keys(tabSlice.tabs).forEach(tabId => {
+            const tabTrapName = tabSlice.tabs[tabId].name
+
+            if (missingFromTrapNames.includes(tabTrapName)) {
+              dispatch(deleteTab(tabId))
+            }
+          })
+          let tabId = uid()
+          dispatch(
+            saveVisitSetup({
+              tabId,
+              values: {
+                ...payload,
+                trapLocationId: getTrapLocationId({
+                  trapName: values.trapName,
+                }),
+              },
+              isPaperEntry,
+            })
+          )
+          dispatch(
+            createTab({
+              tabId,
+              tabName: values.trapName ?? values.trapSite,
+              trapSite: values.trapSite,
+            })
+          )
+          dispatch(
+            markVisitSetupCompleted({
+              tabId,
+              completed: true,
+            })
+          )
+          dispatch(
+            markTrapVisitPaperEntry({
+              tabId,
+              isPaperEntry,
+            })
+          )
+          return
+        }
+
         values?.trapName?.forEach((trapName: string) => {
-          if (currentTabsTrapNames.includes(trapName)) {
+          const siteTrapMatch = isSiteAndTrapNameEqual(values)
+          if (currentTabsTrapNames.includes(trapName) || siteTrapMatch) {
             const tabIds = Object.keys(tabSlice.tabs)
-            const tabIdToUpdate = tabIds.filter(id => {
-              return tabSlice.tabs[id].name == trapName
-            })[0]
-            dispatch(
-              saveVisitSetup({
-                tabId: tabIdToUpdate,
-                values: {
-                  ...payload,
-                  trapLocationId: getTrapLocationId({ trapName }),
-                },
-                isPaperEntry,
-              })
-            )
+
+            const tabIdToUpdate = siteTrapMatch
+              ? tabIds[0]
+              : tabIds.filter(id => {
+                  return tabSlice.tabs[id].name == trapName
+                })[0]
+
+            tabIdToUpdate &&
+              dispatch(
+                saveVisitSetup({
+                  tabId: tabIdToUpdate,
+                  values: {
+                    ...payload,
+                    trapLocationId: getTrapLocationId({ trapName }),
+                  },
+                  isPaperEntry,
+                })
+              )
             dispatch(
               setTabName({
                 tabId: tabIdToUpdate,
@@ -291,6 +416,8 @@ const VisitSetup = ({
     dispatch(resetTabsSlice())
     dispatch(resetVisitSetupSlice())
     dispatch(resetFishProcessingSlice())
+    dispatch(resetFishInputSlice())
+    dispatch(resetBatchCountSlice())
     dispatch(resetTrapPostProcessingSlice())
     dispatch(resetTrapOperationsSlice())
     let programId = null
@@ -311,18 +438,27 @@ const VisitSetup = ({
   }) => {
     let trapLocationId = null
 
-    if (trapSite) {
+    if (trapName) {
       const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
-        (obj: any) => obj.siteName === trapSite
+        (obj: any) => obj.trapName === trapName
       )
       if (trapLocations.length === 1) {
         trapLocationId = trapLocations[0].id
       }
+
+      if (trapLocationId === null) {
+        const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
+          (obj: any) => obj.trapSite === trapName
+        )
+        if (trapLocations.length === 1) {
+          trapLocationId = trapLocations[0].id
+        }
+      }
     }
 
-    if (trapName) {
+    if (trapSite) {
       const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
-        (obj: any) => obj.trapName === trapName
+        (obj: any) => obj.siteName === trapSite
       )
       if (trapLocations.length === 1) {
         trapLocationId = trapLocations[0].id
@@ -375,19 +511,75 @@ const VisitSetup = ({
 
   const updateTrapNameValues = (trapSite: string) => {
     setTrapNameList(
-      visitSetupDefaultsState?.trapLocations
-        ?.filter((obj: any) => obj.siteName === trapSite)
-
-        ?.map((trapLocation: any) => ({
-          label: trapLocation?.trapName,
-          value: trapLocation?.trapName,
-        }))
+      sortBy(
+        visitSetupDefaultsState?.trapLocations
+          ?.filter((obj: any) => obj.siteName === trapSite)
+          ?.map((trapLocation: any) => ({
+            label: trapLocation?.trapName,
+            value: trapLocation?.trapName,
+          })),
+        'label'
+      )
     )
+  }
+
+  const displayEquipmentType = (values: any) => {
+    let trapLocation = null
+    if (showTrapNameField) {
+      trapLocation = selectedProgramObj?.trappingSites?.find(
+        (obj: any) => obj.trapName === values.trapName[0]
+      )
+    } else {
+      trapLocation = visitSetupDefaultsState?.trapLocations?.find(
+        (obj: any) =>
+          obj.trapName === values.trapSite || obj.siteName === values.trapSite
+      )
+    }
+
+    return trapLocation?.definition ? (
+      <Text fontSize='lg' fontWeight='500' mt={0} pt={0}>
+        Equipment: {capitalizeFirstLetterOfEachWord(trapLocation?.definition)}
+      </Text>
+    ) : null
+  }
+
+  const closeOpenDropdowns = (
+    setFieldTouched: (arg0: string, arg1: boolean) => void
+  ) => {
+    if (crewDropDownOpen) {
+      setFieldTouched('crew', true)
+      setCrewDropDownOpen(false)
+    }
+
+    if (trapDropDownOpen) {
+      setFieldTouched('trapName', true)
+      setTrapDropDownOpen(false)
+    }
+  }
+
+  const handleNavButtonClick = (values: any) => {
+    const callback = () => {
+      navigateHelper(
+        'Trap Operations',
+        navigationSlice,
+        navigation,
+        dispatch,
+        updateActiveStep
+      )
+    }
+    navigation.dispatch(StackActions.replace('Loading...'))
+    setTimeout(() => {
+      DeviceEventEmitter.emit('event.load', {
+        process: () => onSubmit(values, tabSlice?.activeTabId),
+        callback,
+      })
+      showSlideAlert(dispatch)
+    }, 1000)
   }
 
   return (
     <Formik
-      validationSchema={trapVisitSchema}
+      validationSchema={validationSchema}
       enableReinitialize={true}
       initialValues={
         tabSlice?.activeTabId
@@ -400,25 +592,8 @@ const VisitSetup = ({
       // maybe this is not needed for first step in form?
       // initialTouched={{ trapSite: crew }}
       // initialErrors={visitSetupState.completed ? undefined : { crew: '' }}
-      onSubmit={values => {
-        const callback = () => {
-          navigateHelper(
-            'Trap Operations',
-            navigationSlice,
-            navigation,
-            dispatch,
-            updateActiveStep
-          )
-        }
-        navigation.dispatch(StackActions.replace('Loading...'))
-        setTimeout(() => {
-          DeviceEventEmitter.emit('event.load', {
-            process: () => onSubmit(values, tabSlice?.activeTabId),
-            callback,
-          })
-          showSlideAlert(dispatch)
-        }, 1000)
-      }}
+      onSubmit={() => {}}
+      validateOnMount={true}
     >
       {({
         handleSubmit,
@@ -429,14 +604,40 @@ const VisitSetup = ({
         errors,
         values,
         resetForm,
+        handleChange,
+        handleBlur,
+        isValid,
+        validateForm,
       }) => {
         useEffect(() => {
-          if (
-            tabSlice.previouslyActiveTabId &&
-            navigationSlice.activeStep === 1
-          ) {
-            onSubmit(values, tabSlice.previouslyActiveTabId)
+          if (typeof values.trapName === 'string') {
+            setFieldValue('trapName', [values.trapName]).then(() => {
+              validateForm()
+            })
           }
+        }, [values.trapName])
+        const navButtons = useMemo(() => {
+          return (
+            <NavButtons
+              navigation={navigation}
+              handleSubmit={(buttonDirection: 'left' | 'right') => {
+                handleNavButtonClick(values)
+              }}
+              errors={errors}
+              touched={touched}
+              values={values}
+              shouldProceedToLoadingScreen={true}
+              isValid={isValid}
+            />
+          )
+        }, [navigation, handleSubmit, errors, touched, values, isValid])
+        useEffect(() => {
+          // if (
+          //   tabSlice.previouslyActiveTabId &&
+          //   navigationSlice.activeStep === 1
+          // ) {
+          //   onSubmit(values, tabSlice.previouslyActiveTabId)
+          // }
 
           if (
             tabSlice?.activeTabId &&
@@ -445,8 +646,8 @@ const VisitSetup = ({
             const programId = find(
               visitSetupDefaultsState?.trapLocations,
               (trapLocation: any) => trapLocation.id === values.trapLocationId
-            )?.id
-            setSelectedProgramId(programId)
+            )
+            setSelectedProgramId(programId.id)
             generateCrewList(programId)
             shouldShowTrapNameField(
               visitSetupState[tabSlice?.activeTabId]?.values?.trapSite
@@ -456,22 +657,12 @@ const VisitSetup = ({
               visitSetupState[tabSlice?.activeTabId]?.values?.trapSite
             )
           }
-        }, [tabSlice.previouslyActiveTabId])
-
-        console.log('errors', errors)
+        }, [tabSlice.previouslyActiveTabId, tabSlice.activeTabId])
 
         return (
           <TouchableWithoutFeedback
             onPress={() => {
-              if (crewDropDownOpen) {
-                setFieldTouched('crew', true)
-                setCrewDropDownOpen(false)
-              }
-
-              if (trapDropDownOpen) {
-                setFieldTouched('trapName', true)
-                setTrapDropDownOpen(false)
-              }
+              closeOpenDropdowns(setFieldTouched)
             }}
           >
             <View flex={1} bg='#fff'>
@@ -483,7 +674,7 @@ const VisitSetup = ({
                 borderColor='themeGrey'
                 borderWidth='15'
               >
-                <VStack space={4}>
+                <VStack space={3}>
                   <FormControl>
                     <HStack space={3} alignItems='center'>
                       <FormControl.Label>
@@ -521,11 +712,21 @@ const VisitSetup = ({
                       // setFieldTouched('stream', true)
                       setFieldError('stream', undefined)
 
-                      setFieldValue('trapSite', '')
+                      if (itemValue !== values.stream) {
+                        setFieldValue('trapSite', []).then(() => {
+                          setFieldTouched('trapSite', false)
+                        })
+                        setFieldValue('trapName', []).then(() => {
+                          setFieldTouched('trapName', false)
+                        })
+                      }
 
                       updateSelectedProgram(itemValue)
                       setFieldValue('crew', []).then(() => {
                         setFieldTouched('crew', false)
+                      })
+                      setFieldValue('dataRecorder', undefined).then(() => {
+                        setFieldTouched('dataRecorder', false)
                       })
                       // setFieldValue('crew', [])
                       // setFieldTouched('crew', false)
@@ -551,7 +752,6 @@ const VisitSetup = ({
                         selectedValue={values.trapSite}
                         placeholder='Select Trap Site'
                         onValueChange={(itemValue: string) => {
-                          dispatch(resetTabsSlice())
                           const showTrapName =
                             shouldShowTrapNameField(itemValue)
                           setFieldValue('trapSite', itemValue).then(() => {
@@ -568,16 +768,19 @@ const VisitSetup = ({
                             })
                           }
                         }}
-                        setFieldTouched={() => setFieldTouched('trapSite')}
                         selectOptions={uniqBy(
-                          visitSetupDefaultsState?.trapLocations
-                            ?.filter(
-                              (obj: any) => obj.programId === selectedProgramId
-                            )
-                            ?.map((trapLocation: any) => ({
-                              label: trapLocation?.siteName,
-                              value: trapLocation?.siteName,
-                            })),
+                          sortBy(
+                            visitSetupDefaultsState?.trapLocations
+                              ?.filter(
+                                (obj: any) =>
+                                  obj.programId === selectedProgramId
+                              )
+                              ?.map((trapLocation: any) => ({
+                                label: trapLocation?.siteName,
+                                value: trapLocation?.siteName,
+                              })),
+                            'label'
+                          ),
                           'label'
                         )}
                       />
@@ -594,7 +797,7 @@ const VisitSetup = ({
                           tabSlice={tabSlice}
                         />
                       )}
-
+                      {displayEquipmentType(values)}
                       <CrewDropDown
                         open={crewDropDownOpen}
                         onOpen={onCrewOpen}
@@ -606,25 +809,31 @@ const VisitSetup = ({
                         visitSetupState={visitSetupState}
                         stream={values.stream}
                         tabId={tabSlice?.activeTabId}
+                        fieldName='crew'
+                        label='Crew'
+                      />
+                      <ConditionalTrapVisitFields
+                        touched={touched}
+                        errors={errors}
                         values={values}
+                        handleChange={handleChange}
+                        handleBlur={handleBlur}
+                        setFieldTouched={setFieldTouched}
+                        dropdownValues={dropdownValues}
+                        activePage={activePage}
+                        formFields={formFields}
+                        setFieldValue={setFieldValue}
+                        activeTabId={tabSlice.activeTabId}
+                        validationSchema={validationSchema}
+                        onOpenCallback={() => {
+                          closeOpenDropdowns(setFieldTouched)
+                        }}
                       />
                     </>
                   )}
                 </VStack>
               </View>
-              <NavButtons
-                resetForm={resetForm}
-                navigation={navigation}
-                handleSubmit={handleSubmit}
-                errors={
-                  values.crew.length
-                    ? errors
-                    : { ...errors, crew: Boolean(values.crew.length) }
-                }
-                touched={touched}
-                isPaperEntry={isPaperEntry}
-                shouldProceedToLoadingScreen={true}
-              />
+              {navButtons}
             </View>
           </TouchableWithoutFeedback>
         )

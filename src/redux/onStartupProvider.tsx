@@ -36,21 +36,27 @@ const OnStartupProvider = (props: Props) => {
 
       const userOnStart = userCredentialsStore.azureUid
       if (userOnStart) {
-        const tokenRefreshResponse = await refreshUserToken(dispatch)
+        try {
+          const tokenRefreshResponse = await refreshUserToken(dispatch)
 
-        if (
-          tokenRefreshResponse &&
-          ['No refresh token found', 'Tokens could not be refreshed'].includes(
-            tokenRefreshResponse
-          ) &&
-          isConnected
-        ) {
-          dispatch(setForcedLogoutModalOpen(true))
-          return
-        }
+          if (
+            tokenRefreshResponse &&
+            [
+              'No refresh token found',
+              'Tokens could not be refreshed',
+            ].includes(tokenRefreshResponse) &&
+            isConnected &&
+            isInternetReachable
+          ) {
+            dispatch(setForcedLogoutModalOpen(true))
+            return
+          }
 
-        if (tokenRefreshResponse === 'Tokens refreshed') {
-          return
+          if (tokenRefreshResponse === 'Tokens refreshed') {
+            return
+          }
+        } catch (error) {
+          console.error('Error refreshing token:', error)
         }
       }
     })
@@ -73,7 +79,6 @@ const OnStartupProvider = (props: Props) => {
     dispatch(clearUserCredentials())
     dispatch(setForcedLogoutModalOpen(false))
   }
-  console.log('forcedLogoutModalOpen', forcedLogoutModalOpen)
   return (
     <>
       <Center>
@@ -101,7 +106,7 @@ const OnStartupProvider = (props: Props) => {
                   onPress={forceLogoutModelOnClose}
                 >
                   <Text color='white' fontWeight={500}>
-                    Ok
+                    OK
                   </Text>
                 </Button>
               </Button.Group>

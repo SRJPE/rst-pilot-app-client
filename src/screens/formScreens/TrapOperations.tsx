@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { Formik, yupToFormErrors } from 'formik'
 import { useSelector, useDispatch, connect } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -14,7 +14,6 @@ import {
   Popover,
   Avatar,
   Pressable,
-  Radio,
   ScrollView,
   KeyboardAvoidingView,
   Switch,
@@ -23,7 +22,10 @@ import {
 } from 'native-base'
 import CopyFormValuesDialog from '../../components/form/CopyFormValuesDialog'
 import NavButtons from '../../components/formContainer/NavButtons'
-import { trapOperationsSchema } from '../../utils/helpers/yupValidations'
+import {
+  trapOperationsSchema,
+  generateDynamicTrapOpsSchema,
+} from '../../utils/helpers/yupValidations'
 import {
   markStepCompleted,
   updateActiveStep,
@@ -33,7 +35,7 @@ import {
   markTrapOperationsCompleted,
   saveTrapOperations,
 } from '../../redux/reducers/formSlices/trapOperationsSlice'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { MaterialIcons } from '@expo/vector-icons'
 import { DeviceEventEmitter, Keyboard } from 'react-native'
 import {
   QARanges,
@@ -41,19 +43,22 @@ import {
   navigateFlowRightButton,
   navigateFlowLeftButton,
   checkOtherTabForms,
+  shouldRenderField,
 } from '../../utils/utils'
 import {
   TabStateI,
   setActiveTab,
 } from '../../redux/reducers/formSlices/tabSlice'
-import DateTimePicker from '@react-native-community/datetimepicker'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { find, flow } from 'lodash'
+import { find } from 'lodash'
 import FormInputComponent, {
   TextInputAdornment,
 } from '../../components/Shared/FormInputComponent'
-import * as yup from 'yup'
+import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
+import TrapEndDateAndTime from '../../components/form/TrapEndDateAndTime'
+import RPMBefore from '../../components/form/RPMBefore'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -78,6 +83,8 @@ const mapStateToProps = (state: RootState) => {
     navigationSlice: state.navigation,
     tabSlice: state.tabSlice,
     visitSetupDefaults: state.visitSetupDefaults,
+    previousTrapVisits:
+      state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
   }
 }
 
@@ -94,6 +101,7 @@ const TrapOperations = ({
   navigationSlice,
   tabSlice,
   visitSetupDefaults,
+  previousTrapVisits,
 }: {
   navigation: any
   reduxState: any
@@ -107,6 +115,7 @@ const TrapOperations = ({
   navigationSlice: any
   tabSlice: TabStateI
   visitSetupDefaults: any
+  previousTrapVisits: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -119,16 +128,15 @@ const TrapOperations = ({
   const trapNotInServiceLabel = '- restart trapping'
   const trapNotInServiceIdentifier = 'trap not in service - restart trapping'
   const [turbidityToggle, setTurbidityToggle] = useState(false as boolean)
-  const [endTime, setEndTime] = useState(new Date() as any)
+  const [endTime, setEndTime] = useState(null as any)
   const [trapPermitInfo, setTrapPermitInfo] = useState<any>(null)
-  const [waterTempUnitC, setWaterTempUnitC] = useState<boolean>(true)
   const [trapLocationInfo, setTrapLocationInfo] = useState<any>(null)
-
-  const convertCtoF = (celsius: number) => (celsius * 9) / 5 + 32
-  const permitFlowThreshold = trapPermitInfo?.flowThreshold || 2000
-  const permitTempThreshold = waterTempUnitC
-    ? trapPermitInfo?.temperatureThreshold
-    : convertCtoF(trapPermitInfo?.temperatureThreshold)
+  const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
+  const [validationSchema, setValidationSchema] = useState<any>(null)
+  const [programFormFields, setProgramFormFields] = useState<any>(null)
+  const [sectionFields, setSectionFields] = useState<any>(null)
+  const inputRefs = useRef({}) // key: field name, value: ref
+  const [mostRecentTrapVisit, setMostRecentTrapVisit] = useState<any>(null)
 
   const allTabIds: string[] = Object.keys(tabSlice.tabs)
 
@@ -142,12 +150,70 @@ const TrapOperations = ({
 
     const currentTrapLocationInfo = find(
       visitSetupDefaults.trapLocations,
-      (permit: any) => permit.id === selectedTrapLocationId
+      (trapLocation: any) => trapLocation.id === selectedTrapLocationId
     )
     setTrapPermitInfo(currentTrapPermitInfo)
 
     setTrapLocationInfo(currentTrapLocationInfo)
-  }, [visitSetupDefaults.permitInfo, selectedTrapLocationId])
+
+    const currentProgramInfo = find(
+      visitSetupDefaults.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+    setSelectedProgramObj(currentProgramInfo)
+
+    if (currentProgramInfo?.programFormFields?.length) {
+      const trapEquimentType =
+        find(
+          visitSetupDefaults?.trapLocations,
+          (trapLocation: any) => trapLocation.id === selectedTrapLocationId
+        )?.equipmentId || null
+
+      // get fields for this section and equipment type, if applicable
+      // null equipmentId indicates field displayed for all equipment types
+      const sectionFields = currentProgramInfo?.programFormFields.filter(
+        (field: any) =>
+          field.formSection === activePage &&
+          (field.equipmentId === null || field.equipmentId === trapEquimentType)
+      )
+
+      setSectionFields(sectionFields)
+      setProgramFormFields(currentProgramInfo?.programFormFields)
+      const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(sectionFields)
+      setValidationSchema(dynamicTrapOpsSchema)
+    } else {
+      setSectionFields(null)
+      setProgramFormFields(null)
+      setValidationSchema(trapOperationsSchema)
+    }
+  }, [
+    visitSetupDefaults.permitInfo,
+    selectedTrapLocationId,
+    visitSetupDefaults.programs,
+    activePage,
+    visitSetupDefaults?.trapLocations,
+    selectedTrapLocationId,
+  ])
+
+  useEffect(() => {
+    const previousTrapVisitsForLocation = previousTrapVisits
+      .filter((visit: any) => {
+        return (
+          visit.createdTrapVisitResponse.trapLocationId ===
+          selectedTrapLocationId
+        )
+      })
+      // .map((visit: any) => visit.createdTrapVisitResponse)
+      .sort(
+        (a: any, b: any) =>
+          new Date(b.createdTrapVisitResponse.trapVisitTimeStart).getTime() -
+          new Date(a.createdTrapVisitResponse.trapVisitTimeStart).getTime()
+      )
+    console.log('selectedTrapLocationId', selectedTrapLocationId)
+    console.log('previousTrapVisitsForLocation', previousTrapVisitsForLocation)
+
+    setMostRecentTrapVisit(previousTrapVisitsForLocation[0])
+  }, [previousTrapVisits, selectedTrapLocationId])
 
   const useFlowMeasureCalculationBool = (flowMeasureEntered: number | null) => {
     return useMemo(() => {
@@ -225,7 +291,7 @@ const TrapOperations = ({
 
   const checkForErrors = (values: any) => {
     try {
-      trapOperationsSchema.validateSync(values, {
+      validationSchema.validateSync(values, {
         abortEarly: false,
         context: { values },
       })
@@ -277,8 +343,16 @@ const TrapOperations = ({
         showSlideAlert(dispatch)
       }
 
-      if (otherTabFormsValid)
+      if (otherTabFormsValid) {
         dispatch(markStepCompleted({ propName: 'trapOperations' }))
+      }
+
+      if (values.gearStatus === 'S') {
+        dispatch(markStepCompleted({ propName: 'fishProcessing' }))
+        dispatch(markStepCompleted({ propName: 'fishInput' }))
+      }
+      showSlideAlert(dispatch)
+      console.log('🚀 ~ handleSubmit ~ Status', values)
     }
   }
 
@@ -308,7 +382,7 @@ const TrapOperations = ({
     tabSlice,
     activeTabId,
     reduxState,
-    schema: trapOperationsSchema,
+    schema: validationSchema,
   })
 
   useEffect(() => {
@@ -317,7 +391,13 @@ const TrapOperations = ({
         reduxState[activeTabId]?.values?.trapVisitStopTime &&
         reduxState[activeTabId]?.values?.trapVisitStopTime !== 'Invalid Date'
       ) {
-        setEndTime(reduxState[activeTabId]?.values?.trapVisitStopTime)
+        setEndTime(
+          reduxState[activeTabId]?.values?.trapVisitStopTime
+            ? new Date(reduxState[activeTabId]?.values?.trapVisitStopTime)
+            : new Date()
+        )
+      } else {
+        setEndTime(new Date())
       }
     }
   }, [activeTabId, reduxState])
@@ -363,11 +443,174 @@ const TrapOperations = ({
     }
   }
 
+  const resetNonExistentFields = useCallback(
+    (values: any, setField: any) => {
+      if (!values || !sectionFields || !validationSchema) {
+        return
+      }
+      const sectionFieldsToKeep = [
+        'flowMeasureUnit',
+        'waterTemperatureUnit',
+        'waterTurbidityUnit',
+        'recordTurbidityInPostProcessing',
+        'coneSetting',
+        'trapVisitStopTime',
+        'trapVisitStartTime',
+      ]
+      const extraFields = Object.keys(values).filter(
+        key =>
+          values[key] !== null &&
+          values[key] !== undefined &&
+          !sectionFieldsToKeep.includes(key) &&
+          !(
+            validationSchema?.fields &&
+            Object.prototype.hasOwnProperty.call(validationSchema.fields, key)
+          )
+      )
+      if (extraFields.length) {
+        extraFields.forEach((field: string) => {
+          setField(field, null)
+        })
+      }
+    },
+    [sectionFields, validationSchema]
+  )
+
+  const renderTrappingDateAndTime = useCallback(
+    (values: any, setFieldValue: any) => {
+      // no program form fields have been set
+      // assume has not been customized
+      if (!endTime) return
+      if (
+        !programFormFields?.length ||
+        !sectionFields.length ||
+        find(sectionFields, {
+          fieldType: 'trapVisitStopTime',
+        })
+      ) {
+        return (
+          <TrapEndDateAndTime
+            endTime={endTime}
+            onEndTimeChange={onEndTimeChange}
+            popoverTrigger={popoverTrigger}
+            trapRestart={values.trapStatus === trapNotInServiceIdentifier}
+          />
+        )
+      } else if (
+        sectionFields?.length &&
+        find(sectionFields, {
+          fieldType: 'datetime',
+          formSection: 'Trap Operations',
+        })
+      ) {
+        const dateFields = sectionFields
+          ?.filter((field: any) => {
+            return (
+              field.fieldType === 'datetime' &&
+              field.formSection === 'Trap Operations'
+            )
+          })
+          .sort((a: any, b: any) => a.orderIndex - b.orderIndex)
+        if (!dateFields?.length) {
+          return null
+        }
+
+        return dateFields.map((item: any) => {
+          const { displayName, fieldName } = item
+          if (!values[fieldName]) {
+            if (fieldName === 'startTime' && mostRecentTrapVisit) {
+              setFieldValue(
+                fieldName,
+                new Date(
+                  mostRecentTrapVisit.createdTrapVisitResponse.trapVisitTimeStart
+                )
+              )
+            } else {
+              setFieldValue(fieldName, new Date())
+            }
+          }
+          return (
+            <FormControl marginBottom={4} key={fieldName}>
+              <VStack space={2}>
+                <HStack space={4}>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      {displayName}{' '}
+                    </Text>
+                  </FormControl.Label>
+                </HStack>
+                <Box alignSelf='flex-start' ml='-2'>
+                  <DateTimePicker
+                    value={
+                      values?.[fieldName]
+                        ? new Date(values?.[fieldName])
+                        : new Date()
+                    }
+                    mode='datetime'
+                    onChange={(event: any, selectedDate: any) => {
+                      setFieldValue(fieldName, selectedDate || new Date())
+                    }}
+                    accentColor='#007C7C'
+                  />
+                </Box>
+              </VStack>
+            </FormControl>
+          )
+        })
+      } else {
+        setEndTime(null)
+      }
+    },
+    [
+      endTime,
+      sectionFields,
+      onEndTimeChange,
+      popoverTrigger,
+      selectedProgramObj,
+      trapNotInServiceIdentifier,
+    ]
+  )
+
+  const renderRPMBefore = ({
+    touched,
+    errors,
+    values,
+    setFieldValue,
+    handleBlur,
+    handleChange,
+  }: {
+    touched: any
+    errors: any
+    values: any
+    setFieldValue: any
+    handleBlur: any
+    handleChange: any
+  }) => {
+    // no program form fields have been set
+    // assume has not been customized
+    if (!programFormFields?.length) {
+      return (
+        <RPMBefore
+          touched={touched}
+          errors={errors}
+          values={values}
+          setFieldValue={setFieldValue}
+          handleBlur={handleBlur}
+          handleChange={handleChange}
+          validationSchema={validationSchema}
+          trapRestart={values.trapStatus === trapNotInServiceIdentifier}
+        />
+      )
+    }
+  }
+
   return (
     <Formik
-      validationSchema={trapOperationsSchema}
-      validateOnChange={true}
+      validationSchema={validationSchema}
       enableReinitialize={true}
+      validateOnMount={false}
+      isInitialValid={true}
+      // validateOnChange={false}
       initialValues={
         activeTabId
           ? reduxState[activeTabId]
@@ -399,7 +642,10 @@ const TrapOperations = ({
         values,
         resetForm,
       }) => {
-        const isValid = trapOperationsSchema.isValidSync(values)
+        resetNonExistentFields(values, setFieldValue)
+
+        const isValid = validationSchema?.isValidSync(values)
+
         const warningResultFlow = useFlowMeasureCalculationBool(
           values.flowMeasure
         )
@@ -407,6 +653,28 @@ const TrapOperations = ({
           Number(values.waterTemperature),
           values.waterTemperatureUnit
         )
+
+        // const checkOtherTabForms = () => {
+        //   const tabIds = Object.keys(tabSlice.tabs)
+
+        //   const trapOperationsOtherTabsValidity = tabIds.map(tabId => {
+        //     if (tabId !== activeTabId) {
+        //       const tabFormValues = reduxState[tabId]?.values
+        //       const formIsValid = validationSchema.isValidSync(tabFormValues)
+        //       return formIsValid
+        //     }
+
+        //     return
+        //   })
+
+        //   const tabIncomplete = trapOperationsOtherTabsValidity.some(
+        //     result => result === false
+        //   )
+
+        //   if (tabIncomplete) return false
+
+        //   return true
+        // }
 
         const handleValuesCopy = () => {
           const tabIds = Object.keys(tabSlice.tabs)
@@ -487,6 +755,7 @@ const TrapOperations = ({
           values,
           isValid,
           endTime,
+          otherTabFormsValid,
         ])
 
         useEffect(() => {
@@ -495,6 +764,54 @@ const TrapOperations = ({
             resetForm()
           }
         }, [previouslyActiveTabId, activeTabId])
+
+        useEffect(() => {
+          if (
+            selectedProgramObj &&
+            (selectedProgramObj.streamName.toLowerCase().includes('clear') ||
+              selectedProgramObj.streamName.toLowerCase().includes('battle'))
+          ) {
+            setFieldValue('waterTemperatureUnit', '°F')
+          }
+          if (
+            selectedProgramObj &&
+            (selectedProgramObj.streamName.toLowerCase().includes('mill') ||
+              selectedProgramObj.streamName.toLowerCase().includes('deer'))
+          ) {
+            setFieldValue('recordTurbidityInPostProcessing', false)
+            setFieldValue('waterTurbidity', '')
+          }
+        }, [selectedProgramObj])
+
+        // setting flow meter serial number from previosu trap visit
+        useEffect(() => {
+          if (
+            find(sectionFields, {
+              fieldName: 'flowMeterSerialNumber',
+              formSection: 'Trap Operations',
+            }) &&
+            !values.flowMeterSerialNumber &&
+            mostRecentTrapVisit?.createdTrapVisitEnvironmentalResponse?.length >
+              0
+          ) {
+            const environmentalValuesObj =
+              mostRecentTrapVisit.createdTrapVisitEnvironmentalResponse.reduce(
+                (
+                  acc: { [x: string]: any },
+                  { measureName, measureValueText }: any
+                ) => {
+                  acc[measureName] = measureValueText
+                  return acc
+                },
+                {}
+              )
+
+            setFieldValue(
+              'flowMeterSerialNumber',
+              environmentalValuesObj?.flowMeterSerialNumber || ''
+            )
+          }
+        }, [mostRecentTrapVisit, mostRecentTrapVisit])
 
         const handleTurbidityToggle = (newValue: boolean) => {
           if (newValue === true) {
@@ -521,6 +838,8 @@ const TrapOperations = ({
               borderBottomWidth='0'
               borderTopWidth='0'
               my='15'
+              nestedScrollEnabled={true}
+              keyboardShouldPersistTaps='handled'
             >
               <Pressable onPress={Keyboard.dismiss}>
                 <VStack space={1}>
@@ -611,70 +930,9 @@ const TrapOperations = ({
                       )}
                     />
                   </FormControl>
-                  {values.trapStatus?.length > 0 && (
-                    <FormControl>
-                      <VStack>
-                        <HStack space={2}>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              Trapping{' '}
-                              {values.trapStatus === trapNotInServiceIdentifier
-                                ? 'Start'
-                                : 'End'}{' '}
-                              Date and Time:
-                            </Text>
-                            <Popover
-                              placement='bottom left'
-                              trigger={popoverTrigger}
-                            >
-                              <Popover.Content
-                                accessibilityLabel='Trap Visit End Info'
-                                w='600'
-                                mr='10'
-                              >
-                                <Popover.Arrow />
-                                <Popover.CloseButton />
-                                <Popover.Header>
-                                  Please set the Date and Time of when you
-                                  removed the trap to collect data and ended the
-                                  current trapping period.
-                                </Popover.Header>
-                                <Popover.Body p={4}>
-                                  <VStack space={2}>
-                                    <HStack space={2} alignItems='flex-start'>
-                                      <Text fontSize='md'>
-                                        This value is used to record the date
-                                        and time of ending the current trapping
-                                        period and removing the trap from the
-                                        water to collect data.
-                                      </Text>
-                                    </HStack>
-                                    <HStack space={2} alignItems='flex-start'>
-                                      <Text fontSize='md'>
-                                        At the end of this form during the Post
-                                        Processing step, if you continue
-                                        trapping, you will set the "Trapping
-                                        Start Date and Time" to record the time
-                                        of starting the trap again.
-                                      </Text>
-                                    </HStack>
-                                  </VStack>
-                                </Popover.Body>
-                              </Popover.Content>
-                            </Popover>
-                          </FormControl.Label>
-                        </HStack>
-                        <Box alignSelf='flex-start' ml='-2' mb={1}>
-                          <DateTimePicker
-                            value={endTime}
-                            mode='datetime'
-                            onChange={onEndTimeChange}
-                            accentColor='#007C7C'
-                          />
-                        </Box>
-                      </VStack>
-                    </FormControl>
-                  )}
+                  {values.trapStatus.length > 0 ? (
+                    <>{renderTrappingDateAndTime(values, setFieldValue)}</>
+                  ) : null}
                   {(values.trapStatus === 'trap functioning but not normally' ||
                     values.trapStatus === 'trap not functioning') && (
                     <CustomSelect
@@ -691,7 +949,15 @@ const TrapOperations = ({
                   )}
                   {values.trapStatus?.length > 0 && (
                     <>
-                      <FormControl w='30%'>
+                      {renderRPMBefore({
+                        touched: touched,
+                        errors: errors,
+                        values: values,
+                        setFieldValue: setFieldValue,
+                        handleBlur: handleBlur,
+                        handleChange: handleChange,
+                      })}
+                      {/* <FormControl w='30%'>
                         <HStack space={4} alignItems='center'>
                           <FormControl.Label>
                             <Text color='black' fontSize='xl'>
@@ -731,104 +997,7 @@ const TrapOperations = ({
                             </HStack>
                           </Radio.Group>
                         </HStack>
-                      </FormControl>
-                      <FormControl>
-                        <HStack space={4} alignItems='center'>
-                          <FormControl.Label>
-                            <Text color='black' fontSize='xl'>
-                              RPM{' '}
-                              {values.trapStatus === trapNotInServiceIdentifier
-                                ? 'After'
-                                : 'Before'}{' '}
-                              Cleaning
-                            </Text>
-                          </FormControl.Label>
-                          <Popover
-                            placement='bottom left'
-                            trigger={triggerProps => {
-                              return (
-                                <IconButton
-                                  {...triggerProps}
-                                  icon={
-                                    <Icon
-                                      as={MaterialIcons}
-                                      color='black'
-                                      name='info-outline'
-                                      size='lg'
-                                    />
-                                  }
-                                ></IconButton>
-                              )
-                            }}
-                          >
-                            <Popover.Content
-                              accessibilityLabel='RPM Info'
-                              w='600'
-                              mr='10'
-                            >
-                              <Popover.Arrow />
-                              <Popover.Header>
-                                Take up to three measurements of cone rotations.
-                                The averages of the entered values will be saved
-                                to the database.
-                              </Popover.Header>
-                            </Popover.Content>
-                          </Popover>
-                        </HStack>
-                        <HStack space={8} justifyContent='space-between'>
-                          <Box flex={1}>
-                            <FormInputComponent
-                              label={'Measure 1'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.rpm1 ? `${values.rpm1}` : ''}
-                              camelName={'rpm1'}
-                              onChangeText={newValue => {
-                                setFieldValue('rpm1', newValue)
-                                if (!newValue) {
-                                  setFieldValue('rpm2', null)
-                                  setFieldValue('rpm3', null)
-                                }
-                              }}
-                              onBlur={handleBlur('rpm1')}
-                            />
-                          </Box>
-                          <Box flex={1}>
-                            <FormInputComponent
-                              isDisabled={values.rpm1 ? false : true}
-                              label={'Measure 2 (optional)'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.rpm2 ? `${values.rpm2}` : ''}
-                              camelName={'rpm2'}
-                              onChangeText={newValue => {
-                                setFieldValue('rpm2', newValue)
-                                if (!newValue) {
-                                  setFieldValue('rpm3', null)
-                                }
-                              }}
-                              onBlur={handleBlur('rpm2')}
-                            />
-                          </Box>
-                          <Box flex={1}>
-                            <FormInputComponent
-                              isDisabled={
-                                values.rpm1 && values.rpm2 ? false : true
-                              }
-                              label={'Measure 3 (optional)'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.rpm3 ? `${values.rpm3}` : ''}
-                              camelName={'rpm3'}
-                              onChangeText={handleChange('rpm3')}
-                              onBlur={handleBlur('rpm3')}
-                            />
-                          </Box>
-                        </HStack>
-                      </FormControl>
+                      </FormControl> */}
 
                       <HStack
                         space={4}
@@ -838,95 +1007,156 @@ const TrapOperations = ({
                         <Heading>Environmental Conditions</Heading>
                       </HStack>
 
-                      <HStack space={5}>
-                        <Box flex={1}>
-                          <FormInputComponent
-                            showWarning={warningResultFlow}
-                            label={'Flow Measure'}
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            value={values.flowMeasure || null}
-                            camelName={'flowMeasure'}
-                            onChangeText={handleChange('flowMeasure')}
-                            onBlur={handleBlur('flowMeasure')}
-                            RightElement={<TextInputAdornment text='cfs' />}
-                          />
-                        </Box>
-
-                        <Box flex={1}>
-                          <FormInputComponent
-                            showWarning={warningResultTemp}
-                            label={'Water Temperature'}
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            value={values.waterTemperature || null}
-                            camelName={'waterTemperature'}
-                            onChangeText={handleChange('waterTemperature')}
-                            onBlur={handleBlur('waterTemperature')}
-                            RightElement={
-                              <Button
-                                bg='warmGray.200'
-                                h={'full'}
-                                w={50}
-                                onPress={() => {
-                                  if (values.waterTemperatureUnit === '°C') {
-                                    setFieldValue('waterTemperatureUnit', '°F')
-                                  } else {
-                                    setFieldValue('waterTemperatureUnit', '°C')
-                                  }
-                                }}
-                              >
-                                <Text>{values.waterTemperatureUnit}</Text>
-                              </Button>
-                            }
-                          />
-                        </Box>
-
-                        {values.recordTurbidityInPostProcessing === false && (
-                          <Box flex={1}>
+                      <HStack space={5} flex={'wrap'}>
+                        {shouldRenderField({
+                          fieldName: 'flowMeasure',
+                          programFormFields,
+                          sectionFields,
+                        }) && (
+                          <Box
+                            flexBasis={'28%'}
+                            minWidth={'28%'}
+                            maxWidth={'28%'}
+                          >
                             <FormInputComponent
-                              label={'Water Turbidity (via CDEC)'}
+                              showWarning={warningResultFlow}
+                              label={'Flow Measure'}
                               placeholder='0'
                               touched={touched}
                               errors={errors}
-                              value={values.waterTurbidity}
-                              camelName={'waterTurbidity'}
-                              onChangeText={handleChange('waterTurbidity')}
-                              onBlur={handleBlur('waterTurbidity')}
-                              RightElement={<TextInputAdornment text='ntu' />}
+                              value={values.flowMeasure || null}
+                              camelName={'flowMeasure'}
+                              onChangeText={handleChange('flowMeasure')}
+                              onBlur={handleBlur('flowMeasure')}
+                              RightElement={<TextInputAdornment text='cfs' />}
+                              validationSchema={validationSchema}
+                              keyboardType={'number-pad'}
+                              inputRefs={inputRefs}
                             />
                           </Box>
                         )}
+
+                        {shouldRenderField({
+                          fieldName: 'waterTemperature',
+                          programFormFields,
+                          sectionFields,
+                        }) && (
+                          <Box
+                            flexBasis={'28%'}
+                            minWidth={'28%'}
+                            maxWidth={'28%'}
+                          >
+                            <FormInputComponent
+                              key={`waterTemperature-${values.waterTemperatureUnit}`}
+                              showWarning={warningResultTemp}
+                              label={'Water Temperature'}
+                              placeholder='0'
+                              touched={touched}
+                              errors={errors}
+                              value={values.waterTemperature || null}
+                              camelName={'waterTemperature'}
+                              onChangeText={handleChange('waterTemperature')}
+                              onBlur={handleBlur('waterTemperature')}
+                              validationSchema={validationSchema}
+                              keyboardType={'number-pad'}
+                              inputRefs={inputRefs}
+                              RightElement={
+                                <Button
+                                  bg='warmGray.200'
+                                  h={'full'}
+                                  w={50}
+                                  onPress={() => {
+                                    if (values.waterTemperatureUnit === '°C') {
+                                      setFieldValue(
+                                        'waterTemperatureUnit',
+                                        '°F'
+                                      )
+                                    } else {
+                                      setFieldValue(
+                                        'waterTemperatureUnit',
+                                        '°C'
+                                      )
+                                    }
+                                  }}
+                                >
+                                  <Text>{values.waterTemperatureUnit}</Text>
+                                </Button>
+                              }
+                            />
+                          </Box>
+                        )}
+
+                        {values.recordTurbidityInPostProcessing === false &&
+                          (!programFormFields?.length ||
+                            find(programFormFields, {
+                              fieldName: 'waterTurbidity',
+                            })) && (
+                            <Box
+                              flexBasis={'28%'}
+                              minWidth={'28%'}
+                              maxWidth={'28%'}
+                            >
+                              <FormInputComponent
+                                label={'Turbidity'}
+                                placeholder='0'
+                                touched={touched}
+                                errors={errors}
+                                value={values.waterTurbidity}
+                                camelName={'waterTurbidity'}
+                                onChangeText={handleChange('waterTurbidity')}
+                                onBlur={handleBlur('waterTurbidity')}
+                                RightElement={<TextInputAdornment text='ntu' />}
+                                validationSchema={validationSchema}
+                                keyboardType={'number-pad'}
+                              />
+                            </Box>
+                          )}
                       </HStack>
 
-                      <Box flex={1} h={'full'}>
-                        <FormControl width={'100%'}>
-                          <HStack space={4} alignItems='center'>
+                      {(!selectedProgramObj?.programFormFields?.length ||
+                        find(selectedProgramObj?.programFormFields, {
+                          fieldName: 'waterTurbidity',
+                        })) && (
+                        <Box flex={1} h={'full'}>
+                          <FormControl width={'100%'}>
                             <FormControl.Label>
                               <Text color='black' fontSize='xl' mb={2}>
                                 Record Turbidity After Trap Visit Save
                               </Text>
                             </FormControl.Label>
-                          </HStack>
 
-                          <HStack space={3}>
-                            <Text fontSize='16'>No</Text>
-                            <Switch
-                              name='recordTurbidityInPostProcessing'
-                              shadow='3'
-                              offTrackColor='secondary'
-                              onTrackColor='primary'
-                              size='md'
-                              isChecked={turbidityToggle}
-                              value={values.recordTurbidityInPostProcessing}
-                              onToggle={handleTurbidityToggle}
-                            />
-                            <Text fontSize='16'>Yes</Text>
-                          </HStack>
-                        </FormControl>
-                      </Box>
+                            <HStack space={2} mb={4}>
+                              <Text fontSize='16'>No</Text>
+                              <Switch
+                                name='recordTurbidityInPostProcessing'
+                                shadow='3'
+                                offTrackColor='secondary'
+                                onTrackColor='primary'
+                                size='md'
+                                isChecked={turbidityToggle}
+                                value={values.recordTurbidityInPostProcessing}
+                                onToggle={handleTurbidityToggle}
+                              />
+                              <Text fontSize='16'>Yes</Text>
+                            </HStack>
+                          </FormControl>
+                        </Box>
+                      )}
+                      <ConditionalTrapVisitFields
+                        touched={touched}
+                        errors={errors}
+                        values={values}
+                        handleChange={handleChange}
+                        handleBlur={handleBlur}
+                        setFieldTouched={setFieldTouched}
+                        dropdownValues={dropdownValues}
+                        activePage={activePage}
+                        formFields={sectionFields}
+                        setFieldValue={setFieldValue}
+                        activeTabId={activeTabId}
+                        validationSchema={validationSchema}
+                        inputRefs={inputRefs}
+                      />
                       {allTabIds.length > 1 && (
                         <CopyFormValuesDialog
                           valueType='environmental'

@@ -22,6 +22,8 @@ interface FishEntry {
   existingMark: boolean
   fishConditions: string[]
   runDefinition?: string
+  eggs?: boolean | null | undefined
+  milting?: boolean | null | undefined
   species?: string
   taxonCode?: string
   adiposeClipped?: boolean
@@ -51,6 +53,9 @@ export interface IndividualFishValuesI {
   plusCountMethod: string // | number
   numFishCaught?: number | null
   plusCount?: boolean
+  comments?: string | null
+  eggs?: boolean | null | undefined
+  milting?: boolean | null | undefined
 }
 
 export const individualFishInitialState = {
@@ -68,6 +73,7 @@ export const individualFishInitialState = {
   willBeUsedInRecapture: false,
   plusCountMethod: '',
   plusCount: false,
+  comments: null,
 }
 
 export interface FishInputValuesI {
@@ -236,6 +242,12 @@ export const saveFishSlice = createSlice({
           plusCountMethod: null,
           plusCount: false,
         } as any
+        if (typeof value?.fishEntryData?.eggs === 'boolean') {
+          batchCountEntry.eggs = value?.fishEntryData?.eggs
+        }
+        if (typeof value?.fishEntryData?.milting === 'boolean') {
+          batchCountEntry.milting = value?.fishEntryData?.milting
+        }
         let id = null
         if (Object.keys(fishStoreCopy).length) {
           // @ts-ignore
@@ -298,6 +310,7 @@ export const saveFishSlice = createSlice({
         lifeStage,
         plusCountMethod,
         dead,
+        comments,
         existingMarks,
         taxonCode,
       } = action.payload
@@ -317,6 +330,7 @@ export const saveFishSlice = createSlice({
         willBeUsedInRecapture: null,
         plusCountMethod,
         plusCount: true,
+        comments: comments || null,
         taxonCode,
       } as IndividualFishValuesI
 

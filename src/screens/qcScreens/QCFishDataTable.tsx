@@ -1,9 +1,7 @@
 import React from 'react'
 import { DataTable } from 'react-native-paper'
-import { connect } from 'react-redux'
-import { RootState } from '../../redux/store'
-import { assign, pick, cloneDeep } from 'lodash'
-import { Row, IconButton, Icon, Box, Text, VStack, View } from 'native-base'
+import { pick, cloneDeep } from 'lodash'
+import { Row, IconButton, Icon, Text, VStack, View } from 'native-base'
 import { Entypo } from '@expo/vector-icons'
 import CustomModal from '../../components/Shared/CustomModal'
 import QCFishModalContent from './QCFishModalContent'
@@ -181,7 +179,7 @@ const QCFishDataTable = ({
             <DataTable.Title
               key={`${header}-${idx}`}
               style={{
-                flex: header === 'Species' || header === 'Species' ? 2 : 1,
+                flex: header === 'Species' ? 2 : 1,
               }}
             >
               {header}

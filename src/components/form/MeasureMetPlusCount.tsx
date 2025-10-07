@@ -62,8 +62,7 @@ const MeasureMetPlusCount = ({
 
     try {
       const plusCount = parseInt(inputValue, 10)
-
-      if (activeTabId) {
+      if (activeTabId && !isNaN(plusCount)) {
         const reorderedTaxon = reorderTaxon(dropdownValues.taxon)
         const taxonCode = findTaxonCode(species.value, reorderedTaxon)
         const plusCountData = {
@@ -152,6 +151,9 @@ const MeasureMetPlusCount = ({
                   mx='auto'
                   minWidth={250}
                   bgColor='gray.400'
+                  _pressed={{
+                    bg: 'gray.600',
+                  }}
                   onPress={closeModal}
                 >
                   <Text fontSize='xl' color='white'>
@@ -164,11 +166,11 @@ const MeasureMetPlusCount = ({
                   bgColor='primary'
                   colorScheme='coolGray'
                   onPress={handleSubmit}
+                  _pressed={{
+                    bg: 'secondary',
+                  }}
                   isDisabled={!inputValue || isNaN(Number(inputValue))}
                   disabled={!inputValue || isNaN(Number(inputValue))}
-                  _pressed={{
-                    bg: 'primary.600',
-                  }}
                   _disabled={{
                     bg: 'gray.400',
                   }}

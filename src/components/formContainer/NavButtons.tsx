@@ -223,11 +223,7 @@ const NavButtons = ({
       case 'Trap Post-Processing':
         if (values?.fishProcessedResult === 'no fish caught') {
           navigateHelper('Fish Processing')
-        } else if (
-          values?.fishProcessedResult ===
-            'no catch data, fish left in live box' ||
-          values?.fishProcessedResult === 'no catch data, fish released'
-        ) {
+        } else if (values?.fishProcessedResult.includes('no catch data')) {
           navigateHelper('Fish Processing')
         } else {
           navigateHelper('Fish Input')
@@ -251,7 +247,9 @@ const NavButtons = ({
 
   const handleRightButton = () => {
     //if handleSubmit truthy, submit form to save to redux
-    if (handleSubmit) {
+    if (handleSubmit && activePage === 'Visit Setup') {
+      handleSubmit()
+    } else if (handleSubmit) {
       handleSubmit('right')
     }
 
@@ -334,8 +332,10 @@ const NavButtons = ({
 
   const rightDisabledBool = useMemo(() => {
     switch (activePage) {
+      case 'Visit Setup':
+        return !isValid
       case 'Incomplete Sections':
-        return !isFormComplete
+        return !isFormComplete || !isValid
       case 'Non Functional Trap':
         return false
       case 'Fish Input':

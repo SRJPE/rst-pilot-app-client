@@ -1,14 +1,5 @@
 import React, { JSX, memo } from 'react'
-// import { Modal } from 'native-base'
-import {
-  Modal,
-  ModalBackdrop,
-  ModalContent,
-  ModalCloseButton,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from '@/components/ui/modal'
+
 import {
   Modal as PaperModal,
   Portal,

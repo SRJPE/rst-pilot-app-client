@@ -146,7 +146,7 @@ const AddTakeAndMortalityModalContent = ({
                   errors={errors}
                   value={values.expectedTake ? `${values.expectedTake}` : ''}
                   camelName={'expectedTake'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   onChangeText={handleChange('expectedTake')}
                   onBlur={handleBlur('expectedTake')}
                 />
@@ -161,7 +161,7 @@ const AddTakeAndMortalityModalContent = ({
                       : ''
                   }
                   camelName={'indirectMortality'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   onChangeText={handleChange('indirectMortality')}
                   onBlur={handleBlur('indirectMortality')}
                 />

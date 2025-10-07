@@ -12,7 +12,6 @@ import {
   Pressable,
   // Radio,
   ScrollView,
-  Stack,
   Switch,
   Text,
   View,
@@ -26,9 +25,9 @@ import {
   RadioIcon,
 } from '@/components/ui/radio'
 import { CircleIcon } from '@/components/ui/icon'
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Keyboard } from 'react-native'
-import { batch, connect, useDispatch } from 'react-redux'
+import { connect, useDispatch } from 'react-redux'
 import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
 import BatchCountButtonGrid from '../../components/form/batchCount/BatchCountButtonGrid'
 import BatchCountDataTable from '../../components/form/batchCount/BatchCountDataTable'
@@ -50,6 +49,7 @@ import {
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
+import { find, keyBy } from 'lodash'
 import {
   calculateLastFish,
   checkFishMeasureProtocol,
@@ -58,9 +58,10 @@ import {
 import FishEntriesSummary from '../../components/form/FishEntriesSummary'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
 import {
-  findLengthAtDateRun,
+  getLadObject,
   findRunDefinition,
 } from '../../utils/helpers/helperFunctions'
+import ToggleLockButton from '@/src/components/Shared/ToggleLockButton'
 
 const BatchCount = ({
   route,
@@ -68,16 +69,23 @@ const BatchCount = ({
   batchCountStore,
   trapOperationsStore,
   dropdownsStore,
+  selectedProgramId,
+  visitSetupDefaults,
   fishInputSlice,
+  visitSetupState,
 }: {
   route: any
   tabSlice: TabStateI
   batchCountStore: any
   trapOperationsStore: any
   dropdownsStore: any
+  selectedProgramId: number | null
+  visitSetupDefaults: any
   fishInputSlice: any
+  visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+
   const navigation = useNavigation()
   const [firstButton, setFirstButton] = useState(0 as number)
   const [numberOfAdditionalButtons, setNumberOfAdditionalButtons] = useState(
@@ -96,6 +104,10 @@ const BatchCount = ({
 
   const [deadIsLocked, setDeadIsLocked] = useState(false as boolean)
   const [deadToggle, setDeadToggle] = useState(false as boolean)
+  const [miltingIsLocked, setMiltingIsLocked] = useState(false as boolean)
+  const [miltingToggle, setMiltingToggle] = useState(false as boolean | null)
+  const [eggsIsLocked, setEggsIsLocked] = useState(false as boolean)
+  const [eggsToggle, setEggsToggle] = useState(false as boolean | null)
   const [markToggle, setMarkToggle] = useState(false as boolean)
   const [FC1Toggle, setFC1Toggle] = useState(false as boolean)
   const [FC2Toggle, setFC2Toggle] = useState(false as boolean)
@@ -108,6 +120,9 @@ const BatchCount = ({
     false as boolean
   )
   const [protocolKeyMet, setProtocolKeyMet] = useState(null as string | null)
+  const [programFormFieldsObj, setProgramFormFieldsObj] = useState(
+    {} as Record<string, any>
+  )
   const [protocolKeyMetRun, setProtocolKeyMetRun] = useState('' as string)
   const [protocolKeyMetLifeStage, setProtocolKeyMetLifeStage] = useState(
     '' as string
@@ -137,20 +152,57 @@ const BatchCount = ({
   }, [dropdownsStore.values])
 
   useEffect(() => {
-    if (lengthAtDateModel && tabSlice.activeTabId) {
-      const ladObjectForTrapDate = findLengthAtDateRun(
+    if (tabSlice.activeTabId) {
+      const ladObjectForTrapDate = getLadObject({
+        activeTabId: tabSlice.activeTabId,
+        trapOperationsStore,
         lengthAtDateModel,
-        trapOperationsStore?.[tabSlice.activeTabId]?.values?.trapVisitStopTime
-      )
+      })
       setLadObject(ladObjectForTrapDate)
     } else {
       setLadObject(null)
     }
   }, [lengthAtDateModel, tabSlice.activeTabId])
-
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
   const { species, fishConditions, existingMarks, taxonCode } =
     batchCharacteristics
+
+  const [selectedProgramObj, setSelectedProgramObj] = useState({} as any)
+
+  useEffect(() => {
+    const currentProgramInfo = find(
+      visitSetupDefaults.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+    setSelectedProgramObj(currentProgramInfo)
+  }, [visitSetupDefaults.programs, selectedProgramId])
+
+  useEffect(() => {
+    const currentProgramInfo = find(
+      visitSetupDefaults.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+
+    if (!currentProgramInfo) return
+
+    const formFieldsLookup = keyBy(
+      currentProgramInfo?.programFormFields,
+      'fieldName'
+    )
+    setProgramFormFieldsObj(formFieldsLookup)
+
+    // if (formFieldsLookup?.['eggs']) {
+    //   console.log('set to false')
+    //   setEggsToggle(false)
+    // } else {
+    //   setEggsToggle(null)
+    // }
+    // if (formFieldsLookup?.['milting']) {
+    //   setMiltingToggle(false)
+    // } else {
+    //   setMiltingToggle(null)
+    // }
+  }, [visitSetupState, visitSetupDefaults])
 
   const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())
@@ -162,9 +214,7 @@ const BatchCount = ({
       dispatch(resetBatchCountSlice())
       showSlideAlert(dispatch, 'Batch Count Saved')
       // @ts-ignore
-      navigation.navigate('Trap Visit Form', {
-        screen: 'Fish Input',
-      })
+      navigation.replace('Fish Input')
     }
   }
   const handlePressSaveAndStartNewBatchCount = () => {
@@ -224,6 +274,16 @@ const BatchCount = ({
       case 'FC3':
         setFC3Toggle(!FC3Toggle)
         break
+      case 'milting':
+        if (miltingIsLocked) return
+        // if (miltingToggle === null) return
+        setMiltingToggle(!miltingToggle)
+        break
+      case 'eggs':
+        if (eggsIsLocked) return
+        // if (eggsToggle === null) return
+        setEggsToggle(!eggsToggle)
+        break
 
       default:
         setMarkToggle(false)
@@ -232,12 +292,22 @@ const BatchCount = ({
         setFC3Toggle(false)
         if (deadIsLocked) return
         setDeadToggle(false)
+        if (miltingIsLocked) return
+        setMiltingToggle(false)
+        if (eggsIsLocked) return
+        setEggsToggle(false)
         break
     }
   }
 
   const handlePressLockDead = () => {
     setDeadIsLocked(!deadIsLocked)
+  }
+  const handlePressLockMilting = () => {
+    setMiltingIsLocked(!miltingIsLocked)
+  }
+  const handlePressLockEggs = () => {
+    setEggsIsLocked(!eggsIsLocked)
   }
 
   useEffect(() => {
@@ -295,14 +365,18 @@ const BatchCount = ({
     )
 
     setTotalCatchCount(total)
-    const lastFishFL = calculateLastFish(batchCountStore.forkLengths)
+    const lastFish = calculateLastFish(batchCountStore.forkLengths)
 
     let lastFishRunValue = ''
     let lastFishLifeStageValue = ''
-    if (lastFishFL && species === 'Chinook salmon' && ladObject) {
-      const run = findRunDefinition(ladObject, lastFishFL)
+    if (lastFish && species === 'Chinook salmon' && ladObject) {
+      const run = findRunDefinition({
+        ladObject,
+        number: lastFish?.forkLength,
+        trapSite: visitSetupState?.[tabSlice.activeTabId]?.values?.trapSite,
+      })
       lastFishRunValue = run || ''
-      const lifeStage = calculateLifeStage(Number(lastFishFL))
+      const lifeStage = calculateLifeStage(Number(lastFish?.forkLength))
       lastFishLifeStageValue = lifeStage || ''
     }
 
@@ -332,7 +406,7 @@ const BatchCount = ({
   }, [
     tabSlice.activeTabId,
     fishInputSlice,
-    species,
+    batchCountStore?.batchCharacteristics?.species,
     batchCountStore.forkLengths,
   ])
 
@@ -360,10 +434,10 @@ const BatchCount = ({
                 closeModal={() => dispatch(resetBatchCountSlice())}
                 headerText={
                   tabSlice.activeTabId
-                    ? `Add Batch Count - ${
+                    ? `Batch Count - ${
                         tabSlice.tabs[tabSlice.activeTabId].name
                       }`
-                    : 'Add Batch Count'
+                    : 'Batch Count'
                 }
                 showHeaderButton={true}
                 showConfirmationModal={true}
@@ -387,12 +461,15 @@ const BatchCount = ({
               Object.keys(combinedFishMeasureCounts).length && (
                 <Box mb={4}>
                   <FishEntriesSummary
-                    lastFishEntry={{
-                      species: batchCountStore.batchCharacteristics.species,
-                      forkLength: calculateLastFish(
-                        batchCountStore.forkLengths
-                      ),
-                    }}
+                    lastFishEntry={
+                      Object.keys(batchCountStore.forkLengths).length
+                        ? {
+                            ...calculateLastFish(batchCountStore.forkLengths),
+                            species:
+                              batchCountStore.batchCharacteristics.species,
+                          }
+                        : {}
+                    }
                     totalCatchCount={totalCatchCount}
                     fishMeasureProtocol={
                       route.params?.fishMeasureProtocol || {}
@@ -446,86 +523,127 @@ const BatchCount = ({
                   <Text bold mb={2}>
                     Fish Conditions:
                   </Text>
-                  <HStack space={3} alignItems='center'>
-                    <HStack alignItems='center' space={4}>
-                      <HStack space={2} alignItems={'center'}>
-                        <Checkbox
-                          value='dead'
-                          isChecked={deadToggle}
-                          shadow='3'
-                          _checked={{
-                            bg: 'primary',
-                            borderColor: 'primary',
-                          }}
-                          size='md'
-                          isDisabled={deadIsLocked}
-                          onChange={() => handleToggles(`dead`)}
-                        />
-                        <HStack space={1} alignItems={'center'}>
-                          <Text fontSize='16'>Dead</Text>
-                          <IconButton
-                            onPress={() => handlePressLockDead()}
-                            icon={
-                              <Icon
-                                as={FontAwesome}
-                                name={deadIsLocked ? 'lock' : 'unlock'}
-                              />
-                            }
-                            borderRadius='full'
-                            _icon={{
-                              size: 5,
-                            }}
-                            _pressed={{
-                              bg: '#FFF',
-                            }}
-                          />
-                        </HStack>
-                      </HStack>
-                      {existingMarks && existingMarks.length > 0 && (
-                        <HStack space={2}>
+                  <ScrollView
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                  >
+                    <HStack space={3} alignItems='center'>
+                      <HStack alignItems='center' space={4}>
+                        <HStack space={2} alignItems={'center'}>
                           <Checkbox
-                            value='mark'
-                            isChecked={markToggle}
+                            value='dead'
+                            isChecked={deadToggle}
                             shadow='3'
                             _checked={{
                               bg: 'primary',
                               borderColor: 'primary',
                             }}
                             size='md'
-                            onChange={() => handleToggles('mark')}
+                            isDisabled={deadIsLocked}
+                            onChange={() => handleToggles(`dead`)}
                           />
-                          <Text fontSize='16'>Marked</Text>
+                          <HStack space={1} alignItems={'center'}>
+                            <Text fontSize='16'>Dead</Text>
+                            <ToggleLockButton
+                              isLocked={deadIsLocked}
+                              onPress={handlePressLockDead}
+                            />
+                          </HStack>
                         </HStack>
-                      )}
-                      {fishConditions.length > 0 &&
-                        fishConditions.map(
-                          (condition: string, index: number) => (
-                            <HStack space={2}>
-                              <Checkbox
-                                value={`FC${index + 1}`}
-                                shadow='3'
-                                _checked={{
-                                  bg: 'primary',
-                                  borderColor: 'primary',
-                                }}
-                                size='md'
-                                isChecked={
-                                  index + 1 === 1
-                                    ? FC1Toggle
-                                    : index + 1 === 2
-                                    ? FC2Toggle
-                                    : FC3Toggle
-                                }
-                                onChange={() => handleToggles(`FC${index + 1}`)}
+                        {programFormFieldsObj?.['milting'] && (
+                          <HStack space={2} alignItems={'center'}>
+                            <Checkbox
+                              value='milting'
+                              isChecked={miltingToggle || false}
+                              shadow='3'
+                              _checked={{
+                                bg: 'primary',
+                                borderColor: 'primary',
+                              }}
+                              size='md'
+                              isDisabled={miltingIsLocked}
+                              onChange={() => handleToggles(`milting`)}
+                            />
+                            <HStack space={1} alignItems={'center'}>
+                              <Text fontSize='16'>Milting</Text>
+                              <ToggleLockButton
+                                isLocked={miltingIsLocked}
+                                onPress={handlePressLockMilting}
                               />
-                              <Text fontSize='16'>{`${
-                                index + 1
-                              }. ${condition}`}</Text>
                             </HStack>
-                          )
+                          </HStack>
                         )}
+                        {programFormFieldsObj?.['eggs'] && (
+                          <HStack space={2} alignItems={'center'}>
+                            <Checkbox
+                              value='eggs'
+                              isChecked={eggsToggle || false}
+                              shadow='3'
+                              _checked={{
+                                bg: 'primary',
+                                borderColor: 'primary',
+                              }}
+                              size='md'
+                              isDisabled={eggsIsLocked}
+                              onChange={() => handleToggles(`eggs`)}
+                            />
+                            <HStack space={1} alignItems={'center'}>
+                              <Text fontSize='16'>Eggs</Text>
+                              <ToggleLockButton
+                                isLocked={eggsIsLocked}
+                                onPress={handlePressLockEggs}
+                              />
+                            </HStack>
+                          </HStack>
+                        )}
+                        {existingMarks && existingMarks.length > 0 && (
+                          <HStack space={2}>
+                            <Checkbox
+                              value='mark'
+                              isChecked={markToggle}
+                              shadow='3'
+                              _checked={{
+                                bg: 'primary',
+                                borderColor: 'primary',
+                              }}
+                              size='md'
+                              onChange={() => handleToggles('mark')}
+                            />
+                            <Text fontSize='16'>Marked</Text>
+                          </HStack>
+                        )}
+                        {fishConditions.length > 0 &&
+                          fishConditions.map(
+                            (condition: string, index: number) => (
+                              <HStack space={2}>
+                                <Checkbox
+                                  value={`FC${index + 1}`}
+                                  shadow='3'
+                                  _checked={{
+                                    bg: 'primary',
+                                    borderColor: 'primary',
+                                  }}
+                                  size='md'
+                                  isChecked={
+                                    index + 1 === 1
+                                      ? FC1Toggle
+                                      : index + 1 === 2
+                                      ? FC2Toggle
+                                      : FC3Toggle
+                                  }
+                                  onChange={() =>
+                                    handleToggles(`FC${index + 1}`)
+                                  }
+                                />
+                                <Text fontSize='16'>{`${
+                                  index + 1
+                                }. ${condition}`}</Text>
+                              </HStack>
+                            )
+                          )}
+                      </HStack>
                     </HStack>
-                  </HStack>
+                  </ScrollView>
                 </Box>
                 {species === 'Chinook salmon' && (
                   <Box px='2%'>
@@ -638,6 +756,7 @@ const BatchCount = ({
                     setFirstButton={setFirstButton}
                     setLifeStageRadioValue={setLifeStageRadioValue}
                     setNumberOfAdditionalButtons={setNumberOfAdditionalButtons}
+                    selectedProgramObj={selectedProgramObj}
                   />
                 </VStack>
                 <BatchCountButtonGrid
@@ -647,6 +766,12 @@ const BatchCount = ({
                   ignoreLifeStage={species !== 'Chinook salmon'}
                   deadToggle={deadToggle}
                   markToggle={markToggle}
+                  miltingToggle={
+                    programFormFieldsObj?.['milting'] ? miltingToggle : null
+                  }
+                  eggsToggle={
+                    programFormFieldsObj?.['eggs'] ? eggsToggle : null
+                  }
                   fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
                     .map((toggle, index) =>
                       toggle ? fishConditions[index] : null
@@ -656,6 +781,7 @@ const BatchCount = ({
                   activeTabId={tabSlice.activeTabId}
                   species={species}
                   ladObject={ladObject}
+                  visitSetupState={visitSetupState}
                 />
                 {species !== 'Chinook salmon' && <View mb='65'></View>}
               </>
@@ -725,25 +851,23 @@ const BatchCount = ({
           modalInitialData={modalInitialData}
         />
       )}
-      {fishMeasureMetModalOpen && (
-        <CustomModal
-          isOpen={fishMeasureMetModalOpen}
+      <CustomModal
+        isOpen={fishMeasureMetModalOpen}
+        closeModal={closeFishMeasureMetModal}
+        height='40%'
+        width={'80%'}
+      >
+        <MeasureMetPlusCount
+          species={{ value: species }}
           closeModal={closeFishMeasureMetModal}
-          height='40%'
-          width={'80%'}
-        >
-          <MeasureMetPlusCount
-            species={{ value: species }}
-            closeModal={closeFishMeasureMetModal}
-            activeTabId={tabSlice.activeTabId}
-            protocolKeyMet={protocolKeyMet}
-            lifeStageValue={protocolKeyMetLifeStage}
-            runValue={protocolKeyMetRun}
-            onSaveCallback={handlePressSaveBatchCount}
-            dropdownValues={dropdownsStore.values}
-          />
-        </CustomModal>
-      )}
+          activeTabId={tabSlice.activeTabId}
+          protocolKeyMet={protocolKeyMet}
+          lifeStageValue={protocolKeyMetLifeStage}
+          runValue={protocolKeyMetRun}
+          onSaveCallback={handlePressSaveBatchCount}
+          dropdownValues={dropdownsStore.values}
+        />
+      </CustomModal>
     </>
   ) : (
     <></>
@@ -756,7 +880,12 @@ const mapStateToProps = (state: RootState) => {
     batchCountStore: state.batchCount,
     trapOperationsStore: state.trapOperations,
     dropdownsStore: state.dropdowns,
+    selectedProgramId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.programId,
+    visitSetupDefaults: state.visitSetupDefaults,
     fishInputSlice: state.fishInput,
+    visitSetupState: state.visitSetup,
   }
 }
 export default connect(mapStateToProps)(BatchCount)

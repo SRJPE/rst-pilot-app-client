@@ -1,3 +1,4 @@
+import React from 'react'
 import { Heading, Image, View, VStack } from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
 import { connect, useDispatch } from 'react-redux'
@@ -17,14 +18,16 @@ import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOp
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
+import { resetBatchCountSlice } from '../../redux/reducers/formSlices/batchCountSlice'
 import { flatten, uniq } from 'lodash'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import {
   returnDefinitionArray,
-  calculateRpmAvg,
+  calcAvgValue,
   returnNullableTableId,
+  findTrapLocationIds,
 } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
@@ -112,21 +115,13 @@ const StartedTrapping = ({
     dispatch(resetGeneticSamplesSlice())
     dispatch(resetMarksOrTagsSlice())
     dispatch(resetFishInputSlice())
+    dispatch(resetBatchCountSlice())
     dispatch(resetFishProcessingSlice())
     dispatch(resetTrapPostProcessingSlice())
     dispatch(resetTrapOperationsSlice())
     dispatch(resetVisitSetupSlice())
     dispatch(resetPaperEntrySlice())
     dispatch(resetTabsSlice())
-  }
-
-  const findTrapLocationIds = () => {
-    let container = [] as any
-    for (let tabId in visitSetupState) {
-      if (tabId === 'placeholderId') continue
-      container.push(visitSetupState[tabId].values.trapLocationId)
-    }
-    return container
   }
 
   const findCrewIdsFromSelectedCrewNames = (
@@ -208,7 +203,10 @@ const StartedTrapping = ({
         coneDepth: trapOperationsState?.[id]?.values.coneDepth
           ? parseFloat(trapOperationsState?.[id]?.values.coneDepth)
           : null,
-        trapInThalweg: null,
+        trapInThalweg:
+          typeof trapOperationsState?.[id]?.values?.trapInThalweg === 'boolean'
+            ? trapOperationsState?.[id]?.values?.trapInThalweg
+            : null,
         trapFunctioning: returnNullableTableId(
           trapFunctioningValues.indexOf('trap not in service')
         ),
@@ -223,7 +221,7 @@ const StartedTrapping = ({
         totalRevolutions: trapPostProcessingState?.[id]?.values.totalRevolutions
           ? parseFloat(trapPostProcessingState?.[id]?.values.totalRevolutions)
           : null,
-        rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
+        rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
         trapVisitEnvironmental: [
           {
             measureName: 'flow measure',
@@ -285,7 +283,7 @@ const StartedTrapping = ({
         saveTrapVisitInformation({
           crew: visitSetupState[tabIds[0]].values.crew,
           programId: visitSetupState[tabIds[0]].values.programId,
-          trapLocationIds: findTrapLocationIds(),
+          trapLocationIds: findTrapLocationIds(visitSetupState),
         })
       )
     })

@@ -133,7 +133,7 @@ const AddTrappingProtocolModalContent = ({
                   }
                   placeholder='0'
                   camelName={'numberMeasured'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   width={'45%'}
                   onChangeText={handleChange('numberMeasured')}
                   onBlur={handleBlur('numberMeasured')}

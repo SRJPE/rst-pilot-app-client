@@ -118,6 +118,12 @@ export const batchCountSlice = createSlice({
         runDefinition: runDefinition,
         taxonCode: taxonCode,
       } as any
+      if (action.payload.eggs !== null) {
+        fishEntry.eggs = action.payload.eggs
+      }
+      if (action.payload.milting !== null) {
+        fishEntry.milting = action.payload.milting
+      }
 
       let id = null
       if (Object.keys(forkLengthsCopy).length) {

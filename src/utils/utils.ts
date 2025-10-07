@@ -1,7 +1,7 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
-import { every, some, sortBy, flatten, uniqBy } from 'lodash'
-import { ReleaseMarkI, Taxon } from './interfaces'
+import { ReleaseMarkI } from './interfaces'
+import { every, some, sortBy, flatten, uniqBy, find, keyBy } from 'lodash'
 import { ObjectSchema } from 'yup'
 import type { InitialStateI as FishProcessingSliceState } from '../redux/reducers/formSlices/fishProcessingSlice'
 
@@ -21,7 +21,7 @@ export const checkOtherTabForms = ({
   const otherTabsValidity = tabIds.map(tabId => {
     if (tabId !== activeTabId) {
       const tabFormValues = reduxState[tabId]?.values
-      const formIsValid = schema.isValidSync(tabFormValues)
+      const formIsValid = schema?.isValidSync(tabFormValues)
       return formIsValid
     }
 
@@ -119,12 +119,13 @@ export const fetchRecentlyUsedSpecies = ({
 }
 
 export const findTaxonCode = (speciesValue: string, taxonArray: any[]) => {
-  const speciesText = speciesValue.includes('recent')
+  const speciesText = speciesValue?.includes('recent')
     ? speciesValue.split('_')[1]
     : speciesValue
 
   return taxonArray?.find(taxon => taxon.commonname === speciesText)?.code
 }
+
 export const createArray = (start: number, end: number) => {
   var result = []
   for (var i = start; i <= start + end; i++) {
@@ -212,6 +213,30 @@ export const buttonLookup: any = {
     lifeStage: 'Silvery Parr',
   },
   '90-117+': { firstButton: 90, additionalButtons: 27, lifeStage: 'Smolt' },
+}
+
+export const yoloButtonLookup: any = {
+  '25-29': {
+    firstButton: 25,
+    additionalButtons: 4,
+    lifeStage: 'Yolk Sac Fry',
+  },
+  '30-40': { firstButton: 30, additionalButtons: 10, lifeStage: 'Fry' },
+  '41-59': { firstButton: 41, additionalButtons: 18, lifeStage: 'Parr' },
+  '60-89': {
+    firstButton: 60,
+    additionalButtons: 29,
+    lifeStage: 'Silvery Parr',
+  },
+  '90-117+': { firstButton: 90, additionalButtons: 27, lifeStage: 'Smolt' },
+}
+
+export const getButtonLookup = (selectedProgramObj: any) => {
+  if (selectedProgramObj?.programName?.includes('Yolo')) {
+    return yoloButtonLookup
+  } else {
+    return buttonLookup
+  }
 }
 
 export const calculateLifeStage = (forkLength: number) => {
@@ -465,6 +490,8 @@ export const navigateFlowRightButton = ({
         return 'High Flows'
       } else if (warnings?.warningResultTemp) {
         return 'High Temperatures'
+      } else if (values.gearStatus === 'S') {
+        return 'Trap Post-Processing'
       } else {
         return 'Fish Processing'
       }
@@ -551,19 +578,14 @@ export const navigateFlowLeftButton = (
     case 'Started Trapping':
       return 'Trap Operations'
     case 'Trap Post-Processing':
+      console.log('🚀 TRAP POST PROCESSING CASE HIT', values)
       if (values?.fishProcessedResult === 'no fish caught') {
         return 'Fish Processing'
-      } else if (
-        values?.fishProcessedResult ===
-          'no catch data, fish left in live box' ||
-        values?.fishProcessedResult === 'no catch data, fish released'
-      ) {
+      } else if (values?.fishProcessedResult?.includes('no catch data')) {
         return 'Fish Processing'
       } else {
         return 'Fish Input'
       }
-      break
-      return 'Fish Input'
     case 'Fish Holding':
       return 'Trap Post-Processing'
     case 'Incomplete Sections':
@@ -719,6 +741,19 @@ export const decodedRecentReleaseMarks = (
     })
 }
 
+export const renderRequiredOrOptionalLabel = ({
+  fieldName,
+  validationSchema,
+}: {
+  fieldName: string
+  validationSchema: any
+}) => {
+  if (validationSchema?.fields?.[fieldName]?.exclusiveTests?.required) {
+    return '*'
+  } else {
+    return ''
+  }
+}
 export const createFormValueDefault = ({
   value,
   required = false,
@@ -731,67 +766,6 @@ export const createFormValueDefault = ({
   touched?: boolean
 }) => {
   return { value, touched, error, required }
-}
-
-export const groupBySpeciesForkLength = (data: Array<any>) => {
-  const result = {} as any
-  let totalCount = 0 as number
-
-  Object.values(data).forEach((fish: any) => {
-    const { species, forkLength, numFishCaught, run } = fish
-
-    totalCount += Number(numFishCaught)
-
-    if (fish.plusCount) {
-      const key = `${species} - ${
-        run && run !== 'not recorded' ? run : ''
-      } Plus Count`
-      if (!result[key]) {
-        result[key] = Number(numFishCaught)
-      } else {
-        result[key] += Number(numFishCaught)
-      }
-      return
-    }
-
-    if (!result[species]) {
-      result[species] = []
-    }
-
-    // Add `forkLength` repeated `numFishCaught` times
-    for (let i = 0; i < numFishCaught; i++) {
-      if (forkLength) {
-        result[species].push(forkLength)
-      }
-    }
-  })
-
-  // Sort the result object by its keys alphabetically
-  const sortedResult = Object.keys(result)
-    .sort()
-    .reduce((acc, key) => {
-      acc[key] = result[key]
-      return acc
-    }, {} as any)
-
-  Object.assign(result, sortedResult)
-
-  sortedResult['totalCount'] = totalCount
-
-  return sortedResult
-}
-
-export const calculateRpmAvg = (rpms: (string | null)[]) => {
-  const validRpms = rpms.filter(n => n)
-  if (!validRpms.length) {
-    return null
-  }
-  const numericRpms = validRpms.map((str: any) => parseFloat(str))
-  let counter = 0
-  numericRpms.forEach((num: number) => {
-    counter += num
-  })
-  return counter / numericRpms.length
 }
 
 export const getCrewValue = ({
@@ -846,6 +820,78 @@ export const getCrewValue = ({
   return filteredCrewIds
 }
 
+export const calcAvgValue = (valuesArray: (string | null)[]) => {
+  const validValues = valuesArray.filter(n => n)
+  if (!validValues.length) {
+    return null
+  }
+  const numericValues = validValues.map((str: any) => parseFloat(str))
+  let counter = 0
+  numericValues.forEach((num: number) => {
+    counter += num
+  })
+  return counter / numericValues.length
+}
+
+export const groupBySpeciesForkLength = (data: Array<any>) => {
+  const result = {} as any
+  let totalCount = 0 as number
+
+  Object.values(data).forEach((fish: any) => {
+    const { species, forkLength, numFishCaught, run } = fish
+
+    totalCount += Number(numFishCaught)
+
+    if (fish.plusCount) {
+      const key = `${species} - ${
+        run && run !== 'not recorded' ? run : ''
+      } Plus Count`
+      if (!result[key]) {
+        result[key] = Number(numFishCaught)
+      } else {
+        result[key] += Number(numFishCaught)
+      }
+      return
+    }
+
+    if (!result[species]) {
+      result[species] = []
+    }
+
+    // Add `forkLength` repeated `numFishCaught` times
+    for (let i = 0; i < numFishCaught; i++) {
+      if (forkLength) {
+        result[species].push(forkLength)
+      }
+    }
+  })
+
+  // Sort the result object by its keys alphabetically
+  const sortedResult = Object.keys(result)
+    .sort()
+    .reduce((acc, key) => {
+      acc[key] = result[key]
+      return acc
+    }, {} as any)
+
+  Object.assign(result, sortedResult)
+
+  sortedResult['totalCount'] = totalCount
+
+  return sortedResult
+}
+
+export const mergePreserveNonNull = (...objects: Record<string, any>[]) => {
+  return objects.reduce((acc, obj) => {
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== null || !(key in acc)) {
+        acc[key] = value
+      }
+    }
+    return acc
+  }, {} as Record<string, any>)
+}
+
 export const getAddFishStateDefaults = () => {
   return {
     whenSpeciesChinook: {
@@ -867,6 +913,16 @@ export const getAddFishStateDefaults = () => {
         value: false,
         touched: true,
         required: true,
+      }),
+      milting: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
+      eggs: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
@@ -891,6 +947,16 @@ export const getAddFishStateDefaults = () => {
         touched: true,
         required: true,
       }),
+      milting: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
+      eggs: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
       comments: createFormValueDefault({ value: null }),
@@ -914,6 +980,16 @@ export const getAddFishStateDefaults = () => {
         value: false,
         touched: true,
         required: true,
+      }),
+      milting: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
+      }),
+      eggs: createFormValueDefault({
+        value: false,
+        touched: true,
+        required: false,
       }),
       plusCountMethod: createFormValueDefault({ value: null }),
       fishConditions: createFormValueDefault({ value: [] }),
@@ -1005,10 +1081,153 @@ export const checkFishMeasureProtocol = ({
 
 export const calculateLastFish = (
   forkLengths: Record<string, any> | null | undefined
-): number | null => {
+): any | null => {
   if (!forkLengths || !Object.values(forkLengths).length) return null
 
   const values = Object.values(forkLengths)
   const lastObject = values[values.length - 1] as any
-  return lastObject.forkLength || null
+  return lastObject || null
+}
+
+export const getProgramFormFieldsLookup = (
+  visitSetupState: any,
+  visitSetupDefaultState: any
+) => {
+  if (!visitSetupDefaultState || !visitSetupDefaultState.programs) return {}
+  const programId = visitSetupState.programId
+  const selectedProgramObj = find(
+    visitSetupDefaultState.programs,
+    (program: any) => program.id === programId
+  )
+  const programFormFields = selectedProgramObj.programFormFields
+  const programFormFieldsObj = programFormFields?.length
+    ? keyBy(programFormFields, 'fieldName')
+    : {}
+  return programFormFieldsObj
+}
+
+export const shouldRenderField = ({
+  fieldName,
+  programFormFields,
+  sectionFields,
+}: {
+  fieldName: string
+  programFormFields: Array<any> | null
+  sectionFields: Array<any> | null
+}) => {
+  if (!programFormFields?.length) {
+    return true
+  }
+
+  if (programFormFields?.length && sectionFields) {
+    return sectionFields.some((field: any) => {
+      return field.fieldName === fieldName
+    })
+  }
+
+  return false
+}
+
+const getNextSampleSuffix = ({
+  arr,
+  taxonAbbreviation,
+  suffixPadding = 3,
+}: {
+  arr: { sampleId?: string }[]
+  taxonAbbreviation?: string
+  suffixPadding?: number
+}) => {
+  let filtered = arr
+
+  if (taxonAbbreviation) {
+    filtered = arr.filter(item =>
+      (item.sampleId ?? '').includes(taxonAbbreviation)
+    )
+  }
+
+  if (filtered.length === 0) {
+    return '001' // No existing samples for this taxon, start from 001
+  }
+
+  const currentHighestSampleSuffix = filtered.reduce((max, curr) => {
+    const getSuffix = (sampleId: string | undefined) =>
+      parseInt((sampleId ?? '').split('_').pop() ?? '', 10)
+
+    return getSuffix(curr.sampleId) > getSuffix(max.sampleId) ? curr : max
+  })
+
+  const test = (currentHighestSampleSuffix.sampleId ?? '').split('_').pop()
+  const nextSampleSuffixNumber = test ? parseInt(test, 10) + 1 : 1
+
+  // Pad with leading zeros to at least 3 digits
+  const nextSampleSuffix = nextSampleSuffixNumber
+    .toString()
+    .padStart(suffixPadding, '0')
+
+  return nextSampleSuffix
+}
+
+export const formatGeneticsSampleId = ({
+  programName,
+  species,
+  geneticSamplesArray,
+  taxonArray = [],
+}: {
+  programName: string
+  species: string
+  geneticSamplesArray: any[]
+  taxonArray?: any[]
+}) => {
+  let sampleId = ''
+
+  const programNameLower = programName.toLowerCase()
+
+  if (programNameLower.includes('yolo')) {
+    const currentYear = new Date().getFullYear()
+
+    if (species.toLowerCase().includes('chinook')) {
+    } else {
+      const taxonObj = taxonArray.find(
+        (item: any) => item.commonname === species
+      )
+      const taxonAbbreviation = taxonObj?.abbreviationCode
+      console.log('taxonAbbreviation', taxonAbbreviation)
+
+      if (!taxonAbbreviation) {
+        return sampleId
+      }
+
+      const sampleIdSuffix = getNextSampleSuffix({
+        arr: geneticSamplesArray,
+        taxonAbbreviation,
+        suffixPadding: 3,
+      })
+      console.log('sampleIdSuffix', sampleIdSuffix)
+      sampleId = `${currentYear}_${taxonAbbreviation}_${sampleIdSuffix}`
+    }
+  } else if (
+    programNameLower.includes('battle') ||
+    programNameLower.includes('clear')
+  ) {
+    // get last two digits of the current year
+    const currentYear = new Date().getFullYear().toString().slice(-2)
+
+    const sampleIdSuffix = getNextSampleSuffix({
+      arr: geneticSamplesArray,
+      suffixPadding: 4,
+    })
+
+    sampleId = `${currentYear}_${sampleIdSuffix}`
+  }
+
+  return sampleId
+}
+
+export const findTrapLocationIds = (visitSetupState: any) => {
+  let container = [] as any
+  for (let tabId in visitSetupState) {
+    if (tabId === 'placeholderId' || tabId === '_persist') continue
+    container.push(visitSetupState[tabId].values.trapLocationId)
+  }
+  return container
 }

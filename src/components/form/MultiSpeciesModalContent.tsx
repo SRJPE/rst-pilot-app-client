@@ -37,9 +37,7 @@ import FishConditionsDropDown from './FishConditionsDropDown'
 import { startCase } from 'lodash'
 import { useNavigation } from '@react-navigation/native'
 import AddExistingMark from './AddExistingMark'
-import { TouchableWithoutFeedback } from 'react-native'
 import { batchCountI } from '../../redux/reducers/formSlices/batchCountSlice'
-import { visitSetupDefaultsSlice } from '@/src/redux/reducers/visitSetupDefaults'
 
 const MultiSpeciesModalContent = ({
   closeModal,
@@ -208,17 +206,15 @@ const MultiSpeciesModalContent = ({
                   closeModal()
                   if (!batchCharacteristics?.multiSpecies?.length) {
                     navigation.preload('Fish Input')
-                    navigation.navigate('Trap Visit Form', {
-                      screen: 'Fish Input',
-                    })
+                    navigation.navigate('Fish Input')
                   }
                 }}
               />
               <VStack px='5%' space={4}>
-                <Text justifyContent='center' fontSize='lg'>
+                {/* <Text justifyContent='center' fontSize='lg'>
                   Please return to the individual fish input if you plan on
                   marking or sampling a fish.
-                </Text>
+                </Text> */}
                 <VStack space={4}>
                   {/* //TODO: Add error logic for custom species dropdown */}
                   {/* //TODO: Replace with Custom Select component */}
@@ -366,7 +362,7 @@ const MultiSpeciesModalContent = ({
                 </VStack>
                 <Button
                   bg='primary'
-                  mt={300}
+                  // mt={300}
                   my='5'
                   px='10'
                   shadow='3'

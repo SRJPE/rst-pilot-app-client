@@ -67,6 +67,7 @@ function InputTurbidity({
       trapLocationId: number
       waterTurbidity: number | null
       trapVisitEndTime: string
+      trapVisitStartTime: string
     }[]
   ) => {
     return trapVisits.map(trapVisit => {
@@ -85,12 +86,31 @@ function InputTurbidity({
         waterTurbidity: trapVisit.waterTurbidity,
         trapLocationName: trapLocation?.trapName,
         trapVisitEndTime: trapVisit.trapVisitEndTime,
+        trapVisitStartTime: trapVisit?.trapVisitStartTime,
       }
     })
   }
   const trapVisitTableData = generateTrapVisitTableData(
     trapVisitsRequiringTurbidity
   )
+
+  const renderTrapVisitDateTime = (trapVisit: any) => {
+    if (trapVisit.trapVisitEndTime) {
+      return (
+        <Text fontSize='md'>
+          <Text bold>Trap Visit Time:</Text>{' '}
+          {new Date(trapVisit.trapVisitEndTime).toLocaleString()}
+        </Text>
+      )
+    } else if (trapVisit.trapVisitStartTime) {
+      return (
+        <Text fontSize='md'>
+          <Text bold>Trap Visit Time:</Text>{' '}
+          {new Date(trapVisit.trapVisitStartTime).toLocaleString()}
+        </Text>
+      )
+    }
+  }
 
   return (
     <ScrollView flex={1} p={5}>
@@ -195,10 +215,7 @@ function InputTurbidity({
                       <Text bold>Trap Location:</Text>{' '}
                       {trapVisit.trapLocationName}
                     </Text>
-                    <Text fontSize='md'>
-                      <Text bold>Trap Visit End Time:</Text>{' '}
-                      {new Date(trapVisit.trapVisitEndTime).toLocaleString()}
-                    </Text>
+                    {renderTrapVisitDateTime(trapVisit)}
                     <Divider my={2} />
                     <HStack alignItems='center' space={3} h={100}>
                       <Box flex={3}>
