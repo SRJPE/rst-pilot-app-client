@@ -225,19 +225,20 @@ const BatchCount = ({
     setBatchCharacteristicsModalOpen(true)
   }
 
-  const buttonNav = () => {
+  const buttonNav = (screenName: string) => {
     // @ts-ignore
     navigation.navigate('Trap Visit Form', {
-      screen: 'Add Fish',
+      screen: screenName,
       params: {
         fishMeasureProtocol: route.params?.fishMeasureProtocol,
         selectedProgramObj: route.params?.selectedProgramObj,
       },
     })
 
-    dispatch(resetBatchCountSlice())
+    // dispatch(resetBatchCountSlice())
     closeFishMeasureMetModal()
   }
+
   const handleShowTableModal = (selectedRowData: any) => {
     const modalDataContainer = {} as any
     Object.keys(selectedRowData).forEach((key: string) => {
@@ -333,7 +334,7 @@ const BatchCount = ({
           forkLength: flObj.forkLength,
           run: flObj?.runDefinition,
           lifeStage: flObj?.lifeStage?.toLowerCase(),
-          species: batchCountStore?.batchCharacteristics?.species,
+          species: flObj?.species,
           numFishCaught: 1,
         }
       }
@@ -465,8 +466,6 @@ const BatchCount = ({
                       Object.keys(batchCountStore.forkLengths).length
                         ? {
                             ...calculateLastFish(batchCountStore.forkLengths),
-                            species:
-                              batchCountStore.batchCharacteristics.species,
                           }
                         : {}
                     }
@@ -493,7 +492,7 @@ const BatchCount = ({
                 justifyContent='center'
                 bg='secondary'
               >
-                <BatchCountHistogram />
+                <BatchCountHistogram batchCharacteristicsSpecies={species} />
               </Box>
             )}
             <VStack space={3}>

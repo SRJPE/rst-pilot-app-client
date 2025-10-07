@@ -214,10 +214,10 @@ const AddFishContent = ({
     }
   }
 
-  const buttonNav = () => {
+  const buttonNav = (screenName: string) => {
     // @ts-ignore
     navigation?.navigate('Trap Visit Form', {
-      screen: 'Batch Count',
+      screen: screenName,
       params: {
         fishMeasureProtocol: route.params?.fishMeasureProtocol,
         selectedProgramObj: route.params?.selectedProgramObj,
@@ -744,18 +744,22 @@ const AddFishContent = ({
           setRun(stateDefaults.whenSpeciesChinook.run)
           return
         }
-        let dateTimeValue = new Date()
 
         const activeTabId = tabSlice.activeTabId
 
-        if (
-          activeTabId &&
+        if (!activeTabId || !trapOperationsStore) return
+
+        let dateTimeValue = new Date()
+        if (trapOperationsStore?.[activeTabId]?.values?.trapVisitTime) {
+          dateTimeValue = new Date(
+            trapOperationsStore?.[activeTabId]?.values?.trapVisitTime
+          )
+        } else if (
           trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
         ) {
           dateTimeValue =
             trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
         } else if (
-          activeTabId &&
           trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
         ) {
           dateTimeValue =

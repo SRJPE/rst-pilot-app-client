@@ -14,7 +14,6 @@ import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
 import MeasureMetPlusCount from '@/src/components/form/MeasureMetPlusCount'
 import MultiSpeciesModalContent from '@/src/components/form/MultiSpeciesModalContent'
 import CustomModal from '@/src/components/Shared/CustomModal'
-import CustomModalHeader from '@/src/components/Shared/CustomModalHeader'
 import {
   removeLastForkLengthEntered,
   resetBatchCountSlice,
@@ -27,6 +26,9 @@ import {
 import { TabStateI } from '@/src/redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '@/src/redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '@/src/redux/store'
+import CustomModalHeader, {
+  AddFishModalHeaderButton,
+} from '../../components/Shared/CustomModalHeader'
 import {
   calculateLastFish,
   checkFishMeasureProtocol,
@@ -476,6 +478,18 @@ const MultiSpecies = ({
     programFormFieldsObj?.['eggs'] &&
     speciesRadioValue.toLocaleLowerCase().includes('shrimp')
 
+  const buttonNav = (screenName: string) => {
+    // @ts-ignore
+    navigation.navigate('Trap Visit Form', {
+      screen: screenName,
+      params: {
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        selectedProgramObj: route.params?.selectedProgramObj,
+      },
+    })
+    closeFishMeasureMetModal()
+  }
+
   if (!isFocused) {
     return null
   }
@@ -496,14 +510,18 @@ const MultiSpecies = ({
                 closeModal={() => dispatch(resetBatchCountSlice())}
                 headerText={
                   tabSlice.activeTabId
-                    ? `Multi Species Entry - ${
+                    ? `Multi Species - ${
                         tabSlice.tabs[tabSlice.activeTabId].name
                       }`
-                    : 'Multi Species Entry'
+                    : 'Multi Species'
                 }
                 showConfirmationModal={true}
                 showHeaderButton={true}
                 navigateBack={true}
+                headerButton={AddFishModalHeaderButton({
+                  activeTab: 'Multi',
+                  buttonNav,
+                })}
               />
             </HStack>
             <Box px='2%'>

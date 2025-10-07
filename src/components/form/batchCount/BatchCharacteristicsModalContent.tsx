@@ -126,6 +126,7 @@ const BatchCharacteristicsModalContent = ({
           saveBatchCharacteristics({
             ...values,
             species: formattedSpecies,
+            multiSpecies: [formattedSpecies],
             taxonCode: selectedTaxonCode,
             tabId: activeTabId,
           })
@@ -139,6 +140,7 @@ const BatchCharacteristicsModalContent = ({
             ...values,
 
             species: formattedSpecies,
+            multiSpecies: [formattedSpecies],
             taxonCode: selectedTaxonCode,
             tabId: activeTabId,
           })
@@ -202,6 +204,9 @@ const BatchCharacteristicsModalContent = ({
                 {/* //TODO: Replace with Custom Select component */}
                 <SpeciesDropDown
                   open={speciesDropDownOpen}
+                  editModeValue={
+                    batchCountStore.batchCharacteristics.species || ''
+                  }
                   onOpen={onSpeciesOpen}
                   setOpen={setSpeciesDropDownOpen}
                   list={speciesList}

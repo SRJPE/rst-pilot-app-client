@@ -17,12 +17,19 @@ import { capitalize } from 'lodash'
 const BatchCountHistogram = ({
   forkLengthsStore,
   batchCountStore,
+  batchCharacteristicsSpecies,
 }: {
   forkLengthsStore: any
   batchCountStore: any
+  batchCharacteristicsSpecies: string
 }) => {
   const prepareDataForGraph = () => {
-    const reformatedBatchCountData = reformatBatchCountData(forkLengthsStore)
+    const currentSpeciesForkLengths = Object.values(forkLengthsStore).filter(
+      (flObj: any) => flObj.species === batchCharacteristicsSpecies
+    ) as any
+    const reformatedBatchCountData = reformatBatchCountData(
+      currentSpeciesForkLengths
+    )
     const storageArray: { forkLength: number; count: number }[] = []
 
     reformatedBatchCountData &&
