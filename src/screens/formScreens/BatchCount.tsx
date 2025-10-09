@@ -435,10 +435,8 @@ const BatchCount = ({
                 closeModal={() => dispatch(resetBatchCountSlice())}
                 headerText={
                   tabSlice.activeTabId
-                    ? `Batch Count - ${
-                        tabSlice.tabs[tabSlice.activeTabId].name
-                      }`
-                    : 'Batch Count'
+                    ? `${tabSlice.tabs[tabSlice.activeTabId].name}`
+                    : 'Batch Count Entry'
                 }
                 showHeaderButton={true}
                 showConfirmationModal={true}

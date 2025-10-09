@@ -510,10 +510,8 @@ const MultiSpecies = ({
                 closeModal={() => dispatch(resetBatchCountSlice())}
                 headerText={
                   tabSlice.activeTabId
-                    ? `Multi Species - ${
-                        tabSlice.tabs[tabSlice.activeTabId].name
-                      }`
-                    : 'Multi Species'
+                    ? `${tabSlice.tabs[tabSlice.activeTabId].name}`
+                    : 'Multi Species Entry'
                 }
                 showConfirmationModal={true}
                 showHeaderButton={true}

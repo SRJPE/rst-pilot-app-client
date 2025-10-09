@@ -398,6 +398,27 @@ export const addMarksOrTagsSchema = yup.object().shape({
   // comments: yup.string(),
 })
 
+export const generateDynamicGeneticsSchema = (fields: Array<any>) => {
+  const sectionFields = fields.filter(
+    (field: any) => field.formSection === 'Genetics'
+  )
+  // always required
+  let schema: { [key: string]: any } = {
+    sampleId: yup.string().required('Sample ID Number required'),
+    mucusSwab: yup.boolean().required('Mucus Swab collection status required'),
+    finClip: yup.boolean().required('Fin Clip collection status required'),
+    crewMember: yup.string().required('Crew Member required'),
+  }
+
+  sectionFields.forEach(field => {
+    const validator = getValidator(field)
+
+    schema[field.fieldName] = validator
+  })
+
+  return yup.object().shape(schema)
+}
+
 export const addGeneticsSampleSchema = yup.object().shape({
   sampleId: yup.string().required('Sample ID Number required'),
   mucusSwab: yup.boolean().required('Mucus Swab collection status required'),

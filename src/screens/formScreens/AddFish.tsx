@@ -823,8 +823,8 @@ const AddFishContent = ({
                         }`
                       : 'Edit Fish'
                     : tabSlice.activeTabId
-                    ? `Add Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
-                    : 'Add Fish'
+                    ? `${tabSlice.tabs[tabSlice.activeTabId].name}`
+                    : 'Individual Fish Entry'
                 }
                 showHeaderButton={true}
                 closeModal={closeModal}

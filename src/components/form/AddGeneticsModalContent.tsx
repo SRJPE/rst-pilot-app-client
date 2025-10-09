@@ -12,7 +12,10 @@ import { Alert, Linking } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import { addGeneticsSampleSchema } from '../../utils/helpers/yupValidations'
+import {
+  addGeneticsSampleSchema,
+  generateDynamicGeneticsSchema,
+} from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
 import FormInputComponent from '../Shared/FormInputComponent'
@@ -59,10 +62,8 @@ const AddGeneticsModalContent = ({
     comments: '',
   })
 
-  console.log('fishRunValue', fishRunValue)
-  console.log('fishAdiposeClippedValue', fishAdiposeClippedValue)
-
   const [sectionFormFields, setSectionFormFields] = useState<any[]>([])
+  const [validationSchema, setValidationSchema] = useState<any>(null)
 
   useEffect(() => {
     if (selectedProgramObj) {
@@ -73,8 +74,12 @@ const AddGeneticsModalContent = ({
           }
         )
         setSectionFormFields(geneticsFields)
+        const dynamicGeneticsSchema =
+          generateDynamicGeneticsSchema(geneticsFields)
+        setValidationSchema(dynamicGeneticsSchema)
       } else {
         setSectionFormFields([])
+        setValidationSchema(addGeneticsSampleSchema)
       }
     }
   }, [selectedProgramObj.programFormFields])
@@ -134,7 +139,7 @@ const AddGeneticsModalContent = ({
   return (
     <ScrollView>
       <Formik
-        validationSchema={addGeneticsSampleSchema}
+        validationSchema={validationSchema}
         initialValues={initialFormValues}
         enableReinitialize={true}
         onSubmit={values => {
