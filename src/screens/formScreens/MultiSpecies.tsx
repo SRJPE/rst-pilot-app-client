@@ -228,7 +228,7 @@ const MultiSpecies = ({
           (flObj: any) => flObj.forkLength && !flObj.plusCount
         ),
         plusCounts: forkLengthsArray.filter(
-          (flObj: any) => flObj.numFishCaught && flObj.plusCount
+          (flObj: any) => Number(flObj.numFishCaught) && flObj.plusCount
         ),
       }
 
@@ -354,7 +354,7 @@ const MultiSpecies = ({
         run: flObj?.runDefinition,
         lifeStage: flObj?.lifeStage?.toLowerCase(),
         species: flObj?.species,
-        numFishCaught: flObj?.numFishCaught || 1,
+        numFishCaught: Number(flObj?.numFishCaught) || 1,
         plusCount: flObj?.plusCount || false,
       }))
 
@@ -363,14 +363,15 @@ const MultiSpecies = ({
       const combinedFishStoreObj: Record<string, any> = { ...existingFishStore }
 
       let total = Object.values(existingFishStore).reduce(
-        (sum, fishObj) => sum + ((fishObj as any).numFishCaught || 0),
+        (sum: number, fishObj) =>
+          sum + (Number((fishObj as any).numFishCaught) || 0),
         0
-      ) as number
+      )
 
       let nextIndex = Object.keys(combinedFishStoreObj).length
       batchCountFishStore.forEach(fish => {
         combinedFishStoreObj[nextIndex++] = fish
-        total += fish.numFishCaught || 0
+        total += Number(fish.numFishCaught) || 0
       })
 
       setTotalCatchCount(total)
@@ -422,7 +423,7 @@ const MultiSpecies = ({
         run: flObj?.runDefinition,
         lifeStage: flObj?.lifeStage?.toLowerCase(),
         species: flObj?.species,
-        numFishCaught: flObj?.numFishCaught || 1,
+        numFishCaught: Number(flObj?.numFishCaught) || 1,
         plusCount: flObj?.plusCount || false,
       }))
 
@@ -431,9 +432,10 @@ const MultiSpecies = ({
       const combinedFishStoreObj: Record<string, any> = { ...existingFishStore }
 
       let total = Object.values(existingFishStore).reduce(
-        (sum, fishObj) => sum + ((fishObj as any).numFishCaught || 0),
+        (sum: number, fishObj) =>
+          sum + (Number((fishObj as any).numFishCaught) || 0),
         0
-      ) as number
+      )
 
       let nextIndex = Object.keys(combinedFishStoreObj).length
       batchCountFishStore.forEach(fish => {

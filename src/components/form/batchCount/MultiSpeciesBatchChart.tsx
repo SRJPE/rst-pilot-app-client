@@ -50,9 +50,18 @@ function groupForkLengthsBySpecies(
 ): Record<string, any[]> {
   const result: Record<string, any[]> = {}
   for (const item of Object.values(data)) {
-    if (!item?.species || typeof item.forkLength !== 'number') continue
+    if (!item?.species || typeof Number(item.forkLength) !== 'number') continue
     if (!result[item.species]) result[item.species] = []
-    result[item.species].push(item)
+    if (
+      typeof Number(item.numFishCaught) === 'number' &&
+      Number(item.numFishCaught) > 1
+    ) {
+      for (let i = 0; i < item.numFishCaught; i++) {
+        result[item.species].push({ ...item })
+      }
+    } else {
+      result[item.species].push(item)
+    }
   }
   return result
 }
@@ -106,6 +115,8 @@ const MultiSpeciesBatchChart = ({
     [batchCountStore?.batchCharacteristics?.multiSpecies]
   )
 
+  console.log('previouslyEnteredFish', previouslyEnteredFish)
+
   const groupedPreviouslyEnteredFish = useMemo(
     () => groupForkLengthsBySpecies(previouslyEnteredFish),
     [previouslyEnteredFish]
@@ -119,6 +130,10 @@ const MultiSpeciesBatchChart = ({
   const combinedFishObj = useMemo(() => {
     const combined: Record<string, any[]> = {}
     for (const key in groupedPreviouslyEnteredFish) {
+      console.log(
+        'groupedPreviouslyEnteredFish[key]',
+        groupedPreviouslyEnteredFish[key]
+      )
       combined[key] = (combined[key] || []).concat(
         groupedPreviouslyEnteredFish[key]
       )
@@ -126,6 +141,7 @@ const MultiSpeciesBatchChart = ({
     for (const key in groupedForkLengths) {
       combined[key] = (combined[key] || []).concat(groupedForkLengths[key])
     }
+    console.log('combined', combined)
     return combined
   }, [groupedForkLengths, groupedPreviouslyEnteredFish])
 

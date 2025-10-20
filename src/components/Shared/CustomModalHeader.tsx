@@ -123,7 +123,7 @@ const CustomModalHeader = ({
           closeModal={() => setConfirmationModalOpen(false)}
         >
           <ConfirmationModalContent
-            modalHeader='Return to fish input?'
+            modalHeader='Return to Fish Input?'
             modalText='
             You are about to return to fish input screen. None of your current batch entries will be saved. Are you sure you want to continue?'
             handlePressCancel={() => setConfirmationModalOpen(false)}
@@ -138,7 +138,7 @@ const CustomModalHeader = ({
               if (resetForm) resetForm()
             }}
             confirmButtonLabel='Leave'
-            cancelButtonLabel='Close'
+            cancelButtonLabel='Cancel'
           />
         </CustomModal>
       )}

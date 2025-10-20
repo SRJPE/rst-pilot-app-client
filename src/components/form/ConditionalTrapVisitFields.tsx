@@ -36,6 +36,7 @@ interface FieldInterface {
 const defaultValues: { [key: string]: any } = {
   counterStart: '0',
   trapInThalweg: false,
+  samplingAltered: false,
 }
 
 const ConditionalTrapVisitFields = ({
