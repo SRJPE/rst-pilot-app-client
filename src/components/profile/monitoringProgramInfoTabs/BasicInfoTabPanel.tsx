@@ -1,10 +1,8 @@
 import { ScrollView, View } from 'react-native'
 import {
-  CrewMember,
   HatcheryInformation,
   MonitoringProgram,
 } from '../../../utils/interfaces'
-import { groupArrayItems } from '../../../utils/utils'
 import { Text, HStack, VStack, Divider } from 'native-base'
 import { DataTable } from 'react-native-paper'
 import { TabPanelWrapper } from './MonitoringInfoTabs'
@@ -16,11 +14,6 @@ export const BasicInfoTabPanel = ({
 }: {
   monitoringProgramInfo: MonitoringProgram | null
 }) => {
-  const groupedCrewMembers = groupArrayItems(
-    monitoringProgramInfo?.crewMembers || [],
-    4
-  ) as CrewMember[][]
-
   const { streamName, programName } = monitoringProgramInfo || {}
   //Placeholder hatchery data
   const hatcheryData: HatcheryInformation[] = [
@@ -144,41 +137,13 @@ export const BasicInfoTabPanel = ({
         <Text fontSize='lg' fontWeight={500}>
           Program Name: <Text fontWeight={300}>{programName}</Text>
         </Text>
-        <VStack alignItems='flex-start' space={2} mt={5}>
-          <Text fontSize='lg' fontWeight={500}>
-            Crew Members:
-          </Text>
-          <HStack space={5}>
-            {groupedCrewMembers?.map((crewMembers, index) => {
-              const lastItem = groupedCrewMembers.at(-1) as CrewMember[]
 
-              return (
-                <React.Fragment>
-                  <VStack key={index}>
-                    {crewMembers.map(({ id, firstName, lastName, role }) => (
-                      <Text
-                        key={id}
-                        fontSize='lg'
-                        fontWeight={300}
-                      >{`${firstName} ${lastName} ${
-                        role === 'lead' ? '(Lead)' : ''
-                      }`}</Text>
-                    ))}
-                  </VStack>
-                  {index !== groupedCrewMembers.indexOf(lastItem) && (
-                    <Divider orientation='vertical' />
-                  )}
-                </React.Fragment>
-              )
-            })}
-          </HStack>
-        </VStack>
         <Text fontSize='lg' fontWeight={500} mt={5}>
           Funding Agency:{' '}
           {/* <Text fontWeight={300}>{monitoringProgramInfo?.agencyDescription} (monitoringProgramInfo.agencyDefinition)</Text> */}
           <Text fontWeight={300}>California Data Exchange Center (CDEC)</Text>
         </Text>
-        <DataTable>
+        {/* <DataTable>
           <Text fontSize='lg' fontWeight={500} mt={5}>
             Hatchery Information:
           </Text>
@@ -245,7 +210,7 @@ export const BasicInfoTabPanel = ({
             to={to}
             onPageChange={onPageChange}
           />
-        </DataTable>
+        </DataTable> */}
       </ScrollView>
     </TabPanelWrapper>
   )

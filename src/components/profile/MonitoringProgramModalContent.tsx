@@ -3,13 +3,22 @@ import React from 'react'
 import type { MonitoringProgram } from '../../utils/interfaces'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import MonitoringInfoTabs from './monitoringProgramInfoTabs/MonitoringInfoTabs'
+import { drop } from 'lodash'
 
 const MonitoringProgramInfoModalContent = ({
   closeModal,
   monitoringProgramInfo,
+  personnelStore,
+  crewMembersStore,
+  dropdownValues,
+  userCredentialsStore,
 }: {
   closeModal: () => void
   monitoringProgramInfo: MonitoringProgram | null
+  personnelStore: any
+  crewMembersStore: any
+  dropdownValues: any[]
+  userCredentialsStore: any
 }) => {
   const { programName } = monitoringProgramInfo || { programName: '' }
 
@@ -20,7 +29,13 @@ const MonitoringProgramInfoModalContent = ({
         showHeaderButton={true}
         closeModal={closeModal}
       />
-      <MonitoringInfoTabs monitoringProgramInfo={monitoringProgramInfo} />
+      <MonitoringInfoTabs
+        monitoringProgramInfo={monitoringProgramInfo}
+        personnelStore={personnelStore}
+        crewMembersStore={crewMembersStore}
+        dropdownValues={dropdownValues}
+        userCredentialsStore={userCredentialsStore}
+      />
       <Button
         m={10}
         alignSelf='center'

@@ -59,36 +59,42 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
             firstName,
             lastName,
             mobilePhone,
-            agencyId,
+            // agencyId: agencyName,
             emailAddress,
             role,
           } = values
-          const createdUserResponse = await api
-            .post(`user/create`, {
-              firstName,
-              lastName,
-              mobilePhone,
-              agencyId,
-              emailAddress,
-            })
-            .catch(error => {
-              console.log(
-                '🚀 ~ file: AddNewUserModalContent.tsx:76 ~ onSubmit={ ~ error:',
-                Object.entries(error)
-              )
+          const agencyId = dropdownValues.find(
+            agencyOption =>
+              agencyOption.definition.toLowerCase() ===
+              values.agencyId.toLowerCase()
+          )?.id
+          // const createdUserResponse = await api
+          //   .post(`user/create`, {
+          //     firstName,
+          //     lastName,
+          //     mobilePhone,
+          //     agencyId,
+          //     emailAddress,
+          //   })
+          //   .catch(error => {
+          //     console.log(
+          //       '🚀 ~ file: AddNewUserModalContent.tsx:76 ~ onSubmit={ ~ error:',
+          //       Object.entries(error)
+          //     )
 
-              const errorMessage = generateErrorMessage(
-                error.code || 'Error during request to create user (ln 88)'
-              )
-              setSubmissionMessage({
-                success: false,
-                message: errorMessage,
-              })
+          //     const errorMessage = generateErrorMessage(
+          //       error.code || 'Error during request to create user (ln 88)'
+          //     )
+          //     setSubmissionMessage({
+          //       success: false,
+          //       message: errorMessage,
+          //     })
 
-              setSubmitting(false)
-            })
+          //     setSubmitting(false)
+          //   })
+          const createdUserResponse = null as any //temp placeholder while backend is being worked on
 
-          if (createdUserResponse?.status === 200) {
+          if (createdUserResponse && createdUserResponse?.status === 200) {
             setSubmissionMessage({
               success: true,
               message: 'User successfully created',
@@ -105,6 +111,23 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
             setTimeout(() => {
               closeModal()
             }, 1000)
+          } else {
+            setSubmissionMessage({
+              success: true,
+              message: 'User successfully created',
+            })
+            await api.post(`/personnel`, {
+              first_name: firstName,
+              last_name: lastName,
+              email: emailAddress,
+              phone: mobilePhone,
+              agencyId,
+              role,
+              azure_uid: null,
+            })
+            setTimeout(() => {
+              closeModal()
+            }, 1000)
           }
         }}
       >
@@ -117,6 +140,7 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
           errors,
           touched,
           setFieldTouched,
+          setFieldValue,
         }) => {
           return (
             <VStack justifyContent={'space-between'} h={800} m='5%'>
@@ -205,19 +229,23 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
                 />
               </FormControl>
               <FormControl>
-                <FormControl.Label>
+                {/* <FormControl.Label>
                   <Text color='black' fontSize='xl'>
                     Funding Agency
                   </Text>
-                </FormControl.Label>
+                </FormControl.Label> */}
                 <CustomSelect
                   selectedValue={values.agencyId as string}
                   placeholder='Funding Agency'
-                  onValueChange={handleChange('agencyId')}
-                  setFieldTouched={setFieldTouched}
+                  onValueChange={(value: string) => {
+                    setFieldValue('agency', value).then(() => {
+                      setFieldTouched('agency')
+                    })
+                  }}
                   selectOptions={dropdownValues}
                   dataType='fundingAgency'
                   disabled={isSubmitting}
+                  label={'Funding Agency'}
                 />
                 {errors.agencyId && touched.agencyId ? (
                   <Text mt='2' color='red.800'>

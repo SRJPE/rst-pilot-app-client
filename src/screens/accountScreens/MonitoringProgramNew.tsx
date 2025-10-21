@@ -49,7 +49,7 @@ const MonitoringProgramNew = ({
   )
   const dispatch = useDispatch<AppDispatch>()
 
-  const SubmitNewMonitoringProgramValues = (values: any) => {
+  const submitNewMonitoringProgramValues = (values: any) => {
     dispatch(saveNewProgramValues(values))
   }
 
@@ -62,7 +62,7 @@ const MonitoringProgramNew = ({
         validationSchema={setUpNewProgramSchema}
         initialValues={createNewProgramHomeStore.values}
         onSubmit={values => {
-          SubmitNewMonitoringProgramValues(values)
+          submitNewMonitoringProgramValues(values)
         }}
       >
         {({
@@ -129,8 +129,11 @@ const MonitoringProgramNew = ({
                       errors={errors}
                       selectedValue={values.fundingAgency}
                       placeholder='Select Funding Agency'
-                      onValueChange={handleChange('fundingAgency')}
-                      setFieldTouched={() => setFieldTouched('fundingAgency')}
+                      onValueChange={(value: string) => {
+                        setFieldValue('agency', value).then(() => {
+                          setFieldTouched('agency')
+                        })
+                      }}
                       selectOptions={dropdownValues?.fundingAgency}
                     />
                     <VStack space={5}>

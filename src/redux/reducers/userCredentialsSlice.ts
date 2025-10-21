@@ -38,6 +38,8 @@ export const getUserPrograms = createAsyncThunk(
   async (personnelId: number) => {
     try {
       const response: any = await api.get(`program/personnel/${personnelId}`)
+
+      console.log('response', response)
       return response.data
     } catch (error: any) {
       console.log('err', error)
