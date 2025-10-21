@@ -58,6 +58,7 @@ import {
   reorderTaxon,
   findTaxonCode,
   calculateLifeStage,
+  getDBValue,
   fetchRecentlyUsedSpecies,
 } from '../../utils/utils'
 import { startCase, find, keyBy, partition } from 'lodash'
@@ -213,10 +214,10 @@ const AddFishContent = ({
     }
   }
 
-  const buttonNav = () => {
+  const buttonNav = (screenName: string) => {
     // @ts-ignore
     navigation?.navigate('Trap Visit Form', {
-      screen: 'Batch Count',
+      screen: screenName,
       params: {
         fishMeasureProtocol: route.params?.fishMeasureProtocol,
         selectedProgramObj: route.params?.selectedProgramObj,
@@ -521,11 +522,22 @@ const AddFishContent = ({
   }
 
   const handleGeneticSamplesFormSubmit = (values: any) => {
+    console.log('values', values)
+    const formattedValues = {
+      ...values,
+      condition: values.condition
+        ? getDBValue(values.condition, 'condition', dropdownsStore)
+        : null,
+      take: values.take
+        ? getDBValue(values.take, 'take', dropdownsStore)
+        : null,
+      // Add any additional formatting logic here
+    }
     setGeneticSamples({
       ...geneticSamples,
       value: Array.isArray(geneticSamples.value)
-        ? [...geneticSamples.value, values]
-        : [values],
+        ? [...geneticSamples.value, formattedValues]
+        : [formattedValues],
     })
   }
 
@@ -732,18 +744,22 @@ const AddFishContent = ({
           setRun(stateDefaults.whenSpeciesChinook.run)
           return
         }
-        let dateTimeValue = new Date()
 
         const activeTabId = tabSlice.activeTabId
 
-        if (
-          activeTabId &&
+        if (!activeTabId || !trapOperationsStore) return
+
+        let dateTimeValue = new Date()
+        if (trapOperationsStore?.[activeTabId]?.values?.trapVisitTime) {
+          dateTimeValue = new Date(
+            trapOperationsStore?.[activeTabId]?.values?.trapVisitTime
+          )
+        } else if (
           trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
         ) {
           dateTimeValue =
             trapOperationsStore?.[activeTabId]?.values?.trapVisitStopTime
         } else if (
-          activeTabId &&
           trapOperationsStore?.[activeTabId]?.values?.trapVisitStartTime
         ) {
           dateTimeValue =
@@ -807,8 +823,8 @@ const AddFishContent = ({
                         }`
                       : 'Edit Fish'
                     : tabSlice.activeTabId
-                    ? `Add Fish - ${tabSlice.tabs[tabSlice.activeTabId].name}`
-                    : 'Add Fish'
+                    ? `${tabSlice.tabs[tabSlice.activeTabId].name}`
+                    : 'Individual Fish Entry'
                 }
                 showHeaderButton={true}
                 closeModal={closeModal}
@@ -1650,6 +1666,11 @@ const AddFishContent = ({
               closeModal={() => setAddGeneticModalOpen(false)}
               species={species}
               reorderedTaxon={reorderedTaxon}
+              selectedProgramObj={route.params?.selectedProgramObj}
+              dropdownValues={dropdownValues}
+              activeTabId={tabSlice.activeTabId}
+              fishRunValue={run.value}
+              fishAdiposeClippedValue={adiposeClipped.value}
             />
           </CustomModal>
         )}

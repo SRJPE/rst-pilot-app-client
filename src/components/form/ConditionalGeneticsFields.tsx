@@ -12,12 +12,8 @@ import FormInputComponent, {
   TextInputAdornment,
 } from '../Shared/FormInputComponent'
 import FastSelect from '../Shared/FastSelect'
-import YSITurbidity from './YSITurbidity'
-import CustomModal from '../Shared/CustomModal'
-import RSTRLogSheet from './RSTRLogSheet'
 import CustomSelect from '../Shared/CustomSelect'
 import { renderRequiredOrOptionalLabel } from '../../utils/utils'
-import RiverDepth from './RiverDepth'
 
 interface FieldInterface {
   id: number
@@ -34,9 +30,7 @@ interface FieldInterface {
 }
 
 const defaultValues: { [key: string]: any } = {
-  counterStart: '0',
-  trapInThalweg: false,
-  samplingAltered: false,
+  genetic: false,
 }
 
 const ConditionalTrapVisitFields = ({
@@ -79,11 +73,6 @@ const ConditionalTrapVisitFields = ({
   const [sortedFormFields, setSortedFormFields] = useState<
     Array<FieldInterface>
   >([])
-  const [showLogSheet, setShowLogSheet] = useState(false)
-
-  const handleLogSheetState = () => {
-    setShowLogSheet(!showLogSheet)
-  }
 
   useEffect(() => {
     if (formFields) {
@@ -100,202 +89,11 @@ const ConditionalTrapVisitFields = ({
     const { fieldName, displayName, unitDefinition, fieldType } = item
     const unitAbbrev = unitDefinition?.match(/\(([^)]+)\)/)?.[1] || undefined
 
-    // exisitng built in fields. prevents duplicate fields from being rendered
-    if (
-      activePage === 'Trap Post-Processing' &&
-      ['debrisVolume', 'totalRevolutions', 'rpmAfter'].includes(fieldName)
-    ) {
-      return null
-    }
-
-    if (
-      activePage === 'Trap Operations' &&
-      ['waterTemperature', 'waterTurbidity'].includes(fieldName)
-    ) {
-      return null
-    }
-
     if (
       defaultValues[fieldName] !== undefined &&
       values[fieldName] === undefined
     ) {
       setFieldValue(fieldName, defaultValues[fieldName])
-    }
-
-    if (fieldName === 'conditionCode') {
-      return (
-        <>
-          <Box
-            key={index} // Always add a key when mapping
-            flexBasis='45%' // Ensures 3 items per row (adjust for spacing)
-            minWidth='45%' // Prevents shrinking too much
-            maxWidth='45%' // Prevents growing beyond this size>
-            flexGrow={1}
-            mr={8} // Removes right margin from every 3rd item
-          >
-            <VStack>
-              <FastSelect
-                selectedValue={values[fieldName]}
-                placeholder={`Select Value for ${displayName}`}
-                camelName={fieldName}
-                label={displayName}
-                errors={errors}
-                touched={touched}
-                onValueChange={handleChange(fieldName)}
-                setFieldTouched={() => setFieldTouched(fieldName)}
-                selectOptions={dropdownValues[fieldName]}
-                validationSchema={validationSchema}
-                tooltip={
-                  activeTabId ? (
-                    <>
-                      <Text fontSize='md'>
-                        Selected Vegetation Code Value:{' '}
-                        {
-                          trapOperationsStore?.[activeTabId]?.values
-                            ?.vegetationCode
-                        }
-                      </Text>
-                    </>
-                  ) : (
-                    false
-                  )
-                }
-              />
-              <Link
-                mb={5}
-                onPress={handleLogSheetState}
-                isUnderlined={true}
-                _text={{
-                  fontSize: 'lg',
-                  color: 'primary',
-                }}
-              >
-                View Log Sheet
-              </Link>
-            </VStack>
-          </Box>
-          {showLogSheet && (
-            <CustomModal isOpen={showLogSheet} closeModal={handleLogSheetState}>
-              <RSTRLogSheet handleLogSheetState={handleLogSheetState} />
-            </CustomModal>
-          )}
-        </>
-      )
-    }
-
-    if (fieldName === 'coneSetting') {
-      if (
-        !values.coneSetting &&
-        activeTabId &&
-        visitSetupState &&
-        visitSetupState[activeTabId] &&
-        visitSetupState[activeTabId].values
-      ) {
-        const { stream } = visitSetupState[activeTabId].values
-        if (stream && stream.toLowerCase().includes('battle')) {
-          setFieldValue('coneSetting', 'full')
-        } else if (stream && stream.toLowerCase().includes('clear')) {
-          setFieldValue('coneSetting', 'half')
-        } else {
-          setFieldValue('coneSetting', 'full')
-        }
-      }
-      return (
-        <FormControl w='100%'>
-          <FormControl.Label>
-            <Text color='black' fontSize='xl'>
-              Cone Setting
-            </Text>
-          </FormControl.Label>
-          <RadioGroup
-            // name='coneSetting'
-            accessibilityLabel='cone setting'
-            value={`${values.coneSetting}`}
-            onChange={(value: any) => {
-              setFieldTouched('coneSetting', true)
-              if (value === 'full') {
-                setFieldValue('coneSetting', 'full')
-              } else {
-                setFieldValue('coneSetting', 'half')
-              }
-            }}
-          >
-            <HStack space={4} marginBottom={5}>
-              <Radio value='full'>
-                <RadioIndicator style={{ width: 25, height: 25 }}>
-                  <View
-                    style={{
-                      width: 13,
-                      height: 13,
-                      borderRadius: 9999,
-                      backgroundColor:
-                        values[fieldName] === 'full'
-                          ? '#007C7C'
-                          : 'transparent',
-                    }}
-                  />
-                </RadioIndicator>
-                <RadioLabel selectionColor='primary' size='lg'>
-                  Full
-                </RadioLabel>
-              </Radio>
-              <Radio value='half'>
-                <RadioIndicator style={{ width: 25, height: 25 }}>
-                  <View
-                    style={{
-                      width: 13,
-                      height: 13,
-                      borderRadius: 9999,
-                      backgroundColor:
-                        values[fieldName] === 'half'
-                          ? '#007C7C'
-                          : 'transparent',
-                    }}
-                  />
-                </RadioIndicator>
-                <RadioLabel selectionColor='primary' size='lg'>
-                  Half
-                </RadioLabel>
-              </Radio>
-            </HStack>
-          </RadioGroup>
-        </FormControl>
-      )
-    }
-
-    if (fieldName === 'ysiTurbidity') {
-      return (
-        <YSITurbidity
-          {...{
-            touched,
-            errors,
-            values,
-            handleChange,
-            handleBlur,
-            setFieldValue,
-            validationSchema,
-            inputRefs,
-          }}
-        />
-      )
-    }
-
-    if (fieldName === 'riverDepth') {
-      return (
-        <RiverDepth
-          {...{
-            touched,
-            errors,
-            values,
-            handleChange,
-            handleBlur,
-            setFieldValue,
-            validationSchema,
-            inputRefs,
-            unitAbbrev,
-          }}
-        />
-      )
     }
 
     if (fieldName === 'dataRecorder') {
@@ -317,10 +115,10 @@ const ConditionalTrapVisitFields = ({
               selectedValue={values.dataRecorder}
               placeholder='Select Data Recorder'
               onValueChange={(itemValue: string) => {
-                setFieldValue('dataRecorder', itemValue).then(() => {
-                  setFieldTouched('dataRecorder', true)
-                })
+                setFieldValue('dataRecorder', itemValue)
+                setFieldTouched('dataRecorder', true)
               }}
+              setFieldTouched={() => setFieldTouched('dataRecorder')}
               selectOptions={values?.crew?.map((crewMember: any) => ({
                 label: crewMember,
                 value: crewMember,

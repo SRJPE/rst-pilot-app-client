@@ -14,7 +14,6 @@ import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
 import MeasureMetPlusCount from '@/src/components/form/MeasureMetPlusCount'
 import MultiSpeciesModalContent from '@/src/components/form/MultiSpeciesModalContent'
 import CustomModal from '@/src/components/Shared/CustomModal'
-import CustomModalHeader from '@/src/components/Shared/CustomModalHeader'
 import {
   removeLastForkLengthEntered,
   resetBatchCountSlice,
@@ -27,6 +26,9 @@ import {
 import { TabStateI } from '@/src/redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '@/src/redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '@/src/redux/store'
+import CustomModalHeader, {
+  AddFishModalHeaderButton,
+} from '../../components/Shared/CustomModalHeader'
 import {
   calculateLastFish,
   checkFishMeasureProtocol,
@@ -226,7 +228,7 @@ const MultiSpecies = ({
           (flObj: any) => flObj.forkLength && !flObj.plusCount
         ),
         plusCounts: forkLengthsArray.filter(
-          (flObj: any) => flObj.numFishCaught && flObj.plusCount
+          (flObj: any) => Number(flObj.numFishCaught) && flObj.plusCount
         ),
       }
 
@@ -352,7 +354,7 @@ const MultiSpecies = ({
         run: flObj?.runDefinition,
         lifeStage: flObj?.lifeStage?.toLowerCase(),
         species: flObj?.species,
-        numFishCaught: flObj?.numFishCaught || 1,
+        numFishCaught: Number(flObj?.numFishCaught) || 1,
         plusCount: flObj?.plusCount || false,
       }))
 
@@ -361,14 +363,15 @@ const MultiSpecies = ({
       const combinedFishStoreObj: Record<string, any> = { ...existingFishStore }
 
       let total = Object.values(existingFishStore).reduce(
-        (sum, fishObj) => sum + ((fishObj as any).numFishCaught || 0),
+        (sum: number, fishObj) =>
+          sum + (Number((fishObj as any).numFishCaught) || 0),
         0
-      ) as number
+      )
 
       let nextIndex = Object.keys(combinedFishStoreObj).length
       batchCountFishStore.forEach(fish => {
         combinedFishStoreObj[nextIndex++] = fish
-        total += fish.numFishCaught || 0
+        total += Number(fish.numFishCaught) || 0
       })
 
       setTotalCatchCount(total)
@@ -420,7 +423,7 @@ const MultiSpecies = ({
         run: flObj?.runDefinition,
         lifeStage: flObj?.lifeStage?.toLowerCase(),
         species: flObj?.species,
-        numFishCaught: flObj?.numFishCaught || 1,
+        numFishCaught: Number(flObj?.numFishCaught) || 1,
         plusCount: flObj?.plusCount || false,
       }))
 
@@ -429,9 +432,10 @@ const MultiSpecies = ({
       const combinedFishStoreObj: Record<string, any> = { ...existingFishStore }
 
       let total = Object.values(existingFishStore).reduce(
-        (sum, fishObj) => sum + ((fishObj as any).numFishCaught || 0),
+        (sum: number, fishObj) =>
+          sum + (Number((fishObj as any).numFishCaught) || 0),
         0
-      ) as number
+      )
 
       let nextIndex = Object.keys(combinedFishStoreObj).length
       batchCountFishStore.forEach(fish => {
@@ -476,6 +480,18 @@ const MultiSpecies = ({
     programFormFieldsObj?.['eggs'] &&
     speciesRadioValue.toLocaleLowerCase().includes('shrimp')
 
+  const buttonNav = (screenName: string) => {
+    // @ts-ignore
+    navigation.navigate('Trap Visit Form', {
+      screen: screenName,
+      params: {
+        fishMeasureProtocol: route.params?.fishMeasureProtocol,
+        selectedProgramObj: route.params?.selectedProgramObj,
+      },
+    })
+    closeFishMeasureMetModal()
+  }
+
   if (!isFocused) {
     return null
   }
@@ -496,14 +512,16 @@ const MultiSpecies = ({
                 closeModal={() => dispatch(resetBatchCountSlice())}
                 headerText={
                   tabSlice.activeTabId
-                    ? `Multi Species Entry - ${
-                        tabSlice.tabs[tabSlice.activeTabId].name
-                      }`
+                    ? `${tabSlice.tabs[tabSlice.activeTabId].name}`
                     : 'Multi Species Entry'
                 }
                 showConfirmationModal={true}
                 showHeaderButton={true}
                 navigateBack={true}
+                headerButton={AddFishModalHeaderButton({
+                  activeTab: 'Multi',
+                  buttonNav,
+                })}
               />
             </HStack>
             <Box px='2%'>

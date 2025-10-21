@@ -32,26 +32,29 @@ const MultiSpeciesChartTab = ({
       borderRadius={15}
       // overflow='hidden'
     >
-      {Array.from({ length: 10 }).map((_, i) => (
-        <Box
-          key={i}
-          flex={1}
-          flexBasis={'9.5%'}
-          h={41}
-          borderWidth={1}
-          background='gray.200'
-          style={{
-            borderTopLeftRadius: i === 0 ? 15 : 0,
-            borderTopRightRadius: i === 9 ? 15 : 0,
-          }}
-        >
-          <Center h={'full'} w={'full'}>
-            <Text fontSize={18} bold>
-              {i + 1}
-            </Text>
-          </Center>
-        </Box>
-      ))}
+      {Array.from({ length: 10 }).map((_, i) => {
+        return (
+          <Box
+            key={i}
+            width={'10%'}
+            flex={1}
+            // flexBasis={'9.5%'}
+            h={41}
+            borderWidth={1}
+            background='gray.200'
+            style={{
+              borderTopLeftRadius: i === 0 ? 15 : 0,
+              borderTopRightRadius: i === 9 ? 15 : 0,
+            }}
+          >
+            <Center h={'full'} w={'full'}>
+              <Text fontSize={18} bold>
+                {i + 1}
+              </Text>
+            </Center>
+          </Box>
+        )
+      })}
 
       <FlatList
         data={slots}
@@ -61,7 +64,7 @@ const MultiSpeciesChartTab = ({
         renderItem={({ item }) => {
           const { cellData, index } = item
           return cellData.forkLength ? (
-            <Box flex={1} flexBasis={'9.5%'} h={50} position='relative'>
+            <Box width={'10%'} h={50} position='relative'>
               <FishDetailPopover
                 cellData={cellData}
                 onRemove={
@@ -72,7 +75,7 @@ const MultiSpeciesChartTab = ({
               />
             </Box>
           ) : (
-            <Box flex={1} flexBasis={'9.5%'} h={50}>
+            <Box width={'10%'} h={50}>
               <Center borderWidth={1} h='full' w='full' background='white'>
                 <Text fontSize={18}>{''}</Text>
               </Center>

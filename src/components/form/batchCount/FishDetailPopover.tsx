@@ -8,6 +8,7 @@ import {
   Text,
   Popover,
 } from 'native-base'
+import { startCase } from 'lodash'
 
 interface FishDetailPopoverProps {
   cellData: {
@@ -16,7 +17,8 @@ interface FishDetailPopoverProps {
     existingMark: boolean
     fishConditions: string[]
     lifeStage: string | null
-    runDefinition: string | null
+    runDefinition?: string | null
+    run?: string | null
     species: string
     eggs?: boolean
     milting?: boolean
@@ -71,6 +73,7 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
     fishConditions,
     lifeStage,
     runDefinition,
+    run,
     species,
     adiposeClipped,
     weight,
@@ -79,9 +82,11 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
     milting,
   } = cellData
 
+  const runValue = runDefinition || run || ''
+
   const formattedSpecies =
-    species === 'Chinook salmon' && lifeStage && runDefinition
-      ? `${species} - ${lifeStage} (${runDefinition})`
+    species === 'Chinook salmon' && lifeStage && runValue
+      ? `${species} - ${startCase(lifeStage)} (${runValue})`
       : species || 'N/A'
 
   return (

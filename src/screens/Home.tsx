@@ -19,7 +19,11 @@ import { RootState, AppDispatch } from '../redux/store'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { getUserPrograms } from '../redux/reducers/userCredentialsSlice'
 import AlertDialog from '../components/Shared/AlertDialog'
-import { retrieveTrapVisitsRequiringTurbidity } from '../utils/helpers/helperFunctions'
+import {
+  retrieveTrapVisitsRequiringTurbidity,
+  retrieveGeneticSamplesRequiringLabData,
+} from '../utils/helpers/helperFunctions'
+import { compact } from 'lodash'
 
 const styles = StyleSheet.create({
   recentItemsContainer: {
@@ -61,19 +65,19 @@ const Home = ({
   navigation,
   userCredentialsStore,
   previousTrapVisits,
-  visitSetupDefaultState,
+  previousCatchRecords,
 }: {
   navigation: any
   userCredentialsStore: any
   previousTrapVisits: any
-  visitSetupDefaultState: any
+  previousCatchRecords: any[]
 }) => {
-  // const visitsRequiringTurbidity =
-  //   retrieveTrapVisitsRequiringTurbidity(previousTrapVisits)
-
   const [staggerOpen, setStaggerOpen] = useState(false as boolean)
   const [opacity, setOpacity] = useState(1 as number)
   const [visitsRequiringTurbidity, setVisitsRequiringTurbidity] = useState(
+    [] as any[]
+  )
+  const [geneticsRequiringLabData, setGeneticsRequiringLabData] = useState(
     [] as any[]
   )
   const dispatch = useDispatch<AppDispatch>()
@@ -85,6 +89,12 @@ const Home = ({
       retrieveTrapVisitsRequiringTurbidity(previousTrapVisits)
     )
   }, [previousTrapVisits])
+
+  useEffect(() => {
+    setGeneticsRequiringLabData(
+      retrieveGeneticSamplesRequiringLabData(previousCatchRecords)
+    )
+  }, [previousCatchRecords])
 
   useEffect(() => {
     staggerOpen ? setOpacity(0.25) : setOpacity(1)
@@ -188,6 +198,22 @@ const Home = ({
           />
         </View>
       )}
+      {geneticsRequiringLabData.length > 0 && (
+        <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
+          <AlertDialog
+            title='Action Required: Add Genetic Sample Data'
+            description={`There ${
+              geneticsRequiringLabData.length === 1
+                ? 'is 1 genetic sample'
+                : `are ${geneticsRequiringLabData.length} genetic samples`
+            } missing lab data. Please add the missing data to complete your records.`}
+            onPress={() => {
+              navigation.navigate('Genetics')
+              setStaggerOpen(false)
+            }}
+          />
+        </View>
+      )}
 
       <BottomNavigation
         navigation={navigation}
@@ -201,9 +227,10 @@ const Home = ({
 const mapStateToProps = (state: RootState) => {
   return {
     userCredentialsStore: state.userCredentials,
-    visitSetupDefaultState: state.visitSetupDefaults,
     previousTrapVisits:
       state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
+    previousCatchRecords:
+      state.trapVisitFormPostBundler.previousCatchRawSubmissions,
   }
 }
 

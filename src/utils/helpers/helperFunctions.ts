@@ -1,4 +1,4 @@
-import type { TrapVisitResponse } from '../interfaces'
+import { compact } from 'lodash'
 
 export const generateErrorMessage = (errorCode: string) => {
   let errorMessage
@@ -190,12 +190,14 @@ export const getLadObject = ({
 }
 
 export const getTimeProperty = (trapOperationsValues: any) => {
-  if (trapOperationsValues?.trapVisitStopTime) {
+  if (trapOperationsValues?.trapVisitTime) {
+    return 'trapVisitTime'
+  } else if (trapOperationsValues?.sampleTime) {
+    return 'sampleTime'
+  } else if (trapOperationsValues?.trapVisitStopTime) {
     return 'trapVisitStopTime'
   } else if (trapOperationsValues?.trapVisitStartTime) {
     return 'trapVisitStartTime'
-  } else if (trapOperationsValues?.sampleTime) {
-    return 'sampleTime'
   }
 
   return null
@@ -209,4 +211,22 @@ export function formatDateString_MM_DD_YY(date: Date | string) {
   const year = d.getFullYear().toString().slice(-2) // last 2 digits
 
   return `${month}_${day}_${year}`
+}
+
+export const retrieveGeneticSamplesRequiringLabData = (
+  previousCatchRecords: any[]
+) => {
+  const geneticsRequiringData = previousCatchRecords
+    .map((catchSubmission: any) => {
+      return catchSubmission.createdGeneticSamplingDataResponse
+    })
+    .flat()
+    .filter(
+      (geneticObj: any) =>
+        geneticObj !== null &&
+        geneticObj.labWeight === null &&
+        ['D', 'I'].includes(geneticObj.takeCode)
+    )
+
+  return geneticsRequiringData
 }
