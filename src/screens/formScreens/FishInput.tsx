@@ -27,9 +27,13 @@ import {
 } from '../../redux/reducers/formSlices/navigationSlice'
 import FishInputDataTable from '../../components/form/FishInputDataTable'
 import PlusCountModalContent from '../../components/form/PlusCountModalContent'
-import { Ionicons } from '@expo/vector-icons'
 import { DeviceEventEmitter, useWindowDimensions } from 'react-native'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import { StackActions } from '@react-navigation/native'
+import { navigateHelper } from '../../utils/utils'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { find, keyBy, mapValues } from 'lodash'
+import FishEntriesSummary from '../../components/form/FishEntriesSummary'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
@@ -47,6 +51,8 @@ const mapStateToProps = (state: RootState) => {
     tabSlice: state.tabSlice,
     fishInputSlice: state.fishInput,
     navigationSlice: state.navigation,
+    visitSetupState: state.visitSetup,
+    visitSetupDefaultsState: state.visitSetupDefaults,
   }
 }
 
@@ -57,6 +63,8 @@ const FishInput = ({
   tabSlice,
   fishInputSlice,
   navigationSlice,
+  visitSetupState,
+  visitSetupDefaultsState,
 }: {
   navigation: any
   activeTabId: string
@@ -64,12 +72,18 @@ const FishInput = ({
   tabSlice: TabStateI
   fishInputSlice: any
   navigationSlice: any
+  visitSetupState: any
+  visitSetupDefaultsState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [addPlusCountModalOpen, setAddPlusCountModalOpen] = useState(
     false as boolean
   )
   const [showError, setShowError] = useState(false as boolean)
+  const [fishMeasureProtocol, setFishMeasureProtocol] = useState(
+    {} as Record<string, number>
+  )
+  const [totalCatchCount, setTotalCatchCount] = useState(0)
   const [addFishModalTab, setAddFishModalTab] = useState<
     'Individual' | 'Batch'
   >('Individual')
@@ -78,11 +92,73 @@ const FishInput = ({
       ? ([...speciesCaptured] as Array<string>)
       : (['YOY Chinook'] as Array<string>)
   )
-  const { height: screenHeight } = useWindowDimensions()
+  const [lastFishEntry, setLastFishEntry] = useState<any>(null)
+
+  const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
+  const errorMessage =
+    tabSlice.tabs[tabSlice.activeTabId || activeTabId]?.errorDetails[
+      'Fish Input'
+    ]?.fishStore
 
   useEffect(() => {
     checkboxGroupValue.length < 1 ? setShowError(true) : setShowError(false)
   }, [checkboxGroupValue])
+
+  useEffect(() => {
+    if (!tabSlice?.activeTabId || !fishInputSlice) {
+      setTotalCatchCount(0)
+      setLastFishEntry(null)
+      return
+    }
+
+    const fishStore = fishInputSlice?.[tabSlice.activeTabId]?.fishStore as {
+      [key: string]: any
+    }
+
+    if (!fishStore) {
+      setTotalCatchCount(0)
+      setLastFishEntry(null)
+      return
+    }
+
+    const total = Object.values(fishStore).reduce(
+      (sum: number, fishObj: any) =>
+        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
+      0
+    ) as number
+
+    setTotalCatchCount(total)
+    const lastFishEntry = Object.values(fishStore).findLast(
+      fishEntry => !fishEntry.plusCount
+    )
+    setLastFishEntry(lastFishEntry || null)
+  }, [tabSlice.activeTabId, fishInputSlice])
+
+  useEffect(() => {
+    const activeTabId = tabSlice.activeTabId || 'placeholderId'
+
+    const selectedProgramId = visitSetupState[activeTabId]?.values?.programId
+    const selectedProgramObj = find(visitSetupDefaultsState.programs, {
+      programId: selectedProgramId,
+    })
+    if (!selectedProgramObj) return
+    setSelectedProgramObj(selectedProgramObj)
+
+    const fishMeasureProtocolObj = mapValues(
+      keyBy(selectedProgramObj?.fishMeasureProtocol, function (obj) {
+        let keyName = obj.commonname
+        if (obj.runName) {
+          keyName += ` - ${obj.runName}`
+        }
+        if (obj.lifeStageName) {
+          keyName += ` - ${obj.lifeStageName}`
+        }
+        return keyName
+      }),
+      (obj: any) => Number(obj.numberMeasured) || 0
+    )
+    setFishMeasureProtocol(fishMeasureProtocolObj)
+  }, [visitSetupState, tabSlice, visitSetupDefaultsState])
 
   const handleSubmit = () => {
     dispatch(
@@ -94,105 +170,55 @@ const FishInput = ({
     dispatch(markFishInputCompleted({ tabId: activeTabId, bool: true }))
     let stepCompletedCheck = true
 
-    if (stepCompletedCheck)
+    if (stepCompletedCheck) {
       dispatch(markStepCompleted({ propName: 'fishInput' }))
-    console.log('🚀 ~ handleSubmit ~ FishInput', checkboxGroupValue)
+    }
   }
 
-  const submissionLoader = () => {
-    if (activeTabId && activeTabId != 'placeholderId') {
-      const callback = () => {
-        navigation.navigate('Trap Visit Form', {
-          screen: navigationSlice.steps[navigationSlice.activeStep + 1]?.name,
-        })
-        dispatch(updateActiveStep(navigationSlice.activeStep + 1))
-      }
+  const submissionLoader = (direction: 'left' | 'right') => {
+    const destination =
+      direction === 'left' ? 'Fish Processing' : 'Trap Post-Processing'
 
-      navigation.push('Loading...')
-
-      setTimeout(() => {
-        DeviceEventEmitter.emit('event.load', {
-          process: () => handleSubmit(),
-          callback,
-        })
-      }, 1000)
+    const callback = () => {
+      navigateHelper(
+        destination,
+        navigationSlice,
+        navigation,
+        dispatch,
+        updateActiveStep
+      )
     }
+
+    navigation.dispatch(StackActions.replace('Loading...'))
+
+    setTimeout(() => {
+      DeviceEventEmitter.emit('event.load', {
+        process: () => handleSubmit(),
+        callback,
+      })
+      showSlideAlert(dispatch)
+    }, 1000)
   }
 
   return (
     <>
       <ScrollView
         flex={1}
-        scrollEnabled={screenHeight < 1180}
+        scrollEnabled
         bg='#fff'
         py='0%'
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <Heading mb={showError ? '0' : '5'} px='5%'>
-          Which species were captured?
+        <Heading mt={5} mb={showError ? '0' : '5'} px='4'>
+          Enter Catch
         </Heading>
-        <VStack space={6}>
-          <FormControl>
-            {showError && (
-              <HStack space={1}>
-                <Icon
-                  marginTop={'.5'}
-                  as={Ionicons}
-                  name='alert-circle-outline'
-                  color='error'
-                />
-                <Text style={{ fontSize: 14, color: '#b71c1c' }}>
-                  {'Species required' as string}
-                </Text>
-              </HStack>
-            )}
-            <Checkbox.Group //https://github.com/GeekyAnts/NativeBase/issues/5073
-              colorScheme='green'
-              px='10%'
-              defaultValue={checkboxGroupValue}
-              accessibilityLabel='Select the species captured'
-              onChange={(values: any) => setCheckboxGroupValue(values)}
-            >
-              <Checkbox
-                value='YOY Chinook'
-                my='1'
-                _checked={{ bg: 'primary', borderColor: 'primary' }}
-              >
-                YOY Chinook
-              </Checkbox>
-              <Checkbox
-                value='Yearling Chinook'
-                my='1'
-                _checked={{ bg: 'primary', borderColor: 'primary' }}
-              >
-                Yearling Chinook
-              </Checkbox>
-              <Checkbox
-                value='Recaptured Chinook'
-                my='1'
-                _checked={{ bg: 'primary', borderColor: 'primary' }}
-              >
-                Recaptured Chinook
-              </Checkbox>
-              <Checkbox
-                value='Steelhead'
-                my='1'
-                _checked={{ bg: 'primary', borderColor: 'primary' }}
-              >
-                Steelhead
-              </Checkbox>
-              <Checkbox
-                value='Other'
-                my='1'
-                _checked={{ bg: 'primary', borderColor: 'primary' }}
-              >
-                Other
-              </Checkbox>
-            </Checkbox.Group>
-          </FormControl>
-
-          <HStack space={10} px='5%'>
+        <Text fontSize='lg' px='4' mb={5}>
+          Record catch data using the individual fish input, the batch entry, or
+          plus count.
+        </Text>
+        <VStack space={4}>
+          <HStack space={10} px='4'>
             <Button
               bg='primary'
               p='3'
@@ -200,11 +226,15 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Add Fish')
+                navigation.replace('Add Fish', {
+                  // Add any props you want to pass here, for example:
+                  fishMeasureProtocol,
+                  selectedProgramObj,
+                })
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>
-                Input Fish Measurements
+                Input Fish
               </Text>
             </Button>
             <Button
@@ -214,14 +244,35 @@ const FishInput = ({
               flex='1'
               shadow='3'
               onPress={() => {
-                navigation.navigate('Batch Count')
+                navigation.replace('Batch Count', {
+                  // Add any props you want to pass here, for example:
+                  fishMeasureProtocol,
+                  selectedProgramObj,
+                })
               }}
             >
               <Text fontSize='sm' fontWeight='bold' color='white'>
-                Input Batch Count
+                Batch Count
               </Text>
             </Button>
-
+            <Button
+              bg='primary'
+              p='3'
+              borderRadius='5'
+              flex='1'
+              shadow='3'
+              onPress={() => {
+                navigation.replace('Multi Species', {
+                  // Add any props you want to pass here, for example:
+                  fishMeasureProtocol,
+                  selectedProgramObj,
+                })
+              }}
+            >
+              <Text fontSize='sm' fontWeight='bold' color='white'>
+                Multi-Species
+              </Text>
+            </Button>
             <Button
               bg='primary'
               p='3'
@@ -237,35 +288,58 @@ const FishInput = ({
               </Text>
             </Button>
           </HStack>
-
+          <HStack>
+            <Text style={{ color: 'red', paddingHorizontal: 20 }}>
+              {errorMessage}
+            </Text>
+          </HStack>
+          {lastFishEntry && tabSlice.activeTabId && fishMeasureProtocol && (
+            <Box px='4'>
+              <Heading mb={0}>Catch Summary</Heading>
+              <FishEntriesSummary
+                lastFishEntry={lastFishEntry}
+                totalCatchCount={totalCatchCount}
+                fishMeasureProtocol={fishMeasureProtocol || {}}
+                fishMeasureCounts={
+                  fishInputSlice?.[tabSlice.activeTabId]?.fishMeasureCounts
+                }
+              />
+            </Box>
+          )}
           <Box px='4'>
-            <Heading>Catch Table</Heading>
+            <HStack space={2} alignItems='center'>
+              <Heading mb={0}>Catch Table</Heading>
+            </HStack>
             <FishInputDataTable navigation={navigation} />
           </Box>
         </VStack>
         {/* --------- Modals --------- */}
-        <CustomModal
-          isOpen={addPlusCountModalOpen}
-          closeModal={() => {
-            if (activeTabId && activeTabId != 'placeholderId') {
-              setAddPlusCountModalOpen(false)
-              dispatch(
-                markFishInputModalOpen({ tabId: activeTabId, bool: false })
-              )
-            }
-          }}
-          height='1/2'
-        >
-          <PlusCountModalContent
+        {addPlusCountModalOpen && (
+          <CustomModal
+            isOpen={addPlusCountModalOpen}
             closeModal={() => {
-              setAddPlusCountModalOpen(false)
+              if (activeTabId && activeTabId != 'placeholderId') {
+                setAddPlusCountModalOpen(false)
+                dispatch(
+                  markFishInputModalOpen({ tabId: activeTabId, bool: false })
+                )
+              }
             }}
-          />
-        </CustomModal>
+            height='100%'
+          >
+            <PlusCountModalContent
+              closeModal={() => {
+                setAddPlusCountModalOpen(false)
+              }}
+            />
+          </CustomModal>
+        )}
       </ScrollView>
       <NavButtons
         navigation={navigation}
-        handleSubmit={submissionLoader}
+        handleSubmit={(buttonDirection: 'left' | 'right') => {
+          submissionLoader(buttonDirection)
+        }}
         shouldProceedToLoadingScreen={true}
         values={checkboxGroupValue}
       />

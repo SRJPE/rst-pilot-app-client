@@ -17,7 +17,7 @@ export interface TrapOperationsValuesI {
   flowMeasureUnit: string
   waterTemperature: number | null
   waterTemperatureUnit: string
-  waterTurbidity: number | null
+  waterTurbidity: number | null | ''
   waterTurbidityUnit: string
   recordTurbidityInPostProcessing: boolean
   coneSetting: string | null
@@ -40,8 +40,8 @@ const initialState: InitialStateI = {
       waterTemperatureUnit: '°C',
       waterTurbidity: null,
       waterTurbidityUnit: 'ntu',
-      recordTurbidityInPostProcessing: false,
-      coneSetting: 'full',
+      recordTurbidityInPostProcessing: true,
+      coneSetting: null,
       rpm1: null,
       rpm2: null,
       rpm3: null,
@@ -63,13 +63,12 @@ export const trapOperationsSlice = createSlice({
         completed: true,
         values: {
           ...values,
-          trapVisitStartTime: state[tabId]
-            ? state[tabId].values.trapVisitStartTime
-            : action.payload.values.trapVisitStartTime,
-
-          trapVisitStopTime: state[tabId]
-            ? state[tabId].values.trapVisitStopTime
-            : action.payload.values.trapVisitStopTime,
+          trapVisitStartTime: action?.payload?.values?.trapVisitStartTime
+            ? action.payload.values.trapVisitStartTime
+            : state?.[tabId]?.values?.trapVisitStartTime,
+          trapVisitStopTime: action?.payload?.values?.trapVisitStopTime
+            ? action.payload.values.trapVisitStopTime
+            : state?.[tabId]?.values?.trapVisitStopTime,
         },
         errors,
       }

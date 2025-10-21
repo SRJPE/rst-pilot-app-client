@@ -3,18 +3,33 @@ import 'dotenv/config'
 export default ({ config }) => {
   return {
     ...config,
-    name: 'rst-pilot-app',
+    name: 'DataTackle',
     slug: 'rst-pilot-app',
     owner: 'flowwest',
     runtimeVersion: {
       policy: 'sdkVersion',
     },
     ios: {
-      bundleIdentifier: 'com.flowwest.rstapp',
+      bundleIdentifier: 'com.flowwest.datatackle',
       supportsTablet: true,
+      infoPlist: {
+        NSLocationWhenInUseUsageDescription:
+          'This app requires access to your location while using the app.',
+        NSLocationAlwaysUsageDescription:
+          'This app requires access to your location even when the app is in the background.',
+        NSLocationAlwaysAndWhenInUseUsageDescription:
+          'This app needs access to your location both when using the app and in the background to provide a better experience.',
+      },
+    },
+    android: {
+      package: 'com.flowwest.datatackle',
     },
     extra: {
-      REACT_APP_BASE_URL: process.env.REACT_APP_BASE_URL,
+      EXPO_PUBLIC_BASE_URL: process.env.EXPO_PUBLIC_BASE_URL,
+      EXPO_PUBLIC_CLIENT_ID: process.env.EXPO_PUBLIC_CLIENT_ID,
+      EXPO_PUBLIC_CLIENT_SECRET_VALUE:
+        process.env.EXPO_PUBLIC_CLIENT_SECRET_VALUE,
+      EXPO_PUBLIC_CLIENT_SECRET_ID: process.env.EXPO_PUBLIC_CLIENT_SECRET_ID,
       eas: {
         projectId: 'a6f6224b-3c38-4476-ad72-6cbea4d1bdc6',
       },
@@ -22,6 +37,7 @@ export default ({ config }) => {
     updates: {
       url: 'https://u.expo.dev/a6f6224b-3c38-4476-ad72-6cbea4d1bdc6',
     },
-    plugins: ['expo-secure-store'],
+    scheme: 'com.onmicrosoft.rstb2c.rsttabletapp',
+    plugins: ['expo-secure-store', 'expo-web-browser'],
   }
 }

@@ -10,7 +10,7 @@ export interface PermitInformationInitialStateI {
     dateExpired: Date
     waterTemperatureThreshold: number | null
     flowThreshold: number | null
-    trapCheckFrequency: number | null
+    trapCheckFrequency: any | null
   }
   takeAndMortalityValues: TakeAndMortalityValuesI
 }
@@ -91,23 +91,27 @@ export const permitInformationSlice = createSlice({
         }
       }
     },
-    deleteIndividualTakeAndMortality: (state, action) => {
+    removeIndividualTakeAndMortality: (state, action) => {
+      const uid = action.payload
       let takeAndMortalityValuesStoreCopy = cloneDeep(
         state.takeAndMortalityValues
       )
-      let id: any = null
 
-      for (let key in takeAndMortalityValuesStoreCopy) {
-        if (takeAndMortalityValuesStoreCopy[key].uid === action.payload.uid) {
-          id = key
-          delete takeAndMortalityValuesStoreCopy[id]
-          state.takeAndMortalityValues = takeAndMortalityValuesStoreCopy
-        }
-      }
-    },
-    updateAllPermitInformationFromExisting: (state, action) => {
-      state.values = action.payload.values
-      state.takeAndMortalityValues = action.payload.takeAndMortalityValues
+      const takeAndMoralityArray = Object.values(
+        takeAndMortalityValuesStoreCopy
+      )
+
+      const updatedTakeAndMoralityArray = takeAndMoralityArray.filter(
+        item => item.uid !== uid
+      )
+
+      const updatedTakeAndMoralityObject: TakeAndMortalityValuesI =
+        updatedTakeAndMoralityArray.reduce(
+          (obj, item, index) => Object.assign(obj, { [index]: item }),
+          {}
+        )
+
+      state.takeAndMortalityValues = updatedTakeAndMoralityObject
     },
   },
 })
@@ -117,8 +121,7 @@ export const {
   savePermitInformationValues,
   saveIndividualTakeAndMortality,
   updateIndividualTakeAndMortality,
-  deleteIndividualTakeAndMortality,
-  updateAllPermitInformationFromExisting,
+  removeIndividualTakeAndMortality,
 } = permitInformationSlice.actions
 
 export default permitInformationSlice.reducer

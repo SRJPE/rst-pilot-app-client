@@ -3,21 +3,22 @@ import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { assign, pick, cloneDeep } from 'lodash'
-import { Row, IconButton, Icon, Box } from 'native-base'
+import { Row, IconButton, Icon, Box, Text, VStack } from 'native-base'
 import { FishStoreI } from '../../redux/reducers/formSlices/fishInputSlice'
 import { Entypo } from '@expo/vector-icons'
+import { generatePaginationRecordsLabel } from '../../utils/helpers/helperFunctions'
 
 const headers = [
   'Species',
   'Count',
-  'Fork Len.',
+  'FL',
   'Run',
   'Weight',
   'Life Stage',
   'Clipped',
   'Marks',
   'Dead',
-  'Recapture',
+  // 'Recapture',
   '',
 ]
 
@@ -31,7 +32,7 @@ const sortedDataByHeaders = [
   'adiposeClipped',
   'existingMarks',
   'dead',
-  'willBeUsedInRecapture',
+  // 'willBeUsedInRecapture',
 ]
 
 const emptyTableData = {
@@ -44,7 +45,7 @@ const emptyTableData = {
   adiposeClipped: '---',
   existingMarks: '---',
   dead: '---',
-  willBeUsedInRecapture: '---',
+  // willBeUsedInRecapture: '---',
 }
 
 const FishInputDataTable = ({
@@ -74,7 +75,7 @@ const FishInputDataTable = ({
       page * numberOfItemsPerPage + numberOfItemsPerPage
     )
     const pageRowsSliced: any = {}
-    pageRowsIndexes.forEach((idx) => {
+    pageRowsIndexes.forEach(idx => {
       pageRowsSliced[Number(idx)] = fishStore[Number(idx)]
     })
 
@@ -87,7 +88,21 @@ const FishInputDataTable = ({
     if (`${obj[key]}` === 'null') {
       return '---'
     }
+    if (`${obj[key]}` === 'not recorded') {
+      return 'NR'
+    }
+    if (key === 'existingMarks') {
+      if (Array.isArray(obj[key])) {
+        return obj[key].length ? 'True' : 'False'
+      }
+      return '---'
+    }
     if (`${obj[key]}`) {
+      if (typeof obj[key] === 'string' || typeof obj[key] === 'boolean') {
+        return `${`${obj[key]}`.charAt(0).toUpperCase()}${`${obj[key]}`.slice(
+          1
+        )}`
+      }
       return `${obj[key]}`
     } else {
       return '---'
@@ -98,15 +113,15 @@ const FishInputDataTable = ({
     let sortedRows: any = {}
 
     const keys = Object.keys(obj)
-    keys.forEach((key) => {
-      let dataObj: any = cloneDeep(obj[Number(key)])
-      dataObj.existingMarks = dataObj.existingMarks.length
-      delete dataObj.UID
-      delete dataObj.fishCondition //come back to fix this
+    keys.forEach(key => {
+      const dataObj = pick(
+        cloneDeep(obj[Number(key)]),
+        sortedDataByHeaders
+      ) as any
       let dataObjPadded = { ...emptyTableData, ...dataObj }
 
       const dataObjKeys = Object.keys(dataObjPadded)
-      dataObjKeys.forEach((dataObjKey) => {
+      dataObjKeys.forEach(dataObjKey => {
         if (dataObjPadded[dataObjKey] === '') {
           dataObjPadded[dataObjKey] = '---'
         }
@@ -131,68 +146,92 @@ const FishInputDataTable = ({
     <DataTable>
       <DataTable.Header>
         {headers.map((header: string, idx: number) => (
-          <DataTable.Title key={`${header}-${idx}`}>{header}</DataTable.Title>
+          <DataTable.Title
+            key={`${header}-${idx}`}
+            style={{
+              flex: header === 'Species' ? 2 : 1,
+            }}
+          >
+            {header}
+          </DataTable.Title>
         ))}
       </DataTable.Header>
 
       {Object.keys(pageRows).map((rowKey, idx: number) => {
         return (
-          <Row key={`${rowKey}-${idx}`}>
-            <DataTable.Row key={`${rowKey}-${idx}`} style={{ flex: 1 }}>
-              {Object.keys(pageRows[rowKey as keyof typeof pageRows])
-                .sort(
-                  (a, b) =>
-                    sortedDataByHeaders.indexOf(a) -
-                    sortedDataByHeaders.indexOf(b)
-                )
-                .map((objKey: string | number, itemIdx: number) => {
-                  if (objKey !== 'plusCountMethod' && objKey !== 'plusCount') {
-                    return (
-                      <DataTable.Cell key={`${objKey}-${itemIdx}`}>
-                        {renderCell(
-                          pageRows[rowKey as keyof typeof pageRows],
-                          objKey
-                        )}
-                      </DataTable.Cell>
-                    )
-                  }
-                })}
-            </DataTable.Row>
-            <IconButton
-              marginY={3}
-              variant='solid'
-              bg='primary'
-              colorScheme='primary'
-              size='sm'
-              isDisabled={rowKey.includes('empty')}
-              onPress={() => {
-                if (!rowKey.includes('empty')) {
-                  if (fishStore[Number(rowKey)]) {
-                    navigation.navigate('Add Fish', {
-                      editModeData: {
-                        id: rowKey,
-                        ...fishStore[Number(rowKey)],
-                      },
-                    })
-                  }
+          <DataTable.Row key={`${rowKey}-${idx}`} style={{ flex: 1 }}>
+            {Object.keys(pageRows[rowKey as keyof typeof pageRows])
+              .sort(
+                (a, b) =>
+                  sortedDataByHeaders.indexOf(a) -
+                  sortedDataByHeaders.indexOf(b)
+              )
+              .map((objKey: string | number, itemIdx: number) => {
+                if (objKey !== 'plusCountMethod' && objKey !== 'plusCount') {
+                  return (
+                    <DataTable.Cell
+                      key={`${objKey}-${itemIdx}`}
+                      style={{
+                        flex: objKey === 'species' ? 2 : 1,
+                      }}
+                    >
+                      {renderCell(
+                        pageRows[rowKey as keyof typeof pageRows],
+                        objKey
+                      )}
+                    </DataTable.Cell>
+                  )
                 }
+              })}
+            <DataTable.Cell
+              key={`edit-row-${idx}`}
+              style={{
+                flex: 1,
               }}
             >
-              <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
-            </IconButton>
-          </Row>
+              <IconButton
+                marginY={3}
+                variant='solid'
+                bg='primary'
+                colorScheme='primary'
+                size='sm'
+                isDisabled={rowKey.includes('empty')}
+                onPress={() => {
+                  if (!rowKey.includes('empty')) {
+                    if (fishStore[Number(rowKey)]) {
+                      navigation.replace('Add Fish', {
+                        editModeData: {
+                          id: rowKey,
+                          ...fishStore[Number(rowKey)],
+                        },
+                      })
+                    }
+                  }
+                }}
+              >
+                <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
+              </IconButton>
+            </DataTable.Cell>
+          </DataTable.Row>
         )
       })}
-
       <DataTable.Pagination
         page={page}
         numberOfPages={Math.ceil(
           Object.keys(fishStore).length / numberOfItemsPerPage
         )}
-        label={`Page ${page + 1}`}
+        label={generatePaginationRecordsLabel(
+          page + 1,
+          numberOfItemsPerPage,
+          Object.keys(fishStore).length
+        )}
         onPageChange={(page: number) => setPage(page)}
         numberOfItemsPerPage={numberOfItemsPerPage}
       />
+      <VStack px='4' mb={10}>
+        <Text>NR: Not Recorded</Text>
+        <Text>---: Null</Text>
+      </VStack>
     </DataTable>
   )
 }

@@ -1,12 +1,21 @@
-import { Box, HStack, Text, Button, Icon } from 'native-base'
-import { useSelector, useDispatch, connect } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
-import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 import { Ionicons } from '@expo/vector-icons'
-import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
+import { StackActions } from '@react-navigation/native'
+import { FormikState } from 'formik'
+import { isEqual } from 'lodash'
+import { Box, Button, HStack, Icon, Text } from 'native-base'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import {
+  checkIfFormIsComplete,
+  resetNavigationSlice,
+  updateActiveStep,
+} from '../../redux/reducers/formSlices/navigationSlice'
+import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
+import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
-import { debounce, isEqual } from 'lodash'
+import { AppDispatch, RootState } from '../../redux/store'
+import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
+import { getAllTabProcessingResults } from '../../redux/reducers/formSlices/fishProcessingSlice'
 
 const NavButtons = ({
   navigation,
@@ -19,8 +28,11 @@ const NavButtons = ({
   tabSlice,
   visitSetupSlice,
   fishProcessingSlice,
+  // fishInput,
   reduxState,
   shouldProceedToLoadingScreen = false,
+  isValid,
+  resetForm,
 }: {
   navigation?: any
   handleSubmit?: any
@@ -31,9 +43,12 @@ const NavButtons = ({
   isPaperEntry?: boolean
   tabSlice: TabStateI
   visitSetupSlice: any
+  fishInput: any
   fishProcessingSlice: any
   reduxState: RootState
   shouldProceedToLoadingScreen?: boolean
+  isValid?: boolean
+  resetForm?: (nextState?: Partial<FormikState<any>> | undefined) => void
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
@@ -42,9 +57,18 @@ const NavButtons = ({
   const previousPage = navigationState.steps[activeStep - 1]?.name
   const [isPaperEntryStore, setIsPaperEntryStore] = useState(false)
 
+  const fishInput = useSelector((state: RootState) => state.fishInput)
+  const fishProcessing = useSelector((state: RootState) => state.fishProcessing)
   useEffect(() => {
     setIsPaperEntryStore(checkIsPaperEntryStore())
+    dispatch(checkIfFormIsComplete())
   }, [tabSlice.activeTabId])
+
+  useEffect(() => {
+    if (activePage === 'Incomplete Sections') {
+      dispatch(checkIfFormIsComplete())
+    }
+  }, [activePage])
 
   const checkIsPaperEntryStore = () => {
     if (isPaperEntry != null) return isPaperEntry
@@ -58,7 +82,7 @@ const NavButtons = ({
     return false
   }
   function useDeepCompareMemoize(value: any) {
-    const ref = useRef()
+    const ref = useRef<any>(null)
 
     if (!isEqual(value, ref.current)) {
       ref.current = value
@@ -70,7 +94,7 @@ const NavButtons = ({
   const checkWillBeHoldingFishForMarkRecapture = () => {
     if (tabSlice.activeTabId) {
       const tabsContainHoldingTrue = Object.keys(tabSlice.tabs).some(
-        (tabId) =>
+        tabId =>
           fishProcessingSlice?.[tabId]?.values
             ?.willBeHoldingFishForMarkRecapture
       )
@@ -88,7 +112,7 @@ const NavButtons = ({
       }
     }
 
-    navigation.navigate('Trap Visit Form', { screen: destination })
+    navigation.dispatch(StackActions.replace(destination))
     dispatch({
       type: updateActiveStep,
       payload: payload,
@@ -96,57 +120,37 @@ const NavButtons = ({
   }
 
   const navigateFlowRightButton = (values: any) => {
+    //this is now kind of redundant with the implementation of the loading screen
     switch (activePage) {
       case 'Visit Setup':
-        if (isPaperEntry) {
-          navigateHelper('Paper Entry')
-        } else {
-          navigateHelper('Trap Operations')
-        }
+        navigateHelper('Trap Operations')
         break
       case 'Trap Operations':
-        if (!isPaperEntryStore) {
-          if (values?.trapStatus === 'trap not functioning') {
-            navigateHelper('Non Functional Trap')
-          } else if (
-            values?.trapStatus === 'trap not in service - restart trapping'
-          ) {
-            navigateHelper('Started Trapping')
-          } else if (values?.flowMeasure > 1000) {
-            navigateHelper('High Flows')
-          } else if (values?.waterTemperatureUnit === '°C') {
-            if (values?.waterTemperature > 30) {
-              navigateHelper('High Temperatures')
-            } else {
-              navigateHelper('Fish Processing')
-            }
-          } else if (values?.waterTemperatureUnit === '°F') {
-            if (values?.waterTemperature > 86) {
-              navigateHelper('High Temperatures')
-            } else {
-              navigateHelper('Fish Processing')
-            }
-          } else {
-            navigateHelper('Fish Processing')
-          }
+        if (values?.trapStatus === 'trap not functioning') {
+          navigateHelper('Non Functional Trap')
+        } else if (
+          values?.trapStatus === 'trap not in service - restart trapping'
+        ) {
+          navigateHelper('Started Trapping')
+        } else {
+          navigateHelper('Fish Processing')
         }
         break
       case 'Fish Processing':
-        if (!isPaperEntryStore) {
-          if (values?.fishProcessedResult === 'no fish caught') {
-            navigateHelper('No Fish Caught')
-          } else if (
-            values?.fishProcessedResult ===
-              'no catch data, fish left in live box' ||
-            values?.fishProcessedResult === 'no catch data, fish released'
-          ) {
-            navigateHelper('Trap Post-Processing')
-          } else {
-            navigateHelper('Fish Input')
-          }
-        } else {
+        if (values?.fishProcessedResult === 'no fish caught') {
           navigateHelper('Trap Post-Processing')
+        } else if (
+          values?.fishProcessedResult ===
+            'no catch data, fish left in live box' ||
+          values?.fishProcessedResult === 'no catch data, fish released'
+        ) {
+          navigateHelper('Trap Post-Processing')
+        } else {
+          navigateHelper('Fish Input')
         }
+        break
+      case 'Fish Input':
+        navigateHelper('Trap Post-Processing')
         break
       case 'Trap Post-Processing':
         if (checkWillBeHoldingFishForMarkRecapture()) {
@@ -159,37 +163,38 @@ const NavButtons = ({
         navigateHelper('Incomplete Sections')
         break
       case 'Incomplete Sections':
-        console.log('🚀 INCOMPLETE SECTIONS CASE HIT')
         navigateHelper('Start Mark Recapture')
         break
       case 'High Flows':
-        navigateHelper('End Trapping')
+        navigateHelper('Start Mark Recapture')
         break
       case 'High Temperatures':
         navigateHelper('Fish Processing')
         break
+      case 'Non Functional Trap':
+        navigateHelper('Fish Processing')
+        break
       case 'No Fish Caught':
-        navigateHelper('Trap Post-Processing')
+        navigateHelper('Start Mark Recapture')
         break
       case 'Paper Entry':
         navigateHelper('Trap Operations')
         break
       case 'Started Trapping':
-        navigation.navigate('Home')
+        navigation?.navigate('Home')
         break
       default:
-        navigation.navigate('Trap Visit Form', {
-          screen: navigationState.steps[activeStep + 1]?.name,
-        })
-        dispatch(updateActiveStep(navigationState.activeStep + 1))
+        console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
         break
     }
   }
 
   const navigateFlowLeftButton = () => {
+    console.log('activePage', activePage)
     switch (activePage) {
       case 'Trap Operations':
-        if (isPaperEntryStore) navigateHelper('Paper Entry')
+        // if (isPaperEntryStore) navigateHelper('Paper Entry')
+        navigateHelper('Visit Setup')
         break
       case 'High Flows':
         navigateHelper('Trap Operations')
@@ -206,11 +211,23 @@ const NavButtons = ({
       case 'No Fish Caught':
         navigateHelper('Fish Processing')
         break
+      case 'Fish Input':
+        navigateHelper('Fish Processing')
+        break
       case 'Paper Entry':
         navigateHelper('Visit Setup')
         break
       case 'Started Trapping':
         navigateHelper('Trap Operations')
+        break
+      case 'Trap Post-Processing':
+        if (values?.fishProcessedResult === 'no fish caught') {
+          navigateHelper('Fish Processing')
+        } else if (values?.fishProcessedResult.includes('no catch data')) {
+          navigateHelper('Fish Processing')
+        } else {
+          navigateHelper('Fish Input')
+        }
         break
       case 'Fish Holding':
         navigateHelper('Trap Post-Processing')
@@ -218,21 +235,25 @@ const NavButtons = ({
       case 'Incomplete Sections':
         if (checkWillBeHoldingFishForMarkRecapture()) {
           navigateHelper('Fish Holding')
+        } else {
+          navigateHelper('Trap Post-Processing')
         }
         break
       default:
+        console.log('HIT DEFAULT, SHOULD NOT HAPPEN')
         break
     }
   }
 
   const handleRightButton = () => {
-    if (handleSubmit) {
+    //if handleSubmit truthy, submit form to save to redux
+    if (handleSubmit && activePage === 'Visit Setup') {
       handleSubmit()
-      showSlideAlert(dispatch)
+    } else if (handleSubmit) {
+      handleSubmit('right')
     }
 
     if (!shouldProceedToLoadingScreen) {
-      // If proceeding to loading screen, do not navigate to next screen, instead navigate from loading screen
       navigateFlowRightButton(values)
     }
   }
@@ -240,42 +261,61 @@ const NavButtons = ({
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen
     if (activePage === 'Visit Setup') {
-      navigation.navigate('Home')
+      console.log('resetting form', resetForm)
+      //If the left button the form is being reset to clear errors and input styles
+      if (resetForm) resetForm()
+      dispatch(resetNavigationSlice())
+      dispatch(resetVisitSetupSlice())
+      dispatch(resetTabsSlice())
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Visit Setup' }],
+      })
+      navigation.getParent()?.navigate('Home')
       return
     }
-    //if function truthy, submit form to save to redux
+
+    if (
+      activePage === 'No Fish Caught' ||
+      activePage === 'High Flows' ||
+      activePage === 'Started Trapping'
+    ) {
+      navigateFlowLeftButton()
+      return
+    }
+
     if (handleSubmit) {
+      // if function truthy, submit form to save to redux
       //do not submit when going back from incomplete sections page (prevents early submission errors)
       if (activePage !== 'Incomplete Sections') {
-        handleSubmit()
+        handleSubmit('left')
+        return
+      } else {
+        navigateFlowLeftButton()
+        return
       }
     }
-    //navigate left
-    navigation.navigate('Trap Visit Form', {
-      screen: navigationState.steps[activeStep - 1]?.name,
-    })
-    dispatch({
-      type: updateActiveStep,
-      payload: navigationState.activeStep - 1,
-    })
-    //navigate various flows if needed (This seems to not be causing performance issues even though it is kind of redundant to place it here)
-    navigateFlowLeftButton()
+
+    if (!shouldProceedToLoadingScreen) {
+      navigateFlowLeftButton()
+      return
+    }
   }
 
   const renderRightButtonText = (activePage: string) => {
     let buttonText
     switch (activePage) {
       case 'High Flows':
-        buttonText = 'End Trapping'
+        buttonText = 'End Trap Visit'
         break
       case 'Non Functional Trap':
-        buttonText = 'End Trapping'
+        buttonText = 'Move on to Fish Processing'
         break
       case 'No Fish Caught':
-        buttonText = 'End Trapping'
+        buttonText = 'End Trap Visit'
         break
       case 'Started Trapping':
-        buttonText = 'Home'
+        buttonText = 'Save Trap Visit'
         break
       case 'High Temperatures':
         buttonText = 'Move on to Fish Processing'
@@ -291,24 +331,47 @@ const NavButtons = ({
   }
 
   const rightDisabledBool = useMemo(() => {
-    if (activePage === 'Incomplete Sections') {
-      // if form is complete, then do not disable button
-      return !isFormComplete
-    } else if (
-      activePage === 'High Flows' ||
-      activePage === 'Non Functional Trap' ||
-      activePage === 'No Fish Caught'
-    ) {
-      return true
-    } else if (activePage === 'Fish Input') {
-      return !(values?.length >= 1)
-    } else {
-      return (
-        (touched && Object.keys(touched).length === 0) ||
-        (errors && Object.keys(errors).length > 0)
-      )
+    switch (activePage) {
+      case 'Visit Setup':
+        return !isValid
+      case 'Incomplete Sections':
+        return !isFormComplete || !isValid
+      case 'Non Functional Trap':
+        return false
+      case 'Fish Input':
+        const allTabProcessingResults =
+          getAllTabProcessingResults(fishProcessing)
+        const fishInputTabValidity = allTabProcessingResults.map(result => {
+          if (result.fishProcessingResult === 'processed fish') {
+            return (
+              Object.values(fishInput[result.tabId]?.fishStore || {}).length > 0
+            )
+          }
+
+          return null
+        })
+
+        return fishInputTabValidity.includes(false)
+      case 'Trap Operations':
+        break
+      case 'Fish Processing':
+        break
+      // return !fishProcessingSchema.isValidSync(values)
+      default:
+        break
     }
-  }, [useDeepCompareMemoize(touched), useDeepCompareMemoize(errors)])
+
+    if (typeof isValid === 'boolean') {
+      return !isValid
+    }
+  }, [
+    useDeepCompareMemoize(touched),
+    useDeepCompareMemoize(errors),
+    useDeepCompareMemoize(values),
+    isValid,
+    activePage,
+    fishInput,
+  ])
 
   return (
     <Box bg='themeGrey' pb='12' pt='6' px='3' maxWidth='100%'>
@@ -322,9 +385,7 @@ const NavButtons = ({
           leftIcon={
             activePage === 'Visit Setup' ? (
               <Icon as={Ionicons} name='home' size='lg' color='primary' />
-            ) : (
-              <></>
-            )
+            ) : undefined
           }
           onPress={handleLeftButton}
         >
@@ -357,6 +418,7 @@ const mapStateToProps = (state: RootState) => {
     visitSetupSlice: state.visitSetup,
     fishProcessingSlice: state.fishProcessing,
     reduxState: state,
+    fishInput: state.fishInput,
   }
 }
 

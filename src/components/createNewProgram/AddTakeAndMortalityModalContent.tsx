@@ -1,12 +1,13 @@
 import { Formik } from 'formik'
 import {
+  Box,
   Button,
   Divider,
   FormControl,
   HStack,
-  KeyboardAvoidingView,
   Text,
   VStack,
+  KeyboardAvoidingView,
 } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -18,11 +19,11 @@ import { reorderTaxon } from '../../utils/utils'
 import {
   IndividualTakeAndMortalityState,
   IndividualTakeAndMortalityStateI,
-  deleteIndividualTakeAndMortality,
+  // deleteIndividualTakeAndMortality,
   saveIndividualTakeAndMortality,
   updateIndividualTakeAndMortality,
 } from '../../redux/reducers/createNewProgramSlices/permitInformationSlice'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const AddTakeAndMortalityModalContent = ({
   closeModal,
@@ -58,7 +59,7 @@ const AddTakeAndMortalityModalContent = ({
     }
   }
   const handleDelete = () => {
-    dispatch(deleteIndividualTakeAndMortality(addTakeAndMortalityModalContent))
+    // dispatch(deleteIndividualTakeAndMortality(addTakeAndMortalityModalContent))
     setModalDataTemp(IndividualTakeAndMortalityState)
   }
 
@@ -82,122 +83,84 @@ const AddTakeAndMortalityModalContent = ({
         touched,
         errors,
         values,
+        resetForm,
       }) => {
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <CustomModalHeader
               headerText={'Add Take and Mortality'}
-              showHeaderButton={true}
-              closeModal={closeModal}
-              headerButton={
-                <HStack space={8}>
-                  {values?.uid && (
-                    <Button
-                      bg='error'
-                      mx='2'
-                      px='10'
-                      shadow='3'
-                      onPress={() => {
-                        handleDelete()
-                        closeModal()
-                      }}
-                    >
-                      <Text fontSize='xl' color='white'>
-                        Delete{' '}
-                      </Text>
-                    </Button>
-                  )}
-                  <Button
-                    bg='primary'
-                    mx='2'
-                    px='10'
-                    shadow='3'
-                    isDisabled={
-                      (Object.values(touched).length === 0 && !values.uid) ||
-                      (Object.values(touched).length > 0 &&
-                        Object.values(errors).length > 0)
-                    }
-                    onPress={() => {
-                      handleSubmit()
-                      closeModal()
-                    }}
-                  >
-                    <Text fontSize='xl' color='white'>
-                      {modalDataTemp?.uid ? 'Save' : 'Add Take and Mortality'}
-                    </Text>
-                  </Button>
-                </HStack>
-              }
+              showHeaderButton={false}
+              closeModal={() => {
+                closeModal()
+                resetForm()
+              }}
             />
             <VStack mx='5%' my='2%' space={6}>
-              <HStack justifyContent='space-evenly'>
-                <FormControl w='45%'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Species
-                    </Text>
-                  </FormControl.Label>
+              <HStack justifyContent='space-evenly' space={5}>
+                <Box flex={1}>
                   <CustomSelect
+                    label='Species'
+                    camelName='species'
+                    errors={errors}
+                    touched={touched}
                     selectedValue={values.species}
-                    placeholder={'Species'}
+                    placeholder={'Select Species'}
                     onValueChange={(value: any) =>
                       handleChange('species')(value)
                     }
-                    setFieldTouched={setFieldTouched}
+                    setFieldTouched={() => setFieldTouched('species')}
                     selectOptions={reorderedTaxon.map((taxon: any) => ({
                       label: taxon?.commonname,
                       value: taxon?.commonname,
                     }))}
                   />
-                </FormControl>
-                <FormControl w='45%' ml='5'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Listing Unit or Stock
-                    </Text>
-                  </FormControl.Label>
+                </Box>
+
+                <Box flex={1}>
                   <CustomSelect
+                    label='Listing Unit or Stock'
+                    camelName='listingUnitOrStock'
+                    errors={errors}
+                    touched={touched}
                     selectedValue={values.listingUnitOrStock}
-                    placeholder={'Listing Unit or Stock'}
+                    placeholder={'Select Listing Unit or Stock'}
                     onValueChange={(value: any) =>
                       handleChange('listingUnitOrStock')(value)
                     }
-                    setFieldTouched={setFieldTouched}
+                    setFieldTouched={() =>
+                      setFieldTouched('listingUnitOrStock')
+                    }
                     selectOptions={dropdownValues?.listingUnit}
                   />
-                </FormControl>
+                </Box>
               </HStack>
 
-              <FormControl w='45%' ml='5'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Life Stage
-                  </Text>
-                </FormControl.Label>
-                <CustomSelect
-                  selectedValue={values.lifeStage}
-                  placeholder={'Life Stage'}
-                  onValueChange={(value: any) =>
-                    handleChange('lifeStage')(value)
-                  }
-                  setFieldTouched={setFieldTouched}
-                  selectOptions={dropdownValues?.lifeStage}
-                />
-              </FormControl>
+              <CustomSelect
+                label='Life Stage'
+                camelName='lifeStage'
+                errors={errors}
+                touched={touched}
+                selectedValue={values.lifeStage}
+                placeholder={'Select Life Stage'}
+                onValueChange={(value: any) => handleChange('lifeStage')(value)}
+                setFieldTouched={() => setFieldTouched('lifeStage')}
+                selectOptions={dropdownValues?.lifeStage}
+              />
 
-              <HStack justifyContent='space-evenly'>
+              <HStack justifyContent='space-evenly' space={5}>
                 <FormInputComponent
                   label={'Expected Take'}
+                  placeholder='0'
                   touched={touched}
                   errors={errors}
                   value={values.expectedTake ? `${values.expectedTake}` : ''}
                   camelName={'expectedTake'}
-                  keyboardType={'numeric'}
-                  width={'45%'}
+                  keyboardType={'number-pad'}
                   onChangeText={handleChange('expectedTake')}
                   onBlur={handleBlur('expectedTake')}
                 />
                 <FormInputComponent
+                  placeholder='0'
                   label={'Indirect Mortality'}
                   touched={touched}
                   errors={errors}
@@ -207,12 +170,31 @@ const AddTakeAndMortalityModalContent = ({
                       : ''
                   }
                   camelName={'indirectMortality'}
-                  keyboardType={'numeric'}
-                  width={'45%'}
+                  keyboardType={'number-pad'}
                   onChangeText={handleChange('indirectMortality')}
                   onBlur={handleBlur('indirectMortality')}
                 />
               </HStack>
+              <Button
+                bg='primary'
+                mx='2'
+                px='10'
+                mt={3}
+                shadow='3'
+                isDisabled={
+                  Object.values(touched).length === 0 ||
+                  (Object.values(touched).length > 0 &&
+                    Object.values(errors).length > 0)
+                }
+                onPress={() => {
+                  handleSubmit()
+                  closeModal()
+                }}
+              >
+                <Text fontSize='xl' color='white'>
+                  Save Add Take and Mortality
+                </Text>
+              </Button>
             </VStack>
           </KeyboardAvoidingView>
         )

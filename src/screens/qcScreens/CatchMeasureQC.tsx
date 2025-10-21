@@ -6,24 +6,45 @@ import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModal from '../../components/Shared/CustomModal'
 import GraphModalContent from '../../components/Shared/GraphModalContent'
-import { catchRawQCSubmission } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
-import { kernelDensityEstimation } from '../../utils/utils'
+import {
+  catchRawQCSubmission,
+  postQCSubmissions,
+} from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
+import {
+  kernelDensityEstimation,
+  handleQCChartButtonClick,
+  legendColorList,
+} from '../../utils/utils'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
 interface GraphDataI {
   'Fork Length': any[]
   Weight: any[]
 }
 
+interface DateRangeI {
+  startDate: Date
+  endDate: Date
+}
+
+const allButtons = ['Fork Length', 'Weight']
+
 function CatchMeasureQC({
   navigation,
   route,
   qcCatchRawSubmissions,
   previousCatchRawSubmissions,
+  lifeStageState,
+  userCredentialsStore,
+  taxonState,
 }: {
   navigation: any
   route: any
   qcCatchRawSubmissions: any[]
   previousCatchRawSubmissions: any[]
+  lifeStageState: any[]
+  userCredentialsStore: any
+  taxonState: any[]
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const [activeButtons, setActiveButtons] = useState<
@@ -39,6 +60,12 @@ function CatchMeasureQC({
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pointClicked, setPointClicked] = useState<any | null>(null)
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRangeI>({
+    startDate: new Date('2023-01-01'),
+    endDate: new Date(new Date().setHours(23, 59, 59, 999)),
+  })
+  const [legendData, setLegendData] = useState<any>({})
+  const [programName, setProgramName] = useState('' as string)
 
   const axisLabelDictionary = {
     'Fork Length': { xLabel: 'Fork Length (mm)', yLabel: 'Density' },
@@ -47,54 +74,113 @@ function CatchMeasureQC({
 
   useEffect(() => {
     const programId = route.params.programId
-    const programCatchRaw = previousCatchRawSubmissions.filter((catchRaw) => {
+    const currentProgram = userCredentialsStore.userPrograms.find(
+      (program: any) => {
+        return program.programId === programId
+      }
+    )
+    setProgramName(currentProgram.programName)
+
+    const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId
     })
-    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+    let qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+
+    qcData = qcData.filter(data => {
+      let qcTrapVisitTime = new Date(
+        data.createdCatchRawResponse.trapVisitTimeEnd
+      )
+      if (!data.createdCatchRawResponse.trapVisitTimeEnd) {
+        qcTrapVisitTime = new Date(
+          data.createdCatchRawResponse.trapVisitTimeStart
+        )
+      }
+      return (
+        qcTrapVisitTime >= selectedDateRange.startDate &&
+        qcTrapVisitTime <= selectedDateRange.endDate
+      )
+    })
 
     // Fork Length Density Calculations -----------------------------
 
     let forkRange: number | null = null
     let forkStartPoint: number | null = null
     let forkGraphSubData: any[] = []
+    const lifeStageMap: any = {}
 
     // array of all fork lengths within the qc dataset
     const forkLengthArray: any[] = qcData
-    .map((catchRawResponse) => {
-      const forkValue = Number(catchRawResponse.createdCatchRawResponse.forkLength)
-      if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
-        forkGraphSubData.push({
-          id: catchRawResponse.createdCatchRawResponse.id,
-          x: forkValue,
-          y: 0,
+      .map(catchRawResponse => {
+        const forkValue = Number(
+          catchRawResponse.createdCatchRawResponse?.forkLength
+        )
+
+        const lifeStageId = catchRawResponse.createdCatchRawResponse?.lifeStage
+        let lifeStageDefinition = null
+        if (lifeStageId) {
+          lifeStageDefinition = lifeStageState.find(
+            (stage: any) => stage.id === lifeStageId
+          ).definition
+
+          if (lifeStageDefinition && !lifeStageMap[lifeStageDefinition]) {
+            let colorOptions = legendColorList.filter(color => {
+              return !Object.values(lifeStageMap).includes(color)
+            })
+
+            lifeStageMap[lifeStageDefinition] = colorOptions[0]
+          }
+        }
+
+        const taxonCode = catchRawResponse.createdCatchRawResponse.taxonCode
+        let species = taxonState.filter((obj: any) => {
+          return obj.code === taxonCode
         })
-      }
-      return forkValue
-    })
-    .filter((num) => {
-      return num != 0
-    })
+        let speciesCommonName = species[0]?.commonname
 
-    // start point is the lowest value fork length
-    forkStartPoint = Math.min(...forkLengthArray)
+        if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
+          forkGraphSubData.push({
+            fieldClicked: 'Fork Length',
+            id: catchRawResponse.createdCatchRawResponse.id,
+            x: forkValue,
+            y: 0,
+            pointDateTimestamp:
+              catchRawResponse.createdCatchRawResponse?.trapVisitTimeEnd,
+            colorScale: lifeStageDefinition
+              ? lifeStageMap[lifeStageDefinition]
+              : 'grey',
+            speciesCommonName,
+            lifeStageDefinition,
+          })
+        }
+        return forkValue
+      })
+      .filter(num => {
+        return num != 0
+      })
 
-    // range is the range of largest fork length to smallest fork length
-    forkRange = Math.max(...forkLengthArray) - forkStartPoint
+    let kdeForkValues: any[] = []
+    if (forkLengthArray.length !== 0) {
+      // start point is the lowest value fork length
+      forkStartPoint = Math.min(...forkLengthArray)
 
-    // Calculate KDE values
-    const forkBinWidth = 10 // forkBinWidth for KDE
-    const minForkLength = Math.min(...forkLengthArray)
-    const maxForkLength = Math.max(...forkLengthArray)
-    const forkGrid = Array.from(
-      { length: 100 },
-      (_, i) => minForkLength + (i * (maxForkLength - minForkLength)) / 99
-    ) // Points to evaluate KDE
+      // range is the range of largest fork length to smallest fork length
+      forkRange = Math.max(...forkLengthArray) - forkStartPoint
 
-    const kdeForkValues = kernelDensityEstimation(
-      forkLengthArray,
-      forkBinWidth,
-      forkGrid
-    )
+      // Calculate KDE values
+      const forkBinWidth = 10 // forkBinWidth for KDE
+      const minForkLength = Math.min(...forkLengthArray)
+      const maxForkLength = Math.max(...forkLengthArray)
+      const forkGrid = Array.from(
+        { length: 100 },
+        (_, i) => minForkLength + (i * (maxForkLength - minForkLength)) / 99
+      ) // Points to evaluate KDE
+
+      kdeForkValues = kernelDensityEstimation(
+        forkLengthArray,
+        forkBinWidth,
+        forkGrid
+      )
+    }
 
     // Weight Density Calculations -----------------------------
 
@@ -103,41 +189,79 @@ function CatchMeasureQC({
     let weightGraphSubData: any[] = []
 
     const weightArray: any[] = qcData
-    .map((catchRawResponse) => {
-      const weightValue = Number(catchRawResponse.createdCatchRawResponse.weight)
-      if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
-        weightGraphSubData.push({
-          id: catchRawResponse.createdCatchRawResponse.id,
-          x: weightValue,
-          y: 0,
-        })
-      }
-      return weightValue
-    })
-    .filter((num) => {
-      return num != 0
-    })
+      .map(catchRawResponse => {
+        const weightValue = Number(
+          catchRawResponse.createdCatchRawResponse.weight
+        )
+        const lifeStageId = catchRawResponse.createdCatchRawResponse?.lifeStage
+        let lifeStageDefinition = null
+        if (lifeStageId) {
+          lifeStageDefinition = lifeStageState.find(
+            (stage: any) => stage.id === lifeStageId
+          ).definition
 
-    weightStartPoint = Math.min(...weightArray)
+          if (lifeStageDefinition && !lifeStageMap[lifeStageDefinition]) {
+            let colorOptions = legendColorList.filter(color => {
+              return !Object.values(lifeStageMap).includes(color)
+            })
 
-    weightRange = Math.max(...weightArray) - weightStartPoint
+            lifeStageMap[lifeStageDefinition] = colorOptions[0]
+          }
+        }
 
-    // Calculate KDE values
-    const weightBinWidth = 10 // forkBinWidth for KDE
-    const minWeightLength = Math.min(...forkLengthArray)
-    const maxWeightLength = Math.max(...forkLengthArray)
-    const weightGrid = Array.from(
-      { length: 100 },
-      (_, i) => minWeightLength + (i * (maxWeightLength - minWeightLength)) / 99
-    ) // Points to evaluate KDE
+        if (!catchRawResponse.createdCatchRawResponse.qcCompleted) {
+          weightGraphSubData.push({
+            fieldClicked: 'Weight',
+            id: catchRawResponse.createdCatchRawResponse.id,
+            x: weightValue,
+            y: 0,
+            pointDateTimestamp:
+              catchRawResponse.createdCatchRawResponse?.createdAt,
+            colorScale: lifeStageDefinition
+              ? lifeStageMap[lifeStageDefinition]
+              : 'grey',
+          })
+        }
+        return weightValue
+      })
+      .filter(num => {
+        return num != 0
+      })
 
-    const kdeWeightValues = kernelDensityEstimation(
-      weightArray,
-      weightBinWidth,
-      weightGrid
+    let kdeWeightValues: any[] = []
+    if (weightArray.length !== 0) {
+      weightStartPoint = Math.min(...weightArray)
+
+      weightRange = Math.max(...weightArray) - weightStartPoint
+
+      // Calculate KDE values
+      const weightBinWidth = 10 // forkBinWidth for KDE
+      const minWeightLength = Math.min(...forkLengthArray)
+      const maxWeightLength = Math.max(...forkLengthArray)
+      const weightGrid = Array.from(
+        { length: 100 },
+        (_, i) =>
+          minWeightLength + (i * (maxWeightLength - minWeightLength)) / 99
+      ) // Points to evaluate KDE
+
+      kdeWeightValues = kernelDensityEstimation(
+        weightArray,
+        weightBinWidth,
+        weightGrid
+      )
+    }
+
+    let legendData: any[] = []
+
+    Object.keys(lifeStageMap).forEach(
+      (key: any) =>
+        (legendData = [
+          ...legendData,
+          { name: key, symbol: { fill: lifeStageMap[key] } },
+        ])
     )
 
-    // Weight Density Calculations -----------------------------
+    setLegendData(legendData)
 
     setGraphData({
       'Fork Length': kdeForkValues,
@@ -148,7 +272,7 @@ function CatchMeasureQC({
       'Fork Length': forkGraphSubData,
       Weight: weightGraphSubData,
     })
-  }, [qcCatchRawSubmissions])
+  }, [qcCatchRawSubmissions, selectedDateRange])
 
   const GraphMenuButton = ({
     buttonName,
@@ -159,16 +283,14 @@ function CatchMeasureQC({
       <Button
         bg={activeButtons.includes(buttonName) ? 'primary' : 'secondary'}
         marginX={0.5}
-        flex={1}
+        flex={8}
         onPress={() => {
-          let activeButtonsCopy = [...activeButtons]
-          if (activeButtons.includes(buttonName)) {
-            activeButtonsCopy.splice(activeButtonsCopy.indexOf(buttonName), 1)
-            setActiveButtons(activeButtonsCopy)
-          } else {
-            activeButtonsCopy.unshift(buttonName)
-            setActiveButtons(activeButtonsCopy)
-          }
+          const newActiveButtons = handleQCChartButtonClick(
+            allButtons,
+            activeButtons,
+            buttonName
+          ) as any
+          setActiveButtons(newActiveButtons)
         }}
       >
         <Text
@@ -188,15 +310,30 @@ function CatchMeasureQC({
   }
 
   const handlePointClicked = (datum: any) => {
-    console.log('point clicked: ', datum)
     setPointClicked(datum)
     setIsModalOpen(true)
   }
 
   const handleModalSubmit = (submission: any) => {
     if (pointClicked) {
-      const catchRawId = submission['Weight']['id']
-      dispatch(catchRawQCSubmission({ catchRawId, submission }))
+      const catchRawId = pointClicked.id
+      let submissions = []
+
+      for (const fieldName in submission) {
+        submissions.push({
+          fieldName,
+          value: submission[fieldName].x,
+        })
+      }
+
+      if (submissions.length)
+        dispatch(
+          catchRawQCSubmission({
+            catchRawId,
+            userId: userCredentialsStore.id,
+            submissions,
+          })
+        )
     }
   }
 
@@ -212,37 +349,74 @@ function CatchMeasureQC({
       >
         <VStack alignItems={'center'} flex={1}>
           <CustomModalHeader
-            headerText={'Fork Length, Weight, Lifestage, Run'}
+            headerText={'Fork Length and Weight'}
             showHeaderButton={false}
             closeModal={() => navigation.goBack()}
           />
           <Text fontSize={'2xl'} fontWeight={300} mb={25} textAlign='center'>
             Edit values by selecting a point on the plot below. Grey density
-            lines show historic fork length distribution
+            lines show historic distribution
           </Text>
 
           <HStack mb={'10'}>
             <GraphMenuButton buttonName={'Fork Length'} />
             <GraphMenuButton buttonName={'Weight'} />
-            <View flex={3}></View>
+            <View flex={2}></View>
+
+            <View>
+              <Text fontSize='xl' color='black' textAlign={'center'}>
+                Start Date
+              </Text>
+              <DateTimePicker
+                value={selectedDateRange.startDate}
+                mode='date'
+                onChange={(event, selectedDate) => {
+                  if (selectedDate) {
+                    setSelectedDateRange({
+                      ...selectedDateRange,
+                      startDate: selectedDate,
+                    })
+                  }
+                }}
+                accentColor='#007C7C'
+              />
+            </View>
+            <View>
+              <Text fontSize='xl' color='black' textAlign={'center'}>
+                End Date
+              </Text>
+              <DateTimePicker
+                value={selectedDateRange.endDate}
+                mode='date'
+                onChange={(event, selectedDate) => {
+                  if (selectedDate)
+                    setSelectedDateRange({
+                      ...selectedDateRange,
+                      endDate: selectedDate,
+                    })
+                }}
+                accentColor='#007C7C'
+              />
+            </View>
           </HStack>
 
           <ScrollView>
-            {activeButtons.map((buttonName) => {
+            {activeButtons.map(buttonName => {
               return (
                 <Graph
                   xLabel={axisLabelDictionary[buttonName]['xLabel']}
                   yLabel={axisLabelDictionary[buttonName]['yLabel']}
-                  key={buttonName}
+                  key={`${buttonName}-${Math.random()}`}
                   chartType='linewithplot'
                   data={graphData[buttonName]}
                   subData={graphSubData[buttonName]}
-                  onPointClick={(datum) => handlePointClicked(datum)}
+                  onPointClick={datum => handlePointClicked(datum)}
                   title={buttonName}
                   barColor='grey'
                   selectedBarColor='green'
                   height={400}
                   width={600}
+                  legendData={legendData.length ? legendData : undefined}
                 />
               )
             })}
@@ -272,11 +446,11 @@ function CatchMeasureQC({
               shadow='5'
               bg='primary'
               onPress={() => {
-                console.log('approve')
+                dispatch(postQCSubmissions())
               }}
             >
               <Text fontSize='xl' color='white' fontWeight={'bold'}>
-                Approve
+                Submit QC
               </Text>
             </Button>
           </HStack>
@@ -286,14 +460,16 @@ function CatchMeasureQC({
         <CustomModal
           isOpen={isModalOpen}
           closeModal={() => handleCloseModal()}
-          height='1/2'
+          height='100%'
         >
           <GraphModalContent
             closeModal={() => handleCloseModal()}
             pointClicked={pointClicked}
             onSubmit={(submission: any) => handleModalSubmit(submission)}
             headerText={'Table of Selected Points'}
-            modalData={graphData}
+            modalData={graphSubData}
+            usesDensity={true}
+            programName={programName}
           />
         </CustomModal>
       ) : (
@@ -304,10 +480,16 @@ function CatchMeasureQC({
 }
 
 const mapStateToProps = (state: RootState) => {
+  const lifeStage = state.dropdowns?.values?.lifeStage
+  const taxon = state.dropdowns.values.taxon
+
   return {
     qcCatchRawSubmissions: state.trapVisitFormPostBundler.qcCatchRawSubmissions,
     previousCatchRawSubmissions:
       state.trapVisitFormPostBundler.previousCatchRawSubmissions,
+    lifeStageState: lifeStage ?? [],
+    userCredentialsStore: state.userCredentials,
+    taxonState: taxon ?? [],
   }
 }
 

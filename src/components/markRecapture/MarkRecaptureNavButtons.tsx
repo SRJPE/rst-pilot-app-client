@@ -2,8 +2,12 @@ import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { Ionicons } from '@expo/vector-icons'
-import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
-import { useRoute } from '@react-navigation/native'
+import {
+  updateActiveMarkRecaptureStep,
+  resetMarkRecapSlice,
+} from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
+import { StackActions, useRoute } from '@react-navigation/native'
+import { DeviceEventEmitter } from 'react-native'
 
 export default function MarkRecaptureNavButtons({
   navigation,
@@ -12,14 +16,15 @@ export default function MarkRecaptureNavButtons({
   touched,
   values,
   clearFormValues,
+  appliedMarks,
 }: {
   navigation?: any
   handleSubmit?: any
   errors?: any
   touched?: any
-
   values?: any
   clearFormValues?: any
+  appliedMarks?: Array<any>
 }) {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector(
@@ -30,35 +35,52 @@ export default function MarkRecaptureNavButtons({
   // const activePage = useRoute()
 
   const handleRightButton = () => {
-    //   //if function truthy, submit form to check for errors and save to redux
-    if (handleSubmit) {
-      handleSubmit()
-    }
     //if Mark Recapture complete lear form values and go to QA and return
 
     if (activePage === 'Mark Recapture Complete') {
+      if (handleSubmit) {
+        handleSubmit()
+      }
       clearFormValues && clearFormValues()
-      navigation.navigate('Quality Control')
+      navigation?.navigate('Quality Control')
       navigation.reset({
         index: 0,
         routes: [{ name: 'Release Trial' }],
       })
+      dispatch(resetMarkRecapSlice())
       return
     }
-    //navigate Right
-    navigation.navigate('Mark Recapture', {
-      screen: navigationState.steps[activeStep + 1]?.name,
-    })
-    dispatch({
-      type: updateActiveMarkRecaptureStep,
-      payload: navigationState.activeStep + 1,
-    })
+
+    const callback = () => {
+      //navigate Right
+      navigation.dispatch(
+        StackActions.replace(navigationState.steps[activeStep + 1]?.name)
+      )
+
+      dispatch({
+        type: updateActiveMarkRecaptureStep,
+        payload: navigationState.activeStep + 1,
+      })
+    }
+
+    navigation.dispatch(StackActions.replace('Loading...'))
+
+    setTimeout(() => {
+      DeviceEventEmitter.emit('event.load', {
+        process: () => {
+          if (handleSubmit) {
+            handleSubmit()
+          }
+        },
+        callback,
+      })
+    }, 1000)
   }
 
   const handleLeftButton = () => {
     //navigate back to home screen from visit setup screen or Mark Recapture Complete screen
     if (activePage === 'Release Trial') {
-      navigation.navigate('Home')
+      navigation?.navigate('Home')
       return
     }
     if (activePage === 'Mark Recapture Complete') {
@@ -67,7 +89,8 @@ export default function MarkRecaptureNavButtons({
         index: 0,
         routes: [{ name: 'Release Trial' }],
       })
-      navigation.navigate('Home')
+      navigation?.navigate('Home')
+      dispatch(resetMarkRecapSlice())
       return
     }
 
@@ -76,9 +99,9 @@ export default function MarkRecaptureNavButtons({
       handleSubmit()
     }
     //navigate left
-    navigation.navigate('Mark Recapture', {
-      screen: navigationState.steps[activeStep - 1]?.name,
-    })
+    navigation.dispatch(
+      StackActions.replace(navigationState.steps[activeStep - 1]?.name)
+    )
     dispatch({
       type: updateActiveMarkRecaptureStep,
       payload: navigationState.activeStep - 1,
@@ -91,7 +114,8 @@ export default function MarkRecaptureNavButtons({
       // OR
       //if current screen uses formik && there are errors
       (touched && Object.keys(touched).length === 0) ||
-      (errors && Object.keys(errors).length > 0)
+      (errors && Object.keys(errors).length > 0) ||
+      (activePage === 'Release Data Entry' && !appliedMarks?.length)
     )
   }
 

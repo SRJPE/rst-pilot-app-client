@@ -1,7 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../../api/axiosConfig'
 import { RootState } from '../../store'
-import { cloneDeep } from 'lodash'
+import { generateErrorMessage } from '../../../utils/helpers/helperFunctions'
+import { showSlideAlert } from '../slideAlertSlice'
+import { getTrapVisitDropdownValues } from '../dropdownsSlice'
 
 interface InitialStateI {
   submissionStatus:
@@ -9,12 +11,12 @@ interface InitialStateI {
     | 'submitting...'
     | 'submission-failed'
     | 'submission-successful'
+    | 'fetch-successful'
+    | 'fetch-failed'
   markRecaptureSubmissions: MarkRecaptureSubmissionI[]
   previousMarkRecaptureSubmissions: MarkRecaptureSubmissionI[]
-  markRecaptureReleaseCrewSubmissions: MarkRecaptureSubmissionI[]
-  previousMarkRecaptureReleaseCrewSubmissions: MarkRecaptureSubmissionI[]
-  markRecaptureReleaseMarksSubmissions: MarkRecaptureSubmissionI[]
   previousMarkRecaptureReleaseMarksSubmissions: MarkRecaptureSubmissionI[]
+  allUserExistingMarks: any[]
 }
 
 interface MarkRecaptureSubmissionI {
@@ -43,58 +45,150 @@ const initialState: InitialStateI = {
   submissionStatus: 'not-submitted',
   markRecaptureSubmissions: [],
   previousMarkRecaptureSubmissions: [],
-  markRecaptureReleaseCrewSubmissions: [],
-  previousMarkRecaptureReleaseCrewSubmissions: [],
-  markRecaptureReleaseMarksSubmissions: [],
   previousMarkRecaptureReleaseMarksSubmissions: [],
+  allUserExistingMarks: [],
 }
 
 export const postMarkRecaptureSubmissions = createAsyncThunk(
   'markRecapturePostBundler/postMarkRecaptureSubmissions',
   async (_, thunkAPI) => {
-    const state = thunkAPI.getState() as RootState
-    let payload: {
-      markRecaptureResponse: any[]
-      markRecaptureReleaseCrewResponse: any[]
-      markRecaptureReleaseMarksResponse: any[]
-    } = {
-      markRecaptureResponse: [],
-      markRecaptureReleaseCrewResponse: [],
-      markRecaptureReleaseMarksResponse: [],
-    }
-    //get submissions
-    const markRecaptureSubmissions =
-      state.markRecaptureFormPostBundler.markRecaptureSubmissions
+    try {
+      const state = thunkAPI.getState() as RootState
+      let payload: {
+        markRecaptureResponse: any[]
+        markRecaptureReleaseCrewResponse: any[]
+        markRecaptureReleaseMarksResponse: any[]
+        failedMarkRecaptureSubmissions: any[]
+      } = {
+        markRecaptureResponse: [],
+        markRecaptureReleaseCrewResponse: [],
+        markRecaptureReleaseMarksResponse: [],
+        failedMarkRecaptureSubmissions: [],
+      }
+      //get submissions
+      const markRecaptureSubmissions = [
+        ...state.markRecaptureFormPostBundler.markRecaptureSubmissions,
+      ]
 
-    await Promise.all(
-      markRecaptureSubmissions.map(async (markRecaptureSubmission: any) => {
-        const markRecaptureSubmissionCopy = cloneDeep(markRecaptureSubmission)
-        console.log(
-          '🚀 ~ hit... markRecaptureSubmissionCopy:',
-          markRecaptureSubmissionCopy
+      // create array of promises to post mark recap objs
+      const markRecapPromises = markRecaptureSubmissions.map(
+        (submissionObj: any) => api.post('release/', submissionObj)
+      )
+
+      // run promise all settled which will return fulfilled or rejected promises
+      const markRecapResults: any = await Promise.allSettled(markRecapPromises)
+
+      try {
+        // iterate over results
+        for (const [index, result] of markRecapResults.entries()) {
+          // Use the index here
+          // if fulfilled, save to payload
+          if (result.status === 'fulfilled') {
+            const { createdReleaseResponse, createdReleaseMarksResponse } =
+              result.value.data
+
+            // save to payload
+            payload.markRecaptureResponse = [
+              ...payload.markRecaptureResponse,
+              ...createdReleaseResponse,
+            ]
+            // payload.markRecaptureReleaseCrewResponse = [
+            //   ...payload.markRecaptureReleaseCrewResponse,
+            //   ...createdReleaseCrewResponse,
+            // ]
+
+            payload.markRecaptureReleaseMarksResponse = [
+              ...payload.markRecaptureReleaseMarksResponse,
+              ...createdReleaseMarksResponse,
+            ]
+            showSlideAlert(
+              thunkAPI.dispatch,
+              'Mark Recapture Saved',
+              'success',
+              5000
+            )
+            const state = thunkAPI.getState() as RootState
+            const userId = state.userCredentials.id
+            if (!userId) break
+            // Refresh dropdown values to get new release sites, purposes, etc
+            // await
+            thunkAPI.dispatch(getTrapVisitDropdownValues(userId.toString()))
+            // if rejected, keep the non duplicates in the submissions for reattempts
+          } else {
+            // showSlideAlert(thunkAPI.dispatch, result, 'error', 5000)
+
+            const { response, reason } = result
+            const errorDetail = response?.data?.detail
+
+            if (reason && reason.message) {
+              showSlideAlert(thunkAPI.dispatch, reason.message, 'error', 5000)
+            }
+
+            if (errorDetail && !errorDetail.includes('already exists')) {
+              payload.failedMarkRecaptureSubmissions.push(
+                markRecaptureSubmissions[index]
+              )
+              showSlideAlert(thunkAPI.dispatch, errorDetail, 'error', 5000)
+            }
+
+            // what is result in this case?
+          }
+        }
+
+        return payload
+      } catch (error) {
+        console.log('error in iterate', error)
+      }
+    } catch (error: any) {
+      const errorMessage = generateErrorMessage(
+        error.code ||
+          'An error occurred while posting mark recapture submissions (ln 125)'
+      )
+      showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
+      console.log('mark recap error', error?.response?.data)
+    }
+  }
+)
+
+export const fetchExistingMarks = createAsyncThunk(
+  'markRecapturePostBundler/fetchExistingMarks',
+  async (_, thunkAPI) => {
+    const allUserExistingMarks: any[] = []
+    try {
+      const state = thunkAPI.getState() as RootState
+      const userPrograms = state.userCredentials.userPrograms
+      if (
+        state.connectivity.isConnected &&
+        state.connectivity.isInternetReachable
+      ) {
+        await Promise.all(
+          userPrograms.map(async program => {
+            const existingMarkResponse = await api.get(
+              `existing-marks/program/${program.programId}`
+            )
+
+            let existingMarks = existingMarkResponse.data
+            console.log('existingMarks', existingMarks)
+
+            allUserExistingMarks.push(...existingMarks)
+          })
         )
-        // submit mark recapture (release trial)
-        const apiResponse: APIResponseI = await api.post(
-          'release/',
-          markRecaptureSubmissionCopy
-        )
-        // get response from server
-        const {
-          createdReleaseResponse,
-          createdReleaseCrewResponse,
-          createdReleaseMarksResponse,
-        } = apiResponse.data
-        // save to payload
-        payload.markRecaptureResponse.push(createdReleaseResponse)
-        payload.markRecaptureReleaseCrewResponse.push(
-          createdReleaseCrewResponse
-        )
-        payload.markRecaptureReleaseMarksResponse.push(
-          createdReleaseMarksResponse
-        )
+
+        return {
+          allUserExistingMarks,
+        }
+      }
+    } catch (error: any) {
+      console.log('🚀 ~ file: markRecapturePostBundler.ts:170 ~ error:', error)
+
+      const errorMessage = generateErrorMessage(
+        error?.code || 'An error occurred while fetching existing marks (ln 58)'
+      )
+      showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
+      thunkAPI.rejectWithValue({
+        allUserExistingMarks: [],
       })
-    )
-    return payload
+    }
   }
 )
 
@@ -113,36 +207,52 @@ export const markRecapturePostBundler = createSlice({
     },
 
     [postMarkRecaptureSubmissions.fulfilled.type]: (state, action) => {
-      const markRecapturePostResult = action.payload.markRecaptureResponse
-      const markRecaptureReleaseCrewPostResult =
-        action.payload.markRecaptureReleaseCrewResponse
-      const markRecaptureReleaseMarksPostResult =
-        action.payload.markRecaptureReleaseMarksResponse
+      if (action.payload) {
+        try {
+          const markRecapturePostResult = action?.payload.markRecaptureResponse
 
-      state.submissionStatus = 'submission-successful'
-      state.previousMarkRecaptureSubmissions = [
-        ...state.previousMarkRecaptureSubmissions,
-        ...markRecapturePostResult,
-      ]
-      state.markRecaptureSubmissions = []
+          const markRecaptureReleaseMarksPostResult =
+            action.payload.markRecaptureReleaseMarksResponse
 
-      state.previousMarkRecaptureReleaseCrewSubmissions = [
-        ...state.previousMarkRecaptureReleaseCrewSubmissions,
-        ...markRecaptureReleaseCrewPostResult,
-      ]
-      state.markRecaptureReleaseCrewSubmissions = []
+          const failedMarkRecaptureSubmissions =
+            action.payload.failedMarkRecaptureSubmissions
 
-      state.previousMarkRecaptureReleaseMarksSubmissions = [
-        ...state.previousMarkRecaptureReleaseMarksSubmissions,
-        ...markRecaptureReleaseMarksPostResult,
-      ]
-      state.markRecaptureReleaseMarksSubmissions = []
+          state.submissionStatus = 'submission-successful'
+          state.previousMarkRecaptureSubmissions = [
+            ...state.previousMarkRecaptureSubmissions,
+            ...markRecapturePostResult,
+          ]
 
-      console.log('successful mark Recap post processing: ', action.payload)
+          state.previousMarkRecaptureReleaseMarksSubmissions = [
+            ...state.previousMarkRecaptureReleaseMarksSubmissions,
+            ...markRecaptureReleaseMarksPostResult,
+          ]
+
+          state.markRecaptureSubmissions = [...failedMarkRecaptureSubmissions]
+        } catch (error) {
+          console.log('eror in fullfilled', error)
+        }
+      }
     },
 
     [postMarkRecaptureSubmissions.rejected.type]: (state, action) => {
+      console.log('rejected mark Recap post processing: ', action.payload)
       state.submissionStatus = 'submission-failed'
+    },
+    [fetchExistingMarks.rejected.type]: (state, action) => {
+      console.log('rejected fetch existing marks: ', action.payload)
+      state.submissionStatus = 'fetch-failed'
+    },
+    [fetchExistingMarks.fulfilled.type]: (state, action) => {
+      console.log('successful fetch existing marks: ', action.payload)
+      if (action.payload) {
+        try {
+          state.allUserExistingMarks = action.payload.allUserExistingMarks
+          state.submissionStatus = 'fetch-successful'
+        } catch (error) {
+          console.log('eror in fullfilled', error)
+        }
+      }
     },
   },
 })

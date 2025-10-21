@@ -6,12 +6,14 @@ const pendingStatus = 'pending'
 const fulfilledStatus = 'fulfilled'
 const rejectedStatus = 'rejected'
 
-interface InitialStateI {
+export interface InitialStateI {
   status: string
   programs: ProgramI[]
   trapLocations: TrapLocationI[]
   releaseSites: ReleaseSiteI[]
   crewMembers: CrewMemberI[][]
+  trapVisitCrew: TrapVisitCrewI[]
+  permitInfo: PermitInfoI[]
 }
 
 interface ProgramI {
@@ -59,7 +61,6 @@ interface ReleaseSiteI {
 }
 
 interface CrewMemberI {
-  id: number
   personnelId: number
   programId: number
   firstName: string
@@ -73,6 +74,26 @@ interface CrewMemberI {
   updatedAt: string
 }
 
+interface TrapVisitCrewI {
+  id: number
+  personnelId: number
+  trapVisitId: number
+}
+
+interface PermitInfoI {
+  id: number
+  permitId: string | null
+  programId: number
+  streamName: string
+  permitStartDate: string | null
+  permitEndDate: string | null
+  flowThreshold: number | null
+  temperatureThreshold: number | null
+  frequencySamplingInclementWeather: number | null
+  permit_file_link: string | null
+  trapLocationsId: number | null
+}
+
 interface APIResponseI {
   data: any
 }
@@ -83,23 +104,34 @@ const initialState: InitialStateI = {
   trapLocations: [],
   releaseSites: [],
   crewMembers: [],
+  trapVisitCrew: [],
+  permitInfo: [],
 }
 
 // Async actions API calls
 export const getVisitSetupDefaults = createAsyncThunk(
   'visitSetupDefaults/getVisitSetupDefaults',
   async (personnelId: number) => {
-    const response: APIResponseI = await api.get(
-      `trap-visit/visit-setup/default/${personnelId}`
-    )
-    return response.data
+    try {
+      const response: APIResponseI = await api.get(
+        `trap-visit/visit-setup/default/${personnelId}`
+      )
+      return response.data
+    } catch (error: any) {
+      console.log('err', error)
+      throw error
+    }
   }
 )
 
 export const visitSetupDefaultsSlice = createSlice({
   name: 'visitSetupDefaults',
   initialState: initialState,
-  reducers: {},
+  reducers: {
+    resetVisitSetupDefaultSlice: () => {
+      return initialState
+    },
+  },
   extraReducers: {
     [getVisitSetupDefaults.pending.type]: (state, action) => {
       state.status = pendingStatus
@@ -111,6 +143,8 @@ export const visitSetupDefaultsSlice = createSlice({
       state.trapLocations = action.payload.trapLocations
       state.releaseSites = action.payload.releaseSites
       state.crewMembers = action.payload.crewMembers
+      state.trapVisitCrew = action.payload.trapVisitCrew
+      state.permitInfo = action.payload.permitInfo
     },
 
     [getVisitSetupDefaults.rejected.type]: (state, action) => {
@@ -118,5 +152,7 @@ export const visitSetupDefaultsSlice = createSlice({
     },
   },
 })
+
+export const { resetVisitSetupDefaultSlice } = visitSetupDefaultsSlice.actions
 
 export default visitSetupDefaultsSlice.reducer

@@ -21,6 +21,7 @@ export interface trapPostProcessingValuesI {
   trapLongitude: number | null
   endingTrapStatus: string
   trapVisitStartTime: Date | null
+  comments: string | null
 }
 
 const initialState: InitialStateI = {
@@ -29,7 +30,6 @@ const initialState: InitialStateI = {
     values: {
       debrisVolume: null,
       totalRevolutions: null,
-      waterTurbidity: null,
       rpm1: null,
       rpm2: null,
       rpm3: null,
@@ -37,6 +37,7 @@ const initialState: InitialStateI = {
       trapLongitude: null,
       endingTrapStatus: 'Restart Trap',
       trapVisitStartTime: null,
+      comments: '',
     },
     errors: {},
   },

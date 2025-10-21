@@ -8,7 +8,7 @@ import {
   Text,
   VStack,
 } from 'native-base'
-import { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import {
   setActiveTab,
@@ -24,29 +24,49 @@ const TabBar = ({
   trapOperationsSlice,
   fishProcessingSlice,
   trapPostProcessingSlice,
+  navigationSlice,
+  fishInputSlice,
 }: {
   headerProps: NativeStackHeaderProps
   tabSlice: TabStateI
   trapOperationsSlice: any
   fishProcessingSlice: any
   trapPostProcessingSlice: any
+  navigationSlice: any
+  fishInputSlice: any
 }) => {
+  const { steps: navigationSteps } = navigationSlice
+  const [activePage, setActivePage] = useState('' as string)
+
+  useEffect(() => {
+    setActivePage(navigationSteps[navigationSlice.activeStep]?.name)
+  }, [navigationSlice.activeStep])
+
   const dispatch = useDispatch<AppDispatch>()
   const nonTabBarScreens = [
+    'Visit Setup',
     'Paper Entry',
     'Add Fish',
     'Batch Count',
+    'Multi Species',
     'Incomplete Sections',
   ]
   const formSlicesToValidateDict = {
     'Trap Operations': trapOperationsSlice,
     'Fish Processing': fishProcessingSlice,
     'Trap Post-Processing': trapPostProcessingSlice,
+    'Fish Input': fishInputSlice,
   }
 
   useEffect(() => {
     generateTabErrorsAndCount()
-  }, [trapOperationsSlice, fishProcessingSlice, trapPostProcessingSlice])
+  }, [
+    trapOperationsSlice,
+    fishProcessingSlice,
+    trapPostProcessingSlice,
+    fishInputSlice,
+    activePage,
+  ])
 
   const generateTabErrorsAndCount = () => {
     let tabsErrorDetails: any = {}
@@ -68,9 +88,31 @@ const TabBar = ({
             formSliceId as keyof typeof formSlicesToValidateDict
           ]
 
-        if (formSlice[tabId] && formSlice[tabId].errors) {
-          tabsErrorDetails[tabId][formSliceId] = formSlice[tabId].errors
-          tabsErrorCount[tabId] += Object.keys(formSlice[tabId].errors).length
+        switch (formSliceId) {
+          case 'Fish Input':
+            if (
+              activePage === 'Fish Input' &&
+              fishProcessingSlice[tabId]?.values?.fishProcessedResult ===
+                'processed fish' &&
+              Object.values(formSlice[tabId]?.fishStore || {}).length < 1
+            ) {
+              tabsErrorDetails[tabId][formSliceId] = {
+                fishStore:
+                  'Add at least 1 fish or select different fish processed result on previous screen ',
+              }
+              tabsErrorCount[tabId] +=
+                Object.keys(formSlice?.tabId?.fishStore || {}).length === 0
+                  ? 1
+                  : 0
+            }
+            break
+          default:
+            if (formSlice[tabId] && formSlice[tabId].errors) {
+              tabsErrorDetails[tabId][formSliceId] = formSlice[tabId].errors
+              tabsErrorCount[tabId] += Object.keys(
+                formSlice[tabId].errors
+              ).length
+            }
         }
       })
     })
@@ -84,6 +126,47 @@ const TabBar = ({
         updateErrorDetails({ tabId, errorDetails: tabsErrorDetails[tabId] })
       )
     })
+  }
+
+  useEffect(() => {
+    if (tabSlice.activeTabId) {
+      // no fish caught - the form ends
+      // 'no catch data, fish left in live box' || 'no catch data, fish released' still goes to Trap Post-Processing'
+
+      // ensure if disabling tabs that entire trap visit values are still being saved correctly on form save
+
+      const isDisabledPage = ['Fish Input'].includes(activePage)
+
+      const isNoFishCaught =
+        fishProcessingSlice[tabSlice?.activeTabId]?.values
+          ?.fishProcessedResult !== 'processed fish'
+
+      const disableTabOnFishInput = isDisabledPage && isNoFishCaught
+
+      if (disableTabOnFishInput) {
+        setDefaultActiveTab(disableTabOnFishInput)
+      }
+    }
+  }, [tabSlice.activeTabId, activePage])
+
+  const setDefaultActiveTab = (defaultTabDisabled: boolean) => {
+    if (!defaultTabDisabled) {
+      return
+    }
+
+    const fishProcessingResults = Object.entries(fishProcessingSlice).map(
+      resultEntry => ({
+        tabId: resultEntry[0],
+        //@ts-ignore, this is a valid key
+        fishProcessingResult: resultEntry[1].values.fishProcessedResult,
+      })
+    )
+
+    const fishInputDefaultTabId = fishProcessingResults.find(
+      result => result.fishProcessingResult === 'processed fish'
+    )
+
+    dispatch(setActiveTab(fishInputDefaultTabId?.tabId))
   }
 
   if (
@@ -100,60 +183,69 @@ const TabBar = ({
               justifyContent='space-between'
               w={'full'}
             >
-              {Object.keys(tabSlice.tabs).map(tabId => (
-                <Box key={`button-${tabId}`}>
-                  <Button
-                    size={'lg'}
-                    height={'16'}
-                    bg={tabId == tabSlice.activeTabId ? 'primary' : 'secondary'}
-                    onPress={() => dispatch(setActiveTab(tabId))}
-                    mr={5}
-                  >
-                    <HStack
-                      alignItems={'center'}
-                      justifyContent='space-between'
-                    >
-                      <Text
-                        fontSize='lg'
-                        color={
-                          tabId == tabSlice.activeTabId ? 'white' : 'primary'
-                        }
-                      >
-                        {tabSlice.tabs[tabId].name}
-                      </Text>
-                    </HStack>
-                  </Button>
-                  {tabSlice.incompleteSectionTouched &&
-                  tabSlice.tabs[tabId].errorDetails[headerProps.route.name] &&
-                  Object.keys(
-                    tabSlice.tabs[tabId].errorDetails[headerProps.route.name]
-                  ).length ? (
-                    <Badge
-                      colorScheme='danger'
-                      rounded='full'
-                      mr={2}
-                      mt={-3}
-                      zIndex={1}
-                      variant='solid'
-                      alignSelf='flex-end'
-                      _text={{
-                        fontSize: 16,
-                      }}
-                      key={`badge-${tabId}`}
-                    >
-                      {
-                        Object.keys(
-                          tabSlice.tabs[tabId].errorDetails[
-                            headerProps.route.name
-                          ]
-                        ).length
+              {Object.keys(tabSlice.tabs).map(tabId => {
+                const isDisabledPage = ['Fish Input'].includes(activePage)
+
+                const isNoFishCaught =
+                  fishProcessingSlice[tabId]?.values?.fishProcessedResult !==
+                  'processed fish'
+
+                const disableTabOnActivePage = isDisabledPage && isNoFishCaught
+
+                return (
+                  <Box key={`button-${tabId}`}>
+                    <Button
+                      size={'lg'}
+                      height={'16'}
+                      bg={
+                        disableTabOnActivePage
+                          ? 'gray.300'
+                          : tabId == tabSlice.activeTabId
+                          ? 'primary'
+                          : 'secondary'
                       }
-                    </Badge>
-                  ) : (
-                    <></>
-                  )}
-                </Box>
-              ))}
+                      onPress={() => dispatch(setActiveTab(tabId))}
+                      mr={5}
+                      disabled={disableTabOnActivePage}
+                    >
+                      <HStack
+                        alignItems={'center'}
+                        justifyContent='space-between'
+                      >
+                        <Text
+                          fontSize='lg'
+                          color={
+                            disableTabOnActivePage
+                              ? 'gray.800'
+                              : tabId == tabSlice.activeTabId
+                              ? 'white'
+                              : 'primary'
+                          }
+                        >
+                          {tabSlice.tabs[tabId].name}
+                        </Text>
+                      </HStack>
+                    </Button>
+                    {tabSlice.tabs[tabId].errorCount > 0 && (
+                      <Badge
+                        colorScheme='danger'
+                        rounded='full'
+                        mr={2}
+                        mt={-3}
+                        zIndex={1}
+                        variant='solid'
+                        alignSelf='flex-end'
+                        _text={{
+                          fontSize: 16,
+                        }}
+                        key={`badge-${tabId}`}
+                      >
+                        {tabSlice.tabs[tabId].errorCount}
+                      </Badge>
+                    )}
+                  </Box>
+                )
+              })}
             </HStack>
           </ScrollView>
           {Object.keys(tabSlice.tabs).length > 1 && (
@@ -176,7 +268,9 @@ const TabBar = ({
       return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].trapSite}</Text>
     } else if (
       tabSlice.activeTabId != null &&
-      headerProps.route.name != 'Incomplete Sections'
+      !['Incomplete Sections', 'Visit Setup', 'Multi Species'].includes(
+        headerProps.route.name
+      )
     ) {
       return <Text ml={5}>{tabSlice.tabs[tabSlice.activeTabId].name}</Text>
     } else {
@@ -194,6 +288,8 @@ const mapStateToProps = (state: RootState) => {
     trapOperationsSlice: state.trapOperations,
     fishProcessingSlice: state.fishProcessing,
     trapPostProcessingSlice: state.trapPostProcessing,
+    navigationSlice: state.navigation,
+    fishInputSlice: state.fishInput,
   }
 }
 

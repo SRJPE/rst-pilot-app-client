@@ -6,17 +6,18 @@ interface InitialStateI {
 }
 
 export interface ReleaseMarkI {
-  markType: string | null
-  markColor: string | null
-  markPosition: string | null
+  markType: string
+  markColor: string
+  markPosition?: string
+  bodyPart?: string
 }
 
 const initialState: InitialStateI = {
   completed: false,
   values: {
-    markType: null,
-    markColor: null,
-    markPosition: null,
+    markType: '',
+    markColor: '',
+    markPosition: '',
   },
 }
 

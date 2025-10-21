@@ -30,6 +30,7 @@ export const navigationSlice = createSlice({
   name: 'markRecaptureNavigation',
   initialState: initialState,
   reducers: {
+    resetMarkRecapSlice: () => initialState,
     updateActiveMarkRecaptureStep: (state, action) => {
       state.activeStep = action.payload
     },
@@ -45,6 +46,7 @@ export const navigationSlice = createSlice({
 export const {
   updateActiveMarkRecaptureStep,
   markActiveMarkRecaptureStepCompleted,
+  resetMarkRecapSlice,
 } = navigationSlice.actions
 
 export default navigationSlice.reducer

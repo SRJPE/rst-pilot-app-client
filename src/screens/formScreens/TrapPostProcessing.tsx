@@ -1,27 +1,35 @@
-import { Formik, yupToFormErrors } from 'formik'
-import { connect, useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
-import {
-  Text,
-  FormControl,
-  Heading,
-  Input,
-  VStack,
-  HStack,
-  Radio,
-  Icon,
-  Button,
-  Pressable,
-  Popover,
-  Box,
-  IconButton,
-  ScrollView,
-} from 'native-base'
+import { MaterialIcons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import { StackActions } from '@react-navigation/native'
+import * as Location from 'expo-location'
+import { Formik, yupToFormErrors } from 'formik'
+import {
+  Box,
+  Button,
+  FormControl,
+  HStack,
+  Heading,
+  Icon,
+  IconButton,
+  KeyboardAvoidingView,
+  Popover,
+  Pressable,
+  Radio,
+  ScrollView,
+  Text,
+  VStack,
+} from 'native-base'
 import NavButtons from '../../components/formContainer/NavButtons'
-import { trapPostProcessingSchema } from '../../utils/helpers/yupValidations'
+import {
+  trapPostProcessingSchema,
+  generateDynamicTrapPostProcessingSchema,
+} from '../../utils/helpers/yupValidations'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DeviceEventEmitter, Keyboard } from 'react-native'
-import RenderErrorMessage from '../../components/Shared/RenderErrorMessage'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import FormInputComponent, {
+  TextInputAdornment,
+} from '../../components/Shared/FormInputComponent'
 import {
   checkIfFormIsComplete,
   markStepCompleted,
@@ -31,18 +39,24 @@ import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
 } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
-import * as Location from 'expo-location'
-import RenderWarningMessage from '../../components/Shared/RenderWarningMessage'
-import { QARanges, navigateHelper } from '../../utils/utils'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  shouldRenderField,
+  navigateHelper,
+  navigateFlowRightButton,
+  navigateFlowLeftButton,
+  showFishInputButton,
+} from '../../utils/utils'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
+import { find } from 'lodash'
+import { AppDispatch, RootState } from '../../redux/store'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = state.tabSlice.activeTabId
   let willBeHoldingFishForMarkRecapture = false
 
   if (activeTabId) {
-    const tabsContainHoldingTrue = Object.keys(state.tabSlice).some(
+    const tabsContainHoldingTrue = Object.keys(state.tabSlice.tabs).some(
       tabId =>
         state.fishProcessing?.[tabId]?.values?.willBeHoldingFishForMarkRecapture
     )
@@ -56,6 +70,16 @@ const mapStateToProps = (state: RootState) => {
     willBeHoldingFishForMarkRecapture,
     previouslyActiveTabId: state.tabSlice.previouslyActiveTabId,
     navigationSlice: state.navigation,
+    userCredentialsStore: state.userCredentials,
+    visitSetupDefaults: state.visitSetupDefaults,
+    selectedProgramId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.programId,
+    trapOperationsStore: state.trapOperations,
+    fishProcessingSlice: state.fishProcessing,
+    selectedTrapLocationId:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.trapLocationId,
   }
 }
 
@@ -67,24 +91,114 @@ const TrapPostProcessing = ({
   willBeHoldingFishForMarkRecapture,
   previouslyActiveTabId,
   navigationSlice,
+  userCredentialsStore,
+  visitSetupDefaults,
+  selectedProgramId,
+  trapOperationsStore,
+  fishProcessingSlice,
+  selectedTrapLocationId,
 }: {
   navigation: any
   reduxState: any
   tabSlice: any
-  activeTabId: any
+  activeTabId: string | null
   willBeHoldingFishForMarkRecapture: boolean
   previouslyActiveTabId: string | null
   navigationSlice: any
+  fishProcessingSlice: any
+  userCredentialsStore: any
+  visitSetupDefaults: any
+  selectedProgramId: any
+  trapOperationsStore: any
+  selectedTrapLocationId: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const navigationState = useSelector((state: any) => state.navigation)
+  const dropdownValues = useSelector(
+    (state: RootState) => state.dropdowns.values
+  )
+  const activeStep = navigationState.activeStep
+  const activePage = navigationState.steps[activeStep]?.name
   const recordTurbidityInPostProcessing = useSelector(
     (state: any) =>
-      state.trapOperations?.[tabSlice.activeTabId]?.values
+      !state.trapOperations?.[tabSlice.activeTabId]?.values
         ?.recordTurbidityInPostProcessing
   )
 
   const [locationClicked, setLocationClicked] = useState(false as boolean)
   const [startTime, setStartTime] = useState(new Date() as any)
+  const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
+  const [validationSchema, setValidationSchema] = useState<any>(
+    trapPostProcessingSchema
+  )
+  const [sectionFields, setSectionFields] = useState<any>(null)
+  const [programFormFields, setProgramFormFields] = useState<any>(null)
+
+  const userPrograms = userCredentialsStore?.userPrograms || []
+
+  const onStartTimeChange = (event: any, selectedDate: any) => {
+    const currentDate = selectedDate
+    setStartTime(currentDate)
+  }
+
+  const tabIds = Object.keys(tabSlice.tabs)
+  const shouldNavigateToFishInput = showFishInputButton({
+    fishProcessing: fishProcessingSlice,
+    tabIds,
+  })
+
+  useEffect(() => {
+    const currentProgramInfo = find(
+      visitSetupDefaults.programs,
+      (program: any) => program.id === selectedProgramId
+    )
+
+    setSelectedProgramObj(currentProgramInfo)
+
+    if (currentProgramInfo?.programFormFields?.length) {
+      const trapEquimentType =
+        find(
+          visitSetupDefaults?.trapLocations,
+          (trapLocation: any) => trapLocation.id === selectedTrapLocationId
+        )?.equipmentId || null
+
+      // get fields for this section and equipment type, if applicable
+      // null equipmentId indicates field displayed for all equipment types
+      const sectionFormFields = currentProgramInfo?.programFormFields.filter(
+        (field: any) =>
+          field.formSection === activePage &&
+          (field.equipmentId === null || field.equipmentId === trapEquimentType)
+      )
+      setSectionFields(sectionFormFields)
+      setProgramFormFields(currentProgramInfo?.programFormFields)
+
+      const dynamicTrapPostProcessingSchema =
+        generateDynamicTrapPostProcessingSchema(sectionFormFields)
+      setValidationSchema(dynamicTrapPostProcessingSchema)
+    } else {
+      setSectionFields(null)
+      setProgramFormFields(null)
+      setValidationSchema(trapPostProcessingSchema)
+    }
+  }, [
+    visitSetupDefaults.programs,
+    visitSetupDefaults.permitInfo,
+    selectedTrapLocationId,
+    activePage,
+  ])
+
+  useEffect(() => {
+    if (activeTabId) {
+      if (
+        reduxState[activeTabId]?.values?.trapVisitStartTime &&
+        reduxState[activeTabId]?.values?.trapVisitStartTime !== 'Invalid Date'
+      ) {
+        setStartTime(
+          reduxState[activeTabId]?.values?.trapVisitStartTime || new Date()
+        )
+      }
+    }
+  }, [activeTabId, reduxState])
 
   const getCurrentLocation = (setFieldTouched: any, setFieldValue: any) => {
     ;(async () => {
@@ -119,7 +233,7 @@ const TrapPostProcessing = ({
 
   const checkForErrors = (values: any) => {
     try {
-      trapPostProcessingSchema.validateSync(values, {
+      validationSchema.validateSync(values, {
         abortEarly: false,
         context: { values },
       })
@@ -131,10 +245,8 @@ const TrapPostProcessing = ({
 
   const onSubmit = (values: any, tabId: string) => {
     let trapVisitStartTime = null
-    if (values.endingTrapStatus === 'Restart Trap') {
+    if (values.endingTrapStatus == 'Restart Trap') {
       trapVisitStartTime = startTime || new Date()
-    } else if (values.endingTrapStatus === 'End Trapping') {
-      trapVisitStartTime = null
     }
     const errors = checkForErrors(values)
     dispatch(
@@ -172,7 +284,7 @@ const TrapPostProcessing = ({
   const initialValues = useMemo(() => {
     let initialValues
 
-    if (reduxState[activeTabId]) {
+    if (activeTabId && reduxState[activeTabId]) {
       initialValues = { ...reduxState[activeTabId].values }
 
       if (recordTurbidityInPostProcessing) {
@@ -191,6 +303,55 @@ const TrapPostProcessing = ({
     return initialValues
   }, [reduxState, activeTabId])
 
+  const nonFeatherYubaProgram = !userPrograms.some((element: string) =>
+    ['Feather RST Monitoring', 'Yuba River RST Monitoring'].includes(element)
+  )
+
+  const handleNavButtonClick = (direction: 'left' | 'right', values: any) => {
+    if (activeTabId && activeTabId != 'placeholderId') {
+      values.fishProcessedResult =
+        fishProcessingSlice?.[activeTabId]?.values?.fishProcessedResult
+
+      let destination = navigateFlowRightButton({
+        values,
+        activePage,
+        holdingForMarkRecap: willBeHoldingFishForMarkRecapture,
+        navigation,
+      })
+
+      if (direction === 'left') {
+        destination = shouldNavigateToFishInput
+          ? navigateFlowLeftButton(
+              activePage,
+              willBeHoldingFishForMarkRecapture,
+              navigation,
+              values
+            )
+          : 'Fish Processing'
+      }
+
+      const callback = () => {
+        navigateHelper(
+          destination,
+          navigationSlice,
+          navigation,
+          dispatch,
+          updateActiveStep
+        )
+      }
+
+      navigation.dispatch(StackActions.replace('Loading...'))
+
+      setTimeout(() => {
+        DeviceEventEmitter.emit('event.load', {
+          process: () => onSubmit(values, activeTabId),
+          callback,
+        })
+        showSlideAlert(dispatch)
+      }, 1000)
+    }
+  }
+
   const popoverTrigger = (triggerProps: any) => {
     return (
       <IconButton
@@ -208,54 +369,212 @@ const TrapPostProcessing = ({
     )
   }
 
-  const onStartTimeChange = (event: any, selectedDate: any) => {
-    const currentDate = selectedDate
-    setStartTime(currentDate)
+  const renderTrappingDateAndTime = (
+    values: any,
+    setFieldValue: any,
+    setFieldTouched: any
+  ) => {
+    // no program form fields have been set
+    // assume has not been customized
+
+    if (
+      !programFormFields ||
+      find(sectionFields, {
+        fieldName: 'trapVisitStartTime',
+      })
+    ) {
+      return (
+        <>
+          <FormControl w='30%'>
+            <FormControl.Label>
+              <Text color='black' fontSize='xl'>
+                Trap Status at End
+              </Text>
+            </FormControl.Label>
+            <Radio.Group
+              name='endingTrapStatus'
+              accessibilityLabel='Ending Trap Status'
+              value={`${values.endingTrapStatus}`}
+              onChange={(newValue: any) => {
+                handleTrapStatusAtEndRadio(
+                  newValue,
+                  setFieldTouched,
+                  setFieldValue
+                )
+              }}
+            >
+              <Radio
+                colorScheme='primary'
+                value='Restart Trap'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                Continue Trapping
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='End Trapping'
+                my={1}
+                _icon={{ color: 'primary' }}
+              >
+                End Trapping
+              </Radio>
+            </Radio.Group>
+          </FormControl>
+          {values.endingTrapStatus === 'Restart Trap' && (
+            <FormControl>
+              <VStack space={2}>
+                <HStack space={4}>
+                  <FormControl.Label>
+                    <Text color='black' fontSize='xl'>
+                      Trapping Start Date and Time:
+                    </Text>
+                    <Popover placement='bottom left' trigger={popoverTrigger}>
+                      <Popover.Content
+                        accessibilityLabel='Trap Visit Start Info'
+                        w='600'
+                        mr='10'
+                      >
+                        <Popover.Arrow />
+                        <Popover.CloseButton />
+                        <Popover.Header>
+                          Please set the Date and Time of when you returned the
+                          trap to begin the new trapping period.
+                        </Popover.Header>
+                        <Popover.Body p={4}>
+                          <VStack space={2}>
+                            <HStack space={2} alignItems='flex-start'>
+                              <Text fontSize='md'>
+                                This value is used to record the date and time
+                                of returning the trap to the water to start the
+                                new trapping period.
+                              </Text>
+                            </HStack>
+                          </VStack>
+                        </Popover.Body>
+                      </Popover.Content>
+                    </Popover>
+                  </FormControl.Label>
+                </HStack>
+                <Box alignSelf='flex-start' ml='-2'>
+                  {startTime ? (
+                    <DateTimePicker
+                      value={startTime ? new Date(startTime) : new Date()}
+                      mode='datetime'
+                      onChange={onStartTimeChange}
+                      accentColor='#007C7C'
+                    />
+                  ) : null}
+                </Box>
+              </VStack>
+            </FormControl>
+          )}
+        </>
+      )
+    } else if (
+      sectionFields?.length &&
+      find(sectionFields, {
+        fieldName: 'trapVisitTime',
+      })
+    ) {
+      const item = find(programFormFields, {
+        fieldName: 'trapVisitTime',
+      })
+      const { displayName } = item
+      if (!values.trapVisitTime) {
+        setFieldValue('trapVisitTime', new Date())
+      }
+      return (
+        <FormControl marginBottom={4}>
+          <VStack space={2}>
+            <HStack space={4}>
+              <FormControl.Label>
+                <Text color='black' fontSize='xl'>
+                  {displayName}{' '}
+                </Text>
+              </FormControl.Label>
+            </HStack>
+            <Box alignSelf='flex-start' ml='-2'>
+              <DateTimePicker
+                value={
+                  values?.trapVisitTime
+                    ? new Date(values?.trapVisitTime)
+                    : new Date()
+                }
+                mode='datetime'
+                onChange={(event: any, selectedDate: any) => {
+                  setFieldValue('trapVisitTime', selectedDate || new Date())
+                }}
+                accentColor='#007C7C'
+              />
+            </Box>
+          </VStack>
+        </FormControl>
+      )
+    } else {
+      setStartTime(null)
+      return null
+    }
+  }
+
+  const renderEndingTrapStatus = (
+    values: any,
+    setFieldValue: any,
+    setFieldTouched: any
+  ) => {
+    return (
+      <FormControl w='30%'>
+        <FormControl.Label>
+          <Text color='black' fontSize='xl'>
+            Trap Status at End
+          </Text>
+        </FormControl.Label>
+        <Radio.Group
+          name='endingTrapStatus'
+          accessibilityLabel='Ending Trap Status'
+          value={`${values.endingTrapStatus}`}
+          onChange={(newValue: any) => {
+            handleTrapStatusAtEndRadio(newValue, setFieldTouched, setFieldValue)
+          }}
+        >
+          <Radio
+            colorScheme='primary'
+            value='Restart Trap'
+            my={1}
+            _icon={{ color: 'primary' }}
+          >
+            Continue Trapping
+          </Radio>
+          <Radio
+            colorScheme='primary'
+            value='End Trapping'
+            my={1}
+            _icon={{ color: 'primary' }}
+          >
+            End Trapping
+          </Radio>
+        </Radio.Group>
+      </FormControl>
+    )
   }
 
   return (
     <Formik
-      validationSchema={trapPostProcessingSchema}
+      validationSchema={validationSchema}
       enableReinitialize={true}
+      validateOnMount={false}
       initialValues={initialValues}
-      initialTouched={{ debrisVolume: true }}
+      initialTouched={
+        activeTabId && reduxState[activeTabId]
+          ? reduxState[activeTabId].touched
+          : null
+      }
       initialErrors={
         activeTabId && reduxState[activeTabId]
           ? reduxState[activeTabId].errors
           : null
       }
-      onSubmit={values => {
-        if (activeTabId && activeTabId != 'placeholderId') {
-          const callback = () => {
-            if (willBeHoldingFishForMarkRecapture) {
-              navigateHelper(
-                'Fish Holding',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            } else {
-              navigateHelper(
-                'Incomplete Sections',
-                navigationSlice,
-                navigation,
-                dispatch,
-                updateActiveStep
-              )
-            }
-          }
-
-          navigation.push('Loading...')
-
-          setTimeout(() => {
-            DeviceEventEmitter.emit('event.load', {
-              process: () => onSubmit(values, activeTabId),
-              callback,
-            })
-          }, 2000)
-        }
-      }}
+      onSubmit={() => {}}
     >
       {({
         handleChange,
@@ -267,27 +586,75 @@ const TrapPostProcessing = ({
         errors,
         values,
         resetForm,
+        isValid,
       }) => {
+        const checkOtherTabForms = () => {
+          const tabIds = Object.keys(tabSlice.tabs)
+          const fishProcessingOtherTabsValidity = tabIds.map(tabId => {
+            if (tabId !== activeTabId) {
+              const tabFormValues = reduxState[tabId]?.values
+              const formIsValid = validationSchema?.isValidSync(tabFormValues)
+
+              return formIsValid
+            }
+
+            return
+          })
+
+          const tabIncomplete = fishProcessingOtherTabsValidity.some(
+            result => result === false
+          )
+
+          if (tabIncomplete) return false
+
+          return true
+        }
+
+        const otherTabFormsValid = checkOtherTabForms()
+
         useEffect(() => {
-          if (previouslyActiveTabId && navigationSlice.activeStep === 5) {
+          if (
+            Object.keys(tabSlice.tabs).length > 1 &&
+            previouslyActiveTabId &&
+            previouslyActiveTabId !== activeTabId &&
+            navigationSlice.activeStep === 5
+          ) {
             onSubmit(values, previouslyActiveTabId)
             resetForm()
           }
-        }, [previouslyActiveTabId])
+        }, [previouslyActiveTabId, activeTabId])
+
         const navButtons = useMemo(
           () => (
             <NavButtons
               navigation={navigation}
-              handleSubmit={handleSubmit}
+              handleSubmit={(buttonDirection: 'left' | 'right') => {
+                handleNavButtonClick(buttonDirection, values)
+              }}
               errors={errors}
               touched={touched}
               shouldProceedToLoadingScreen={true}
+              isValid={isValid && otherTabFormsValid}
             />
           ),
-          [navigation, handleSubmit, errors, touched]
+          [
+            navigation,
+            handleSubmit,
+            errors,
+            touched,
+            activePage,
+            values,
+            startTime,
+            isValid,
+            fishProcessingSlice,
+          ]
         )
         return (
-          <>
+          <KeyboardAvoidingView
+            flex={1}
+            // behavior='padding'
+            // keyboardVerticalOffset={100}
+          >
             <ScrollView>
               <Pressable
                 flex={1}
@@ -296,323 +663,280 @@ const TrapPostProcessing = ({
                 py='3%'
                 borderColor='themeGrey'
                 borderWidth='15'
+                minHeight={'100%'}
                 onPress={Keyboard.dismiss}
               >
-                <VStack space={10}>
+                <VStack space={1}>
                   <Heading>Trap Post-Processing</Heading>
-                  <HStack space={8}>
-                    <FormControl w='30%'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Debris Volume
-                        </Text>
-                      </FormControl.Label>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('debrisVolume')}
-                        onBlur={handleBlur('debrisVolume')}
-                        value={values.debrisVolume}
-                      />
-                      <Text
-                        color='#A1A1A1'
-                        position='absolute'
-                        top={50}
-                        right={4}
-                        fontSize={16}
+                  <HStack space={5}>
+                    {shouldRenderField({
+                      fieldName: 'debrisVolume',
+                      programFormFields,
+                      sectionFields,
+                    }) && (
+                      <Box
+                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                        minWidth='30%' // Prevents shrinking too much
+                        maxWidth='30%' // Prevents growing beyond this size
                       >
-                        {'gal'}
-                      </Text>
-                      {Number(values.debrisVolume) >
-                        QARanges.debrisVolume.max && <RenderWarningMessage />}
-                      {tabSlice.incompleteSectionTouched
-                        ? errors.debrisVolume &&
-                          RenderErrorMessage(errors, 'debrisVolume')
-                        : touched.debrisVolume &&
-                          errors.debrisVolume &&
-                          RenderErrorMessage(errors, 'debrisVolume')}
-                    </FormControl>
-                    <FormControl w='30%'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Total Revolutions
-                        </Text>
-                      </FormControl.Label>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Numeric Value'
-                        keyboardType='numeric'
-                        onChangeText={handleChange('totalRevolutions')}
-                        onBlur={handleBlur('totalRevolutions')}
-                        value={values.totalRevolutions}
-                      />
-                      {Number(values.totalRevolutions) >
-                        QARanges.totalRevolutions.max && (
-                        <RenderWarningMessage />
-                      )}
-                      {tabSlice.incompleteSectionTouched
-                        ? errors.totalRevolutions &&
-                          RenderErrorMessage(errors, 'totalRevolutions')
-                        : touched.totalRevolutions &&
-                          errors.totalRevolutions &&
-                          RenderErrorMessage(errors, 'totalRevolutions')}
-                    </FormControl>
-                    {recordTurbidityInPostProcessing && (
-                      <FormControl w='30%'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Water Turbidity
-                          </Text>
-                        </FormControl.Label>
-                        <Input
-                          height='50px'
-                          fontSize='16'
-                          placeholder='Numeric Value'
-                          keyboardType='numeric'
-                          onChangeText={handleChange('waterTurbidity')}
-                          onBlur={handleBlur('waterTurbidity')}
-                          value={values.waterTurbidity}
-                        />
-
-                        <Text
-                          color='#A1A1A1'
-                          position='absolute'
-                          top={50}
-                          right={4}
-                          fontSize={16}
-                        >
-                          {'ntu'}
-                        </Text>
-
-                        {Number(values.waterTurbidity) >
-                          QARanges.waterTurbidity.max && (
-                          <RenderWarningMessage />
-                        )}
-                        {tabSlice.incompleteSectionTouched
-                          ? errors.waterTurbidity &&
-                            RenderErrorMessage(errors, 'waterTurbidity')
-                          : touched.waterTurbidity &&
-                            errors.waterTurbidity &&
-                            RenderErrorMessage(errors, 'waterTurbidity')}
-                      </FormControl>
-                    )}
-                  </HStack>
-
-                  <FormControl>
-                    <HStack space={4} alignItems='center'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          RPM After Cleaning
-                        </Text>
-                      </FormControl.Label>
-                      {((touched.rpm1 && errors.rpm1) ||
-                        (touched.rpm2 && errors.rpm2) ||
-                        (touched.rpm3 && errors.rpm3)) && (
-                        <HStack space={1}>
-                          <Icon
-                            marginTop={'.5'}
-                            as={Ionicons}
-                            name='alert-circle-outline'
-                            color='error'
-                          />
-                          <Text style={{ fontSize: 16, color: '#b71c1c' }}>
-                            At least one measurement is required
-                          </Text>
-                        </HStack>
-                      )}
-                    </HStack>
-
-                    <HStack space={8} justifyContent='space-between'>
-                      <FormControl w='30%'>
-                        <VStack>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm1')}
-                            onBlur={handleBlur('rpm1')}
-                            value={values.rpm1}
-                          />
-                          {Number(values.rpm1) > QARanges.RPM.max ? (
-                            <RenderWarningMessage />
-                          ) : (
-                            <></>
-                          )}
-                        </VStack>
-                      </FormControl>
-                      <FormControl w='30%'>
-                        <VStack>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value (optional)'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm2')}
-                            onBlur={handleBlur('rpm2')}
-                            value={values.rpm2}
-                          />
-                          {Number(values.rpm2) > QARanges.RPM.max ? (
-                            <RenderWarningMessage />
-                          ) : (
-                            <></>
-                          )}
-                        </VStack>
-                      </FormControl>
-
-                      <FormControl w='30%'>
-                        <VStack>
-                          <Input
-                            height='50px'
-                            fontSize='16'
-                            placeholder='Numeric Value (optional)'
-                            keyboardType='numeric'
-                            onChangeText={handleChange('rpm3')}
-                            onBlur={handleBlur('rpm3')}
-                            value={values.rpm3}
-                          />
-                          {Number(values.rpm3) > QARanges.RPM.max ? (
-                            <RenderWarningMessage />
-                          ) : (
-                            <></>
-                          )}
-                        </VStack>
-                      </FormControl>
-                    </HStack>
-                    <Text color='grey' my='5' fontSize='17'>
-                      Take one or more measure of cone rotations. We will save
-                      the average in our database.
-                    </Text>
-
-                    <HStack space={3} mt='5'>
-                      <Button
-                        w='1/2'
-                        // h='12%'
-                        bg='primary'
-                        px='10'
-                        isLoading={locationClicked}
-                        spinnerPlacement='end'
-                        isLoadingText='Drop Pin at Current Location'
-                        _loading={{
-                          _text: {
-                            fontSize: 'xl',
-                          },
-                        }}
-                        onPress={() => {
-                          setLocationClicked(true)
-                          getCurrentLocation(setFieldTouched, setFieldValue)
-                        }}
-                      >
-                        <Text fontSize='xl' color='white'>
-                          Drop Pin at Current Location
-                        </Text>
-                      </Button>
-                      <VStack space={3} alignSelf='center'>
-                        <Text fontSize='xl' color='black'>
-                          {values.trapLatitude
-                            ? `Lat:  ${values.trapLatitude}`
-                            : 'Lat:'}
-                        </Text>
-                        <Text fontSize='xl' color='black'>
-                          {values.trapLongitude
-                            ? `Long:  ${values.trapLongitude}`
-                            : 'Long:'}
-                        </Text>
-                      </VStack>
-                    </HStack>
-                  </FormControl>
-                  <FormControl w='30%'>
-                    <FormControl.Label>
-                      <Text color='black' fontSize='xl'>
-                        Trap Status at End
-                      </Text>
-                    </FormControl.Label>
-                    <Radio.Group
-                      name='endingTrapStatus'
-                      accessibilityLabel='Ending Trap Status'
-                      value={`${values.endingTrapStatus}`}
-                      onChange={(newValue: any) => {
-                        handleTrapStatusAtEndRadio(
-                          newValue,
-                          setFieldTouched,
-                          setFieldValue
-                        )
-                      }}
-                    >
-                      <Radio
-                        colorScheme='primary'
-                        value='Restart Trap'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        Continue Trapping
-                      </Radio>
-                      <Radio
-                        colorScheme='primary'
-                        value='End Trapping'
-                        my={1}
-                        _icon={{ color: 'primary' }}
-                      >
-                        End Trapping
-                      </Radio>
-                    </Radio.Group>
-                  </FormControl>
-                  {values.endingTrapStatus == 'Restart Trap' && (
-                    <FormControl>
-                      <HStack>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Trapping Start Date and Time:
-                          </Text>
-                          <Popover
-                            placement='bottom left'
-                            trigger={popoverTrigger}
-                          >
-                            <Popover.Content
-                              accessibilityLabel='Trap Visit Start Info'
-                              w='600'
-                              mr='10'
-                            >
-                              <Popover.Arrow />
-                              <Popover.CloseButton />
-                              <Popover.Header>
-                                Please set the Date and Time of when you return
-                                the trap back to the water and begin the new
-                                trapping period.
-                              </Popover.Header>
-                              <Popover.Body p={4}>
-                                <VStack space={2}>
-                                  <HStack space={2} alignItems='flex-start'>
-                                    <Text fontSize='md'>
-                                      This value is used to record the date and
-                                      time of starting a new trapping period and
-                                      returning the trap from the water.
-                                    </Text>
-                                  </HStack>
-                                </VStack>
-                              </Popover.Body>
-                            </Popover.Content>
-                          </Popover>
-                        </FormControl.Label>
-                      </HStack>
-                      <Box alignSelf='flex-start' ml='-2'>
-                        <DateTimePicker
-                          value={startTime}
-                          mode='datetime'
-                          onChange={onStartTimeChange}
-                          accentColor='#007C7C'
+                        <FormInputComponent
+                          label='Debris Volume'
+                          placeholder='0'
+                          touched={touched}
+                          errors={errors}
+                          camelName='debrisVolume'
+                          onChangeText={handleChange('debrisVolume')}
+                          onBlur={() => setFieldTouched('debrisVolume')}
+                          value={values.debrisVolume}
+                          RightElement={<TextInputAdornment text='gal' />}
+                          validationSchema={validationSchema}
+                          keyboardType='number-pad'
                         />
                       </Box>
+                    )}
+                    {shouldRenderField({
+                      fieldName: 'totalRevolutions',
+                      programFormFields,
+                      sectionFields,
+                    }) && (
+                      <Box
+                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                        minWidth='30%' // Prevents shrinking too much
+                        maxWidth='30%' // Prevents growing beyond this size
+                      >
+                        <FormInputComponent
+                          label='Total Revolutions'
+                          placeholder='0'
+                          touched={touched}
+                          errors={errors}
+                          camelName='totalRevolutions'
+                          onChangeText={handleChange('totalRevolutions')}
+                          onBlur={() => setFieldTouched('totalRevolutions')}
+                          value={values.totalRevolutions}
+                          validationSchema={validationSchema}
+                          keyboardType='number-pad'
+                        />
+                      </Box>
+                    )}
+                    {/* {recordTurbidityInPostProcessing && (
+                          <FormInputComponent
+                            label=' Water Turbidity (optional)'
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            camelName='waterTurbidity'
+                            onChangeText={handleChange('waterTurbidity')}
+                            onBlur={() => setFieldTouched('waterTurbidity')}
+                            value={values.waterTurbidity}
+                          />
+                        )} */}
+                  </HStack>
+                  {shouldRenderField({
+                    fieldName: 'rpmAfter',
+                    programFormFields,
+                    sectionFields,
+                  }) && (
+                    <FormControl>
+                      <HStack space={4} alignItems='center'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            RPM After Cleaning
+                          </Text>
+                        </FormControl.Label>
+                        <Popover
+                          placement='bottom left'
+                          trigger={triggerProps => {
+                            return (
+                              <IconButton
+                                {...triggerProps}
+                                icon={
+                                  <Icon
+                                    as={MaterialIcons}
+                                    color='black'
+                                    name='info-outline'
+                                    size='lg'
+                                  />
+                                }
+                              ></IconButton>
+                            )
+                          }}
+                        >
+                          <Popover.Content
+                            accessibilityLabel='RPM Info'
+                            w='600'
+                            mr='10'
+                          >
+                            <Popover.Arrow />
+                            <Popover.Header>
+                              Take up to three measurements of cone rotations.
+                              The averages of the entered values will be saved
+                              to the database.
+                            </Popover.Header>
+                          </Popover.Content>
+                        </Popover>
+                      </HStack>
+                      <HStack space={5} justifyContent='space-between'>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            label={'Measure 1'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.rpm1 ? `${values.rpm1}` : ''}
+                            camelName={'rpm1'}
+                            onChangeText={newValue => {
+                              setFieldValue('rpm1', newValue)
+                              if (!newValue) {
+                                setFieldValue('rpm2', null)
+                                setFieldValue('rpm3', null)
+                              }
+                            }}
+                            onBlur={handleBlur('rpm1')}
+                            validationSchema={validationSchema}
+                            keyboardType='number-pad'
+                          />
+                        </Box>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            isDisabled={values.rpm1 ? false : true}
+                            label={'Measure 2'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.rpm2 ? `${values.rpm2}` : ''}
+                            camelName={'rpm2'}
+                            onChangeText={newValue => {
+                              setFieldValue('rpm2', newValue)
+                              if (!newValue) {
+                                setFieldValue('rpm3', null)
+                              }
+                            }}
+                            onBlur={handleBlur('rpm2')}
+                            validationSchema={validationSchema}
+                            keyboardType='number-pad'
+                          />
+                        </Box>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            isDisabled={
+                              values.rpm1 && values.rpm2 ? false : true
+                            }
+                            label={'Measure 3'}
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            value={values.rpm3 ? `${values.rpm3}` : ''}
+                            camelName={'rpm3'}
+                            onChangeText={handleChange('rpm3')}
+                            onBlur={handleBlur('rpm3')}
+                            validationSchema={validationSchema}
+                            keyboardType='number-pad'
+                          />
+                        </Box>
+                      </HStack>
                     </FormControl>
                   )}
+                  <ConditionalTrapVisitFields
+                    touched={touched}
+                    errors={errors}
+                    values={values}
+                    handleChange={handleChange}
+                    handleBlur={handleBlur}
+                    setFieldTouched={setFieldTouched}
+                    dropdownValues={dropdownValues}
+                    activePage={activePage}
+                    formFields={sectionFields}
+                    setFieldValue={setFieldValue}
+                    activeTabId={activeTabId}
+                    trapOperationsStore={trapOperationsStore}
+                    validationSchema={validationSchema}
+                  />
+                  {/* <HStack
+                        space={5}
+                        justifyContent='space-between'
+                        alignItems='center'
+                      >
+                        <Box flex={1}>
+                          <FormInputComponent
+                            label={'Latitude'}
+                            placeholder='0.00'
+                            touched={touched}
+                            errors={errors}
+                            value={values?.trapLatitude?.toString() || ''}
+                            camelName={'trapLatitude'}
+                            onChangeText={handleChange('trapLatitude')}
+                            onBlur={handleBlur('trapLatitude')}
+                            validationSchema={validationSchema}
+                            keyboardType='number-pad'
+                          />
+                        </Box>
+                        <Box flex={1}>
+                          <FormInputComponent
+                            label={'Longitude'}
+                            placeholder='0.00'
+                            touched={touched}
+                            errors={errors}
+                            value={values?.trapLongitude?.toString() || ''}
+                            camelName={'trapLongitude'}
+                            onChangeText={handleChange('trapLongitude')}
+                            onBlur={handleBlur('trapLongitude')}
+                            validationSchema={validationSchema}
+                            keyboardType='number-pad'
+                          />
+                        </Box>
+                        {nonFeatherYubaProgram && (
+                          <Box>
+                            <Button
+                              bg='primary'
+                              h={50}
+                              px={5}
+                              // isLoading={locationClicked}
+                              // isLoading
+                              isLoadingText='Retrieving Location'
+                              spinnerPlacement='end'
+                              _loading={{
+                                _text: {
+                                  fontSize: 'xl',
+                                },
+                              }}
+                              onPress={() => {
+                                setLocationClicked(true)
+                                getCurrentLocation(setFieldTouched, setFieldValue)
+                              }}
+                            >
+                              <Text fontSize='xl' color='white'>
+                                Use Current Location
+                              </Text>
+                            </Button>
+                          </Box>
+                        )}
+                      </HStack> */}
+                  {renderTrappingDateAndTime(
+                    values,
+                    setFieldValue,
+                    setFieldTouched
+                  )}
+                  {/* {renderEndingTrapStatus(
+                    values,
+                    setFieldValue,
+                    setFieldTouched
+                  )} */}
+                  <FormInputComponent
+                    multiline={true}
+                    label={'Comments'}
+                    placeholder='Enter any additional comments'
+                    touched={touched}
+                    errors={errors}
+                    value={values.comments}
+                    camelName={'comments'}
+                    onChangeText={handleChange('comments')}
+                    onBlur={handleBlur('comments')}
+                  />
                 </VStack>
               </Pressable>
             </ScrollView>
             {navButtons}
-          </>
+          </KeyboardAvoidingView>
         )
       }}
     </Formik>

@@ -1,33 +1,60 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep } from 'lodash'
-import { reformatBatchCountData } from '../../../utils/utils'
 import { ReleaseMarkI } from '../addAnotherMarkSlice'
 
 export interface BatchStoreI {
   [id: number]: singleBatchRawI
 }
 export interface singleBatchRawI {
-  forkLength: number
+  forkLength: number | null
   lifeStage: string
   dead: boolean
-  fishCondition: boolean
+  fishConditions: boolean
   existingMark: boolean
+  species?: string
+  uid?: string | null
+  runDefinition?: string | null
+  taxonCode?: string
 }
 export interface batchCharacteristicsI {
-  tabId: string | null
   species: string
+  multiSpecies?: string[]
   adiposeClipped: boolean
-  fishCondition: string
+  fishConditions: string[]
   existingMarks: Array<ReleaseMarkI>
+  taxonCode?: string
+}
+export interface batchCountI {
+  tabId: string | null
+  batchCharacteristics: batchCharacteristicsI
   forkLengths?: BatchStoreI
 }
-export const initialState: batchCharacteristicsI = {
+export const initialState: batchCountI = {
   tabId: null,
-  species: '',
-  adiposeClipped: false,
-  fishCondition: '',
-  existingMarks: [],
+  batchCharacteristics: {
+    species: '',
+    multiSpecies: [],
+    adiposeClipped: false,
+    fishConditions: [],
+    existingMarks: [],
+  },
   forkLengths: {},
+}
+
+const getRun = (species: string, runValue: any) => {
+  if (species === 'Chinook salmon') {
+    return runValue ? runValue.toLowerCase() : 'not recorded'
+  } else {
+    return null
+  }
+}
+
+const getLifeStage = (species: string, lifeStageValue: any) => {
+  if (species === 'Chinook salmon' || species === 'Steelhead / rainbow trout') {
+    return lifeStageValue ? lifeStageValue.toLowerCase() : 'not recorded'
+  } else {
+    return null
+  }
 }
 
 export const batchCountSlice = createSlice({
@@ -36,31 +63,68 @@ export const batchCountSlice = createSlice({
   reducers: {
     resetBatchCountSlice: () => initialState,
     saveBatchCharacteristics: (state, action) => {
-      const { tabId, species, adiposeClipped, fishCondition } = action.payload
+      const {
+        tabId,
+        species,
+        multiSpecies,
+        adiposeClipped,
+        fishConditions,
+        taxonCode,
+      } = action.payload
       const forkLengthsCopy = cloneDeep(state.forkLengths) as any
       state.tabId = tabId
-      state.species = species
-      state.adiposeClipped = adiposeClipped
-      state.fishCondition = fishCondition
+      state.batchCharacteristics.species = species
+      state.batchCharacteristics.multiSpecies = multiSpecies
+      state.batchCharacteristics.taxonCode = taxonCode
+      state.batchCharacteristics.adiposeClipped = adiposeClipped
+      state.batchCharacteristics.fishConditions = fishConditions
       state.forkLengths = forkLengthsCopy
     },
     addMarkToBatchCountExistingMarks: (state, action) => {
-      state.existingMarks = [...state.existingMarks, action.payload]
+      state.batchCharacteristics.existingMarks = [
+        ...state.batchCharacteristics.existingMarks,
+        action.payload,
+      ]
     },
     removeMarkFromBatchCountExistingMarks: (state, action) => {
-      state.existingMarks = action.payload
+      state.batchCharacteristics.existingMarks = action.payload
     },
     addForkLengthToBatchStore: (state, action) => {
       const forkLengthsCopy = cloneDeep(state.forkLengths) || {
         ...state.forkLengths,
       }
+      const {
+        uid,
+        species,
+        forkLength,
+        existingMark,
+        adiposeClipped,
+        fishConditions,
+        runDefinition,
+        lifeStage,
+        dead,
+        taxonCode,
+      } = action.payload
+
       const fishEntry = {
-        forkLength: action.payload.forkLength,
-        lifeStage: action.payload.lifeStage,
-        dead: action.payload.dead,
-        existingMark: action.payload.existingMark,
-        fishCondition: action.payload.fishCondition,
+        uid: uid || null,
+        species: species || '',
+        adiposeClipped: adiposeClipped,
+        forkLength: forkLength,
+        lifeStage: lifeStage,
+        dead: dead,
+        existingMark: existingMark,
+        fishConditions: fishConditions,
+        runDefinition: runDefinition,
+        taxonCode: taxonCode,
       } as any
+      if (action.payload.eggs !== null) {
+        fishEntry.eggs = action.payload.eggs
+      }
+      if (action.payload.milting !== null) {
+        fishEntry.milting = action.payload.milting
+      }
+
       let id = null
       if (Object.keys(forkLengthsCopy).length) {
         // @ts-ignore
@@ -72,8 +136,70 @@ export const batchCountSlice = createSlice({
       forkLengthsCopy[id] = fishEntry
       state.forkLengths = forkLengthsCopy
     },
+    addPlusCountToBatchStore: (state, action) => {
+      const {
+        tabId,
+        species,
+        count,
+        run,
+        lifeStage,
+        plusCountMethod,
+        dead,
+        existingMarks,
+        taxonCode,
+      } = action.payload
+      const forkLengthsCopy = cloneDeep(state.forkLengths) || {
+        ...state.forkLengths,
+      }
 
-    removeLastForkLengthEntered: (state) => {
+      const plusCountEntry = {
+        tabId,
+        UID: null,
+        species,
+        numFishCaught: count,
+        forkLength: null,
+        run: getRun(species, run),
+        weight: null,
+        fishConditions: false,
+        lifeStage: getLifeStage(species, lifeStage),
+        adiposeClipped: null,
+        existingMarks: existingMarks?.length ? existingMarks : [],
+        existingMark: existingMarks?.length ? true : false,
+        dead,
+        willBeUsedInRecapture: null,
+        plusCountMethod,
+        plusCount: true,
+        taxonCode,
+      }
+
+      let id = null
+      if (Object.keys(forkLengthsCopy).length) {
+        // @ts-ignore
+        const largestId = Math.max(...Object.keys(forkLengthsCopy))
+        id = largestId + 1
+      } else {
+        id = 0
+      }
+      forkLengthsCopy[id] = plusCountEntry
+      state.forkLengths = forkLengthsCopy
+    },
+    removeForkLengthByUID: (state, action) => {
+      const forkLengthsCopy = cloneDeep(state.forkLengths) as any
+
+      const newForkLengthsArray = (
+        Object.values(forkLengthsCopy) as singleBatchRawI[]
+      ).filter(fishEntry => fishEntry.uid !== action.payload)
+
+      const updatedForkLengthsObj = newForkLengthsArray.reduce<
+        Record<number, any>
+      >((acc, item, idx) => {
+        acc[idx] = item
+        return acc
+      }, {} as Record<number, (typeof newForkLengthsArray)[0]>)
+
+      state.forkLengths = updatedForkLengthsObj
+    },
+    removeLastForkLengthEntered: state => {
       const forkLengthsCopy = cloneDeep(state.forkLengths) as any
       if (Object.keys(forkLengthsCopy).length) {
         // @ts-ignore
@@ -135,8 +261,10 @@ export const {
   addMarkToBatchCountExistingMarks,
   removeMarkFromBatchCountExistingMarks,
   removeLastForkLengthEntered,
+  removeForkLengthByUID,
   updateSingleForkLengthCount,
   addForkLengthToBatchStore,
+  addPlusCountToBatchStore,
 } = batchCountSlice.actions
 
 export default batchCountSlice.reducer

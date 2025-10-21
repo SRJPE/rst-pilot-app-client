@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import { Ionicons } from '@expo/vector-icons'
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { Formik } from 'formik'
 import {
   Box,
   Center,
@@ -7,25 +9,26 @@ import {
   Heading,
   Icon,
   Pressable,
+  ScrollView,
   Text,
   VStack,
+  View,
 } from 'native-base'
-import AppLogo from '../../../components/Shared/AppLogo'
-import { Feather } from '@expo/vector-icons'
-import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
-import CustomModal from '../../../components/Shared/CustomModal'
-import ChooseFileModalContent from '../../../components/createNewProgram/ChooseFileModalContent'
-import CustomSelect from '../../../components/Shared/CustomSelect'
-import { Formik } from 'formik'
-import { AppDispatch, RootState } from '../../../redux/store'
+import React, { useState } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
+import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
+import AppLogo from '../../../components/Shared/AppLogo'
+import CustomSelect from '../../../components/Shared/CustomSelect'
+import FilePreviewCard from '../../../components/Shared/FilePreviewCard'
+import FormInputComponent from '../../../components/Shared/FormInputComponent'
+import PdfPreviewScreen from '../../../components/Shared/PdfPreviewScreen'
 import {
   EfficiencyTrialProtocolsInitialStateI,
   saveHatcheryInformationValues,
 } from '../../../redux/reducers/createNewProgramSlices/efficiencyTrialProtocolsSlice'
-import FormInputComponent from '../../../components/Shared/FormInputComponent'
+import { AppDispatch, RootState } from '../../../redux/store'
 import { hatcheryInformationSchema } from '../../../utils/helpers/yupValidations'
-import DateTimePicker from '@react-native-community/datetimepicker'
+import useCacheDirectory from '../../../utils/hooks/useCacheDirectory'
 
 const HatcheryInformation = ({
   efficiencyTrialProtocolsStore,
@@ -46,6 +49,15 @@ const HatcheryInformation = ({
   const [chooseFileModalOpen, setChooseFileModalOpen] = useState(
     false as boolean
   )
+  const {
+    handleFileRemoval,
+    handleOpenPdfPreview,
+    handleClosePdfPreview,
+    files,
+    activeFilePreview,
+    openDocumentPicker,
+  } = useCacheDirectory('hatcheryInformation')
+
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -62,37 +74,14 @@ const HatcheryInformation = ({
   }
 
   const handleEfficiencyTrialProtocolsSubmission = (values: any) => {
-    delete values.agreementStartDate
-    delete values.agreementEndDate
-    delete values.renewalDate
-    console.log('🚀 ~ handleEfficiencyTrialProtocolsSubmission ~ values :', {
-      ...values,
-      expectedNumberOfFishReceivedAtEachPickup: Number(
-        values.expectedNumberOfFishReceivedAtEachPickup
-      ),
-      agreementStartDate,
-      agreementEndDate,
-      renewalDate,
-    })
-    dispatch(
-      saveHatcheryInformationValues({
-        ...values,
-        expectedNumberOfFishReceivedAtEachPickup: Number(
-          values.expectedNumberOfFishReceivedAtEachPickup
-        ),
-
-        agreementStartDate,
-        agreementEndDate,
-        renewalDate,
-      })
-    )
+    dispatch(saveHatcheryInformationValues(values))
   }
   return (
     <>
       <Formik
         validationSchema={hatcheryInformationSchema}
         initialValues={efficiencyTrialProtocolsStore.values}
-        onSubmit={(values) => {
+        onSubmit={values => {
           handleEfficiencyTrialProtocolsSubmission(values)
         }}
       >
@@ -100,148 +89,175 @@ const HatcheryInformation = ({
           handleChange,
           handleBlur,
           handleSubmit,
-          setFieldValue,
           setFieldTouched,
           touched,
           errors,
           values,
         }) => (
-          <>
-            <Box overflow='hidden' flex={1} bg='#fff'>
-              <Center bg='primary' py='5%'>
-                <AppLogo imageSize={200} />
-              </Center>
-              <VStack py='5%' px='10%' space={5}>
-                <Heading alignSelf='center'>Hatchery Information</Heading>
-                <HStack space={10}>
-                  <VStack space={2}>
-                    <Text color='black' fontSize='xl'>
-                      Agreement Start Date
-                    </Text>
-                    <Box alignSelf='flex-start' minWidth='220' ml='-95'>
-                      <DateTimePicker
-                        value={agreementStartDate}
-                        mode='date'
-                        onChange={onStartDateChange}
-                        accentColor='#007C7C'
-                      />
-                    </Box>
-                  </VStack>
-                  <VStack space={2}>
-                    <Text color='black' fontSize='xl'>
-                      Agreement End Date
-                    </Text>
-                    <Box alignSelf='flex-start' minWidth='220' ml='-95'>
-                      <DateTimePicker
-                        value={agreementEndDate}
-                        mode='date'
-                        onChange={onEndDateChange}
-                        accentColor='#007C7C'
-                      />
-                    </Box>
-                  </VStack>
-                  <VStack space={2}>
-                    <Text color='black' fontSize='xl'>
-                      Agreement Renewal Date
-                    </Text>
-                    <Box alignSelf='flex-start' minWidth='220' ml='-95'>
-                      <DateTimePicker
-                        value={renewalDate}
-                        mode='date'
-                        onChange={onRenewalDateChange}
-                        accentColor='#007C7C'
-                      />
-                    </Box>
-                  </VStack>
-                </HStack>
-                <VStack space={4}>
-                  <FormInputComponent
-                    label={'Hatchery'}
-                    touched={touched}
-                    errors={errors}
-                    value={values.hatchery ? `${values.hatchery}` : ''}
-                    camelName={'hatchery'}
-                    onChangeText={handleChange('hatchery')}
-                    onBlur={handleBlur('hatchery')}
-                  />
-                  <HStack space={10} alignItems='center'>
-                    <FormControl width={'45%'}>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Frequency of Receiving Fish{' '}
-                        </Text>
-                      </FormControl.Label>
-                      <CustomSelect
-                        selectedValue={values.frequencyOfReceivingFish}
-                        placeholder={'Frequency'}
-                        onValueChange={(value: any) =>
-                          handleChange('frequencyOfReceivingFish')(value)
-                        }
-                        setFieldTouched={() =>
-                          setFieldTouched('frequencyOfReceivingFish')
-                        }
-                        selectOptions={dropdownValues?.frequency}
-                      />
-                    </FormControl>
+          <View h={'100%'} backgroundColor={'white'}>
+            <ScrollView>
+              <Box overflow='hidden' flex={1} bg='#fff'>
+                <Center bg='primary' py='5%'>
+                  <AppLogo imageSize={200} />
+                </Center>
+                <VStack py='5%' px='10%' space={5}>
+                  <Heading alignSelf='center'>Hatchery Information</Heading>
+                  <HStack space={10}>
+                    <VStack space={2}>
+                      <Text color='black' fontSize='md'>
+                        Agreement Start Date
+                      </Text>
+
+                      <Box alignSelf='flex-start'>
+                        <DateTimePicker
+                          value={agreementStartDate}
+                          mode='date'
+                          onChange={onStartDateChange}
+                          accentColor='#007C7C'
+                        />
+                      </Box>
+                    </VStack>
+                    <VStack space={2}>
+                      <Text color='black' fontSize='md'>
+                        Agreement Start Date
+                      </Text>
+
+                      <Box alignSelf='flex-start'>
+                        <DateTimePicker
+                          value={agreementEndDate}
+                          mode='date'
+                          onChange={onEndDateChange}
+                          accentColor='#007C7C'
+                        />
+                      </Box>
+                    </VStack>
+                    <VStack space={2}>
+                      <Text color='black' fontSize='md'>
+                        Agreement Renewal Date
+                      </Text>
+                      <Box alignSelf='flex-start'>
+                        <DateTimePicker
+                          value={renewalDate}
+                          mode='date'
+                          onChange={onRenewalDateChange}
+                          accentColor='#007C7C'
+                        />
+                      </Box>
+                    </VStack>
+                  </HStack>
+                  <VStack space={4}>
                     <FormInputComponent
-                      width={'49%'}
-                      label={'Expected Number of Fish'}
+                      label={'Hatchery'}
+                      placeholder='Enter Hatchery Name'
                       touched={touched}
                       errors={errors}
-                      value={
-                        values.expectedNumberOfFishReceivedAtEachPickup
-                          ? `${values.expectedNumberOfFishReceivedAtEachPickup}`
-                          : ''
-                      }
-                      camelName={'expectedNumberOfFishReceivedAtEachPickup'}
-                      keyboardType={'numeric'}
-                      onChangeText={handleChange(
-                        'expectedNumberOfFishReceivedAtEachPickup'
-                      )}
-                      onBlur={handleBlur(
-                        'expectedNumberOfFishReceivedAtEachPickup'
-                      )}
+                      value={values.hatchery ? `${values.hatchery}` : ''}
+                      camelName={'hatchery'}
+                      onChangeText={handleChange('hatchery')}
+                      onBlur={handleBlur('hatchery')}
                     />
-                  </HStack>
-                </VStack>
-                <Text fontSize='lg' color='grey'>
-                  Upload PDF of Efficiency Monitoring Protocols
-                </Text>
-                <Pressable
-                  alignSelf='center'
-                  onPress={() => setChooseFileModalOpen(true)}
-                >
-                  <Center
-                    h='150'
-                    w='650'
-                    borderWidth='2'
-                    borderColor='grey'
-                    borderStyle='dotted'
+                    <HStack space={5}>
+                      <Box flex={1}>
+                        <CustomSelect
+                          label='Frequency of Receiving Fish'
+                          selectedValue={values.frequencyOfReceivingFish}
+                          placeholder={'Select Frequency'}
+                          camelName='frequencyOfReceivingFish'
+                          touched={touched}
+                          errors={errors}
+                          onValueChange={(value: any) =>
+                            handleChange('frequencyOfReceivingFish')(value)
+                          }
+                          setFieldTouched={() =>
+                            setFieldTouched('frequencyOfReceivingFish')
+                          }
+                          selectOptions={dropdownValues?.frequency}
+                        />
+                      </Box>
+
+                      <FormInputComponent
+                        label={'Expected # of Fish Received at Pickup'}
+                        placeholder='0'
+                        touched={touched}
+                        errors={errors}
+                        value={
+                          values.expectedNumberOfFishReceivedAtEachPickup
+                            ? `${values.expectedNumberOfFishReceivedAtEachPickup}`
+                            : ''
+                        }
+                        camelName={'expectedNumberOfFishReceivedAtEachPickup'}
+                        keyboardType={'number-pad'}
+                        onChangeText={handleChange(
+                          'expectedNumberOfFishReceivedAtEachPickup'
+                        )}
+                        onBlur={handleBlur(
+                          'expectedNumberOfFishReceivedAtEachPickup'
+                        )}
+                      />
+                    </HStack>
+                  </VStack>
+                  <Text fontSize='lg' color='grey'>
+                    Upload PDF of Agreement with Hatchery
+                  </Text>
+                  <Pressable
+                    alignSelf='center'
+                    onPress={() => openDocumentPicker()}
                   >
-                    <Icon as={Feather} name='plus' size='5xl' color='grey' />
-                  </Center>
-                </Pressable>
-              </VStack>
-            </Box>
+                    <Center
+                      h='100'
+                      w='650'
+                      borderWidth='2'
+                      borderColor='grey'
+                      borderStyle='dotted'
+                    >
+                      <Icon
+                        as={Ionicons}
+                        name='cloud-upload'
+                        size='5xl'
+                        color='grey'
+                      />
+                      <Text fontSize='lg'>
+                        Click to{' '}
+                        <Text
+                          style={{
+                            textDecorationLine: 'underline',
+                          }}
+                          color={'primary'}
+                        >
+                          select file
+                        </Text>
+                      </Text>
+                    </Center>
+                  </Pressable>
+
+                  {files.map((file, index) => (
+                    <FilePreviewCard
+                      key={index + file.name}
+                      handleFileRemoval={handleFileRemoval}
+                      handleOpenPdfPreview={handleOpenPdfPreview}
+                      file={file}
+                    />
+                  ))}
+                </VStack>
+              </Box>
+            </ScrollView>
             <CreateNewProgramNavButtons
               navigation={navigation}
               handleSubmit={handleSubmit}
               touched={touched}
               errors={errors}
             />
-          </>
+          </View>
         )}
       </Formik>
+
       {/* --------- Modals --------- */}
-      <CustomModal
-        isOpen={chooseFileModalOpen}
-        closeModal={() => setChooseFileModalOpen(false)}
-        height='1/3'
-      >
-        <ChooseFileModalContent
-          closeModal={() => setChooseFileModalOpen(false)}
+      {activeFilePreview?.uri && (
+        <PdfPreviewScreen
+          handleClosePdfPreview={handleClosePdfPreview}
+          activeFilePreview={activeFilePreview}
         />
-      </CustomModal>
+      )}
     </>
   )
 }

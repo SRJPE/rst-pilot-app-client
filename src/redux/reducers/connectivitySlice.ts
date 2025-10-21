@@ -1,12 +1,17 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import {
   fetchPreviousTrapAndCatch,
+  postQCSubmissions,
   postTrapVisitFormSubmissions,
 } from './postSlices/trapVisitFormPostBundler'
-import { postMarkRecaptureSubmissions } from './postSlices/markRecapturePostBundler'
+import {
+  postMarkRecaptureSubmissions,
+  fetchExistingMarks,
+} from './postSlices/markRecapturePostBundler'
 import { postMonitoringProgramSubmissions } from './postSlices/monitoringProgramPostBundler'
+import { showSlideAlert } from './slideAlertSlice'
 
-interface InitialStateI {
+export interface InitialStateI {
   type: string
   isConnected: boolean
   isInternetReachable: boolean
@@ -19,6 +24,7 @@ interface ConnectivityInfoI {
   type: string
   isConnected: boolean
   isInternetReachable: boolean
+  timestamp?: string
 }
 
 // Connection Types:
@@ -44,13 +50,35 @@ export const connectionChanged = createAsyncThunk(
   'connectivitySlice/connectionChanged',
   async (connectionState: ConnectivityInfoI, thunkAPI) => {
     const payload = connectionState
-    console.log('connection changed...', connectionState)
+    const state: any = thunkAPI.getState() // Access Redux state
     try {
-      if (connectionState.isConnected && connectionState.isInternetReachable) {
-        thunkAPI.dispatch(fetchPreviousTrapAndCatch())
+      if (
+        connectionState.isConnected &&
+        connectionState.isInternetReachable &&
+        state.userCredentials.id
+      ) {
         thunkAPI.dispatch(postTrapVisitFormSubmissions())
+        thunkAPI.dispatch(postQCSubmissions())
         thunkAPI.dispatch(postMarkRecaptureSubmissions())
         thunkAPI.dispatch(postMonitoringProgramSubmissions())
+        thunkAPI.dispatch(fetchPreviousTrapAndCatch())
+        thunkAPI.dispatch(fetchExistingMarks())
+        showSlideAlert(
+          thunkAPI.dispatch,
+          'Network connection established successfully',
+          'success',
+          5000
+        )
+      } else if (
+        !connectionState.isConnected &&
+        !connectionState.isInternetReachable
+      ) {
+        showSlideAlert(
+          thunkAPI.dispatch,
+          'No network connection. Operating in offline mode',
+          'error',
+          5000
+        )
       }
       return payload
     } catch (e) {
@@ -69,10 +97,10 @@ export const connectivitySlice = createSlice({
       const receipt = { type, isConnected, isInternetReachable }
       const historyCopy = state.history
       if (historyCopy.length < historyLengthLimit) {
-        historyCopy.push(receipt)
+        historyCopy.push({ ...receipt, timestamp: new Date().toISOString() })
       } else {
         historyCopy.shift()
-        historyCopy.push(receipt)
+        historyCopy.push({ ...receipt, timestamp: new Date().toISOString() })
       }
       state.type = type
       state.isConnected = isConnected

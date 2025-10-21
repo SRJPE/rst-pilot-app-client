@@ -17,7 +17,7 @@ const CreateNewProgramNavButtons = ({
   variant,
   disableRightButtonBool,
   formIsCompleteAndValid,
-  POSTMonitoringProgramSubmissions,
+  POSTMonitoringProgramSubmissionsHandler,
   clearFormValues,
 }: {
   crewMembersStore: CrewMembersStoreI
@@ -29,7 +29,7 @@ const CreateNewProgramNavButtons = ({
   variant?: string
   disableRightButtonBool?: boolean
   formIsCompleteAndValid?: boolean
-  POSTMonitoringProgramSubmissions?: Function
+  POSTMonitoringProgramSubmissionsHandler?: Function
   clearFormValues?: Function
 }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -44,41 +44,41 @@ const CreateNewProgramNavButtons = ({
         navigation.goBack()
         break
       case 'Efficiency Trial Protocols':
-        navigation.navigate('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Hatchery Information',
         })
         break
       case 'Hatchery Information':
         handleSubmit()
         dispatch(markCreateNewProgramStepCompleted('efficiencyTrialProtocols'))
-        navigation.navigate('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Create New Program Home',
         })
         break
       case 'Trapping Protocols':
-        navigation.navigate('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Trapping Protocols Table',
         })
         break
       case 'Trapping Protocols Table':
         dispatch(markCreateNewProgramStepCompleted('trappingProtocols'))
-        navigation.navigate('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Create New Program Home',
         })
         break
       case 'Permit Information':
-        navigation.navigate('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Permitting Information Input',
         })
         break
       case 'Trapping Sites':
         if (isMultipleTrapsVariant) {
-          navigation.navigate('Create New Program', {
+          navigation?.navigate('Create New Program', {
             screen: 'Multiple Traps',
           })
         } else {
           dispatch(markCreateNewProgramStepCompleted('trappingSites'))
-          navigation.navigate('Create New Program', {
+          navigation?.navigate('Create New Program', {
             screen: 'Create New Program Home',
           })
         }
@@ -88,33 +88,33 @@ const CreateNewProgramNavButtons = ({
         // Add dispatch function to save trap site group data to redux store
         //*****
         handleSubmit && handleSubmit()
-        navigation.navigate('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Trapping Sites',
         })
         break
       case 'Permitting Information Input':
         handleSubmit()
         dispatch(markCreateNewProgramStepCompleted('permitInformation'))
-        navigation.navigate('Create New Program', {
+        navigation?.navigate('Create New Program', {
           screen: 'Create New Program Home',
         })
         break
       case 'Create New Program Home':
         //post submission
-        if (POSTMonitoringProgramSubmissions) {
-          POSTMonitoringProgramSubmissions()
-          navigation.navigate('Create New Program', {
+        if (POSTMonitoringProgramSubmissionsHandler) {
+          POSTMonitoringProgramSubmissionsHandler()
+          navigation?.navigate('Create New Program', {
             screen: 'Create New Program Complete',
           })
         }
         break
       case 'Create New Program Complete':
         clearFormValues && clearFormValues()
-        navigation.navigate('Home')
-        navigation.reset({
+        navigation?.reset({
           index: 0,
           routes: [{ name: 'Monitoring Program New' }],
         })
+        navigation?.navigate('Profile')
 
         break
 
@@ -125,15 +125,12 @@ const CreateNewProgramNavButtons = ({
   const handleLeftButton = () => {
     switch (activePage) {
       case 'Create New Program Home':
-        navigation.navigate('Monitoring Program', {
+        navigation?.navigate('Monitoring Program', {
           screen: 'Monitoring Program New',
         })
         break
       case 'Create New Program Complete':
         clearFormValues && clearFormValues()
-        navigation.navigate('Monitoring Program', {
-          screen: 'Monitoring Program New',
-        })
         navigation.reset({
           index: 0,
           routes: [{ name: 'Monitoring Program New' }],
@@ -142,7 +139,7 @@ const CreateNewProgramNavButtons = ({
       case 'Trapping Sites':
         if (isMultipleTrapsVariant) {
           dispatch(markCreateNewProgramStepCompleted('trappingSites'))
-          navigation.navigate('Create New Program', {
+          navigation?.navigate('Create New Program', {
             screen: 'Create New Program Home',
           })
         } else {
@@ -170,12 +167,7 @@ const CreateNewProgramNavButtons = ({
 
         break
       case 'Crew Members':
-        // rightButtonText = 'Save Crew Members and Exit'
-        rightButtonText = 'Save and Return'
-
-        break
-      case 'Efficiency Trial Protocols':
-        rightButtonText = 'Next'
+        rightButtonText = 'Save Crew Members'
         break
       case 'Hatchery Information':
         rightButtonText = 'Save and Exit'
@@ -184,21 +176,13 @@ const CreateNewProgramNavButtons = ({
         rightButtonText = 'Next'
         break
       case 'Trapping Protocols Table':
-        // rightButtonText = 'Save Trapping Protocols and Exit'
-        rightButtonText = 'Save and Return'
-
-        break
-      case 'Permit Information':
-        rightButtonText = 'Next'
-
+        rightButtonText = 'Save Trapping Protocols'
         break
       case 'Permitting Information Input':
-        // rightButtonText = 'Save Permitting Information and Exit'
-        rightButtonText = 'Save and Return'
-
+        rightButtonText = 'Save Permitting Information'
         break
       case 'Create New Program Complete':
-        rightButtonText = 'Go Home'
+        rightButtonText = 'Return to Profile'
         break
 
       default:
@@ -247,7 +231,8 @@ const CreateNewProgramNavButtons = ({
         break
       case 'Hatchery Information':
         shouldBeDisabled =
-          Object.keys(touched).length === 0 || Object.keys(errors).length > 0
+          // Object.keys(touched).length === 0 || Object.keys(errors).length > 0
+          Object.keys(errors).length > 0
 
         break
       case 'Trapping Protocols Table':
@@ -257,8 +242,8 @@ const CreateNewProgramNavButtons = ({
         break
       case 'Permitting Information Input':
         // expand validation
-        // shouldBeDisabled =
-        //   Object.keys(touched).length === 0 || Object.keys(errors).length > 0
+        shouldBeDisabled =
+          Object.keys(touched).length === 0 || Object.keys(errors).length > 0
 
         break
       default:

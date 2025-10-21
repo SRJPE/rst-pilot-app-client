@@ -17,6 +17,9 @@ import {
 import { StyleSheet, useWindowDimensions } from 'react-native'
 import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { CommonActions } from '@react-navigation/native'
+import { resetNavigationSlice } from '../../redux/reducers/formSlices/navigationSlice'
+import { useDispatch } from 'react-redux'
 
 const styles = StyleSheet.create({
   button: {
@@ -63,6 +66,7 @@ export default function BottomNavigation({
   staggerOpen?: boolean
 }) {
   const { isOpen, onToggle, onClose } = useDisclose()
+  const dispatch = useDispatch()
 
   const [staggerTranslateXValue, setstaggerTranslateXValue] = useState(
     // -173 as number
@@ -82,21 +86,40 @@ export default function BottomNavigation({
   // }, [screenHeight])
 
   const handlePressQCData = useCallback(() => {
-    navigation.navigate('Quality Control')
+    navigation?.navigate('Quality Control')
     onClose()
   }, [navigation])
   const handlePressTrapVisit = useCallback(() => {
-    navigation.navigate('Trap Visit Form')
+    dispatch(resetNavigationSlice())
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Trap Visit Form',
+            state: {
+              routes: [
+                {
+                  name: 'Visit Setup',
+                },
+              ],
+            },
+          },
+        ],
+      })
+    )
+
+    navigation.navigate('Trap Visit Form', { screen: 'Visit Setup' })
     setStaggerOpen(false)
     onClose()
   }, [navigation])
   const handlePressMarkRecapture = useCallback(() => {
-    navigation.navigate('Mark Recapture')
+    navigation?.navigate('Mark Recapture')
     setStaggerOpen(false)
     onClose()
   }, [navigation])
   const handlePressGenerateReport = useCallback(() => {
-    navigation.navigate('Generate Report')
+    navigation?.navigate('Generate Report')
     onClose()
   }, [navigation])
   const handlePressStagger = () => {
@@ -168,13 +191,13 @@ export default function BottomNavigation({
                 >
                   <Badge
                     alignSelf='center'
-                    variant={'solid'}
+                    variant='solid'
                     bg='secondary'
                     opacity='0.8'
                     borderRadius='5'
                   >
                     <Text fontSize={23} fontWeight='400'>
-                      Standard Trap Visit
+                      Fish Sampling Data Entry
                     </Text>
                   </Badge>
                   <IconButton
@@ -198,12 +221,7 @@ export default function BottomNavigation({
                 <HStack
                   space={2}
                   alignItems='center'
-                  justifyContent='flex-start'
-                  style={[
-                    {
-                      transform: [{ translateX: staggerTranslateXValue }],
-                    },
-                  ]}
+                  style={[{ transform: [{ translateX: -63 }] }]}
                 >
                   <Badge
                     alignSelf='center'
@@ -213,7 +231,7 @@ export default function BottomNavigation({
                     borderRadius='5'
                   >
                     <Text fontSize={23} fontWeight='400'>
-                      Mark Recapture Release
+                      Release Trial
                     </Text>
                   </Badge>
                   <IconButton

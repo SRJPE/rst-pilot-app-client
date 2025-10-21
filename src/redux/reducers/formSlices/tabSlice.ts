@@ -23,7 +23,7 @@ interface TabInfoI {
 }
 
 interface ErrorDetailsI {
-  [pageName: string]: string
+  [pageName: string]: any
 }
 
 const initialState: TabStateI = {
@@ -45,7 +45,7 @@ export const tabsSlice = createSlice({
       }
       const timestamp = new Date()
       let groupId = uid()
-      Object.keys(state.tabs).forEach((id) => {
+      Object.keys(state.tabs).forEach(id => {
         if (state.tabs[id].trapSite === trapSite) {
           groupId = state.tabs[id].groupId
         }
@@ -80,15 +80,19 @@ export const tabsSlice = createSlice({
     },
     updateErrorCount: (state, action) => {
       const { tabId, errorCount } = action.payload
-      state.tabs[tabId].errorCount = errorCount
+      if (tabId && state?.tabs?.[tabId]) {
+        state.tabs[tabId].errorCount = errorCount
+      }
     },
     updateErrorDetails: (state, action) => {
       const { tabId, errorDetails } = action.payload
-      state.tabs[tabId].errorDetails = errorDetails
+      if (tabId && state?.tabs?.[tabId]) {
+        state.tabs[tabId].errorDetails = errorDetails
+      }
     },
     setIncompleteSectionTouched: (state, action) => {
       state.incompleteSectionTouched = action.payload
-    }
+    },
   },
 })
 

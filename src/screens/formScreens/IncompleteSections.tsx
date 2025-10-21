@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { Heading, View, VStack } from 'native-base'
+import React, { useEffect, useRef, useState } from 'react'
+import { Box, Divider, Heading, ScrollView, View, VStack } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import navigationSlice, {
@@ -27,15 +27,30 @@ import { resetTrapOperationsSlice } from '../../redux/reducers/formSlices/trapOp
 import { resetVisitSetupSlice } from '../../redux/reducers/formSlices/visitSetupSlice'
 import { resetPaperEntrySlice } from '../../redux/reducers/formSlices/paperEntrySlice'
 import { resetTabsSlice } from '../../redux/reducers/formSlices/tabSlice'
-import { cloneDeep, flatten, uniq } from 'lodash'
-import { uid } from 'uid'
+import { resetBatchCountSlice } from '../../redux/reducers/formSlices/batchCountSlice'
+import { cloneDeep, find, flatten, keyBy, uniq } from 'lodash'
 import {
   setIncompleteSectionTouched,
   TabStateI,
 } from '../../redux/reducers/formSlices/tabSlice'
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { DeviceEventEmitter } from 'react-native'
-import { navigateHelper } from '../../utils/utils'
+import {
+  combinePlusCounts,
+  navigateHelper,
+  returnDefinitionArray,
+  getCrewValue,
+  returnNullableTableId,
+  calcAvgValue,
+  mergePreserveNonNull,
+  showFishInputButton,
+  findTrapLocationIds,
+} from '../../utils/utils'
+import { StackActions } from '@react-navigation/native'
+import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import ReviewValuesModal from '../../components/form/ReviewValuesModal'
+import ReviewValuesButton from '../../components/form/ReviewValuesButton'
+import CustomSelect from '@/src/components/Shared/CustomSelect'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -48,10 +63,10 @@ const mapStateToProps = (state: RootState) => {
     dropdownsState: state.dropdowns,
     connectivityState: state.connectivity,
     fishInputState: state.fishInput,
-    paperEntryState: state.paperEntry,
     tabState: state.tabSlice,
     addGeneticSamplesState: state.addGeneticSamples,
     appliedMarksState: state.addMarksOrTags,
+    userCredentialsStore: state.userCredentials,
   }
 }
 
@@ -66,10 +81,10 @@ const IncompleteSections = ({
   dropdownsState,
   connectivityState,
   fishInputState,
-  paperEntryState,
   tabState,
   addGeneticSamplesState,
   appliedMarksState,
+  userCredentialsStore,
 }: {
   navigation: any
   navigationState: any
@@ -81,10 +96,10 @@ const IncompleteSections = ({
   dropdownsState: any
   connectivityState: any
   fishInputState: any
-  paperEntryState: any
   tabState: TabStateI
   addGeneticSamplesState: any
   appliedMarksState: any
+  userCredentialsStore: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
@@ -92,11 +107,37 @@ const IncompleteSections = ({
     numOfFormSteps - 1
   ) as Array<any>
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [reviewValuesModalIsOpen, setReviewValuesModalIsOpen] = useState(
+    false as boolean
+  )
   const hasSubmittedRef = useRef(false)
+  const [
+    conditionalIncompleteSectionFields,
+    setConditionalIncompleteSectionFields,
+  ] = useState({} as any)
+  const [
+    conditionalIncompleteSectionValues,
+    setConditionalIncompleteSectionValues,
+  ] = useState({} as any)
+  const [isValid, setIsValid] = useState(false)
+  const tabIds = Object.keys(tabState?.tabs)
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
+    dispatch(checkIfFormIsComplete())
   }, [])
+
+  useEffect(() => {
+    // if no conditional fields, then section is valid
+    if (!Object.keys(conditionalIncompleteSectionValues).length) {
+      setIsValid(true)
+    } else if (Object.keys(conditionalIncompleteSectionValues).length > 0) {
+      const isValid = Object.values(conditionalIncompleteSectionValues).every(
+        value => value !== undefined && value !== null && value !== ''
+      )
+      setIsValid(isValid)
+    }
+  }, [conditionalIncompleteSectionFields, conditionalIncompleteSectionValues])
 
   const emitSubmission = () => {
     if (isSubmitting) return // If already submitting, return early
@@ -113,7 +154,7 @@ const IncompleteSections = ({
       setIsSubmitting(false) // Reset submitting state after navigation
     }
 
-    navigation.push('Loading...')
+    navigation.dispatch(StackActions.replace('Loading...'))
 
     setTimeout(() => {
       DeviceEventEmitter.emit('event.load', {
@@ -139,6 +180,12 @@ const IncompleteSections = ({
         dispatch(postTrapVisitFormSubmissions())
       } else {
         console.log('Connection issue during submission')
+        showSlideAlert(
+          dispatch,
+          'Connection issue during trap visit submission. Application will save data locally and attempt to submit later when connected.',
+          'error',
+          5000
+        )
       }
     } catch (error) {
       console.log('submit error: ', error)
@@ -152,6 +199,7 @@ const IncompleteSections = ({
     dispatch(resetGeneticSamplesSlice())
     dispatch(resetMarksOrTagsSlice())
     dispatch(resetFishInputSlice())
+    dispatch(resetBatchCountSlice())
     dispatch(resetFishProcessingSlice())
     dispatch(resetTrapPostProcessingSlice())
     dispatch(resetTrapOperationsSlice())
@@ -160,22 +208,43 @@ const IncompleteSections = ({
     dispatch(resetTabsSlice())
   }
 
-  const returnDefinitionArray = (dropdownsArray: any[]) => {
-    return dropdownsArray.map((dropdownObj: any) => {
-      return dropdownObj.definition
-    })
-  }
+  useEffect(() => {
+    const selectedProgramId = tabState?.activeTabId
+      ? visitSetupState?.[tabState.activeTabId]?.values?.programId
+      : null
 
-  const findTrapLocationIds = () => {
-    let container = [] as any
-    for (let tabId in visitSetupState) {
-      if (tabId === 'placeholderId') continue
-      container.push(visitSetupState[tabId].values.trapLocationId)
+    if (selectedProgramId) {
+      const currentProgramInfo = find(
+        visitSetupDefaultState.programs,
+        (program: any) => program.id === selectedProgramId
+      )
+
+      if (currentProgramInfo?.programFormFields?.length) {
+        const incompleteSectionFields =
+          currentProgramInfo?.programFormFields.filter((formField: any) => {
+            return formField?.formSection === 'Incomplete Sections'
+          })
+
+        const sectionFieldsObj = keyBy(incompleteSectionFields, 'fieldName')
+
+        setConditionalIncompleteSectionFields(sectionFieldsObj)
+
+        setConditionalIncompleteSectionValues(
+          Object.keys(sectionFieldsObj).reduce<{ [key: string]: any }>(
+            (obj, key) => {
+              obj[key] = undefined
+              return obj
+            },
+            {}
+          )
+        )
+      } else {
+        setConditionalIncompleteSectionFields({})
+        setConditionalIncompleteSectionValues({})
+      }
     }
-    return container
-  }
+  }, [visitSetupDefaultState.programs])
 
-  const returnNullableTableId = (value: any) => (value == -1 ? null : value + 1)
   const findCrewIdsFromSelectedCrewNames = (
     selectedCrewNames: Array<string>
   ) => {
@@ -190,15 +259,150 @@ const IncompleteSections = ({
       {}
     )
 
-    const filteredNames = uniq(
+    const filteredCrewIds = uniq(
       allCrewObjects
         .filter(
           (obj: any) => selectedCrewNamesMap[`${obj.firstName} ${obj.lastName}`]
         )
-        .map((obj: any) => obj.personnelId)
+        .map((obj: any) => Number(obj.personnelId))
     )
     //if the array contains a single string, return the string in an array
-    return filteredNames
+    return filteredCrewIds
+  }
+
+  const getDBValue = (value: any, dropdownName: string) => {
+    const dropdownValues = dropdownsState.values[dropdownName]
+
+    const id = find(dropdownValues, { code: value })?.id || null
+    return id
+  }
+
+  const formatTrapVisitEnvironmentalValues = (
+    values: any,
+    programId: number
+  ) => {
+    const selectedProgramObj = find(
+      visitSetupDefaultState.programs,
+      (program: any) => program.id === programId
+    )
+
+    const programFormFields = selectedProgramObj.programFormFields
+
+    const environmentalFieldsToIgnore = [
+      'flowMeasure',
+      'waterTemperature',
+      'waterTurbidity',
+    ]
+
+    const def = programFormFields
+      .filter(
+        (obj: any) =>
+          obj.isEnvironmentalField &&
+          !environmentalFieldsToIgnore.includes(obj.fieldName)
+      )
+      .map((obj: any) => obj.fieldName)
+    console.log('def', def)
+
+    const formFieldsLookup = keyBy(programFormFields, 'fieldName')
+
+    console.log('def', def)
+
+    let baseEnvValues = [
+      {
+        measureName: 'flow measure',
+        measureValueNumeric: values.flowMeasure
+          ? Number(values.flowMeasure)
+          : undefined,
+        measureValueText: values.flowMeasure
+          ? values.flowMeasure?.toString()
+          : undefined,
+        measureUnit: 5,
+      },
+      {
+        measureName: 'water temperature',
+        measureValueNumeric: values.waterTemperature
+          ? Number(values.waterTemperature)
+          : undefined,
+        measureValueText: values.waterTemperature
+          ? values.waterTemperature?.toString()
+          : undefined,
+        measureUnit: values.waterTemperatureUnit === '°F' ? 1 : 2,
+      },
+      {
+        measureName: 'water turbidity',
+        measureValueNumeric: values.waterTurbidityIsPresent
+          ? values.waterTurbidity
+          : values?.recordTurbidityInPostProcessing
+          ? null
+          : undefined,
+        measureValueText: values.waterTurbidityIsPresent
+          ? values.waterTurbidity?.toString()
+          : values?.recordTurbidityInPostProcessing
+          ? ''
+          : undefined,
+        measureUnit: 25,
+      },
+    ] as Array<any>
+
+    def.forEach((field: string) => {
+      if (values[field]) {
+        if (formFieldsLookup[field].fieldType === 'dropdown') {
+          baseEnvValues.push({
+            measureName: formFieldsLookup[field].fieldName,
+            measureValueNumeric: null,
+            measureValueText: values[field]?.toString(),
+            measureUnit: null,
+          })
+        } else {
+          baseEnvValues.push({
+            measureName: formFieldsLookup[field].fieldName,
+            measureValueNumeric: Number(values[field]),
+            measureValueText: values[field]?.toString(),
+            measureUnit: formFieldsLookup[field].unitId || null,
+          })
+        }
+      }
+    })
+
+    let meanFNU = null
+    if (values.turbidity1 && values.turbidity2 && values.turbidity3) {
+      meanFNU = calcAvgValue([
+        values.turbidity1,
+        values.turbidity2,
+        values.turbidity3,
+      ])
+      baseEnvValues.push({
+        measureName: 'meanFNU',
+        measureValueNumeric: meanFNU,
+        measureValueText: meanFNU?.toString(),
+        measureUnit: 38, //fnu
+      })
+    }
+
+    if (def.includes('riverDepth')) {
+      baseEnvValues = baseEnvValues.concat(
+        {
+          measureName: 'riverLeft',
+          measureValueNumeric: values.riverLeft,
+          measureValueText: values.riverLeft?.toString(),
+          measureUnit: 9,
+        },
+        {
+          measureName: 'riverCenter',
+          measureValueNumeric: values.riverCenter,
+          measureValueText: values.riverCenter?.toString(),
+          measureUnit: 9,
+        },
+        {
+          measureName: 'riverRight',
+          measureValueNumeric: values.riverRight,
+          measureValueText: values.riverRight?.toString(),
+          measureUnit: 9,
+        }
+      )
+    }
+
+    return baseEnvValues
   }
 
   const saveTrapVisits = () => {
@@ -217,21 +421,12 @@ const IncompleteSections = ({
     const trapStatusAtEndValues = returnDefinitionArray(
       dropdownsState.values.trapStatusAtEnd
     )
-    const calculateRpmAvg = (rpms: (string | null)[]) => {
-      const validRpms = rpms.filter(n => n)
-      if (!validRpms.length) {
-        return null
-      }
-      const numericRpms = validRpms.map((str: any) => parseInt(str))
-      let counter = 0
-      numericRpms.forEach((num: number) => {
-        counter += num
-      })
-      return counter / numericRpms.length
-    }
 
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
+      const waterTurbidityIsPresent =
+        trapOperationsState[id].values.waterTurbidity !== '' &&
+        trapOperationsState[id].values.waterTurbidity !== null
       const {
         rpm1: startRpm1,
         rpm2: startRpm2,
@@ -242,35 +437,79 @@ const IncompleteSections = ({
         rpm2: endRpm2,
         rpm3: endRpm3,
       } = trapPostProcessingState[id].values
-      const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
 
+      const programId = visitSetupState[id].values.programId
+
+      let trapVisitTimeEnd =
+        trapOperationsState?.[id]?.values?.trapVisitStopTime || null
+
+      let trapVisitTimeStart =
+        trapPostProcessingState?.[id]?.values?.trapVisitStartTime || null
+
+      // // if PULL day, set trap visit time end to now
+      // if (trapOperationsState?.[id]?.values?.gearStatus === 'P') {
+      //   trapVisitTimeEnd = new Date()
+      //   trapVisitTimeStart = new Date()
+      // }
+
+      // if trapVisitTime , which is time for checking, set both to the saem value
+      if (trapOperationsState?.[id]?.values?.trapVisitTime) {
+        trapVisitTimeEnd = trapOperationsState?.[id]?.values?.trapVisitTime
+        trapVisitTimeStart = trapOperationsState?.[id]?.values?.trapVisitTime
+      } else if (trapPostProcessingState?.[id]?.values?.trapVisitTime) {
+        trapVisitTimeEnd = trapPostProcessingState?.[id]?.values?.trapVisitTime
+        trapVisitTimeStart =
+          trapPostProcessingState?.[id]?.values?.trapVisitTime
+      } else if (trapOperationsState?.[id]?.values?.sampleTime) {
+        trapVisitTimeEnd = trapOperationsState?.[id]?.values?.startTime
+        trapVisitTimeStart = trapOperationsState?.[id]?.values?.sampleTime
+      }
+
+      const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
       const selectedCrewIds =
         findCrewIdsFromSelectedCrewNames(selectedCrewNames)
+
       const trapVisitSubmission = {
         trapVisitUid: id,
-        crew: selectedCrewIds,
-        programId: visitSetupState[id].values.programId,
+        // crew: selectedCrewIds,
+        crew: getCrewValue({
+          visitSetupValues: visitSetupState[id].values,
+          visitSetupDefaultState,
+          fieldCheckValue: conditionalIncompleteSectionValues['fieldCheck'],
+        }),
+        programId,
         visitTypeId: null,
         trapLocationId: visitSetupState[id].values.trapLocationId,
         isPaperEntry: visitSetupState[id].isPaperEntry,
-        trapVisitTimeStart:
-          trapPostProcessingState[id].values.trapVisitStartTime,
-        trapVisitTimeEnd: trapOperationsState[id].values.trapVisitStopTime,
+        trapVisitTimeStart,
+        trapVisitTimeEnd,
         fishProcessed: returnNullableTableId(
           fishProcessedValues.indexOf(
-            fishProcessingState[id].values.fishProcessedResult
+            trapOperationsState[id].values.gearStatus === 'S'
+              ? 'no catch data, setting trap'
+              : fishProcessingState[id].values.fishProcessedResult
           )
         ),
         whyFishNotProcessed: returnNullableTableId(
           whyFishNotProcessedValues.indexOf(
-            fishProcessingState[id].values.reasonForNotProcessing
+            trapOperationsState[id].values.gearStatus === 'S'
+              ? 'not recorded'
+              : fishProcessingState?.[id]?.values?.reasonForNotProcessing
           )
         ),
-        sampleGearId: null,
+        sampleGearId:
+          find(
+            visitSetupDefaultState?.trapLocations,
+            (trapLocation: any) =>
+              trapLocation.id === visitSetupState[id].values.trapLocationId
+          )?.equipmentId || null,
         coneDepth: trapOperationsState[id].values.coneDepth
-          ? parseInt(trapOperationsState[id].values.coneDepth)
+          ? parseFloat(trapOperationsState[id].values.coneDepth)
           : null,
-        trapInThalweg: null,
+        trapInThalweg:
+          typeof trapOperationsState?.[id]?.values?.trapInThalweg === 'boolean'
+            ? trapOperationsState?.[id]?.values?.trapInThalweg
+            : null,
         trapFunctioning: returnNullableTableId(
           trapFunctioningValues.indexOf(
             trapOperationsState[id].values.trapStatus
@@ -287,42 +526,18 @@ const IncompleteSections = ({
           )
         ),
         totalRevolutions: trapPostProcessingState[id].values.totalRevolutions
-          ? parseInt(trapPostProcessingState[id].values.totalRevolutions)
+          ? parseFloat(trapPostProcessingState[id].values.totalRevolutions)
           : null,
-        rpmAtStart: calculateRpmAvg([startRpm1, startRpm2, startRpm3]),
-        rpmAtEnd: calculateRpmAvg([endRpm1, endRpm2, endRpm3]),
-        trapVisitEnvironmental: [
-          {
-            measureName: 'flow measure',
-            measureValueNumeric: trapOperationsState[id].values.flowMeasure,
-            measureValueText:
-              trapOperationsState[id].values.flowMeasure?.toString(),
-            measureUnit: 5,
-          },
-          {
-            measureName: 'water temperature',
-            measureValueNumeric:
-              trapOperationsState[id].values.waterTemperature,
-            measureValueText:
-              trapOperationsState[id].values.waterTemperature?.toString(),
-            measureUnit:
-              trapOperationsState[id].values.waterTemperatureUnit === '°F'
-                ? 1
-                : 2,
-          },
-          {
-            measureName: 'water turbidity',
-            measureValueNumeric:
-              trapOperationsState[id].values.waterTurbidity ||
-              trapPostProcessingState[id].values.waterTurbidity ||
-              null,
-            measureValueText:
-              trapOperationsState[id].values?.waterTurbidity?.toString() ||
-              trapPostProcessingState[id].values?.waterTurbidity?.toString() ||
-              '',
-            measureUnit: 25,
-          },
-        ],
+        rpmAtStart: calcAvgValue([startRpm1, startRpm2, startRpm3]),
+        rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
+        trapVisitEnvironmental: formatTrapVisitEnvironmentalValues(
+          mergePreserveNonNull(
+            trapOperationsState[id].values,
+            trapPostProcessingState[id].values,
+            { waterTurbidityIsPresent }
+          ),
+          programId
+        ),
         trapCoordinates: {
           xCoord: trapPostProcessingState[id].values.trapLatitude,
           yCoord: trapPostProcessingState[id].values.trapLongitude,
@@ -331,14 +546,58 @@ const IncompleteSections = ({
         },
         inHalfConeConfiguration:
           trapOperationsState[id].values.coneSetting === 'half' ? true : false,
-        debrisVolumeLiters: trapPostProcessingState[id].values.debrisVolume
-          ? parseInt(trapPostProcessingState[id].values.debrisVolume)
+        debrisVolumeGal: trapPostProcessingState[id].values.debrisVolume
+          ? parseFloat(trapPostProcessingState[id].values.debrisVolume)
           : null,
         qcCompleted: null,
         qcCompletedAt: null,
-        comments: paperEntryState[id]
-          ? paperEntryState[id].values.comments
+        comments: trapPostProcessingState[id].values.comments
+          ? trapPostProcessingState[id].values.comments
           : null,
+        createdBy: userCredentialsStore.id,
+        // new form fields
+        revCounter: trapPostProcessingState?.[id]?.values?.revCounter || null,
+        ysiNum: getDBValue(trapOperationsState[id].values.ysiNum, 'ysiNum'),
+        gearStatus: getDBValue(
+          trapOperationsState[id].values.gearStatus,
+          'gearStatus'
+        ),
+        vegetationCode: getDBValue(
+          trapOperationsState[id].values.vegetationCode,
+          'vegetationCode'
+        ),
+        conditionCode: getDBValue(
+          trapPostProcessingState[id].values.conditionCode,
+          'conditionCode'
+        ),
+        tideCode: getDBValue(
+          trapPostProcessingState[id].values.tideCode,
+          'tideCode'
+        ),
+        flowDirection: getDBValue(
+          trapOperationsState[id].values.flowDirection,
+          'flowDirection'
+        ),
+        weatherCode: getDBValue(
+          trapOperationsState[id].values.weatherCode,
+          'weatherCode'
+        ),
+        substrate: getDBValue(
+          trapOperationsState[id].values.substrate,
+          'substrate'
+        ),
+        length: trapOperationsState[id].values.length
+          ? parseFloat(trapOperationsState[id].values.length)
+          : null,
+        width: trapOperationsState[id].values.width
+          ? parseFloat(trapOperationsState[id].values.width)
+          : null,
+        depth: trapOperationsState[id].values.depth
+          ? parseFloat(trapOperationsState[id].values.depth)
+          : null,
+        samplingAltered: trapPostProcessingState[id].values.samplingAltered
+          ? true
+          : false,
       }
 
       dispatch(saveTrapVisitSubmission(trapVisitSubmission))
@@ -347,7 +606,7 @@ const IncompleteSections = ({
         saveTrapVisitInformation({
           crew: visitSetupState[tabIds[0]].values.crew,
           programId: visitSetupState[tabIds[0]].values.programId,
-          trapLocationIds: findTrapLocationIds(),
+          trapLocationIds: findTrapLocationIds(visitSetupState),
         })
       )
     })
@@ -362,11 +621,17 @@ const IncompleteSections = ({
       dropdownsState.values.plusCountMethodology
     )
     const runValues = returnDefinitionArray(dropdownsState.values.run)
+    const runCodeMethodValues = returnDefinitionArray(
+      dropdownsState.values.runCodeMethods
+    )
     const markTypeValues = returnDefinitionArray(dropdownsState.values.markType)
     const markColorValues = returnDefinitionArray(
       dropdownsState.values.markColor
     )
     const bodyPartValues = returnDefinitionArray(dropdownsState.values.bodyPart)
+    const fishConditionValues = returnDefinitionArray(
+      dropdownsState.values.fishCondition
+    )
     const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
       let code = null
       dropdownsState.values.taxon.forEach((taxonValue: any) => {
@@ -383,7 +648,10 @@ const IncompleteSections = ({
 
     const catchRawSubmissions: any[] = []
 
-    Object.keys(fishInputState).forEach(tabId => {
+    // skips the "Unused variable" warning
+    let { _persist: _, ...fishInputStateClean } = fishInputState
+
+    Object.keys(fishInputStateClean).forEach(tabId => {
       if (tabId != 'placeholderId') {
         const fishStoreKeys = Object.keys(fishInputState[tabId].fishStore)
         const programId = Object.keys(visitSetupState).includes(tabId)
@@ -393,7 +661,7 @@ const IncompleteSections = ({
         fishStoreKeys.forEach(key => {
           const fishValue = fishInputState[tabId].fishStore[key]
 
-          const filterAndPrepareData = (data: Array<any>) => {
+          const filterAndPrepareData = (data: Array<any>, hasUid: boolean) => {
             let dataCopy = cloneDeep(data)
             //before I filter the data I need to prepare the appliedMarks Array
             //if the data is NOT from genetic sample:
@@ -420,34 +688,53 @@ const IncompleteSections = ({
               })
             }
 
-            const filteredData = dataCopy.filter((obj: any) => {
-              return obj.UID === fishValue.UID
-            })
+            let filteredData = dataCopy
+
+            if (hasUid) {
+              filteredData = dataCopy.filter((obj: any) => {
+                return obj.UID === fishValue.UID
+              })
+            }
 
             return filteredData.map((obj: any) => {
               obj.crewMember = findCrewIdsFromSelectedCrewNames([
                 obj.crewMember,
-              ])
+              ])[0]
               return obj
             })
           }
 
-          const findReleaseIdFromExistingMarks = () => {
-            let releaseId = null
-            fishValue.existingMarks.forEach((existingMark: any) => {
-              if (existingMark.releaseId) {
-                releaseId = existingMark.releaseId
-              } else {
-              }
-            })
-            return releaseId
-          }
-
           const getRunClassMethod = (fishValue: any) => {
             if (fishValue.species === 'Chinook salmon') {
-              return fishValue.run === 'not recorded' ? 5 : 6
+              if (fishValue.captureRunClassMethod) {
+                return returnNullableTableId(
+                  runCodeMethodValues.indexOf(fishValue.captureRunClassMethod)
+                )
+              }
+              return fishValue.run === 'not recorded'
+                ? returnNullableTableId(
+                    runCodeMethodValues.indexOf('not recorded')
+                  )
+                : returnNullableTableId(
+                    runCodeMethodValues.indexOf('expert judgement')
+                  )
             } else {
               return null
+            }
+          }
+          const getCatchFishConditions = (fishConditionArray: string[]) => {
+            if (Array.isArray(fishConditionArray)) {
+              return fishConditionArray.map((fishCondition: string) => {
+                return returnNullableTableId(
+                  fishConditionValues.indexOf(fishCondition)
+                )
+              })
+            } else {
+              return [
+                returnNullableTableId(
+                  fishConditionValues.indexOf(fishConditionArray)
+                ),
+              ]
             }
           }
 
@@ -455,27 +742,31 @@ const IncompleteSections = ({
             uid: tabId,
             programId,
             trapVisitId: null,
-            taxonCode: returnTaxonCode(fishValue),
+            taxonCode: fishValue.taxonCode,
             captureRunClass: returnNullableTableId(
-              runValues.indexOf(fishValue.run)
+              runValues.indexOf(fishValue?.run?.toLowerCase() || '')
             ),
             // defaults to "expert judgement" (id: 6) if run was selected from fish input dropdown
             captureRunClassMethod: getRunClassMethod(fishValue),
             // defaults to "none" (id: 1) if not selected
-            markType: 1, // Check w/ Erin
+            // markType: 1, // Check w/ Erin
             markedForRelease: fishValue.willBeUsedInRecapture,
             adiposeClipped: fishValue.adiposeClipped ? true : false,
             dead: fishValue.dead ? true : false,
+            milting:
+              typeof fishValue.milting === 'boolean' ? fishValue.milting : null,
+            eggs: typeof fishValue.eggs === 'boolean' ? fishValue.eggs : null,
+            fishCondition: getCatchFishConditions(fishValue.fishCondition),
             lifeStage: returnNullableTableId(
-              lifeStageValues.indexOf(fishValue.lifeStage)
+              lifeStageValues.indexOf(fishValue?.lifeStage?.toLowerCase() || '')
             ),
             forkLength:
               fishValue.forkLength != null
-                ? parseInt(fishValue?.forkLength as any)
+                ? parseFloat(fishValue?.forkLength as any)
                 : null,
             weight:
               fishValue?.weight != null
-                ? parseInt(fishValue?.weight as any)
+                ? parseFloat(fishValue?.weight as any)
                 : null,
             numFishCaught: fishValue?.numFishCaught,
             plusCount: fishValue?.plusCount ? true : false,
@@ -485,14 +776,14 @@ const IncompleteSections = ({
                 )
               : null,
             isRandom: null, // Check w/ Erin
-            releaseId: findReleaseIdFromExistingMarks(),
-            comments: null,
-            createdBy: null,
+            comments: fishValue.comments != null ? fishValue?.comments : null,
+            createdBy: userCredentialsStore.id,
             qcCompleted: null,
             qcCompletedBy: null,
             qcTime: null,
             qcComments: null,
             existingMarks: fishValue.existingMarks.map((markObj: any) => {
+              //need to pick between body part and mark position, we go back and forth and its causing problems
               return {
                 releaseId:
                   markObj.releaseId !== undefined ? markObj.releaseId : null,
@@ -508,22 +799,43 @@ const IncompleteSections = ({
               }
             }),
             geneticSamplingData: filterAndPrepareData(
-              addGeneticSamplesState.values
+              fishValue?.geneticSamples || [],
+              false
             ),
-            appliedMarks: filterAndPrepareData(appliedMarksState.values),
+            appliedMarks: filterAndPrepareData(
+              fishValue?.appliedMarks || [],
+              false
+            ),
           })
         })
       }
     })
 
     if (catchRawSubmissions.length) {
-      dispatch(saveCatchRawSubmissions(catchRawSubmissions))
+      const catchRawPlusCountCombined = combinePlusCounts(catchRawSubmissions)
+      dispatch(saveCatchRawSubmissions(catchRawPlusCountCombined))
     }
   }
 
+  const handleOpenReviewValuesModal = () => {
+    setReviewValuesModalIsOpen(true)
+  }
+
+  const handleCloseReviewValuesModal = () => {
+    setReviewValuesModalIsOpen(false)
+  }
+
+  // console.log('visitSetupState', visitSetupState)
+  // console.log('tabState', tabState)
+  const renderFishInputButton = showFishInputButton({
+    fishProcessing: fishProcessingState,
+    tabIds,
+  })
+
   return (
     <>
-      <View
+      <ScrollView
+        height={'800px'}
         flex={1}
         bg='#fff'
         // justifyContent='center'
@@ -531,28 +843,92 @@ const IncompleteSections = ({
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={10} p='15%'>
-          <Heading textAlign='center'>
+        <VStack space={8} p='15%' height={'100%'} flex={1}>
+          <Heading textAlign='center' padding={0}>
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>
           {stepsArray.map((step: any, idx: number) => {
-            return (
-              <IncompleteSectionButton
-                name={step.name}
-                completed={step.completed}
-                navigation={navigation}
-                key={idx}
-                step={idx + 1}
-                tabState={tabState}
-              />
+            if (
+              (step.name === 'Fish Input' && renderFishInputButton) ||
+              step.name !== 'Fish Input'
             )
+              return (
+                <IncompleteSectionButton
+                  name={step.name}
+                  completed={step.completed}
+                  navigation={navigation}
+                  key={idx}
+                  step={idx + 1}
+                  tabState={tabState}
+                />
+              )
           })}
+          <Divider />
+          <ReviewValuesButton
+            handleOpenReviewValuesModal={handleOpenReviewValuesModal}
+          />
+          {conditionalIncompleteSectionFields['fieldCheck'] && (
+            <Box
+              key={'index'} // Always add a key when mapping
+              // flexBasis='100%' // Ensures 3 items per row (adjust for spacing)
+              // minWidth='100%' // Prevents shrinking too much
+              // maxWidth='100%' // Prevents growing beyond this size>
+              // flexGrow={1}
+              // mr={8} // Removes right margin from every 3rd item
+              mb={100} // Adds bottom margin to each item
+            >
+              <CustomSelect
+                camelName={'fieldCheck'}
+                label={
+                  conditionalIncompleteSectionFields['fieldCheck'].displayName
+                }
+                selectedValue={conditionalIncompleteSectionValues['fieldCheck']}
+                placeholder='Select Field Check'
+                onValueChange={(itemValue: string) => {
+                  setConditionalIncompleteSectionValues((prevFields: any) => {
+                    const updatedFields = cloneDeep(prevFields)
+                    updatedFields['fieldCheck'] = itemValue
+                    return updatedFields
+                  }) // Update the state with the selected value
+                }}
+                selectOptions={
+                  tabState?.activeTabId
+                    ? visitSetupState?.[
+                        tabState.activeTabId
+                      ]?.values?.crew?.map((crewMember: any) => ({
+                        label: crewMember,
+                        value: crewMember,
+                      }))
+                    : []
+                }
+                // validationSchema={validationSchema}
+                // onOpenCallback={onOpenCallback}
+              />
+            </Box>
+          )}
         </VStack>
-      </View>
+      </ScrollView>
+      {reviewValuesModalIsOpen && (
+        <ReviewValuesModal
+          handleCloseReviewValuesModal={handleCloseReviewValuesModal}
+          isOpen={reviewValuesModalIsOpen}
+          formValues={{
+            visitSetupState,
+            trapOperationsState,
+            fishProcessingState,
+            fishInputState,
+            trapPostProcessingState,
+          }}
+          tabState={tabState}
+          visitSetupDefaultState={visitSetupDefaultState}
+          fieldCheck={conditionalIncompleteSectionValues['fieldCheck']}
+        />
+      )}
       <NavButtons
         navigation={navigation}
         handleSubmit={emitSubmission}
         shouldProceedToLoadingScreen={true}
+        isValid={isValid}
       />
     </>
   )

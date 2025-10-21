@@ -1,17 +1,21 @@
 import { Ionicons } from '@expo/vector-icons'
-import { StyleProp, StyleSheet, TextStyle } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { useFormikContext } from 'formik'
 import {
   Box,
   Button,
+  Divider,
   Heading,
   HStack,
   Icon,
-  View,
   Text,
-  Divider,
+  View,
 } from 'native-base'
-import React from 'react'
-import { useNavigation } from '@react-navigation/native'
+import { useState } from 'react'
+import { Keyboard, StyleProp, StyleSheet, TextStyle } from 'react-native'
+import CustomModal from './CustomModal'
+import ConfirmationModalContent from './ConfirmationModalContent'
+import { border } from 'native-base/lib/typescript/theme/styled-system'
 
 const CustomModalHeader = ({
   headerText,
@@ -19,6 +23,7 @@ const CustomModalHeader = ({
   showHeaderButton,
   headerButton,
   closeModal,
+  showConfirmationModal,
   navigateBack,
   headerStyle,
 }: {
@@ -27,13 +32,21 @@ const CustomModalHeader = ({
   showHeaderButton: boolean
   headerButton?: any
   closeModal?: any
+  showConfirmationModal?: boolean
   navigateBack?: any
   headerStyle?: StyleProp<TextStyle>
 }) => {
   const navigation = useNavigation() as any
-  if (showHeaderButton) {
-    return (
-      <>
+  const formikContext = useFormikContext()
+  let resetForm = null as any
+  if (formikContext) {
+    resetForm = formikContext.resetForm
+  }
+  const [confirmationModalOpen, setConfirmationModalOpen] =
+    useState<boolean>(false)
+  return (
+    <>
+      {showHeaderButton ? (
         <HStack
           justifyContent='space-between'
           alignItems='center'
@@ -41,22 +54,28 @@ const CustomModalHeader = ({
           space={5}
           w='100%'
         >
-          <HStack alignItems='center'>
+          <HStack alignItems='center' mx={'2%'}>
             <Button
               size='lg'
               onPress={() => {
+                if (showConfirmationModal) {
+                  setConfirmationModalOpen(true)
+                  return
+                }
+
                 if (navigateBack) {
+                  navigation.preload('Fish Input')
                   // navigation.goBack()
                   navigation.navigate('Trap Visit Form', {
                     screen: 'Fish Input',
                   })
                 }
-                if (closeModal) {
-                  closeModal()
-                }
+                if (closeModal) closeModal()
+
+                if (resetForm) resetForm()
               }}
             >
-              <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
+              <Icon as={Ionicons} name={'close'} size='3xl' color='black' />
             </Button>
             <Heading style={headerStyle} fontSize={headerFontSize}>
               {headerText}
@@ -64,24 +83,24 @@ const CustomModalHeader = ({
           </HStack>
           <Box mr='5'>{headerButton}</Box>
         </HStack>
-        <Divider my={2} thickness='3' />
-      </>
-    )
-  } else {
-    return (
-      <>
+      ) : (
         <HStack
           justifyContent='space-between'
           alignItems='center'
           marginTop={2}
+          mx={'2%'}
         >
           <Button
             size='lg'
             onPress={() => {
+              Keyboard.dismiss()
               if (closeModal) closeModal()
+              setTimeout(() => {
+                if (resetForm) resetForm()
+              }, 500)
             }}
           >
-            <Icon as={Ionicons} name={'close'} size='5xl' color='black' />
+            <Icon as={Ionicons} name={'close'} size='3xl' color='black' />
           </Button>
           <Heading
             flex={1}
@@ -93,10 +112,38 @@ const CustomModalHeader = ({
             {headerText}
           </Heading>
         </HStack>
-        <Divider my={2} thickness='3' />
-      </>
-    )
-  }
+      )}
+      <Divider my={2} thickness='3' />
+      {closeModal && (
+        <CustomModal
+          height={200}
+          width={525}
+          style={{ borderRadius: 5 }}
+          isOpen={confirmationModalOpen}
+          closeModal={() => setConfirmationModalOpen(false)}
+        >
+          <ConfirmationModalContent
+            modalHeader='Return to fish input?'
+            modalText='
+            You are about to return to fish input screen. None of your current batch entries will be saved. Are you sure you want to continue?'
+            handlePressCancel={() => setConfirmationModalOpen(false)}
+            handlePressConfirm={() => {
+              if (navigateBack) {
+                navigation.preload('Fish Input')
+                navigation.navigate('Trap Visit Form', {
+                  screen: 'Fish Input',
+                })
+              }
+              if (closeModal) closeModal()
+              if (resetForm) resetForm()
+            }}
+            confirmButtonLabel='Leave'
+            cancelButtonLabel='Close'
+          />
+        </CustomModal>
+      )}
+    </>
+  )
 }
 
 const addFishModalButtonStyles = StyleSheet.create({

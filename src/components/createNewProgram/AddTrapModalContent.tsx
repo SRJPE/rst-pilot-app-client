@@ -1,17 +1,9 @@
-import { MaterialIcons } from '@expo/vector-icons'
 import { Formik } from 'formik'
-import {
-  Button,
-  Divider,
-  HStack,
-  Icon,
-  KeyboardAvoidingView,
-  Pressable,
-  Text,
-  VStack,
-} from 'native-base'
+import { Button, HStack, Text, VStack, KeyboardAvoidingView } from 'native-base'
 
+import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import FormInputComponent from '../../components/Shared/FormInputComponent'
 import {
   deleteIndividualTrapSite,
   individualTrappingSiteState,
@@ -22,9 +14,6 @@ import {
 import { AppDispatch } from '../../redux/store'
 import { trappingSitesSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
-import FormInputComponent from '../../components/Shared/FormInputComponent'
-import { useEffect, useState } from 'react'
-import RenderErrorMessage from '../Shared/RenderErrorMessage'
 
 const AddTrapModalContent = ({
   closeModal,
@@ -79,52 +68,14 @@ const AddTrapModalContent = ({
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <CustomModalHeader
-              headerText={'Add Trap'}
-              showHeaderButton={true}
+              headerText={'Add Traps'}
+              showHeaderButton={false}
               closeModal={closeModal}
-              headerButton={
-                <HStack space={8}>
-                  {values?.uid && (
-                    <Button
-                      bg='error'
-                      mx='2'
-                      px='10'
-                      shadow='3'
-                      onPress={() => {
-                        handleDelete()
-                        closeModal()
-                      }}
-                    >
-                      <Text fontSize='xl' color='white'>
-                        Delete{' '}
-                      </Text>
-                    </Button>
-                  )}
-                  <Button
-                    bg='primary'
-                    mx='2'
-                    px='10'
-                    shadow='3'
-                    isDisabled={
-                      (Object.values(touched).length === 0 && !values.uid) ||
-                      (Object.values(touched).length > 0 &&
-                        Object.values(errors).length > 0)
-                    }
-                    onPress={() => {
-                      handleSubmit()
-                      closeModal()
-                    }}
-                  >
-                    <Text fontSize='xl' color='white'>
-                      {modalDataTemp?.uid ? 'Save' : 'Add Trap'}
-                    </Text>
-                  </Button>
-                </HStack>
-              }
             />
-            <VStack mx='5%' my='2%' space={6}>
+            <VStack mx='5%' my='2%' space={5}>
               <FormInputComponent
                 label={'Trap Name'}
+                placeholder='Enter Trap Name'
                 touched={touched}
                 errors={errors}
                 value={values.trapName ? `${values.trapName}` : ''}
@@ -133,47 +84,40 @@ const AddTrapModalContent = ({
                 onBlur={handleBlur('trapName')}
               />
 
-              <HStack space={10} alignItems='center'>
+              <HStack space={5}>
                 <FormInputComponent
                   label={'Trap Latitude'}
+                  placeholder='00.000'
                   touched={touched}
                   errors={errors}
                   value={values.trapLatitude ? `${values.trapLatitude}` : ''}
                   camelName={'trapLatitude'}
-                  keyboardType={'numeric'}
-                  width={'40%'}
+                  keyboardType={'number-pad'}
                   onChangeText={handleChange('trapLatitude')}
                   onBlur={handleBlur('trapLatitude')}
                 />
                 <FormInputComponent
                   label={'Trap Longitude'}
+                  placeholder='00.000'
                   touched={touched}
                   errors={errors}
                   value={values.trapLongitude ? `${values.trapLongitude}` : ''}
                   camelName={'trapLongitude'}
-                  keyboardType={'numeric'}
-                  width={'40%'}
+                  keyboardType={'number-pad'}
                   onChangeText={handleChange('trapLongitude')}
                   onBlur={handleBlur('trapLongitude')}
                 />
-                {/* <Pressable alignSelf='flex-end'>
-                  <Icon
-                    as={MaterialIcons}
-                    name={'add-location-alt'}
-                    size='16'
-                    color='primary'
-                  />
-                </Pressable> */}
               </HStack>
 
-              <HStack space={10}>
+              <HStack space={5}>
                 <FormInputComponent
                   label={'Cone Size'}
+                  placeholder='0'
                   touched={touched}
                   errors={errors}
                   value={values.coneSize ? `${values.coneSize}` : ''}
                   camelName={'coneSize'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   width={'40%'}
                   onChangeText={handleChange('coneSize')}
                   onBlur={handleBlur('coneSize')}
@@ -181,6 +125,7 @@ const AddTrapModalContent = ({
 
                 <FormInputComponent
                   label={'USGS Station Number'}
+                  placeholder='00000000'
                   touched={touched}
                   errors={errors}
                   value={
@@ -189,27 +134,31 @@ const AddTrapModalContent = ({
                       : ''
                   }
                   camelName={'USGSStationNumber'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   width={'40%'}
                   onChangeText={handleChange('USGSStationNumber')}
                   onBlur={handleBlur('USGSStationNumber')}
                 />
               </HStack>
-              <FormInputComponent
-                label={'Release Site Name'}
-                touched={touched}
-                errors={errors}
-                value={
-                  values.releaseSiteName ? `${values.releaseSiteName}` : ''
-                }
-                camelName={'releaseSiteName'}
-                onChangeText={handleChange('releaseSiteName')}
-                onBlur={handleBlur('releaseSiteName')}
-              />
+              <HStack>
+                <FormInputComponent
+                  label={'Release Site Name'}
+                  placeholder='Enter Release Site Name'
+                  touched={touched}
+                  errors={errors}
+                  value={
+                    values.releaseSiteName ? `${values.releaseSiteName}` : ''
+                  }
+                  camelName={'releaseSiteName'}
+                  onChangeText={handleChange('releaseSiteName')}
+                  onBlur={handleBlur('releaseSiteName')}
+                />
+              </HStack>
 
-              <HStack space={10} alignItems='center'>
+              <HStack space={5} alignItems='center'>
                 <FormInputComponent
                   label={'Release Site Latitude'}
+                  placeholder='00.000'
                   touched={touched}
                   errors={errors}
                   value={
@@ -218,7 +167,7 @@ const AddTrapModalContent = ({
                       : ''
                   }
                   camelName={'releaseSiteLatitude'}
-                  keyboardType={'numeric'}
+                  keyboardType={'number-pad'}
                   width={'40%'}
                   onChangeText={handleChange('releaseSiteLatitude')}
                   onBlur={handleBlur('releaseSiteLatitude')}
@@ -227,6 +176,7 @@ const AddTrapModalContent = ({
                 <FormInputComponent
                   label={'Release Site Longitude'}
                   touched={touched}
+                  placeholder='00.000'
                   errors={errors}
                   value={
                     values.releaseSiteLongitude
@@ -234,22 +184,27 @@ const AddTrapModalContent = ({
                       : ''
                   }
                   camelName={'releaseSiteLongitude'}
-                  keyboardType={'numeric'}
-                  width={'40%'}
+                  keyboardType={'number-pad'}
                   onChangeText={handleChange('releaseSiteLongitude')}
                   onBlur={handleBlur('releaseSiteLongitude')}
                   stackDirection={'column'}
                 />
-
-                {/* <Pressable alignSelf='flex-end'>
-                  <Icon
-                    as={MaterialIcons}
-                    name={'add-location-alt'}
-                    size='16'
-                    color='primary'
-                  />
-                </Pressable> */}
               </HStack>
+              <Button
+                bg='primary'
+                mx='2'
+                px='10'
+                shadow='3'
+                isDisabled={!trappingSitesSchema.isValidSync(values)}
+                onPress={() => {
+                  handleSubmit()
+                  closeModal()
+                }}
+              >
+                <Text fontSize='xl' color='white'>
+                  Save Trap
+                </Text>
+              </Button>
             </VStack>
           </KeyboardAvoidingView>
         )

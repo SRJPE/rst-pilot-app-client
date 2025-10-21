@@ -1,9 +1,25 @@
 import React, { useEffect, useState } from 'react'
-import { Text, VStack, Heading, View, IconButton } from 'native-base'
+import {
+  Text,
+  VStack,
+  Heading,
+  View,
+  IconButton,
+  Box,
+  Pressable,
+} from 'native-base'
 import BottomNavigation from '../components/home/HomeNavButtons'
 import { StyleSheet } from 'react-native'
 import AppLogo from '../components/Shared/AppLogo'
 import { Entypo } from '@expo/vector-icons'
+import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
+import { getTrapVisitDropdownValues } from '../redux/reducers/dropdownsSlice'
+import { fetchPreviousTrapAndCatch } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
+import { RootState, AppDispatch } from '../redux/store'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import { getUserPrograms } from '../redux/reducers/userCredentialsSlice'
+import AlertDialog from '../components/Shared/AlertDialog'
+import { retrieveTrapVisitsRequiringTurbidity } from '../utils/helpers/helperFunctions'
 
 const styles = StyleSheet.create({
   recentItemsContainer: {
@@ -21,7 +37,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   recentItemsCard: {
-    height: 200,
+    height: 150,
     width: 200,
     borderWidth: 1,
     borderColor: '#A29C9C',
@@ -33,7 +49,7 @@ const styles = StyleSheet.create({
     flex: 3,
   },
   recentItemsCardTextContainer: {
-    flex: 2,
+    flex: 1,
     paddingHorizontal: 10,
     paddingVertical: 8,
     display: 'flex',
@@ -41,31 +57,91 @@ const styles = StyleSheet.create({
   },
 })
 
-export default function Home({ navigation }: { navigation: any }) {
+const Home = ({
+  navigation,
+  userCredentialsStore,
+  previousTrapVisits,
+  visitSetupDefaultState,
+}: {
+  navigation: any
+  userCredentialsStore: any
+  previousTrapVisits: any
+  visitSetupDefaultState: any
+}) => {
+  // const visitsRequiringTurbidity =
+  //   retrieveTrapVisitsRequiringTurbidity(previousTrapVisits)
+
   const [staggerOpen, setStaggerOpen] = useState(false as boolean)
   const [opacity, setOpacity] = useState(1 as number)
+  const [visitsRequiringTurbidity, setVisitsRequiringTurbidity] = useState(
+    [] as any[]
+  )
+  const dispatch = useDispatch<AppDispatch>()
+
+  const connectivityState = useSelector((state: any) => state.connectivity)
+
+  useEffect(() => {
+    setVisitsRequiringTurbidity(
+      retrieveTrapVisitsRequiringTurbidity(previousTrapVisits)
+    )
+  }, [previousTrapVisits])
 
   useEffect(() => {
     staggerOpen ? setOpacity(0.25) : setOpacity(1)
   }, [staggerOpen])
 
-  const recentItemsCard = ({
-    title,
-    date,
-  }: {
-    title: string
-    date: string
-  }) => {
+  useEffect(() => {
+    if (
+      userCredentialsStore?.id &&
+      connectivityState.isConnected &&
+      connectivityState.isInternetReachable
+    ) {
+      try {
+        dispatch(getVisitSetupDefaults(userCredentialsStore.id))
+        dispatch(getTrapVisitDropdownValues(userCredentialsStore.id))
+        dispatch(fetchPreviousTrapAndCatch())
+      } catch (error) {
+        console.log('error from home screen: ', error)
+      }
+    }
+  }, [
+    userCredentialsStore.id,
+    connectivityState.isConnected,
+    connectivityState.isInternetReachable,
+    userCredentialsStore?.userPrograms?.length,
+  ])
+
+  useEffect(() => {
+    ;(async () => {
+      if (userCredentialsStore?.id && !userCredentialsStore.userPrograms) {
+        try {
+          dispatch(getVisitSetupDefaults(userCredentialsStore.id))
+          dispatch(getTrapVisitDropdownValues(userCredentialsStore.id))
+
+          dispatch(getUserPrograms(userCredentialsStore?.id))
+        } catch (error) {
+          console.log('error from home screen: ', error)
+        }
+      }
+    })()
+  }, [userCredentialsStore.userPrograms])
+
+  const recentItemsCard = ({ text }: { text: string }) => {
     return (
-      <View style={styles.recentItemsCard}>
-        <View style={styles.recentItemsCardPreviewContainer}></View>
-        <View style={styles.recentItemsCardTextContainer}>
-          <Text fontSize={19} maxWidth={150}>
-            {title}
-          </Text>
-          <Text color='#A1A1A1'>{date}</Text>
-        </View>
-      </View>
+      <Pressable onPress={() => navigation.navigate('Input Turbidity')}>
+        <Box>
+          <View style={styles.recentItemsCard}>
+            <View style={styles.recentItemsCardTextContainer}>
+              <Text fontSize={30} textAlign={'center'}>
+                {text}
+              </Text>
+              {/* <Text color='#A1A1A1' fontSize={20}>
+            {date}
+          </Text> */}
+            </View>
+          </View>
+        </Box>
+      </Pressable>
     )
   }
 
@@ -93,23 +169,25 @@ export default function Home({ navigation }: { navigation: any }) {
       <Heading fontWeight={300} fontSize={50}>
         Welcome!
       </Heading>
-      {staggerOpen ? (
-        <View py='18'></View>
-      ) : (
-        <Text fontWeight={300} fontSize={23}>
-          Select the action you would like to perform.
-        </Text>
-      )}
-      {/* <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
-        <Text fontWeight={300} fontSize={20} marginBottom={5}>
-          Recent Items
-        </Text>
-        <View style={styles.recentItemsCardRow}>
-          {recentItemsCard({ title: 'Trap Visit Data Entry', date: '7/21/22' })}
-          {recentItemsCard({ title: 'Report', date: '7/22/22' })}
-          {recentItemsCard({ title: 'Quality Control', date: '7/24/22' })}
+      <Text fontWeight={300} fontSize={23}>
+        Select the action you would like to perform.
+      </Text>
+      {visitsRequiringTurbidity.length > 0 && (
+        <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
+          <AlertDialog
+            title='Action Required: Add Turbidity Values'
+            description={`There ${
+              visitsRequiringTurbidity.length === 1
+                ? 'is 1 trap visit'
+                : `are ${visitsRequiringTurbidity.length} trap visits`
+            } missing turbidity values. Please add the missing data to complete your records.`}
+            onPress={() => {
+              navigation.navigate('Input Turbidity')
+              setStaggerOpen(false)
+            }}
+          />
         </View>
-      </View> */}
+      )}
 
       <BottomNavigation
         navigation={navigation}
@@ -119,3 +197,14 @@ export default function Home({ navigation }: { navigation: any }) {
     </VStack>
   )
 }
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    userCredentialsStore: state.userCredentials,
+    visitSetupDefaultState: state.visitSetupDefaults,
+    previousTrapVisits:
+      state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
+  }
+}
+
+export default connect(mapStateToProps)(Home)

@@ -1,39 +1,71 @@
-import { useCallback, useEffect } from 'react'
+import { MaterialIcons } from '@expo/vector-icons'
+import Ionicons from '@expo/vector-icons/Ionicons'
+import { DrawerContentComponentProps } from '@react-navigation/drawer'
 import {
-  HStack,
-  VStack,
-  Avatar,
-  Heading,
-  IconButton,
   Box,
   Divider,
+  HStack,
+  IconButton,
+  Pressable,
+  ScrollView,
+  Text,
+  VStack,
 } from 'native-base'
-import {
-  DrawerContentScrollView,
-  DrawerContentComponentProps,
-} from '@react-navigation/drawer'
-import Ionicons from '@expo/vector-icons/Ionicons'
-import MenuButton from './MenuButton'
-import { useSelector } from 'react-redux'
-import { AppDispatch } from '../../redux/store'
-import { useDispatch } from 'react-redux'
+import React, { useCallback } from 'react'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import {
   numOfFormSteps,
   updateActiveStep,
 } from '../../redux/reducers/formSlices/navigationSlice'
 import { updateActiveMarkRecaptureStep } from '../../redux/reducers/markRecaptureSlices/markRecaptureNavigationSlice'
+import { AppDispatch, RootState } from '../../redux/store'
 import AppLogo from '../Shared/AppLogo'
+import MenuButton from './MenuButton'
+import { setActiveTab } from '../../redux/reducers/formSlices/tabSlice'
+import { showFishInputButton } from '@/src/utils/utils'
 
-const DrawerMenu = (props: DrawerContentComponentProps) => {
+interface ExtendedDrawerProps extends DrawerContentComponentProps {
+  userCredentialsStore: any
+  tabSlice: any
+  visitSetupSlice: any
+}
+
+const DrawerMenu = ({
+  userCredentialsStore,
+  tabSlice,
+  visitSetupSlice,
+  ...props
+}: ExtendedDrawerProps) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigationState = useSelector((state: any) => state.navigation)
-  const reduxState = useSelector((state: any) => state)
+  const fishProcessingState = useSelector((state: any) => state.fishProcessing)
+
   const { steps, activeStep } = navigationState
+  const { activeTabId, tabs } = tabSlice
+
+  const isFormNavigationUnlocked = () => {
+    const programId =
+      visitSetupSlice[activeTabId]?.values?.programId || 'placeholderId'
+
+    const unrestrictedIds = [7, 8]
+
+    return unrestrictedIds.includes(programId)
+  }
+
+  const hasUnrestrictedFormNavigation = isFormNavigationUnlocked()
+
+  const tabIds = Object.keys(tabs)
+
   const { state, navigation } = props
-  const currentRoute = state.routeNames[state.index]
+  const currentRoute = state?.routeNames[state.index]
+
   //unsliced Array for dev
   // const stepsArray = Object.values(steps) as Array<any>
-  const stepsArray = Object.values(steps).slice(0, numOfFormSteps) as Array<any>
+  const stepsArray = Object.values(steps).slice(0, numOfFormSteps) as Array<{
+    completed?: boolean
+    name: string
+    propName: string
+  }>
 
   //mark recapture steps
   const markRecaptureSteps = useSelector(
@@ -44,31 +76,59 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
     2
   ) as Array<any>
 
+  const showStepNavigationButton = useCallback(
+    (stepIndex: number) => {
+      if (stepsArray[stepIndex].propName === 'visitSetup') {
+        return true
+      }
+
+      if (stepsArray[stepIndex].propName === 'fishInput') {
+        return showFishInputButton({
+          fishProcessing: fishProcessingState,
+          tabIds,
+        })
+      }
+
+      if (stepsArray[stepIndex].completed) {
+        return true
+      }
+
+      if (stepsArray[stepIndex - 1].completed) {
+        return true
+      }
+    },
+    [activeStep, stepsArray]
+  )
+
   const handlePressMainNavButton = useCallback(
     (buttonTitle: string) => {
-      navigation.navigate(buttonTitle)
+      navigation?.navigate(buttonTitle)
     },
     [navigation]
   )
 
-  const handlePressFormButton = useCallback((buttonTitle: string) => {
-    navigation.navigate('Trap Visit Form', { screen: buttonTitle })
-    //for each object in the steps Array
-    //if the Object contain the name property that matched button title
-    //assign the index top stepPayload
-    //navigate to the index + 1
-    let stepPayload
-    for (let i = 0; i < stepsArray.length; i++) {
-      if (stepsArray[i].name === buttonTitle) {
-        stepPayload = i + 1
+  const handlePressFormButton = useCallback(
+    (buttonTitle: string) => {
+      navigation?.navigate('Trap Visit Form', { screen: buttonTitle })
+      //for each object in the steps Array
+      //if the Object contain the name property that matched button title
+      //assign the index top stepPayload
+      //navigate to the index + 1
+      let stepPayload
+      for (let i = 0; i < stepsArray.length; i++) {
+        if (stepsArray[i].name === buttonTitle) {
+          stepPayload = i + 1
+        }
       }
-    }
-    dispatch({
-      type: updateActiveStep,
-      payload: stepPayload,
-      // payload: steps[buttonTitle],
-    })
-  }, [])
+      dispatch(setActiveTab(tabSlice.activeTabId))
+      dispatch({
+        type: updateActiveStep,
+        payload: stepPayload,
+        // payload: steps[buttonTitle],
+      })
+    },
+    [tabSlice]
+  )
 
   const handlePressMarkRecaptureButton = useCallback((buttonTitle: string) => {
     navigation.navigate('Mark Recapture', { screen: buttonTitle })
@@ -85,124 +145,138 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
   }, [])
 
   return (
-    <Box safeArea flex={1} p={7}>
-      <VStack flex={1} space={2}>
-        <HStack justifyContent='flex-end'>
-          <IconButton
-            onPress={() => navigation.closeDrawer()}
-            borderWidth={2}
-            borderRadius={100}
-            variant='solid'
-            backgroundColor='primary'
-            borderColor='primary'
-            _icon={{
-              as: Ionicons,
-              name: 'chevron-back',
-              size: 6,
-              color: '#FFF',
-            }}
-          />
+    <ScrollView>
+      <VStack bg='primary' pt={8}>
+        <AppLogo imageSize={175} />
+        <IconButton
+          onPress={() => navigation.closeDrawer()}
+          borderWidth={2}
+          borderRadius={100}
+          variant='solid'
+          position='absolute'
+          right={2}
+          top={5}
+          backgroundColor='primary'
+          borderColor='primary'
+          _icon={{
+            as: Ionicons,
+            name: 'chevron-back',
+            size: 10,
+            color: 'white',
+          }}
+        />
+        <HStack
+          p={7}
+          space={3}
+          alignItems='center'
+          justifyContent='space-between'
+        >
+          <VStack>
+            <Text fontSize='xl' color='white' bold mt={3}>
+              {userCredentialsStore.displayName}
+            </Text>
+            <Text fontSize='md' color='white'>
+              {userCredentialsStore.emailAddress}
+            </Text>
+            <Pressable
+              variant='outline'
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                marginTop: 10,
+              }}
+              onPress={() => {
+                handlePressMainNavButton('Profile')
+              }}
+            >
+              <MaterialIcons
+                name='settings'
+                size={20}
+                color='white'
+                style={{ marginRight: 5 }}
+              />
+              <Text color='white'>Settings</Text>
+            </Pressable>
+          </VStack>
         </HStack>
-        <AppLogo imageSize={225} />
-        <DrawerContentScrollView>
-          <MenuButton
-            active={currentRoute === 'Home'}
-            onPress={() => handlePressMainNavButton('Home')}
-            icon='home'
-            title='Home'
-          />
-          <MenuButton
-            active={false}
-            onPress={() => console.log('REDUX STATE:', reduxState)}
-            icon='bug'
-            title='DEV LOG'
-          />
-          <MenuButton
-            active={currentRoute === 'Profile'}
-            onPress={() => {
-              handlePressMainNavButton('Profile')
-            }}
-            icon='person'
-            title='Profile'
-          />
-          <MenuButton
-            active={currentRoute === 'Monitoring Program'}
-            onPress={() => {
-              handlePressMainNavButton('Monitoring Program')
-            }}
-            icon='add-circle'
-            title='Monitoring Program'
-          />
-          <MenuButton
-            active={currentRoute === 'Permit Info'}
-            onPress={() => {
-              handlePressMainNavButton('Permit Info')
-            }}
-            icon='information-circle'
-            title='Permit Info'
-          />
-          <MenuButton
-            active={currentRoute === 'Generate Report'}
-            onPress={() => handlePressMainNavButton('Generate Report')}
-            icon='bar-chart'
-            title='Generate Report'
-          />
-          <MenuButton
-            active={currentRoute === 'Quality Control'}
-            onPress={() => handlePressMainNavButton('Quality Control')}
-            icon='bar-chart'
-            title='QC Data'
-          />
-          <MenuButton
-            active={currentRoute === 'Inspector'}
-            onPress={() => handlePressMainNavButton('Inspector')}
-            icon='search'
-            title='Inspector'
-          />
-          <MenuButton
-            active={currentRoute === 'Trap Visit Form'}
-            onPress={() => handlePressMainNavButton('Trap Visit Form')}
-            icon='clipboard'
-            title='Trap Visit Form'
-            completed={true}
-          />
-          {stepsArray && currentRoute === 'Trap Visit Form' && (
-            <>
-              <Divider mt='2' />
-              {stepsArray.map((step: any, index: any) => {
+        <Divider mt='2' />
+
+        <MenuButton
+          active={currentRoute === 'Home'}
+          onPress={() => handlePressMainNavButton('Home')}
+          icon='home'
+          title='Home'
+        />
+        <MenuButton
+          active={currentRoute === 'Permit Info'}
+          onPress={() => {
+            handlePressMainNavButton('Permit Info')
+          }}
+          icon='information-circle'
+          title='Permit Info'
+        />
+        <MenuButton
+          active={currentRoute === 'Generate Report'}
+          onPress={() => handlePressMainNavButton('Generate Report')}
+          icon='bar-chart'
+          title='Generate Report'
+        />
+        <MenuButton
+          active={currentRoute === 'Quality Control'}
+          onPress={() => handlePressMainNavButton('Quality Control')}
+          icon='bar-chart'
+          title='QC Data'
+        />
+        <MenuButton
+          active={false}
+          onPress={() => handlePressMainNavButton('Inspector')}
+          icon='search'
+          title='Inspector'
+        />
+        <MenuButton
+          active={currentRoute === 'Mark Recapture'}
+          onPress={() => handlePressMainNavButton('Mark Recapture')}
+          icon='clipboard'
+          title='Mark Recapture'
+        />
+        {markRecaptureStepsArray && currentRoute === 'Mark Recapture' && (
+          <>
+            <Divider mt='2' />
+            {markRecaptureStepsArray.map((step: any, index: any) => {
+              return (
+                <VStack ml='4' key={index}>
+                  <MenuButton
+                    active={currentRoute === step.name}
+                    completed={step.completed}
+                    icon='ellipse'
+                    listItem={true}
+                    title={step.name}
+                    onPress={() => handlePressMarkRecaptureButton(step.name)}
+                  />
+                </VStack>
+              )
+            })}
+          </>
+        )}
+        <MenuButton
+          active={currentRoute === 'Trap Visit Form'}
+          onPress={() => handlePressMainNavButton('Trap Visit Form')}
+          icon='clipboard'
+          title='Trap Visit Form'
+          completed={true}
+        />
+        {stepsArray && currentRoute === 'Trap Visit Form' && (
+          <>
+            <Divider mt='2' />
+            {stepsArray.map((step: any, index: number) => {
+              if (
+                showStepNavigationButton(index) ||
+                hasUnrestrictedFormNavigation === true
+              )
                 return (
                   <VStack ml='4' key={index}>
                     <MenuButton
-                      active={currentRoute === step.name}
-                      // isDisabled={
-                      //   reduxState[step.propName]?.completed ? false : true
-                      // }
-                      completed={step.completed}
-                      onPress={() => handlePressFormButton(step.name)}
-                      icon='ellipse'
-                      listItem={true}
-                      title={step.name}
-                    />
-                  </VStack>
-                )
-              })}
-            </>
-          )}
-          <MenuButton
-            active={currentRoute === 'Mark Recapture'}
-            onPress={() => handlePressMainNavButton('Mark Recapture')}
-            icon='clipboard'
-            title='Mark Recapture'
-            completed={true}
-          />
-          {markRecaptureStepsArray && currentRoute === 'Mark Recapture' && (
-            <>
-              <Divider mt='2' />
-              {markRecaptureStepsArray.map((step: any, index: any) => {
-                return (
-                  <VStack ml='4' key={index}>
-                    <MenuButton
-                      active={currentRoute === step.name}
+                      active={activeStep - 1 === index}
                       completed={step.completed}
                       icon='ellipse'
                       listItem={true}
@@ -214,13 +288,26 @@ const DrawerMenu = (props: DrawerContentComponentProps) => {
                     />
                   </VStack>
                 )
-              })}
-            </>
-          )}
-        </DrawerContentScrollView>
+            })}
+          </>
+        )}
+        <MenuButton
+          active={false}
+          onPress={() => handlePressMainNavButton('Input Turbidity')}
+          icon='add-circle'
+          title='Input Turbidity'
+        />
       </VStack>
-    </Box>
+    </ScrollView>
   )
 }
 
-export default DrawerMenu
+const mapStateToProps = (state: RootState) => {
+  return {
+    userCredentialsStore: state.userCredentials,
+    tabSlice: state.tabSlice,
+    visitSetupSlice: state.visitSetup,
+  }
+}
+
+export default connect(mapStateToProps)(DrawerMenu)

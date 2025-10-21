@@ -21,7 +21,7 @@ const MonitoringProgramHome = ({ navigation }: { navigation: any }) => {
           w='400px'
           shadow='5'
           onPress={() => {
-            navigation.navigate('Monitoring Program', {
+            navigation?.navigate('Monitoring Program', {
               screen: 'Monitoring Program New',
             })
           }}
@@ -37,7 +37,7 @@ const MonitoringProgramHome = ({ navigation }: { navigation: any }) => {
           w='400px'
           shadow='5'
           onPress={() => {
-            navigation.navigate('Monitoring Program', {
+            navigation?.navigate('Monitoring Program', {
               screen: 'Monitoring Program Existing',
             })
           }}

@@ -86,7 +86,7 @@ const CrewMembers = ({
       <Formik
         validationSchema={crewMembersLeadSchema}
         initialValues={{ agency: '', orcidId: '' }}
-        onSubmit={(values) => {
+        onSubmit={values => {
           handleSaveTeamLeadInformation(values)
         }}
       >

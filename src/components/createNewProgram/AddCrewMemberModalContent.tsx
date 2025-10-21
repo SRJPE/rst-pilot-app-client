@@ -1,278 +1,225 @@
-import { Formik } from 'formik'
+import React, { useState } from 'react'
 import {
   Button,
+  Center,
   Divider,
   FormControl,
+  Heading,
   HStack,
+  Icon,
   Input,
-  KeyboardAvoidingView,
-  Radio,
+  Pressable,
+  ScrollView,
   Text,
+  View,
   VStack,
 } from 'native-base'
-import { useDispatch, useSelector } from 'react-redux'
+import { Ionicons } from '@expo/vector-icons'
+import CreateNewProgramNavButtons from '../../components/createNewProgram/CreateNewProgramNavButtons'
+import CustomModal from '../../components/Shared/CustomModal'
+import AddCrewMemberModalContent from '../../components/createNewProgram/AddCrewMemberModalContent'
+import AppLogo from '../../components/Shared/AppLogo'
+import CrewMemberDataTable from '../../components/createNewProgram/CrewMemberDataTable'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../../redux/store'
 import {
-  IndividualCrewMemberValuesI,
   IndividualCrewMemberState,
   saveIndividualCrewMember,
-  updateIndividualCrewMember,
-  deleteIndividualCrewMember,
 } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
-import { AppDispatch, RootState } from '../../redux/store'
+import { Formik } from 'formik'
 import FormInputComponent from '../../components/Shared/FormInputComponent'
+import CustomSelect from '../../components/Shared/CustomSelect'
+import { crewMembersLeadSchema } from '../../utils/helpers/yupValidations'
 
-import CustomModalHeader from '../Shared/CustomModalHeader'
-import { crewMembersSchema } from '../../utils/helpers/yupValidations'
-import CustomSelect from '../Shared/CustomSelect'
-import { useEffect, useState } from 'react'
+export const sampleTeamLead = {
+  //to be replaced when a logged in user is persisted
+  firstName: 'John',
+  lastName: 'Doe',
+  phoneNumber: '1234567890',
+  email: 'test@flowwest.com',
+  isLead: true,
+}
 
-const AddCrewMemberModalContent = ({
-  closeModal,
-  addTrapModalContent,
+const CrewMembers = ({
+  navigation,
+  crewMembersStore,
 }: {
-  closeModal: any
-  addTrapModalContent?: any
+  navigation: any
+  crewMembersStore: any
 }) => {
+  const [addCrewMemberModalOpen, setAddCrewMemberModalOpen] = useState(
+    false as boolean
+  )
+  const [addTrapModalContent, setAddTrapModalContent] = useState(
+    IndividualCrewMemberState as any
+  )
+  const { firstName, lastName, phoneNumber, email } = sampleTeamLead
   const dispatch = useDispatch<AppDispatch>()
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
-  const [modalDataTemp, setModalDataTemp] = useState(
-    IndividualCrewMemberState as IndividualCrewMemberValuesI
-  )
 
-  const handleAddCrewMemberSubmission = (
-    values: IndividualCrewMemberValuesI
-  ) => {
-    if (values?.uid) {
-      dispatch(
-        updateIndividualCrewMember({
-          ...values,
-          isLead: !!values.isLead,
-        })
-      )
-    } else {
-      dispatch(
-        saveIndividualCrewMember({
-          ...values,
-          isLead: !!values.isLead,
-        })
-      )
+  const handleSaveTeamLeadInformation = (values: any) => {
+    let payload = {
+      ...sampleTeamLead,
+      ...values,
     }
+    console.log('🚀 ~ handleSaveTeamLeadInformation ~ payload:', payload)
+    dispatch(saveIndividualCrewMember(payload))
+  }
+  const handleShowTableModal = (selectedRowData: any) => {
+    const modalDataContainer = {} as any
+    Object.keys(selectedRowData).forEach((key: string) => {
+      modalDataContainer[key] = selectedRowData?.[key]?.toString()
+    })
+    setAddTrapModalContent(modalDataContainer)
+    setAddCrewMemberModalOpen(true)
   }
 
-  useEffect(() => {
-    if (addTrapModalContent.uid) {
-      setModalDataTemp(addTrapModalContent)
-    }
-  }, [addTrapModalContent])
-
-  const handleDelete = () => {
-    dispatch(deleteIndividualCrewMember(addTrapModalContent))
-    setModalDataTemp(IndividualCrewMemberState)
+  const handleCloseModal = () => {
+    setAddCrewMemberModalOpen(false)
+    setAddTrapModalContent(IndividualCrewMemberState)
   }
 
   return (
-    <Formik
-      validationSchema={crewMembersSchema}
-      enableReinitialize
-      initialValues={modalDataTemp}
-      onSubmit={(values, { resetForm, setSubmitting }) => {
-        handleAddCrewMemberSubmission(values)
-        resetForm()
-        setSubmitting(false)
-      }}
-    >
-      {({
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        setFieldValue,
-        setFieldTouched,
-        setValues,
-        touched,
-        errors,
-        values,
-      }) => {
-        return (
-          <KeyboardAvoidingView flex='1' behavior='padding'>
-            <CustomModalHeader
-              headerText={'Add Crew Member'}
-              showHeaderButton={true}
-              closeModal={closeModal}
-              headerButton={
-                <HStack space={8}>
-                  {values?.uid && (
-                    <Button
-                      bg='error'
-                      mx='2'
-                      px='10'
-                      shadow='3'
-                      onPress={() => {
-                        handleDelete()
-                        closeModal()
-                      }}
+    <>
+      <Formik
+        validationSchema={crewMembersLeadSchema}
+        initialValues={{ agency: '', orcidId: '' }}
+        onSubmit={values => {
+          handleSaveTeamLeadInformation(values)
+        }}
+      >
+        {({
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          setFieldValue,
+          setFieldTouched,
+          touched,
+          errors,
+          values,
+        }) => (
+          <>
+            <View flex={1} bg='#fff'>
+              <Center bg='primary' py='5%'>
+                <AppLogo imageSize={200} />
+              </Center>
+              <VStack py='5%' px='10%' space={5}>
+                <Heading alignSelf='center'>Add Trapping Crew</Heading>
+                <Text fontSize='lg' color='grey'>
+                  {
+                    'Please add some additional information about yourself and add your crew \nmembers. Accounts will be created for all crew members.'
+                  }
+                </Text>
+              </VStack>
+              {Object.values(crewMembersStore).length === 0 ? (
+                <VStack pb='5%' px='10%' space={5}>
+                  <HStack
+                    space={5}
+                    alignItems='center'
+                    justifyContent='space-between'
+                  >
+                    <HStack
+                      space={5}
+                      alignItems='center'
+                      justifyContent='space-between'
                     >
+                      <Icon
+                        as={Ionicons}
+                        name='person-circle'
+                        size='5xl'
+                        color='primary'
+                      />
+                      <Heading alignSelf='center'>You (Team Lead)</Heading>
+                    </HStack>
+                    <Button bg='primary' onPress={() => handleSubmit()}>
                       <Text fontSize='xl' color='white'>
-                        Delete{' '}
+                        Save your information
                       </Text>
                     </Button>
-                  )}
-                  <Button
-                    bg='primary'
-                    mx='2'
-                    px='10'
-                    shadow='3'
-                    isDisabled={
-                      (Object.values(touched).length === 0 && !values.uid) ||
-                      (Object.values(touched).length > 0 &&
-                        Object.values(errors).length > 0)
-                    }
-                    onPress={() => {
-                      handleSubmit()
-                      closeModal()
-                    }}
-                  >
-                    <Text fontSize='xl' color='white'>
-                      {modalDataTemp?.uid ? 'Save' : 'Add Crew Member'}
-                    </Text>
-                  </Button>
-                </HStack>
-              }
-            />
-            <VStack mx='5%' my='2%' space={4}>
-              {/* <FormControl>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Search for existing User
-                  </Text>
-                </FormControl.Label>
-                <Input //TODO: implement search
-                  height='50px'
-                  fontSize='16'
-                  placeholder='Search for existing User'
-                  value={''}
-                />
-              </FormControl>
-              <Divider thickness='3' my='2%' /> */}
-
-              <HStack justifyContent='space-between'>
-                <FormInputComponent
-                  label={'First Name'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.firstName ? `${values.firstName}` : ''}
-                  camelName={'firstName'}
-                  width={'45%'}
-                  onChangeText={handleChange('firstName')}
-                  onBlur={handleBlur('firstName')}
-                />
-                <FormInputComponent
-                  label={'Last Name'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.lastName ? `${values.lastName}` : ''}
-                  camelName={'lastName'}
-                  width={'45%'}
-                  onChangeText={handleChange('lastName')}
-                  onBlur={handleBlur('lastName')}
-                />
-              </HStack>
-
-              <HStack justifyContent='space-between'>
-                <FormInputComponent
-                  label={'Phone Number'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.phoneNumber ? `${values.phoneNumber}` : ''}
-                  camelName={'phoneNumber'}
-                  keyboardType={'numeric'}
-                  width={'45%'}
-                  onChangeText={handleChange('phoneNumber')}
-                  onBlur={handleBlur('phoneNumber')}
-                />
-                <FormInputComponent
-                  label={'Email'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.email ? `${values.email}` : ''}
-                  camelName={'email'}
-                  width={'45%'}
-                  onChangeText={handleChange('email')}
-                  onBlur={handleBlur('email')}
-                />
-              </HStack>
-
-              <HStack justifyContent='space-between'>
-                <FormControl w='45%'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Funding Agency
-                    </Text>
-                  </FormControl.Label>
-                  <CustomSelect
-                    selectedValue={values.agency as string}
-                    placeholder='Funding Agency'
-                    onValueChange={handleChange('agency')}
-                    setFieldTouched={setFieldTouched}
-                    selectOptions={dropdownValues?.fundingAgency}
+                  </HStack>
+                  <Text>First Name: {firstName}</Text>
+                  <Text>Last Name: {lastName}</Text>
+                  <Text>Phone Number: {phoneNumber}</Text>
+                  <Text>Email: {email}</Text>
+                  <HStack space={10} alignItems='center'>
+                    <FormControl w='45%'>
+                      <FormControl.Label>
+                        <Text color='black' fontSize='xl'>
+                          Funding Agency
+                        </Text>
+                      </FormControl.Label>
+                      <CustomSelect
+                        selectedValue={values.agency}
+                        placeholder='Funding Agency'
+                        onValueChange={handleChange('agency')}
+                        setFieldTouched={setFieldTouched}
+                        selectOptions={dropdownValues?.fundingAgency}
+                      />
+                    </FormControl>
+                    <FormInputComponent
+                      width={'45%'}
+                      label={'Orcid ID'}
+                      touched={touched}
+                      errors={errors}
+                      value={values.orcidId ? `${values.orcidId}` : ''}
+                      camelName={'orcidId'}
+                      onChangeText={handleChange('orcidId')}
+                      onBlur={handleBlur('orcidId')}
+                    />
+                  </HStack>
+                </VStack>
+              ) : (
+                <ScrollView h={300}>
+                  <CrewMemberDataTable
+                    handleShowTableModal={handleShowTableModal}
                   />
-                </FormControl>
-                <FormInputComponent
-                  label={'Orcid ID (optional)'}
-                  touched={touched}
-                  errors={errors}
-                  value={values.orcidId ? `${values.orcidId}` : ''}
-                  camelName={'orcidId'}
-                  width={'45%'}
-                  onChangeText={handleChange('orcidId')}
-                  onBlur={handleBlur('orcidId')}
+                </ScrollView>
+              )}
+              <Divider my='1%' />
+              <VStack py='5%' px='10%' space={5}>
+                <Pressable onPress={() => setAddCrewMemberModalOpen(true)}>
+                  <HStack alignItems='center'>
+                    <Icon
+                      as={Ionicons}
+                      name={'add-circle'}
+                      size='3xl'
+                      color='primary'
+                      marginRight='1'
+                    />
+                    <Text color='primary' fontSize='xl'>
+                      Add crew Member
+                    </Text>
+                  </HStack>
+                </Pressable>
+              </VStack>
+            </View>
+            <CreateNewProgramNavButtons navigation={navigation} />
+            {/* --------- Modals --------- */}
+            {addCrewMemberModalOpen && (
+              <CustomModal
+                isOpen={addCrewMemberModalOpen}
+                closeModal={handleCloseModal}
+                height='55%'
+              >
+                <AddCrewMemberModalContent
+                  addTrapModalContent={addTrapModalContent}
+                  closeModal={handleCloseModal}
                 />
-              </HStack>
-
-              <FormControl w='30%'>
-                <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Is Lead
-                  </Text>
-                </FormControl.Label>
-                <Radio.Group
-                  name='isLead'
-                  accessibilityLabel='is lead'
-                  value={`${values.isLead}`}
-                  onChange={(value: any) => {
-                    setFieldTouched('isLead', true)
-                    if (value === 'true') {
-                      setFieldValue('isLead', true)
-                    } else {
-                      setFieldValue('isLead', false)
-                    }
-                  }}
-                >
-                  <Radio
-                    colorScheme='primary'
-                    value='false'
-                    my={1}
-                    _icon={{ color: 'primary' }}
-                  >
-                    No
-                  </Radio>
-                  <Radio
-                    colorScheme='primary'
-                    value='true'
-                    my={1}
-                    _icon={{ color: 'primary' }}
-                  >
-                    Yes
-                  </Radio>
-                </Radio.Group>
-              </FormControl>
-            </VStack>
-          </KeyboardAvoidingView>
-        )
-      }}
-    </Formik>
+              </CustomModal>
+            )}
+          </>
+        )}
+      </Formik>
+    </>
   )
 }
 
-export default AddCrewMemberModalContent
+const mapStateToProps = (state: RootState) => {
+  return {
+    crewMembersStore: state.crewMembers.crewMembersStore,
+  }
+}
+
+export default connect(mapStateToProps)(CrewMembers)

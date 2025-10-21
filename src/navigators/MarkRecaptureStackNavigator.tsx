@@ -2,6 +2,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import ReleaseDataEntry from '../screens/markRecaptureScreens/ReleaseTrialDataEntry'
 import ReleaseTrial from '../screens/markRecaptureScreens/ReleaseTrial'
 import MarkRecaptureComplete from '../screens/markRecaptureScreens/MarkRecaptureComplete'
+import LoadingScreen from '../components/Shared/LoadingScreen'
 
 const MarkRecapture = createStackNavigator()
 
@@ -20,6 +21,13 @@ export default function MarkRecaptureStackNavigator() {
       <MarkRecapture.Screen
         name='Mark Recapture Complete'
         component={MarkRecaptureComplete}
+      />
+      <MarkRecapture.Screen
+        name='Loading...'
+        component={LoadingScreen}
+        options={{
+          animationTypeForReplace: 'push',
+        }}
       />
     </MarkRecapture.Navigator>
   )

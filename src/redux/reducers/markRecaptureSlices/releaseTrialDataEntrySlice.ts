@@ -37,6 +37,11 @@ export const releaseTrialDataEntrySlice = createSlice({
     saveReleaseTrialDataEntry: (state, action) => {
       state.values = action.payload
     },
+    // saveTrapVisitInformation: (state, action) => {
+    //   state.crew = action.payload.crew
+    //   state.programId = action.payload.programId
+    //   state.trapLocationIds = action.payload.trapLocationIds
+    // },
     saveTrapVisitInformation: (state, action) => {
       state.crew = action.payload.crew
       state.programId = action.payload.programId

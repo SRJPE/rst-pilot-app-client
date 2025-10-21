@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react'
-import { View } from 'native-base'
+import { View, Text } from 'native-base'
 import DropDownPicker from 'react-native-dropdown-picker'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
+import { useFormikContext } from 'formik'
+import { uniq, flatten } from 'lodash'
 
 export default function TrapNameDropDown({
+  open,
+  onOpen,
+  setOpen,
   list,
   setList,
   setFieldValue,
@@ -11,6 +16,9 @@ export default function TrapNameDropDown({
   visitSetupState,
   tabSlice,
 }: {
+  open: boolean
+  onOpen: any
+  setOpen: any
   list: any
   setList: any
   setFieldValue: any
@@ -18,10 +26,25 @@ export default function TrapNameDropDown({
   visitSetupState: any
   tabSlice: TabStateI
 }) {
-  const [open, setOpen] = useState(false as boolean)
   const [value, setValue] = useState([] as Array<any>)
+  const [marginBottom, setMarginBottom] = useState(0 as number)
+  const formikProps = useFormikContext<{ trapName: string[] }>()
+
+  const trapNameError = formikProps.errors.trapName
+  const trapNameTouched = formikProps.touched.trapName
+  const trapNameDropdownHasError = trapNameError && trapNameTouched
 
   useEffect(() => {
+    if (Object.keys(tabSlice.tabs).length > 1) {
+      let trapNames = Object.keys(tabSlice.tabs).map(
+        (tabId: any) => visitSetupState[tabId]?.values?.trapName
+      )
+      trapNames = uniq(flatten(trapNames))
+      if (trapNames.length > 0) {
+        setValue(trapNames)
+        return
+      }
+    }
     if (
       tabSlice?.activeTabId &&
       visitSetupState[tabSlice.activeTabId]?.values?.trapName
@@ -29,16 +52,15 @@ export default function TrapNameDropDown({
       const trapNameOrNames =
         visitSetupState[tabSlice.activeTabId]?.values?.trapName
       if (Array.isArray(trapNameOrNames)) {
-        setValue([...trapNameOrNames])
+        setValue(trapNameOrNames)
       } else {
         setValue([trapNameOrNames])
       }
     }
-  }, [tabSlice.activeTabId])
+  }, [tabSlice, tabSlice.activeTabId])
 
   useEffect(() => {
     setFieldValue('trapName', [...value])
-    setFieldTouched('trapName', true)
   }, [value])
 
   const generateMarginBottom = () => {
@@ -54,19 +76,26 @@ export default function TrapNameDropDown({
       return 50
     }
   }
+  useEffect(() => {
+    setMarginBottom(generateMarginBottom())
+    setValue([])
+  }, [list])
 
   return (
-    <View
-      style={{
-        backgroundColor: '#171717',
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: open ? generateMarginBottom() : 0,
-      }}
-    >
+    <View>
+      <Text
+        color={trapNameDropdownHasError ? 'red.700' : 'black'}
+        fontSize='md'
+      >
+        Trap Name
+      </Text>
       <DropDownPicker
         open={open}
+        onOpen={onOpen}
+        onClose={() => {
+          console.log('touched should be true')
+          setFieldTouched('trapName', true)
+        }}
         value={value}
         items={list}
         setOpen={setOpen}
@@ -74,11 +103,39 @@ export default function TrapNameDropDown({
         setItems={setList}
         multiple={true}
         mode='BADGE'
+        listMode='SCROLLVIEW'
         badgeDotColors={['#007C7C']}
         placeholder='Select trap names'
         searchPlaceholder='Search...'
         maxHeight={275}
+        zIndex={2000}
+        style={{
+          marginTop: 4,
+          borderColor: trapNameDropdownHasError ? 'darkred' : '#d4d4d4d4',
+          borderRadius: 4,
+          height: 50,
+          backgroundColor: '#fff',
+          marginBottom: open ? marginBottom : 0,
+        }}
+        arrowIconStyle={{
+          width: 30,
+          height: 30,
+        }}
+        dropDownContainerStyle={{
+          backgroundColor: '#fff',
+          borderColor: '#d4d4d4d4',
+          borderBottomLeftRadius: 4,
+          borderBottomRightRadius: 4,
+        }}
+        textStyle={{
+          fontSize: 16,
+        }}
       />
+      {trapNameDropdownHasError && (
+        <Text style={{ color: 'darkred', marginTop: 5 }}>
+          {trapNameError as string}
+        </Text>
+      )}
     </View>
   )
 }

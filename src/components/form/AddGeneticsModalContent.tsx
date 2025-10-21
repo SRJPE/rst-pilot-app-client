@@ -1,44 +1,96 @@
 import { Formik } from 'formik'
 import {
+  Button,
   FormControl,
   HStack,
-  Input,
-  ScrollView,
-  VStack,
-  Text,
-  Button,
   Radio,
-  Divider,
+  ScrollView,
+  Text,
+  VStack,
 } from 'native-base'
-
-import { Linking, Alert } from 'react-native'
+import { Alert, Linking } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { addGeneticsSampleSchema } from '../../utils/helpers/yupValidations'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
-import RenderErrorMessage from '../Shared/RenderErrorMessage'
-
-const initialFormValues = {
-  sampleId: '',
-  mucusSwab: false,
-  finClip: false,
-  crewMember: '',
-  comments: '',
-}
+import FormInputComponent from '../Shared/FormInputComponent'
+import { formatGeneticsSampleId } from '../../utils/utils'
+import { useEffect, useState } from 'react'
 
 const AddGeneticsModalContent = ({
   handleGeneticSampleFormSubmit,
   closeModal,
   crewMembers,
+  previousGeneticSamples,
+  species,
+  reorderedTaxon,
+  fishStore,
+  visitSetupState,
 }: {
   handleGeneticSampleFormSubmit: any
   closeModal: any
   crewMembers: Array<any>
+  previousGeneticSamples: Array<any>
+  species: any
+  reorderedTaxon: any
+  fishStore: any
+  visitSetupState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const connectivityState = useSelector((state: any) => state.connectivity)
+  const [initialFormValues, setInitialFormValues] = useState({
+    sampleId: '',
+    mucusSwab: false,
+    finClip: false,
+    crewMember: '',
+    comments: '',
+  })
+
+  useEffect(() => {
+    console.log('previousGeneticSamples', previousGeneticSamples)
+    console.log('current,', fishStore)
+
+    const fishStoreGeneticSamples = [] as any[]
+    if (fishStore && Object.keys(fishStore).length > 0) {
+      Object.keys(fishStore).forEach(key => {
+        const fishData = fishStore[key]
+        console.log('fishData', fishData)
+        if (
+          fishData &&
+          fishData.geneticSamples &&
+          fishData.geneticSamples.length > 0
+        ) {
+          fishStoreGeneticSamples.push(...fishData.geneticSamples)
+        }
+      })
+    }
+
+    const combinedGeneticSamples = [
+      ...previousGeneticSamples,
+      ...fishStoreGeneticSamples,
+    ]
+
+    console.log('CGS', combinedGeneticSamples)
+    console.log('visitSetupState', visitSetupState)
+
+    if (species.value) {
+      const defaultSampleIDNumber = formatGeneticsSampleId({
+        programName: visitSetupState.stream,
+        geneticSamplesArray: combinedGeneticSamples,
+        species: species.value,
+        taxonArray: reorderedTaxon,
+      })
+      console.log('🚀 ~ defaultSampleIDNumber', defaultSampleIDNumber)
+      if (defaultSampleIDNumber) {
+        setInitialFormValues({
+          ...initialFormValues,
+          sampleId: defaultSampleIDNumber,
+        })
+      }
+    }
+  }, [previousGeneticSamples, species])
 
   const handleFormSubmit = (values: any) => {
     handleGeneticSampleFormSubmit(values)
@@ -58,7 +110,8 @@ const AddGeneticsModalContent = ({
       <Formik
         validationSchema={addGeneticsSampleSchema}
         initialValues={initialFormValues}
-        onSubmit={(values) => {
+        enableReinitialize={true}
+        onSubmit={values => {
           console.log('🚀 ~  Genetic Sample values', values)
           handleFormSubmit(values)
         }}
@@ -76,28 +129,8 @@ const AddGeneticsModalContent = ({
           <>
             <CustomModalHeader
               headerText={'Collect a genetic sample'}
-              showHeaderButton={true}
+              showHeaderButton={false}
               closeModal={closeModal}
-              headerButton={
-                <Button
-                  bg='primary'
-                  mx='2'
-                  px='10'
-                  shadow='3'
-                  isDisabled={
-                    (touched && Object.keys(touched).length === 0) ||
-                    (errors && Object.keys(errors).length > 0)
-                  }
-                  onPress={() => {
-                    handleSubmit()
-                    closeModal()
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Save
-                  </Text>
-                </Button>
-              }
             />
             <>
               <VStack paddingX='10' paddingTop='3' paddingBottom='10'>
@@ -135,32 +168,20 @@ const AddGeneticsModalContent = ({
 
                 <HStack>
                   <VStack space={4} w='1/2' paddingRight='5'>
-                    <FormControl>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Sample ID Number:
-                          </Text>
-                        </FormControl.Label>
-
-                        {touched.sampleId &&
-                          errors.sampleId &&
-                          RenderErrorMessage(errors, 'sampleId')}
-                      </HStack>
-                      <Input
-                        height='50px'
-                        fontSize='16'
-                        placeholder='Write a comment'
-                        keyboardType='default'
-                        onChangeText={handleChange('sampleId')}
-                        onBlur={handleBlur('sampleId')}
-                        value={values.sampleId}
-                      />
-                    </FormControl>
+                    <FormInputComponent
+                      camelName='sampleId'
+                      value={values.sampleId}
+                      touched={touched}
+                      errors={errors}
+                      placeholder='00000000'
+                      label='Sample ID Number'
+                      onChangeText={handleChange('sampleId')}
+                      onBlur={handleBlur('sampleId')}
+                    />
 
                     <FormControl>
                       <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
+                        <Text color='black' fontSize='md'>
                           Confirm Mucus Swab Collected
                         </Text>
                       </FormControl.Label>
@@ -197,7 +218,7 @@ const AddGeneticsModalContent = ({
 
                     <FormControl>
                       <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
+                        <Text color='black' fontSize='md'>
                           Fin Clip Collected
                         </Text>
                       </FormControl.Label>
@@ -232,38 +253,34 @@ const AddGeneticsModalContent = ({
                       </Radio.Group>
                     </FormControl>
 
-                    <FormControl>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            Crew Member Collecting Samples
-                          </Text>
-                        </FormControl.Label>
-
-                        {touched.crewMember &&
-                          errors.crewMember &&
-                          RenderErrorMessage(errors, 'crewMember')}
-                      </HStack>
-                      <CustomSelect
-                        selectedValue={values.crewMember}
-                        placeholder={'Crew Member'}
-                        onValueChange={handleChange('crewMember')}
-                        setFieldTouched={setFieldTouched}
-                        selectOptions={
-                          crewMembers.length
-                            ? crewMembers.map((item: any) => ({
-                                label: item,
-                                value: item,
-                              }))
-                            : [
-                                {
-                                  label: 'No crew members found',
-                                  value: 'null',
-                                },
-                              ]
-                        }
-                      />
-                    </FormControl>
+                    <CustomSelect
+                      label='Crew Member'
+                      camelName='crewMember'
+                      touched={touched}
+                      errors={errors}
+                      selectedValue={values.crewMember}
+                      placeholder={'Select Crew Member'}
+                      // onValueChange={handleChange('crewMember')}
+                      onValueChange={(itemValue: string) => {
+                        setFieldValue('crewMember', itemValue).then(() => {
+                          setFieldTouched('crewMember', true)
+                        })
+                      }}
+                      // setFieldTouched={() => setFieldTouched('crewMember')}
+                      selectOptions={
+                        crewMembers.length
+                          ? crewMembers.map((item: any) => ({
+                              label: item,
+                              value: item,
+                            }))
+                          : [
+                              {
+                                label: 'No crew members found',
+                                value: 'null',
+                              },
+                            ]
+                      }
+                    />
                   </VStack>
 
                   {/* <View w='1/2' h='full' paddingLeft='5'>
@@ -277,23 +294,35 @@ const AddGeneticsModalContent = ({
                     </Box>
                   </View> */}
                 </HStack>
-
-                <FormControl mt='2'>
-                  <FormControl.Label>
-                    <Text color='black' fontSize='xl'>
-                      Comments
-                    </Text>
-                  </FormControl.Label>
-                  <Input
-                    height='50px'
-                    fontSize='16'
-                    placeholder='Write a comment'
-                    keyboardType='default'
-                    onChangeText={handleChange('comments')}
-                    onBlur={handleBlur('comments')}
-                    value={values.comments}
-                  />
-                </FormControl>
+                <FormInputComponent
+                  camelName='comments'
+                  value={values.comments}
+                  touched={touched}
+                  errors={errors}
+                  placeholder='Write a comment'
+                  label='Comments (optional)'
+                  multiline={true}
+                  onChangeText={handleChange('comments')}
+                  onBlur={handleBlur('comments')}
+                />
+                <Button
+                  bg='primary'
+                  mx='2'
+                  px='10'
+                  shadow='3'
+                  isDisabled={
+                    (touched && Object.keys(touched).length === 0) ||
+                    (errors && Object.keys(errors).length > 0)
+                  }
+                  onPress={() => {
+                    handleSubmit()
+                    closeModal()
+                  }}
+                >
+                  <Text fontSize='xl' color='white'>
+                    Save
+                  </Text>
+                </Button>
               </VStack>
             </>
           </>
@@ -303,11 +332,32 @@ const AddGeneticsModalContent = ({
   )
 }
 const mapStateToProps = (state: RootState) => {
-  const activeTabId = state.tabSlice.activeTabId
+  const activeTabId = state.tabSlice.activeTabId || 'placeholderId'
+  let filteredResponses = [] as any[]
+
+  if (activeTabId) {
+    const programId = state.visitSetup[activeTabId].values.programId
+    const responses = [] as any[]
+
+    state.trapVisitFormPostBundler.previousCatchRawSubmissions.forEach(
+      (item: any) => {
+        if (item?.createdGeneticSamplingDataResponse) {
+          responses.push(...item?.createdGeneticSamplingDataResponse)
+        }
+      }
+    )
+    // Filter responses by programId
+    filteredResponses = responses.filter((response: any) => {
+      return response?.programId === programId
+    })
+  }
+
   return {
-    crewMembers: activeTabId
-      ? state.visitSetup[activeTabId].values.crew
-      : state.visitSetup['placeholderId'].values.crew,
+    crewMembers: state.visitSetup?.[activeTabId]?.values.crew,
+    previousGeneticSamples: filteredResponses,
+    addGeneticSamples: state.addGeneticSamples,
+    fishStore: state.fishInput?.[activeTabId]?.fishStore,
+    visitSetupState: state.visitSetup?.[activeTabId]?.values,
   }
 }
 

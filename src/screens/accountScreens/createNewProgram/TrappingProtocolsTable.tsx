@@ -86,18 +86,16 @@ const TrappingProtocolsTable = ({ navigation }: { navigation: any }) => {
       </View>
       <CreateNewProgramNavButtons navigation={navigation} />
       {/* --------- Modals --------- */}
-      {addTrappingProtocolModalOpen && (
-        <CustomModal
-          isOpen={addTrappingProtocolModalOpen}
-          closeModal={handleCloseModal}
-          height='45%'
-        >
-          <AddTrappingProtocolModalContent
-            addTrappingProtocolsModalContent={addTrappingProtocolsModalContent}
-            closeModal={handleCloseModal}
-          />
-        </CustomModal>
-      )}
+      <CustomModal
+        isOpen={addTrappingProtocolModalOpen}
+        closeModal={() => setAddTrappingProtocolModalOpen(false)}
+        height='50%'
+      >
+        <AddTrappingProtocolModalContent
+          addTrappingProtocolsModalContent={addTrappingProtocolsModalContent}
+          closeModal={() => setAddTrappingProtocolModalOpen(false)}
+        />
+      </CustomModal>
     </>
   )
 }

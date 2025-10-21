@@ -6,23 +6,7 @@ import { Entypo } from '@expo/vector-icons'
 import { RootState } from '../../redux/store'
 import { IndividualTrappingSiteValuesI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 
-interface Header {
-  colData: string
-  label: string
-  numeric: boolean
-  flex: number
-}
-const headers: Header[] = [
-  { colData: 'species', label: 'Species', numeric: false, flex: 1 },
-  { colData: 'run', label: 'Run', numeric: false, flex: 1 },
-  { colData: 'lifeStage', label: 'Life Stage', numeric: false, flex: 1 },
-  {
-    colData: 'numberMeasured',
-    label: 'Number Measured',
-    numeric: false,
-    flex: 1,
-  },
-]
+const headers = ['Species', 'Run', 'Life Stage', 'Number Measured', 'UID']
 
 const TrappingProtocolsDataTable = ({
   trappingProtocolsStore,
@@ -40,66 +24,39 @@ const TrappingProtocolsDataTable = ({
   }, [trappingProtocolsStore])
   return (
     <DataTable>
-      <DataTable.Header>
-        {headers.map(({ label, numeric, flex }, idx: number) => (
-          <DataTable.Title
-            key={idx}
-            numeric={numeric}
-            style={{
-              paddingHorizontal: 10,
-              flex: flex,
-            }}
-          >
-            {label}
+      <DataTable.Header style={{ display: 'flex' }}>
+        {headers.map((header: string, idx: number) => (
+          <DataTable.Title key={idx} style={{ flex: 3 }}>
+            {header}
           </DataTable.Title>
         ))}
-        <DataTable.Title
-          style={{
-            paddingHorizontal: 10,
-            flex: 0,
-          }}
-        >
-          {''}
-        </DataTable.Title>
+        <DataTable.Title style={{ flex: 1, padding: 3 }}>{''}</DataTable.Title>
       </DataTable.Header>
       {processedData.map((trappingProtocolObject: any, idx: number) => {
+        const cellValues = { ...trappingProtocolObject } as any
+        delete cellValues?.uid
         return (
-          <DataTable.Row style={[{ height: 55 }]} key={idx}>
-            {Object.entries(trappingProtocolObject).map(
-              (keyValuePair: any, idx: number) => {
-                const [key, cellValue] = keyValuePair
-                const currentCol = headers.find(
-                  (header) => header.colData === key
-                )
-
-                if (currentCol)
-                  return (
-                    <DataTable.Cell
-                      numeric={currentCol.numeric}
-                      key={idx}
-                      style={{
-                        paddingHorizontal: 10,
-                        flex: currentCol.flex,
-                      }}
-                    >
-                      {cellValue.toString().charAt(0).toUpperCase() +
-                        cellValue.toString().slice(1)}
-                    </DataTable.Cell>
-                  )
-              }
+          <DataTable.Row style={[{ height: 55, display: 'flex' }]} key={idx}>
+            {Object.values(trappingProtocolObject).map(
+              (callValue: any, idx: number) => (
+                <DataTable.Cell style={{ flex: 3 }} key={idx}>
+                  {callValue}
+                </DataTable.Cell>
+              )
             )}
             <IconButton
-              marginY={3}
+              flex={1}
+              // margin={2}
+              p={1}
               variant='solid'
-              bg='primary'
-              colorScheme='primary'
+              bg='transparent'
+              // colorScheme='primary'
               size='sm'
               onPress={() => {
-                console.log('TRAP OBJECT ROW DATA: ', trappingProtocolObject)
                 handleShowTableModal(trappingProtocolObject)
               }}
             >
-              <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
+              <Icon as={Entypo} size='5' name='edit' color='primary' />
             </IconButton>
           </DataTable.Row>
         )

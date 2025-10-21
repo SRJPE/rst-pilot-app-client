@@ -1,13 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { color } from 'native-base/lib/typescript/theme/styled-system'
 
-interface InitialStateI {
+export interface SlideAlertInitialStateI {
   slideAlertOpen: boolean
-  slideAlertTitle?: string
+  slideAlertTitle: string
+  slideAlertColor: 'success' | 'error' | 'warning' | 'info'
 }
 
-const initialState: InitialStateI = {
+const initialState: SlideAlertInitialStateI = {
   slideAlertOpen: false,
   slideAlertTitle: '',
+  slideAlertColor: 'success',
 }
 
 export const slideAlertSlice = createSlice({
@@ -23,18 +26,32 @@ export const slideAlertSlice = createSlice({
     setSlideAlertTitle: (state, action) => {
       state.slideAlertTitle = action.payload
     },
+    setSlideAlertColor: (state, action) => {
+      state.slideAlertColor = action.payload
+    },
   },
 })
 
-export const showSlideAlert = (dispatch: any, slideTitle?: string) => {
+export const showSlideAlert = (
+  dispatch: any,
+  slideTitle?: string,
+  slideColor: 'success' | 'error' | 'warning' = 'success',
+  slideDuration: number = 2000
+) => {
   dispatch(setSlideAlertTitle(slideTitle))
+  dispatch(setSlideAlertColor(slideColor))
   dispatch(openSlideAlert())
   setTimeout(() => {
     dispatch(closeSlideAlert())
-  }, 2000)
+  }, slideDuration)
 }
 
-export const { openSlideAlert, closeSlideAlert, setSlideAlertTitle } =
-  slideAlertSlice.actions
+
+export const {
+  openSlideAlert,
+  closeSlideAlert,
+  setSlideAlertTitle,
+  setSlideAlertColor,
+} = slideAlertSlice.actions
 
 export default slideAlertSlice.reducer

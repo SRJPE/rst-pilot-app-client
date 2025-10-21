@@ -1,30 +1,34 @@
 import React, { useEffect, useState } from 'react'
 import { DataTable } from 'react-native-paper'
 import { connect } from 'react-redux'
-import { Icon, IconButton } from 'native-base'
+import { HStack, Icon, IconButton } from 'native-base'
 import { Entypo } from '@expo/vector-icons'
 import { RootState } from '../../redux/store'
 import { IndividualTrappingSiteValuesI } from '../../redux/reducers/createNewProgramSlices/trappingSitesSlice'
 import { TakeAndMortalityValuesI } from '../../redux/reducers/createNewProgramSlices/permitInformationSlice'
-import { startCase } from 'lodash'
+import { removeIndividualTakeAndMortality } from '../../redux/reducers/createNewProgramSlices/permitInformationSlice'
+import { useDispatch } from 'react-redux'
 
-interface Header {
-  colData: string
+type ColumnDef = {
   label: string
-  numeric: boolean
   flex: number
+  field: string
+  type?: 'string' | 'number' | 'date'
 }
-const headers: Header[] = [
-  { colData: 'species', label: 'Species', numeric: false, flex: 1 },
-  { colData: 'listingUnitOrStock', label: 'Stock', numeric: false, flex: 1 },
-  { colData: 'lifeStage', label: 'Life Stage', numeric: false, flex: 1 },
-  { colData: 'expectedTake', label: 'Expected Take', numeric: false, flex: 1 },
+
+const columnDefs: ColumnDef[] = [
+  { label: 'Species', flex: 4, field: 'species', type: 'string' },
+  { label: 'Stock', flex: 4, field: 'listingUnitOrStock', type: 'string' },
+  { label: 'Life Stage', flex: 2, field: 'lifeStage', type: 'string' },
+  { label: 'Expected Take', flex: 2, field: 'expectedTake', type: 'number' },
   {
-    colData: 'indirectMortality',
     label: 'Indirect Mortality',
-    numeric: false,
-    flex: 1,
+    flex: 2,
+    field: 'indirectMortality',
+    type: 'number',
   },
+  // { label: 'UID', flex: 2, field: 'uid', type: 'string' },
+  { label: 'Actions', flex: 2, field: 'actions' },
 ]
 const TakeAndMortalityDataTable = ({
   takeAndMortalityValuesStore,
@@ -33,24 +37,36 @@ const TakeAndMortalityDataTable = ({
   takeAndMortalityValuesStore: TakeAndMortalityValuesI
   handleShowTableModal?: any
 }) => {
+  const dispatch = useDispatch()
   const [processedData, setProcessedData] = useState(
     [] as Array<IndividualTrappingSiteValuesI>
+  )
+  console.log(
+    '🚀 ~ file: TakeAndMortalityDataTable.tsx:30 ~ processedData:',
+    processedData
   )
 
   useEffect(() => {
     setProcessedData(Object.values(takeAndMortalityValuesStore))
   }, [takeAndMortalityValuesStore])
   return (
-    <DataTable>
-      <DataTable.Header>
-        {headers.map(({ label, numeric, flex }, idx: number) => (
+    <DataTable style={{ paddingHorizontal: '4%' }}>
+      <DataTable.Header style={{ display: 'flex', height: 65 }}>
+        {columnDefs.map(({ type, label, flex }: ColumnDef, idx: number) => (
           <DataTable.Title
             key={idx}
-            numeric={numeric}
-            style={{
-              paddingHorizontal: 10,
-              flex: flex,
-            }}
+            numeric
+            numberOfLines={2}
+            style={[
+              {
+                paddingHorizontal: 5,
+                justifyContent: type === 'number' ? 'flex-end' : 'flex-start',
+                flexWrap: 'wrap',
+                // borderWidth: 1,
+                // borderColor: 'red',
+                flex,
+              },
+            ]}
           >
             {label}
           </DataTable.Title>
@@ -66,42 +82,83 @@ const TakeAndMortalityDataTable = ({
       </DataTable.Header>
       {processedData.map((takeAndMortalityObject: any, idx: number) => {
         return (
-          <DataTable.Row style={[{ height: 55 }]} key={idx}>
-            {Object.entries(takeAndMortalityObject).map(
-              (keyValuePair: any, idx: number) => {
-                const [key, cellValue] = keyValuePair
-                const currentCol = headers.find(
-                  (header) => header.colData === key
-                )
+          <DataTable.Row
+            key={idx}
+            style={{ display: 'flex' }}
+            onPress={
+              () => {}
+              // handleShowTableModal(trappingProtocolObject)
+            }
+          >
+            {columnDefs
+              .slice(0, columnDefs.length - 1)
+              .map(({ type, field, flex }: ColumnDef, idx: number) => (
+                <DataTable.Cell
+                  key={idx}
+                  style={{
+                    paddingHorizontal: 5,
+                    justifyContent:
+                      type === 'number' ? 'flex-end' : 'flex-start',
 
-                if (currentCol)
-                  return (
-                    <DataTable.Cell
-                      numeric={currentCol.numeric}
-                      key={idx}
-                      style={{
-                        paddingHorizontal: 10,
-                        flex: currentCol.flex,
-                      }}
-                    >
-                      {startCase(cellValue)}
-                    </DataTable.Cell>
-                  )
-              }
-            )}
-            <IconButton
-              marginY={3}
-              variant='solid'
-              bg='primary'
-              colorScheme='primary'
-              size='sm'
-              onPress={() => {
-                console.log('TRAP OBJECT ROW DATA: ', takeAndMortalityObject)
-                handleShowTableModal(takeAndMortalityObject)
+                    // borderWidth: 1,
+                    // borderColor: 'blue',
+                    flex,
+                  }}
+                >
+                  {trappingProtocolObject[field]}
+                </DataTable.Cell>
+              ))}
+            {/* {Object.values(trappingProtocolObject).map(
+              (callValue: any, idx: number) => (
+                <DataTable.Cell
+                  key={idx}
+                  style={{ borderWidth: 1, borderColor: 'blue', flex: 1 }}
+                >
+                  {callValue}
+                </DataTable.Cell>
+              )
+            )} */}
+            <DataTable.Cell
+              style={{
+                flex: 2,
+                paddingHorizontal: 10,
+                display: 'flex',
+                justifyContent: 'center',
               }}
             >
-              <Icon as={Entypo} size='5' name='edit' color='warmGray.50' />
-            </IconButton>
+              <HStack space={3}>
+                <IconButton
+                  variant='solid'
+                  bg='primary'
+                  colorScheme='primary'
+                  size='sm'
+                  onPress={() => {
+                    console.log(
+                      'TRAP OBJECT ROW DATA: ',
+                      trappingProtocolObject
+                    )
+                    handleShowTableModal(trappingProtocolObject)
+                  }}
+                >
+                  <Icon as={Entypo} name='edit' color='warmGray.50' />
+                </IconButton>
+                <IconButton
+                  variant='solid'
+                  bg='primary'
+                  colorScheme='primary'
+                  size='sm'
+                  onPress={() =>
+                    dispatch(
+                      removeIndividualTakeAndMortality(
+                        trappingProtocolObject.uid
+                      )
+                    )
+                  }
+                >
+                  <Icon as={Entypo} name='trash' color='warmGray.50' />
+                </IconButton>
+              </HStack>
+            </DataTable.Cell>
           </DataTable.Row>
         )
       })}

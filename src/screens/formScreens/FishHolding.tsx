@@ -1,11 +1,17 @@
 import { useNavigation } from '@react-navigation/native'
-import { HStack, VStack, Text, Button, Heading, View } from 'native-base'
-import { useCallback, useEffect, useState } from 'react'
-import { connect, useDispatch } from 'react-redux'
 import {
-  FishStoreI,
-  updateFishEntry,
-} from '../../redux/reducers/formSlices/fishInputSlice'
+  HStack,
+  Text,
+  Button,
+  Heading,
+  View,
+  Input,
+  Box,
+  ScrollView,
+} from 'native-base'
+import React, { useCallback, useEffect, useState } from 'react'
+import { connect, useDispatch } from 'react-redux'
+import { updateFishEntry } from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveTotalFishHolding } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import FishHoldingCard from '../../components/form/FishHoldingCard'
@@ -16,6 +22,8 @@ import {
   SelectedFishStoreI,
 } from '../../redux/reducers/markRecaptureSlices/fishHoldingSlice'
 import { saveTrapVisitInformation } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
+import { navigateHelper, findTrapLocationIds } from '../../utils/utils'
+import { updateActiveStep } from '../../redux/reducers/formSlices/navigationSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -54,7 +62,7 @@ const FishHolding = ({
   const [selectedFishStore, setSelectedFishStore] = useState({} as any)
   const [selectedLifeStages, setSelectedLifeStages] = useState([] as Array<any>)
   const [selectedRuns, setSelectedRuns] = useState([] as Array<any>)
-  const [totalFish, setTotalFish] = useState(0 as number)
+  const [totalFish, setTotalFish] = useState(0 as number | string)
 
   useEffect(() => {
     if (
@@ -205,26 +213,19 @@ const FishHolding = ({
     setSelectedLifeStagesAndRuns()
     calculateTotalFish()
   }
-  const findTrapLocationIds = () => {
-    let container = [] as any
-    for (let tabId in visitSetupState) {
-      if (tabId === 'placeholderId') continue
-      container.push(visitSetupState[tabId].values.trapLocationId)
-    }
-    return container
-  }
 
   const tabIds = Object.keys(tabState.tabs)
-  const handleSubmit = (tabId: string) => {
+  const handleSubmit = (tabId: string, buttonDirection?: string) => {
     if (tabId) {
+      const totalFishNumeric = parseInt(totalFish as string, 10)
       //saves for release trial
-      dispatch(saveTotalFishHolding(totalFish))
+      dispatch(saveTotalFishHolding(totalFishNumeric))
       //saves for releaseTrial data entry
       dispatch(
         saveTrapVisitInformation({
           crew: visitSetupState[tabIds[0]].values.crew,
           programId: visitSetupState[tabIds[0]].values.programId,
-          trapLocationIds: findTrapLocationIds(),
+          trapLocationIds: findTrapLocationIds(visitSetupState),
         })
       )
       // saves to fish holding
@@ -245,18 +246,32 @@ const FishHolding = ({
       }
       dispatch(
         saveFishHolding({
-          totalFishHolding: totalFish,
+          totalFishHolding: totalFishNumeric,
           selectedFishStore: selectedFishStore,
         })
       )
       dispatch(markFishHoldingCompleted(true))
+    }
+    if (buttonDirection) {
+      const destination =
+        buttonDirection === 'left'
+          ? 'Trap Post-Processing'
+          : 'Incomplete Sections'
+
+      navigateHelper(
+        destination,
+        navigationSlice,
+        navigation,
+        dispatch,
+        updateActiveStep
+      )
     }
   }
 
   //render new cards when selected runs or lifeStages change
   const renderFishHoldingCards = useCallback(() => {
     return (
-      <HStack space={10} justifyContent='center' h='70%'>
+      <HStack space={10} justifyContent='center' height={'400px'}>
         <FishHoldingCard
           cardContent={selectedLifeStages}
           handlePressRemoveBadge={handlePressRemoveBadge}
@@ -271,45 +286,75 @@ const FishHolding = ({
     )
   }, [selectedRuns, selectedLifeStages])
 
+  const handleTotalFishChange = (text: string) => setTotalFish(text)
+
   return (
     <>
-      <View flex={1} bg='#fff' p='5%' borderColor='themeGrey' borderWidth='15'>
-        <VStack space={8}>
-          <Heading fontSize='28'>
-            Which fish are you holding for mark recapture trials?
-          </Heading>
-          <HStack>
-            <Button
-              bg='primary'
-              alignSelf='flex-start'
-              shadow='5'
-              ml='10'
-              onPress={handleClearAll}
-            >
-              <Text fontWeight='bold' color='white'>
-                Clear all, I am not holding any fish
-              </Text>
-            </Button>
-            <Button
-              bg='primary'
-              alignSelf='flex-start'
-              shadow='5'
-              ml='180'
-              onPress={handleResetAll}
-            >
-              <Text fontWeight='bold' color='white'>
-                Reset All
-              </Text>
-            </Button>
+      <ScrollView
+        bg='#fff'
+        p='5%'
+        borderColor='themeGrey'
+        borderWidth='15'
+        flex={1}
+        scrollEnabled
+        height={'100%'}
+      >
+        <Heading fontSize='28'>
+          Which fish are you holding for mark recapture trials?
+        </Heading>
+        <Box>
+          <Text fontSize={'xl'} marginTop={5}>
+            Select appropriate life stages and runs for the fish you are holding
+            for mark recapture trials. Total Fish Holding will be updated based
+            on the selected life stages and runs. You may also edit the final
+            number within the input field.
+          </Text>
+        </Box>
+        <View marginTop={10} marginBottom={10}>
+          <HStack space={10} justifyContent='center'>
+            <Heading alignSelf='center'>Total Fish Holding:</Heading>
+            <Box alignItems='center' w={100}>
+              <Input
+                value={totalFish.toString()}
+                w='100%'
+                size={'2xl'}
+                onChangeText={handleTotalFishChange}
+                keyboardType='number-pad'
+              />
+            </Box>
           </HStack>
-          {renderFishHoldingCards()}
-          <Heading alignSelf='center'>Total Fish Holding: {totalFish}</Heading>
-        </VStack>
-      </View>
+        </View>
+        {/* {renderFishHoldingCards()} */}
+        <HStack marginBottom={10}>
+          <Button
+            bg='primary'
+            alignSelf='flex-start'
+            shadow='5'
+            ml='10'
+            onPress={handleClearAll}
+          >
+            <Text fontWeight='bold' color='white'>
+              Clear all, I am not holding any fish
+            </Text>
+          </Button>
+          <Button
+            bg='primary'
+            alignSelf='flex-start'
+            shadow='5'
+            ml='180'
+            onPress={handleResetAll}
+          >
+            <Text fontWeight='bold' color='white'>
+              Reset All
+            </Text>
+          </Button>
+        </HStack>
+        {renderFishHoldingCards()}
+      </ScrollView>
       <NavButtons
         navigation={navigation}
-        handleSubmit={() => {
-          if (activeTabId) handleSubmit(activeTabId)
+        handleSubmit={(buttonDirection?: string) => {
+          if (activeTabId) handleSubmit(activeTabId, buttonDirection)
         }}
       />
     </>

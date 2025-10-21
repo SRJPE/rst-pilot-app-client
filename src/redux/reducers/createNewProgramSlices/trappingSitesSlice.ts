@@ -23,6 +23,7 @@ export interface IndividualTrappingSiteValuesI {
   releaseSiteLatitude: number | null
   releaseSiteLongitude: number | null
   uid: string
+  siteName?: string
 }
 export const individualTrappingSiteState: IndividualTrappingSiteValuesI = {
   trapName: '',
@@ -34,6 +35,7 @@ export const individualTrappingSiteState: IndividualTrappingSiteValuesI = {
   releaseSiteLatitude: null,
   releaseSiteLongitude: null,
   uid: '',
+  siteName: '',
 }
 
 export const trappingSitesSlice = createSlice({
