@@ -220,7 +220,13 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
           orderIndex={orderIndex}
           camelName={camelName}
         />
-        <Box mt={2} h={25}>
+        <Box
+          mt={2}
+          h={25}
+          mb={showError ? 2 : 0}
+          flexDirection='row'
+          flexWrap='wrap'
+        >
           {showError && (
             <RenderErrorMessage errors={errors} inputName={camelName} />
           )}

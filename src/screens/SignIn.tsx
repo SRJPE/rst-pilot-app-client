@@ -238,11 +238,6 @@ const SignIn = ({
                 Forgot Password
               </Text>
             </Pressable>
-            <Pressable>
-              <Text color='#fff' fontSize='lg'>
-                Create Account
-              </Text>
-            </Pressable>
           </HStack>
         </VStack>
       </ImageBackground>

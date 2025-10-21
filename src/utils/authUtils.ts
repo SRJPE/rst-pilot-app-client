@@ -57,7 +57,7 @@ export const refreshUserToken = async (
 
         await storeAccessTokens({
           accessToken,
-          refreshToken: refreshToken || existingRefreshToken || '',
+          refreshToken: refreshToken,
           idToken,
           expiresIn,
           issuedAt,

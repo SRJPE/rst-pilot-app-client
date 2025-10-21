@@ -1128,25 +1128,42 @@ export const shouldRenderField = ({
   return false
 }
 
+const getRunInitials = (run: string) => {
+  let runToUse = run
+  if (run.toLowerCase() === 'not recorded') {
+    runToUse = ''
+  } else if (run.toLowerCase() === 'late fall') {
+    runToUse = 'fall'
+  }
+
+  return runToUse
+    .split(' ') // split into words
+    .map(word => word[0]) // take first letter of each
+    .join('') // join them back together
+    .toUpperCase() // make sure they’re uppercase
+}
+
 const getNextSampleSuffix = ({
   arr,
-  taxonAbbreviation,
+  targetString,
   suffixPadding = 3,
+  adiposeFish,
 }: {
   arr: { sampleId?: string }[]
-  taxonAbbreviation?: string
+  targetString?: string
   suffixPadding?: number
+  adiposeFish?: boolean
 }) => {
   let filtered = arr
 
-  if (taxonAbbreviation) {
-    filtered = arr.filter(item =>
-      (item.sampleId ?? '').includes(taxonAbbreviation)
-    )
+  if (adiposeFish) {
+    filtered = arr.filter(item => item.sampleId?.startsWith(targetString ?? ''))
+  } else if (targetString) {
+    filtered = arr.filter(item => (item.sampleId ?? '').includes(targetString))
   }
 
   if (filtered.length === 0) {
-    return '001' // No existing samples for this taxon, start from 001
+    return '1'.padStart(suffixPadding, '0') // No existing samples for this taxon, start from 001
   }
 
   const currentHighestSampleSuffix = filtered.reduce((max, curr) => {
@@ -1156,8 +1173,12 @@ const getNextSampleSuffix = ({
     return getSuffix(curr.sampleId) > getSuffix(max.sampleId) ? curr : max
   })
 
-  const test = (currentHighestSampleSuffix.sampleId ?? '').split('_').pop()
-  const nextSampleSuffixNumber = test ? parseInt(test, 10) + 1 : 1
+  const previousSampleIdSuffix = (currentHighestSampleSuffix.sampleId ?? '')
+    .split('_')
+    .pop()
+  const nextSampleSuffixNumber = previousSampleIdSuffix
+    ? parseInt(previousSampleIdSuffix, 10) + 1
+    : 1
 
   // Pad with leading zeros to at least 3 digits
   const nextSampleSuffix = nextSampleSuffixNumber
@@ -1172,20 +1193,38 @@ export const formatGeneticsSampleId = ({
   species,
   geneticSamplesArray,
   taxonArray = [],
+  fishRunValue,
+  fishAdiposeClippedValue,
 }: {
   programName: string
   species: string
   geneticSamplesArray: any[]
   taxonArray?: any[]
+  fishRunValue?: string
+  fishAdiposeClippedValue?: boolean
 }) => {
   let sampleId = ''
 
   const programNameLower = programName.toLowerCase()
 
-  if (programNameLower.includes('yolo')) {
+  if (programNameLower.includes('yolo') || programNameLower.includes('flow')) {
     const currentYear = new Date().getFullYear()
 
     if (species.toLowerCase().includes('chinook')) {
+      const runAbbreviation = fishRunValue ? getRunInitials(fishRunValue) : ''
+      const adiposeString = fishAdiposeClippedValue ? 'Ad_minus' : 'Ad_plus'
+
+      const yearAdiposeRun = `${currentYear}${adiposeString}-${runAbbreviation}`
+
+      console.log('yearAdiposeRun', yearAdiposeRun)
+
+      const sampleIdSuffix = getNextSampleSuffix({
+        arr: geneticSamplesArray,
+        targetString: yearAdiposeRun,
+        suffixPadding: 3,
+        adiposeFish: true,
+      })
+      sampleId = `${yearAdiposeRun}_${sampleIdSuffix}`
     } else {
       const taxonObj = taxonArray.find(
         (item: any) => item.commonname === species
@@ -1199,10 +1238,9 @@ export const formatGeneticsSampleId = ({
 
       const sampleIdSuffix = getNextSampleSuffix({
         arr: geneticSamplesArray,
-        taxonAbbreviation,
+        targetString: taxonAbbreviation,
         suffixPadding: 3,
       })
-      console.log('sampleIdSuffix', sampleIdSuffix)
       sampleId = `${currentYear}_${taxonAbbreviation}_${sampleIdSuffix}`
     }
   } else if (
@@ -1230,4 +1268,15 @@ export const findTrapLocationIds = (visitSetupState: any) => {
     container.push(visitSetupState[tabId].values.trapLocationId)
   }
   return container
+}
+
+export const getDBValue = (
+  value: any,
+  dropdownName: string,
+  dropdownsState: any
+) => {
+  const dropdownValues = dropdownsState.values[dropdownName]
+
+  const id = find(dropdownValues, { code: value })?.id || null
+  return id
 }

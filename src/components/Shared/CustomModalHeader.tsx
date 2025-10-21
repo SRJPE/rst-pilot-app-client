@@ -123,7 +123,7 @@ const CustomModalHeader = ({
           closeModal={() => setConfirmationModalOpen(false)}
         >
           <ConfirmationModalContent
-            modalHeader='Return to fish input?'
+            modalHeader='Return to Fish Input?'
             modalText='
             You are about to return to fish input screen. None of your current batch entries will be saved. Are you sure you want to continue?'
             handlePressCancel={() => setConfirmationModalOpen(false)}
@@ -138,7 +138,7 @@ const CustomModalHeader = ({
               if (resetForm) resetForm()
             }}
             confirmButtonLabel='Leave'
-            cancelButtonLabel='Close'
+            cancelButtonLabel='Cancel'
           />
         </CustomModal>
       )}
@@ -152,27 +152,23 @@ const addFishModalButtonStyles = StyleSheet.create({
     borderRadius: 50,
     width: 200,
     height: 50,
-    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonBoxLeft: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
+    flex: 1,
     height: '100%',
-    paddingHorizontal: 25,
     borderRadius: 50,
-    display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonBoxRight: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
+    flex: 1,
     height: '100%',
-    paddingHorizontal: 25,
     borderRadius: 50,
-    display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   activeTab: {
     backgroundColor: '#007C7C',
@@ -194,7 +190,7 @@ export const AddFishModalHeaderButton = ({
   return (
     <View style={addFishModalButtonStyles.individualOrBatchButton}>
       <Box
-        onTouchStart={() => buttonNav()}
+        onTouchStart={() => buttonNav('Add Fish')}
         style={
           activeTab === 'Individual'
             ? [
@@ -205,11 +201,11 @@ export const AddFishModalHeaderButton = ({
         }
       >
         <Text color={activeTab === 'Individual' ? 'white' : '#007C7C'}>
-          Individual
+          IND
         </Text>
       </Box>
       <Box
-        onTouchStart={() => buttonNav()}
+        onTouchStart={() => buttonNav('Batch Count')}
         style={
           activeTab === 'Batch'
             ? [
@@ -219,7 +215,20 @@ export const AddFishModalHeaderButton = ({
             : addFishModalButtonStyles.buttonBoxRight
         }
       >
-        <Text color={activeTab === 'Batch' ? 'white' : '#007C7C'}>Batch</Text>
+        <Text color={activeTab === 'Batch' ? 'white' : '#007C7C'}>BATCH</Text>
+      </Box>
+      <Box
+        onTouchStart={() => buttonNav('Multi Species')}
+        style={
+          activeTab === 'Multi'
+            ? [
+                addFishModalButtonStyles.buttonBoxRight,
+                addFishModalButtonStyles.activeTab,
+              ]
+            : addFishModalButtonStyles.buttonBoxRight
+        }
+      >
+        <Text color={activeTab === 'Multi' ? 'white' : '#007C7C'}>MULTI</Text>
       </Box>
     </View>
   )

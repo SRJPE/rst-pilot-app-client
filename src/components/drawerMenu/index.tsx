@@ -294,6 +294,12 @@ const DrawerMenu = ({
           icon='add-circle'
           title='Input Turbidity'
         />
+        <MenuButton
+          active={false}
+          onPress={() => handlePressMainNavButton('Genetics')}
+          icon='flask-outline'
+          title='Genetics'
+        />
       </VStack>
     </ScrollView>
   )

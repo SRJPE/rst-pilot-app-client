@@ -45,6 +45,7 @@ import {
   mergePreserveNonNull,
   showFishInputButton,
   findTrapLocationIds,
+  getDBValue,
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
@@ -270,12 +271,12 @@ const IncompleteSections = ({
     return filteredCrewIds
   }
 
-  const getDBValue = (value: any, dropdownName: string) => {
-    const dropdownValues = dropdownsState.values[dropdownName]
+  // const getDBValue = (value: any, dropdownName: string) => {
+  //   const dropdownValues = dropdownsState.values[dropdownName]
 
-    const id = find(dropdownValues, { code: value })?.id || null
-    return id
-  }
+  //   const id = find(dropdownValues, { code: value })?.id || null
+  //   return id
+  // }
 
   const formatTrapVisitEnvironmentalValues = (
     values: any,
@@ -557,34 +558,45 @@ const IncompleteSections = ({
         createdBy: userCredentialsStore.id,
         // new form fields
         revCounter: trapPostProcessingState?.[id]?.values?.revCounter || null,
-        ysiNum: getDBValue(trapOperationsState[id].values.ysiNum, 'ysiNum'),
+        ysiNum: getDBValue(
+          trapOperationsState[id].values.ysiNum,
+          'ysiNum',
+          dropdownsState
+        ),
         gearStatus: getDBValue(
           trapOperationsState[id].values.gearStatus,
-          'gearStatus'
+          'gearStatus',
+          dropdownsState
         ),
         vegetationCode: getDBValue(
           trapOperationsState[id].values.vegetationCode,
-          'vegetationCode'
+          'vegetationCode',
+          dropdownsState
         ),
         conditionCode: getDBValue(
           trapPostProcessingState[id].values.conditionCode,
-          'conditionCode'
+          'conditionCode',
+          dropdownsState
         ),
         tideCode: getDBValue(
           trapPostProcessingState[id].values.tideCode,
-          'tideCode'
+          'tideCode',
+          dropdownsState
         ),
         flowDirection: getDBValue(
           trapOperationsState[id].values.flowDirection,
-          'flowDirection'
+          'flowDirection',
+          dropdownsState
         ),
         weatherCode: getDBValue(
           trapOperationsState[id].values.weatherCode,
-          'weatherCode'
+          'weatherCode',
+          dropdownsState
         ),
         substrate: getDBValue(
           trapOperationsState[id].values.substrate,
-          'substrate'
+          'substrate',
+          dropdownsState
         ),
         length: trapOperationsState[id].values.length
           ? parseFloat(trapOperationsState[id].values.length)

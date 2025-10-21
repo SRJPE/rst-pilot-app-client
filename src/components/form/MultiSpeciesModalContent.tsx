@@ -78,12 +78,21 @@ const MultiSpeciesModalContent = ({
   const { batchCharacteristics, forkLengths } = batchCountStore
   const speciesInFishStore = useMemo(() => {
     if (!activeTabId) return []
+
     const species = Object.values(
       fishInputSlice[activeTabId]?.fishStore || {}
     ).map((fish: any) => fish.species)
 
+    const forkLengthSpecies = Object.values(forkLengths || {})?.map(
+      (fish: any) => fish.species
+    )
+
     const uniqueSpecies = Array.from(
-      new Set([...species, ...(batchCharacteristics?.multiSpecies || [])])
+      new Set([
+        ...species,
+        ...forkLengthSpecies,
+        ...(batchCharacteristics?.multiSpecies || []),
+      ])
     )
 
     return uniqueSpecies
@@ -176,6 +185,8 @@ const MultiSpeciesModalContent = ({
   ) => {
     setRecentExistingMarks([selectedRecentReleaseMark])
   }
+
+  console.log('speciesInFishStore', speciesInFishStore)
 
   return (
     <ScrollView>

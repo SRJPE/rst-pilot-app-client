@@ -9,7 +9,12 @@ const RenderErrorMessage = ({
   inputName: string
 }) => {
   return (
-    <Text style={{ fontSize: 14, color: '#b71c1c' }}>
+    <Text
+      style={{
+        fontSize: 14,
+        color: '#b71c1c',
+      }}
+    >
       {errors[inputName] as string}
     </Text>
   )
