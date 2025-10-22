@@ -158,7 +158,7 @@ const TabBar = ({
       resultEntry => ({
         tabId: resultEntry[0],
         //@ts-ignore, this is a valid key
-        fishProcessingResult: resultEntry[1].values.fishProcessedResult,
+        fishProcessingResult: resultEntry?.[1]?.values?.fishProcessedResult,
       })
     )
 
