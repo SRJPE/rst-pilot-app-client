@@ -68,31 +68,30 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
               agencyOption.definition.toLowerCase() ===
               values.agencyId.toLowerCase()
           )?.id
-          // const createdUserResponse = await api
-          //   .post(`user/create`, {
-          //     firstName,
-          //     lastName,
-          //     mobilePhone,
-          //     agencyId,
-          //     emailAddress,
-          //   })
-          //   .catch(error => {
-          //     console.log(
-          //       '🚀 ~ file: AddNewUserModalContent.tsx:76 ~ onSubmit={ ~ error:',
-          //       Object.entries(error)
-          //     )
+          const createdUserResponse = await api
+            .post(`user/create`, {
+              firstName,
+              lastName,
+              mobilePhone,
+              agencyId,
+              emailAddress,
+            })
+            .catch(error => {
+              console.log(
+                '🚀 ~ file: AddNewUserModalContent.tsx:76 ~ onSubmit={ ~ error:',
+                Object.entries(error)
+              )
 
-          //     const errorMessage = generateErrorMessage(
-          //       error.code || 'Error during request to create user (ln 88)'
-          //     )
-          //     setSubmissionMessage({
-          //       success: false,
-          //       message: errorMessage,
-          //     })
+              const errorMessage = generateErrorMessage(
+                error.code || 'Error during request to create user (ln 88)'
+              )
+              setSubmissionMessage({
+                success: false,
+                message: errorMessage,
+              })
 
-          //     setSubmitting(false)
-          //   })
-          const createdUserResponse = null as any //temp placeholder while backend is being worked on
+              setSubmitting(false)
+            })
 
           if (createdUserResponse && createdUserResponse?.status === 200) {
             setSubmissionMessage({
@@ -229,11 +228,6 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
                 />
               </FormControl>
               <FormControl>
-                {/* <FormControl.Label>
-                  <Text color='black' fontSize='xl'>
-                    Funding Agency
-                  </Text>
-                </FormControl.Label> */}
                 <CustomSelect
                   selectedValue={values.agencyId as string}
                   placeholder='Funding Agency'
