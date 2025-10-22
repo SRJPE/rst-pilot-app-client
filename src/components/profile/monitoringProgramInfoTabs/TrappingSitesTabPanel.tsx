@@ -13,18 +13,18 @@ export const TrappingSitesTabPanel = ({
 
   const { page, itemsPerPage, from, to, onPageChange } = useTablePagination(
     trappingSites,
-    { itemsPerPage: 5 }
+    { itemsPerPage: 10 }
   )
   return (
     <TabPanelWrapper>
       <ScrollView>
-        <Image
+        {/* <Image
           source={{
             uri: 'https://www.maptive.com/wp-content/uploads/2020/11/sales-use-case-mapping-software-e1600453645467.jpg',
           }}
           alt={'default trap image'}
           height={300}
-        />
+        /> */}
         <VStack space={3} marginTop={5}>
           <Text fontSize='lg' fontWeight={500}>
             Trap Sites:

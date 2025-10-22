@@ -79,7 +79,13 @@ const CustomSelect: React.FC<CustomSelectI> = ({
     if (typeof label !== 'string') return ''
     if (
       placeholder === 'Species' ||
-      ['dataRecorder', 'fieldCheck', 'crewMember'].includes(camelName || '')
+      [
+        'dataRecorder',
+        'fieldCheck',
+        'crewMember',
+        'fundingAgency',
+        'agency',
+      ].includes(camelName || '')
     ) {
       return label
     } else if (placeholder === 'Funding Agency' && label !== 'not recorded') {

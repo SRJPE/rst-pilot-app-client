@@ -66,12 +66,7 @@ const OnStartupProvider = (props: Props) => {
         unsubscribe()
       }
     }
-  }, [
-    props.isConnected,
-    props.isInternetReachable,
-    props.userCredentialsStore,
-    dispatch,
-  ])
+  }, [props.isConnected, props.isInternetReachable, dispatch])
 
   const cancelRef = useRef(null)
 

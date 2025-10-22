@@ -46,15 +46,22 @@ import { resetFishInputSlice } from '@/src/redux/reducers/formSlices/fishInputSl
 import { resetMarksOrTagsSlice } from '@/src/redux/reducers/formSlices/addMarksOrTagsSlice'
 import { resetGeneticSamplesSlice } from '@/src/redux/reducers/formSlices/addGeneticSamplesSlice'
 import { resetBatchCountSlice } from '@/src/redux/reducers/formSlices/batchCountSlice'
+import { getPersonnelDefaults } from '@/src/redux/reducers/personnelSlice'
 
 const Profile = ({
   userCredentialsStore,
   connectivityStore,
   navigation,
+  personnelStore,
+  crewMembersStore,
+  dropdownValues,
 }: {
   userCredentialsStore: any
   connectivityStore: any
   navigation: any
+  personnelStore: any
+  crewMembersStore: any
+  dropdownValues: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false)
@@ -79,8 +86,28 @@ const Profile = ({
   useEffect(() => {
     if (userCredentialsStore.userPrograms) {
       setUserPrograms(userCredentialsStore.userPrograms)
+      if (selectedMonitoringProgramInfo) {
+        const updatedProgram = userCredentialsStore.userPrograms.find(
+          (program: any) => program.id === selectedMonitoringProgramInfo.id
+        )
+        setSelectedMonitoringProgramInfo(updatedProgram)
+      }
     }
   }, [userCredentialsStore.userPrograms])
+
+  useEffect(() => {
+    if (
+      personnelStore.personnelOptions.length === 0 &&
+      connectivityStore.isConnected &&
+      connectivityStore.isInternetReachable
+    ) {
+      dispatch(getPersonnelDefaults())
+    }
+  }, [
+    personnelStore.personnelOptions.length,
+    connectivityStore.isConnected,
+    connectivityStore.isInternetReachable,
+  ])
 
   const deviceIsConnected =
     connectivityStore.isConnected && connectivityStore.isInternetReachable
@@ -342,6 +369,10 @@ const Profile = ({
           <MonitoringProgramInfoModalContent
             closeModal={() => setMonitoringProgramInfoModalOpen(false)}
             monitoringProgramInfo={selectedMonitoringProgramInfo}
+            personnelStore={personnelStore}
+            crewMembersStore={crewMembersStore}
+            dropdownValues={dropdownValues}
+            userCredentialsStore={userCredentialsStore}
           />
         </CustomModal>
       )}
@@ -410,9 +441,13 @@ const Profile = ({
   )
 }
 const mapStateToProps = (state: RootState) => {
+  console.log('state.personnel', state.personnel)
   return {
     userCredentialsStore: state.userCredentials,
     connectivityStore: state.connectivity,
+    crewMembersStore: state.crewMembers.crewMembersStore,
+    personnelStore: state.personnel,
+    dropdownValues: state.dropdowns.values,
   }
 }
 
