@@ -240,7 +240,7 @@ function Genetics({
               color='primary'
             />
             <Text fontSize='lg' textAlign='center'>
-              No trap visits requiring water turbidity input.
+              No trap visits requiring genetics input.
             </Text>
           </VStack>
         )}
