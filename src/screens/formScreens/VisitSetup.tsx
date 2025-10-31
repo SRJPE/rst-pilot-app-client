@@ -137,7 +137,7 @@ const VisitSetup = ({
       // set default values
       setIsPaperEntry(visitSetupState[tabSlice?.activeTabId]?.isPaperEntry)
     }
-  }, [tabSlice?.activeTabId])
+  }, [tabSlice?.activeTabId, selectedProgramId])
 
   useEffect(() => {
     const currentProgramInfo = find(
@@ -659,6 +659,35 @@ const VisitSetup = ({
           }
         }, [tabSlice.previouslyActiveTabId, tabSlice.activeTabId])
 
+        useEffect(() => {
+          if (selectedProgramId && !values.stream) {
+            const program = find(
+              visitSetupDefaultsState?.programs,
+              (program: any) => program.id === selectedProgramId
+            )
+            if (program) {
+              setFieldValue('stream', program.streamName).then(() => {
+                setFieldTouched('stream', true)
+              })
+
+              setFieldError('stream', undefined)
+              setFieldValue('trapSite', []).then(() => {
+                setFieldTouched('trapSite', false)
+              })
+              setFieldValue('trapName', []).then(() => {
+                setFieldTouched('trapName', false)
+              })
+
+              setFieldValue('crew', []).then(() => {
+                setFieldTouched('crew', false)
+              })
+              setFieldValue('dataRecorder', undefined).then(() => {
+                setFieldTouched('dataRecorder', false)
+              })
+            }
+          }
+        }, [values, selectedProgramId])
+
         return (
           <TouchableWithoutFeedback
             onPress={() => {
@@ -702,7 +731,7 @@ const VisitSetup = ({
                     camelName='stream'
                     errors={errors}
                     touched={touched}
-                    selectedValue={values.stream}
+                    selectedValue={values.stream || ''}
                     placeholder='Select Stream'
                     onValueChange={(itemValue: string) => {
                       setFieldValue('stream', itemValue).then(() => {
@@ -728,10 +757,7 @@ const VisitSetup = ({
                       setFieldValue('dataRecorder', undefined).then(() => {
                         setFieldTouched('dataRecorder', false)
                       })
-                      // setFieldValue('crew', [])
-                      // setFieldTouched('crew', false)
                     }}
-                    setFieldTouched={() => setFieldTouched('stream')}
                     selectOptions={visitSetupDefaultsState?.programs?.map(
                       (program: any) => ({
                         label: program?.streamName,

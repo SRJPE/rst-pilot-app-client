@@ -7,6 +7,7 @@ import {
   IconButton,
   Box,
   Pressable,
+  HStack,
 } from 'native-base'
 import BottomNavigation from '../components/home/HomeNavButtons'
 import { StyleSheet } from 'react-native'
@@ -26,10 +27,10 @@ import {
 import { compact } from 'lodash'
 
 const styles = StyleSheet.create({
-  recentItemsContainer: {
+  actionRequiredContainer: {
     minHeight: 75,
     alignSelf: 'flex-end',
-    width: '100%',
+    width: '50%',
     paddingHorizontal: 50,
     display: 'flex',
     flexDirection: 'column',
@@ -136,6 +137,17 @@ const Home = ({
     })()
   }, [userCredentialsStore.userPrograms])
 
+  const getCardWidth = () => {
+    let count = 0
+    if (visitsRequiringTurbidity.length > 0) {
+      count += 1
+    }
+    if (geneticsRequiringLabData.length > 0) {
+      count += 1
+    }
+    return count === 1 ? '100%' : '50%'
+  }
+
   const recentItemsCard = ({ text }: { text: string }) => {
     return (
       <Pressable onPress={() => navigation.navigate('Input Turbidity')}>
@@ -182,38 +194,52 @@ const Home = ({
       <Text fontWeight={300} fontSize={23}>
         Select the action you would like to perform.
       </Text>
-      {visitsRequiringTurbidity.length > 0 && (
-        <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
-          <AlertDialog
-            title='Action Required: Add Turbidity Values'
-            description={`There ${
-              visitsRequiringTurbidity.length === 1
-                ? 'is 1 trap visit'
-                : `are ${visitsRequiringTurbidity.length} trap visits`
-            } missing turbidity values. Please add the missing data to complete your records.`}
-            onPress={() => {
-              navigation.navigate('Input Turbidity')
-              setStaggerOpen(false)
-            }}
-          />
-        </View>
-      )}
-      {geneticsRequiringLabData.length > 0 && (
-        <View style={[{ opacity: opacity }, styles.recentItemsContainer]}>
-          <AlertDialog
-            title='Action Required: Add Genetic Sample Data'
-            description={`There ${
-              geneticsRequiringLabData.length === 1
-                ? 'is 1 genetic sample'
-                : `are ${geneticsRequiringLabData.length} genetic samples`
-            } missing lab data. Please add the missing data to complete your records.`}
-            onPress={() => {
-              navigation.navigate('Genetics')
-              setStaggerOpen(false)
-            }}
-          />
-        </View>
-      )}
+      <HStack style={{ height: 150 }} alignItems='stretch'>
+        {visitsRequiringTurbidity.length > 0 && (
+          <View
+            style={[
+              { opacity: opacity },
+              styles.actionRequiredContainer,
+              { width: getCardWidth(), height: '100%' }, // full height of HStack
+            ]}
+          >
+            <AlertDialog
+              title='Add Turbidity Values'
+              description={`There ${
+                visitsRequiringTurbidity.length === 1
+                  ? 'is 1 trap visit'
+                  : `are ${visitsRequiringTurbidity.length} trap visits`
+              } missing turbidity. Please add the missing data to complete your records.`}
+              onPress={() => {
+                navigation.navigate('Input Turbidity')
+                setStaggerOpen(false)
+              }}
+            />
+          </View>
+        )}
+        {geneticsRequiringLabData.length > 0 && (
+          <View
+            style={[
+              { opacity: opacity },
+              styles.actionRequiredContainer,
+              { width: getCardWidth(), height: '100%' }, // full height of HStack
+            ]}
+          >
+            <AlertDialog
+              title='Add Genetic Sample Data'
+              description={`There ${
+                geneticsRequiringLabData.length === 1
+                  ? 'is 1 genetic sample'
+                  : `are ${geneticsRequiringLabData.length} genetic samples`
+              } missing lab weight. Please add the missing data to complete your records.`}
+              onPress={() => {
+                navigation.navigate('Genetics')
+                setStaggerOpen(false)
+              }}
+            />
+          </View>
+        )}
+      </HStack>
 
       <BottomNavigation
         navigation={navigation}

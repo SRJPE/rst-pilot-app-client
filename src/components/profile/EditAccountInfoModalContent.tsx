@@ -33,9 +33,11 @@ const editAccountValidationSchema = Yup.object().shape({
 const EditAccountInfoModalContent = ({
   closeModal,
   user,
+  submissionHandler,
 }: {
   closeModal: () => void
   user: any
+  submissionHandler?: (values: any) => void
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [submissionMessage, setSubmissionMessage] = useState({
@@ -65,6 +67,33 @@ const EditAccountInfoModalContent = ({
           role: user.role || '',
         }}
         onSubmit={async (values, { setSubmitting }) => {
+          if (submissionHandler) {
+            try {
+              await submissionHandler(values)
+              setSubmissionMessage({
+                success: true,
+                message: 'User successfully updated',
+              })
+              setTimeout(() => {
+                closeModal()
+              }, 1000)
+            } catch (error: any) {
+              const errorMessage = generateErrorMessage(
+                error.code || 'Error during request to edit user (ln 81)'
+              )
+
+              setSubmissionMessage({
+                success: false,
+                message: errorMessage,
+              })
+
+              setSubmitting(false)
+            } finally {
+              setSubmitting(false)
+              return
+            }
+          }
+
           const {
             firstName,
             lastName,
@@ -135,7 +164,7 @@ const EditAccountInfoModalContent = ({
           setFieldTouched,
         }) => {
           return (
-            <VStack space={5} p={5}>
+            <VStack justifyContent={'space-between'} h={800} m='5%'>
               <FormInputComponent
                 touched={touched}
                 errors={errors}

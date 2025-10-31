@@ -30,8 +30,12 @@ import {
 } from '@/src/redux/reducers/personnelSlice'
 import { AppDispatch } from '../../../redux/store'
 import { useDispatch } from 'react-redux'
-import { getUserPrograms } from '../../../redux/reducers/userCredentialsSlice'
+import {
+  getUserPrograms,
+  updatePersonnelById,
+} from '../../../redux/reducers/userCredentialsSlice'
 import { Entypo } from '@expo/vector-icons'
+import EditAccountInfoModalContent from '../EditAccountInfoModalContent'
 
 export const CrewTabPanel = ({
   monitoringProgramInfo,
@@ -56,6 +60,8 @@ export const CrewTabPanel = ({
   )
 
   const [addCrewMemberModalOpen, setAddCrewMemberModalOpen] = useState(false)
+  const [editCrewMemberModalOpen, setEditCrewMemberModalOpen] = useState(false)
+  const [crewMemberToEdit, setCrewMemberToEdit] = useState<any>(null)
 
   const [addTrapModalContent, setAddTrapModalContent] = useState(
     IndividualCrewMemberState as any
@@ -123,6 +129,63 @@ export const CrewTabPanel = ({
       })
   }
 
+  const openEditCrewMemberModal = async (id: number) => {
+    const crewMember = monitoringProgramInfo?.crewMembers.find(
+      crewMember => crewMember.id === id
+    )
+    console.log('crewMember', monitoringProgramInfo)
+    if (!crewMember) return
+
+    const agencyDefinition = dropdownValues?.fundingAgency?.find(
+      (agencyOption: { id: number }) => agencyOption.id === crewMember.agencyId
+    )?.definition
+
+    setCrewMemberToEdit({
+      ...crewMember,
+      emailAddress: crewMember.email,
+      agencyDefinition,
+    })
+    setEditCrewMemberModalOpen(true)
+  }
+
+  const handleSaveEditedCrewMember = async (values: any) => {
+    const { firstName, lastName, phone, agencyDefinition, emailAddress, role } =
+      values
+
+    const selectedAgency = dropdownValues.fundingAgency.find(
+      (agencyOption: { definition: any }) =>
+        agencyOption.definition === agencyDefinition
+    )
+
+    const updatedValues = {
+      firstName: firstName,
+      lastName: lastName,
+      phone: phone,
+      agencyId: selectedAgency?.id,
+      role,
+      updatedAt: new Date().toISOString(),
+    }
+
+    dispatch(
+      await updatePersonnelById({
+        ...updatedValues,
+        id: crewMemberToEdit.id,
+      })
+    )
+      .then(() => {
+        setCrewMemberToEdit(null)
+        setEditCrewMemberModalOpen(false)
+        dispatch(getPersonnelDefaults())
+        dispatch(getUserPrograms(userCredentialsStore?.id))
+      })
+      .catch(err => {
+        console.error('Failed to post personnel', err)
+      })
+  }
+
+  console.log('crewMemberToEdit', crewMemberToEdit)
+  console.log('editCrewMemberModalOpen', editCrewMemberModalOpen)
+
   return (
     <>
       <TabPanelWrapper>
@@ -174,30 +237,45 @@ export const CrewTabPanel = ({
                     <DataTable.Cell style={{ flex: 0.5 }}>
                       {role}
                     </DataTable.Cell>
-                    <DataTable.Cell
-                      style={{
-                        flex: 0.5,
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        alignItems: 'flex-end',
-                      }}
-                    >
-                      <IconButton
-                        variant='solid'
-                        bg='red.700'
-                        colorScheme='red'
-                        size='md'
-                        onPress={() => {
-                          handleRemoveCrewMember(id)
-                        }}
+                    <DataTable.Cell style={{ flex: 0.5 }}>
+                      <HStack
+                        space={2}
+                        alignItems='center'
+                        justifyContent='flex-end'
                       >
-                        <Icon
-                          as={Entypo}
-                          size='5'
-                          name='trash'
-                          color='warmGray.50'
-                        />
-                      </IconButton>
+                        <IconButton
+                          variant='solid'
+                          bg='primary'
+                          colorScheme='primary'
+                          size='md'
+                          onPress={() => {
+                            openEditCrewMemberModal(id)
+                          }}
+                        >
+                          <Icon
+                            as={Entypo}
+                            size='5'
+                            name='pencil'
+                            color='warmGray.50'
+                          />
+                        </IconButton>
+                        <IconButton
+                          variant='solid'
+                          bg='red.700'
+                          colorScheme='red'
+                          size='md'
+                          onPress={() => {
+                            handleRemoveCrewMember(id)
+                          }}
+                        >
+                          <Icon
+                            as={Entypo}
+                            size='5'
+                            name='trash'
+                            color='warmGray.50'
+                          />
+                        </IconButton>
+                      </HStack>
                     </DataTable.Cell>
                   </DataTable.Row>
                 ))}
@@ -218,18 +296,33 @@ export const CrewTabPanel = ({
         </ScrollView>
       </TabPanelWrapper>
       {/* --------- Modals --------- */}
-      <CustomModal
-        isOpen={addCrewMemberModalOpen}
-        closeModal={() => setAddCrewMemberModalOpen(false)}
-        height='100%'
-      >
-        <AddCrewMemberModalContent
-          personnelOptions={personnelOptions}
-          addTrapModalContent={addTrapModalContent}
+      {addCrewMemberModalOpen && (
+        <CustomModal
+          isOpen={addCrewMemberModalOpen}
           closeModal={() => setAddCrewMemberModalOpen(false)}
-          handleAddCrewMember={handleAddCrewMember}
-        />
-      </CustomModal>
+          height='100%'
+        >
+          <AddCrewMemberModalContent
+            personnelOptions={personnelOptions}
+            addTrapModalContent={addTrapModalContent}
+            closeModal={() => setAddCrewMemberModalOpen(false)}
+            handleAddCrewMember={handleAddCrewMember}
+          />
+        </CustomModal>
+      )}
+      {editCrewMemberModalOpen && (
+        <CustomModal
+          isOpen={editCrewMemberModalOpen}
+          closeModal={() => setEditCrewMemberModalOpen(false)}
+          height='100%'
+        >
+          <EditAccountInfoModalContent
+            closeModal={() => setEditCrewMemberModalOpen(false)}
+            user={crewMemberToEdit}
+            submissionHandler={handleSaveEditedCrewMember}
+          />
+        </CustomModal>
+      )}
     </>
   )
 }

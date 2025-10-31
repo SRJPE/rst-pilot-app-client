@@ -46,6 +46,23 @@ export const getUserPrograms = createAsyncThunk(
   }
 )
 
+// Async actions API calls
+export const updatePersonnelById = createAsyncThunk(
+  'userCredentials/updatePersonnelById',
+  async (updatedData: any) => {
+    try {
+      const { id } = updatedData
+      delete updatedData.id
+      delete updatedData.agencyDefinition
+      const response: any = await api.put(`/personnel/id/${id}`, updatedData)
+      return response.data
+    } catch (error: any) {
+      console.log('err', error)
+      throw error
+    }
+  }
+)
+
 export const userCredentialsSlice = createSlice({
   name: 'userCredentials',
   initialState: initialState,
@@ -114,6 +131,9 @@ export const userCredentialsSlice = createSlice({
     // Add async and additional action types here, and handle loading state as needed
     [getUserPrograms.fulfilled.type]: (state, action) => {
       state.userPrograms = action.payload
+    },
+    [updatePersonnelById.fulfilled.type]: (state, action) => {
+      console.log('Updated Personnel Response:', action.payload)
     },
   },
 })
