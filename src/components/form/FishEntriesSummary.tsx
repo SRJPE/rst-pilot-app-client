@@ -12,12 +12,7 @@ import {
 import { ChevronUpIcon, ChevronDownIcon } from '@/components/ui/icon'
 import { useEffect, useState } from 'react'
 import { startCase } from 'lodash'
-
-type FishParts = {
-  species: string
-  run?: string
-  lifeStage?: string
-}
+import { sumCountsWithFallback } from '@/src/utils/utils'
 
 const FishEntriesSummary = ({
   lastFishEntry,
@@ -36,107 +31,12 @@ const FishEntriesSummary = ({
     {}
   )
 
-  function parseParts(str: string): FishParts {
-    const parts = str.split(' - ').map(p => p.trim())
-    return {
-      species: parts[0] || '',
-      run:
-        parts[1] &&
-        ![
-          'fry',
-          'adult',
-          'juvenile',
-          'parr',
-          'smolt',
-          'jack',
-          'not recorded',
-          'silvery parr',
-        ].includes(parts[1])
-          ? parts[1]
-          : '',
-      lifeStage:
-        parts[2] ||
-        (parts[1] &&
-        [
-          'fry',
-          'adult',
-          'juvenile',
-          'parr',
-          'smolt',
-          'jack',
-          'not recorded',
-          'silvery parr',
-        ].includes(parts[1])
-          ? parts[1]
-          : ''),
-    }
-  }
-
-  /**
-   * Constructs a key in the same format used by fishMeasureProtocol and fishMeasureCounts.
-   */
-  function makeKey({ species, run, lifeStage }: FishParts): string {
-    let key = species
-    if (run && run !== 'not recorded') key += ` - ${run}`
-    if (lifeStage && lifeStage !== 'not recorded') key += ` - ${lifeStage}`
-    return key
-  }
-
-  /**
-   * Sums counts based on protocol, with fallback for unmatched entries.
-   */
-  function sumCountsWithFallback(protocol: any, counts: any): any {
-    const result: any = {}
-    const matchedCountKeys = new Set<string>()
-
-    for (const protoKey in protocol) {
-      const protoParts = parseParts(protoKey)
-      let totalIndividual = 0
-      let totalPlus = 0
-
-      for (const countKey in counts) {
-        const countParts = parseParts(countKey)
-        const speciesMatch = protoParts.species === countParts.species
-        const runMatch = !protoParts.run || protoParts.run === countParts.run
-        const lifeStageMatch =
-          !protoParts.lifeStage || protoParts.lifeStage === countParts.lifeStage
-
-        if (speciesMatch && runMatch && lifeStageMatch) {
-          const count = counts[countKey]
-          totalIndividual += count.individualCount || 0
-          totalPlus += count.plusCount || 0
-          matchedCountKeys.add(countKey)
-        }
-      }
-
-      if (totalIndividual > 0 || totalPlus > 0) {
-        result[protoKey] = {
-          individualCount: totalIndividual,
-          plusCount: totalPlus,
-        }
-      }
-    }
-
-    // Add unmatched entries
-    for (const countKey in counts) {
-      if (matchedCountKeys.has(countKey)) continue
-
-      const count = counts[countKey]
-      const total = (count.individualCount || 0) + (count.plusCount || 0)
-      if (total === 0) continue
-
-      const fallbackKey = makeKey(parseParts(countKey))
-      result[fallbackKey] = { ...count }
-    }
-
-    return result
-  }
-
   useEffect(() => {
     if (
       !fishMeasureProtocol ||
       !fishMeasureCounts ||
-      !Object.keys(fishMeasureCounts).length
+      !Object.keys(fishMeasureCounts).length ||
+      !showSpeciesCounts
     ) {
       return
     }
@@ -145,6 +45,8 @@ const FishEntriesSummary = ({
       fishMeasureProtocol,
       fishMeasureCounts
     )
+    console.log('fishmeasurecounts summary:', fishMeasureCounts)
+    console.log('finalSums summary:', finalSums)
     setProtocolCounts(finalSums)
   }, [fishMeasureProtocol, fishMeasureCounts])
 
