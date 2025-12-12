@@ -842,8 +842,11 @@ export const groupBySpeciesForkLength = (data: Array<any>) => {
 
     totalCount += Number(numFishCaught)
 
+    const speciesWithRun =
+      run && run !== 'not recorded' ? `${species} - ${run}` : species
+
     if (fish.plusCount) {
-      const key = `${species} - ${
+      const key = `${speciesWithRun} - ${
         run && run !== 'not recorded' ? run : ''
       } Plus Count`
       if (!result[key]) {
@@ -854,14 +857,14 @@ export const groupBySpeciesForkLength = (data: Array<any>) => {
       return
     }
 
-    if (!result[species]) {
-      result[species] = []
+    if (!result[speciesWithRun]) {
+      result[speciesWithRun] = []
     }
 
     // Add `forkLength` repeated `numFishCaught` times
     for (let i = 0; i < numFishCaught; i++) {
       if (forkLength) {
-        result[species].push(forkLength)
+        result[speciesWithRun].push(forkLength)
       }
     }
   })
@@ -1279,4 +1282,106 @@ export const getDBValue = (
 
   const id = find(dropdownValues, { code: value })?.id || null
   return id
+}
+
+type FishParts = {
+  species: string
+  run?: string
+  lifeStage?: string
+}
+
+function parseParts(str: string): FishParts {
+  const parts = str.split(' - ').map(p => p.trim())
+  return {
+    species: parts[0] || '',
+    run:
+      parts[1] &&
+      ![
+        'fry',
+        'adult',
+        'juvenile',
+        'parr',
+        'smolt',
+        'jack',
+        'not recorded',
+        'silvery parr',
+      ].includes(parts[1])
+        ? parts[1]
+        : '',
+    lifeStage:
+      parts[2] ||
+      (parts[1] &&
+      [
+        'fry',
+        'adult',
+        'juvenile',
+        'parr',
+        'smolt',
+        'jack',
+        'not recorded',
+        'silvery parr',
+      ].includes(parts[1])
+        ? parts[1]
+        : ''),
+  }
+}
+
+/**
+ * Constructs a key in the same format used by fishMeasureProtocol and fishMeasureCounts.
+ */
+function makeKey({ species, run, lifeStage }: FishParts): string {
+  let key = species
+  if (run && run !== 'not recorded') key += ` - ${run}`
+  if (lifeStage && lifeStage !== 'not recorded') key += ` - ${lifeStage}`
+  return key
+}
+
+/**
+ * Sums counts based on protocol, with fallback for unmatched entries.
+ */
+export function sumCountsWithFallback(protocol: any, counts: any): any {
+  const result: any = {}
+  const matchedCountKeys = new Set<string>()
+
+  for (const protoKey in protocol) {
+    const protoParts = parseParts(protoKey)
+    let totalIndividual = 0
+    let totalPlus = 0
+
+    for (const countKey in counts) {
+      const countParts = parseParts(countKey)
+      const speciesMatch = protoParts.species === countParts.species
+      const runMatch = !protoParts.run || protoParts.run === countParts.run
+      const lifeStageMatch =
+        !protoParts.lifeStage || protoParts.lifeStage === countParts.lifeStage
+
+      if (speciesMatch && runMatch && lifeStageMatch) {
+        const count = counts[countKey]
+        totalIndividual += count.individualCount || 0
+        totalPlus += count.plusCount || 0
+        matchedCountKeys.add(countKey)
+      }
+    }
+
+    if (totalIndividual > 0 || totalPlus > 0) {
+      result[protoKey] = {
+        individualCount: totalIndividual,
+        plusCount: totalPlus,
+      }
+    }
+  }
+
+  // Add unmatched entries
+  for (const countKey in counts) {
+    if (matchedCountKeys.has(countKey)) continue
+
+    const count = counts[countKey]
+    const total = (count.individualCount || 0) + (count.plusCount || 0)
+    if (total === 0) continue
+
+    const fallbackKey = makeKey(parseParts(countKey))
+    result[fallbackKey] = { ...count }
+  }
+
+  return result
 }

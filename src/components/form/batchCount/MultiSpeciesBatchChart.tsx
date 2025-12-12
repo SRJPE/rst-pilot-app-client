@@ -75,6 +75,7 @@ const MultiSpeciesBatchChart = ({
   setTabIndex,
   fishInputSlice,
   fishMeasureCounts = {},
+  fishMeasureProtocol = {},
 }: {
   tabIndex: number
   setTabIndex: (index: number) => void
@@ -84,8 +85,16 @@ const MultiSpeciesBatchChart = ({
   tabSlice: TabStateI
   fishInputSlice: InitialStateI
   fishMeasureCounts?: Record<string, any>
+  fishMeasureProtocol?: Record<any, any>
 }) => {
   const activeTabId = tabSlice?.activeTabId || 'placeholderId'
+
+  const getRows = (activeSpeciesTab: string) => {
+    const rows = combinedFishObj[activeSpeciesTab]
+      ? Math.ceil(combinedFishObj[activeSpeciesTab].length / 10)
+      : 1
+    return rows
+  }
 
   // ✅ Redux selector optimized with shallowEqual
   const previouslyEnteredFish = useSelector((state: RootState) => {
@@ -115,8 +124,6 @@ const MultiSpeciesBatchChart = ({
     [batchCountStore?.batchCharacteristics?.multiSpecies]
   )
 
-  console.log('previouslyEnteredFish', previouslyEnteredFish)
-
   const groupedPreviouslyEnteredFish = useMemo(
     () => groupForkLengthsBySpecies(previouslyEnteredFish),
     [previouslyEnteredFish]
@@ -130,10 +137,6 @@ const MultiSpeciesBatchChart = ({
   const combinedFishObj = useMemo(() => {
     const combined: Record<string, any[]> = {}
     for (const key in groupedPreviouslyEnteredFish) {
-      console.log(
-        'groupedPreviouslyEnteredFish[key]',
-        groupedPreviouslyEnteredFish[key]
-      )
       combined[key] = (combined[key] || []).concat(
         groupedPreviouslyEnteredFish[key]
       )
@@ -141,7 +144,6 @@ const MultiSpeciesBatchChart = ({
     for (const key in groupedForkLengths) {
       combined[key] = (combined[key] || []).concat(groupedForkLengths[key])
     }
-    console.log('combined', combined)
     return combined
   }, [groupedForkLengths, groupedPreviouslyEnteredFish])
 
@@ -149,11 +151,22 @@ const MultiSpeciesBatchChart = ({
   const totalSlots = 50
 
   const slots = useMemo(() => {
-    return Array.from({ length: totalSlots }, (_, i) => {
+    const rows = getRows(activeSpeciesTab)
+    let protocolSlots = fishMeasureProtocol[activeSpeciesTab] || totalSlots
+
+    if (
+      activeSpeciesTab &&
+      activeSpeciesTab.toLocaleLowerCase().includes('chinook') &&
+      rows * 10 > protocolSlots
+    ) {
+      protocolSlots = rows * 10
+    }
+
+    return Array.from({ length: protocolSlots }, (_, i) => {
       const cellData = combinedFishObj[activeSpeciesTab]?.[i] || DEFAULT_CELL
       return { index: i, cellData }
     })
-  }, [combinedFishObj, activeSpeciesTab])
+  }, [combinedFishObj, activeSpeciesTab, fishMeasureProtocol])
 
   // ✅ Memoized renderScene
   const renderScene = useCallback(
@@ -234,6 +247,17 @@ const MultiSpeciesBatchChart = ({
     setTabIndex(spvTabIndex >= 0 ? spvTabIndex : 0)
   }, [speciesRadioValue, routes, setTabIndex])
 
+  const getChartHeight = (activeSpeciesTab: string) => {
+    const rows = getRows(activeSpeciesTab)
+    if (
+      activeSpeciesTab &&
+      activeSpeciesTab.toLocaleLowerCase().includes('chinook') &&
+      rows > 5
+    )
+      return 420 + (rows - 5) * 50
+    return fishMeasureProtocol[activeSpeciesTab] === 20 ? 270 : 420
+  }
+
   return (
     <NativeBaseProvider>
       <Center flex={1} px='3'>
@@ -245,7 +269,7 @@ const MultiSpeciesBatchChart = ({
           initialLayout={initialLayout}
           style={{
             marginTop: StatusBar.currentHeight,
-            height: 420,
+            height: getChartHeight(activeSpeciesTab),
             width: '100%',
           }}
           lazy

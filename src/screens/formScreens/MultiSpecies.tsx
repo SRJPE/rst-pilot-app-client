@@ -546,7 +546,9 @@ const MultiSpecies = ({
                       route.params?.fishMeasureProtocol || {}
                     }
                     fishMeasureCounts={combinedFishMeasureCounts}
-                    showSpeciesCounts={false}
+                    showSpeciesCounts={speciesRadioValue
+                      .toLocaleLowerCase()
+                      .includes('chinook')}
                   />
                 </Box>
               )}
@@ -557,6 +559,7 @@ const MultiSpecies = ({
               speciesRadioValue={speciesRadioValue}
               setSpeciesRadioValue={setSpeciesRadioValue}
               fishMeasureCounts={combinedFishMeasureCounts}
+              fishMeasureProtocol={route.params?.fishMeasureProtocol || {}}
             />
             <VStack space={3}>
               <>
