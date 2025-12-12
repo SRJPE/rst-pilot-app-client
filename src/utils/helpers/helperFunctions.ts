@@ -47,13 +47,14 @@ export const convertUTCToLocalTime = (utcTime: string) => {
 
 export const findLengthAtDateRun = (array: Array<any>, targetDate: Date) => {
   return array.find(item => {
-    const ladDate = new Date(item.ladDate)
-
     if (!targetDate) return false
-    return (
-      ladDate.getMonth() === targetDate?.getMonth() &&
-      ladDate.getDate() === targetDate?.getDate()
-    )
+
+    const [year, month, day] = item.ladDate.split('-')
+
+    const match =
+      Number(month) === targetDate.getMonth() + 1 &&
+      Number(day) === targetDate.getDate()
+    return match
   })
 }
 
