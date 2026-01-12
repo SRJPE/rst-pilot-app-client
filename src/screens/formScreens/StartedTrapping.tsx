@@ -191,10 +191,11 @@ const StartedTrapping = ({
         visitTypeId: null,
         trapLocationId: visitSetupState?.[id]?.values.trapLocationId,
         isPaperEntry: visitSetupState?.[id].isPaperEntry,
-        trapVisitTimeStart: trapOperationsState?.[id]?.values.trapVisitStopTime, // time from trap operations will BE START TIME bc they are restarting the trap
+        trapVisitTimeStart:
+          trapOperationsState?.[id]?.values.trapVisitStopTime || new Date(), // time from trap operations will BE START TIME bc they are restarting the trap
         // trapVisitTimeEnd: trapOperationsState?.[id]?.values.trapVisitStopTime,
         fishProcessed: returnNullableTableId(
-          fishProcessedValues.indexOf('no fish caught')
+          fishProcessedValues.indexOf('no catch data, setting trap')
         ),
         whyFishNotProcessed: returnNullableTableId(
           whyFishNotProcessedValues.indexOf('not recorded')
