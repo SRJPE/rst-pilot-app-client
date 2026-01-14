@@ -31,6 +31,7 @@ interface FormInputComponentI {
   isLast?: boolean
   formFields?: any
   orderIndex?: number
+  values?: any
 }
 
 export const TextInputAdornment = ({ text }: { text: string }) => {
@@ -171,11 +172,14 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   isLast,
   formFields,
   orderIndex,
+  values,
 }) => {
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
 
   const showError = hasError && isTouched
+
+  console.log('values', values)
 
   return (
     <Box minH={100} flex={1}>
@@ -198,6 +202,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
               ? renderRequiredOrOptionalLabel({
                   fieldName: camelName,
                   validationSchema,
+                  values,
                 })
               : ''}
           </Text>

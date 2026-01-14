@@ -744,10 +744,20 @@ export const decodedRecentReleaseMarks = (
 export const renderRequiredOrOptionalLabel = ({
   fieldName,
   validationSchema,
+  values,
 }: {
   fieldName: string
   validationSchema: any
+  values?: any
 }) => {
+  console.log('values', values)
+  console.log('fieldName', fieldName)
+  if (values?.trapStatus === 'trap not in service - restart trapping') {
+    return ['rpm1', 'flowMeasure', 'waterTemperature'].includes(fieldName)
+      ? ''
+      : '*'
+  }
+
   if (validationSchema?.fields?.[fieldName]?.exclusiveTests?.required) {
     return '*'
   } else {

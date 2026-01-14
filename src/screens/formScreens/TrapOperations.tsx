@@ -209,8 +209,6 @@ const TrapOperations = ({
           new Date(b.createdTrapVisitResponse.trapVisitTimeStart).getTime() -
           new Date(a.createdTrapVisitResponse.trapVisitTimeStart).getTime()
       )
-    console.log('selectedTrapLocationId', selectedTrapLocationId)
-    console.log('previousTrapVisitsForLocation', previousTrapVisitsForLocation)
 
     setMostRecentTrapVisit(previousTrapVisitsForLocation[0])
   }, [previousTrapVisits, selectedTrapLocationId])
@@ -514,8 +512,6 @@ const TrapOperations = ({
         if (!dateFields?.length) {
           return null
         }
-
-        console.log('df', dateFields)
 
         return dateFields.map((item: any) => {
           const { displayName, fieldName } = item
@@ -1034,6 +1030,7 @@ const TrapOperations = ({
                               validationSchema={validationSchema}
                               keyboardType={'number-pad'}
                               inputRefs={inputRefs}
+                              values={values}
                             />
                           </Box>
                         )}
@@ -1062,6 +1059,7 @@ const TrapOperations = ({
                               validationSchema={validationSchema}
                               keyboardType={'number-pad'}
                               inputRefs={inputRefs}
+                              values={values}
                               RightElement={
                                 <Button
                                   bg='warmGray.200'

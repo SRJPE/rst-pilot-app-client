@@ -302,11 +302,8 @@ const IncompleteSections = ({
           !environmentalFieldsToIgnore.includes(obj.fieldName)
       )
       .map((obj: any) => obj.fieldName)
-    console.log('def', def)
 
     const formFieldsLookup = keyBy(programFormFields, 'fieldName')
-
-    console.log('def', def)
 
     let baseEnvValues = [
       {
@@ -465,10 +462,6 @@ const IncompleteSections = ({
         trapVisitTimeEnd = trapOperationsState?.[id]?.values?.startTime
         trapVisitTimeStart = trapOperationsState?.[id]?.values?.sampleTime
       }
-
-      const selectedCrewNames: string[] = [...visitSetupState[id].values.crew] // ['james', 'steve']
-      const selectedCrewIds =
-        findCrewIdsFromSelectedCrewNames(selectedCrewNames)
 
       const trapVisitSubmission = {
         trapVisitUid: id,

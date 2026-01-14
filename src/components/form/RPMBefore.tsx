@@ -88,6 +88,7 @@ const RPMBefore = ({
             onBlur={handleBlur('rpm1')}
             validationSchema={validationSchema}
             keyboardType={'number-pad'}
+            values={values}
           />
         </Box>
         <Box
