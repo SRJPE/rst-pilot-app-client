@@ -113,20 +113,17 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
     flowMeasure: yup
       .number()
       .nullable()
-      .transform((value, originalValue) => {
-        return originalValue === '' ? null : value
-      })
-      // .required('Flow measure is required')
-      .transform(emptyStringToNull)
+      .transform(normalizeNumber)
       .when('trapStatus', {
         is: trapRestart,
-        then: yup.number().nullable().optional(),
-        otherwise: yup.number().required('Flow measure is required'),
+        then: yup.number().transform(normalizeNumber).nullable().optional(),
+        otherwise: yup.number().nullable().transform(normalizeNumber),
+        // .required('Flow measure is required'),
       }),
     waterTemperature: yup
       .number()
       .nullable()
-      .transform(emptyStringToNull)
+      .transform(normalizeNumber)
       .when('trapStatus', {
         is: trapRestart,
         then: yup.number().nullable().optional(),
@@ -174,8 +171,15 @@ const trapRestart = (val?: string) => {
   return val === 'trap not in service - restart trapping'
 }
 
-const emptyStringToNull = (value: any, originalValue: any) =>
-  originalValue === '' ? null : value
+const normalizeNumber = (value: any, originalValue: any) => {
+  if (originalValue === '' || originalValue === null) {
+    return null
+  }
+  if (Number.isNaN(value)) {
+    return null
+  }
+  return value
+}
 
 export const trapOperationsSchema = yup.object().shape({
   trapStatus: yup.string().required('Trap status required'),
@@ -189,7 +193,7 @@ export const trapOperationsSchema = yup.object().shape({
 
   flowMeasure: yup
     .number()
-    .transform(emptyStringToNull)
+    .transform(normalizeNumber)
     .when('trapStatus', {
       is: trapRestart,
       then: yup.number().nullable().optional(),
@@ -199,7 +203,7 @@ export const trapOperationsSchema = yup.object().shape({
   waterTemperature: yup
     .number()
     .nullable()
-    .transform(emptyStringToNull)
+    .transform(normalizeNumber)
     .when('trapStatus', {
       is: trapRestart,
       then: yup.number().nullable().optional(),
@@ -232,7 +236,7 @@ export const trapOperationsSchema = yup.object().shape({
     .min(0, 'Measurement must be >= 0')
     .nullable()
     .max(30, 'Measurement must be ≤ 30')
-    .transform(emptyStringToNull)
+    .transform(normalizeNumber)
     .when('trapStatus', {
       is: trapRestart,
       then: yup.number().nullable().optional(),

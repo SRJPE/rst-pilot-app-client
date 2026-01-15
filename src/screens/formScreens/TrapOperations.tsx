@@ -825,6 +825,11 @@ const TrapOperations = ({
           setTurbidityToggle(newValue)
         }
 
+        useEffect(() => {
+          if (isNaN(values.flowMeasure)) {
+            setFieldValue('flowMeasure', null)
+          }
+        }, [values.flowMeasure])
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
