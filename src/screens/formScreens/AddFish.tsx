@@ -522,7 +522,6 @@ const AddFishContent = ({
   }
 
   const handleGeneticSamplesFormSubmit = (values: any) => {
-    console.log('values', values)
     const formattedValues = {
       ...values,
       condition: values.condition
@@ -823,8 +822,8 @@ const AddFishContent = ({
                         }`
                       : 'Edit Fish'
                     : tabSlice.activeTabId
-                    ? `${tabSlice.tabs[tabSlice.activeTabId].name}`
-                    : 'Individual Fish Entry'
+                      ? `${tabSlice.tabs[tabSlice.activeTabId].name}`
+                      : 'Individual Fish Entry'
                 }
                 showHeaderButton={true}
                 closeModal={closeModal}

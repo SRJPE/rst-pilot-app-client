@@ -331,13 +331,13 @@ const IncompleteSections = ({
         measureValueNumeric: values.waterTurbidityIsPresent
           ? values.waterTurbidity
           : values?.recordTurbidityInPostProcessing
-          ? null
-          : undefined,
+            ? null
+            : undefined,
         measureValueText: values.waterTurbidityIsPresent
           ? values.waterTurbidity?.toString()
           : values?.recordTurbidityInPostProcessing
-          ? ''
-          : undefined,
+            ? ''
+            : undefined,
         measureUnit: 25,
       },
     ] as Array<any>
@@ -450,17 +450,19 @@ const IncompleteSections = ({
       //   trapVisitTimeStart = new Date()
       // }
 
-      // if trapVisitTime , which is time for checking, set both to the saem value
-      if (trapOperationsState?.[id]?.values?.trapVisitTime) {
-        trapVisitTimeEnd = trapOperationsState?.[id]?.values?.trapVisitTime
-        trapVisitTimeStart = trapOperationsState?.[id]?.values?.trapVisitTime
-      } else if (trapPostProcessingState?.[id]?.values?.trapVisitTime) {
-        trapVisitTimeEnd = trapPostProcessingState?.[id]?.values?.trapVisitTime
-        trapVisitTimeStart =
-          trapPostProcessingState?.[id]?.values?.trapVisitTime
-      } else if (trapOperationsState?.[id]?.values?.sampleTime) {
-        trapVisitTimeEnd = trapOperationsState?.[id]?.values?.startTime
-        trapVisitTimeStart = trapOperationsState?.[id]?.values?.sampleTime
+      const combinedOpsandPostProcessing = {
+        ...trapOperationsState[id].values,
+        ...trapPostProcessingState[id].values,
+      }
+
+      // if trapVisitTime , which is time for checking, set both to the same value
+      if (combinedOpsandPostProcessing?.trapVisitTime) {
+        trapVisitTimeEnd = combinedOpsandPostProcessing?.trapVisitTime
+        trapVisitTimeStart = combinedOpsandPostProcessing?.trapVisitTime
+      } else if (combinedOpsandPostProcessing?.sampleTime) {
+        // if sample time, there is start (day before when trap was set) and sample time
+        trapVisitTimeEnd = combinedOpsandPostProcessing?.startTime
+        trapVisitTimeStart = combinedOpsandPostProcessing?.sampleTime
       }
 
       const trapVisitSubmission = {
@@ -550,44 +552,44 @@ const IncompleteSections = ({
           : null,
         createdBy: userCredentialsStore.id,
         // new form fields
-        revCounter: trapPostProcessingState?.[id]?.values?.revCounter || null,
+        revCounter: combinedOpsandPostProcessing.revCounter || null,
         ysiNum: getDBValue(
-          trapOperationsState[id].values.ysiNum,
+          combinedOpsandPostProcessing.ysiNum,
           'ysiNum',
           dropdownsState
         ),
         gearStatus: getDBValue(
-          trapOperationsState[id].values.gearStatus,
+          combinedOpsandPostProcessing.gearStatus,
           'gearStatus',
           dropdownsState
         ),
         vegetationCode: getDBValue(
-          trapOperationsState[id].values.vegetationCode,
+          combinedOpsandPostProcessing.vegetationCode,
           'vegetationCode',
           dropdownsState
         ),
         conditionCode: getDBValue(
-          trapPostProcessingState[id].values.conditionCode,
+          combinedOpsandPostProcessing.conditionCode,
           'conditionCode',
           dropdownsState
         ),
         tideCode: getDBValue(
-          trapPostProcessingState[id].values.tideCode,
+          combinedOpsandPostProcessing.tideCode,
           'tideCode',
           dropdownsState
         ),
         flowDirection: getDBValue(
-          trapOperationsState[id].values.flowDirection,
+          combinedOpsandPostProcessing.flowDirection,
           'flowDirection',
           dropdownsState
         ),
         weatherCode: getDBValue(
-          trapOperationsState[id].values.weatherCode,
+          combinedOpsandPostProcessing.weatherCode,
           'weatherCode',
           dropdownsState
         ),
         substrate: getDBValue(
-          trapOperationsState[id].values.substrate,
+          combinedOpsandPostProcessing.substrate,
           'substrate',
           dropdownsState
         ),
@@ -600,9 +602,10 @@ const IncompleteSections = ({
         depth: trapOperationsState[id].values.depth
           ? parseFloat(trapOperationsState[id].values.depth)
           : null,
-        samplingAltered: trapPostProcessingState[id].values.samplingAltered
-          ? true
-          : false,
+        samplingAltered:
+          typeof combinedOpsandPostProcessing.samplingAltered === 'boolean'
+            ? combinedOpsandPostProcessing.samplingAltered
+            : null,
       }
 
       dispatch(saveTrapVisitSubmission(trapVisitSubmission))

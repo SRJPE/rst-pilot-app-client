@@ -49,7 +49,6 @@ export const postPersonnel = createAsyncThunk(
   'personnel/post',
   async (values: any) => {
     try {
-      console.log('values', values)
       const response: APIResponseI = await api.post(`personnel/`, values)
       return response.data
     } catch (error: any) {
@@ -76,7 +75,6 @@ export const deletePersonnelFromTeam = createAsyncThunk(
   'personnel/deleteFromTeam',
   async (values: any) => {
     try {
-      console.log('values', values)
       const response: APIResponseI = await api.delete(`personnel/team`, {
         data: values,
       })

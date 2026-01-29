@@ -179,8 +179,6 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
 
   const showError = hasError && isTouched
 
-  console.log('values', values)
-
   return (
     <Box minH={100} flex={1}>
       <FormControl flex={1} isInvalid={showError} isDisabled={isDisabled}>
@@ -190,10 +188,10 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
               showWarning
                 ? 'amber.700'
                 : showError
-                ? 'red.700'
-                : isDisabled
-                ? 'gray.400'
-                : 'black'
+                  ? 'red.700'
+                  : isDisabled
+                    ? 'gray.400'
+                    : 'black'
             }
             fontSize='16'
           >

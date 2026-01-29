@@ -750,8 +750,6 @@ export const renderRequiredOrOptionalLabel = ({
   validationSchema: any
   values?: any
 }) => {
-  console.log('values', values)
-  console.log('fieldName', fieldName)
   if (values?.trapStatus === 'trap not in service - restart trapping') {
     return ['rpm1', 'flowMeasure', 'waterTemperature'].includes(fieldName)
       ? ''
@@ -895,14 +893,17 @@ export const groupBySpeciesForkLength = (data: Array<any>) => {
 }
 
 export const mergePreserveNonNull = (...objects: Record<string, any>[]) => {
-  return objects.reduce((acc, obj) => {
-    for (const [key, value] of Object.entries(obj)) {
-      if (value !== null || !(key in acc)) {
-        acc[key] = value
+  return objects.reduce(
+    (acc, obj) => {
+      for (const [key, value] of Object.entries(obj)) {
+        if (value !== null || !(key in acc)) {
+          acc[key] = value
+        }
       }
-    }
-    return acc
-  }, {} as Record<string, any>)
+      return acc
+    },
+    {} as Record<string, any>
+  )
 }
 
 export const getAddFishStateDefaults = () => {
