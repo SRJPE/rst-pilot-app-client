@@ -744,10 +744,18 @@ export const decodedRecentReleaseMarks = (
 export const renderRequiredOrOptionalLabel = ({
   fieldName,
   validationSchema,
+  values,
 }: {
   fieldName: string
   validationSchema: any
+  values?: any
 }) => {
+  if (values?.trapStatus === 'trap not in service - restart trapping') {
+    return ['rpm1', 'flowMeasure', 'waterTemperature'].includes(fieldName)
+      ? ''
+      : '*'
+  }
+
   if (validationSchema?.fields?.[fieldName]?.exclusiveTests?.required) {
     return '*'
   } else {
@@ -885,14 +893,17 @@ export const groupBySpeciesForkLength = (data: Array<any>) => {
 }
 
 export const mergePreserveNonNull = (...objects: Record<string, any>[]) => {
-  return objects.reduce((acc, obj) => {
-    for (const [key, value] of Object.entries(obj)) {
-      if (value !== null || !(key in acc)) {
-        acc[key] = value
+  return objects.reduce(
+    (acc, obj) => {
+      for (const [key, value] of Object.entries(obj)) {
+        if (value !== null || !(key in acc)) {
+          acc[key] = value
+        }
       }
-    }
-    return acc
-  }, {} as Record<string, any>)
+      return acc
+    },
+    {} as Record<string, any>
+  )
 }
 
 export const getAddFishStateDefaults = () => {

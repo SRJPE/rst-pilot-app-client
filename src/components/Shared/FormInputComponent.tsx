@@ -31,6 +31,7 @@ interface FormInputComponentI {
   isLast?: boolean
   formFields?: any
   orderIndex?: number
+  values?: any
 }
 
 export const TextInputAdornment = ({ text }: { text: string }) => {
@@ -171,6 +172,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
   isLast,
   formFields,
   orderIndex,
+  values,
 }) => {
   const hasError = errors[camelName]
   const isTouched = touched[camelName]
@@ -186,10 +188,10 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
               showWarning
                 ? 'amber.700'
                 : showError
-                ? 'red.700'
-                : isDisabled
-                ? 'gray.400'
-                : 'black'
+                  ? 'red.700'
+                  : isDisabled
+                    ? 'gray.400'
+                    : 'black'
             }
             fontSize='16'
           >
@@ -198,6 +200,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
               ? renderRequiredOrOptionalLabel({
                   fieldName: camelName,
                   validationSchema,
+                  values,
                 })
               : ''}
           </Text>

@@ -113,16 +113,22 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
     flowMeasure: yup
       .number()
       .nullable()
-      .transform((value, originalValue) => {
-        return originalValue === '' ? null : value
-      })
-      // .required('Flow measure is required')
-      .typeError('Value must be a number'),
+      .transform(normalizeNumber)
+      .when('trapStatus', {
+        is: trapRestart,
+        then: yup.number().transform(normalizeNumber).nullable().optional(),
+        otherwise: yup.number().nullable().transform(normalizeNumber),
+        // .required('Flow measure is required'),
+      }),
     waterTemperature: yup
       .number()
       .nullable()
-      .typeError('Value must be a number')
-      .required('Water temperature is required'),
+      .transform(normalizeNumber)
+      .when('trapStatus', {
+        is: trapRestart,
+        then: yup.number().nullable().optional(),
+        otherwise: yup.number().required('Temperature is required'),
+      }),
     waterTurbidity: yup
       .number()
       .nullable()
@@ -161,6 +167,20 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
   return yup.object().shape(schema)
 }
 
+const trapRestart = (val?: string) => {
+  return val === 'trap not in service - restart trapping'
+}
+
+const normalizeNumber = (value: any, originalValue: any) => {
+  if (originalValue === '' || originalValue === null) {
+    return null
+  }
+  if (Number.isNaN(value)) {
+    return null
+  }
+  return value
+}
+
 export const trapOperationsSchema = yup.object().shape({
   trapStatus: yup.string().required('Trap status required'),
   reasonNotFunc: yup.string().when('trapStatus', {
@@ -170,17 +190,25 @@ export const trapOperationsSchema = yup.object().shape({
       ),
     then: yup.string().required('Reason for trap malfunction required'),
   }),
+
   flowMeasure: yup
     .number()
-    .nullable()
+    .transform(normalizeNumber)
+    .when('trapStatus', {
+      is: trapRestart,
+      then: yup.number().nullable().optional(),
+      otherwise: yup.number().required('Flow measure is required'),
+    }),
 
-    .required('Flow measure is required')
-    .typeError('Value must be a number'),
   waterTemperature: yup
     .number()
     .nullable()
-    .typeError('Value must be a number')
-    .required('Water temperature is required'),
+    .transform(normalizeNumber)
+    .when('trapStatus', {
+      is: trapRestart,
+      then: yup.number().nullable().optional(),
+      otherwise: yup.number().required('Temperature is required'),
+    }),
 
   flowMeasureUnit: yup.string(),
   waterTemperatureUnit: yup.string(),
@@ -208,8 +236,12 @@ export const trapOperationsSchema = yup.object().shape({
     .min(0, 'Measurement must be >= 0')
     .nullable()
     .max(30, 'Measurement must be ≤ 30')
-    .typeError('Value must be a number')
-    .required('Enter at least one measurement'),
+    .transform(normalizeNumber)
+    .when('trapStatus', {
+      is: trapRestart,
+      then: yup.number().nullable().optional(),
+      otherwise: yup.number().required('Enter at least one RPM'),
+    }),
   rpm2: yup
     .number()
     .min(0, 'Measurement must be >= 0')

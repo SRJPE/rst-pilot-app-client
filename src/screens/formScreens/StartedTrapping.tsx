@@ -28,6 +28,7 @@ import {
   calcAvgValue,
   returnNullableTableId,
   findTrapLocationIds,
+  getCrewValue,
 } from '../../utils/utils'
 
 const mapStateToProps = (state: RootState) => {
@@ -178,23 +179,22 @@ const StartedTrapping = ({
         rpm3: endRpm3,
       } = trapOperationsState?.[id].values // end rpm if restart bc no start
 
-      const selectedCrewNames: string[] = [
-        ...visitSetupState?.[id]?.values.crew,
-      ] // ['james', 'steve']
-
-      const selectedCrewIds =
-        findCrewIdsFromSelectedCrewNames(selectedCrewNames)
       const trapVisitSubmission = {
         trapVisitUid: id,
-        crew: selectedCrewIds,
+        crew: getCrewValue({
+          visitSetupValues: visitSetupState[id].values,
+          visitSetupDefaultState,
+          fieldCheckValue: undefined,
+        }),
         programId: visitSetupState?.[id]?.values.programId,
         visitTypeId: null,
         trapLocationId: visitSetupState?.[id]?.values.trapLocationId,
         isPaperEntry: visitSetupState?.[id].isPaperEntry,
-        trapVisitTimeStart: trapOperationsState?.[id]?.values.trapVisitStopTime, // time from trap operations will BE START TIME bc they are restarting the trap
+        trapVisitTimeStart:
+          trapOperationsState?.[id]?.values.trapVisitStopTime || new Date(), // time from trap operations will BE START TIME bc they are restarting the trap
         // trapVisitTimeEnd: trapOperationsState?.[id]?.values.trapVisitStopTime,
         fishProcessed: returnNullableTableId(
-          fishProcessedValues.indexOf('no fish caught')
+          fishProcessedValues.indexOf('no catch data, setting trap')
         ),
         whyFishNotProcessed: returnNullableTableId(
           whyFishNotProcessedValues.indexOf('not recorded')
@@ -225,17 +225,22 @@ const StartedTrapping = ({
         trapVisitEnvironmental: [
           {
             measureName: 'flow measure',
-            measureValueNumeric: trapOperationsState?.[id]?.values.flowMeasure,
+            measureValueNumeric:
+              Number(trapOperationsState?.[id]?.values.flowMeasure) ||
+              undefined,
             measureValueText:
-              trapOperationsState?.[id]?.values.flowMeasure?.toString(),
+              trapOperationsState?.[id]?.values.flowMeasure?.toString() ||
+              undefined,
             measureUnit: 5,
           },
           {
             measureName: 'water temperature',
             measureValueNumeric:
-              trapOperationsState?.[id]?.values.waterTemperature,
+              Number(trapOperationsState?.[id]?.values.waterTemperature) ||
+              undefined,
             measureValueText:
-              trapOperationsState?.[id]?.values.waterTemperature?.toString(),
+              trapOperationsState?.[id]?.values.waterTemperature?.toString() ||
+              undefined,
             measureUnit:
               trapOperationsState?.[id]?.values.waterTemperatureUnit === '°F'
                 ? 1
