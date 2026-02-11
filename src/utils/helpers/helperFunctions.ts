@@ -193,6 +193,8 @@ export const getLadObject = ({
 export const getTimeProperty = (trapOperationsValues: any) => {
   if (trapOperationsValues?.trapVisitTime) {
     return 'trapVisitTime'
+  } else if (trapOperationsValues?.arrivalTime) {
+    return 'arrivalTime'
   } else if (trapOperationsValues?.sampleTime) {
     return 'sampleTime'
   } else if (trapOperationsValues?.trapVisitStopTime) {

@@ -8,7 +8,7 @@ import {
   ScrollView,
   Text,
 } from 'native-base'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { useDispatch } from 'react-redux'
 import { uid } from 'uid'
 import { addForkLengthToBatchStore } from '../../../redux/reducers/formSlices/batchCountSlice'
@@ -56,11 +56,13 @@ const BatchCountButtonGrid = ({
   const dispatch = useDispatch<AppDispatch>()
   const [showPopover, setShowPopover] = useState<boolean>(false)
 
+  // No local buffering: dispatch immediately on press to avoid missed taps
+
   useEffect(() => {
     setNumArray(createArray(firstButton, numberOfAdditionalButtons))
   }, [firstButton])
 
-  const handlePress = (num: number) => {
+  const handlePress = useCallback((num: number) => {
     let runDefinition = null as string | null | undefined
     if (species === 'Chinook salmon' && activeTabId && ladObject) {
       runDefinition = findRunDefinition({
@@ -69,6 +71,8 @@ const BatchCountButtonGrid = ({
         trapSite: visitSetupState?.[activeTabId]?.values?.trapSite,
       })
     }
+
+    // dispatch immediately to avoid missing taps
     dispatch(
       addForkLengthToBatchStore({
         uid: uid(),
@@ -86,7 +90,7 @@ const BatchCountButtonGrid = ({
       })
     )
     handleToggles('reset')
-  }
+  }, [dispatch, species, activeTabId, ladObject, visitSetupState, ignoreLifeStage, selectedLifeStage, deadToggle, markToggle, miltingToggle, eggsToggle, adiposeClippedToggle, fishConditions, taxonCode, handleToggles])
 
   const [customForkLengthValue, setCustomForkLengthValue] = useState<string>('')
 
@@ -116,8 +120,14 @@ const BatchCountButtonGrid = ({
   const showEnterNumberButton = numArray?.at(-1) === 117
   const initialFocusRef = useRef(null)
 
+  useEffect(() => {
+    return () => {
+      // nothing to flush when dispatching immediately
+    }
+  }, [])
+
   return (
-    <ScrollView display='flex' height='210'>
+    <ScrollView display='flex' height='210' keyboardShouldPersistTaps='handled'>
       <Box
         flexDirection='row'
         justifyContent='flex-start'
@@ -150,7 +160,6 @@ const BatchCountButtonGrid = ({
                       w='60'
                       margin='2'
                       borderRadius='sm'
-                      shadow='3'
                     >
                       <Text fontSize='lg' bold color='white'>
                         {num}

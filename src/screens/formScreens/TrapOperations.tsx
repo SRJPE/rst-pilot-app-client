@@ -483,7 +483,7 @@ const TrapOperations = ({
         !programFormFields?.length ||
         !sectionFields.length ||
         find(sectionFields, {
-          fieldType: 'trapVisitStopTime',
+          fieldName: 'trapVisitStopTime',
         })
       ) {
         return (
@@ -520,10 +520,12 @@ const TrapOperations = ({
               setFieldValue(
                 fieldName,
                 new Date(
-                  mostRecentTrapVisit.createdTrapVisitResponse.trapVisitTimeStart
+                  mostRecentTrapVisit.createdTrapVisitResponse
+                    .trapVisitTimeStart
                 )
               )
             } else {
+              console.log('fieldName:', fieldName)
               setFieldValue(fieldName, new Date())
             }
           }
@@ -586,7 +588,15 @@ const TrapOperations = ({
   }) => {
     // no program form fields have been set
     // assume has not been customized
-    if (!programFormFields?.length) {
+    if (
+      !programFormFields?.length ||
+      !sectionFields.length ||
+      find(sectionFields, {
+        fieldName: 'rpmBefore',
+        formSection: 'Trap Operations',
+      })
+    ) {
+      console.log('values', values)
       return (
         <RPMBefore
           touched={touched}
@@ -601,6 +611,8 @@ const TrapOperations = ({
       )
     }
   }
+
+  console.log('reduxState:', reduxState)
 
   return (
     <Formik
@@ -769,15 +781,27 @@ const TrapOperations = ({
             (selectedProgramObj.streamName.toLowerCase().includes('clear') ||
               selectedProgramObj.streamName.toLowerCase().includes('battle'))
           ) {
-            setFieldValue('waterTemperatureUnit', '°F')
+            setFieldValue(
+              'waterTemperatureUnit',
+              reduxState[activeTabId ? activeTabId : 'placeholderId']?.values
+                ?.waterTemperatureUnit || '°F'
+            )
           }
           if (
             selectedProgramObj &&
             (selectedProgramObj.streamName.toLowerCase().includes('mill') ||
               selectedProgramObj.streamName.toLowerCase().includes('deer'))
           ) {
-            setFieldValue('recordTurbidityInPostProcessing', false)
-            setFieldValue('waterTurbidity', '')
+            setFieldValue(
+              'recordTurbidityInPostProcessing',
+              reduxState[activeTabId ? activeTabId : 'placeholderId']?.values
+                ?.recordTurbidityInPostProcessing || false
+            )
+            setFieldValue(
+              'waterTurbidity',
+              reduxState[activeTabId ? activeTabId : 'placeholderId']?.values
+                ?.waterTurbidity || ''
+            )
           }
         }, [selectedProgramObj])
 
@@ -830,6 +854,22 @@ const TrapOperations = ({
             setFieldValue('flowMeasure', null)
           }
         }, [values.flowMeasure])
+
+        useEffect(() => {
+          if (programFormFields && activeTabId) {
+            const waterTurbidity = find(programFormFields, {
+              fieldName: 'waterTurbidity',
+              formSection: 'Trap Operations',
+            })
+            if (
+              waterTurbidity?.required &&
+              !reduxState[activeTabId]?.values?.waterTurbidity
+            ) {
+              setFieldValue('waterTurbidity', '')
+              setFieldValue('recordTurbidityInPostProcessing', false)
+            }
+          }
+        }, [programFormFields, activeTabId])
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
@@ -1121,32 +1161,35 @@ const TrapOperations = ({
                       {(!selectedProgramObj?.programFormFields?.length ||
                         find(selectedProgramObj?.programFormFields, {
                           fieldName: 'waterTurbidity',
-                        })) && (
-                        <Box flex={1} h={'full'}>
-                          <FormControl width={'100%'}>
-                            <FormControl.Label>
-                              <Text color='black' fontSize='xl' mb={2}>
-                                Record Turbidity After Trap Visit Save
-                              </Text>
-                            </FormControl.Label>
+                        })) &&
+                        !find(selectedProgramObj?.programFormFields, {
+                          fieldName: 'waterTurbidity',
+                        })?.required && (
+                          <Box flex={1} h={'full'}>
+                            <FormControl width={'100%'}>
+                              <FormControl.Label>
+                                <Text color='black' fontSize='xl' mb={2}>
+                                  Record Turbidity After Trap Visit Save
+                                </Text>
+                              </FormControl.Label>
 
-                            <HStack space={2} mb={4}>
-                              <Text fontSize='16'>No</Text>
-                              <Switch
-                                name='recordTurbidityInPostProcessing'
-                                shadow='3'
-                                offTrackColor='secondary'
-                                onTrackColor='primary'
-                                size='md'
-                                isChecked={turbidityToggle}
-                                value={values.recordTurbidityInPostProcessing}
-                                onToggle={handleTurbidityToggle}
-                              />
-                              <Text fontSize='16'>Yes</Text>
-                            </HStack>
-                          </FormControl>
-                        </Box>
-                      )}
+                              <HStack space={2} mb={4}>
+                                <Text fontSize='16'>No</Text>
+                                <Switch
+                                  name='recordTurbidityInPostProcessing'
+                                  shadow='3'
+                                  offTrackColor='secondary'
+                                  onTrackColor='primary'
+                                  size='md'
+                                  isChecked={turbidityToggle}
+                                  value={values.recordTurbidityInPostProcessing}
+                                  onToggle={handleTurbidityToggle}
+                                />
+                                <Text fontSize='16'>Yes</Text>
+                              </HStack>
+                            </FormControl>
+                          </Box>
+                        )}
                       <ConditionalTrapVisitFields
                         touched={touched}
                         errors={errors}

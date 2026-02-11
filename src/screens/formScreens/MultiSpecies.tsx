@@ -209,6 +209,7 @@ const MultiSpecies = ({
         trapOperationsStore,
         lengthAtDateModel,
       })
+      console.log('ladObjectForTrapDate:', ladObjectForTrapDate)
       setLadObject(ladObjectForTrapDate)
     } else {
       setLadObject(null)
@@ -234,11 +235,14 @@ const MultiSpecies = ({
 
       const formattedForkLengths = groupedForkLengths.individualFish.reduce<
         Record<any, unknown>
-      >((acc, item, idx) => {
-        acc[idx] = item
+      >(
+        (acc, item, idx) => {
+          acc[idx] = item
 
-        return acc
-      }, {} as Record<number, string>)
+          return acc
+        },
+        {} as Record<number, string>
+      )
 
       const batchCountData = {
         tabId,
@@ -722,8 +726,8 @@ const MultiSpecies = ({
                                   index + 1 === 1
                                     ? FC1Toggle
                                     : index + 1 === 2
-                                    ? FC2Toggle
-                                    : FC3Toggle
+                                      ? FC2Toggle
+                                      : FC3Toggle
                                 }
                                 onChange={() => handleToggles(`FC${index + 1}`)}
                               />

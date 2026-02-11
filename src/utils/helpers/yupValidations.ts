@@ -193,66 +193,69 @@ export const trapOperationsSchema = yup.object().shape({
 
   flowMeasure: yup
     .number()
+    .nullable()
     .transform(normalizeNumber)
+    .typeError('Value must be a number')
     .when('trapStatus', {
       is: trapRestart,
       then: yup.number().nullable().optional(),
-      otherwise: yup.number().required('Flow measure is required'),
+      otherwise: yup.number().nullable().required('Flow measure is required'),
     }),
 
   waterTemperature: yup
     .number()
     .nullable()
     .transform(normalizeNumber)
+    .typeError('Value must be a number')
     .when('trapStatus', {
       is: trapRestart,
       then: yup.number().nullable().optional(),
-      otherwise: yup.number().required('Temperature is required'),
+      otherwise: yup.number().nullable().required('Temperature is required'),
     }),
 
   flowMeasureUnit: yup.string(),
   waterTemperatureUnit: yup.string(),
+
   waterTurbidity: yup.lazy(value =>
     value === '' || value === null
-      ? yup.string().min(0).nullable()
+      ? yup.number().nullable().notRequired()
       : yup
           .number()
           .nullable()
+          .transform(normalizeNumber)
           .typeError('Value must be a number')
           .positive('Value should be positive')
   ),
-  // waterTurbidity: yup
-  //   .number()
-  //   .nullable()
-  //   .typeError('Value must be a number'),
-  // waterTurbidity: yup
-  //   .mixed()
-  //   .test('is-empty-or-number', 'Value must be a number', value => {
-  //     return value === '' || value === null || !isNaN(value)
-  //   }),
+
   waterTurbidityUnit: yup.string(),
+
   rpm1: yup
     .number()
     .min(0, 'Measurement must be >= 0')
     .nullable()
     .max(30, 'Measurement must be ≤ 30')
     .transform(normalizeNumber)
+    .typeError('Value must be a number')
     .when('trapStatus', {
       is: trapRestart,
       then: yup.number().nullable().optional(),
-      otherwise: yup.number().required('Enter at least one RPM'),
+      otherwise: yup.number().nullable().required('Enter at least one RPM'),
     }),
+
   rpm2: yup
     .number()
     .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
+    .transform(normalizeNumber)
     .typeError('Value must be a number'),
+
   rpm3: yup
     .number()
     .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
+    .transform(normalizeNumber)
     .typeError('Value must be a number'),
 })
 

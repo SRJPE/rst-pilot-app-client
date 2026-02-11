@@ -28,7 +28,7 @@ const useCacheDirectory = (documentType: string) => {
   const [files, setFiles] = useState<FileDetails[]>([])
   const [activeFilePreview, setActiveFilePreview] =
     useState<FileDetails | null>(null)
-  const cacheDirectory = FileSystem.cacheDirectory
+  const cacheDirectory = (FileSystem as any).cacheDirectory
 
   const handleFileRemoval = async (selectedFile: FileDetails) => {
     try {
@@ -47,7 +47,7 @@ const useCacheDirectory = (documentType: string) => {
     setActiveFilePreview(null)
   }
 
-  const moveFileToCustomLocation = ({
+  const moveFileToCustomLocation = async ({
     uri,
     name,
   }: {
@@ -56,34 +56,35 @@ const useCacheDirectory = (documentType: string) => {
   }) => {
     const newPath = `${cacheDirectory}DocumentPicker/${documentType}/${name}`
 
-    FileSystem.moveAsync({
-      from: uri,
-      to: newPath,
-    })
-      .then(() => {
-        console.log(
-          '🚀 ~ file: useCacheDirectory.ts:61 File moved to:',
-          newPath
-        )
-      })
-      .catch(error => {
-        console.log(
-          '🚀 ~ file: useCacheDirectory.ts:64 ~ moveFileToCustomLocation ~ error:',
-          error
-        )
-      })
+    try {
+      await FileSystem.moveAsync({ from: uri, to: newPath })
+      console.log('🚀 ~ file: useCacheDirectory.ts:61 File moved to:', newPath)
+    } catch (error) {
+      console.log(
+        '🚀 ~ file: useCacheDirectory.ts:64 ~ moveFileToCustomLocation ~ error:',
+        error
+      )
+      // If move fails, return the original uri so caller still has a usable path
+      return uri
+    }
 
     return newPath
   }
 
   const handleFileSelection = async ({ files }: { files: FileDetails[] }) => {
-    const movedFiles = files.map(file => {
-      const newUriPath = moveFileToCustomLocation({
-        name: file.name,
-        uri: file.uri,
-      })
-      return { ...file, uri: newUriPath }
-    })
+    const movedFiles: FileDetails[] = []
+    for (const file of files) {
+      try {
+        const newUriPath = await moveFileToCustomLocation({
+          name: file.name,
+          uri: file.uri,
+        })
+        movedFiles.push({ ...file, uri: newUriPath })
+      } catch (err) {
+        console.error('Error moving selected file:', err)
+        movedFiles.push(file)
+      }
+    }
 
     setFiles(movedFiles)
   }
@@ -105,20 +106,24 @@ const useCacheDirectory = (documentType: string) => {
       const fileNames = await FileSystem.readDirectoryAsync(
         `${cacheDirectory}/DocumentPicker/${documentType}`
       )
-      fileNames.forEach(async (fileName: string) => {
-        const fileInfo = (await FileSystem.getInfoAsync(
-          `${cacheDirectory}/DocumentPicker/${documentType}/${fileName}`
-        )) as FileSystem.FileInfo & { mimeType: string; size: number }
+      for (const fileName of fileNames) {
+        try {
+          const fileInfo = (await FileSystem.getInfoAsync(
+            `${cacheDirectory}/DocumentPicker/${documentType}/${fileName}`
+          )) as any
 
-        const fileDetails = {
-          mimeType: fileInfo.mimeType || '',
-          name: fileName,
-          size: fileInfo.size,
-          uri: `${cacheDirectory}DocumentPicker/${documentType}/${fileName}`,
+          const fileDetails = {
+            mimeType: fileInfo.mimeType || '',
+            name: fileName,
+            size: fileInfo.size || 0,
+            uri: `${cacheDirectory}DocumentPicker/${documentType}/${fileName}`,
+          }
+
+          setFiles(prevFiles => [...prevFiles, fileDetails])
+        } catch (err) {
+          console.error('Error getting info for cached file:', fileName, err)
         }
-
-        setFiles(prevFiles => [...prevFiles, fileDetails])
-      })
+      }
     } catch (error) {
       console.error('Error reading cache directory:', error)
     }
@@ -179,34 +184,51 @@ export const postMonitoringProgramFilesToDB = async ({
   createdHatcheryInfoId?: number
   createdPermitInformationId?: number
 }) => {
-  const cacheDirectoryUri = `${FileSystem.cacheDirectory}DocumentPicker`
+  const cacheDirectoryUri = `${(FileSystem as any).cacheDirectory}DocumentPicker`
 
-  const cachedDirectories = await FileSystem.readDirectoryAsync(
-    cacheDirectoryUri
-  )
+  let cachedDirectories: string[] = []
+  try {
+    cachedDirectories = await FileSystem.readDirectoryAsync(cacheDirectoryUri)
+  } catch (error) {
+    console.error('Error reading cache directory root:', error)
+    return
+  }
 
   const accessToken = await SecureStore.getItemAsync('userAccessToken')
 
-  cachedDirectories.forEach(async (directory: string) => {
-    const serverEndpoint = process.env.EXPO_PUBLIC_BASE_URL || '#'
-    const directoryUri = `${cacheDirectoryUri}/${directory}`
-    const fileNames = await FileSystem.readDirectoryAsync(directoryUri)
+  const serverEndpoint = process.env.EXPO_PUBLIC_BASE_URL || ''
+  if (!serverEndpoint) {
+    console.log('No server endpoint configured; skipping cached file uploads')
+    return
+  }
 
+  for (const directory of cachedDirectories) {
+    const directoryUri = `${cacheDirectoryUri}/${directory}`
+    let fileNames: string[] = []
     try {
-      fileNames.forEach(async (fileName: string, idx) => {
+      fileNames = await FileSystem.readDirectoryAsync(directoryUri)
+    } catch (error) {
+      console.error(`Error reading directory ${directoryUri}:`, error)
+      continue
+    }
+
+    for (const fileName of fileNames) {
+      try {
+        const filePath = `${directoryUri}/${fileName}`
         const fileUploadResponse = await FileSystem.uploadAsync(
           `${serverEndpoint}/program/files`,
-          `${directoryUri}/${fileName}`,
+          filePath,
           {
             headers: { authorization: `Bearer ${accessToken}` },
             fieldName: 'file',
             httpMethod: 'POST',
-            uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+            uploadType: (FileSystem as any).FileSystemUploadType.MULTIPART,
           }
         )
 
         if (fileUploadResponse.status !== 200) {
-          throw new Error('File upload failed')
+          console.error('File upload failed for', filePath)
+          continue
         }
 
         const fileUploadResponseBody: FileUploadResponseBody = JSON.parse(
@@ -216,44 +238,40 @@ export const postMonitoringProgramFilesToDB = async ({
         // make api patch request to link file to program submission
         switch (directory) {
           case 'efficiencyTrialProtocols':
-            const etpResponse = await api.put(`program/${createdProgramId}`, {
+            await api.put(`program/${createdProgramId}`, {
               efficiencyProtocolsDocumentLink: fileUploadResponseBody.etag,
             })
-
             break
           case 'rotaryScrewTrapProtocols':
-            const rstResponse = await api.put(`program/${createdProgramId}`, {
+            await api.put(`program/${createdProgramId}`, {
               trappingProtocolsDocumentLink: fileUploadResponseBody.etag,
             })
-
             break
           case 'permitInformation':
-            const piResponse = await api.put(
-              `permit-info/${createdPermitInformationId}`,
-              {
-                permitFileLink: fileUploadResponseBody.etag,
-              }
-            )
+            await api.put(`permit-info/${createdPermitInformationId}`, {
+              permitFileLink: fileUploadResponseBody.etag,
+            })
             break
           case 'hatcheryInformation':
-            const hiResponse = await api.put(
-              `hatchery-info/${createdHatcheryInfoId}`,
-              {
-                hatcheryFileLink: fileUploadResponseBody.etag,
-              }
-            )
-
+            await api.put(`hatchery-info/${createdHatcheryInfoId}`, {
+              hatcheryFileLink: fileUploadResponseBody.etag,
+            })
             break
           default:
             break
         }
 
-        FileSystem.deleteAsync(`${directoryUri}/${fileName}`)
-      })
-    } catch (error) {
-      console.error('Error posting file:', error)
+        try {
+          await FileSystem.deleteAsync(`${directoryUri}/${fileName}`)
+        } catch (err) {
+          console.error('Failed to delete cached file after upload:', err)
+        }
+      } catch (error) {
+        console.error('Error posting file:', error)
+        // Continue with next file
+      }
     }
-  })
+  }
 }
 
 export default useCacheDirectory

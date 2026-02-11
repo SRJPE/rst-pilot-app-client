@@ -244,7 +244,7 @@ const IncompleteSections = ({
         setConditionalIncompleteSectionValues({})
       }
     }
-  }, [visitSetupDefaultState.programs])
+  }, [visitSetupDefaultState.programs, tabState.activeTabId])
 
   const findCrewIdsFromSelectedCrewNames = (
     selectedCrewNames: Array<string>
@@ -422,19 +422,13 @@ const IncompleteSections = ({
 
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
+      const opsValues = trapOperationsState[id]?.values ?? {}
+      const postValues = trapPostProcessingState[id]?.values ?? {}
+
       const waterTurbidityIsPresent =
-        trapOperationsState[id].values.waterTurbidity !== '' &&
-        trapOperationsState[id].values.waterTurbidity !== null
-      const {
-        rpm1: startRpm1,
-        rpm2: startRpm2,
-        rpm3: startRpm3,
-      } = trapOperationsState[id].values
-      const {
-        rpm1: endRpm1,
-        rpm2: endRpm2,
-        rpm3: endRpm3,
-      } = trapPostProcessingState[id].values
+        opsValues.waterTurbidity !== '' && opsValues.waterTurbidity !== null
+      const { rpm1: startRpm1, rpm2: startRpm2, rpm3: startRpm3 } = opsValues
+      const { rpm1: endRpm1, rpm2: endRpm2, rpm3: endRpm3 } = postValues
 
       const programId = visitSetupState[id].values.programId
 
@@ -463,6 +457,9 @@ const IncompleteSections = ({
         // if sample time, there is start (day before when trap was set) and sample time
         trapVisitTimeEnd = combinedOpsandPostProcessing?.startTime
         trapVisitTimeStart = combinedOpsandPostProcessing?.sampleTime
+      } else if (combinedOpsandPostProcessing?.arrivalTime) {
+        trapVisitTimeEnd = combinedOpsandPostProcessing?.arrivalTime
+        trapVisitTimeStart = combinedOpsandPostProcessing?.arrivalTime
       }
 
       const trapVisitSubmission = {
@@ -527,11 +524,9 @@ const IncompleteSections = ({
         rpmAtStart: calcAvgValue([startRpm1, startRpm2, startRpm3]),
         rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
         trapVisitEnvironmental: formatTrapVisitEnvironmentalValues(
-          mergePreserveNonNull(
-            trapOperationsState[id].values,
-            trapPostProcessingState[id].values,
-            { waterTurbidityIsPresent }
-          ),
+          mergePreserveNonNull(opsValues, postValues, {
+            waterTurbidityIsPresent,
+          }),
           programId
         ),
         trapCoordinates: {
@@ -640,19 +635,12 @@ const IncompleteSections = ({
     const fishConditionValues = returnDefinitionArray(
       dropdownsState.values.fishCondition
     )
-    const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
-      let code = null
-      dropdownsState.values.taxon.forEach((taxonValue: any) => {
-        if (
-          taxonValue.commonname
-            .toLowerCase()
-            .includes(fishSubmissionData.species.toLowerCase())
-        ) {
-          code = taxonValue.code
-        }
-      })
-      return code
-    }
+    const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) =>
+      dropdownsState.values.taxon.find((taxonValue: any) =>
+        taxonValue.commonname
+          .toLowerCase()
+          .includes(fishSubmissionData.species.toLowerCase())
+      )?.code ?? null
 
     const catchRawSubmissions: any[] = []
 

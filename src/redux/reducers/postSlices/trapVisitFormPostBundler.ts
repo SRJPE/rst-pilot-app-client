@@ -127,85 +127,57 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
         }
       } = {}
 
-      trapVisitSubmissions.forEach(trapSubmission => {
+      // Build promise tracker sequentially and execute each submission with per-item try/catch
+      for (const trapSubmission of trapVisitSubmissions) {
         const uuid = trapSubmission.trapVisitUid
-        const trapPromise = api.post('trap-visit/', trapSubmission)
         const linkedCatchRawSubmissions = catchRawSubmissions.filter(
           catchSubmission => catchSubmission.uid === uuid
         )
 
-        promiseTracker[uuid] = {
-          trapPromise,
-          linkedCatchRawSubmissions,
-        }
-      })
+        try {
+          const response: any = await api.post('trap-visit/', trapSubmission)
+          let trapId = response?.data?.createdTrapVisitResponse?.id
+          // Save to payload
+          payload.trapVisitResponse.push(response.data)
 
-      for (const uuid in promiseTracker) {
-        const { trapPromise, linkedCatchRawSubmissions } = promiseTracker[uuid]
+          const bulkSubmissions = linkedCatchRawSubmissions.map(
+            ({ uid, ...rest }: { uid: string }) => ({
+              ...rest,
+              trapVisitId: trapId,
+            })
+          )
 
-        await trapPromise
-          .then(async (response: any) => {
-            let trapId = response?.data?.createdTrapVisitResponse?.id
-            // Save to payload
-            payload.trapVisitResponse.push(response.data)
+          // send as one request of array of catch raw records
+          const catchResponse = await api.post('catch-raw/', bulkSubmissions)
 
-            // const catchPromises = linkedCatchRawSubmissions.map(
-            //   ({ uid, ...rest }: { uid: string }) =>
-            //     api.post('catch-raw/', {
-            //       ...rest,
-            //       trapVisitId: trapId,
-            //     })
-            // )
+          // handle response
+          if (catchResponse?.data) {
+            payload.catchRawResponse = [
+              ...payload.catchRawResponse,
+              ...catchResponse.data,
+            ]
+          }
+        } catch (error: any) {
+          console.log(
+            '🚀 ~ file: trapVisitFormPostBundler.ts ~ submission error:',
+            error
+          )
 
-            const bulkSubmissions = linkedCatchRawSubmissions.map(
-              ({ uid, ...rest }: { uid: string }) => {
-                return {
-                  ...rest,
-                  trapVisitId: trapId,
-                }
-              }
-            )
+          const errorMessage = generateErrorMessage(
+            error.code || 'Error during catch raw submission (ln 170)'
+          )
 
-            // send as one request of array of catch raw records
-            const catchPromise = await api.post('catch-raw/', bulkSubmissions)
-
-            const catchResults = await Promise.allSettled([catchPromise])
-
-            for (const result of catchResults) {
-              if (result.status === 'fulfilled') {
-                console.log('server processed catch raw: ', result)
-                payload.catchRawResponse = [
-                  ...payload.catchRawResponse,
-                  ...result.value.data,
-                ]
-              } else {
-                console.log('server processed catch fail: ', result)
-                throw new Error(result.reason)
-                // handle failed catch-raw request
-              }
-            }
-          })
-          .catch((error: any) => {
-            console.log(
-              '🚀 ~ file: trapVisitFormPostBundler.ts:189 ~ error:',
-              error
-            )
-
-            const errorMessage = generateErrorMessage(
-              error.code || 'Error during catch raw submission (ln 170)'
-            )
-
-            showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
-            const { response } = error
-            const errorDetail = response?.data?.detail
-            if (!errorDetail?.includes('already exists')) {
-              payload.failedTrapVisitSubmissions.push(
-                trapVisitSubmissions.find(
-                  trapSubmission => trapSubmission.trapVisitUid === uuid
-                )
+          showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
+          const { response } = error
+          const errorDetail = response?.data?.detail
+          if (!errorDetail?.includes('already exists')) {
+            payload.failedTrapVisitSubmissions.push(
+              trapVisitSubmissions.find(
+                t => t.trapVisitUid === uuid
               )
-            }
-          })
+            )
+          }
+        }
       }
     } catch (err) {
       console.log('error in fetchWithPostParams: BUNDLER', err)

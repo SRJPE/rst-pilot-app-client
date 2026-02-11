@@ -525,20 +525,39 @@ const VisitSetup = ({
 
   const displayEquipmentType = (values: any) => {
     let trapLocation = null
+    let trapLocationDefinition = ''
     if (showTrapNameField) {
-      trapLocation = selectedProgramObj?.trappingSites?.find(
-        (obj: any) => obj.trapName === values.trapName[0]
-      )
+      if (values.trapName?.length > 1) {
+        let trapLocations = [] as any
+        // for each trapName, find the corresponding trapLocation
+        values.trapName.forEach((name: string) => {
+          const location = selectedProgramObj?.trappingSites?.find(
+            (obj: any) => obj.trapName === name
+          )
+          if (location) {
+            trapLocations.push(location)
+          }
+        })
+        trapLocationDefinition = trapLocations
+          .map((loc: any) => loc.definition)
+          .join(', ')
+      } else {
+        trapLocation = selectedProgramObj?.trappingSites?.find(
+          (obj: any) => obj.trapName === values.trapName[0]
+        )
+        trapLocationDefinition = trapLocation?.definition
+      }
     } else {
       trapLocation = visitSetupDefaultsState?.trapLocations?.find(
         (obj: any) =>
           obj.trapName === values.trapSite || obj.siteName === values.trapSite
       )
+      trapLocationDefinition = trapLocation?.definition
     }
 
-    return trapLocation?.definition ? (
+    return trapLocationDefinition ? (
       <Text fontSize='lg' fontWeight='500' mt={0} pt={0}>
-        Equipment: {capitalizeFirstLetterOfEachWord(trapLocation?.definition)}
+        Equipment: {capitalizeFirstLetterOfEachWord(trapLocationDefinition)}
       </Text>
     ) : null
   }

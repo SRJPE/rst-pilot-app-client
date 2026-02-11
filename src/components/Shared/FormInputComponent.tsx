@@ -7,8 +7,27 @@ import {
   TextInputFocusEventData,
   Keyboard,
 } from 'react-native'
-import { FastField } from 'formik'
+import { FastField, getIn } from 'formik'
 import { renderRequiredOrOptionalLabel } from '../../utils/utils'
+
+const shouldComponentUpdate = (nextProps: any, currentProps: any) => {
+  return (
+    nextProps.isDisabled !== currentProps.isDisabled ||
+    nextProps.value !== currentProps.value ||
+    nextProps.name !== currentProps.name ||
+    nextProps.required !== currentProps.required ||
+    nextProps.disabled !== currentProps.disabled ||
+    nextProps.readOnly !== currentProps.readOnly ||
+    nextProps.formik.isSubmitting !== currentProps.formik.isSubmitting ||
+    Object.keys(nextProps).length !== Object.keys(currentProps).length ||
+    getIn(nextProps.formik.values, currentProps.name) !==
+      getIn(currentProps.formik.values, currentProps.name) ||
+    getIn(nextProps.formik.errors, currentProps.name) !==
+      getIn(currentProps.formik.errors, currentProps.name) ||
+    getIn(nextProps.formik.touched, currentProps.name) !==
+      getIn(currentProps.formik.touched, currentProps.name)
+  )
+}
 
 interface FormInputComponentI {
   label: string
@@ -44,8 +63,6 @@ export const TextInputAdornment = ({ text }: { text: string }) => {
 
 const FastInput = ({
   field,
-  form,
-  value,
   keyboardType,
   placeholder,
   onChangeText,
@@ -59,10 +76,9 @@ const FastInput = ({
   formFields,
   orderIndex,
   camelName,
+  key,
 }: {
   field: any
-  form: any
-  value: any
   keyboardType: any
   placeholder: any
   onChangeText: any
@@ -76,6 +92,7 @@ const FastInput = ({
   formFields?: any
   orderIndex?: number
   camelName?: string
+  key?: string
 }) => {
   const handleSubmitEditing = useCallback(() => {
     if (formFields && !isLast && orderIndex !== undefined) {
@@ -124,6 +141,7 @@ const FastInput = ({
   return (
     <Input
       {...field} // Includes value and onChangeText automatically
+      key={key}
       multiline={multiline}
       readOnly={isDisabled}
       height={multiline ? 100 : 50}
@@ -206,6 +224,7 @@ const FormInputComponent: React.FC<FormInputComponentI> = ({
           </Text>
         </FormControl.Label>
         <FastField
+          shouldUpdate={shouldComponentUpdate}
           name={camelName}
           component={FastInput}
           value={value}

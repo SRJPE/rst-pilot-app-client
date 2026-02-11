@@ -106,7 +106,8 @@ api.interceptors.request.use(
 
           if (!existingRefreshToken) {
             store.dispatch(setForcedLogoutModalOpen(true))
-            return
+            // No refresh token available — allow request to continue without modifying headers
+            return config
           }
 
           const tokenEndpoint =
@@ -147,29 +148,30 @@ api.interceptors.request.use(
 
               return newConfig
             }
+            } catch (error) {
+              console.error('Error refreshing token:', error)
+            }
+
+            if (accessToken && idToken) {
+              const newConfig = config as any
+              newConfig.headers['Authorization'] = `Bearer ${accessToken}`
+              newConfig.headers['idToken'] = idToken
+              return newConfig
+            }
+
+            // If we reach here, allow the request to proceed without auth headers
+            return config
           } catch (error) {
-            console.error('Error refreshing token:', error)
+            return config
           }
-
-          if (accessToken && idToken) {
-            const newConfig = config as any
-            newConfig.headers['Authorization'] = `Bearer ${accessToken}`
-            newConfig.headers['idToken'] = idToken
-            return newConfig
-          }
-
-          // if (!tokenIsExpired) {
-          //   return config
-          // }
-
-          throw new Error('No tokens found')
-        } catch (error) {
-          return config
-        }
       }
+
+      // If not connected (or we didn't return earlier), allow the request to proceed unchanged
+      return config
     } catch (error) {
       console.error('Error in Axios request interceptor:', error)
-      return Promise.reject(error)
+      // Ensure we always return a config or a rejection. Allow request to proceed.
+      return config
     }
   },
   error => {
@@ -180,11 +182,14 @@ api.interceptors.request.use(
 // Axios middleware to convert all api responses to camelCase
 api.interceptors.response.use(
   (response: AxiosResponse) => {
-    if (
-      response.data &&
-      response.headers['content-type'].includes('application/json')
-    ) {
-      response.data = camelizeKeys(response.data)
+    try {
+      const contentType = (response.headers && response.headers['content-type']) || ''
+      if (response.data && typeof contentType === 'string' && contentType.includes('application/json')) {
+        response.data = camelizeKeys(response.data)
+      }
+    } catch (err) {
+      // If headers are malformed, don't crash — just return response as-is
+      console.error('Error processing response headers:', err)
     }
     return response
   },

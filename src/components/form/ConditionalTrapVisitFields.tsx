@@ -110,7 +110,7 @@ const ConditionalTrapVisitFields = ({
 
     if (
       activePage === 'Trap Operations' &&
-      ['waterTemperature', 'waterTurbidity'].includes(fieldName)
+      ['waterTemperature', 'waterTurbidity', 'flowMeasure'].includes(fieldName)
     ) {
       return null
     }

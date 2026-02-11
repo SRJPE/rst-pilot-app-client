@@ -45,8 +45,6 @@ const FishEntriesSummary = ({
       fishMeasureProtocol,
       fishMeasureCounts
     )
-    console.log('fishmeasurecounts summary:', fishMeasureCounts)
-    console.log('finalSums summary:', finalSums)
     setProtocolCounts(finalSums)
   }, [fishMeasureProtocol, fishMeasureCounts])
 
