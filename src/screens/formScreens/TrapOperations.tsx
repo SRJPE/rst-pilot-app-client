@@ -453,6 +453,9 @@ const TrapOperations = ({
         'recordTurbidityInPostProcessing',
         'coneSetting',
         'trapVisitStopTime',
+        'rpm1',
+        'rpm2',
+        'rpm3',
         'trapVisitStartTime',
       ]
       const extraFields = Object.keys(values).filter(
