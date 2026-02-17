@@ -158,6 +158,18 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
       schema.riverRight = validator
       return
     }
+    if (field.fieldName === 'rpmBefore') {
+      validator = yup
+        .number()
+        .typeError('Must be a number')
+        .nullable()
+        .min(0, 'Measurement must be >= 0')
+        .max(30, 'Measurement must be ≤ 30')
+      schema.rpm1 = validator.required('Enter at least one RPM')
+      schema.rpm2 = validator
+      schema.rpm3 = validator
+      return
+    }
 
     validator = getValidator(field)
 
@@ -340,6 +352,9 @@ export const generateDynamicTrapPostProcessingSchema = (fields: Array<any>) => {
   }
 
   sectionFields.forEach(field => {
+    if (field.fieldName === 'rpmAfter') {
+      return
+    }
     const validator = getValidator(field)
     schema[field.fieldName] = validator
   })

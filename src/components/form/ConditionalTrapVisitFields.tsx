@@ -103,14 +103,25 @@ const ConditionalTrapVisitFields = ({
     // exisitng built in fields. prevents duplicate fields from being rendered
     if (
       activePage === 'Trap Post-Processing' &&
-      ['debrisVolume', 'totalRevolutions', 'rpmAfter'].includes(fieldName)
+      [
+        'debrisVolume',
+        'totalRevolutions',
+        'rpmAfter',
+        'counterStart',
+        'counterEnd',
+      ].includes(fieldName)
     ) {
       return null
     }
 
     if (
       activePage === 'Trap Operations' &&
-      ['waterTemperature', 'waterTurbidity', 'flowMeasure'].includes(fieldName)
+      [
+        'waterTemperature',
+        'waterTurbidity',
+        'flowMeasure',
+        'rpmBefore',
+      ].includes(fieldName)
     ) {
       return null
     }

@@ -1124,12 +1124,14 @@ export const shouldRenderField = ({
   fieldName,
   programFormFields,
   sectionFields,
+  renderOnDefault = true,
 }: {
   fieldName: string
   programFormFields: Array<any> | null
   sectionFields: Array<any> | null
+  renderOnDefault?: boolean
 }) => {
-  if (!programFormFields?.length) {
+  if (!programFormFields?.length && renderOnDefault) {
     return true
   }
 

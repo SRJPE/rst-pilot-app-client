@@ -694,6 +694,70 @@ const TrapPostProcessing = ({
                         />
                       </Box>
                     )}
+                  </HStack>
+                  <HStack space={5}>
+                    {shouldRenderField({
+                      fieldName: 'counterStart',
+                      programFormFields,
+                      sectionFields,
+                      renderOnDefault: false,
+                    }) && (
+                      <Box
+                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                        minWidth='30%' // Prevents shrinking too much
+                        maxWidth='30%' // Prevents growing beyond this size
+                      >
+                        <FormInputComponent
+                          label='Counter Start'
+                          placeholder='0'
+                          touched={touched}
+                          errors={errors}
+                          camelName='counterStart'
+                          onChangeText={handleChange('counterStart')}
+                          onBlur={() => setFieldTouched('counterStart')}
+                          value={values.counterStart}
+                          validationSchema={validationSchema}
+                          keyboardType='number-pad'
+                        />
+                      </Box>
+                    )}
+                    {shouldRenderField({
+                      fieldName: 'counterEnd',
+                      programFormFields,
+                      sectionFields,
+                      renderOnDefault: false,
+                    }) && (
+                      <Box
+                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                        minWidth='30%' // Prevents shrinking too much
+                        maxWidth='30%' // Prevents growing beyond this size
+                      >
+                        <FormInputComponent
+                          label='Counter End'
+                          placeholder='0'
+                          touched={touched}
+                          errors={errors}
+                          camelName='counterEnd'
+                          onChangeText={handleChange('counterEnd')}
+                          onBlur={() => setFieldTouched('counterEnd')}
+                          value={values.counterStart}
+                          validationSchema={validationSchema}
+                          keyboardType='number-pad'
+                        />
+                      </Box>
+                    )}
+                    {/* {recordTurbidityInPostProcessing && (
+                          <FormInputComponent
+                            label=' Water Turbidity (optional)'
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            camelName='waterTurbidity'
+                            onChangeText={handleChange('waterTurbidity')}
+                            onBlur={() => setFieldTouched('waterTurbidity')}
+                            value={values.waterTurbidity}
+                          />
+                        )} */}
                     {shouldRenderField({
                       fieldName: 'totalRevolutions',
                       programFormFields,
