@@ -172,9 +172,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           const errorDetail = response?.data?.detail
           if (!errorDetail?.includes('already exists')) {
             payload.failedTrapVisitSubmissions.push(
-              trapVisitSubmissions.find(
-                t => t.trapVisitUid === uuid
-              )
+              trapVisitSubmissions.find(t => t.trapVisitUid === uuid)
             )
           }
         }
@@ -241,11 +239,28 @@ export const postQCSubmissions = createAsyncThunk(
           (catchSubmission: any) => {
             return Promise.resolve()
               .then(() => {
+                console.log('catchSubmission', catchSubmission)
                 let id = catchSubmission.createdCatchRawResponse.id
-                let payload = { ...catchSubmission }
-                delete payload.createdCatchRawResponse.id
-                delete payload.stagedForSubmission
+                let payload = {
+                  ...catchSubmission,
+                  createdCatchRawResponse: {
+                    ...catchSubmission.createdCatchRawResponse,
+                    id: undefined, // or null
+                  },
+                  createdGeneticSamplingDataResponse: {
+                    ...catchSubmission.createdGeneticSamplingDataResponse,
+                    catchRawCreatedAt: undefined, // or null
+                  },
+                  createdFishConditionResponse: {
+                    ...catchSubmission.createdFishConditionResponse,
+                    catchRawCreatedAt: undefined, // or null
+                  },
+                }
+                console.log('payload', payload)
+                delete payload?.createdCatchRawResponse?.id
+                delete payload?.stagedForSubmission
 
+                console.log('hje;l;lop')
                 return api.put(`catch-raw/${id}`, payload)
               })
               .catch(error => {
