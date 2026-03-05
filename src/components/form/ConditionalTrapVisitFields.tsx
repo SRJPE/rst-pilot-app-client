@@ -109,6 +109,7 @@ const ConditionalTrapVisitFields = ({
         'rpmAfter',
         'counterStart',
         'counterEnd',
+        'endingTrapStatus',
       ].includes(fieldName)
     ) {
       return null

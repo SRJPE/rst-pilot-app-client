@@ -522,40 +522,50 @@ const TrapPostProcessing = ({
     setFieldValue: any,
     setFieldTouched: any
   ) => {
-    return (
-      <FormControl w='30%'>
-        <FormControl.Label>
-          <Text color='black' fontSize='xl'>
-            Trap Status at End
-          </Text>
-        </FormControl.Label>
-        <Radio.Group
-          name='endingTrapStatus'
-          accessibilityLabel='Ending Trap Status'
-          value={`${values.endingTrapStatus}`}
-          onChange={(newValue: any) => {
-            handleTrapStatusAtEndRadio(newValue, setFieldTouched, setFieldValue)
-          }}
-        >
-          <Radio
-            colorScheme='primary'
-            value='Restart Trap'
-            my={1}
-            _icon={{ color: 'primary' }}
+    if (
+      find(sectionFields, {
+        fieldName: 'endingTrapStatus',
+      })
+    ) {
+      return (
+        <FormControl w='30%'>
+          <FormControl.Label>
+            <Text color='black' fontSize='xl'>
+              Trap Status at End
+            </Text>
+          </FormControl.Label>
+          <Radio.Group
+            name='endingTrapStatus'
+            accessibilityLabel='Ending Trap Status'
+            value={`${values.endingTrapStatus}`}
+            onChange={(newValue: any) => {
+              handleTrapStatusAtEndRadio(
+                newValue,
+                setFieldTouched,
+                setFieldValue
+              )
+            }}
           >
-            Continue Trapping
-          </Radio>
-          <Radio
-            colorScheme='primary'
-            value='End Trapping'
-            my={1}
-            _icon={{ color: 'primary' }}
-          >
-            End Trapping
-          </Radio>
-        </Radio.Group>
-      </FormControl>
-    )
+            <Radio
+              colorScheme='primary'
+              value='Restart Trap'
+              my={1}
+              _icon={{ color: 'primary' }}
+            >
+              Continue Trapping
+            </Radio>
+            <Radio
+              colorScheme='primary'
+              value='End Trapping'
+              my={1}
+              _icon={{ color: 'primary' }}
+            >
+              End Trapping
+            </Radio>
+          </Radio.Group>
+        </FormControl>
+      )
+    }
   }
 
   return (
@@ -588,6 +598,7 @@ const TrapPostProcessing = ({
         resetForm,
         isValid,
       }) => {
+        console.log('Trap Post-Processing', errors)
         const checkOtherTabForms = () => {
           const tabIds = Object.keys(tabSlice.tabs)
           const fishProcessingOtherTabsValidity = tabIds.map(tabId => {
@@ -980,11 +991,11 @@ const TrapPostProcessing = ({
                     setFieldValue,
                     setFieldTouched
                   )}
-                  {/* {renderEndingTrapStatus(
+                  {renderEndingTrapStatus(
                     values,
                     setFieldValue,
                     setFieldTouched
-                  )} */}
+                  )}
                   <FormInputComponent
                     multiline={true}
                     label={'Comments'}

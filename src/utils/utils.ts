@@ -1,6 +1,6 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
-import { ReleaseMarkI } from './interfaces'
+import { ReleaseMarkI, Taxon } from './interfaces'
 import { every, some, sortBy, flatten, uniqBy, find, keyBy } from 'lodash'
 import { ObjectSchema } from 'yup'
 import type { InitialStateI as FishProcessingSliceState } from '../redux/reducers/formSlices/fishProcessingSlice'
@@ -82,14 +82,19 @@ export const reorderTaxon = (taxonArray: any[], reverse?: boolean) => {
     alphabeticalTaxon.reverse()
   }
 
-  return alphabeticalTaxon?.map((taxon: any) => ({
-    ...taxon,
-    label: `${taxon?.commonname} ${
-      taxon?.abbreviationCode ? `(${taxon?.abbreviationCode})` : ''
-    }`,
-    value: taxon?.commonname,
-    parent: 'allSpecies',
-  }))
+  return alphabeticalTaxon?.map((taxon: any) => {
+    const label = taxon.isFullName
+      ? taxon.abbreviationCode
+      : `${taxon?.commonname} ${
+          taxon?.abbreviationCode ? `(${taxon?.abbreviationCode})` : ''
+        }`
+    return {
+      ...taxon,
+      label,
+      value: taxon?.commonname,
+      parent: 'allSpecies',
+    }
+  })
 }
 
 export const fetchRecentlyUsedSpecies = ({
@@ -104,7 +109,11 @@ export const fetchRecentlyUsedSpecies = ({
   if (trapSiteData?.recentSpecies?.length) {
     const recentlyUsedSpecies = trapSiteData.recentSpecies
     const formattedRecentlyUsedSpecies = recentlyUsedSpecies.map((rs: any) => ({
-      label: rs.commonname,
+      label: rs.isFullName
+        ? rs.abbreviationCode
+        : `${rs?.commonname} ${
+            rs?.abbreviationCode ? `(${rs?.abbreviationCode})` : ''
+          }`,
       value: `recent_${rs.commonname}`,
       parent: 'recentlyUsed',
     }))

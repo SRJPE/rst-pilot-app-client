@@ -27,6 +27,7 @@ export interface TrappingSite {
   dataRecorderAgencyId: number
   dataRecorderId: number
   datum: string | null
+  definition?: string
   gageAgency: number
   gageNumber: string
   id: number

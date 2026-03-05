@@ -599,7 +599,6 @@ const TrapOperations = ({
         formSection: 'Trap Operations',
       })
     ) {
-      console.log('values', values)
       return (
         <RPMBefore
           touched={touched}
@@ -614,8 +613,6 @@ const TrapOperations = ({
       )
     }
   }
-
-  console.log('reduxState:', reduxState)
 
   return (
     <Formik

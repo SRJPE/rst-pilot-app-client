@@ -15,6 +15,7 @@ export const TrappingSitesTabPanel = ({
     trappingSites,
     { itemsPerPage: 10 }
   )
+
   return (
     <TabPanelWrapper>
       <ScrollView>
@@ -38,7 +39,7 @@ export const TrappingSitesTabPanel = ({
                 <Text>Trap Name</Text>
               </DataTable.Title>
               <DataTable.Title>
-                <Text>Gage Number</Text>
+                <Text>Equipment Type</Text>
               </DataTable.Title>
               <DataTable.Title>
                 <Text>X Coord</Text>
@@ -50,7 +51,7 @@ export const TrappingSitesTabPanel = ({
             {trappingSites
               .slice(from, to)
               ?.map(
-                ({ id, siteName, trapName, gageNumber, xCoord, yCoord }) => (
+                ({ id, siteName, trapName, definition, xCoord, yCoord }) => (
                   <DataTable.Row key={id}>
                     <DataTable.Cell>
                       <Text>{siteName}</Text>
@@ -59,7 +60,7 @@ export const TrappingSitesTabPanel = ({
                       <Text>{trapName}</Text>
                     </DataTable.Cell>
                     <DataTable.Cell>
-                      <Text>{gageNumber}</Text>
+                      <Text>{definition}</Text>
                     </DataTable.Cell>
                     <DataTable.Cell>
                       <Text>{xCoord}</Text>

@@ -209,7 +209,6 @@ const MultiSpecies = ({
         trapOperationsStore,
         lengthAtDateModel,
       })
-      console.log('ladObjectForTrapDate:', ladObjectForTrapDate)
       setLadObject(ladObjectForTrapDate)
     } else {
       setLadObject(null)
@@ -550,9 +549,7 @@ const MultiSpecies = ({
                       route.params?.fishMeasureProtocol || {}
                     }
                     fishMeasureCounts={combinedFishMeasureCounts}
-                    showSpeciesCounts={speciesRadioValue
-                      .toLocaleLowerCase()
-                      .includes('chinook')}
+                    showSpeciesCounts={true}
                   />
                 </Box>
               )}

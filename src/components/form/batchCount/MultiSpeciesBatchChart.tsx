@@ -91,9 +91,10 @@ const MultiSpeciesBatchChart = ({
   const activeTabId = tabSlice?.activeTabId || 'placeholderId'
 
   const getRows = (activeSpeciesTab: string) => {
-    const rows = combinedFishObj[activeSpeciesTab]
-      ? Math.ceil(combinedFishObj[activeSpeciesTab].length / 10)
-      : 1
+    const individualFish = combinedFishObj?.[activeSpeciesTab]?.filter(
+      item => !item.plusCount
+    )
+    const rows = individualFish ? Math.ceil(individualFish.length / 10) : 1
     return rows
   }
 
@@ -294,7 +295,14 @@ const MultiSpeciesBatchChart = ({
       rows > 5
     )
       return 420 + (rows - 5) * 50
-    return fishMeasureProtocol[activeSpeciesTab] === 20 ? 270 : 420
+
+    if (fishMeasureProtocol[activeSpeciesTab]) {
+      const baseHeight = 170
+      return (
+        baseHeight + Math.ceil(fishMeasureProtocol[activeSpeciesTab] / 10) * 50
+      )
+    }
+    return 420
   }
 
   const handleToggles = (toggleName: string) => {
