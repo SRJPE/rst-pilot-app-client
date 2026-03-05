@@ -88,6 +88,7 @@ const MultiSpeciesBatchChart = ({
   fishMeasureCounts?: Record<string, any>
   fishMeasureProtocol?: Record<any, any>
 }) => {
+  console.log('tabSlice', tabSlice)
   const activeTabId = tabSlice?.activeTabId || 'placeholderId'
 
   const getRows = (activeSpeciesTab: string) => {
@@ -360,87 +361,90 @@ const MultiSpeciesBatchChart = ({
           <Text>Dead</Text>
         </HStack>
       </HStack>
-      {activeSpeciesTab?.toLocaleLowerCase()?.includes('chinook') && (
-        <Box px='2%' mb={3} w='100%'>
-          <Text bold mb={2}>
-            Filter Table by Run:
-          </Text>
-          <HStack space={3} alignItems='center'>
-            <HStack alignItems='center' space={4}>
-              <HStack space={2}>
-                <Checkbox
-                  value='fall'
-                  isChecked={fallToggle}
-                  shadow='3'
-                  _checked={{
-                    bg: 'primary',
-                    borderColor: 'primary',
-                  }}
-                  size='md'
-                  onChange={() => handleToggles('fall')}
-                />
-                <Text fontSize='16'>Fall</Text>
-              </HStack>
-              <HStack space={2}>
-                <Checkbox
-                  value='late fall'
-                  isChecked={lateFallToggle}
-                  shadow='3'
-                  _checked={{
-                    bg: 'primary',
-                    borderColor: 'primary',
-                  }}
-                  size='md'
-                  onChange={() => handleToggles('late fall')}
-                />
-                <Text fontSize='16'>Late Fall</Text>
-              </HStack>
-              <HStack space={2}>
-                <Checkbox
-                  value='spring'
-                  isChecked={springToggle}
-                  shadow='3'
-                  _checked={{
-                    bg: 'primary',
-                    borderColor: 'primary',
-                  }}
-                  size='md'
-                  onChange={() => handleToggles('spring')}
-                />
-                <Text fontSize='16'>Spring</Text>
-              </HStack>
-              <HStack space={2}>
-                <Checkbox
-                  value='winter'
-                  isChecked={winterToggle}
-                  shadow='3'
-                  _checked={{
-                    bg: 'primary',
-                    borderColor: 'primary',
-                  }}
-                  size='md'
-                  onChange={() => handleToggles('winter')}
-                />
-                <Text fontSize='16'>Winter</Text>
-              </HStack>
-              <HStack space={2}>
-                <Checkbox
-                  value='hybrid'
-                  isChecked={hybridToggle}
-                  shadow='3'
-                  _checked={{
-                    bg: 'primary',
-                    borderColor: 'primary',
-                  }}
-                  size='md'
-                  onChange={() => handleToggles('hybrid')}
-                />
-                <Text fontSize='16'>Hybrid</Text>
+      {activeSpeciesTab?.toLocaleLowerCase()?.includes('chinook') &&
+        !tabSlice?.tabs?.[activeTabId]?.name
+          .toLowerCase()
+          .includes('butte') && (
+          <Box px='2%' mb={3} w='100%'>
+            <Text bold mb={2}>
+              Filter Table by Run:
+            </Text>
+            <HStack space={3} alignItems='center'>
+              <HStack alignItems='center' space={4}>
+                <HStack space={2}>
+                  <Checkbox
+                    value='fall'
+                    isChecked={fallToggle}
+                    shadow='3'
+                    _checked={{
+                      bg: 'primary',
+                      borderColor: 'primary',
+                    }}
+                    size='md'
+                    onChange={() => handleToggles('fall')}
+                  />
+                  <Text fontSize='16'>Fall</Text>
+                </HStack>
+                <HStack space={2}>
+                  <Checkbox
+                    value='late fall'
+                    isChecked={lateFallToggle}
+                    shadow='3'
+                    _checked={{
+                      bg: 'primary',
+                      borderColor: 'primary',
+                    }}
+                    size='md'
+                    onChange={() => handleToggles('late fall')}
+                  />
+                  <Text fontSize='16'>Late Fall</Text>
+                </HStack>
+                <HStack space={2}>
+                  <Checkbox
+                    value='spring'
+                    isChecked={springToggle}
+                    shadow='3'
+                    _checked={{
+                      bg: 'primary',
+                      borderColor: 'primary',
+                    }}
+                    size='md'
+                    onChange={() => handleToggles('spring')}
+                  />
+                  <Text fontSize='16'>Spring</Text>
+                </HStack>
+                <HStack space={2}>
+                  <Checkbox
+                    value='winter'
+                    isChecked={winterToggle}
+                    shadow='3'
+                    _checked={{
+                      bg: 'primary',
+                      borderColor: 'primary',
+                    }}
+                    size='md'
+                    onChange={() => handleToggles('winter')}
+                  />
+                  <Text fontSize='16'>Winter</Text>
+                </HStack>
+                <HStack space={2}>
+                  <Checkbox
+                    value='hybrid'
+                    isChecked={hybridToggle}
+                    shadow='3'
+                    _checked={{
+                      bg: 'primary',
+                      borderColor: 'primary',
+                    }}
+                    size='md'
+                    onChange={() => handleToggles('hybrid')}
+                  />
+                  <Text fontSize='16'>Hybrid</Text>
+                </HStack>
               </HStack>
             </HStack>
-          </HStack>
-        </Box>
-      )}
+          </Box>
+        )}
     </Center>
   )
 }

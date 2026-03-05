@@ -113,6 +113,9 @@ export const findRunDefinition = ({
       trapSite.toLowerCase().includes('upper clear'))
   ) {
     if (runObj?.definition === 'fall') return 'spring'
+  } else if (trapSite && trapSite.toLowerCase().includes('parrot')) {
+    // parrot phelan diversion dam
+    return 'spring'
   }
 
   return runObj?.definition || 'not recorded'
