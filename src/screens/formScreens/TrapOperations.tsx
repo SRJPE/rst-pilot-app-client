@@ -828,6 +828,8 @@ const TrapOperations = ({
                 {}
               )
 
+            console.log('mostRecentTrapVisit', mostRecentTrapVisit)
+
             setFieldValue(
               'flowMeterSerialNumber',
               environmentalValuesObj?.flowMeterSerialNumber || ''

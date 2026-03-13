@@ -9,7 +9,7 @@
     "web": "DARK_MODE=media expo start --web",
     "build-production": "EXPO_PUBLIC_BASE_URL=\"https://jpe-app-server-production.azurewebsites.net\" eas update --branch production",
     "build-testing": "EXPO_PUBLIC_BASE_URL=\"https://jpe-app-server.azurewebsites.net\" eas update --branch testing",
-    "build-yolo-testing": "EXPO_PUBLIC_BASE_URL=\"https://jpe-app-server.azurewebsites.net\" eas update --branch yolo-testing",
+    "build-yolo-testing": "EXPO_PUBLIC_BASE_URL=\"https://jpe-app-server-ybfmp.azurewebsites.net\" eas update --branch yolo-testing",
     "build-dev": "EXPO_PUBLIC_BASE_URL=\"https://jpe-app-server.azurewebsites.net\" eas update --branch dev",
     "postinstall": "patch-package",
     "build-simulator": "eas build -p ios --profile development-simulator"

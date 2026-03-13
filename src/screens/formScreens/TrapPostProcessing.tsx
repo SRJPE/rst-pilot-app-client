@@ -126,7 +126,7 @@ const TrapPostProcessing = ({
   )
 
   const [locationClicked, setLocationClicked] = useState(false as boolean)
-  const [startTime, setStartTime] = useState(new Date() as any)
+  const [startTime, setStartTime] = useState(null as any)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
   const [validationSchema, setValidationSchema] = useState<any>(
     trapPostProcessingSchema
@@ -135,6 +135,13 @@ const TrapPostProcessing = ({
   const [programFormFields, setProgramFormFields] = useState<any>(null)
 
   const userPrograms = userCredentialsStore?.userPrograms || []
+
+  useEffect(() => {
+    const trapOpsValues = trapOperationsStore?.[tabSlice.activeTabId]?.values
+    if (startTime === null && trapOpsValues) {
+      setStartTime(trapOpsValues.trapVisitStopTime || new Date())
+    }
+  }, [trapOperationsStore?.[tabSlice.activeTabId]?.values])
 
   const onStartTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate

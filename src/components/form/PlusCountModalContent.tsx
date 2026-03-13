@@ -114,7 +114,11 @@ const PlusCountModalContent = ({
           touched: true,
           required: false,
         })
-      : stateDefaults.whenSpeciesChinook.species
+      : createFormValueDefault({
+          value: 'Chinook salmon',
+          touched: true,
+          required: true,
+        })
   )
 
   //RECENT MARKS ADDITIONS
@@ -176,6 +180,7 @@ const PlusCountModalContent = ({
               console.log('species', species)
               handleFormSubmit({ ...values, species: species.value })
               resetForm()
+              closeModal()
             }}
           >
             {({
@@ -189,6 +194,7 @@ const PlusCountModalContent = ({
               setFieldValue,
               resetForm,
             }) => {
+              console.log('values', values)
               return (
                 <TouchableWithoutFeedback
                   onPress={() => {
