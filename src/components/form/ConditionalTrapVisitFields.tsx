@@ -390,7 +390,7 @@ const ConditionalTrapVisitFields = ({
         >
           <FastSelect
             selectedValue={values[fieldName]}
-            placeholder={`Select Value for ${displayName}`}
+            placeholder={`${displayName}`}
             camelName={fieldName}
             label={displayName}
             errors={errors}

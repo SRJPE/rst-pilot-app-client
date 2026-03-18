@@ -8,7 +8,7 @@ import {
   Select as NBSelect,
   Text,
 } from 'native-base'
-import { capitalize, find } from 'lodash'
+import { capitalize, find, startCase } from 'lodash'
 import { StyleProp, ViewStyle } from 'react-native'
 import RenderErrorMessage from './RenderErrorMessage'
 import { FormikErrors, FormikTouched, FastField } from 'formik'
@@ -50,6 +50,8 @@ const itemStyle = { style: { fontSize: 16, height: 24, color: 'black' } }
 const itemLabelModifier = (label: string, placeholder: string) => {
   if (placeholder === 'Species') {
     return label
+  } else if (placeholder === 'Debris Level') {
+    return startCase(label)
   } else if (placeholder === 'Funding Agency' && label !== 'not recorded') {
     return label.toLocaleUpperCase()
   } else return label.replace(/\w+/g, capitalize)
@@ -160,9 +162,12 @@ const FastSelect = ({
                   return (
                     <SelectItem
                       key={item.id}
-                      label={`${item.code.toUpperCase()} ${
-                        item.description ? `- ${item.description}` : ''
-                      }`}
+                      label={
+                        item.code.toLowerCase() !==
+                        item.description?.toLowerCase()
+                          ? `${item.code.toUpperCase()} ${item.description ? `- ${item.description}` : ''}`
+                          : item.description.toUpperCase()
+                      }
                       value={item.code}
                       textStyle={itemStyle}
                     />

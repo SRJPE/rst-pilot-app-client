@@ -19,6 +19,9 @@ const ForkLengthButtonGroup = ({
   const handlePressGroupButton = (key: string) => {
     setFirstButton(buttonLookup[key].firstButton)
     setNumberOfAdditionalButtons(buttonLookup[key].additionalButtons)
+
+    console.log('selectedProgramObj', selectedProgramObj)
+    if (selectedProgramObj.streamName.toLowerCase().includes('butte')) return
     setLifeStageRadioValue(buttonLookup[key].lifeStage)
   }
 

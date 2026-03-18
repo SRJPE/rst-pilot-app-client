@@ -625,8 +625,8 @@ const BatchCount = ({
                                     index + 1 === 1
                                       ? FC1Toggle
                                       : index + 1 === 2
-                                      ? FC2Toggle
-                                      : FC3Toggle
+                                        ? FC2Toggle
+                                        : FC3Toggle
                                   }
                                   onChange={() =>
                                     handleToggles(`FC${index + 1}`)
@@ -735,6 +735,24 @@ const BatchCount = ({
                               />
                             </RadioIndicator>
                             <RadioLabel>Smolt</RadioLabel>
+                          </Radio>
+                          <Radio value='Yearling'>
+                            <RadioIndicator style={{ width: 25, height: 25 }}>
+                              <RadioIcon
+                                as={CircleIcon}
+                                style={{ width: 15, height: 15 }}
+                              />
+                            </RadioIndicator>
+                            <RadioLabel>Yearling</RadioLabel>
+                          </Radio>
+                          <Radio value='Adult'>
+                            <RadioIndicator style={{ width: 25, height: 25 }}>
+                              <RadioIcon
+                                as={CircleIcon}
+                                style={{ width: 15, height: 15 }}
+                              />
+                            </RadioIndicator>
+                            <RadioLabel>Adult</RadioLabel>
                           </Radio>
                         </HStack>
                       </RadioGroup>

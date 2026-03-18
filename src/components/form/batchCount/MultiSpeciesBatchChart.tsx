@@ -116,6 +116,13 @@ const MultiSpeciesBatchChart = ({
     return String(combinedPlusCountTotal || 0)
   }, [batchCountStore.forkLengths, speciesRadioValue, fishMeasureCounts])
 
+  const currentSpeciesMeasuredCount = useMemo(() => {
+    const combinedMeasuredCountTotal =
+      fishMeasureCounts[speciesRadioValue]?.individualCount || 0
+
+    return String(combinedMeasuredCountTotal || 0)
+  }, [batchCountStore.forkLengths, speciesRadioValue, fishMeasureCounts])
+
   const [routes, setRoutes] = useState<Array<TabNavigationRoute>>([])
   const [fallToggle, setFallToggle] = useState(true)
   const [lateFallToggle, setLateFallToggle] = useState(true)
@@ -217,10 +224,16 @@ const MultiSpeciesBatchChart = ({
         activeTab={route.key}
         slots={slots}
         currentSpeciesPlusCount={currentSpeciesPlusCount}
+        currentSpeciesMeasuredCount={currentSpeciesMeasuredCount}
         combinedFishObj={combinedFishObj}
       />
     ),
-    [slots, currentSpeciesPlusCount, combinedFishObj]
+    [
+      slots,
+      currentSpeciesPlusCount,
+      currentSpeciesMeasuredCount,
+      combinedFishObj,
+    ]
   )
 
   // ✅ Memoized renderTabBar

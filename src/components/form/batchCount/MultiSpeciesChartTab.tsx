@@ -1,5 +1,5 @@
 import { Box, Center, HStack, Text } from 'native-base'
-import React from 'react'
+import { useMemo } from 'react'
 import { FlatList } from 'react-native'
 import { FishDetailPopover } from '@/src/components/form/batchCount/FishDetailPopover'
 import { useDispatch } from 'react-redux'
@@ -11,6 +11,7 @@ type Props = {
   activeTab: string
   combinedFishObj: Record<string, any[]>
   currentSpeciesPlusCount: string
+  currentSpeciesMeasuredCount: string
 }
 
 const MultiSpeciesChartTab = ({
@@ -19,6 +20,7 @@ const MultiSpeciesChartTab = ({
   species,
   combinedFishObj,
   currentSpeciesPlusCount,
+  currentSpeciesMeasuredCount,
 }: Props) => {
   const dispatch = useDispatch()
   return (
@@ -97,7 +99,7 @@ const MultiSpeciesChartTab = ({
         <Text fontSize={18} p={3} display='flex'>
           <Text bold>Measured Count:</Text>
           <Text> </Text>
-          <Text>{combinedFishObj[species]?.length || 0}</Text>
+          <Text>{currentSpeciesMeasuredCount}</Text>
         </Text>
         <Text fontSize={18} p={3} display='flex'>
           <Text bold>Plus Count:</Text>
