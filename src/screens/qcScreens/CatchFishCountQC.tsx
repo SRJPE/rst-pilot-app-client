@@ -121,7 +121,7 @@ function CatchFishCountQC({
         return program.programId === programId
       }
     )
-    setProgramName(currentProgram.programName)
+    setProgramName(currentProgram?.programName)
     const programCatchRaw = previousCatchRawSubmissions.filter(
       (catchRaw: any) => {
         return catchRaw.createdCatchRawResponse.programId === programId
