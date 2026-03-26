@@ -32,6 +32,7 @@ import {
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
+import { useFormSave } from '../../context/FormSaveContext'
 
 const mapStateToProps = (state: RootState) => {
   const activeTabId = state.tabSlice.activeTabId
@@ -67,6 +68,7 @@ const FishProcessing = ({
   navigationSlice: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const { registerSaveHandler } = useFormSave()
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
@@ -226,6 +228,11 @@ const FishProcessing = ({
           }
         }, [previouslyActiveTabId, activeTabId])
 
+        useEffect(() => {
+          registerSaveHandler(() => onSubmit(values, activeTabId))
+          return () => registerSaveHandler(null)
+        }, [values, activeTabId])
+
         const checkOtherTabForms = () => {
           const tabIds = Object.keys(tabSlice.tabs)
 
@@ -253,6 +260,7 @@ const FishProcessing = ({
 
         const noCatchData =
           values?.fishProcessedResult.includes('no catch data')
+
         const navButtons = useMemo(
           () => (
             <NavButtons
@@ -276,6 +284,8 @@ const FishProcessing = ({
             activePage,
             reduxState,
             tabSlice,
+            isValid,
+            activeTabId,
           ]
         )
         return (

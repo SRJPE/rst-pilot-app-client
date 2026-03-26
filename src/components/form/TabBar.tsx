@@ -166,7 +166,9 @@ const TabBar = ({
       result => result.fishProcessingResult === 'processed fish'
     )
 
-    dispatch(setActiveTab(fishInputDefaultTabId?.tabId))
+    if (fishInputDefaultTabId) {
+      dispatch(setActiveTab(fishInputDefaultTabId?.tabId))
+    }
   }
 
   if (
@@ -201,8 +203,8 @@ const TabBar = ({
                         disableTabOnActivePage
                           ? 'gray.300'
                           : tabId == tabSlice.activeTabId
-                          ? 'primary'
-                          : 'secondary'
+                            ? 'primary'
+                            : 'secondary'
                       }
                       onPress={() => dispatch(setActiveTab(tabId))}
                       mr={5}
@@ -218,8 +220,8 @@ const TabBar = ({
                             disableTabOnActivePage
                               ? 'gray.800'
                               : tabId == tabSlice.activeTabId
-                              ? 'white'
-                              : 'primary'
+                                ? 'white'
+                                : 'primary'
                           }
                         >
                           {tabSlice.tabs[tabId].name}

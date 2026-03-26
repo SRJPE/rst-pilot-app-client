@@ -96,10 +96,14 @@ export const generateTrapVisitSchema = (fields: Array<any>) => {
   return yup.object().shape(schema)
 }
 
-export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
+export const generateDynamicTrapOpsSchema = (
+  fields: Array<any>,
+  conditionCode?: string | null
+) => {
   const sectionFields = fields.filter(
     (field: any) => field.formSection === 'Trap Operations'
   )
+  console.log('sectionFields', sectionFields)
   // always required
   let schema: { [key: string]: any } = {
     trapStatus: yup.string().required('Trap status required'),
@@ -150,9 +154,10 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
       schema.turbidity3 = validator
       return
     }
+
     if (field.fieldName === 'riverDepth') {
       validator = yup.number().typeError('Must be a number')
-      validator = validator.required(`Measurement required`)
+
       schema.riverLeft = validator
       schema.riverCenter = validator
       schema.riverRight = validator
@@ -172,6 +177,13 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
     }
 
     validator = getValidator(field)
+
+    if (['length', 'width', 'depth'].includes(field.fieldName)) {
+      const dimensionsOptional = conditionCode === '4'
+      if (dimensionsOptional) {
+        validator = validator.nullable().optional()
+      }
+    }
 
     schema[field.fieldName] = validator
   })

@@ -50,6 +50,7 @@ import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
 import { find } from 'lodash'
 import { AppDispatch, RootState } from '../../redux/store'
+import { useFormSave } from '../../context/FormSaveContext'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = state.tabSlice.activeTabId
@@ -113,6 +114,7 @@ const TrapPostProcessing = ({
   selectedTrapLocationId: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const { registerSaveHandler } = useFormSave()
   const navigationState = useSelector((state: any) => state.navigation)
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -605,7 +607,6 @@ const TrapPostProcessing = ({
         resetForm,
         isValid,
       }) => {
-        console.log('Trap Post-Processing', errors)
         const checkOtherTabForms = () => {
           const tabIds = Object.keys(tabSlice.tabs)
           const fishProcessingOtherTabsValidity = tabIds.map(tabId => {
@@ -641,6 +642,11 @@ const TrapPostProcessing = ({
             resetForm()
           }
         }, [previouslyActiveTabId, activeTabId])
+
+        useEffect(() => {
+          registerSaveHandler(() => onSubmit(values, activeTabId))
+          return () => registerSaveHandler(null)
+        }, [values, activeTabId, startTime])
 
         const navButtons = useMemo(
           () => (

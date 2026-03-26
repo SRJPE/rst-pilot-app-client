@@ -52,6 +52,7 @@ import { generateTrapVisitSchema } from '../../utils/helpers/yupValidations'
 import { InferType } from 'yup'
 import { resetFishInputSlice } from '@/src/redux/reducers/formSlices/fishInputSlice'
 import { resetBatchCountSlice } from '@/src/redux/reducers/formSlices/batchCountSlice'
+import { useFormSave } from '../../context/FormSaveContext'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -77,6 +78,7 @@ const VisitSetup = ({
 }) => {
   // try {
   const dispatch = useDispatch<AppDispatch>()
+  const { registerSaveHandler } = useFormSave()
   const navigationState = useSelector((state: any) => state.navigation)
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -635,6 +637,12 @@ const VisitSetup = ({
             })
           }
         }, [values.trapName])
+
+        useEffect(() => {
+          registerSaveHandler(() => onSubmit(values, tabSlice.activeTabId))
+          return () => registerSaveHandler(null)
+        }, [values, tabSlice.activeTabId])
+
         const navButtons = useMemo(() => {
           return (
             <NavButtons

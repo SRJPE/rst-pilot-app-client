@@ -59,6 +59,7 @@ import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVis
 import TrapEndDateAndTime from '../../components/form/TrapEndDateAndTime'
 import RPMBefore from '../../components/form/RPMBefore'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import { useFormSave } from '../../context/FormSaveContext'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -85,6 +86,11 @@ const mapStateToProps = (state: RootState) => {
     visitSetupDefaults: state.visitSetupDefaults,
     previousTrapVisits:
       state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
+    conditionCode:
+      (
+        state.trapPostProcessing[state.tabSlice.activeTabId ?? 'placeholderId']
+          ?.values as any
+      )?.conditionCode ?? null,
   }
 }
 
@@ -102,6 +108,7 @@ const TrapOperations = ({
   tabSlice,
   visitSetupDefaults,
   previousTrapVisits,
+  conditionCode,
 }: {
   navigation: any
   reduxState: any
@@ -116,8 +123,10 @@ const TrapOperations = ({
   tabSlice: TabStateI
   visitSetupDefaults: any
   previousTrapVisits: any
+  conditionCode: string | null
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const { registerSaveHandler } = useFormSave()
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
@@ -171,15 +180,31 @@ const TrapOperations = ({
 
       // get fields for this section and equipment type, if applicable
       // null equipmentId indicates field displayed for all equipment types
-      const sectionFields = currentProgramInfo?.programFormFields.filter(
+      let sectionFields = currentProgramInfo?.programFormFields.filter(
         (field: any) =>
           field.formSection === activePage &&
           (field.equipmentId === null || field.equipmentId === trapEquimentType)
       )
 
+      if (conditionCode && conditionCode === '4') {
+        sectionFields = sectionFields.map((field: any) => {
+          if (['length', 'width', 'depth'].includes(field.fieldName)) {
+            const updatedField = {
+              ...field,
+              required: false,
+            }
+            return updatedField
+          }
+          return field
+        })
+      }
+
       setSectionFields(sectionFields)
       setProgramFormFields(currentProgramInfo?.programFormFields)
-      const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(sectionFields)
+      const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(
+        sectionFields,
+        conditionCode
+      )
       setValidationSchema(dynamicTrapOpsSchema)
     } else {
       setSectionFields(null)
@@ -193,6 +218,7 @@ const TrapOperations = ({
     activePage,
     visitSetupDefaults?.trapLocations,
     selectedTrapLocationId,
+    conditionCode,
   ])
 
   useEffect(() => {
@@ -774,6 +800,11 @@ const TrapOperations = ({
             resetForm()
           }
         }, [previouslyActiveTabId, activeTabId])
+
+        useEffect(() => {
+          registerSaveHandler(() => onSubmit(values, activeTabId))
+          return () => registerSaveHandler(null)
+        }, [values, activeTabId, endTime])
 
         useEffect(() => {
           if (

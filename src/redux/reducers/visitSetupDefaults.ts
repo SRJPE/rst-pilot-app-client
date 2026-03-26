@@ -116,6 +116,7 @@ export const getVisitSetupDefaults = createAsyncThunk(
       const response: APIResponseI = await api.get(
         `trap-visit/visit-setup/default/${personnelId}`
       )
+      console.log('res', response.data)
       return response.data
     } catch (error: any) {
       console.log('err', error)
