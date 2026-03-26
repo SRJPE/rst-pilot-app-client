@@ -101,6 +101,17 @@ const VisitSetup = ({
   const [validationSchema, setValidationSchema] = useState<any>(trapVisitSchema)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
   const [formFields, setFormFields] = useState<any>(null)
+  const [selectedProject, setSelectedProject] = useState<string | null>(null)
+
+  const projectsForStream = useMemo(() => {
+    if (!selectedProgramId) return []
+    const projects = visitSetupDefaultsState?.trapLocations
+      ?.filter((loc: any) => loc.programId === selectedProgramId && loc.project)
+      ?.map((loc: any) => loc.project as string)
+    return [...new Set(projects)] as string[]
+  }, [visitSetupDefaultsState?.trapLocations, selectedProgramId])
+
+  const showProjectDropdown = projectsForStream.length > 0
 
   const isSiteAndTrapNameEqual = useCallback(
     (visitSetupValues: InferType<typeof trapVisitSchema>) => {
@@ -428,6 +439,7 @@ const VisitSetup = ({
     })
     setSelectedProgramId(programId)
     setShowTrapNameField(false)
+    setSelectedProject(null)
     generateCrewList(programId)
   }
 
@@ -797,6 +809,30 @@ const VisitSetup = ({
                       <Text fontSize='lg' fontWeight='500' mt={5}>
                         Confirm the following values:
                       </Text>
+                      {showProjectDropdown && (
+                        <CustomSelect
+                          label='Project'
+                          camelName='project'
+                          errors={{}}
+                          touched={{}}
+                          selectedValue={selectedProject || ''}
+                          placeholder='Select Project'
+                          onValueChange={(itemValue: string) => {
+                            setSelectedProject(itemValue)
+                            setFieldValue('trapSite', []).then(() =>
+                              setFieldTouched('trapSite', false)
+                            )
+                            setFieldValue('trapName', []).then(() =>
+                              setFieldTouched('trapName', false)
+                            )
+                            setShowTrapNameField(false)
+                          }}
+                          selectOptions={projectsForStream.map(p => ({
+                            label: p,
+                            value: p,
+                          }))}
+                        />
+                      )}
                       <CustomSelect
                         label='Trap Site'
                         camelName='trapSite'
@@ -824,10 +860,14 @@ const VisitSetup = ({
                         selectOptions={uniqBy(
                           sortBy(
                             visitSetupDefaultsState?.trapLocations
-                              ?.filter(
-                                (obj: any) =>
-                                  obj.programId === selectedProgramId
-                              )
+                              ?.filter((obj: any) => {
+                                if (obj.programId !== selectedProgramId)
+                                  return false
+                                if (showProjectDropdown && selectedProject) {
+                                  return obj.project === selectedProject
+                                }
+                                return true
+                              })
                               ?.map((trapLocation: any) => ({
                                 label: trapLocation?.siteName,
                                 value: trapLocation?.siteName,

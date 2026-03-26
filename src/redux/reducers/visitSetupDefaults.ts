@@ -48,6 +48,7 @@ interface TrapLocationI {
   comments: string | null
   createdAt: string | null
   updatedAt: string | null
+  project?: string | null
 }
 interface ReleaseSiteI {
   id: number
