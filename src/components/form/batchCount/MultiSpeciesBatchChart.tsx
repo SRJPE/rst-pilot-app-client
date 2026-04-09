@@ -179,6 +179,8 @@ const MultiSpeciesBatchChart = ({
 
     let fishCellData = combinedFishObj[activeSpeciesTab] || []
 
+    console.log('fishCellData', fishCellData)
+
     if (
       activeSpeciesTab &&
       activeSpeciesTab.toLocaleLowerCase().includes('chinook')

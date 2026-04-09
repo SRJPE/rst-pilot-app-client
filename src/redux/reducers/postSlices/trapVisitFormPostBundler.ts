@@ -248,6 +248,7 @@ export const postQCSubmissions = createAsyncThunk(
 
         const trapResults = await Promise.allSettled(trapPromises)
         const catchResults = await Promise.allSettled(catchPromises)
+
         const trapVisitResponse = []
 
         for (const result of trapResults as any) {
@@ -491,6 +492,17 @@ const getIndexOfDuplicateTrapVisit = ({
 
   return index
 }
+
+export const catchRawQCDeletion = createAsyncThunk(
+  'trapVisitPostBundler/catchRawQCDeletion',
+  async (
+    { catchRawId }: { catchRawId: number; userId: number },
+    thunkAPI
+  ) => {
+    await api.delete(`catch-raw/${catchRawId}`)
+    return catchRawId
+  }
+)
 
 export const trapVisitPostBundler = createSlice({
   name: 'trapVisitPostBundler',
@@ -888,11 +900,6 @@ export const trapVisitPostBundler = createSlice({
         state.qcCatchRawSubmissions.push(qcCatchRaw)
       }
     },
-    catchRawQCDeletion: (state, action) => {
-      let { catchRawId } = action.payload
-
-      state.qcCatchRawDeletions.push(catchRawId)
-    },
     resetTrapVisitFormPostBundler: () => {
       return initialState
     },
@@ -957,7 +964,6 @@ export const trapVisitPostBundler = createSlice({
 
     builder.addCase(postQCSubmissions.fulfilled.type, (state, action: any) => {
       const { trapVisitResponse, catchRawResponse } = action.payload
-      console.log('fufilled postQCSubmissions: ', action.payload)
 
       // remove all updated trap visit and catch raw in trapVisitResponse and catchRawResponse from qcTrapVisitSubmissions and qcCatchRawSubmissions
       if (trapVisitResponse.length) {
@@ -993,6 +999,7 @@ export const trapVisitPostBundler = createSlice({
       if (catchRawResponse.length) {
         state.previousCatchRawSubmissions.push(...catchRawResponse)
       }
+
     })
 
     builder.addCase(
@@ -1011,6 +1018,22 @@ export const trapVisitPostBundler = createSlice({
         state.fetchStatus = 'fetch-failed'
       }
     )
+
+    builder.addCase(
+      catchRawQCDeletion.fulfilled.type,
+      (state, action: any) => {
+        const catchRawId = action.payload
+        state.previousCatchRawSubmissions =
+          state.previousCatchRawSubmissions.filter(
+            (catchRaw: any) =>
+              catchRaw.createdCatchRawResponse.id !== catchRawId
+          )
+        state.qcCatchRawSubmissions = state.qcCatchRawSubmissions.filter(
+          (catchRaw: any) =>
+            catchRaw.createdCatchRawResponse.id !== catchRawId
+        )
+      }
+    )
   },
 })
 
@@ -1023,7 +1046,6 @@ export const {
   clearPendingTrapVisitSubs,
   clearPendingCatchRawSubs,
   addMissingFetchedRecords,
-  catchRawQCDeletion,
   // addMissingFetchedTrapVisitSubs,
   // addMissingFetchedCatchRawSubs,
 } = trapVisitPostBundler.actions

@@ -23,6 +23,8 @@ const MultiSpeciesChartTab = ({
   currentSpeciesMeasuredCount,
 }: Props) => {
   const dispatch = useDispatch()
+
+  console.log('slots', slots)
   return (
     <Box
       flex={1}

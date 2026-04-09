@@ -209,6 +209,7 @@ const MultiSpecies = ({
         trapOperationsStore,
         lengthAtDateModel,
       })
+      console.log('ladObjectForTrapDate', ladObjectForTrapDate)
       setLadObject(ladObjectForTrapDate)
     } else {
       setLadObject(null)
