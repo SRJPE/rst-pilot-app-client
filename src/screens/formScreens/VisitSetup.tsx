@@ -106,10 +106,22 @@ const VisitSetup = ({
 
   const projectsForStream = useMemo(() => {
     if (!selectedProgramId) return []
-    const projects = visitSetupDefaultsState?.trapLocations
-      ?.filter((loc: any) => loc.programId === selectedProgramId && loc.project)
-      ?.map((loc: any) => loc.project as string)
-    return [...new Set(projects)] as string[]
+    const projects: string[] =
+      visitSetupDefaultsState?.trapLocations
+        ?.filter(
+          (loc: any) => loc.programId === selectedProgramId && loc.project
+        )
+        ?.map((loc: any) => (loc.project as string).trim()) ?? []
+
+    // dedupe and sort A-Z (case-insensitive)
+    const uniqueSorted = Array.from(new Set(projects)).filter(
+      Boolean
+    ) as string[]
+    uniqueSorted.sort((a: string, b: string) =>
+      a.localeCompare(b, undefined, { sensitivity: 'base' })
+    )
+
+    return uniqueSorted as string[]
   }, [visitSetupDefaultsState?.trapLocations, selectedProgramId])
 
   const showProjectDropdown = projectsForStream.length > 0
@@ -150,6 +162,9 @@ const VisitSetup = ({
 
       // set default values
       setIsPaperEntry(visitSetupState[tabSlice?.activeTabId]?.isPaperEntry)
+      setSelectedProject(
+        visitSetupState[tabSlice?.activeTabId]?.values?.project ?? null
+      )
     }
   }, [tabSlice?.activeTabId, selectedProgramId])
 
@@ -196,6 +211,7 @@ const VisitSetup = ({
           ? [values.trapName]
           : values.trapName,
       programId,
+      project: selectedProject,
     }
     // if no current tabs, create all new tabs
     if (!tabId) {

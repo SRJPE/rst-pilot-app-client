@@ -17,6 +17,7 @@ interface VisitSetupValuesI {
   trapSite: string
   trapName?: string
   crew: Array<string>
+  project?: string | null
 }
 
 const initialState: InitialStateI = {
