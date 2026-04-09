@@ -20,6 +20,7 @@ import {
   Switch,
   HStack,
   Divider,
+  ScrollView,
 } from 'native-base'
 import CrewDropDown from '../../components/form/CrewDropDown'
 import NavButtons from '../../components/formContainer/NavButtons'
@@ -728,207 +729,214 @@ const VisitSetup = ({
         }, [values, selectedProgramId])
 
         return (
-          <TouchableWithoutFeedback
-            onPress={() => {
-              closeOpenDropdowns(setFieldTouched)
-            }}
+          <ScrollView
+            keyboardShouldPersistTaps='handled'
+            contentContainerStyle={{ flexGrow: 1 }}
           >
-            <View flex={1} bg='#fff'>
-              <View
-                flex={1}
-                bg='#fff'
-                px='5%'
-                py='3%'
-                borderColor='themeGrey'
-                borderWidth='15'
-              >
-                <VStack space={3}>
-                  <FormControl>
-                    <HStack space={3} alignItems='center'>
-                      <FormControl.Label>
-                        <Heading size='md' fontSize={25}>
-                          Is this a paper entry from a previous trap visit?
-                        </Heading>
-                      </FormControl.Label>
-                      <Switch
-                        shadow='3'
-                        offTrackColor='secondary'
-                        onTrackColor='primary'
-                        size='md'
-                        value={isPaperEntry}
-                        accessibilityLabel='Is the entry a paper entry?'
-                        onToggle={() => setIsPaperEntry(!isPaperEntry)}
-                      />
-                    </HStack>
-                  </FormControl>
-                  <Divider />
-                  <Heading size='md' fontSize={25}>
-                    Which stream are you trapping on?
-                  </Heading>
-                  <CustomSelect
-                    label='Stream'
-                    camelName='stream'
-                    errors={errors}
-                    touched={touched}
-                    selectedValue={values.stream || ''}
-                    placeholder='Select Stream'
-                    onValueChange={(itemValue: string) => {
-                      setFieldValue('stream', itemValue).then(() => {
-                        setFieldTouched('stream', true)
-                      })
-                      // setFieldValue('stream', itemValue)
-                      // setFieldTouched('stream', true)
-                      setFieldError('stream', undefined)
-
-                      if (itemValue !== values.stream) {
-                        setFieldValue('trapSite', []).then(() => {
-                          setFieldTouched('trapSite', false)
-                        })
-                        setFieldValue('trapName', []).then(() => {
-                          setFieldTouched('trapName', false)
-                        })
-                      }
-
-                      updateSelectedProgram(itemValue)
-                      setFieldValue('crew', []).then(() => {
-                        setFieldTouched('crew', false)
-                      })
-                      setFieldValue('dataRecorder', undefined).then(() => {
-                        setFieldTouched('dataRecorder', false)
-                      })
-                    }}
-                    selectOptions={visitSetupDefaultsState?.programs?.map(
-                      (program: any) => ({
-                        label: program?.streamName,
-                        value: program?.streamName,
-                      })
-                    )}
-                  />
-                  {values.stream && (
-                    <>
-                      <Text fontSize='lg' fontWeight='500' mt={5}>
-                        Confirm the following values:
-                      </Text>
-                      {showProjectDropdown && (
-                        <CustomSelect
-                          label='Project'
-                          camelName='project'
-                          errors={{}}
-                          touched={{}}
-                          selectedValue={selectedProject || ''}
-                          placeholder='Select Project'
-                          onValueChange={(itemValue: string) => {
-                            setSelectedProject(itemValue)
-                            setFieldValue('trapSite', []).then(() =>
-                              setFieldTouched('trapSite', false)
-                            )
-                            setFieldValue('trapName', []).then(() =>
-                              setFieldTouched('trapName', false)
-                            )
-                            setShowTrapNameField(false)
-                          }}
-                          selectOptions={projectsForStream.map(p => ({
-                            label: p,
-                            value: p,
-                          }))}
+            <TouchableWithoutFeedback
+              onPress={() => {
+                closeOpenDropdowns(setFieldTouched)
+              }}
+            >
+              <View flex={1} bg='#fff'>
+                <View
+                  flex={1}
+                  bg='#fff'
+                  px='5%'
+                  py='3%'
+                  borderColor='themeGrey'
+                  borderWidth='15'
+                >
+                  <VStack space={3}>
+                    <FormControl>
+                      <HStack space={3} alignItems='center'>
+                        <FormControl.Label>
+                          <Heading size='md' fontSize={25}>
+                            Is this a paper entry from a previous trap visit?
+                          </Heading>
+                        </FormControl.Label>
+                        <Switch
+                          shadow='3'
+                          offTrackColor='secondary'
+                          onTrackColor='primary'
+                          size='md'
+                          value={isPaperEntry}
+                          accessibilityLabel='Is the entry a paper entry?'
+                          onToggle={() => setIsPaperEntry(!isPaperEntry)}
                         />
-                      )}
-                      <CustomSelect
-                        label='Trap Site'
-                        camelName='trapSite'
-                        errors={errors}
-                        touched={touched}
-                        selectedValue={values.trapSite}
-                        placeholder='Select Trap Site'
-                        onValueChange={(itemValue: string) => {
-                          const showTrapName =
-                            shouldShowTrapNameField(itemValue)
-                          setFieldValue('trapSite', itemValue).then(() => {
-                            setFieldTouched('trapSite', true)
-                          })
+                      </HStack>
+                    </FormControl>
+                    <Divider />
+                    <Heading size='md' fontSize={25}>
+                      Which stream are you trapping on?
+                    </Heading>
+                    <CustomSelect
+                      label='Stream'
+                      camelName='stream'
+                      errors={errors}
+                      touched={touched}
+                      selectedValue={values.stream || ''}
+                      placeholder='Select Stream'
+                      onValueChange={(itemValue: string) => {
+                        setFieldValue('stream', itemValue).then(() => {
+                          setFieldTouched('stream', true)
+                        })
+                        // setFieldValue('stream', itemValue)
+                        // setFieldTouched('stream', true)
+                        setFieldError('stream', undefined)
 
-                          if (showTrapName) {
-                            setFieldValue('trapName', []).then(() => {
-                              setFieldTouched('trapName', true)
-                            })
-                          } else {
-                            setFieldValue('trapName', [itemValue]).then(() => {
-                              setFieldTouched('trapName', true)
-                            })
-                          }
-                        }}
-                        selectOptions={uniqBy(
-                          sortBy(
-                            visitSetupDefaultsState?.trapLocations
-                              ?.filter((obj: any) => {
-                                if (obj.programId !== selectedProgramId)
-                                  return false
-                                if (showProjectDropdown && selectedProject) {
-                                  return obj.project === selectedProject
-                                }
-                                return true
-                              })
-                              ?.map((trapLocation: any) => ({
-                                label: trapLocation?.siteName,
-                                value: trapLocation?.siteName,
-                              })),
-                            'label'
-                          ),
-                          'label'
+                        if (itemValue !== values.stream) {
+                          setFieldValue('trapSite', []).then(() => {
+                            setFieldTouched('trapSite', false)
+                          })
+                          setFieldValue('trapName', []).then(() => {
+                            setFieldTouched('trapName', false)
+                          })
+                        }
+
+                        updateSelectedProgram(itemValue)
+                        setFieldValue('crew', []).then(() => {
+                          setFieldTouched('crew', false)
+                        })
+                        setFieldValue('dataRecorder', undefined).then(() => {
+                          setFieldTouched('dataRecorder', false)
+                        })
+                      }}
+                      selectOptions={visitSetupDefaultsState?.programs?.map(
+                        (program: any) => ({
+                          label: program?.streamName,
+                          value: program?.streamName,
+                        })
+                      )}
+                    />
+                    {values.stream && (
+                      <>
+                        <Text fontSize='lg' fontWeight='500' mt={5}>
+                          Confirm the following values:
+                        </Text>
+                        {showProjectDropdown && (
+                          <CustomSelect
+                            label='Project'
+                            camelName='project'
+                            errors={{}}
+                            touched={{}}
+                            selectedValue={selectedProject || ''}
+                            placeholder='Select Project'
+                            onValueChange={(itemValue: string) => {
+                              setSelectedProject(itemValue)
+                              setFieldValue('trapSite', []).then(() =>
+                                setFieldTouched('trapSite', false)
+                              )
+                              setFieldValue('trapName', []).then(() =>
+                                setFieldTouched('trapName', false)
+                              )
+                              setShowTrapNameField(false)
+                            }}
+                            selectOptions={projectsForStream.map(p => ({
+                              label: p,
+                              value: p,
+                            }))}
+                          />
                         )}
-                      />
-                      {showTrapNameField && (
-                        <TrapNameDropDown
-                          open={trapDropDownOpen}
-                          onOpen={onTrapOpen}
-                          setOpen={setTrapDropDownOpen}
-                          list={trapNameList}
-                          setList={setTrapNameList}
+                        <CustomSelect
+                          label='Trap Site'
+                          camelName='trapSite'
+                          errors={errors}
+                          touched={touched}
+                          selectedValue={values.trapSite}
+                          placeholder='Select Trap Site'
+                          onValueChange={(itemValue: string) => {
+                            const showTrapName =
+                              shouldShowTrapNameField(itemValue)
+                            setFieldValue('trapSite', itemValue).then(() => {
+                              setFieldTouched('trapSite', true)
+                            })
+
+                            if (showTrapName) {
+                              setFieldValue('trapName', []).then(() => {
+                                setFieldTouched('trapName', true)
+                              })
+                            } else {
+                              setFieldValue('trapName', [itemValue]).then(
+                                () => {
+                                  setFieldTouched('trapName', true)
+                                }
+                              )
+                            }
+                          }}
+                          selectOptions={uniqBy(
+                            sortBy(
+                              visitSetupDefaultsState?.trapLocations
+                                ?.filter((obj: any) => {
+                                  if (obj.programId !== selectedProgramId)
+                                    return false
+                                  if (showProjectDropdown && selectedProject) {
+                                    return obj.project === selectedProject
+                                  }
+                                  return true
+                                })
+                                ?.map((trapLocation: any) => ({
+                                  label: trapLocation?.siteName,
+                                  value: trapLocation?.siteName,
+                                })),
+                              'label'
+                            ),
+                            'label'
+                          )}
+                        />
+                        {showTrapNameField && (
+                          <TrapNameDropDown
+                            open={trapDropDownOpen}
+                            onOpen={onTrapOpen}
+                            setOpen={setTrapDropDownOpen}
+                            list={trapNameList}
+                            setList={setTrapNameList}
+                            setFieldValue={setFieldValue}
+                            setFieldTouched={setFieldTouched}
+                            visitSetupState={visitSetupState}
+                            tabSlice={tabSlice}
+                          />
+                        )}
+                        {displayEquipmentType(values)}
+                        <CrewDropDown
+                          open={crewDropDownOpen}
+                          onOpen={onCrewOpen}
+                          setOpen={setCrewDropDownOpen}
+                          list={crewList}
+                          setList={setCrewList}
                           setFieldValue={setFieldValue}
                           setFieldTouched={setFieldTouched}
                           visitSetupState={visitSetupState}
-                          tabSlice={tabSlice}
+                          stream={values.stream}
+                          tabId={tabSlice?.activeTabId}
+                          fieldName='crew'
+                          label='Crew'
                         />
-                      )}
-                      {displayEquipmentType(values)}
-                      <CrewDropDown
-                        open={crewDropDownOpen}
-                        onOpen={onCrewOpen}
-                        setOpen={setCrewDropDownOpen}
-                        list={crewList}
-                        setList={setCrewList}
-                        setFieldValue={setFieldValue}
-                        setFieldTouched={setFieldTouched}
-                        visitSetupState={visitSetupState}
-                        stream={values.stream}
-                        tabId={tabSlice?.activeTabId}
-                        fieldName='crew'
-                        label='Crew'
-                      />
-                      <ConditionalTrapVisitFields
-                        touched={touched}
-                        errors={errors}
-                        values={values}
-                        handleChange={handleChange}
-                        handleBlur={handleBlur}
-                        setFieldTouched={setFieldTouched}
-                        dropdownValues={dropdownValues}
-                        activePage={activePage}
-                        formFields={formFields}
-                        setFieldValue={setFieldValue}
-                        activeTabId={tabSlice.activeTabId}
-                        validationSchema={validationSchema}
-                        onOpenCallback={() => {
-                          closeOpenDropdowns(setFieldTouched)
-                        }}
-                      />
-                    </>
-                  )}
-                </VStack>
+                        <ConditionalTrapVisitFields
+                          touched={touched}
+                          errors={errors}
+                          values={values}
+                          handleChange={handleChange}
+                          handleBlur={handleBlur}
+                          setFieldTouched={setFieldTouched}
+                          dropdownValues={dropdownValues}
+                          activePage={activePage}
+                          formFields={formFields}
+                          setFieldValue={setFieldValue}
+                          activeTabId={tabSlice.activeTabId}
+                          validationSchema={validationSchema}
+                          onOpenCallback={() => {
+                            closeOpenDropdowns(setFieldTouched)
+                          }}
+                        />
+                      </>
+                    )}
+                  </VStack>
+                </View>
+                {navButtons}
               </View>
-              {navButtons}
-            </View>
-          </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback>
+          </ScrollView>
         )
       }}
     </Formik>
