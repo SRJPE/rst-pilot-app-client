@@ -212,26 +212,17 @@ export const postQCSubmissions = createAsyncThunk(
       if (qcTrapVisitSubmissions.length || qcCatchRawSubmissions.length) {
         const trapPromises = qcTrapVisitSubmissions.map(
           (trapSubmission: any) => {
-            let id = trapSubmission.createdTrapVisitResponse.id
-            let payload = { ...trapSubmission }
-            delete payload?.createdTrapVisitResponse.id
-            delete payload?.stagedForSubmission
+            const cloned = JSON.parse(JSON.stringify(trapSubmission))
+            const id = cloned.createdTrapVisitResponse.id
+            delete cloned.createdTrapVisitResponse.id
+            delete cloned.stagedForSubmission
 
-            return api
-              .put(`trap-visit/${id}`, {
-                ...payload,
-              })
-              .catch((error: any) => {
-                console.log(
-                  '🚀 ~ file: trapVisitFormPostBundler.ts:223 ~ error:',
-                  Object.entries(error)
-                )
-
-                const errorMessage = generateErrorMessage(
-                  error.code || 'Error during post qc submission (ln 230)'
-                )
-                showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
-              })
+            return api.put(`trap-visit/${id}`, cloned).catch((error: any) => {
+              const errorMessage = generateErrorMessage(
+                error.code || 'Error during post qc submission (ln 230)'
+              )
+              showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
+            })
           }
         )
 
@@ -239,33 +230,18 @@ export const postQCSubmissions = createAsyncThunk(
           (catchSubmission: any) => {
             return Promise.resolve()
               .then(() => {
-                console.log('catchSubmission', catchSubmission)
-                let id = catchSubmission.createdCatchRawResponse.id
-                let payload = {
-                  ...catchSubmission,
-                  createdCatchRawResponse: {
-                    ...catchSubmission.createdCatchRawResponse,
-                    id: undefined, // or null
-                  },
-                  createdGeneticSamplingDataResponse: {
-                    ...catchSubmission.createdGeneticSamplingDataResponse,
-                    catchRawCreatedAt: undefined, // or null
-                  },
-                  createdFishConditionResponse: {
-                    ...catchSubmission.createdFishConditionResponse,
-                    catchRawCreatedAt: undefined, // or null
-                  },
-                }
-                console.log('payload', payload)
-                delete payload?.createdCatchRawResponse?.id
-                delete payload?.stagedForSubmission
-
-                console.log('hje;l;lop')
-                return api.put(`catch-raw/${id}`, payload)
+                const cloned = JSON.parse(JSON.stringify(catchSubmission))
+                const id = cloned.createdCatchRawResponse.id
+                delete cloned.createdCatchRawResponse.id
+                delete cloned.createdGeneticSamplingDataResponse
+                  ?.catchRawCreatedAt
+                delete cloned.createdFishConditionResponse?.catchRawCreatedAt
+                delete cloned.stagedForSubmission
+                return api.put(`catch-raw/${id}`, cloned)
               })
               .catch(error => {
                 console.log('error in catchPromises: ', error)
-                return Promise.reject(error) // Ensures it can be handled properly in Promise.allSettled
+                return Promise.reject(error)
               })
           }
         )
