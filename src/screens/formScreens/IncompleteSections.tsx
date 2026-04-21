@@ -752,7 +752,9 @@ const IncompleteSections = ({
             milting:
               typeof fishValue.milting === 'boolean' ? fishValue.milting : null,
             eggs: typeof fishValue.eggs === 'boolean' ? fishValue.eggs : null,
-            fishCondition: getCatchFishConditions(fishValue.fishCondition),
+            fishCondition: fishValue.fishConditions.length
+              ? getCatchFishConditions(fishValue.fishConditions)
+              : null,
             lifeStage: returnNullableTableId(
               lifeStageValues.indexOf(fishValue?.lifeStage?.toLowerCase() || '')
             ),

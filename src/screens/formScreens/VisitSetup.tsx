@@ -556,7 +556,7 @@ const VisitSetup = ({
 
   const displayEquipmentType = (values: any) => {
     let trapLocation = null
-    let trapLocationDefinition = ''
+    let trapLocationDefinition = null
     if (showTrapNameField) {
       if (values.trapName?.length > 1) {
         let trapLocations = [] as any
@@ -569,9 +569,12 @@ const VisitSetup = ({
             trapLocations.push(location)
           }
         })
-        trapLocationDefinition = trapLocations
+        const trapLocationEquipment = trapLocations
           .map((loc: any) => loc.definition)
-          .join(', ')
+          .filter((tle: any) => tle !== null)
+        trapLocationDefinition = trapLocationEquipment.length
+          ? trapLocations.map((loc: any) => loc.definition).join(', ')
+          : ''
       } else {
         trapLocation = selectedProgramObj?.trappingSites?.find(
           (obj: any) => obj.trapName === values.trapName[0]

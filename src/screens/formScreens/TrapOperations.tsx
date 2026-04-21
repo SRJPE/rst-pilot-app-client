@@ -400,6 +400,40 @@ const TrapOperations = ({
   const onEndTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
     setEndTime(currentDate)
+    if (allTabIds.length > 1 && endTime) {
+      const prev = new Date(endTime)
+      const next = new Date(currentDate)
+      const dateChanged =
+        prev.getFullYear() !== next.getFullYear() ||
+        prev.getMonth() !== next.getMonth() ||
+        prev.getDate() !== next.getDate()
+
+      if (dateChanged) {
+        allTabIds.forEach(tabId => {
+          if (tabId === activeTabId) return
+          const tabIdValues = reduxState[tabId]?.values
+          if (tabIdValues) {
+            const existingTime = tabIdValues.trapVisitStopTime
+              ? new Date(tabIdValues.trapVisitStopTime)
+              : currentDate
+            const mergedDate = new Date(currentDate)
+            mergedDate.setHours(
+              existingTime.getHours(),
+              existingTime.getMinutes(),
+              existingTime.getSeconds(),
+              existingTime.getMilliseconds()
+            )
+            dispatch(
+              saveTrapOperations({
+                tabId,
+                values: { ...tabIdValues, trapVisitStopTime: mergedDate },
+                errors: reduxState[tabId]?.errors || {},
+              })
+            )
+          }
+        })
+      }
+    }
   }
 
   const otherTabFormsValid = checkOtherTabForms({
@@ -424,7 +458,7 @@ const TrapOperations = ({
         setEndTime(new Date())
       }
     }
-  }, [activeTabId, reduxState])
+  }, [activeTabId])
 
   const handleNavButtonClick = (
     direction: 'left' | 'right',
@@ -577,7 +611,45 @@ const TrapOperations = ({
                     }
                     mode='datetime'
                     onChange={(event: any, selectedDate: any) => {
-                      setFieldValue(fieldName, selectedDate || new Date())
+                      const newDate = selectedDate || new Date()
+                      const prevDate = values?.[fieldName]
+                        ? new Date(values[fieldName])
+                        : null
+                      setFieldValue(fieldName, newDate)
+                      if (allTabIds.length > 1 && prevDate) {
+                        const dateChanged =
+                          prevDate.getFullYear() !== newDate.getFullYear() ||
+                          prevDate.getMonth() !== newDate.getMonth() ||
+                          prevDate.getDate() !== newDate.getDate()
+                        if (dateChanged) {
+                          allTabIds.forEach(tabId => {
+                            if (tabId === activeTabId) return
+                            const tabIdValues = reduxState[tabId]?.values
+                            if (tabIdValues) {
+                              const existingTime = tabIdValues[fieldName]
+                                ? new Date(tabIdValues[fieldName])
+                                : newDate
+                              const mergedDate = new Date(newDate)
+                              mergedDate.setHours(
+                                existingTime.getHours(),
+                                existingTime.getMinutes(),
+                                existingTime.getSeconds(),
+                                existingTime.getMilliseconds()
+                              )
+                              dispatch(
+                                saveTrapOperations({
+                                  tabId,
+                                  values: {
+                                    ...tabIdValues,
+                                    [fieldName]: mergedDate,
+                                  },
+                                  errors: reduxState[tabId]?.errors || {},
+                                })
+                              )
+                            }
+                          })
+                        }
+                      }
                     }}
                     accentColor='#007C7C'
                   />
@@ -597,6 +669,9 @@ const TrapOperations = ({
       popoverTrigger,
       selectedProgramObj,
       trapNotInServiceIdentifier,
+      allTabIds,
+      activeTabId,
+      reduxState,
     ]
   )
 
