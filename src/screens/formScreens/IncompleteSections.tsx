@@ -4,6 +4,7 @@ import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import navigationSlice, {
   checkIfFormIsComplete,
+  markStepCompleted,
   numOfFormSteps,
   resetNavigationSlice,
   updateActiveStep,
@@ -125,6 +126,27 @@ const IncompleteSections = ({
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
+
+    // Sync navigation step completion from per-tab slice completed flags.
+    // This handles the case where a user jumps directly to this screen without
+    // visiting each section individually (nav slice never got markStepCompleted).
+    const allTabIds = Object.keys(tabState.tabs)
+    if (allTabIds.length > 0) {
+      const allComplete = (sliceState: any) =>
+        allTabIds.every(id => sliceState[id]?.completed)
+
+      if (allComplete(visitSetupState))
+        dispatch(markStepCompleted({ propName: 'visitSetup' }))
+      if (allComplete(trapOperationsState))
+        dispatch(markStepCompleted({ propName: 'trapOperations' }))
+      if (allComplete(fishProcessingState))
+        dispatch(markStepCompleted({ propName: 'fishProcessing' }))
+      if (allComplete(fishInputState))
+        dispatch(markStepCompleted({ propName: 'fishInput' }))
+      if (allComplete(trapPostProcessingState))
+        dispatch(markStepCompleted({ propName: 'trapPostProcessing' }))
+    }
+
     dispatch(checkIfFormIsComplete())
   }, [])
 

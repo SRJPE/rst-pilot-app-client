@@ -103,7 +103,6 @@ export const generateDynamicTrapOpsSchema = (
   const sectionFields = fields.filter(
     (field: any) => field.formSection === 'Trap Operations'
   )
-  console.log('sectionFields', sectionFields)
   // always required
   let schema: { [key: string]: any } = {
     trapStatus: yup.string().required('Trap status required'),
@@ -137,7 +136,9 @@ export const generateDynamicTrapOpsSchema = (
       .number()
       .nullable()
       .transform((value, originalValue) => {
-        return originalValue === '' ? null : value
+        if (originalValue === '' || originalValue === null || originalValue === undefined)
+          return null
+        return value
       })
       // .required('Flow measure is required')
       .typeError('Value must be a number'),
@@ -246,7 +247,6 @@ export const trapOperationsSchema = yup.object().shape({
       : yup
           .number()
           .nullable()
-          .transform(normalizeNumber)
           .typeError('Value must be a number')
           .positive('Value should be positive')
   ),

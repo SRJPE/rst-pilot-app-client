@@ -336,6 +336,8 @@ const TrapOperations = ({
             ...values,
             waterTurbidity: values.recordTurbidityInPostProcessing
               ? null
+              : values.waterTurbidity !== '' && values.waterTurbidity !== null
+              ? Number(values.waterTurbidity)
               : values.waterTurbidity,
             trapVisitStopTime: endTime, //refactor needed
             trapVisitStartTime: new Date(),
@@ -822,7 +824,11 @@ const TrapOperations = ({
                     trapVisitStartTime: tabIdValues?.trapVisitStartTime,
                     flowMeasure: values.flowMeasure,
                     flowMeasureUnit: values.flowMeasureUnit,
-                    waterTurbidity: values.waterTurbidity,
+                    waterTurbidity:
+                      values.waterTurbidity !== '' &&
+                      values.waterTurbidity !== null
+                        ? Number(values.waterTurbidity)
+                        : values.waterTurbidity,
                     waterTurbidityUnit: values.waterTurbidityUnit,
                     waterTemperature: values.waterTemperature,
                     waterTemperatureUnit: values.waterTemperatureUnit,

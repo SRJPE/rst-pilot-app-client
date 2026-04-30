@@ -261,7 +261,14 @@ const TrapPostProcessing = ({
     dispatch(
       saveTrapPostProcessing({
         tabId,
-        values: { ...values, trapVisitStartTime },
+        values: {
+          ...values,
+          trapVisitStartTime,
+          waterTurbidity:
+            values.waterTurbidity !== '' && values.waterTurbidity !== null
+              ? Number(values.waterTurbidity)
+              : values.waterTurbidity,
+        },
         errors,
       })
     )
