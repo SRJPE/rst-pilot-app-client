@@ -198,10 +198,12 @@ const FishEntriesSummary = ({
                             }
                           >
                             {formatFishMeasureProtocolText(fishName)}:{' '}
-                            {String(
-                              (countObj as { individualCount?: number })
-                                ?.individualCount
-                            )}
+                            {countObj?.individualCount > 0
+                              ? String(
+                                  (countObj as { individualCount?: number })
+                                    ?.individualCount
+                                )
+                              : ''}
                             {fishMeasureProtocol[fishName]
                               ? `/${fishMeasureProtocol[fishName]} `
                               : ' '}

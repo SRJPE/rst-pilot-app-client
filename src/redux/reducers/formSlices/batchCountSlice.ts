@@ -182,14 +182,8 @@ export const batchCountSlice = createSlice({
         taxonCode,
       }
 
-      let id = null
-      if (Object.keys(forkLengthsCopy).length) {
-        // @ts-ignore
-        const largestId = Math.max(...Object.keys(forkLengthsCopy))
-        id = largestId + 1
-      } else {
-        id = 0
-      }
+      const id = (state as any).nextForkId || 0
+      ;(state as any).nextForkId = id + 1
       forkLengthsCopy[id] = plusCountEntry
       state.forkLengths = forkLengthsCopy
     },

@@ -575,7 +575,12 @@ const ReviewValuesModal = ({
         )
 
         // --- 1. fish_input.csv ---
-        const fishCSV = arrayToCSV(Object.values(fishInputState))
+
+        const fishRows = Object.values(fishInputState).map((fish: any) => ({
+          trapSite: visitSetupState.trapSite,
+          ...fish,
+        }))
+        const fishCSV = arrayToCSV(fishRows)
         zip.file(
           `catch_${formattedTrapSite}_${formattedSampleTime}.csv`,
           fishCSV

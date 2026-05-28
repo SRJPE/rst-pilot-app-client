@@ -3,6 +3,25 @@ import * as yup from 'yup'
 const getValidator = (field: any) => {
   let validator = yup.string() as any // Default to string validation
 
+  if (field.fieldName === 'secchi') {
+    validator = yup.mixed().nullable().test(
+      'secchi-value',
+      'Must be a number or "Too Clear for Secchi"',
+      (value: any) => {
+        if (value === null || value === undefined || value === '') return true
+        if (value === 'Too Clear for Secchi') return true
+        const num = Number(value)
+        return !isNaN(num) && num >= 0
+      }
+    )
+    if (field.required) {
+      validator = validator.required('Secchi is required')
+    } else {
+      validator = validator.nullable()
+    }
+    return validator
+  }
+
   if (field.fieldType === 'email') {
     validator = yup.string().email('Invalid email format')
   } else if (field.fieldType === 'input') {

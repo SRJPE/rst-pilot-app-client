@@ -18,6 +18,7 @@ import RSTRLogSheet from './RSTRLogSheet'
 import CustomSelect from '../Shared/CustomSelect'
 import { renderRequiredOrOptionalLabel } from '../../utils/utils'
 import RiverDepth from './RiverDepth'
+import SecchiInput from './SecchiInput'
 
 interface FieldInterface {
   id: number
@@ -344,6 +345,27 @@ const ConditionalTrapVisitFields = ({
         </>
       )
     }
+    if (fieldName === 'secchi' && fieldType === 'input') {
+      return (
+        <Box key={index} flexBasis='28%' minWidth='28%' maxWidth='28%' mr={8}>
+          <SecchiInput
+            value={values[fieldName]}
+            onChangeValue={val => {
+              setFieldTouched(fieldName, true)
+              setFieldValue(fieldName, val)
+            }}
+            onBlur={() => handleBlur(fieldName)}
+            touched={touched}
+            errors={errors}
+            displayName={displayName}
+            unitAbbrev={unitAbbrev}
+            validationSchema={validationSchema}
+            camelName={fieldName}
+          />
+        </Box>
+      )
+    }
+
     if (fieldType === 'input') {
       let inputWidth = '28%'
       if (fieldName.toLowerCase().includes('flow')) {

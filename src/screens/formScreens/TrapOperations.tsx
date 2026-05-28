@@ -188,7 +188,9 @@ const TrapOperations = ({
 
       if (conditionCode && conditionCode === '4') {
         sectionFields = sectionFields.map((field: any) => {
-          if (['length', 'width', 'depth'].includes(field.fieldName)) {
+          if (
+            ['length', 'width', 'depth', 'substrate'].includes(field.fieldName)
+          ) {
             const updatedField = {
               ...field,
               required: false,
@@ -337,8 +339,8 @@ const TrapOperations = ({
             waterTurbidity: values.recordTurbidityInPostProcessing
               ? null
               : values.waterTurbidity !== '' && values.waterTurbidity !== null
-              ? Number(values.waterTurbidity)
-              : values.waterTurbidity,
+                ? Number(values.waterTurbidity)
+                : values.waterTurbidity,
             trapVisitStopTime: endTime, //refactor needed
             trapVisitStartTime: new Date(),
           },

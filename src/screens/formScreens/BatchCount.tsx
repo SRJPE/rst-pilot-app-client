@@ -25,7 +25,7 @@ import {
   RadioIcon,
 } from '@/components/ui/radio'
 import { CircleIcon } from '@/components/ui/icon'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Keyboard } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
 import BatchCharacteristicsModalContent from '../../components/form/batchCount/BatchCharacteristicsModalContent'
@@ -112,10 +112,6 @@ const BatchCount = ({
   const [FC1Toggle, setFC1Toggle] = useState(false as boolean)
   const [FC2Toggle, setFC2Toggle] = useState(false as boolean)
   const [FC3Toggle, setFC3Toggle] = useState(false as boolean)
-  const [totalCatchCount, setTotalCatchCount] = useState(0 as number)
-  const [combinedFishMeasureCounts, setCombinedFishMeasureCounts] = useState(
-    {} as Record<string, any>
-  )
   const [fishMeasureMetModalOpen, setFishMeasureMetModalOpen] = useState(
     false as boolean
   )
@@ -203,6 +199,35 @@ const BatchCount = ({
     //   setMiltingToggle(null)
     // }
   }, [visitSetupState, visitSetupDefaults])
+
+  const combinedFishData = useMemo(() => {
+    const batchCountFishStore = Object.values(
+      batchCountStore?.forkLengths || {}
+    ).map((flObj: any) => ({
+      forkLength: flObj.forkLength,
+      run: flObj?.runDefinition,
+      lifeStage: flObj?.lifeStage?.toLowerCase(),
+      species: flObj?.species,
+      numFishCaught: Number(flObj?.numFishCaught) || 1,
+      plusCount: flObj?.plusCount || false,
+    }))
+    const existingFishStore = (fishInputSlice?.[tabSlice.activeTabId ?? '']
+      ?.fishStore || {}) as Record<string, any>
+    const combined: Record<string, any> = { ...existingFishStore }
+    let nextIndex = Object.keys(combined).length
+    for (const fish of batchCountFishStore) {
+      combined[nextIndex++] = fish
+    }
+    const total = Object.values(combined).reduce(
+      (sum: number, f: any) => sum + (Number(f.numFishCaught) || 0),
+      0
+    )
+    return {
+      combinedFishStoreObj: combined,
+      totalCatchCount: total,
+      fishMeasureCounts: getFishMeasureCounts(combined),
+    }
+  }, [batchCountStore?.forkLengths, fishInputSlice, tabSlice.activeTabId])
 
   const handlePressRemoveFish = () => {
     dispatch(removeLastForkLengthEntered())
@@ -322,50 +347,13 @@ const BatchCount = ({
       setProtocolKeyMet(null)
       return
     }
-
     if (batchCharacteristicsModalOpen) {
       setFishMeasureMetModalOpen(false)
       setProtocolKeyMet(null)
       return
     }
-    const batchCountFishStore = Object.values(batchCountStore?.forkLengths).map(
-      (flObj: any) => {
-        return {
-          forkLength: flObj.forkLength,
-          run: flObj?.runDefinition,
-          lifeStage: flObj?.lifeStage?.toLowerCase(),
-          species: flObj?.species,
-          numFishCaught: 1,
-        }
-      }
-    )
 
-    const existingFishStore = fishInputSlice?.[tabSlice.activeTabId]
-      ?.fishStore as Record<string, { numFishCaught: number }>
-
-    const combinedFishStoreObj = {
-      ...existingFishStore,
-    } as Record<string, any>
-
-    let nextIndex = Object.keys(combinedFishStoreObj).length
-    batchCountFishStore.forEach(fish => {
-      combinedFishStoreObj[nextIndex] = fish
-      nextIndex++
-    })
-
-    const combinedFishMeasureCountsObj =
-      getFishMeasureCounts(combinedFishStoreObj)
-    setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
-
-    if (!combinedFishStoreObj) return
-
-    const total = Object.values(combinedFishStoreObj).reduce(
-      (sum, fishObj) =>
-        sum + (fishObj.numFishCaught ? Number(fishObj.numFishCaught) : 0),
-      0
-    )
-
-    setTotalCatchCount(total)
+    const { fishMeasureCounts } = combinedFishData
     const lastFish = calculateLastFish(batchCountStore.forkLengths)
 
     let lastFishRunValue = ''
@@ -382,7 +370,7 @@ const BatchCount = ({
     }
 
     const protocolResult = checkFishMeasureProtocol({
-      fishMeasureCounts: combinedFishMeasureCountsObj,
+      fishMeasureCounts,
       fishMeasureProtocol: route.params?.fishMeasureProtocol,
       speciesValue: species as string,
       runValue: lastFishRunValue,
@@ -405,10 +393,10 @@ const BatchCount = ({
       setProtocolKeyMetLifeStage('')
     }
   }, [
+    combinedFishData,
     tabSlice.activeTabId,
-    fishInputSlice,
+    batchCharacteristicsModalOpen,
     batchCountStore?.batchCharacteristics?.species,
-    batchCountStore.forkLengths,
   ])
 
   const closeFishMeasureMetModal = () => {
@@ -456,8 +444,8 @@ const BatchCount = ({
             </Box>
             <Divider m='1%' />
 
-            {combinedFishMeasureCounts &&
-              Object.keys(combinedFishMeasureCounts).length && (
+            {combinedFishData.fishMeasureCounts &&
+              Object.keys(combinedFishData.fishMeasureCounts).length > 0 && (
                 <Box mb={4}>
                   <FishEntriesSummary
                     lastFishEntry={
@@ -467,11 +455,11 @@ const BatchCount = ({
                           }
                         : {}
                     }
-                    totalCatchCount={totalCatchCount}
+                    totalCatchCount={combinedFishData.totalCatchCount}
                     fishMeasureProtocol={
                       route.params?.fishMeasureProtocol || {}
                     }
-                    fishMeasureCounts={combinedFishMeasureCounts}
+                    fishMeasureCounts={combinedFishData.fishMeasureCounts}
                   />
                 </Box>
               )}
@@ -798,6 +786,19 @@ const BatchCount = ({
                   ladObject={ladObject}
                   visitSetupState={visitSetupState}
                 />
+                <Divider mb='1%' />
+                <Button
+                  leftIcon={<Icon as={FontAwesome} name={'plus'} />}
+                  background='primary'
+                  mr='auto'
+                  mt={3}
+                  px={5}
+                  onPress={() => setFishMeasureMetModalOpen(true)}
+                >
+                  <Text color='white' fontSize={18}>
+                    Add Plus Count
+                  </Text>
+                </Button>
                 {species !== 'Chinook salmon' && <View mb='65'></View>}
               </>
 

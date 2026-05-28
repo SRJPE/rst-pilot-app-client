@@ -374,11 +374,12 @@ const IncompleteSections = ({
             measureUnit: null,
           })
         } else {
+          const isTextOnly = isNaN(Number(values[field]))
           baseEnvValues.push({
             measureName: formFieldsLookup[field].fieldName,
-            measureValueNumeric: Number(values[field]),
+            measureValueNumeric: isTextOnly ? null : Number(values[field]),
             measureValueText: values[field]?.toString(),
-            measureUnit: formFieldsLookup[field].unitId || null,
+            measureUnit: isTextOnly ? null : formFieldsLookup[field].unitId || null,
           })
         }
       }

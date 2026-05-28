@@ -683,8 +683,7 @@ const TrapPostProcessing = ({
         return (
           <KeyboardAvoidingView
             flex={1}
-            // behavior='padding'
-            // keyboardVerticalOffset={100}
+            behavior='padding'
           >
             <ScrollView>
               <Pressable

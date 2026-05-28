@@ -34,18 +34,6 @@ const initialLayout = {
   width: Dimensions.get('window').width,
 }
 
-const DEFAULT_CELL = {
-  forkLength: null,
-  dead: false,
-  existingMark: false,
-  fishConditions: [],
-  lifeStage: null,
-  runDefinition: null,
-  species: '',
-  taxonCode: null,
-  uid: null,
-}
-
 function groupForkLengthsBySpecies(
   data: Record<string, any>
 ): Record<string, any[]> {
@@ -88,7 +76,6 @@ const MultiSpeciesBatchChart = ({
   fishMeasureCounts?: Record<string, any>
   fishMeasureProtocol?: Record<any, any>
 }) => {
-  console.log('tabSlice', tabSlice)
   const activeTabId = tabSlice?.activeTabId || 'placeholderId'
 
   const getRows = (activeSpeciesTab: string) => {
@@ -99,29 +86,10 @@ const MultiSpeciesBatchChart = ({
     return rows
   }
 
-  // ✅ Redux selector optimized with shallowEqual
-  const previouslyEnteredFish = useSelector((state: RootState) => {
-    if (!activeTabId) return []
-    const fishStore = state.fishInput[activeTabId]?.fishStore || {}
-    return Object.values(fishStore).filter(
-      (fish: any) => fish.species === speciesRadioValue
-    )
+  const previouslyEnteredFishStore = useSelector((state: RootState) => {
+    if (!activeTabId) return {}
+    return state.fishInput[activeTabId]?.fishStore || {}
   }, shallowEqual)
-
-  // ✅ Efficient calculation (no intermediate arrays)
-  const currentSpeciesPlusCount = useMemo(() => {
-    const combinedPlusCountTotal =
-      fishMeasureCounts[speciesRadioValue]?.plusCount || 0
-
-    return String(combinedPlusCountTotal || 0)
-  }, [batchCountStore.forkLengths, speciesRadioValue, fishMeasureCounts])
-
-  const currentSpeciesMeasuredCount = useMemo(() => {
-    const combinedMeasuredCountTotal =
-      fishMeasureCounts[speciesRadioValue]?.individualCount || 0
-
-    return String(combinedMeasuredCountTotal || 0)
-  }, [batchCountStore.forkLengths, speciesRadioValue, fishMeasureCounts])
 
   const [routes, setRoutes] = useState<Array<TabNavigationRoute>>([])
   const [fallToggle, setFallToggle] = useState(true)
@@ -129,6 +97,18 @@ const MultiSpeciesBatchChart = ({
   const [springToggle, setSpringToggle] = useState(true)
   const [winterToggle, setWinterToggle] = useState(true)
   const [hybridToggle, setHybridToggle] = useState(true)
+
+  // Derive active run names from toggle booleans so renderScene only sees
+  // one stable dep instead of five separate booleans.
+  const activeRuns = useMemo(() => {
+    const runs: string[] = []
+    if (fallToggle) runs.push('fall')
+    if (lateFallToggle) runs.push('late fall')
+    if (springToggle) runs.push('spring')
+    if (winterToggle) runs.push('winter')
+    if (hybridToggle) runs.push('hybrid')
+    return runs
+  }, [fallToggle, lateFallToggle, springToggle, winterToggle, hybridToggle])
 
   const forkLengths = useMemo(
     () => batchCountStore?.forkLengths || {},
@@ -140,8 +120,8 @@ const MultiSpeciesBatchChart = ({
   )
 
   const groupedPreviouslyEnteredFish = useMemo(
-    () => groupForkLengthsBySpecies(previouslyEnteredFish),
-    [previouslyEnteredFish]
+    () => groupForkLengthsBySpecies(previouslyEnteredFishStore),
+    [previouslyEnteredFishStore]
   )
 
   const groupedForkLengths = useMemo(
@@ -163,79 +143,25 @@ const MultiSpeciesBatchChart = ({
   }, [groupedForkLengths, groupedPreviouslyEnteredFish])
 
   const activeSpeciesTab = routes[tabIndex]?.title
-  const totalSlots = 50
 
-  const slots = useMemo(() => {
-    const rows = getRows(activeSpeciesTab)
-    let protocolSlots = fishMeasureProtocol[activeSpeciesTab] || totalSlots
+  const activeTabColor = useColorModeValue('#000', '#e5e5e5')
+  const inactiveTabColor = useColorModeValue('#1f2937', '#a1a1aa')
+  const inactiveBorderColor = useColorModeValue('coolGray.200', 'gray.400')
 
-    if (
-      activeSpeciesTab &&
-      activeSpeciesTab.toLocaleLowerCase().includes('chinook') &&
-      rows * 10 > protocolSlots
-    ) {
-      protocolSlots = rows * 10
-    }
-
-    let fishCellData = combinedFishObj[activeSpeciesTab] || []
-
-    console.log('fishCellData', fishCellData)
-
-    if (
-      activeSpeciesTab &&
-      activeSpeciesTab.toLocaleLowerCase().includes('chinook')
-    ) {
-      const filteredFishByRun = combinedFishObj?.[activeSpeciesTab]?.filter(
-        item => {
-          const toggledRuns = []
-          if (fallToggle) toggledRuns.push('fall')
-          if (lateFallToggle) toggledRuns.push('late fall')
-          if (springToggle) toggledRuns.push('spring')
-          if (winterToggle) toggledRuns.push('winter')
-          if (hybridToggle) toggledRuns.push('hybrid')
-
-          return (
-            toggledRuns.includes(item.runDefinition) ||
-            toggledRuns.includes(item.run)
-          )
-        }
-      )
-      fishCellData = filteredFishByRun || []
-    }
-
-    return Array.from({ length: protocolSlots }, (_, i) => {
-      const cellData = fishCellData[i] || DEFAULT_CELL
-      return { index: i, cellData }
-    })
-  }, [
-    combinedFishObj,
-    activeSpeciesTab,
-    fishMeasureProtocol,
-    fallToggle,
-    springToggle,
-    winterToggle,
-    lateFallToggle,
-    hybridToggle,
-  ])
-
-  // ✅ Memoized renderScene
+  // ✅ Memoized renderScene — does NOT depend on speciesRadioValue or active tab,
+  // so switching tabs no longer invalidates all scenes.
   const renderScene = useCallback(
     ({ route }: { route: TabNavigationRoute }) => (
       <MultiSpeciesChartTab
         species={route.title}
         activeTab={route.key}
-        slots={slots}
-        currentSpeciesPlusCount={currentSpeciesPlusCount}
-        currentSpeciesMeasuredCount={currentSpeciesMeasuredCount}
         combinedFishObj={combinedFishObj}
+        fishMeasureCounts={fishMeasureCounts}
+        fishMeasureProtocol={fishMeasureProtocol}
+        activeRuns={activeRuns}
       />
     ),
-    [
-      slots,
-      currentSpeciesPlusCount,
-      currentSpeciesMeasuredCount,
-      combinedFishObj,
-    ]
+    [combinedFishObj, fishMeasureCounts, fishMeasureProtocol, activeRuns]
   )
 
   // ✅ Memoized renderTabBar
@@ -249,14 +175,9 @@ const MultiSpeciesBatchChart = ({
         <ScrollView horizontal>
           {props.navigationState.routes.map(
             (route: TabNavigationRoute, i: number) => {
-              const color =
-                tabIndex === i
-                  ? useColorModeValue('#000', '#e5e5e5')
-                  : useColorModeValue('#1f2937', '#a1a1aa')
+              const color = tabIndex === i ? activeTabColor : inactiveTabColor
               const borderColor =
-                tabIndex === i
-                  ? 'cyan.500'
-                  : useColorModeValue('coolGray.200', 'gray.400')
+                tabIndex === i ? 'cyan.500' : inactiveBorderColor
               return (
                 <Pressable
                   key={route.key}
@@ -283,7 +204,14 @@ const MultiSpeciesBatchChart = ({
         </ScrollView>
       </Box>
     ),
-    [tabIndex, setTabIndex, setSpeciesRadioValue]
+    [
+      tabIndex,
+      setTabIndex,
+      setSpeciesRadioValue,
+      activeTabColor,
+      inactiveTabColor,
+      inactiveBorderColor,
+    ]
   )
 
   // Build routes once per species change
@@ -294,14 +222,6 @@ const MultiSpeciesBatchChart = ({
     }))
     setRoutes(newRoutes)
   }, [selectedSpecies])
-
-  // Update tab index when speciesRadioValue changes
-  useEffect(() => {
-    const spvTabIndex = routes.findIndex(
-      route => route.title === speciesRadioValue
-    )
-    setTabIndex(spvTabIndex >= 0 ? spvTabIndex : 0)
-  }, [speciesRadioValue, routes, setTabIndex])
 
   const getChartHeight = (activeSpeciesTab: string) => {
     const rows = getRows(activeSpeciesTab)
@@ -350,7 +270,12 @@ const MultiSpeciesBatchChart = ({
         navigationState={{ index: tabIndex, routes }}
         renderScene={renderScene}
         renderTabBar={renderTabBar}
-        onIndexChange={setTabIndex}
+        onIndexChange={index => {
+          setTabIndex(index)
+          if (routes[index]) {
+            setSpeciesRadioValue(routes[index].title)
+          }
+        }}
         initialLayout={initialLayout}
         style={{
           marginTop: StatusBar.currentHeight,

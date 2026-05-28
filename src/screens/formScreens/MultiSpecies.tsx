@@ -127,6 +127,7 @@ const MultiSpecies = ({
   )
   const [showAddPlusCountButton, setShowAddPlusCountButton] =
     useState<boolean>(false)
+
   const [programFormFieldsObj, setProgramFormFieldsObj] = useState(
     {} as Record<string, any>
   )
@@ -146,13 +147,55 @@ const MultiSpecies = ({
 
   const reorderedTaxon = reorderTaxon(dropdownsStore.values.taxon)
 
+  // Pre-compute combined fish store and measure counts once — independent of
+  // speciesRadioValue so switching species tabs doesn't trigger a full rebuild.
+  const combinedFishData = useMemo(() => {
+    const activeTabId = tabSlice.activeTabId
+    const batchCountFishStore = Object.values(
+      batchCountStore?.forkLengths || {}
+    ).map((flObj: any) => ({
+      forkLength: flObj.forkLength,
+      run: flObj?.runDefinition,
+      lifeStage: flObj?.lifeStage?.toLowerCase(),
+      species: flObj?.species,
+      numFishCaught: Number(flObj?.numFishCaught) || 1,
+      plusCount: flObj?.plusCount || false,
+    }))
+
+    const existingFishStore =
+      (activeTabId ? fishInputSlice[activeTabId]?.fishStore : null) ?? {}
+    const combined: Record<string, any> = { ...existingFishStore }
+
+    let total = Object.values(existingFishStore).reduce(
+      (sum: number, fish) => sum + (Number((fish as any).numFishCaught) || 0),
+      0
+    )
+
+    let nextIndex = Object.keys(combined).length
+    for (const fish of batchCountFishStore) {
+      combined[nextIndex++] = fish
+      total += Number(fish.numFishCaught) || 0
+    }
+
+    return {
+      combinedFishStoreObj: combined,
+      totalCatchCount: total,
+      fishMeasureCounts: getFishMeasureCounts(combined),
+    }
+  }, [batchCountStore.forkLengths, fishInputSlice, tabSlice.activeTabId])
+
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
   const { multiSpecies, fishConditions, existingMarks, adiposeClipped } =
     batchCharacteristics
 
+  // Sync pre-computed values into state (avoids redundant setState on species switch)
+  useEffect(() => {
+    setTotalCatchCount(combinedFishData.totalCatchCount)
+    setCombinedFishMeasureCounts(combinedFishData.fishMeasureCounts)
+  }, [combinedFishData])
+
   useEffect(() => {
     if (!isFocused) {
-      console.log('🧹 Screen blurred — clearing form')
       setFishMeasureMetModalOpen(false)
       setProtocolKeyMet(null)
       setProtocolKeyMetRun('')
@@ -209,7 +252,6 @@ const MultiSpecies = ({
         trapOperationsStore,
         lengthAtDateModel,
       })
-      console.log('ladObjectForTrapDate', ladObjectForTrapDate)
       setLadObject(ladObjectForTrapDate)
     } else {
       setLadObject(null)
@@ -338,7 +380,6 @@ const MultiSpecies = ({
   const currentRoute = navState?.routes[navState?.index]
   useFocusEffect(
     useCallback(() => {
-      // Early exits
       if (
         currentRoute?.name !== 'Multi Species' ||
         !tabSlice?.activeTabId ||
@@ -350,46 +391,16 @@ const MultiSpecies = ({
         return
       }
 
-      // Build batch store (memoized outside)
-      const batchCountFishStore = Object.values(
+      const { fishMeasureCounts } = combinedFishData
+
+      const plusCountExists = Object.values(
         batchCountStore?.forkLengths || {}
-      ).map((flObj: any) => ({
-        forkLength: flObj.forkLength,
-        run: flObj?.runDefinition,
-        lifeStage: flObj?.lifeStage?.toLowerCase(),
-        species: flObj?.species,
-        numFishCaught: Number(flObj?.numFishCaught) || 1,
-        plusCount: flObj?.plusCount || false,
-      }))
-
-      const existingFishStore =
-        fishInputSlice[tabSlice.activeTabId]?.fishStore ?? {}
-      const combinedFishStoreObj: Record<string, any> = { ...existingFishStore }
-
-      let total = Object.values(existingFishStore).reduce(
-        (sum: number, fishObj) =>
-          sum + (Number((fishObj as any).numFishCaught) || 0),
-        0
-      )
-
-      let nextIndex = Object.keys(combinedFishStoreObj).length
-      batchCountFishStore.forEach(fish => {
-        combinedFishStoreObj[nextIndex++] = fish
-        total += Number(fish.numFishCaught) || 0
-      })
-
-      setTotalCatchCount(total)
-
-      const combinedFishMeasureCountsObj =
-        getFishMeasureCounts(combinedFishStoreObj)
-      setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
-
-      const plusCountExists = batchCountFishStore.some(
-        fishObj => fishObj.species === speciesRadioValue && fishObj.plusCount
+      ).some(
+        (flObj: any) => flObj.species === speciesRadioValue && flObj.plusCount
       )
 
       const protocolResult = checkFishMeasureProtocol({
-        fishMeasureCounts: combinedFishMeasureCountsObj,
+        fishMeasureCounts,
         fishMeasureProtocol: route.params?.fishMeasureProtocol,
         speciesValue: speciesRadioValue,
         runValue: '',
@@ -408,7 +419,7 @@ const MultiSpecies = ({
     }, [
       tabSlice.activeTabId,
       speciesRadioValue,
-      batchCountStore.forkLengths,
+      combinedFishData,
       currentRoute?.name,
       multiSpeciesModalOpen,
       fishInputSlice,
@@ -419,52 +430,14 @@ const MultiSpecies = ({
   const handleAddPlusCountClick = () => {
     setFishMeasureMetModalOpen(true)
     if (tabSlice?.activeTabId && speciesRadioValue) {
-      // Build batch store (memoized outside)
-      const batchCountFishStore = Object.values(
-        batchCountStore?.forkLengths || {}
-      ).map((flObj: any) => ({
-        forkLength: flObj.forkLength,
-        run: flObj?.runDefinition,
-        lifeStage: flObj?.lifeStage?.toLowerCase(),
-        species: flObj?.species,
-        numFishCaught: Number(flObj?.numFishCaught) || 1,
-        plusCount: flObj?.plusCount || false,
-      }))
-
-      const existingFishStore =
-        fishInputSlice[tabSlice.activeTabId]?.fishStore ?? {}
-      const combinedFishStoreObj: Record<string, any> = { ...existingFishStore }
-
-      let total = Object.values(existingFishStore).reduce(
-        (sum: number, fishObj) =>
-          sum + (Number((fishObj as any).numFishCaught) || 0),
-        0
-      )
-
-      let nextIndex = Object.keys(combinedFishStoreObj).length
-      batchCountFishStore.forEach(fish => {
-        combinedFishStoreObj[nextIndex++] = fish
-        total += fish.numFishCaught || 0
-      })
-      const combinedFishMeasureCountsObj =
-        getFishMeasureCounts(combinedFishStoreObj)
-      setCombinedFishMeasureCounts(combinedFishMeasureCountsObj)
       const protocolResult = checkFishMeasureProtocol({
-        fishMeasureCounts: combinedFishMeasureCountsObj,
+        fishMeasureCounts: combinedFishData.fishMeasureCounts,
         fishMeasureProtocol: route.params?.fishMeasureProtocol,
         speciesValue: speciesRadioValue,
         runValue: '',
         lifeStageValue: '',
       })
-
-      if (protocolResult?.protocolMet) {
-        setShowAddPlusCountButton(true)
-      } else {
-        setShowAddPlusCountButton(false)
-        setFishMeasureMetModalOpen(false)
-      }
-
-      setProtocolKeyMet(protocolResult?.protocolKeyMet ?? null)
+      setProtocolKeyMet(protocolResult?.protocolKeyMet ?? speciesRadioValue)
     }
   }
 
@@ -575,6 +548,8 @@ const MultiSpecies = ({
                       value={speciesRadioValue}
                       onChange={nextValue => {
                         setSpeciesRadioValue(nextValue)
+                        const idx = multiSpecies?.indexOf(nextValue) ?? -1
+                        setTabIndex(idx >= 0 ? idx : 0)
                       }}
                     >
                       <Box
@@ -826,67 +801,65 @@ const MultiSpecies = ({
                   </Box>
                 )}
 
-                {showAddPlusCountButton ? (
-                  <>
-                    <Divider mb='1%' />
-
-                    <Button
-                      leftIcon={<Icon as={FontAwesome} name={'plus'} />}
-                      background='primary'
-                      mr='auto'
-                      px={5}
-                      onPress={handleAddPlusCountClick}
-                    >
-                      <Text color='white' fontSize={18}>
-                        Add Plus Count
-                      </Text>
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <VStack alignItems='center' justifyContent='center'>
-                      <Heading size='sm' pb='2%'>
-                        {showTable
-                          ? 'Record count for each fork length: '
-                          : 'Select size range for fork length buttons: '}
-                      </Heading>
-                      <ForkLengthButtonGroup
-                        setFirstButton={setFirstButton}
-                        setLifeStageRadioValue={setLifeStageRadioValue}
-                        setNumberOfAdditionalButtons={
-                          setNumberOfAdditionalButtons
-                        }
-                        selectedProgramObj={route?.params?.selectedProgramObj}
-                        disabled={speciesRadioValue === ''}
+                <>
+                  {!showAddPlusCountButton && (
+                    <>
+                      <VStack alignItems='center' justifyContent='center'>
+                        <Heading size='sm' pb='2%'>
+                          {showTable
+                            ? 'Record count for each fork length: '
+                            : 'Select size range for fork length buttons: '}
+                        </Heading>
+                        <ForkLengthButtonGroup
+                          setFirstButton={setFirstButton}
+                          setLifeStageRadioValue={setLifeStageRadioValue}
+                          setNumberOfAdditionalButtons={
+                            setNumberOfAdditionalButtons
+                          }
+                          selectedProgramObj={route?.params?.selectedProgramObj}
+                          disabled={speciesRadioValue === ''}
+                        />
+                      </VStack>
+                      <BatchCountButtonGrid
+                        firstButton={firstButton}
+                        numberOfAdditionalButtons={numberOfAdditionalButtons}
+                        selectedLifeStage={lifeStageRadioValue}
+                        ignoreLifeStage={speciesRadioValue !== 'Chinook salmon'}
+                        deadToggle={deadToggle}
+                        markToggle={markToggle}
+                        adiposeClippedToggle={adiposeClippedToggle}
+                        fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
+                          .map((toggle, index) =>
+                            toggle ? fishConditions[index] : null
+                          )
+                          .filter(condition => condition !== null)}
+                        handleToggles={handleToggles}
+                        activeTabId={tabSlice.activeTabId}
+                        species={speciesRadioValue}
+                        taxonCode={findTaxonCode(
+                          speciesRadioValue,
+                          reorderedTaxon
+                        )}
+                        ladObject={ladObject}
+                        miltingToggle={miltingToggle}
+                        eggsToggle={eggsToggle}
+                        visitSetupState={visitSetupState}
                       />
-                    </VStack>
-                    <BatchCountButtonGrid
-                      firstButton={firstButton}
-                      numberOfAdditionalButtons={numberOfAdditionalButtons}
-                      selectedLifeStage={lifeStageRadioValue}
-                      ignoreLifeStage={speciesRadioValue !== 'Chinook salmon'}
-                      deadToggle={deadToggle}
-                      markToggle={markToggle}
-                      adiposeClippedToggle={adiposeClippedToggle}
-                      fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
-                        .map((toggle, index) =>
-                          toggle ? fishConditions[index] : null
-                        )
-                        .filter(condition => condition !== null)}
-                      handleToggles={handleToggles}
-                      activeTabId={tabSlice.activeTabId}
-                      species={speciesRadioValue}
-                      taxonCode={findTaxonCode(
-                        speciesRadioValue,
-                        reorderedTaxon
-                      )}
-                      ladObject={ladObject}
-                      miltingToggle={miltingToggle}
-                      eggsToggle={eggsToggle}
-                      visitSetupState={visitSetupState}
-                    />
-                  </>
-                )}
+                    </>
+                  )}
+                  <Divider mb='1%' />
+                  <Button
+                    leftIcon={<Icon as={FontAwesome} name={'plus'} />}
+                    background='primary'
+                    mr='auto'
+                    px={5}
+                    onPress={handleAddPlusCountClick}
+                  >
+                    <Text color='white' fontSize={18}>
+                      Add Plus Count
+                    </Text>
+                  </Button>
+                </>
                 {speciesRadioValue !== 'Chinook salmon' && (
                   <View mb='65'></View>
                 )}
@@ -955,13 +928,7 @@ const MultiSpecies = ({
       )}
       {fishMeasureMetModalOpen && (
         <CustomModal
-          isOpen={
-            fishMeasureMetModalOpen &&
-            !!protocolKeyMet &&
-            protocolKeyMet
-              .toLowerCase()
-              .includes(speciesRadioValue.toLowerCase())
-          }
+          isOpen={fishMeasureMetModalOpen}
           closeModal={closeFishMeasureMetModal}
           height='40%'
           width={'80%'}
