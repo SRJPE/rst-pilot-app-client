@@ -411,8 +411,8 @@ const MultiSpecies = ({
         setShowAddPlusCountButton(true)
         if (!plusCountExists) setFishMeasureMetModalOpen(true)
       } else {
-        setShowAddPlusCountButton(false)
-        setFishMeasureMetModalOpen(false)
+        // setShowAddPlusCountButton(false)
+        // setFishMeasureMetModalOpen(false)
       }
 
       setProtocolKeyMet(protocolResult?.protocolKeyMet ?? null)
@@ -853,6 +853,7 @@ const MultiSpecies = ({
                     background='primary'
                     mr='auto'
                     px={5}
+                    ml='5'
                     onPress={handleAddPlusCountClick}
                   >
                     <Text color='white' fontSize={18}>

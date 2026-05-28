@@ -793,6 +793,7 @@ const BatchCount = ({
                   mr='auto'
                   mt={3}
                   px={5}
+                  ml='5'
                   onPress={() => setFishMeasureMetModalOpen(true)}
                 >
                   <Text color='white' fontSize={18}>

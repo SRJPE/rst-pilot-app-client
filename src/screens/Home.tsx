@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   Text,
   VStack,
@@ -10,11 +10,10 @@ import {
   HStack,
 } from 'native-base'
 import BottomNavigation from '../components/home/HomeNavButtons'
-import { StyleSheet } from 'react-native'
+import { Animated, Easing, StyleSheet } from 'react-native'
 import AppLogo from '../components/Shared/AppLogo'
 import { Entypo } from '@expo/vector-icons'
 import { getVisitSetupDefaults } from '../redux/reducers/visitSetupDefaults'
-import { getTrapVisitDropdownValues } from '../redux/reducers/dropdownsSlice'
 import { fetchPreviousTrapAndCatch } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
 import { RootState, AppDispatch } from '../redux/store'
 import { connect, useDispatch, useSelector } from 'react-redux'
@@ -84,6 +83,27 @@ const Home = ({
   const dispatch = useDispatch<AppDispatch>()
 
   const connectivityState = useSelector((state: any) => state.connectivity)
+  const fetchStatus = useSelector(
+    (state: RootState) => state.trapVisitFormPostBundler.fetchStatus
+  )
+  const isLoading =
+    fetchStatus === 'initial-state' || fetchStatus === 'fetch-pending'
+
+  const spinValue = useRef(new Animated.Value(0)).current
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(spinValue, {
+        toValue: 1,
+        duration: 3000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    ).start()
+  }, [])
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '-360deg'],
+  })
 
   useEffect(() => {
     setVisitsRequiringTurbidity(
@@ -109,7 +129,6 @@ const Home = ({
     ) {
       try {
         dispatch(getVisitSetupDefaults(userCredentialsStore.id))
-        dispatch(getTrapVisitDropdownValues(userCredentialsStore.id))
         dispatch(fetchPreviousTrapAndCatch())
       } catch (error) {
         console.log('error from home screen: ', error)
@@ -127,8 +146,6 @@ const Home = ({
       if (userCredentialsStore?.id && !userCredentialsStore.userPrograms) {
         try {
           dispatch(getVisitSetupDefaults(userCredentialsStore.id))
-          dispatch(getTrapVisitDropdownValues(userCredentialsStore.id))
-
           dispatch(getUserPrograms(userCredentialsStore?.id))
         } catch (error) {
           console.log('error from home screen: ', error)
@@ -157,9 +174,6 @@ const Home = ({
               <Text fontSize={30} textAlign={'center'}>
                 {text}
               </Text>
-              {/* <Text color='#A1A1A1' fontSize={20}>
-            {date}
-          </Text> */}
             </View>
           </View>
         </Box>
@@ -174,7 +188,6 @@ const Home = ({
       alignItems='center'
       justifyContent='space-between'
       bg='#FFFFFF'
-      // opacity={staggerOpen ? 0.25 : 1.0}
     >
       <View ml='10' mt='10' mb='-5' alignSelf='flex-start'>
         <IconButton
@@ -200,7 +213,7 @@ const Home = ({
             style={[
               { opacity: opacity },
               styles.actionRequiredContainer,
-              { width: getCardWidth(), height: '100%' }, // full height of HStack
+              { width: getCardWidth(), height: '100%' },
             ]}
           >
             <AlertDialog
@@ -222,7 +235,7 @@ const Home = ({
             style={[
               { opacity: opacity },
               styles.actionRequiredContainer,
-              { width: getCardWidth(), height: '100%' }, // full height of HStack
+              { width: getCardWidth(), height: '100%' },
             ]}
           >
             <AlertDialog
@@ -246,6 +259,33 @@ const Home = ({
         setStaggerOpen={setStaggerOpen}
         staggerOpen={staggerOpen}
       />
+
+      {isLoading && (
+        <Box
+          position='absolute'
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          bg='rgba(255,255,255,0.85)'
+          justifyContent='center'
+          alignItems='center'
+          zIndex={999}
+        >
+          <Animated.Image
+            source={require('../../assets/data-tackle-spinner.png')}
+            style={{
+              transform: [{ rotate: spin }],
+              width: 300,
+              height: 300,
+            }}
+            alt='loading'
+          />
+          <Text fontSize='lg' mt={4} color='gray.600'>
+            Loading...
+          </Text>
+        </Box>
+      )}
     </VStack>
   )
 }

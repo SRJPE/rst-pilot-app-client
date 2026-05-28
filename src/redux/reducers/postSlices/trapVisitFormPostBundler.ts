@@ -9,7 +9,7 @@ import { AxiosError } from 'axios'
 import { getVisitSetupDefaults } from '../visitSetupDefaults'
 
 interface InitialStateI {
-  fetchStatus: 'initial-state' | 'fetch-failed' | 'fetch-successful'
+  fetchStatus: 'initial-state' | 'fetch-pending' | 'fetch-failed' | 'fetch-successful'
   submissionStatus:
     | 'not-submitted'
     | 'submitting...'
@@ -1000,6 +1000,10 @@ export const trapVisitPostBundler = createSlice({
         state.previousCatchRawSubmissions.push(...catchRawResponse)
       }
 
+    })
+
+    builder.addCase(fetchPreviousTrapAndCatch.pending.type, state => {
+      state.fetchStatus = 'fetch-pending'
     })
 
     builder.addCase(
