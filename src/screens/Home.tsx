@@ -102,7 +102,7 @@ const Home = ({
   }, [])
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '-360deg'],
+    outputRange: ['0deg', '360deg'],
   })
 
   useEffect(() => {
