@@ -49,7 +49,7 @@ const MultiSpeciesChartTab = ({
     const rows = Math.ceil(individualFish.length / 10) || 1
 
     let protocolSlots = fishMeasureProtocol[species] || TOTAL_SLOTS
-    if (isChinook && rows * 10 > protocolSlots) {
+    if (rows * 10 > protocolSlots) {
       protocolSlots = rows * 10
     }
 
@@ -115,6 +115,7 @@ const MultiSpeciesChartTab = ({
         keyExtractor={item => item.cellData.uid ?? `slot-${item.index}`}
         numColumns={10}
         scrollEnabled={false}
+        style={{ width: '100%' }}
         renderItem={({ item }) => {
           const { cellData, index } = item
           return cellData.forkLength ? (

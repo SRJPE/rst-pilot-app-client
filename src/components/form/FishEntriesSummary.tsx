@@ -10,7 +10,7 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion'
 import { ChevronUpIcon, ChevronDownIcon } from '@/components/ui/icon'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { startCase } from 'lodash'
 import { sumCountsWithFallback } from '@/src/utils/utils'
 
@@ -225,4 +225,4 @@ const FishEntriesSummary = ({
   )
 }
 
-export default FishEntriesSummary
+export default React.memo(FishEntriesSummary)

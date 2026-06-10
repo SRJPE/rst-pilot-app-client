@@ -63,6 +63,8 @@ import { getLadObject } from '../../utils/helpers/helperFunctions'
 import ToggleLockButton from '@/src/components/Shared/ToggleLockButton'
 import { find, keyBy } from 'lodash'
 
+const EMPTY_FISH_MEASURE_PROTOCOL: Record<string, number> = {}
+
 const MultiSpecies = ({
   route,
   tabSlice,
@@ -125,8 +127,6 @@ const MultiSpecies = ({
   const [fishMeasureMetModalOpen, setFishMeasureMetModalOpen] = useState(
     false as boolean
   )
-  const [showAddPlusCountButton, setShowAddPlusCountButton] =
-    useState<boolean>(false)
 
   const [programFormFieldsObj, setProgramFormFieldsObj] = useState(
     {} as Record<string, any>
@@ -145,7 +145,10 @@ const MultiSpecies = ({
 
   const isFocused = useIsFocused()
 
-  const reorderedTaxon = reorderTaxon(dropdownsStore.values.taxon)
+  const reorderedTaxon = useMemo(
+    () => reorderTaxon(dropdownsStore.values.taxon),
+    [dropdownsStore.values.taxon]
+  )
 
   // Pre-compute combined fish store and measure counts once — independent of
   // speciesRadioValue so switching species tabs doesn't trigger a full rebuild.
@@ -182,11 +185,23 @@ const MultiSpecies = ({
       totalCatchCount: total,
       fishMeasureCounts: getFishMeasureCounts(combined),
     }
-  }, [batchCountStore.forkLengths, fishInputSlice, tabSlice.activeTabId])
+  }, [
+    batchCountStore.forkLengths,
+    fishInputSlice[tabSlice.activeTabId ?? '']?.fishStore,
+    tabSlice.activeTabId,
+  ])
 
   const { tabId, batchCharacteristics, forkLengths } = batchCountStore
   const { multiSpecies, fishConditions, existingMarks, adiposeClipped } =
     batchCharacteristics
+
+  const activeFishConditions = useMemo(
+    () =>
+      [FC1Toggle, FC2Toggle, FC3Toggle]
+        .map((toggle, index) => (toggle ? fishConditions[index] : null))
+        .filter((c): c is string => c !== null),
+    [FC1Toggle, FC2Toggle, FC3Toggle, fishConditions]
+  )
 
   // Sync pre-computed values into state (avoids redundant setState on species switch)
   useEffect(() => {
@@ -319,51 +334,51 @@ const MultiSpecies = ({
     return count
   }
 
-  const handleToggles = (toggleName: string) => {
-    switch (toggleName) {
-      case 'dead':
-        if (deadIsLocked) break
-        setDeadToggle(!deadToggle)
-        break
-      case 'mark':
-        setMarkToggle(!markToggle)
-        break
-      case 'adiposeClipped':
-        setAdiposeClippedToggle(!adiposeClippedToggle)
-        break
-      case 'FC1':
-        setFC1Toggle(!FC1Toggle)
-        break
-      case 'FC2':
-        setFC2Toggle(!FC2Toggle)
-        break
-      case 'FC3':
-        setFC3Toggle(!FC3Toggle)
-        break
-      case 'milting':
-        if (miltingIsLocked) return
-
-        setMiltingToggle(!miltingToggle)
-        break
-      case 'eggs':
-        if (eggsIsLocked) return
-
-        setEggsToggle(!eggsToggle)
-        break
-
-      default:
-        setMarkToggle(false)
-        setEggsToggle(false)
-        setMiltingToggle(false)
-        setFC1Toggle(false)
-        setFC2Toggle(false)
-        setFC3Toggle(false)
-        setAdiposeClippedToggle(false)
-        if (deadIsLocked) break
-        setDeadToggle(false)
-        break
-    }
-  }
+  const handleToggles = useCallback(
+    (toggleName: string) => {
+      switch (toggleName) {
+        case 'dead':
+          if (deadIsLocked) break
+          setDeadToggle(t => !t)
+          break
+        case 'mark':
+          setMarkToggle(t => !t)
+          break
+        case 'adiposeClipped':
+          setAdiposeClippedToggle(t => !t)
+          break
+        case 'FC1':
+          setFC1Toggle(t => !t)
+          break
+        case 'FC2':
+          setFC2Toggle(t => !t)
+          break
+        case 'FC3':
+          setFC3Toggle(t => !t)
+          break
+        case 'milting':
+          if (miltingIsLocked) return
+          setMiltingToggle(t => !t)
+          break
+        case 'eggs':
+          if (eggsIsLocked) return
+          setEggsToggle(t => !t)
+          break
+        default:
+          setMarkToggle(false)
+          setEggsToggle(false)
+          setMiltingToggle(false)
+          setFC1Toggle(false)
+          setFC2Toggle(false)
+          setFC3Toggle(false)
+          setAdiposeClippedToggle(false)
+          if (deadIsLocked) break
+          setDeadToggle(false)
+          break
+      }
+    },
+    [deadIsLocked, miltingIsLocked, eggsIsLocked]
+  )
 
   const handlePressLockDead = () => {
     setDeadIsLocked(!deadIsLocked)
@@ -408,21 +423,18 @@ const MultiSpecies = ({
       })
 
       if (protocolResult?.protocolMet) {
-        setShowAddPlusCountButton(true)
         if (!plusCountExists) setFishMeasureMetModalOpen(true)
       } else {
-        // setShowAddPlusCountButton(false)
-        // setFishMeasureMetModalOpen(false)
+        setFishMeasureMetModalOpen(false)
       }
 
       setProtocolKeyMet(protocolResult?.protocolKeyMet ?? null)
     }, [
       tabSlice.activeTabId,
       speciesRadioValue,
-      combinedFishData,
+      combinedFishData.fishMeasureCounts,
       currentRoute?.name,
       multiSpeciesModalOpen,
-      fishInputSlice,
       route.params?.fishMeasureProtocol,
     ])
   )
@@ -448,6 +460,14 @@ const MultiSpecies = ({
 
   const currentSpeciesFishMeasureProtocol =
     route.params?.fishMeasureProtocol[speciesRadioValue]
+
+  const lastFishEntry = useMemo(
+    () => ({
+      species: speciesRadioValue,
+      ...calculateLastFish(batchCountStore.forkLengths),
+    }),
+    [speciesRadioValue, batchCountStore.forkLengths]
+  )
 
   const showMiltingToggle =
     programFormFieldsObj?.['milting'] &&
@@ -514,13 +534,11 @@ const MultiSpecies = ({
               Object.keys(combinedFishMeasureCounts).length && (
                 <Box mb={4}>
                   <FishEntriesSummary
-                    lastFishEntry={{
-                      species: speciesRadioValue,
-                      ...calculateLastFish(batchCountStore.forkLengths),
-                    }}
+                    lastFishEntry={lastFishEntry}
                     totalCatchCount={totalCatchCount}
                     fishMeasureProtocol={
-                      route.params?.fishMeasureProtocol || {}
+                      route.params?.fishMeasureProtocol ??
+                      EMPTY_FISH_MEASURE_PROTOCOL
                     }
                     fishMeasureCounts={combinedFishMeasureCounts}
                     showSpeciesCounts={true}
@@ -534,7 +552,9 @@ const MultiSpecies = ({
               speciesRadioValue={speciesRadioValue}
               setSpeciesRadioValue={setSpeciesRadioValue}
               fishMeasureCounts={combinedFishMeasureCounts}
-              fishMeasureProtocol={route.params?.fishMeasureProtocol || {}}
+              fishMeasureProtocol={
+                route.params?.fishMeasureProtocol ?? EMPTY_FISH_MEASURE_PROTOCOL
+              }
             />
             <VStack space={3}>
               <>
@@ -802,51 +822,40 @@ const MultiSpecies = ({
                 )}
 
                 <>
-                  {!showAddPlusCountButton && (
-                    <>
-                      <VStack alignItems='center' justifyContent='center'>
-                        <Heading size='sm' pb='2%'>
-                          {showTable
-                            ? 'Record count for each fork length: '
-                            : 'Select size range for fork length buttons: '}
-                        </Heading>
-                        <ForkLengthButtonGroup
-                          setFirstButton={setFirstButton}
-                          setLifeStageRadioValue={setLifeStageRadioValue}
-                          setNumberOfAdditionalButtons={
-                            setNumberOfAdditionalButtons
-                          }
-                          selectedProgramObj={route?.params?.selectedProgramObj}
-                          disabled={speciesRadioValue === ''}
-                        />
-                      </VStack>
-                      <BatchCountButtonGrid
-                        firstButton={firstButton}
-                        numberOfAdditionalButtons={numberOfAdditionalButtons}
-                        selectedLifeStage={lifeStageRadioValue}
-                        ignoreLifeStage={speciesRadioValue !== 'Chinook salmon'}
-                        deadToggle={deadToggle}
-                        markToggle={markToggle}
-                        adiposeClippedToggle={adiposeClippedToggle}
-                        fishConditions={[FC1Toggle, FC2Toggle, FC3Toggle]
-                          .map((toggle, index) =>
-                            toggle ? fishConditions[index] : null
-                          )
-                          .filter(condition => condition !== null)}
-                        handleToggles={handleToggles}
-                        activeTabId={tabSlice.activeTabId}
-                        species={speciesRadioValue}
-                        taxonCode={findTaxonCode(
-                          speciesRadioValue,
-                          reorderedTaxon
-                        )}
-                        ladObject={ladObject}
-                        miltingToggle={miltingToggle}
-                        eggsToggle={eggsToggle}
-                        visitSetupState={visitSetupState}
-                      />
-                    </>
-                  )}
+                  <VStack alignItems='center' justifyContent='center'>
+                    <Heading size='sm' pb='2%'>
+                      {showTable
+                        ? 'Record count for each fork length: '
+                        : 'Select size range for fork length buttons: '}
+                    </Heading>
+                    <ForkLengthButtonGroup
+                      setFirstButton={setFirstButton}
+                      setLifeStageRadioValue={setLifeStageRadioValue}
+                      setNumberOfAdditionalButtons={
+                        setNumberOfAdditionalButtons
+                      }
+                      selectedProgramObj={route?.params?.selectedProgramObj}
+                      disabled={speciesRadioValue === ''}
+                    />
+                  </VStack>
+                  <BatchCountButtonGrid
+                    firstButton={firstButton}
+                    numberOfAdditionalButtons={numberOfAdditionalButtons}
+                    selectedLifeStage={lifeStageRadioValue}
+                    ignoreLifeStage={speciesRadioValue !== 'Chinook salmon'}
+                    deadToggle={deadToggle}
+                    markToggle={markToggle}
+                    adiposeClippedToggle={adiposeClippedToggle}
+                    fishConditions={activeFishConditions}
+                    handleToggles={handleToggles}
+                    activeTabId={tabSlice.activeTabId}
+                    species={speciesRadioValue}
+                    taxonCode={findTaxonCode(speciesRadioValue, reorderedTaxon)}
+                    ladObject={ladObject}
+                    miltingToggle={miltingToggle}
+                    eggsToggle={eggsToggle}
+                    visitSetupState={visitSetupState}
+                  />
                   <Divider mb='1%' />
                   <Button
                     leftIcon={<Icon as={FontAwesome} name={'plus'} />}
@@ -861,9 +870,6 @@ const MultiSpecies = ({
                     </Text>
                   </Button>
                 </>
-                {speciesRadioValue !== 'Chinook salmon' && (
-                  <View mb='65'></View>
-                )}
               </>
 
               <HStack

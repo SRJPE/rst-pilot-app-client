@@ -16,6 +16,28 @@ import { AppDispatch } from '../../../redux/store'
 import { findRunDefinition } from '../../../utils/helpers/helperFunctions'
 import { createArray } from '../../../utils/utils'
 
+const ForkLengthButton = React.memo(
+  ({ num, onPress }: { num: number; onPress: (n: number) => void }) => (
+    <Pressable onPress={() => onPress(num)} _pressed={{ bg: 'pink' }}>
+      {({ isPressed }: { isPressed: boolean }) => (
+        <Box
+          justifyContent='center'
+          alignItems='center'
+          bg={isPressed ? 'secondary' : 'primary'}
+          h='55'
+          w='60'
+          margin='2'
+          borderRadius='sm'
+        >
+          <Text fontSize='lg' bold color='white'>
+            {num}
+          </Text>
+        </Box>
+      )}
+    </Pressable>
+  )
+)
+
 const BatchCountButtonGrid = ({
   firstButton,
   numberOfAdditionalButtons,
@@ -137,39 +159,9 @@ const BatchCountButtonGrid = ({
         mx={'auto'}
       >
         {numArray.length > 1 ? (
-          numArray.map((num: number, idx: number) => {
-            return (
-              <Pressable
-                key={idx}
-                onPress={() => handlePress(num)}
-                // onPressIn={() => {
-                //   // Optional: Add haptic feedback on press
-                //   Vibration.vibrate(100)
-                // }}
-                _pressed={{
-                  bg: 'pink',
-                }}
-              >
-                {({ isPressed }) => {
-                  return (
-                    <Box
-                      justifyContent='center'
-                      alignItems='center'
-                      bg={isPressed ? 'secondary' : 'primary'}
-                      h='55'
-                      w='60'
-                      margin='2'
-                      borderRadius='sm'
-                    >
-                      <Text fontSize='lg' bold color='white'>
-                        {num}
-                      </Text>
-                    </Box>
-                  )
-                }}
-              </Pressable>
-            )
-          })
+          numArray.map((num: number, idx: number) => (
+            <ForkLengthButton key={idx} num={num} onPress={handlePress} />
+          ))
         ) : (
           <Text bold fontSize='lg'>
             Please select a fork length size range.
@@ -271,4 +263,30 @@ const BatchCountButtonGrid = ({
   )
 }
 
-export default BatchCountButtonGrid
+export default React.memo(
+  BatchCountButtonGrid,
+  (prev, next) => {
+    if (prev.activeTabId !== next.activeTabId) return false
+    const prevSite =
+      prev.visitSetupState?.[prev.activeTabId ?? '']?.values?.trapSite
+    const nextSite =
+      next.visitSetupState?.[next.activeTabId ?? '']?.values?.trapSite
+    return (
+      prev.firstButton === next.firstButton &&
+      prev.numberOfAdditionalButtons === next.numberOfAdditionalButtons &&
+      prev.selectedLifeStage === next.selectedLifeStage &&
+      prev.ignoreLifeStage === next.ignoreLifeStage &&
+      prev.deadToggle === next.deadToggle &&
+      prev.markToggle === next.markToggle &&
+      prev.miltingToggle === next.miltingToggle &&
+      prev.eggsToggle === next.eggsToggle &&
+      prev.adiposeClippedToggle === next.adiposeClippedToggle &&
+      prev.fishConditions === next.fishConditions &&
+      prev.handleToggles === next.handleToggles &&
+      prev.species === next.species &&
+      prev.taxonCode === next.taxonCode &&
+      prev.ladObject === next.ladObject &&
+      prevSite === nextSite
+    )
+  }
+)

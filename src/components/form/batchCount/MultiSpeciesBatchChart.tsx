@@ -224,21 +224,11 @@ const MultiSpeciesBatchChart = ({
   }, [selectedSpecies])
 
   const getChartHeight = (activeSpeciesTab: string) => {
-    const rows = getRows(activeSpeciesTab)
-    if (
-      activeSpeciesTab &&
-      activeSpeciesTab.toLocaleLowerCase().includes('chinook') &&
-      rows > 5
+    const actualRows = getRows(activeSpeciesTab)
+    const protocolRows = Math.ceil(
+      (fishMeasureProtocol[activeSpeciesTab] || 50) / 10
     )
-      return 420 + (rows - 5) * 50
-
-    if (fishMeasureProtocol[activeSpeciesTab]) {
-      const baseHeight = 170
-      return (
-        baseHeight + Math.ceil(fishMeasureProtocol[activeSpeciesTab] / 10) * 50
-      )
-    }
-    return 420
+    return 170 + Math.max(actualRows, protocolRows) * 50
   }
 
   const handleToggles = (toggleName: string) => {
