@@ -522,6 +522,7 @@ const ReviewValuesModal = ({
 
   // helper: flatten nested objects into single-level row, skip nulls
   function flattenObject(obj: any) {
+    if (obj == null) return {}
     return Object.keys(obj).reduce((acc: any, key) => {
       const value = obj[key]
       const newKey = key
@@ -573,20 +574,7 @@ const ReviewValuesModal = ({
         const formattedSampleTime = formatDateString_MM_DD_YY(
           timeProperty ? trapOperationsState[timeProperty] : new Date()
         )
-
-        // --- 1. fish_input.csv ---
-
-        const fishRows = Object.values(fishInputState).map((fish: any) => ({
-          trapSite: visitSetupState.trapSite,
-          ...fish,
-        }))
-        const fishCSV = arrayToCSV(fishRows)
-        zip.file(
-          `catch_${formattedTrapSite}_${formattedSampleTime}.csv`,
-          fishCSV
-        )
-
-        // --- 2. visit_summary.csv ---
+        // --- 1. visit_summary.csv ---
         const wideRow = {
           ...flattenObject(visitSetupState),
           ...flattenObject(trapOperationsState),
@@ -598,6 +586,22 @@ const ReviewValuesModal = ({
           `trap_visit_${formattedTrapSite}_${formattedSampleTime}.csv`,
           visitCSV
         )
+
+        // --- 2. fish_input.csv ---
+
+        const fishRows = Object.values(fishInputState ?? {}).map(
+          (fish: any) => ({
+            trapSite: visitSetupState.trapSite,
+            ...fish,
+          })
+        )
+        if (fishRows.length) {
+          const fishCSV = arrayToCSV(fishRows)
+          zip.file(
+            `catch_${formattedTrapSite}_${formattedSampleTime}.csv`,
+            fishCSV
+          )
+        }
       })
 
       // --- 3. Generate zip ---
