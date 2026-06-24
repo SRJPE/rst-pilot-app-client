@@ -90,7 +90,12 @@ const mapStateToProps = (state: RootState) => {
       (
         state.trapPostProcessing[state.tabSlice.activeTabId ?? 'placeholderId']
           ?.values as any
-      )?.conditionCode ?? null,
+      )?.conditionCode ??
+      (
+        state.trapOperations[state.tabSlice.activeTabId ?? 'placeholderId']
+          ?.values as any
+      )?.conditionCode ??
+      null,
   }
 }
 
@@ -375,7 +380,7 @@ const TrapOperations = ({
         dispatch(markStepCompleted({ propName: 'trapOperations' }))
       }
 
-      if (values.gearStatus === 'S') {
+      if (values.gearStatus === 'S' || values.conditionCode === '4' || conditionCode === '4') {
         dispatch(markStepCompleted({ propName: 'fishProcessing' }))
         dispatch(markStepCompleted({ propName: 'fishInput' }))
       }
@@ -475,7 +480,7 @@ const TrapOperations = ({
         direction === 'left'
           ? navigateFlowLeftButton('Trap Operations', false, navigation)
           : navigateFlowRightButton({
-              values,
+              values: { ...values, conditionCode },
               activePage: 'Trap Operations',
               holdingForMarkRecap: false,
               navigation,

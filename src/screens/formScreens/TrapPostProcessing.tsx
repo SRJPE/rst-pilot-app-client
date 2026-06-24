@@ -39,6 +39,7 @@ import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
 } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
+import { saveFishProcessing } from '../../redux/reducers/formSlices/fishProcessingSlice'
 import {
   shouldRenderField,
   navigateHelper,
@@ -294,6 +295,25 @@ const TrapPostProcessing = ({
       dispatch(markStepCompleted({ propName: 'trapPostProcessing' }))
       dispatch(checkIfFormIsComplete())
     }
+
+    if (values.conditionCode === '4') {
+      const allTabIds: string[] = Object.keys(tabSlice.tabs)
+      allTabIds.forEach(allTabId => {
+        dispatch(
+          saveFishProcessing({
+            tabId: allTabId,
+            values: {
+              fishProcessedResult: 'not recorded',
+              reasonForNotProcessing: '',
+              willBeHoldingFishForMarkRecapture: false,
+            },
+            errors: {},
+          })
+        )
+      })
+      dispatch(markStepCompleted({ propName: 'fishProcessing' }))
+      dispatch(markStepCompleted({ propName: 'fishInput' }))
+    }
     console.log('🚀 ~ onSubmit ~ TrapPostProcessing', values)
   }
 
@@ -336,14 +356,18 @@ const TrapPostProcessing = ({
       })
 
       if (direction === 'left') {
-        destination = shouldNavigateToFishInput
-          ? navigateFlowLeftButton(
-              activePage,
-              willBeHoldingFishForMarkRecapture,
-              navigation,
-              values
-            )
-          : 'Fish Processing'
+        if (values.conditionCode === '4') {
+          destination = 'Trap Operations'
+        } else {
+          destination = shouldNavigateToFishInput
+            ? navigateFlowLeftButton(
+                activePage,
+                willBeHoldingFishForMarkRecapture,
+                navigation,
+                values
+              )
+            : 'Fish Processing'
+        }
       }
 
       const callback = () => {

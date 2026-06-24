@@ -501,6 +501,8 @@ export const navigateFlowRightButton = ({
         return 'High Temperatures'
       } else if (values.gearStatus === 'S') {
         return 'Trap Post-Processing'
+      } else if (values.conditionCode === '4') {
+        return 'Trap Post-Processing'
       } else {
         return 'Fish Processing'
       }
@@ -1220,6 +1222,8 @@ export const formatGeneticsSampleId = ({
   taxonArray = [],
   fishRunValue,
   fishAdiposeClippedValue,
+  trapOperationsState,
+  activeTabId,
 }: {
   programName: string
   species: string
@@ -1227,21 +1231,31 @@ export const formatGeneticsSampleId = ({
   taxonArray?: any[]
   fishRunValue?: string
   fishAdiposeClippedValue?: boolean
+  trapOperationsState?: any
+  activeTabId: string
 }) => {
   let sampleId = ''
 
   const programNameLower = programName.toLowerCase()
 
-  if (programNameLower.includes('yolo') || programNameLower.includes('flow')) {
-    const currentYear = new Date().getFullYear()
+  const trapOperationsValues = trapOperationsState?.[activeTabId]?.values
+  let currentYear = new Date().getFullYear()
 
+  if (trapOperationsValues) {
+    currentYear = new Date(
+      trapOperationsValues.trapVisitTime ??
+        trapOperationsValues.sampleTime ??
+        trapOperationsValues.trapVisitStopTime ??
+        trapOperationsValues.trapVisitStartTime
+    ).getFullYear()
+  }
+
+  if (programNameLower.includes('yolo') || programNameLower.includes('flow')) {
     if (species.toLowerCase().includes('chinook')) {
       const runAbbreviation = fishRunValue ? getRunInitials(fishRunValue) : ''
       const adiposeString = fishAdiposeClippedValue ? 'Ad_minus' : 'Ad_plus'
 
       const yearAdiposeRun = `${currentYear}${adiposeString}-${runAbbreviation}`
-
-      console.log('yearAdiposeRun', yearAdiposeRun)
 
       const sampleIdSuffix = getNextSampleSuffix({
         arr: geneticSamplesArray,
@@ -1255,7 +1269,6 @@ export const formatGeneticsSampleId = ({
         (item: any) => item.commonname === species
       )
       const taxonAbbreviation = taxonObj?.abbreviationCode
-      console.log('taxonAbbreviation', taxonAbbreviation)
 
       if (!taxonAbbreviation) {
         return sampleId

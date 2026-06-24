@@ -1434,24 +1434,21 @@ const AddFishContent = ({
                     )}
                     {!fishConditionsDropdownOpen && !speciesDropDownOpen && (
                       <HStack mb={'4'}>
-                        {(species.value === 'Chinook salmon' ||
-                          species.value === 'Steelhead / rainbow trout') && (
-                          <Button
-                            height='40px'
-                            fontSize='16'
-                            bg='secondary'
-                            color='#007C7C'
-                            py='1'
-                            px='20'
-                            shadow='3'
-                            borderRadius='5'
-                            maxWidth='40%'
-                            marginRight='10'
-                            onPress={() => setTagFishModalOpen(true)}
-                          >
-                            <Text color='primary'>Tag Fish</Text>
-                          </Button>
-                        )}
+                        <Button
+                          height='40px'
+                          fontSize='16'
+                          bg='secondary'
+                          color='#007C7C'
+                          py='1'
+                          px='20'
+                          shadow='3'
+                          borderRadius='5'
+                          maxWidth='40%'
+                          marginRight='10'
+                          onPress={() => setTagFishModalOpen(true)}
+                        >
+                          <Text color='primary'>Tag Fish</Text>
+                        </Button>
                         <Button
                           bg='secondary'
                           color='#007C7C'

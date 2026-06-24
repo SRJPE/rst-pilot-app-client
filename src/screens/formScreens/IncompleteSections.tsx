@@ -503,12 +503,15 @@ const IncompleteSections = ({
           fishProcessedValues.indexOf(
             trapOperationsState[id].values.gearStatus === 'S'
               ? 'no catch data, setting trap'
+              : combinedOpsandPostProcessing.conditionCode === '4'
+              ? 'not recorded'
               : fishProcessingState[id].values.fishProcessedResult
           )
         ),
         whyFishNotProcessed: returnNullableTableId(
           whyFishNotProcessedValues.indexOf(
-            trapOperationsState[id].values.gearStatus === 'S'
+            trapOperationsState[id].values.gearStatus === 'S' ||
+            combinedOpsandPostProcessing.conditionCode === '4'
               ? 'not recorded'
               : fishProcessingState?.[id]?.values?.reasonForNotProcessing
           )
