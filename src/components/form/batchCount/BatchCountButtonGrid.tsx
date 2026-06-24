@@ -8,13 +8,35 @@ import {
   ScrollView,
   Text,
 } from 'native-base'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { useDispatch } from 'react-redux'
 import { uid } from 'uid'
 import { addForkLengthToBatchStore } from '../../../redux/reducers/formSlices/batchCountSlice'
 import { AppDispatch } from '../../../redux/store'
 import { findRunDefinition } from '../../../utils/helpers/helperFunctions'
 import { createArray } from '../../../utils/utils'
+
+const ForkLengthButton = React.memo(
+  ({ num, onPress }: { num: number; onPress: (n: number) => void }) => (
+    <Pressable onPress={() => onPress(num)} _pressed={{ bg: 'pink' }}>
+      {({ isPressed }: { isPressed: boolean }) => (
+        <Box
+          justifyContent='center'
+          alignItems='center'
+          bg={isPressed ? 'secondary' : 'primary'}
+          h='55'
+          w='60'
+          margin='2'
+          borderRadius='sm'
+        >
+          <Text fontSize='lg' bold color='white'>
+            {num}
+          </Text>
+        </Box>
+      )}
+    </Pressable>
+  )
+)
 
 const BatchCountButtonGrid = ({
   firstButton,
@@ -56,11 +78,13 @@ const BatchCountButtonGrid = ({
   const dispatch = useDispatch<AppDispatch>()
   const [showPopover, setShowPopover] = useState<boolean>(false)
 
+  // No local buffering: dispatch immediately on press to avoid missed taps
+
   useEffect(() => {
     setNumArray(createArray(firstButton, numberOfAdditionalButtons))
   }, [firstButton])
 
-  const handlePress = (num: number) => {
+  const handlePress = useCallback((num: number) => {
     let runDefinition = null as string | null | undefined
     if (species === 'Chinook salmon' && activeTabId && ladObject) {
       runDefinition = findRunDefinition({
@@ -69,6 +93,8 @@ const BatchCountButtonGrid = ({
         trapSite: visitSetupState?.[activeTabId]?.values?.trapSite,
       })
     }
+
+    // dispatch immediately to avoid missing taps
     dispatch(
       addForkLengthToBatchStore({
         uid: uid(),
@@ -86,7 +112,7 @@ const BatchCountButtonGrid = ({
       })
     )
     handleToggles('reset')
-  }
+  }, [dispatch, species, activeTabId, ladObject, visitSetupState, ignoreLifeStage, selectedLifeStage, deadToggle, markToggle, miltingToggle, eggsToggle, adiposeClippedToggle, fishConditions, taxonCode, handleToggles])
 
   const [customForkLengthValue, setCustomForkLengthValue] = useState<string>('')
 
@@ -116,8 +142,14 @@ const BatchCountButtonGrid = ({
   const showEnterNumberButton = numArray?.at(-1) === 117
   const initialFocusRef = useRef(null)
 
+  useEffect(() => {
+    return () => {
+      // nothing to flush when dispatching immediately
+    }
+  }, [])
+
   return (
-    <ScrollView display='flex' height='210'>
+    <ScrollView display='flex' height='210' keyboardShouldPersistTaps='handled'>
       <Box
         flexDirection='row'
         justifyContent='flex-start'
@@ -127,40 +159,9 @@ const BatchCountButtonGrid = ({
         mx={'auto'}
       >
         {numArray.length > 1 ? (
-          numArray.map((num: number, idx: number) => {
-            return (
-              <Pressable
-                key={idx}
-                onPress={() => handlePress(num)}
-                // onPressIn={() => {
-                //   // Optional: Add haptic feedback on press
-                //   Vibration.vibrate(100)
-                // }}
-                _pressed={{
-                  bg: 'pink',
-                }}
-              >
-                {({ isPressed }) => {
-                  return (
-                    <Box
-                      justifyContent='center'
-                      alignItems='center'
-                      bg={isPressed ? 'secondary' : 'primary'}
-                      h='55'
-                      w='60'
-                      margin='2'
-                      borderRadius='sm'
-                      shadow='3'
-                    >
-                      <Text fontSize='lg' bold color='white'>
-                        {num}
-                      </Text>
-                    </Box>
-                  )
-                }}
-              </Pressable>
-            )
-          })
+          numArray.map((num: number, idx: number) => (
+            <ForkLengthButton key={idx} num={num} onPress={handlePress} />
+          ))
         ) : (
           <Text bold fontSize='lg'>
             Please select a fork length size range.
@@ -262,4 +263,30 @@ const BatchCountButtonGrid = ({
   )
 }
 
-export default BatchCountButtonGrid
+export default React.memo(
+  BatchCountButtonGrid,
+  (prev, next) => {
+    if (prev.activeTabId !== next.activeTabId) return false
+    const prevSite =
+      prev.visitSetupState?.[prev.activeTabId ?? '']?.values?.trapSite
+    const nextSite =
+      next.visitSetupState?.[next.activeTabId ?? '']?.values?.trapSite
+    return (
+      prev.firstButton === next.firstButton &&
+      prev.numberOfAdditionalButtons === next.numberOfAdditionalButtons &&
+      prev.selectedLifeStage === next.selectedLifeStage &&
+      prev.ignoreLifeStage === next.ignoreLifeStage &&
+      prev.deadToggle === next.deadToggle &&
+      prev.markToggle === next.markToggle &&
+      prev.miltingToggle === next.miltingToggle &&
+      prev.eggsToggle === next.eggsToggle &&
+      prev.adiposeClippedToggle === next.adiposeClippedToggle &&
+      prev.fishConditions === next.fishConditions &&
+      prev.handleToggles === next.handleToggles &&
+      prev.species === next.species &&
+      prev.taxonCode === next.taxonCode &&
+      prev.ladObject === next.ladObject &&
+      prevSite === nextSite
+    )
+  }
+)

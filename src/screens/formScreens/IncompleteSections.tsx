@@ -4,6 +4,7 @@ import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import navigationSlice, {
   checkIfFormIsComplete,
+  markStepCompleted,
   numOfFormSteps,
   resetNavigationSlice,
   updateActiveStep,
@@ -125,6 +126,27 @@ const IncompleteSections = ({
 
   useEffect(() => {
     dispatch(setIncompleteSectionTouched(true))
+
+    // Sync navigation step completion from per-tab slice completed flags.
+    // This handles the case where a user jumps directly to this screen without
+    // visiting each section individually (nav slice never got markStepCompleted).
+    const allTabIds = Object.keys(tabState.tabs)
+    if (allTabIds.length > 0) {
+      const allComplete = (sliceState: any) =>
+        allTabIds.every(id => sliceState[id]?.completed)
+
+      if (allComplete(visitSetupState))
+        dispatch(markStepCompleted({ propName: 'visitSetup' }))
+      if (allComplete(trapOperationsState))
+        dispatch(markStepCompleted({ propName: 'trapOperations' }))
+      if (allComplete(fishProcessingState))
+        dispatch(markStepCompleted({ propName: 'fishProcessing' }))
+      if (allComplete(fishInputState))
+        dispatch(markStepCompleted({ propName: 'fishInput' }))
+      if (allComplete(trapPostProcessingState))
+        dispatch(markStepCompleted({ propName: 'trapPostProcessing' }))
+    }
+
     dispatch(checkIfFormIsComplete())
   }, [])
 
@@ -244,7 +266,7 @@ const IncompleteSections = ({
         setConditionalIncompleteSectionValues({})
       }
     }
-  }, [visitSetupDefaultState.programs])
+  }, [visitSetupDefaultState.programs, tabState.activeTabId])
 
   const findCrewIdsFromSelectedCrewNames = (
     selectedCrewNames: Array<string>
@@ -352,11 +374,12 @@ const IncompleteSections = ({
             measureUnit: null,
           })
         } else {
+          const isTextOnly = isNaN(Number(values[field]))
           baseEnvValues.push({
             measureName: formFieldsLookup[field].fieldName,
-            measureValueNumeric: Number(values[field]),
+            measureValueNumeric: isTextOnly ? null : Number(values[field]),
             measureValueText: values[field]?.toString(),
-            measureUnit: formFieldsLookup[field].unitId || null,
+            measureUnit: isTextOnly ? null : formFieldsLookup[field].unitId || null,
           })
         }
       }
@@ -422,19 +445,13 @@ const IncompleteSections = ({
 
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
+      const opsValues = trapOperationsState[id]?.values ?? {}
+      const postValues = trapPostProcessingState[id]?.values ?? {}
+
       const waterTurbidityIsPresent =
-        trapOperationsState[id].values.waterTurbidity !== '' &&
-        trapOperationsState[id].values.waterTurbidity !== null
-      const {
-        rpm1: startRpm1,
-        rpm2: startRpm2,
-        rpm3: startRpm3,
-      } = trapOperationsState[id].values
-      const {
-        rpm1: endRpm1,
-        rpm2: endRpm2,
-        rpm3: endRpm3,
-      } = trapPostProcessingState[id].values
+        opsValues.waterTurbidity !== '' && opsValues.waterTurbidity !== null
+      const { rpm1: startRpm1, rpm2: startRpm2, rpm3: startRpm3 } = opsValues
+      const { rpm1: endRpm1, rpm2: endRpm2, rpm3: endRpm3 } = postValues
 
       const programId = visitSetupState[id].values.programId
 
@@ -463,6 +480,9 @@ const IncompleteSections = ({
         // if sample time, there is start (day before when trap was set) and sample time
         trapVisitTimeEnd = combinedOpsandPostProcessing?.startTime
         trapVisitTimeStart = combinedOpsandPostProcessing?.sampleTime
+      } else if (combinedOpsandPostProcessing?.arrivalTime) {
+        trapVisitTimeEnd = combinedOpsandPostProcessing?.arrivalTime
+        trapVisitTimeStart = combinedOpsandPostProcessing?.arrivalTime
       }
 
       const trapVisitSubmission = {
@@ -483,12 +503,15 @@ const IncompleteSections = ({
           fishProcessedValues.indexOf(
             trapOperationsState[id].values.gearStatus === 'S'
               ? 'no catch data, setting trap'
+              : combinedOpsandPostProcessing.conditionCode === '4'
+              ? 'not recorded'
               : fishProcessingState[id].values.fishProcessedResult
           )
         ),
         whyFishNotProcessed: returnNullableTableId(
           whyFishNotProcessedValues.indexOf(
-            trapOperationsState[id].values.gearStatus === 'S'
+            trapOperationsState[id].values.gearStatus === 'S' ||
+            combinedOpsandPostProcessing.conditionCode === '4'
               ? 'not recorded'
               : fishProcessingState?.[id]?.values?.reasonForNotProcessing
           )
@@ -527,11 +550,9 @@ const IncompleteSections = ({
         rpmAtStart: calcAvgValue([startRpm1, startRpm2, startRpm3]),
         rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
         trapVisitEnvironmental: formatTrapVisitEnvironmentalValues(
-          mergePreserveNonNull(
-            trapOperationsState[id].values,
-            trapPostProcessingState[id].values,
-            { waterTurbidityIsPresent }
-          ),
+          mergePreserveNonNull(opsValues, postValues, {
+            waterTurbidityIsPresent,
+          }),
           programId
         ),
         trapCoordinates: {
@@ -640,19 +661,12 @@ const IncompleteSections = ({
     const fishConditionValues = returnDefinitionArray(
       dropdownsState.values.fishCondition
     )
-    const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) => {
-      let code = null
-      dropdownsState.values.taxon.forEach((taxonValue: any) => {
-        if (
-          taxonValue.commonname
-            .toLowerCase()
-            .includes(fishSubmissionData.species.toLowerCase())
-        ) {
-          code = taxonValue.code
-        }
-      })
-      return code
-    }
+    const returnTaxonCode = (fishSubmissionData: IndividualFishValuesI) =>
+      dropdownsState.values.taxon.find((taxonValue: any) =>
+        taxonValue.commonname
+          .toLowerCase()
+          .includes(fishSubmissionData.species.toLowerCase())
+      )?.code ?? null
 
     const catchRawSubmissions: any[] = []
 
@@ -764,7 +778,9 @@ const IncompleteSections = ({
             milting:
               typeof fishValue.milting === 'boolean' ? fishValue.milting : null,
             eggs: typeof fishValue.eggs === 'boolean' ? fishValue.eggs : null,
-            fishCondition: getCatchFishConditions(fishValue.fishCondition),
+            fishCondition: fishValue.fishConditions.length
+              ? getCatchFishConditions(fishValue.fishConditions)
+              : null,
             lifeStage: returnNullableTableId(
               lifeStageValues.indexOf(fishValue?.lifeStage?.toLowerCase() || '')
             ),

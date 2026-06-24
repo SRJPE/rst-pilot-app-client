@@ -251,15 +251,15 @@ const StartedTrapping = ({
             measureValueNumeric: waterTurbidityIsPresent
               ? trapOperationsState?.[id]?.values.waterTurbidity
               : trapOperationsState?.[id]?.values
-                  ?.recordTurbidityInPostProcessing
-              ? null
-              : undefined,
+                    ?.recordTurbidityInPostProcessing
+                ? null
+                : undefined,
             measureValueText: waterTurbidityIsPresent
               ? trapOperationsState?.[id]?.values.waterTurbidity?.toString()
               : trapOperationsState?.[id]?.values
-                  ?.recordTurbidityInPostProcessing
-              ? ''
-              : 'undefined',
+                    ?.recordTurbidityInPostProcessing
+                ? ''
+                : 'undefined',
             measureUnit: 25,
           },
         ],
@@ -303,7 +303,7 @@ const StartedTrapping = ({
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={12} p='10'>
+        <VStack space={12}>
           <Image
             alignSelf='center'
             source={require('../../../assets/checkmark_outline.png')}
@@ -312,9 +312,10 @@ const StartedTrapping = ({
             color='themeGrey'
           />
           <Heading textAlign='center'>
-            {`Looks like you just dropped your cone to start trapping. 
-
-              Save your restart trap information`}
+            Looks like you just dropped your cone to start trapping.
+          </Heading>
+          <Heading textAlign='center'>
+            Save your restart trap information
           </Heading>
         </VStack>
       </View>

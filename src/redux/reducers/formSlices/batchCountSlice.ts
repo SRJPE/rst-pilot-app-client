@@ -41,6 +41,9 @@ export const initialState: batchCountI = {
   forkLengths: {},
 }
 
+// add a counter for generating incremental ids without scanning keys
+;(initialState as any).nextForkId = 0
+
 const getRun = (species: string, runValue: any) => {
   if (species === 'Chinook salmon') {
     return runValue ? runValue.toLowerCase() : 'not recorded'
@@ -90,9 +93,10 @@ export const batchCountSlice = createSlice({
       state.batchCharacteristics.existingMarks = action.payload
     },
     addForkLengthToBatchStore: (state, action) => {
-      const forkLengthsCopy = cloneDeep(state.forkLengths) || {
-        ...state.forkLengths,
-      }
+      // use an incremental id to avoid scanning keys and deep clones
+      // @ts-ignore - we manage nextForkId on the slice
+      const id = (state as any).nextForkId || 0
+      ;(state as any).nextForkId = id + 1
       const {
         uid,
         species,
@@ -125,16 +129,22 @@ export const batchCountSlice = createSlice({
         fishEntry.milting = action.payload.milting
       }
 
-      let id = null
-      if (Object.keys(forkLengthsCopy).length) {
-        // @ts-ignore
-        const largestId = Math.max(...Object.keys(forkLengthsCopy))
-        id = largestId + 1
-      } else {
-        id = 0
+      state.forkLengths = state.forkLengths || {}
+      state.forkLengths[id] = fishEntry
+    },
+    // Bulk add many fork length entries in one operation (better for rapid input)
+    addForkLengthsBulk: (state, action) => {
+      const entries = action.payload as any[]
+      if (!entries || !entries.length) return
+      state.forkLengths = state.forkLengths || {}
+      // @ts-ignore
+      let nextId = (state as any).nextForkId || 0
+      for (const entry of entries) {
+        state.forkLengths[nextId] = entry
+        nextId++
       }
-      forkLengthsCopy[id] = fishEntry
-      state.forkLengths = forkLengthsCopy
+      // @ts-ignore
+      ;(state as any).nextForkId = nextId
     },
     addPlusCountToBatchStore: (state, action) => {
       const {
@@ -172,14 +182,8 @@ export const batchCountSlice = createSlice({
         taxonCode,
       }
 
-      let id = null
-      if (Object.keys(forkLengthsCopy).length) {
-        // @ts-ignore
-        const largestId = Math.max(...Object.keys(forkLengthsCopy))
-        id = largestId + 1
-      } else {
-        id = 0
-      }
+      const id = (state as any).nextForkId || 0
+      ;(state as any).nextForkId = id + 1
       forkLengthsCopy[id] = plusCountEntry
       state.forkLengths = forkLengthsCopy
     },
@@ -265,6 +269,7 @@ export const {
   updateSingleForkLengthCount,
   addForkLengthToBatchStore,
   addPlusCountToBatchStore,
+  addForkLengthsBulk,
 } = batchCountSlice.actions
 
 export default batchCountSlice.reducer

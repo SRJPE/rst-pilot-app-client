@@ -85,8 +85,8 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
   const runValue = runDefinition || run || ''
 
   const formattedSpecies =
-    species === 'Chinook salmon' && lifeStage && runValue
-      ? `${species} - ${startCase(lifeStage)} (${runValue})`
+    species === 'Chinook salmon'
+      ? `${species}${lifeStage ? ` - ${startCase(lifeStage)}` : ''} (${runValue ?? ''})`
       : species || 'N/A'
 
   return (
@@ -196,8 +196,8 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
                   ? 'Yes'
                   : 'No'
                 : milting
-                ? 'Yes'
-                : 'No'}
+                  ? 'Yes'
+                  : 'No'}
             </Text>
           </VStack>
         </HStack>

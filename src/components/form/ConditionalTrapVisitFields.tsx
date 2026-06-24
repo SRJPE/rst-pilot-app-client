@@ -18,6 +18,7 @@ import RSTRLogSheet from './RSTRLogSheet'
 import CustomSelect from '../Shared/CustomSelect'
 import { renderRequiredOrOptionalLabel } from '../../utils/utils'
 import RiverDepth from './RiverDepth'
+import SecchiInput from './SecchiInput'
 
 interface FieldInterface {
   id: number
@@ -103,14 +104,26 @@ const ConditionalTrapVisitFields = ({
     // exisitng built in fields. prevents duplicate fields from being rendered
     if (
       activePage === 'Trap Post-Processing' &&
-      ['debrisVolume', 'totalRevolutions', 'rpmAfter'].includes(fieldName)
+      [
+        'debrisVolume',
+        'totalRevolutions',
+        'rpmAfter',
+        'counterStart',
+        'counterEnd',
+        'endingTrapStatus',
+      ].includes(fieldName)
     ) {
       return null
     }
 
     if (
       activePage === 'Trap Operations' &&
-      ['waterTemperature', 'waterTurbidity'].includes(fieldName)
+      [
+        'waterTemperature',
+        'waterTurbidity',
+        'flowMeasure',
+        'rpmBefore',
+      ].includes(fieldName)
     ) {
       return null
     }
@@ -332,6 +345,27 @@ const ConditionalTrapVisitFields = ({
         </>
       )
     }
+    if (fieldName === 'secchi' && fieldType === 'input') {
+      return (
+        <Box key={index} flexBasis='28%' minWidth='28%' maxWidth='28%' mr={8}>
+          <SecchiInput
+            value={values[fieldName]}
+            onChangeValue={val => {
+              setFieldTouched(fieldName, true)
+              setFieldValue(fieldName, val)
+            }}
+            onBlur={() => handleBlur(fieldName)}
+            touched={touched}
+            errors={errors}
+            displayName={displayName}
+            unitAbbrev={unitAbbrev}
+            validationSchema={validationSchema}
+            camelName={fieldName}
+          />
+        </Box>
+      )
+    }
+
     if (fieldType === 'input') {
       let inputWidth = '28%'
       if (fieldName.toLowerCase().includes('flow')) {
@@ -378,7 +412,7 @@ const ConditionalTrapVisitFields = ({
         >
           <FastSelect
             selectedValue={values[fieldName]}
-            placeholder={`Select Value for ${displayName}`}
+            placeholder={`${displayName}`}
             camelName={fieldName}
             label={displayName}
             errors={errors}

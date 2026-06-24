@@ -39,6 +39,7 @@ import {
   markTrapPostProcessingCompleted,
   saveTrapPostProcessing,
 } from '../../redux/reducers/formSlices/trapPostProcessingSlice'
+import { saveFishProcessing } from '../../redux/reducers/formSlices/fishProcessingSlice'
 import {
   shouldRenderField,
   navigateHelper,
@@ -50,6 +51,7 @@ import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
 import { find } from 'lodash'
 import { AppDispatch, RootState } from '../../redux/store'
+import { useFormSave } from '../../context/FormSaveContext'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = state.tabSlice.activeTabId
@@ -113,6 +115,7 @@ const TrapPostProcessing = ({
   selectedTrapLocationId: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const { registerSaveHandler } = useFormSave()
   const navigationState = useSelector((state: any) => state.navigation)
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -126,7 +129,7 @@ const TrapPostProcessing = ({
   )
 
   const [locationClicked, setLocationClicked] = useState(false as boolean)
-  const [startTime, setStartTime] = useState(new Date() as any)
+  const [startTime, setStartTime] = useState(null as any)
   const [selectedProgramObj, setSelectedProgramObj] = useState<any>(null)
   const [validationSchema, setValidationSchema] = useState<any>(
     trapPostProcessingSchema
@@ -135,6 +138,13 @@ const TrapPostProcessing = ({
   const [programFormFields, setProgramFormFields] = useState<any>(null)
 
   const userPrograms = userCredentialsStore?.userPrograms || []
+
+  useEffect(() => {
+    const trapOpsValues = trapOperationsStore?.[tabSlice.activeTabId]?.values
+    if (startTime === null && trapOpsValues) {
+      setStartTime(trapOpsValues.trapVisitStopTime || new Date())
+    }
+  }, [trapOperationsStore?.[tabSlice.activeTabId]?.values])
 
   const onStartTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
@@ -252,7 +262,14 @@ const TrapPostProcessing = ({
     dispatch(
       saveTrapPostProcessing({
         tabId,
-        values: { ...values, trapVisitStartTime },
+        values: {
+          ...values,
+          trapVisitStartTime,
+          waterTurbidity:
+            values.waterTurbidity !== '' && values.waterTurbidity !== null
+              ? Number(values.waterTurbidity)
+              : values.waterTurbidity,
+        },
         errors,
       })
     )
@@ -277,6 +294,25 @@ const TrapPostProcessing = ({
     if (stepCompletedCheck) {
       dispatch(markStepCompleted({ propName: 'trapPostProcessing' }))
       dispatch(checkIfFormIsComplete())
+    }
+
+    if (values.conditionCode === '4') {
+      const allTabIds: string[] = Object.keys(tabSlice.tabs)
+      allTabIds.forEach(allTabId => {
+        dispatch(
+          saveFishProcessing({
+            tabId: allTabId,
+            values: {
+              fishProcessedResult: 'not recorded',
+              reasonForNotProcessing: '',
+              willBeHoldingFishForMarkRecapture: false,
+            },
+            errors: {},
+          })
+        )
+      })
+      dispatch(markStepCompleted({ propName: 'fishProcessing' }))
+      dispatch(markStepCompleted({ propName: 'fishInput' }))
     }
     console.log('🚀 ~ onSubmit ~ TrapPostProcessing', values)
   }
@@ -320,14 +356,18 @@ const TrapPostProcessing = ({
       })
 
       if (direction === 'left') {
-        destination = shouldNavigateToFishInput
-          ? navigateFlowLeftButton(
-              activePage,
-              willBeHoldingFishForMarkRecapture,
-              navigation,
-              values
-            )
-          : 'Fish Processing'
+        if (values.conditionCode === '4') {
+          destination = 'Trap Operations'
+        } else {
+          destination = shouldNavigateToFishInput
+            ? navigateFlowLeftButton(
+                activePage,
+                willBeHoldingFishForMarkRecapture,
+                navigation,
+                values
+              )
+            : 'Fish Processing'
+        }
       }
 
       const callback = () => {
@@ -522,40 +562,50 @@ const TrapPostProcessing = ({
     setFieldValue: any,
     setFieldTouched: any
   ) => {
-    return (
-      <FormControl w='30%'>
-        <FormControl.Label>
-          <Text color='black' fontSize='xl'>
-            Trap Status at End
-          </Text>
-        </FormControl.Label>
-        <Radio.Group
-          name='endingTrapStatus'
-          accessibilityLabel='Ending Trap Status'
-          value={`${values.endingTrapStatus}`}
-          onChange={(newValue: any) => {
-            handleTrapStatusAtEndRadio(newValue, setFieldTouched, setFieldValue)
-          }}
-        >
-          <Radio
-            colorScheme='primary'
-            value='Restart Trap'
-            my={1}
-            _icon={{ color: 'primary' }}
+    if (
+      find(sectionFields, {
+        fieldName: 'endingTrapStatus',
+      })
+    ) {
+      return (
+        <FormControl w='30%'>
+          <FormControl.Label>
+            <Text color='black' fontSize='xl'>
+              Trap Status at End
+            </Text>
+          </FormControl.Label>
+          <Radio.Group
+            name='endingTrapStatus'
+            accessibilityLabel='Ending Trap Status'
+            value={`${values.endingTrapStatus}`}
+            onChange={(newValue: any) => {
+              handleTrapStatusAtEndRadio(
+                newValue,
+                setFieldTouched,
+                setFieldValue
+              )
+            }}
           >
-            Continue Trapping
-          </Radio>
-          <Radio
-            colorScheme='primary'
-            value='End Trapping'
-            my={1}
-            _icon={{ color: 'primary' }}
-          >
-            End Trapping
-          </Radio>
-        </Radio.Group>
-      </FormControl>
-    )
+            <Radio
+              colorScheme='primary'
+              value='Restart Trap'
+              my={1}
+              _icon={{ color: 'primary' }}
+            >
+              Continue Trapping
+            </Radio>
+            <Radio
+              colorScheme='primary'
+              value='End Trapping'
+              my={1}
+              _icon={{ color: 'primary' }}
+            >
+              End Trapping
+            </Radio>
+          </Radio.Group>
+        </FormControl>
+      )
+    }
   }
 
   return (
@@ -624,6 +674,11 @@ const TrapPostProcessing = ({
           }
         }, [previouslyActiveTabId, activeTabId])
 
+        useEffect(() => {
+          registerSaveHandler(() => onSubmit(values, activeTabId))
+          return () => registerSaveHandler(null)
+        }, [values, activeTabId, startTime])
+
         const navButtons = useMemo(
           () => (
             <NavButtons
@@ -652,8 +707,7 @@ const TrapPostProcessing = ({
         return (
           <KeyboardAvoidingView
             flex={1}
-            // behavior='padding'
-            // keyboardVerticalOffset={100}
+            behavior='padding'
           >
             <ScrollView>
               <Pressable
@@ -694,6 +748,70 @@ const TrapPostProcessing = ({
                         />
                       </Box>
                     )}
+                  </HStack>
+                  <HStack space={5}>
+                    {shouldRenderField({
+                      fieldName: 'counterStart',
+                      programFormFields,
+                      sectionFields,
+                      renderOnDefault: false,
+                    }) && (
+                      <Box
+                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                        minWidth='30%' // Prevents shrinking too much
+                        maxWidth='30%' // Prevents growing beyond this size
+                      >
+                        <FormInputComponent
+                          label='Counter Start'
+                          placeholder='0'
+                          touched={touched}
+                          errors={errors}
+                          camelName='counterStart'
+                          onChangeText={handleChange('counterStart')}
+                          onBlur={() => setFieldTouched('counterStart')}
+                          value={values.counterStart}
+                          validationSchema={validationSchema}
+                          keyboardType='number-pad'
+                        />
+                      </Box>
+                    )}
+                    {shouldRenderField({
+                      fieldName: 'counterEnd',
+                      programFormFields,
+                      sectionFields,
+                      renderOnDefault: false,
+                    }) && (
+                      <Box
+                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
+                        minWidth='30%' // Prevents shrinking too much
+                        maxWidth='30%' // Prevents growing beyond this size
+                      >
+                        <FormInputComponent
+                          label='Counter End'
+                          placeholder='0'
+                          touched={touched}
+                          errors={errors}
+                          camelName='counterEnd'
+                          onChangeText={handleChange('counterEnd')}
+                          onBlur={() => setFieldTouched('counterEnd')}
+                          value={values.counterStart}
+                          validationSchema={validationSchema}
+                          keyboardType='number-pad'
+                        />
+                      </Box>
+                    )}
+                    {/* {recordTurbidityInPostProcessing && (
+                          <FormInputComponent
+                            label=' Water Turbidity (optional)'
+                            placeholder='0'
+                            touched={touched}
+                            errors={errors}
+                            camelName='waterTurbidity'
+                            onChangeText={handleChange('waterTurbidity')}
+                            onBlur={() => setFieldTouched('waterTurbidity')}
+                            value={values.waterTurbidity}
+                          />
+                        )} */}
                     {shouldRenderField({
                       fieldName: 'totalRevolutions',
                       programFormFields,
@@ -916,11 +1034,11 @@ const TrapPostProcessing = ({
                     setFieldValue,
                     setFieldTouched
                   )}
-                  {/* {renderEndingTrapStatus(
+                  {renderEndingTrapStatus(
                     values,
                     setFieldValue,
                     setFieldTouched
-                  )} */}
+                  )}
                   <FormInputComponent
                     multiline={true}
                     label={'Comments'}

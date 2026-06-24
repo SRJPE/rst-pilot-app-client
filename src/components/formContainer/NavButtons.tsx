@@ -4,7 +4,7 @@ import { FormikState } from 'formik'
 import { isEqual } from 'lodash'
 import { Box, Button, HStack, Icon, Text } from 'native-base'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { connect, useDispatch, useSelector } from 'react-redux'
+import { connect, shallowEqual, useDispatch, useSelector } from 'react-redux'
 import {
   checkIfFormIsComplete,
   resetNavigationSlice,
@@ -28,8 +28,6 @@ const NavButtons = ({
   tabSlice,
   visitSetupSlice,
   fishProcessingSlice,
-  // fishInput,
-  reduxState,
   shouldProceedToLoadingScreen = false,
   isValid,
   resetForm,
@@ -43,9 +41,7 @@ const NavButtons = ({
   isPaperEntry?: boolean
   tabSlice: TabStateI
   visitSetupSlice: any
-  fishInput: any
   fishProcessingSlice: any
-  reduxState: RootState
   shouldProceedToLoadingScreen?: boolean
   isValid?: boolean
   resetForm?: (nextState?: Partial<FormikState<any>> | undefined) => void
@@ -57,8 +53,15 @@ const NavButtons = ({
   const previousPage = navigationState.steps[activeStep - 1]?.name
   const [isPaperEntryStore, setIsPaperEntryStore] = useState(false)
 
-  const fishInput = useSelector((state: RootState) => state.fishInput)
-  const fishProcessing = useSelector((state: RootState) => state.fishProcessing)
+  const fishStoreHasEntries = useSelector((state: RootState) => {
+    const result: Record<string, boolean> = {}
+    for (const tabId in state.fishInput) {
+      result[tabId] =
+        Object.keys(state.fishInput[tabId]?.fishStore || {}).length > 0
+    }
+    return result
+  }, shallowEqual)
+
   useEffect(() => {
     setIsPaperEntryStore(checkIsPaperEntryStore())
     dispatch(checkIfFormIsComplete())
@@ -330,6 +333,10 @@ const NavButtons = ({
     return buttonText
   }
 
+  const memoTouched = useDeepCompareMemoize(touched)
+  const memoErrors = useDeepCompareMemoize(errors)
+  const memoValues = useDeepCompareMemoize(values)
+
   const rightDisabledBool = useMemo(() => {
     switch (activePage) {
       case 'Visit Setup':
@@ -340,12 +347,10 @@ const NavButtons = ({
         return false
       case 'Fish Input':
         const allTabProcessingResults =
-          getAllTabProcessingResults(fishProcessing)
+          getAllTabProcessingResults(fishProcessingSlice)
         const fishInputTabValidity = allTabProcessingResults.map(result => {
           if (result.fishProcessingResult === 'processed fish') {
-            return (
-              Object.values(fishInput[result.tabId]?.fishStore || {}).length > 0
-            )
+            return fishStoreHasEntries[result.tabId] === true
           }
 
           return null
@@ -365,12 +370,12 @@ const NavButtons = ({
       return !isValid
     }
   }, [
-    useDeepCompareMemoize(touched),
-    useDeepCompareMemoize(errors),
-    useDeepCompareMemoize(values),
+    memoTouched,
+    memoErrors,
+    memoValues,
     isValid,
     activePage,
-    fishInput,
+    fishStoreHasEntries,
   ])
 
   return (
@@ -417,8 +422,6 @@ const mapStateToProps = (state: RootState) => {
     tabSlice: state.tabSlice,
     visitSetupSlice: state.visitSetup,
     fishProcessingSlice: state.fishProcessing,
-    reduxState: state,
-    fishInput: state.fishInput,
   }
 }
 

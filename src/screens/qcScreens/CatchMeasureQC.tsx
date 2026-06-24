@@ -79,7 +79,7 @@ function CatchMeasureQC({
         return program.programId === programId
       }
     )
-    setProgramName(currentProgram.programName)
+    setProgramName(currentProgram?.programName)
 
     const programCatchRaw = previousCatchRawSubmissions.filter(catchRaw => {
       return catchRaw.createdCatchRawResponse.programId === programId

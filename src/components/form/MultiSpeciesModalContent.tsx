@@ -186,8 +186,6 @@ const MultiSpeciesModalContent = ({
     setRecentExistingMarks([selectedRecentReleaseMark])
   }
 
-  console.log('speciesInFishStore', speciesInFishStore)
-
   return (
     <ScrollView>
       <Formik

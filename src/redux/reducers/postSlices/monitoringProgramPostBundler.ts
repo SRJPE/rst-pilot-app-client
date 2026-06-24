@@ -42,52 +42,61 @@ export const postMonitoringProgramSubmissions = createAsyncThunk(
       state.monitoringProgramPostBundler.monitoringProgramSubmissions
 
     try {
-      await Promise.all(
-        monitoringProgramSubmissions.map(
-          async (monitoringProgramSubmission: MonitoringProgramSubmissionI) => {
-            const monitoringProgramSubmissionCopy = cloneDeep(
-              monitoringProgramSubmission
-            )
-            console.log(
-              '🚀 ~ file: monitoringProgramPostBundler.ts:83 ~ monitoringProgramSubmissionCopy:',
-              monitoringProgramSubmissionCopy
-            )
+      // Process submissions sequentially to ensure per-item error handling
+      for (const monitoringProgramSubmission of monitoringProgramSubmissions) {
+        try {
+          const monitoringProgramSubmissionCopy = cloneDeep(
+            monitoringProgramSubmission
+          )
+          console.log(
+            '🚀 ~ file: monitoringProgramPostBundler.ts ~ monitoringProgramSubmissionCopy:',
+            monitoringProgramSubmissionCopy
+          )
 
-            // submit monitoring Program
-            const apiResponse: APIResponseI = await api.post(
-              'program/',
-              monitoringProgramSubmissionCopy
-            )
-            // get response from server
-            const userProgramResponse = await api.get(
-              `program/personnel/${monitoringProgramSubmissionCopy.metaData.personnelLead}`
-            )
+          // submit monitoring Program
+          const apiResponse: APIResponseI = await api.post(
+            'program/',
+            monitoringProgramSubmissionCopy
+          )
+          // get response from server
+          const userProgramResponse = await api.get(
+            `program/personnel/${monitoringProgramSubmissionCopy.metaData.personnelLead}`
+          )
 
-            // save to payload
-            payload.monitoringProgramResponse.push(apiResponse.data)
-            const {
-              createdProgramResponse: { id: createdProgramId } = {},
-              createdHatcheryInfoResponse: { id: createdHatcheryInfoId } = {},
-              createdPermitInformationResponse: {
-                id: createdPermitInformationId,
-              } = {},
-            } = apiResponse.data || {}
-            const isNonTestSave =
-              createdPermitInformationId &&
-              createdProgramId &&
-              createdHatcheryInfoId
+          // save to payload
+          payload.monitoringProgramResponse.push(apiResponse.data)
+          const {
+            createdProgramResponse: { id: createdProgramId } = {},
+            createdHatcheryInfoResponse: { id: createdHatcheryInfoId } = {},
+            createdPermitInformationResponse: {
+              id: createdPermitInformationId,
+            } = {},
+          } = apiResponse.data || {}
+          const isNonTestSave =
+            createdPermitInformationId &&
+            createdProgramId &&
+            createdHatcheryInfoId
 
-            if (isNonTestSave)
-              postMonitoringProgramFilesToDB({
-                createdProgramId,
-                createdHatcheryInfoId,
-                createdPermitInformationId,
-              })
+          if (isNonTestSave)
+            postMonitoringProgramFilesToDB({
+              createdProgramId,
+              createdHatcheryInfoId,
+              createdPermitInformationId,
+            })
 
-            thunkAPI.dispatch(updateUserPrograms(userProgramResponse.data))
-          }
-        )
-      )
+          thunkAPI.dispatch(updateUserPrograms(userProgramResponse.data))
+        } catch (error: any) {
+          console.log(
+            '🚀 ~ file: monitoringProgramPostBundler.ts ~ submission error:',
+            error
+          )
+          const errorMessage = generateErrorMessage(
+            error?.code ||
+              'An unknown error occurred during monitoring program submission (ln 67)'
+          )
+          showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
+        }
+      }
     } catch (error: any) {
       console.log(
         '🚀 ~ file: monitoringProgramPostBundler.ts:102 ~ error:',

@@ -96,7 +96,7 @@ function TrapQC({
         return program.programId === programId
       }
     )
-    setProgramName(currentProgram.programName)
+    setProgramName(currentProgram?.programName)
 
     let tempData: any[] = []
     let turbidityData: any[] = []
@@ -152,8 +152,8 @@ function TrapQC({
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
-                ? 'rgb(255, 100, 84)'
-                : undefined,
+                  ? 'rgb(255, 100, 84)'
+                  : undefined,
             })
           }
 
@@ -175,8 +175,8 @@ function TrapQC({
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
-                ? 'rgb(255, 100, 84)'
-                : undefined,
+                  ? 'rgb(255, 100, 84)'
+                  : undefined,
             })
           }
 
@@ -192,8 +192,8 @@ function TrapQC({
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
-                ? 'rgb(255, 100, 84)'
-                : undefined,
+                  ? 'rgb(255, 100, 84)'
+                  : undefined,
             }
 
             rpmAtStartData.push(rpmAtStart)
@@ -211,8 +211,8 @@ function TrapQC({
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
-                ? 'rgb(255, 100, 84)'
-                : undefined,
+                  ? 'rgb(255, 100, 84)'
+                  : undefined,
             }
             rpmAtEndData.push(rpmAtEnd)
           }
@@ -226,8 +226,8 @@ function TrapQC({
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
-                ? 'rgb(255, 100, 84)'
-                : undefined,
+                  ? 'rgb(255, 100, 84)'
+                  : undefined,
             }
             counterData.push(counter)
           }
@@ -241,8 +241,8 @@ function TrapQC({
               colorScale: stagedForSubmission
                 ? '#FBA72A'
                 : !qcCompleted
-                ? 'rgb(255, 100, 84)'
-                : undefined,
+                  ? 'rgb(255, 100, 84)'
+                  : undefined,
             }
             debrisData.push(debris)
           }

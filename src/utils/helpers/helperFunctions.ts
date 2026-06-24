@@ -46,6 +46,7 @@ export const convertUTCToLocalTime = (utcTime: string) => {
 }
 
 export const findLengthAtDateRun = (array: Array<any>, targetDate: Date) => {
+  console.log('targetDate', targetDate)
   return array.find(item => {
     if (!targetDate) return false
 
@@ -54,6 +55,8 @@ export const findLengthAtDateRun = (array: Array<any>, targetDate: Date) => {
     const match =
       Number(month) === targetDate.getMonth() + 1 &&
       Number(day) === targetDate.getDate()
+
+    console.log('td.get', targetDate.getMonth() + 1, targetDate.getDate())
     return match
   })
 }
@@ -113,6 +116,9 @@ export const findRunDefinition = ({
       trapSite.toLowerCase().includes('upper clear'))
   ) {
     if (runObj?.definition === 'fall') return 'spring'
+  } else if (trapSite && trapSite.toLowerCase().includes('parrot')) {
+    // parrot phelan diversion dam
+    return 'spring'
   }
 
   return runObj?.definition || 'not recorded'
@@ -158,6 +164,8 @@ export const getLadObject = ({
 }) => {
   let dateTimeValue = new Date()
 
+  console.log('dtv', dateTimeValue)
+
   const timeProperty = getTimeProperty(
     trapOperationsStore?.[activeTabId]?.values
   )
@@ -183,6 +191,8 @@ export const getLadObject = ({
     dateTimeValue = trapOperationsStore?.[activeTabId]?.values?.sampleTime
   }
 
+  console.log('lengthAtDateModel', lengthAtDateModel)
+
   const ladObjectForTrapDate = findLengthAtDateRun(
     lengthAtDateModel,
     dateTimeValue ? new Date(dateTimeValue) : new Date()
@@ -193,6 +203,8 @@ export const getLadObject = ({
 export const getTimeProperty = (trapOperationsValues: any) => {
   if (trapOperationsValues?.trapVisitTime) {
     return 'trapVisitTime'
+  } else if (trapOperationsValues?.arrivalTime) {
+    return 'arrivalTime'
   } else if (trapOperationsValues?.sampleTime) {
     return 'sampleTime'
   } else if (trapOperationsValues?.trapVisitStopTime) {

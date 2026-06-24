@@ -22,10 +22,10 @@ const OnStartupProvider = (props: Props) => {
     (state: RootState) => state.userAuth
   )
 
-  let unsubscribe: NetInfoSubscription
+  let unsubscribe: NetInfoSubscription | null = null
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(async connectionState => {
+    unsubscribe = NetInfo.addEventListener(async connectionState => {
       const { isConnected, isInternetReachable, userCredentialsStore } = props
       if (
         isConnected != connectionState.isConnected ||
@@ -62,8 +62,12 @@ const OnStartupProvider = (props: Props) => {
     })
 
     return () => {
-      if (unsubscribe) {
-        unsubscribe()
+      try {
+        if (unsubscribe) {
+          unsubscribe()
+        }
+      } catch (err) {
+        console.error('Error unsubscribing NetInfo listener:', err)
       }
     }
   }, [props.isConnected, props.isInternetReachable, dispatch])

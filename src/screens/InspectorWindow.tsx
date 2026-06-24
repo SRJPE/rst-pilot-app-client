@@ -4,6 +4,7 @@ import { AppDispatch, RootState, persistor } from '../redux/store'
 import { connect, useDispatch } from 'react-redux'
 import { startCase } from 'lodash'
 import * as Clipboard from 'expo-clipboard'
+import Constants from 'expo-constants'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -210,6 +211,10 @@ const Debug = (props: DebugPropsI) => {
         Inspector
       </Text>
       <Divider marginTop={'10'} />
+      <Text fontSize='2xl' color={'white'} marginTop='10'>
+        Currently connected to:{' '}
+        {Constants.expoConfig?.extra?.EXPO_PUBLIC_BASE_URL}
+      </Text>
 
       <ScrollView
         flex={1}

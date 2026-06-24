@@ -60,6 +60,12 @@ export default function SpeciesDropDown({
   )
 
   useEffect(() => {
+    if (speciesValue && !value) {
+      setValue(speciesValue)
+    }
+  }, [speciesValue, value])
+
+  useEffect(() => {
     //if using formik
     if (setFieldTouched && setFieldValue) {
       if (value !== '') {

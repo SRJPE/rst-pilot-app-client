@@ -11,6 +11,7 @@ import {
   ScrollView,
   Text,
   useColorModeValue,
+  Checkbox,
 } from 'native-base'
 import React, {
   ComponentType,
@@ -31,18 +32,6 @@ type TabAcc = { [key: string]: ComponentType<unknown> }
 
 const initialLayout = {
   width: Dimensions.get('window').width,
-}
-
-const DEFAULT_CELL = {
-  forkLength: null,
-  dead: false,
-  existingMark: false,
-  fishConditions: [],
-  lifeStage: null,
-  runDefinition: null,
-  species: '',
-  taxonCode: null,
-  uid: null,
 }
 
 function groupForkLengthsBySpecies(
@@ -90,30 +79,36 @@ const MultiSpeciesBatchChart = ({
   const activeTabId = tabSlice?.activeTabId || 'placeholderId'
 
   const getRows = (activeSpeciesTab: string) => {
-    const rows = combinedFishObj[activeSpeciesTab]
-      ? Math.ceil(combinedFishObj[activeSpeciesTab].length / 10)
-      : 1
+    const individualFish = combinedFishObj?.[activeSpeciesTab]?.filter(
+      item => !item.plusCount
+    )
+    const rows = individualFish ? Math.ceil(individualFish.length / 10) : 1
     return rows
   }
 
-  // ✅ Redux selector optimized with shallowEqual
-  const previouslyEnteredFish = useSelector((state: RootState) => {
-    if (!activeTabId) return []
-    const fishStore = state.fishInput[activeTabId]?.fishStore || {}
-    return Object.values(fishStore).filter(
-      (fish: any) => fish.species === speciesRadioValue
-    )
+  const previouslyEnteredFishStore = useSelector((state: RootState) => {
+    if (!activeTabId) return {}
+    return state.fishInput[activeTabId]?.fishStore || {}
   }, shallowEqual)
 
-  // ✅ Efficient calculation (no intermediate arrays)
-  const currentSpeciesPlusCount = useMemo(() => {
-    const combinedPlusCountTotal =
-      fishMeasureCounts[speciesRadioValue]?.plusCount || 0
-
-    return String(combinedPlusCountTotal || 0)
-  }, [batchCountStore.forkLengths, speciesRadioValue, fishMeasureCounts])
-
   const [routes, setRoutes] = useState<Array<TabNavigationRoute>>([])
+  const [fallToggle, setFallToggle] = useState(true)
+  const [lateFallToggle, setLateFallToggle] = useState(true)
+  const [springToggle, setSpringToggle] = useState(true)
+  const [winterToggle, setWinterToggle] = useState(true)
+  const [hybridToggle, setHybridToggle] = useState(true)
+
+  // Derive active run names from toggle booleans so renderScene only sees
+  // one stable dep instead of five separate booleans.
+  const activeRuns = useMemo(() => {
+    const runs: string[] = []
+    if (fallToggle) runs.push('fall')
+    if (lateFallToggle) runs.push('late fall')
+    if (springToggle) runs.push('spring')
+    if (winterToggle) runs.push('winter')
+    if (hybridToggle) runs.push('hybrid')
+    return runs
+  }, [fallToggle, lateFallToggle, springToggle, winterToggle, hybridToggle])
 
   const forkLengths = useMemo(
     () => batchCountStore?.forkLengths || {},
@@ -125,8 +120,8 @@ const MultiSpeciesBatchChart = ({
   )
 
   const groupedPreviouslyEnteredFish = useMemo(
-    () => groupForkLengthsBySpecies(previouslyEnteredFish),
-    [previouslyEnteredFish]
+    () => groupForkLengthsBySpecies(previouslyEnteredFishStore),
+    [previouslyEnteredFishStore]
   )
 
   const groupedForkLengths = useMemo(
@@ -148,38 +143,25 @@ const MultiSpeciesBatchChart = ({
   }, [groupedForkLengths, groupedPreviouslyEnteredFish])
 
   const activeSpeciesTab = routes[tabIndex]?.title
-  const totalSlots = 50
 
-  const slots = useMemo(() => {
-    const rows = getRows(activeSpeciesTab)
-    let protocolSlots = fishMeasureProtocol[activeSpeciesTab] || totalSlots
+  const activeTabColor = useColorModeValue('#000', '#e5e5e5')
+  const inactiveTabColor = useColorModeValue('#1f2937', '#a1a1aa')
+  const inactiveBorderColor = useColorModeValue('coolGray.200', 'gray.400')
 
-    if (
-      activeSpeciesTab &&
-      activeSpeciesTab.toLocaleLowerCase().includes('chinook') &&
-      rows * 10 > protocolSlots
-    ) {
-      protocolSlots = rows * 10
-    }
-
-    return Array.from({ length: protocolSlots }, (_, i) => {
-      const cellData = combinedFishObj[activeSpeciesTab]?.[i] || DEFAULT_CELL
-      return { index: i, cellData }
-    })
-  }, [combinedFishObj, activeSpeciesTab, fishMeasureProtocol])
-
-  // ✅ Memoized renderScene
+  // ✅ Memoized renderScene — does NOT depend on speciesRadioValue or active tab,
+  // so switching tabs no longer invalidates all scenes.
   const renderScene = useCallback(
     ({ route }: { route: TabNavigationRoute }) => (
       <MultiSpeciesChartTab
         species={route.title}
         activeTab={route.key}
-        slots={slots}
-        currentSpeciesPlusCount={currentSpeciesPlusCount}
         combinedFishObj={combinedFishObj}
+        fishMeasureCounts={fishMeasureCounts}
+        fishMeasureProtocol={fishMeasureProtocol}
+        activeRuns={activeRuns}
       />
     ),
-    [slots, currentSpeciesPlusCount, combinedFishObj]
+    [combinedFishObj, fishMeasureCounts, fishMeasureProtocol, activeRuns]
   )
 
   // ✅ Memoized renderTabBar
@@ -193,14 +175,9 @@ const MultiSpeciesBatchChart = ({
         <ScrollView horizontal>
           {props.navigationState.routes.map(
             (route: TabNavigationRoute, i: number) => {
-              const color =
-                tabIndex === i
-                  ? useColorModeValue('#000', '#e5e5e5')
-                  : useColorModeValue('#1f2937', '#a1a1aa')
+              const color = tabIndex === i ? activeTabColor : inactiveTabColor
               const borderColor =
-                tabIndex === i
-                  ? 'cyan.500'
-                  : useColorModeValue('coolGray.200', 'gray.400')
+                tabIndex === i ? 'cyan.500' : inactiveBorderColor
               return (
                 <Pressable
                   key={route.key}
@@ -227,7 +204,14 @@ const MultiSpeciesBatchChart = ({
         </ScrollView>
       </Box>
     ),
-    [tabIndex, setTabIndex, setSpeciesRadioValue]
+    [
+      tabIndex,
+      setTabIndex,
+      setSpeciesRadioValue,
+      activeTabColor,
+      inactiveTabColor,
+      inactiveBorderColor,
+    ]
   )
 
   // Build routes once per species change
@@ -239,60 +223,159 @@ const MultiSpeciesBatchChart = ({
     setRoutes(newRoutes)
   }, [selectedSpecies])
 
-  // Update tab index when speciesRadioValue changes
-  useEffect(() => {
-    const spvTabIndex = routes.findIndex(
-      route => route.title === speciesRadioValue
-    )
-    setTabIndex(spvTabIndex >= 0 ? spvTabIndex : 0)
-  }, [speciesRadioValue, routes, setTabIndex])
-
   const getChartHeight = (activeSpeciesTab: string) => {
-    const rows = getRows(activeSpeciesTab)
-    if (
-      activeSpeciesTab &&
-      activeSpeciesTab.toLocaleLowerCase().includes('chinook') &&
-      rows > 5
+    const actualRows = getRows(activeSpeciesTab)
+    const protocolRows = Math.ceil(
+      (fishMeasureProtocol[activeSpeciesTab] || 50) / 10
     )
-      return 420 + (rows - 5) * 50
-    return fishMeasureProtocol[activeSpeciesTab] === 20 ? 270 : 420
+    return 170 + Math.max(actualRows, protocolRows) * 50
+  }
+
+  const handleToggles = (toggleName: string) => {
+    switch (toggleName) {
+      case 'fall':
+        setFallToggle(!fallToggle)
+        break
+      case 'late fall':
+        setLateFallToggle(!lateFallToggle)
+        break
+      case 'spring':
+        setSpringToggle(!springToggle)
+        break
+      case 'winter':
+        setWinterToggle(!winterToggle)
+        break
+      case 'hybrid':
+        setHybridToggle(!hybridToggle)
+        break
+
+      default:
+        break
+    }
   }
 
   return (
-    <NativeBaseProvider>
-      <Center flex={1} px='3'>
-        <TabView
-          navigationState={{ index: tabIndex, routes }}
-          renderScene={renderScene}
-          renderTabBar={renderTabBar}
-          onIndexChange={setTabIndex}
-          initialLayout={initialLayout}
-          style={{
-            marginTop: StatusBar.currentHeight,
-            height: getChartHeight(activeSpeciesTab),
-            width: '100%',
-          }}
-          lazy
-          renderLazyPlaceholder={() => (
-            <Center flex={1}>
-              <Text>Loading...</Text>
-            </Center>
-          )}
-        />
-        <HStack space={5} justifyContent='center' mb={3}>
-          <HStack space={2}>
-            <Box
-              h={5}
-              w={8}
-              borderWidth={2}
-              borderRadius='50%'
-              borderColor='black'
-            />
-            <Text>Dead</Text>
-          </HStack>
+    <Center flex={1} px='3'>
+      <TabView
+        navigationState={{ index: tabIndex, routes }}
+        renderScene={renderScene}
+        renderTabBar={renderTabBar}
+        onIndexChange={index => {
+          setTabIndex(index)
+          if (routes[index]) {
+            setSpeciesRadioValue(routes[index].title)
+          }
+        }}
+        initialLayout={initialLayout}
+        style={{
+          marginTop: StatusBar.currentHeight,
+          height: getChartHeight(activeSpeciesTab),
+          width: '100%',
+        }}
+        lazy
+        renderLazyPlaceholder={() => (
+          <Center flex={1}>
+            <Text>Loading...</Text>
+          </Center>
+        )}
+      />
+      <HStack space={5} justifyContent='center' mb={3}>
+        <HStack space={2}>
+          <Box
+            h={5}
+            w={8}
+            borderWidth={2}
+            borderRadius='50%'
+            borderColor='black'
+          />
+          <Text>Dead</Text>
         </HStack>
-      </Center>
-    </NativeBaseProvider>
+      </HStack>
+      {activeSpeciesTab?.toLocaleLowerCase()?.includes('chinook') &&
+        !tabSlice?.tabs?.[activeTabId]?.name
+          .toLowerCase()
+          .includes('butte') && (
+          <Box px='2%' mb={3} w='100%'>
+            <Text bold mb={2}>
+              Filter Table by Run:
+            </Text>
+            <HStack space={3} alignItems='center'>
+              <HStack alignItems='center' space={4}>
+                <HStack space={2}>
+                  <Checkbox
+                    value='fall'
+                    isChecked={fallToggle}
+                    shadow='3'
+                    _checked={{
+                      bg: 'primary',
+                      borderColor: 'primary',
+                    }}
+                    size='md'
+                    onChange={() => handleToggles('fall')}
+                  />
+                  <Text fontSize='16'>Fall</Text>
+                </HStack>
+                <HStack space={2}>
+                  <Checkbox
+                    value='late fall'
+                    isChecked={lateFallToggle}
+                    shadow='3'
+                    _checked={{
+                      bg: 'primary',
+                      borderColor: 'primary',
+                    }}
+                    size='md'
+                    onChange={() => handleToggles('late fall')}
+                  />
+                  <Text fontSize='16'>Late Fall</Text>
+                </HStack>
+                <HStack space={2}>
+                  <Checkbox
+                    value='spring'
+                    isChecked={springToggle}
+                    shadow='3'
+                    _checked={{
+                      bg: 'primary',
+                      borderColor: 'primary',
+                    }}
+                    size='md'
+                    onChange={() => handleToggles('spring')}
+                  />
+                  <Text fontSize='16'>Spring</Text>
+                </HStack>
+                <HStack space={2}>
+                  <Checkbox
+                    value='winter'
+                    isChecked={winterToggle}
+                    shadow='3'
+                    _checked={{
+                      bg: 'primary',
+                      borderColor: 'primary',
+                    }}
+                    size='md'
+                    onChange={() => handleToggles('winter')}
+                  />
+                  <Text fontSize='16'>Winter</Text>
+                </HStack>
+                <HStack space={2}>
+                  <Checkbox
+                    value='hybrid'
+                    isChecked={hybridToggle}
+                    shadow='3'
+                    _checked={{
+                      bg: 'primary',
+                      borderColor: 'primary',
+                    }}
+                    size='md'
+                    onChange={() => handleToggles('hybrid')}
+                  />
+                  <Text fontSize='16'>Hybrid</Text>
+                </HStack>
+              </HStack>
+            </HStack>
+          </Box>
+        )}
+    </Center>
   )
 }
 

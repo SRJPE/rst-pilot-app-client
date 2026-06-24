@@ -155,7 +155,7 @@ function CatchCategoricalQC({
         return program.programId === programId
       }
     )
-    setProgramName(currentProgram.programName)
+    setProgramName(currentProgram?.programName)
     const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
 
     let adiposeClippedData: any[] = []

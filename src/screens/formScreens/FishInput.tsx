@@ -34,6 +34,7 @@ import { navigateHelper } from '../../utils/utils'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { find, keyBy, mapValues } from 'lodash'
 import FishEntriesSummary from '../../components/form/FishEntriesSummary'
+import { useFormSave } from '../../context/FormSaveContext'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = 'placeholderId'
@@ -76,6 +77,7 @@ const FishInput = ({
   visitSetupDefaultsState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const { registerSaveHandler } = useFormSave()
   const [addPlusCountModalOpen, setAddPlusCountModalOpen] = useState(
     false as boolean
   )
@@ -174,6 +176,11 @@ const FishInput = ({
       dispatch(markStepCompleted({ propName: 'fishInput' }))
     }
   }
+
+  useEffect(() => {
+    registerSaveHandler(() => handleSubmit())
+    return () => registerSaveHandler(null)
+  }, [checkboxGroupValue, activeTabId])
 
   const submissionLoader = (direction: 'left' | 'right') => {
     const destination =

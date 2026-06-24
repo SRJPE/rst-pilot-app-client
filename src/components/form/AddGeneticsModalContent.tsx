@@ -31,7 +31,7 @@ const AddGeneticsModalContent = ({
   species,
   reorderedTaxon,
   fishStore,
-  visitSetupState,
+  trapOperationsState,
   selectedProgramObj,
   dropdownValues,
   activeTabId,
@@ -45,7 +45,7 @@ const AddGeneticsModalContent = ({
   species: any
   reorderedTaxon: any
   fishStore: any
-  visitSetupState: any
+  trapOperationsState: any
   selectedProgramObj: any
   dropdownValues: any
   activeTabId: string
@@ -112,6 +112,8 @@ const AddGeneticsModalContent = ({
         taxonArray: reorderedTaxon,
         fishRunValue: fishRunValue,
         fishAdiposeClippedValue: fishAdiposeClippedValue,
+        trapOperationsState,
+        activeTabId,
       })
       console.log('🚀 ~ defaultSampleIDNumber', defaultSampleIDNumber)
       if (defaultSampleIDNumber) {
@@ -404,6 +406,7 @@ const mapStateToProps = (state: RootState) => {
     addGeneticSamples: state.addGeneticSamples,
     fishStore: state.fishInput?.[activeTabId]?.fishStore,
     visitSetupState: state.visitSetup?.[activeTabId]?.values,
+    trapOperationsState: state.trapOperations,
   }
 }
 

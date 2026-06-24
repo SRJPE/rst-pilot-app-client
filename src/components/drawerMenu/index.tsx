@@ -13,6 +13,7 @@ import {
 } from 'native-base'
 import React, { useCallback } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
+import { useFormSave } from '../../context/FormSaveContext'
 import {
   numOfFormSteps,
   updateActiveStep,
@@ -37,6 +38,7 @@ const DrawerMenu = ({
   ...props
 }: ExtendedDrawerProps) => {
   const dispatch = useDispatch<AppDispatch>()
+  const { saveCurrentForm } = useFormSave()
   const navigationState = useSelector((state: any) => state.navigation)
   const fishProcessingState = useSelector((state: any) => state.fishProcessing)
 
@@ -44,12 +46,12 @@ const DrawerMenu = ({
   const { activeTabId, tabs } = tabSlice
 
   const isFormNavigationUnlocked = () => {
-    const programId =
-      visitSetupSlice[activeTabId]?.values?.programId || 'placeholderId'
+    // const programId =
+    //   visitSetupSlice[activeTabId]?.values?.programId || 'placeholderId'
 
-    const unrestrictedIds = [7, 8]
+    // const unrestrictedIds = [6, 7, 8]
 
-    return unrestrictedIds.includes(programId)
+    return !!activeTabId
   }
 
   const hasUnrestrictedFormNavigation = isFormNavigationUnlocked()
@@ -89,13 +91,21 @@ const DrawerMenu = ({
         })
       }
 
-      if (stepsArray[stepIndex].completed) {
-        return true
+      if (stepsArray[stepIndex].propName === 'incompleteSections') {
+        return stepsArray
+          .filter(step => step.propName !== 'incompleteSections')
+          .every(step => step.completed)
       }
 
-      if (stepsArray[stepIndex - 1].completed) {
-        return true
-      }
+      return true
+
+      // if (stepsArray[stepIndex].completed) {
+      //   return true
+      // }
+
+      // if (stepsArray[stepIndex - 1].completed) {
+      //   return true
+      // }
     },
     [activeStep, stepsArray]
   )
@@ -109,6 +119,7 @@ const DrawerMenu = ({
 
   const handlePressFormButton = useCallback(
     (buttonTitle: string) => {
+      saveCurrentForm()
       navigation?.navigate('Trap Visit Form', { screen: buttonTitle })
       //for each object in the steps Array
       //if the Object contain the name property that matched button title
@@ -127,7 +138,7 @@ const DrawerMenu = ({
         // payload: steps[buttonTitle],
       })
     },
-    [tabSlice]
+    [tabSlice, saveCurrentForm]
   )
 
   const handlePressMarkRecaptureButton = useCallback((buttonTitle: string) => {
@@ -270,7 +281,7 @@ const DrawerMenu = ({
             <Divider mt='2' />
             {stepsArray.map((step: any, index: number) => {
               if (
-                showStepNavigationButton(index) ||
+                showStepNavigationButton(index) &&
                 hasUnrestrictedFormNavigation === true
               )
                 return (

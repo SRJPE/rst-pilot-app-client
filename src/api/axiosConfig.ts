@@ -58,6 +58,8 @@ const convertUTCToLocal: any = (data: any) => {
 
 const controller = new AbortController()
 
+let refreshPromise: Promise<void> | null = null
+
 const baseURL = Constants.expoConfig?.extra?.EXPO_PUBLIC_BASE_URL
 const api = axios.create({
   baseURL,
@@ -82,16 +84,14 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config: AxiosRequestConfig) => {
     try {
-      const { isConnected, isInternetReachable } = store.getState().connectivity
+      const { isConnected } = store.getState().connectivity
 
-      //Attempt to refresh token only if there is a network connection
       if (isConnected) {
         const accessToken = await SecureStore.getItemAsync('userAccessToken')
         const idToken = await SecureStore.getItemAsync('userIdToken')
-        const tokenExpiresAt = await SecureStore.getItemAsync(
-          'userAccessTokenExpiresAt'
-        )
+        const tokenExpiresAt = await SecureStore.getItemAsync('userAccessTokenExpiresAt')
         const tokenIsExpired = moment().isAfter(tokenExpiresAt)
+
         if (!tokenIsExpired && accessToken && idToken) {
           const newConfig = config as any
           newConfig.headers['Authorization'] = `Bearer ${accessToken}`
@@ -99,92 +99,73 @@ api.interceptors.request.use(
           return newConfig
         }
 
-        try {
-          //refreshAsync to exchange for new token
-          const existingRefreshToken =
-            (await SecureStore.getItemAsync('userRefreshToken')) || undefined
+        const existingRefreshToken =
+          (await SecureStore.getItemAsync('userRefreshToken')) || undefined
 
-          if (!existingRefreshToken) {
-            store.dispatch(setForcedLogoutModalOpen(true))
-            return
-          }
-
-          const tokenEndpoint =
-            'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/b2c_1_signin/oauth2/v2.0/token'
-
-          try {
-            const refreshResponse = await refreshAsync(
-              {
-                clientId: EXPO_PUBLIC_CLIENT_ID,
-                refreshToken: existingRefreshToken,
-              },
-              { tokenEndpoint }
-            )
-
-            if (refreshResponse.accessToken) {
-              const {
-                accessToken,
-                refreshToken,
-                idToken,
-                issuedAt,
-                expiresIn,
-              } = refreshResponse
-
-              await storeAccessTokens({
-                accessToken,
-                refreshToken: refreshToken,
-                idToken,
-                expiresIn,
-                issuedAt,
-              })
-
-              const newConfig = config as AxiosRequestConfig<any>
-
-              //@ts-ignore - this is a hack to add the headers to the config
-              newConfig.headers['Authorization'] = `Bearer ${accessToken}`
-              //@ts-ignore - see above
-              newConfig.headers['idToken'] = idToken as string
-
-              return newConfig
-            }
-          } catch (error) {
-            console.error('Error refreshing token:', error)
-          }
-
-          if (accessToken && idToken) {
-            const newConfig = config as any
-            newConfig.headers['Authorization'] = `Bearer ${accessToken}`
-            newConfig.headers['idToken'] = idToken
-            return newConfig
-          }
-
-          // if (!tokenIsExpired) {
-          //   return config
-          // }
-
-          throw new Error('No tokens found')
-        } catch (error) {
+        if (!existingRefreshToken) {
+          store.dispatch(setForcedLogoutModalOpen(true))
           return config
         }
+
+        const tokenEndpoint =
+          'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/b2c_1_signin/oauth2/v2.0/token'
+
+        if (!refreshPromise) {
+          refreshPromise = refreshAsync(
+            { clientId: EXPO_PUBLIC_CLIENT_ID, refreshToken: existingRefreshToken },
+            { tokenEndpoint }
+          )
+            .then(async refreshResponse => {
+              if (refreshResponse.accessToken) {
+                const { accessToken, refreshToken, idToken, issuedAt, expiresIn } = refreshResponse
+                await storeAccessTokens({ accessToken, refreshToken, idToken, expiresIn, issuedAt })
+              }
+            })
+            .catch(error => {
+              console.error('Error refreshing token:', error)
+            })
+            .finally(() => {
+              refreshPromise = null
+            })
+        }
+
+        try {
+          await refreshPromise
+
+          const freshAccessToken = await SecureStore.getItemAsync('userAccessToken')
+          const freshIdToken = await SecureStore.getItemAsync('userIdToken')
+
+          if (freshAccessToken && freshIdToken) {
+            const newConfig = config as any
+            newConfig.headers['Authorization'] = `Bearer ${freshAccessToken}`
+            newConfig.headers['idToken'] = freshIdToken
+            return newConfig
+          }
+        } catch (error) {
+          console.error('Error awaiting token refresh:', error)
+        }
       }
+
+      return config
     } catch (error) {
       console.error('Error in Axios request interceptor:', error)
-      return Promise.reject(error)
+      return config
     }
   },
-  error => {
-    return Promise.reject(error)
-  }
+  error => Promise.reject(error)
 )
 
 // Axios middleware to convert all api responses to camelCase
 api.interceptors.response.use(
   (response: AxiosResponse) => {
-    if (
-      response.data &&
-      response.headers['content-type'].includes('application/json')
-    ) {
-      response.data = camelizeKeys(response.data)
+    try {
+      const contentType = (response.headers && response.headers['content-type']) || ''
+      if (response.data && typeof contentType === 'string' && contentType.includes('application/json')) {
+        response.data = camelizeKeys(response.data)
+      }
+    } catch (err) {
+      // If headers are malformed, don't crash — just return response as-is
+      console.error('Error processing response headers:', err)
     }
     return response
   },

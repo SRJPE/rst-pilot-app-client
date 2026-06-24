@@ -1,6 +1,6 @@
 import { StackActions } from '@react-navigation/native'
 import { useEffect, useState } from 'react'
-import { ReleaseMarkI } from './interfaces'
+import { ReleaseMarkI, Taxon } from './interfaces'
 import { every, some, sortBy, flatten, uniqBy, find, keyBy } from 'lodash'
 import { ObjectSchema } from 'yup'
 import type { InitialStateI as FishProcessingSliceState } from '../redux/reducers/formSlices/fishProcessingSlice'
@@ -82,14 +82,19 @@ export const reorderTaxon = (taxonArray: any[], reverse?: boolean) => {
     alphabeticalTaxon.reverse()
   }
 
-  return alphabeticalTaxon?.map((taxon: any) => ({
-    ...taxon,
-    label: `${taxon?.commonname} ${
-      taxon?.abbreviationCode ? `(${taxon?.abbreviationCode})` : ''
-    }`,
-    value: taxon?.commonname,
-    parent: 'allSpecies',
-  }))
+  return alphabeticalTaxon?.map((taxon: any) => {
+    const label = taxon.isFullName
+      ? taxon.abbreviationCode
+      : `${taxon?.commonname} ${
+          taxon?.abbreviationCode ? `(${taxon?.abbreviationCode})` : ''
+        }`
+    return {
+      ...taxon,
+      label,
+      value: taxon?.commonname,
+      parent: 'allSpecies',
+    }
+  })
 }
 
 export const fetchRecentlyUsedSpecies = ({
@@ -104,7 +109,11 @@ export const fetchRecentlyUsedSpecies = ({
   if (trapSiteData?.recentSpecies?.length) {
     const recentlyUsedSpecies = trapSiteData.recentSpecies
     const formattedRecentlyUsedSpecies = recentlyUsedSpecies.map((rs: any) => ({
-      label: rs.commonname,
+      label: rs.isFullName
+        ? rs.abbreviationCode
+        : `${rs?.commonname} ${
+            rs?.abbreviationCode ? `(${rs?.abbreviationCode})` : ''
+          }`,
       value: `recent_${rs.commonname}`,
       parent: 'recentlyUsed',
     }))
@@ -491,6 +500,8 @@ export const navigateFlowRightButton = ({
       } else if (warnings?.warningResultTemp) {
         return 'High Temperatures'
       } else if (values.gearStatus === 'S') {
+        return 'Trap Post-Processing'
+      } else if (values.conditionCode === '4') {
         return 'Trap Post-Processing'
       } else {
         return 'Fish Processing'
@@ -1124,12 +1135,14 @@ export const shouldRenderField = ({
   fieldName,
   programFormFields,
   sectionFields,
+  renderOnDefault = true,
 }: {
   fieldName: string
   programFormFields: Array<any> | null
   sectionFields: Array<any> | null
+  renderOnDefault?: boolean
 }) => {
-  if (!programFormFields?.length) {
+  if (!programFormFields?.length && renderOnDefault) {
     return true
   }
 
@@ -1209,6 +1222,8 @@ export const formatGeneticsSampleId = ({
   taxonArray = [],
   fishRunValue,
   fishAdiposeClippedValue,
+  trapOperationsState,
+  activeTabId,
 }: {
   programName: string
   species: string
@@ -1216,21 +1231,31 @@ export const formatGeneticsSampleId = ({
   taxonArray?: any[]
   fishRunValue?: string
   fishAdiposeClippedValue?: boolean
+  trapOperationsState?: any
+  activeTabId: string
 }) => {
   let sampleId = ''
 
   const programNameLower = programName.toLowerCase()
 
-  if (programNameLower.includes('yolo') || programNameLower.includes('flow')) {
-    const currentYear = new Date().getFullYear()
+  const trapOperationsValues = trapOperationsState?.[activeTabId]?.values
+  let currentYear = new Date().getFullYear()
 
+  if (trapOperationsValues) {
+    currentYear = new Date(
+      trapOperationsValues.trapVisitTime ??
+        trapOperationsValues.sampleTime ??
+        trapOperationsValues.trapVisitStopTime ??
+        trapOperationsValues.trapVisitStartTime
+    ).getFullYear()
+  }
+
+  if (programNameLower.includes('yolo') || programNameLower.includes('flow')) {
     if (species.toLowerCase().includes('chinook')) {
       const runAbbreviation = fishRunValue ? getRunInitials(fishRunValue) : ''
       const adiposeString = fishAdiposeClippedValue ? 'Ad_minus' : 'Ad_plus'
 
       const yearAdiposeRun = `${currentYear}${adiposeString}-${runAbbreviation}`
-
-      console.log('yearAdiposeRun', yearAdiposeRun)
 
       const sampleIdSuffix = getNextSampleSuffix({
         arr: geneticSamplesArray,
@@ -1244,7 +1269,6 @@ export const formatGeneticsSampleId = ({
         (item: any) => item.commonname === species
       )
       const taxonAbbreviation = taxonObj?.abbreviationCode
-      console.log('taxonAbbreviation', taxonAbbreviation)
 
       if (!taxonAbbreviation) {
         return sampleId

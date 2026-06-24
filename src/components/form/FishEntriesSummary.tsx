@@ -10,7 +10,7 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion'
 import { ChevronUpIcon, ChevronDownIcon } from '@/components/ui/icon'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { startCase } from 'lodash'
 import { sumCountsWithFallback } from '@/src/utils/utils'
 
@@ -45,8 +45,6 @@ const FishEntriesSummary = ({
       fishMeasureProtocol,
       fishMeasureCounts
     )
-    console.log('fishmeasurecounts summary:', fishMeasureCounts)
-    console.log('finalSums summary:', finalSums)
     setProtocolCounts(finalSums)
   }, [fishMeasureProtocol, fishMeasureCounts])
 
@@ -200,10 +198,12 @@ const FishEntriesSummary = ({
                             }
                           >
                             {formatFishMeasureProtocolText(fishName)}:{' '}
-                            {String(
-                              (countObj as { individualCount?: number })
-                                ?.individualCount
-                            )}
+                            {countObj?.individualCount > 0
+                              ? String(
+                                  (countObj as { individualCount?: number })
+                                    ?.individualCount
+                                )
+                              : ''}
                             {fishMeasureProtocol[fishName]
                               ? `/${fishMeasureProtocol[fishName]} `
                               : ' '}
@@ -225,4 +225,4 @@ const FishEntriesSummary = ({
   )
 }
 
-export default FishEntriesSummary
+export default React.memo(FishEntriesSummary)

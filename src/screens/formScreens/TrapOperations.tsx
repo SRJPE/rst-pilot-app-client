@@ -59,6 +59,7 @@ import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVis
 import TrapEndDateAndTime from '../../components/form/TrapEndDateAndTime'
 import RPMBefore from '../../components/form/RPMBefore'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import { useFormSave } from '../../context/FormSaveContext'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -85,6 +86,16 @@ const mapStateToProps = (state: RootState) => {
     visitSetupDefaults: state.visitSetupDefaults,
     previousTrapVisits:
       state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
+    conditionCode:
+      (
+        state.trapPostProcessing[state.tabSlice.activeTabId ?? 'placeholderId']
+          ?.values as any
+      )?.conditionCode ??
+      (
+        state.trapOperations[state.tabSlice.activeTabId ?? 'placeholderId']
+          ?.values as any
+      )?.conditionCode ??
+      null,
   }
 }
 
@@ -102,6 +113,7 @@ const TrapOperations = ({
   tabSlice,
   visitSetupDefaults,
   previousTrapVisits,
+  conditionCode,
 }: {
   navigation: any
   reduxState: any
@@ -116,8 +128,10 @@ const TrapOperations = ({
   tabSlice: TabStateI
   visitSetupDefaults: any
   previousTrapVisits: any
+  conditionCode: string | null
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const { registerSaveHandler } = useFormSave()
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
@@ -171,15 +185,33 @@ const TrapOperations = ({
 
       // get fields for this section and equipment type, if applicable
       // null equipmentId indicates field displayed for all equipment types
-      const sectionFields = currentProgramInfo?.programFormFields.filter(
+      let sectionFields = currentProgramInfo?.programFormFields.filter(
         (field: any) =>
           field.formSection === activePage &&
           (field.equipmentId === null || field.equipmentId === trapEquimentType)
       )
 
+      if (conditionCode && conditionCode === '4') {
+        sectionFields = sectionFields.map((field: any) => {
+          if (
+            ['length', 'width', 'depth', 'substrate'].includes(field.fieldName)
+          ) {
+            const updatedField = {
+              ...field,
+              required: false,
+            }
+            return updatedField
+          }
+          return field
+        })
+      }
+
       setSectionFields(sectionFields)
       setProgramFormFields(currentProgramInfo?.programFormFields)
-      const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(sectionFields)
+      const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(
+        sectionFields,
+        conditionCode
+      )
       setValidationSchema(dynamicTrapOpsSchema)
     } else {
       setSectionFields(null)
@@ -193,6 +225,7 @@ const TrapOperations = ({
     activePage,
     visitSetupDefaults?.trapLocations,
     selectedTrapLocationId,
+    conditionCode,
   ])
 
   useEffect(() => {
@@ -310,7 +343,9 @@ const TrapOperations = ({
             ...values,
             waterTurbidity: values.recordTurbidityInPostProcessing
               ? null
-              : values.waterTurbidity,
+              : values.waterTurbidity !== '' && values.waterTurbidity !== null
+                ? Number(values.waterTurbidity)
+                : values.waterTurbidity,
             trapVisitStopTime: endTime, //refactor needed
             trapVisitStartTime: new Date(),
           },
@@ -345,7 +380,7 @@ const TrapOperations = ({
         dispatch(markStepCompleted({ propName: 'trapOperations' }))
       }
 
-      if (values.gearStatus === 'S') {
+      if (values.gearStatus === 'S' || values.conditionCode === '4' || conditionCode === '4') {
         dispatch(markStepCompleted({ propName: 'fishProcessing' }))
         dispatch(markStepCompleted({ propName: 'fishInput' }))
       }
@@ -374,6 +409,40 @@ const TrapOperations = ({
   const onEndTimeChange = (event: any, selectedDate: any) => {
     const currentDate = selectedDate
     setEndTime(currentDate)
+    if (allTabIds.length > 1 && endTime) {
+      const prev = new Date(endTime)
+      const next = new Date(currentDate)
+      const dateChanged =
+        prev.getFullYear() !== next.getFullYear() ||
+        prev.getMonth() !== next.getMonth() ||
+        prev.getDate() !== next.getDate()
+
+      if (dateChanged) {
+        allTabIds.forEach(tabId => {
+          if (tabId === activeTabId) return
+          const tabIdValues = reduxState[tabId]?.values
+          if (tabIdValues) {
+            const existingTime = tabIdValues.trapVisitStopTime
+              ? new Date(tabIdValues.trapVisitStopTime)
+              : currentDate
+            const mergedDate = new Date(currentDate)
+            mergedDate.setHours(
+              existingTime.getHours(),
+              existingTime.getMinutes(),
+              existingTime.getSeconds(),
+              existingTime.getMilliseconds()
+            )
+            dispatch(
+              saveTrapOperations({
+                tabId,
+                values: { ...tabIdValues, trapVisitStopTime: mergedDate },
+                errors: reduxState[tabId]?.errors || {},
+              })
+            )
+          }
+        })
+      }
+    }
   }
 
   const otherTabFormsValid = checkOtherTabForms({
@@ -398,7 +467,7 @@ const TrapOperations = ({
         setEndTime(new Date())
       }
     }
-  }, [activeTabId, reduxState])
+  }, [activeTabId])
 
   const handleNavButtonClick = (
     direction: 'left' | 'right',
@@ -411,7 +480,7 @@ const TrapOperations = ({
         direction === 'left'
           ? navigateFlowLeftButton('Trap Operations', false, navigation)
           : navigateFlowRightButton({
-              values,
+              values: { ...values, conditionCode },
               activePage: 'Trap Operations',
               holdingForMarkRecap: false,
               navigation,
@@ -453,6 +522,9 @@ const TrapOperations = ({
         'recordTurbidityInPostProcessing',
         'coneSetting',
         'trapVisitStopTime',
+        'rpm1',
+        'rpm2',
+        'rpm3',
         'trapVisitStartTime',
       ]
       const extraFields = Object.keys(values).filter(
@@ -483,7 +555,7 @@ const TrapOperations = ({
         !programFormFields?.length ||
         !sectionFields.length ||
         find(sectionFields, {
-          fieldType: 'trapVisitStopTime',
+          fieldName: 'trapVisitStopTime',
         })
       ) {
         return (
@@ -520,10 +592,12 @@ const TrapOperations = ({
               setFieldValue(
                 fieldName,
                 new Date(
-                  mostRecentTrapVisit.createdTrapVisitResponse.trapVisitTimeStart
+                  mostRecentTrapVisit.createdTrapVisitResponse
+                    .trapVisitTimeStart
                 )
               )
             } else {
+              console.log('fieldName:', fieldName)
               setFieldValue(fieldName, new Date())
             }
           }
@@ -546,7 +620,45 @@ const TrapOperations = ({
                     }
                     mode='datetime'
                     onChange={(event: any, selectedDate: any) => {
-                      setFieldValue(fieldName, selectedDate || new Date())
+                      const newDate = selectedDate || new Date()
+                      const prevDate = values?.[fieldName]
+                        ? new Date(values[fieldName])
+                        : null
+                      setFieldValue(fieldName, newDate)
+                      if (allTabIds.length > 1 && prevDate) {
+                        const dateChanged =
+                          prevDate.getFullYear() !== newDate.getFullYear() ||
+                          prevDate.getMonth() !== newDate.getMonth() ||
+                          prevDate.getDate() !== newDate.getDate()
+                        if (dateChanged) {
+                          allTabIds.forEach(tabId => {
+                            if (tabId === activeTabId) return
+                            const tabIdValues = reduxState[tabId]?.values
+                            if (tabIdValues) {
+                              const existingTime = tabIdValues[fieldName]
+                                ? new Date(tabIdValues[fieldName])
+                                : newDate
+                              const mergedDate = new Date(newDate)
+                              mergedDate.setHours(
+                                existingTime.getHours(),
+                                existingTime.getMinutes(),
+                                existingTime.getSeconds(),
+                                existingTime.getMilliseconds()
+                              )
+                              dispatch(
+                                saveTrapOperations({
+                                  tabId,
+                                  values: {
+                                    ...tabIdValues,
+                                    [fieldName]: mergedDate,
+                                  },
+                                  errors: reduxState[tabId]?.errors || {},
+                                })
+                              )
+                            }
+                          })
+                        }
+                      }
                     }}
                     accentColor='#007C7C'
                   />
@@ -566,6 +678,9 @@ const TrapOperations = ({
       popoverTrigger,
       selectedProgramObj,
       trapNotInServiceIdentifier,
+      allTabIds,
+      activeTabId,
+      reduxState,
     ]
   )
 
@@ -586,7 +701,14 @@ const TrapOperations = ({
   }) => {
     // no program form fields have been set
     // assume has not been customized
-    if (!programFormFields?.length) {
+    if (
+      !programFormFields?.length ||
+      !sectionFields.length ||
+      find(sectionFields, {
+        fieldName: 'rpmBefore',
+        formSection: 'Trap Operations',
+      })
+    ) {
       return (
         <RPMBefore
           touched={touched}
@@ -709,7 +831,11 @@ const TrapOperations = ({
                     trapVisitStartTime: tabIdValues?.trapVisitStartTime,
                     flowMeasure: values.flowMeasure,
                     flowMeasureUnit: values.flowMeasureUnit,
-                    waterTurbidity: values.waterTurbidity,
+                    waterTurbidity:
+                      values.waterTurbidity !== '' &&
+                      values.waterTurbidity !== null
+                        ? Number(values.waterTurbidity)
+                        : values.waterTurbidity,
                     waterTurbidityUnit: values.waterTurbidityUnit,
                     waterTemperature: values.waterTemperature,
                     waterTemperatureUnit: values.waterTemperatureUnit,
@@ -764,20 +890,37 @@ const TrapOperations = ({
         }, [previouslyActiveTabId, activeTabId])
 
         useEffect(() => {
+          registerSaveHandler(() => onSubmit(values, activeTabId))
+          return () => registerSaveHandler(null)
+        }, [values, activeTabId, endTime])
+
+        useEffect(() => {
           if (
             selectedProgramObj &&
             (selectedProgramObj.streamName.toLowerCase().includes('clear') ||
               selectedProgramObj.streamName.toLowerCase().includes('battle'))
           ) {
-            setFieldValue('waterTemperatureUnit', '°F')
+            setFieldValue(
+              'waterTemperatureUnit',
+              reduxState[activeTabId ? activeTabId : 'placeholderId']?.values
+                ?.waterTemperatureUnit || '°F'
+            )
           }
           if (
             selectedProgramObj &&
             (selectedProgramObj.streamName.toLowerCase().includes('mill') ||
               selectedProgramObj.streamName.toLowerCase().includes('deer'))
           ) {
-            setFieldValue('recordTurbidityInPostProcessing', false)
-            setFieldValue('waterTurbidity', '')
+            setFieldValue(
+              'recordTurbidityInPostProcessing',
+              reduxState[activeTabId ? activeTabId : 'placeholderId']?.values
+                ?.recordTurbidityInPostProcessing || false
+            )
+            setFieldValue(
+              'waterTurbidity',
+              reduxState[activeTabId ? activeTabId : 'placeholderId']?.values
+                ?.waterTurbidity || ''
+            )
           }
         }, [selectedProgramObj])
 
@@ -803,6 +946,8 @@ const TrapOperations = ({
                 },
                 {}
               )
+
+            console.log('mostRecentTrapVisit', mostRecentTrapVisit)
 
             setFieldValue(
               'flowMeterSerialNumber',
@@ -830,6 +975,22 @@ const TrapOperations = ({
             setFieldValue('flowMeasure', null)
           }
         }, [values.flowMeasure])
+
+        useEffect(() => {
+          if (programFormFields && activeTabId) {
+            const waterTurbidity = find(programFormFields, {
+              fieldName: 'waterTurbidity',
+              formSection: 'Trap Operations',
+            })
+            if (
+              waterTurbidity?.required &&
+              !reduxState[activeTabId]?.values?.waterTurbidity
+            ) {
+              setFieldValue('waterTurbidity', '')
+              setFieldValue('recordTurbidityInPostProcessing', false)
+            }
+          }
+        }, [programFormFields, activeTabId])
         return (
           <KeyboardAvoidingView flex='1' behavior='padding'>
             <ScrollView
@@ -1121,32 +1282,35 @@ const TrapOperations = ({
                       {(!selectedProgramObj?.programFormFields?.length ||
                         find(selectedProgramObj?.programFormFields, {
                           fieldName: 'waterTurbidity',
-                        })) && (
-                        <Box flex={1} h={'full'}>
-                          <FormControl width={'100%'}>
-                            <FormControl.Label>
-                              <Text color='black' fontSize='xl' mb={2}>
-                                Record Turbidity After Trap Visit Save
-                              </Text>
-                            </FormControl.Label>
+                        })) &&
+                        !find(selectedProgramObj?.programFormFields, {
+                          fieldName: 'waterTurbidity',
+                        })?.required && (
+                          <Box flex={1} h={'full'}>
+                            <FormControl width={'100%'}>
+                              <FormControl.Label>
+                                <Text color='black' fontSize='xl' mb={2}>
+                                  Record Turbidity After Trap Visit Save
+                                </Text>
+                              </FormControl.Label>
 
-                            <HStack space={2} mb={4}>
-                              <Text fontSize='16'>No</Text>
-                              <Switch
-                                name='recordTurbidityInPostProcessing'
-                                shadow='3'
-                                offTrackColor='secondary'
-                                onTrackColor='primary'
-                                size='md'
-                                isChecked={turbidityToggle}
-                                value={values.recordTurbidityInPostProcessing}
-                                onToggle={handleTurbidityToggle}
-                              />
-                              <Text fontSize='16'>Yes</Text>
-                            </HStack>
-                          </FormControl>
-                        </Box>
-                      )}
+                              <HStack space={2} mb={4}>
+                                <Text fontSize='16'>No</Text>
+                                <Switch
+                                  name='recordTurbidityInPostProcessing'
+                                  shadow='3'
+                                  offTrackColor='secondary'
+                                  onTrackColor='primary'
+                                  size='md'
+                                  isChecked={turbidityToggle}
+                                  value={values.recordTurbidityInPostProcessing}
+                                  onToggle={handleTurbidityToggle}
+                                />
+                                <Text fontSize='16'>Yes</Text>
+                              </HStack>
+                            </FormControl>
+                          </Box>
+                        )}
                       <ConditionalTrapVisitFields
                         touched={touched}
                         errors={errors}

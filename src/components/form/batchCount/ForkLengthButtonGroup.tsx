@@ -1,5 +1,5 @@
 import { Button, Text } from 'native-base'
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { getButtonLookup } from '../../../utils/utils'
 
 const ForkLengthButtonGroup = ({
@@ -15,12 +15,26 @@ const ForkLengthButtonGroup = ({
   selectedProgramObj: any
   disabled?: boolean
 }) => {
-  const buttonLookup = getButtonLookup(selectedProgramObj)
-  const handlePressGroupButton = (key: string) => {
-    setFirstButton(buttonLookup[key].firstButton)
-    setNumberOfAdditionalButtons(buttonLookup[key].additionalButtons)
-    setLifeStageRadioValue(buttonLookup[key].lifeStage)
-  }
+  const buttonLookup = useMemo(
+    () => getButtonLookup(selectedProgramObj),
+    [selectedProgramObj]
+  )
+
+  const handlePressGroupButton = useCallback(
+    (key: string) => {
+      setFirstButton(buttonLookup[key].firstButton)
+      setNumberOfAdditionalButtons(buttonLookup[key].additionalButtons)
+      if (selectedProgramObj.streamName.toLowerCase().includes('butte')) return
+      setLifeStageRadioValue(buttonLookup[key].lifeStage)
+    },
+    [
+      buttonLookup,
+      selectedProgramObj,
+      setFirstButton,
+      setNumberOfAdditionalButtons,
+      setLifeStageRadioValue,
+    ]
+  )
 
   return (
     <Button.Group
@@ -54,4 +68,4 @@ const ForkLengthButtonGroup = ({
   )
 }
 
-export default ForkLengthButtonGroup
+export default React.memo(ForkLengthButtonGroup)

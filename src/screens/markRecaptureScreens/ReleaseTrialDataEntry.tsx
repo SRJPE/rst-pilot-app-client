@@ -108,9 +108,23 @@ const ReleaseDataEntry = ({
   }
 
   useEffect(() => {
-    const preparedReleaseSites = removeDuplicates(
-      visitSetupDefaultsState.releaseSites
+    let preparedReleaseSites: any[] = [
+      ...removeDuplicates(visitSetupDefaultsState.releaseSites || []).sort(
+        (a: any, b: any) =>
+          (a.releaseSiteName || '').localeCompare(b.releaseSiteName || '')
+      ),
+    ]
+
+    // Ensure a single "No release site" entry exists and is at the end
+    preparedReleaseSites = preparedReleaseSites.filter(
+      (rs: any) => rs.releaseSiteName !== 'No release site'
     )
+    preparedReleaseSites.push({
+      releaseSiteName: 'No release site',
+      releaseSiteId: null,
+      trapLocationsId: null,
+      programId: null,
+    })
     const filteredReleaseSites = preparedReleaseSites.filter(
       (releaseSite: any) =>
         releaseTrialDataEntryState.trapLocationIds.indexOf(

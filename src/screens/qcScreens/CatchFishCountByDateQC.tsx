@@ -71,7 +71,13 @@ function CatchFishCountByDateQC({
       }
     )
 
-    const qcData = [...qcCatchRawSubmissions, ...programCatchRaw]
+    const programQCCatchRawSubmissions = qcCatchRawSubmissions.filter(
+      (catchRaw: any) => {
+        return catchRaw.createdCatchRawResponse.programId === programId
+      }
+    )
+
+    const qcData = [...programQCCatchRawSubmissions, ...programCatchRaw]
 
     const selectedDateDateString = selectedDate.toDateString()
 
@@ -91,6 +97,8 @@ function CatchFishCountByDateQC({
     qcDataFiltered.sort(
       (a, b) => a.createdCatchRawResponse.id - b.createdCatchRawResponse.id
     )
+
+    console.log('Filtered QC Data:', qcDataFiltered)
 
     setTableData(qcDataFiltered)
   }, [selectedDate, qcCatchRawSubmissions])

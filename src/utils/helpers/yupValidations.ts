@@ -3,6 +3,25 @@ import * as yup from 'yup'
 const getValidator = (field: any) => {
   let validator = yup.string() as any // Default to string validation
 
+  if (field.fieldName === 'secchi') {
+    validator = yup.mixed().nullable().test(
+      'secchi-value',
+      'Must be a number or "Too Clear for Secchi"',
+      (value: any) => {
+        if (value === null || value === undefined || value === '') return true
+        if (value === 'Too Clear for Secchi') return true
+        const num = Number(value)
+        return !isNaN(num) && num >= 0
+      }
+    )
+    if (field.required) {
+      validator = validator.required('Secchi is required')
+    } else {
+      validator = validator.nullable()
+    }
+    return validator
+  }
+
   if (field.fieldType === 'email') {
     validator = yup.string().email('Invalid email format')
   } else if (field.fieldType === 'input') {
@@ -96,7 +115,10 @@ export const generateTrapVisitSchema = (fields: Array<any>) => {
   return yup.object().shape(schema)
 }
 
-export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
+export const generateDynamicTrapOpsSchema = (
+  fields: Array<any>,
+  conditionCode?: string | null
+) => {
   const sectionFields = fields.filter(
     (field: any) => field.formSection === 'Trap Operations'
   )
@@ -133,7 +155,9 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
       .number()
       .nullable()
       .transform((value, originalValue) => {
-        return originalValue === '' ? null : value
+        if (originalValue === '' || originalValue === null || originalValue === undefined)
+          return null
+        return value
       })
       // .required('Flow measure is required')
       .typeError('Value must be a number'),
@@ -150,16 +174,36 @@ export const generateDynamicTrapOpsSchema = (fields: Array<any>) => {
       schema.turbidity3 = validator
       return
     }
+
     if (field.fieldName === 'riverDepth') {
       validator = yup.number().typeError('Must be a number')
-      validator = validator.required(`Measurement required`)
+
       schema.riverLeft = validator
       schema.riverCenter = validator
       schema.riverRight = validator
       return
     }
+    if (field.fieldName === 'rpmBefore') {
+      validator = yup
+        .number()
+        .typeError('Must be a number')
+        .nullable()
+        .min(0, 'Measurement must be >= 0')
+        .max(30, 'Measurement must be ≤ 30')
+      schema.rpm1 = validator.required('Enter at least one RPM')
+      schema.rpm2 = validator
+      schema.rpm3 = validator
+      return
+    }
 
     validator = getValidator(field)
+
+    if (['length', 'width', 'depth'].includes(field.fieldName)) {
+      const dimensionsOptional = conditionCode === '4'
+      if (dimensionsOptional) {
+        validator = validator.nullable().optional()
+      }
+    }
 
     schema[field.fieldName] = validator
   })
@@ -193,66 +237,68 @@ export const trapOperationsSchema = yup.object().shape({
 
   flowMeasure: yup
     .number()
+    .nullable()
     .transform(normalizeNumber)
+    .typeError('Value must be a number')
     .when('trapStatus', {
       is: trapRestart,
       then: yup.number().nullable().optional(),
-      otherwise: yup.number().required('Flow measure is required'),
+      otherwise: yup.number().nullable().required('Flow measure is required'),
     }),
 
   waterTemperature: yup
     .number()
     .nullable()
     .transform(normalizeNumber)
+    .typeError('Value must be a number')
     .when('trapStatus', {
       is: trapRestart,
       then: yup.number().nullable().optional(),
-      otherwise: yup.number().required('Temperature is required'),
+      otherwise: yup.number().nullable().required('Temperature is required'),
     }),
 
   flowMeasureUnit: yup.string(),
   waterTemperatureUnit: yup.string(),
+
   waterTurbidity: yup.lazy(value =>
     value === '' || value === null
-      ? yup.string().min(0).nullable()
+      ? yup.number().nullable().notRequired()
       : yup
           .number()
           .nullable()
           .typeError('Value must be a number')
           .positive('Value should be positive')
   ),
-  // waterTurbidity: yup
-  //   .number()
-  //   .nullable()
-  //   .typeError('Value must be a number'),
-  // waterTurbidity: yup
-  //   .mixed()
-  //   .test('is-empty-or-number', 'Value must be a number', value => {
-  //     return value === '' || value === null || !isNaN(value)
-  //   }),
+
   waterTurbidityUnit: yup.string(),
+
   rpm1: yup
     .number()
     .min(0, 'Measurement must be >= 0')
     .nullable()
     .max(30, 'Measurement must be ≤ 30')
     .transform(normalizeNumber)
+    .typeError('Value must be a number')
     .when('trapStatus', {
       is: trapRestart,
       then: yup.number().nullable().optional(),
-      otherwise: yup.number().required('Enter at least one RPM'),
+      otherwise: yup.number().nullable().required('Enter at least one RPM'),
     }),
+
   rpm2: yup
     .number()
     .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
+    .transform(normalizeNumber)
     .typeError('Value must be a number'),
+
   rpm3: yup
     .number()
     .min(0, 'Measurement must be >= 0')
     .max(30, 'Measurement must be ≤ 30')
     .nullable()
+    .transform(normalizeNumber)
     .typeError('Value must be a number'),
 })
 
@@ -337,6 +383,9 @@ export const generateDynamicTrapPostProcessingSchema = (fields: Array<any>) => {
   }
 
   sectionFields.forEach(field => {
+    if (field.fieldName === 'rpmAfter') {
+      return
+    }
     const validator = getValidator(field)
     schema[field.fieldName] = validator
   })

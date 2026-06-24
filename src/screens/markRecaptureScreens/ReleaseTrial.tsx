@@ -112,8 +112,8 @@ const ReleaseTrial = ({
                     touched={touched}
                     errors={errors}
                     camelName='wildCount'
-                    showWarning={!fishHoldingEqualsWildCount(values.wildCount)}
-                    warningMessage='This value does not match the previously confirmed value.'
+                    // showWarning={!fishHoldingEqualsWildCount(values.wildCount)}
+                    // warningMessage='This value does not match the previously confirmed value.'
                   />
                   <FormInputComponent
                     label='Dead Count (wild)'
