@@ -224,7 +224,7 @@ function fishInputSpeciesTableHtml(fishInputState: any): string {
           html += `<tr>${headerTd('FL (mm)', true)}${chunk.map((_, i) => headerTd(String(i + 1))).join('')}</tr>`
 
         html += `<tr>
-        <td style="padding:4px 8px;border:1px solid #ddd;background:#f0fffe;width:110px;">${ci === 0 && isSalmonid ? '&nbsp;' : ''}</td>
+        <td style="padding:4px 8px;border:1px solid #ddd;background:#f0fffe;width:110px;"></td>
         ${chunk.map(f => td(f ? formatFlCell(f) : '', 'background:#f0fffe;font-size:16px;')).join('')}
       </tr>`
 
@@ -331,6 +331,8 @@ function fishGeneticsTableHtml(
       .join('; ')
     const commentsVal = sampleComments || fish.comments || '—'
 
+    const geneticYN = samples.some((s: any) => s.genetic) ? 'Y' : samples.length ? 'N' : '—'
+
     return `<tr style="background:${idx % 2 === 0 ? 'white' : '#f9f9f9'}">
       ${cell(String(idx + 1), '28px')}
       ${cell(geneticIds)}
@@ -338,8 +340,8 @@ function fishGeneticsTableHtml(
       ${cell(fish.dead ? 'Y' : 'N', '32px')}
       ${cell(conditions)}
       ${cell(takeVal, '38px')}
+      ${cell(geneticYN, '38px')}
       ${cell(geneticTypes)}
-      ${cell(marks)}
       ${cell(commentsVal)}
     </tr>`
   })
@@ -354,8 +356,8 @@ function fishGeneticsTableHtml(
         ${hdr('Dead', '32px')}
         ${hdr('Condition')}
         ${hdr('Take', '38px')}
+        ${hdr('Genetic', '38px')}
         ${hdr('Sample Type')}
-        ${hdr('Marks / Tags Applied')}
         ${hdr('Comments')}
       </tr></thead>
       <tbody>${rows.join('\n')}</tbody>
@@ -1042,8 +1044,8 @@ const FishGeneticsTable = ({
     { label: 'Dead', flex: 0.5 },
     { label: 'Cond.', flex: 0.7 },
     { label: 'Take', flex: 0.5 },
+    { label: 'Genetic', flex: 0.5 },
     { label: 'Sample Type', flex: 1 },
-    { label: 'Marks/Tags', flex: 1.5 },
     { label: 'Comments', flex: 1.2 },
   ]
 
@@ -1097,6 +1099,8 @@ const FishGeneticsTable = ({
       .join('; ')
     const commentsVal = sampleComments || fish.comments || '—'
 
+    const geneticYN = samples.some((s: any) => s.genetic) ? 'Y' : samples.length ? 'N' : '—'
+
     return [
       String(idx + 1),
       geneticIds,
@@ -1104,8 +1108,8 @@ const FishGeneticsTable = ({
       fish.dead ? 'Y' : 'N',
       conditions,
       takeVal,
+      geneticYN,
       geneticTypes,
-      marks,
       commentsVal,
     ]
   }
@@ -1142,7 +1146,7 @@ const FishGeneticsTable = ({
               borderLeftColor: '#d1d5db',
             }}
           >
-            <Text fontSize={12} fontWeight='bold' textAlign='center'>
+            <Text fontSize={12} fontWeight='bold' textAlign='center' numberOfLines={1} adjustsFontSizeToFit>
               {col.label}
             </Text>
           </View>
@@ -1509,7 +1513,6 @@ const ReviewValuesModal = ({
 
             return {
               trapSite: visitSetupState.trapSite,
-              UID: fish.UID,
               species: fish.species,
               forkLength: fish.forkLength,
               run: fish.run,
@@ -1552,60 +1555,17 @@ const ReviewValuesModal = ({
           const sampleDate = formatDateString_MM_DD_YY(
             timeProperty ? trapOperationsState[timeProperty] : new Date()
           )
-          const geneticsRows = (detailedFish as any[]).map((fish: any) => ({
-            UID: fish.UID || '',
-            Date: sampleDate,
-            SiteCode: visitSetupState.trapSite || '',
-            Species: fish.species || '',
-            FL_mm: fish.forkLength ?? '',
-            FieldWt_g: fish.weight ?? '',
-            AdiposeClipped:
-              fish.adiposeClipped == null
-                ? ''
-                : fish.adiposeClipped
-                  ? 'Y'
-                  : 'N',
-            Dead: fish.dead == null ? '' : fish.dead ? 'Y' : 'N',
-            Eggs: fish.eggs == null ? '' : fish.eggs ? 'Y' : 'N',
-            Milting: fish.milting == null ? '' : fish.milting ? 'Y' : 'N',
-            Stage:
-              fish.lifeStage && fish.lifeStage !== 'not recorded'
-                ? fish.lifeStage
-                : '',
-            Condition: Array.isArray(fish.fishConditions)
-              ? fish.fishConditions.join('; ')
-              : '',
-            Genetic_YN:
-              Array.isArray(fish.geneticSamples) && fish.geneticSamples.length
-                ? 'Y'
-                : 'N',
-            GeneticSampleIDs: Array.isArray(fish.geneticSamples)
-              ? fish.geneticSamples
-                  .map((s: any) => s.sampleId || '?')
-                  .join('; ')
-              : '',
-            GeneticTypes: Array.isArray(fish.geneticSamples)
-              ? fish.geneticSamples
-                  .map((s: any) =>
-                    [
-                      s.mucusSwab ? 'MucusSwab' : null,
-                      s.finClip ? 'FinClip' : null,
-                    ]
-                      .filter(Boolean)
-                      .join('+')
-                  )
-                  .join('; ')
-              : '',
-            Take_YN:
-              fish.willBeUsedInRecapture == null
-                ? ''
-                : fish.willBeUsedInRecapture
-                  ? 'Y'
-                  : 'N',
-            MarksTagsApplied: Array.isArray(fish.appliedMarks)
+          const lookupCode = (table: string, id: any) => {
+            if (id == null) return ''
+            const item = find(dropdownValues?.[table], { id })
+            return item?.code || item?.definition || item?.description || ''
+          }
+          const marksTagsApplied = (fish: any) =>
+            Array.isArray(fish.appliedMarks)
               ? fish.appliedMarks.map(formatAppliedMark).join('; ')
-              : '',
-            ExistingMarks: Array.isArray(fish.existingMarks)
+              : ''
+          const existingMarks = (fish: any) =>
+            Array.isArray(fish.existingMarks)
               ? fish.existingMarks
                   .map((m: any) =>
                     typeof m === 'object'
@@ -1613,9 +1573,44 @@ const ReviewValuesModal = ({
                       : String(m)
                   )
                   .join('; ')
-              : '',
-            Comments: fish.comments || '',
-          }))
+              : ''
+          // Column order matches the genetics table in the review modal / PDF:
+          // context | Genetic ID | Ad+/- | Dead | Condition | Take | Sample Type | Marks/Tags | Comments
+          const geneticsRows = (detailedFish as any[]).flatMap((fish: any) => {
+            const samples: any[] = Array.isArray(fish.geneticSamples)
+              ? fish.geneticSamples
+              : []
+            const makeRow = (s: any | null) => ({
+              Date: sampleDate,
+              SiteCode: visitSetupState.trapSite || '',
+              Species: fish.species || '',
+              'FL (mm)': fish.forkLength ?? '',
+              'Field Wt (g)': fish.weight ?? '',
+              Run: fish.run && fish.run !== 'not recorded' ? fish.run : '',
+              Stage:
+                fish.lifeStage && fish.lifeStage !== 'not recorded'
+                  ? fish.lifeStage
+                  : '',
+              // genetics table column order starts here
+              'Genetic ID': s?.sampleId || '',
+              'Ad +/-':
+                fish.adiposeClipped == null
+                  ? ''
+                  : fish.adiposeClipped
+                    ? '+'
+                    : '-',
+              Dead: fish.dead ? 'Y' : 'N',
+              Condition: s ? lookupCode('condition', s.condition) : '',
+              Take: s ? lookupCode('take', s.take) : '',
+              Genetic: s ? (s.genetic ? 'Y' : 'N') : '',
+              'Mucus Swab': s ? (s.mucusSwab ? 'Y' : 'N') : '',
+              'Fin Clip': s ? (s.finClip ? 'Y' : 'N') : '',
+              'Crew Member': s?.crewMember || '',
+              Comments: s?.comments || fish.comments || '',
+            })
+            if (!samples.length) return [makeRow(null)]
+            return samples.map(makeRow)
+          })
           zip.file(
             `genetics_${formattedTrapSite}_${formattedSampleTime}.csv`,
             arrayToCSV(geneticsRows)
