@@ -331,7 +331,11 @@ function fishGeneticsTableHtml(
       .join('; ')
     const commentsVal = sampleComments || fish.comments || '—'
 
-    const geneticYN = samples.some((s: any) => s.genetic) ? 'Y' : samples.length ? 'N' : '—'
+    const geneticYN = samples.some((s: any) => s.genetic)
+      ? 'Y'
+      : samples.length
+        ? 'N'
+        : '—'
 
     return `<tr style="background:${idx % 2 === 0 ? 'white' : '#f9f9f9'}">
       ${cell(String(idx + 1), '28px')}
@@ -1099,7 +1103,11 @@ const FishGeneticsTable = ({
       .join('; ')
     const commentsVal = sampleComments || fish.comments || '—'
 
-    const geneticYN = samples.some((s: any) => s.genetic) ? 'Y' : samples.length ? 'N' : '—'
+    const geneticYN = samples.some((s: any) => s.genetic)
+      ? 'Y'
+      : samples.length
+        ? 'N'
+        : '—'
 
     return [
       String(idx + 1),
@@ -1146,7 +1154,13 @@ const FishGeneticsTable = ({
               borderLeftColor: '#d1d5db',
             }}
           >
-            <Text fontSize={12} fontWeight='bold' textAlign='center' numberOfLines={1} adjustsFontSizeToFit>
+            <Text
+              fontSize={12}
+              fontWeight='bold'
+              textAlign='center'
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
               {col.label}
             </Text>
           </View>
@@ -1390,9 +1404,20 @@ const ReviewValuesModal = ({
       fieldCheck,
       dropdownValues,
     })
+    const firstKey = routes?.[0]?.key
+    const visitSetupVals = formValues?.visitSetupState?.[firstKey]?.values
+    const trapOpsVals = formValues?.trapOperationsState?.[firstKey]?.values
+    const timeProperty = getTimeProperty(trapOpsVals)
+    const trapSite = visitSetupVals?.trapSite || 'trap'
+    const dateStr = formatDateString_MM_DD_YY(
+      timeProperty ? trapOpsVals?.[timeProperty] : new Date()
+    )
+    const filename = `${trapSite}_${dateStr}.pdf`
     const { uri } = await Print.printToFileAsync({ html })
     try {
-      await shareAsync(uri, {
+      const destUri = `${FileSystem.documentDirectory}${filename}`
+      await FileSystem.copyAsync({ from: uri, to: destUri })
+      await shareAsync(destUri, {
         UTI: '.pdf',
         mimeType: 'application/pdf',
       })

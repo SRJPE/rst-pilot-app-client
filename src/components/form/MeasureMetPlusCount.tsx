@@ -1,32 +1,22 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import {
-  // FormControl,
   VStack,
+  HStack,
   Text,
   Button,
   Box,
-  ScrollView,
+  Radio,
+  FormControl as NBFormControl,
 } from 'native-base'
 import { Input, InputField } from '@/components/ui/input'
-
-import {
-  FormControl,
-  FormControlLabel,
-  FormControlLabelText,
-} from '@/components/ui/form-control'
-import { HStack } from '@/components/ui/hstack'
 import { reorderTaxon, findTaxonCode } from '../../utils/utils'
-import { connect, useDispatch, useSelector } from 'react-redux'
+import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
 import { addPlusCountToBatchStore } from '../../redux/reducers/formSlices/batchCountSlice'
 
-const mapStateToProps = (state: RootState) => {
-  return {
-    // addAnotherMarkValues: state.addAnotherMark.values,
-  }
-}
+const mapStateToProps = (state: RootState) => ({})
 
 const MeasureMetPlusCount = ({
   species,
@@ -50,8 +40,8 @@ const MeasureMetPlusCount = ({
   dropdownValues: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
-
   const [inputValue, setInputValue] = React.useState('')
+  const [dead, setDead] = React.useState(false)
 
   const handleSubmit = () => {
     let submittedRun = ''
@@ -69,7 +59,7 @@ const MeasureMetPlusCount = ({
           tabId: activeTabId,
           existingMarks: [],
           count: plusCount,
-          dead: false,
+          dead,
           lifeStage: submittedLifeStage,
           plusCountMethod: 'none',
           run: submittedRun,
@@ -81,17 +71,15 @@ const MeasureMetPlusCount = ({
           case 'multiSpecies':
             dispatch(addPlusCountToBatchStore(plusCountData))
             break
-          case 'default':
           default:
             dispatch(savePlusCount(plusCountData))
             break
         }
 
         closeModal()
-        if (onSaveCallback) {
-          onSaveCallback() // Reset species after submission
-        }
-        setInputValue('') // Reset input value after submission
+        if (onSaveCallback) onSaveCallback()
+        setInputValue('')
+        setDead(false)
       }
     } catch (error) {
       console.error('Error in handleSubmit:', error)
@@ -99,92 +87,117 @@ const MeasureMetPlusCount = ({
   }
 
   return (
-    <>
+    <Box flex={1} paddingX={8} paddingBottom={6}>
       <CustomModalHeader
         headerText={`Enter Plus Count for ${protocolKeyMet || species.value}`}
         headerFontSize={24}
         showHeaderButton={true}
         closeModal={closeModal}
       />
-      <ScrollView>
-        <Box paddingX='10' paddingTop='2' paddingBottom='2'>
-          <Text fontSize='xl' color='black'>
-            You have met the fish measure count requirement for{' '}
-            <Text bold>{protocolKeyMet}</Text>. You may now enter plus counts
-            for all remaining <Text bold>{protocolKeyMet}</Text>.
-          </Text>
-          <VStack space={4} mt={5}>
-            <FormControl
-              size='lg'
-              isDisabled={false}
-              isReadOnly={false}
-              isRequired={false}
-            >
-              <FormControlLabel>
-                <FormControlLabelText>Plus Count</FormControlLabelText>
-              </FormControlLabel>
-              <Input
-                className='my-1'
-                size={'lg'}
-                style={{ height: 60, width: '100%' }}
+
+      <Text fontSize='lg' color='gray.600' mt={4} mb={6}>
+        You have met the fish measure count requirement for{' '}
+        <Text bold color='black'>
+          {protocolKeyMet}
+        </Text>
+        . Enter the plus count for all remaining{' '}
+        <Text bold color='black'>
+          {protocolKeyMet}
+        </Text>
+        .
+      </Text>
+
+      <VStack space={4}>
+        <NBFormControl>
+          <NBFormControl.Label
+            _text={{ fontSize: 'xl', fontWeight: 'semibold', color: 'black' }}
+          >
+            Plus Count
+          </NBFormControl.Label>
+          <Input size='xl' style={{ height: 56 }}>
+            <InputField
+              keyboardType='number-pad'
+              placeholder='0'
+              value={inputValue}
+              onChangeText={text => setInputValue(text.replace(/[^0-9]/g, ''))}
+              style={{ fontSize: 22 }}
+            />
+          </Input>
+        </NBFormControl>
+
+        <NBFormControl>
+          <NBFormControl.Label
+            _text={{ fontSize: 'xl', fontWeight: 'semibold', color: 'black' }}
+          >
+            Dead
+          </NBFormControl.Label>
+          <Radio.Group
+            name='dead'
+            accessibilityLabel='dead'
+            value={`${dead}`}
+            onChange={value => setDead(value === 'true')}
+          >
+            <HStack space={4}>
+              <Radio
+                colorScheme='primary'
+                value='true'
+                size='lg'
+                _icon={{ color: 'primary' }}
               >
-                <InputField
-                  keyboardType='number-pad'
-                  placeholder='Plus Count'
-                  value={inputValue}
-                  onChangeText={text => {
-                    // Only allow numeric input
-                    const numericText = text.replace(/[^0-9]/g, '')
-                    setInputValue(numericText)
-                  }}
-                />
-              </Input>
-            </FormControl>
-            <Box
-              // flexDirection='row'
-              justifyContent='space-between'
-              width={'100%'}
-              my={3}
-            >
-              <HStack>
-                <Button
-                  mx='auto'
-                  minWidth={250}
-                  bgColor='gray.400'
-                  _pressed={{
-                    bg: 'gray.600',
-                  }}
-                  onPress={closeModal}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Close
-                  </Text>
-                </Button>
-                <Button
-                  mx='auto'
-                  minWidth={250}
-                  bgColor='primary'
-                  colorScheme='coolGray'
-                  onPress={handleSubmit}
-                  _pressed={{
-                    bg: 'secondary',
-                  }}
-                  isDisabled={!inputValue || isNaN(Number(inputValue))}
-                  disabled={!inputValue || isNaN(Number(inputValue))}
-                  _disabled={{
-                    bg: 'gray.400',
-                  }}
-                >
-                  <Text fontSize='xl' color='white'>
-                    Save Plus Count
-                  </Text>
-                </Button>
-              </HStack>
-            </Box>
-          </VStack>
+                <Text fontSize='xl' ml={2}>
+                  True
+                </Text>
+              </Radio>
+              <Radio
+                colorScheme='primary'
+                value='false'
+                size='lg'
+                _icon={{ color: 'primary' }}
+              >
+                <Text fontSize='xl' ml={2}>
+                  False
+                </Text>
+              </Radio>
+            </HStack>
+          </Radio.Group>
+        </NBFormControl>
+
+        <Box flexDirection='row' mt={2}>
+          <Button
+            mx='auto'
+            minWidth={250}
+            bgColor='gray.400'
+            _pressed={{
+              bg: 'gray.600',
+            }}
+            onPress={closeModal}
+          >
+            <Text fontSize='xl' color='white'>
+              Close
+            </Text>
+          </Button>
+          <Button
+            mx='auto'
+            minWidth={250}
+            bgColor='primary'
+            colorScheme='coolGray'
+            onPress={handleSubmit}
+            _pressed={{
+              bg: 'secondary',
+            }}
+            isDisabled={!inputValue || isNaN(Number(inputValue))}
+            disabled={!inputValue || isNaN(Number(inputValue))}
+            _disabled={{
+              bg: 'gray.400',
+            }}
+          >
+            <Text fontSize='xl' color='white'>
+              Save Plus Count
+            </Text>
+          </Button>
         </Box>
-      </ScrollView>
-    </>
+      </VStack>
+    </Box>
   )
 }
 
