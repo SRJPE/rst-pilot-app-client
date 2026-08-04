@@ -9,6 +9,7 @@ import {
   HStack,
   Icon,
   Pressable,
+  Switch,
   Text,
   View,
   VStack,
@@ -20,7 +21,10 @@ import { AppDispatch, RootState } from '../../redux/store'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useState, useEffect } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { releaseTrialDataEntrySchema } from '../../utils/helpers/yupValidations'
+import {
+  releaseTrialDataEntrySchema,
+  releaseTrialDataEntryMultiLocationSchema,
+} from '../../utils/helpers/yupValidations'
 import {
   markReleaseTrialDataEntryCompleted,
   saveReleaseTrialDataEntry,
@@ -85,6 +89,7 @@ const ReleaseDataEntry = ({
   const [markedTime, setMarkedTime] = useState(new Date() as any)
   const [releaseTime, setReleaseTime] = useState(new Date() as any)
   const [addMarkModalOpen, setAddMarkModalOpen] = useState(false as boolean)
+  const [multiLocation, setMultiLocation] = useState(false)
   const [selectedRecentReleaseMarks, setSelectedRecentReleaseMarks] = useState<
     any[]
   >([])
@@ -210,38 +215,47 @@ const ReleaseDataEntry = ({
           .map((obj: any) => obj.personnelId)
       )
 
+      const firstMarkSiteName = multiLocation
+        ? releaseTrialDataEntryState.values.appliedMarks[0]?.releaseSiteName
+        : formValues.releaseLocation
+
       const programIdOfReleaseLocation = preparedReleaseSites.find(
-        (releaseSite: any) =>
-          releaseSite.releaseSiteName === formValues.releaseLocation
+        (releaseSite: any) => releaseSite.releaseSiteName === firstMarkSiteName
       )?.programId
+
+      const topLevelReleaseSiteId =
+        find(releaseSiteValues, ['releaseSiteName', firstMarkSiteName])
+          ?.releaseSiteId || null
 
       const markRecaptureSubmission: MarkRecaptureSubmissionI = {
         programId:
           programIdOfReleaseLocation || releaseTrialDataEntryState.programId,
         releasePurposeId: 1, //left as null
-        releaseSiteId:
-          find(releaseSiteValues, [
-            'releaseSiteName',
-            formValues.releaseLocation,
-          ]).releaseSiteId || null,
+        releaseSiteId: topLevelReleaseSiteId,
         releasedAt: releaseTime,
         markedAt: markedTime,
         marksArray: [
           ...releaseTrialDataEntryState.values.appliedMarks,
           ...selectedRecentReleaseMarks,
-        ].map((markObj: any) => {
-          return {
-            markType: returnNullableTableId(
-              markTypeValues.indexOf(markObj.markType)
-            ),
-            markColor: returnNullableTableId(
-              markColorValues.indexOf(markObj.markColor)
-            ),
-            markPosition: returnNullableTableId(
-              bodyPartValues.indexOf(markObj.markPosition)
-            ),
-          }
-        }),
+        ].map((markObj: any) => ({
+          markType: returnNullableTableId(
+            markTypeValues.indexOf(markObj.markType)
+          ),
+          markColor: returnNullableTableId(
+            markColorValues.indexOf(markObj.markColor)
+          ),
+          markPosition: returnNullableTableId(
+            bodyPartValues.indexOf(markObj.markPosition)
+          ),
+          ...(markObj.releaseSiteName != null && {
+            releaseSiteId:
+              find(releaseSiteValues, [
+                'releaseSiteName',
+                markObj.releaseSiteName,
+              ])?.releaseSiteId || null,
+          }),
+          ...(markObj.fishCount != null && { fishCount: markObj.fishCount }),
+        })),
         runHatcheryFish: returnNullableTableId(
           runValues.indexOf(releaseTrialState.values.runIDHatchery)
         ),
@@ -290,7 +304,11 @@ const ReleaseDataEntry = ({
 
   return (
     <Formik
-      validationSchema={releaseTrialDataEntrySchema}
+      validationSchema={
+        multiLocation
+          ? releaseTrialDataEntryMultiLocationSchema
+          : releaseTrialDataEntrySchema
+      }
       initialValues={{
         ...releaseTrialDataEntryState.values,
         releaseLocation: filteredReleaseSites[0],
@@ -364,6 +382,18 @@ const ReleaseDataEntry = ({
                     )
                   })} */}
               </VStack>
+              <HStack alignItems='center' space={3}>
+                <Switch
+                  size='md'
+                  colorScheme='primary'
+                  isChecked={multiLocation}
+                  onToggle={() => setMultiLocation(prev => !prev)}
+                />
+                <Text fontSize='md' color='black'>
+                  Multiple releases
+                </Text>
+              </HStack>
+
               <MarkBadgeList
                 badgeListContent={
                   releaseTrialDataEntryState.values.appliedMarks
@@ -390,28 +420,30 @@ const ReleaseDataEntry = ({
 
               <Divider bg='black' />
 
-              <CustomSelect
-                label='Confirm Release Location'
-                camelName='releaseLocation'
-                selectedValue={
-                  values.releaseLocation?.releaseSiteName ||
-                  values.releaseLocation
-                }
-                touched={touched}
-                errors={errors}
-                placeholder='Select Location'
-                onValueChange={(itemValue: string) => {
-                  setFieldValue('releaseLocation', itemValue).then(() => {
-                    setFieldTouched('releaseLocation', true)
-                  })
-                }}
-                selectOptions={preparedReleaseSites?.map(
-                  (releaseSite: any) => ({
-                    label: releaseSite?.releaseSiteName,
-                    value: releaseSite?.releaseSiteName,
-                  })
-                )}
-              />
+              {!multiLocation && (
+                <CustomSelect
+                  label='Confirm Release Location'
+                  camelName='releaseLocation'
+                  selectedValue={
+                    values.releaseLocation?.releaseSiteName ||
+                    values.releaseLocation
+                  }
+                  touched={touched}
+                  errors={errors}
+                  placeholder='Select Location'
+                  onValueChange={(itemValue: string) => {
+                    setFieldValue('releaseLocation', itemValue).then(() => {
+                      setFieldTouched('releaseLocation', true)
+                    })
+                  }}
+                  selectOptions={preparedReleaseSites?.map(
+                    (releaseSite: any) => ({
+                      label: releaseSite?.releaseSiteName,
+                      value: releaseSite?.releaseSiteName,
+                    })
+                  )}
+                />
+              )}
 
               <VStack space={2}>
                 <Text color='black' fontSize='xl'>
@@ -457,6 +489,8 @@ const ReleaseDataEntry = ({
             <AddAnotherMarkModalContent
               closeModal={() => setAddMarkModalOpen(false)}
               screenName={'markRecaptureRelease'}
+              multiLocation={multiLocation}
+              releaseSiteOptions={preparedReleaseSites}
             />
           </CustomModal>
         </>

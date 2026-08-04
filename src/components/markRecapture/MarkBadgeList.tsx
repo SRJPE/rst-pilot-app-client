@@ -11,6 +11,8 @@ interface markBadgeI {
   markColor: string
   markPosition?: string
   bodyPart?: string
+  fishCount?: number | null
+  releaseSiteName?: string | null
 }
 
 const MarkBadgeList = ({
@@ -64,8 +66,12 @@ const MarkBadgeList = ({
         <VStack space={5}>
           {badgeListContent.length > 0 &&
             badgeListContent.map((badge: markBadgeI, index: number) => {
-              const { markType, markColor, markPosition, bodyPart } = badge
-              //TO-DO: incorporate the abbreviation lookup table
+              const { markType, markColor, markPosition, bodyPart, fishCount, releaseSiteName } = badge
+              const parts = [
+                `${markType} - ${markColor} - ${markPosition || bodyPart}`,
+                fishCount != null ? `${fishCount} fish` : null,
+                releaseSiteName || null,
+              ].filter(Boolean)
               return (
                 <Badge
                   key={index}
@@ -88,7 +94,7 @@ const MarkBadgeList = ({
                   }
                 >
                   <Text color='white' fontWeight='500' fontSize='md'>
-                    {`${markType} - ${markColor} - ${markPosition || bodyPart}`}
+                    {parts.join(' | ')}
                   </Text>
                 </Badge>
               )

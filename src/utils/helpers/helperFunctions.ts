@@ -56,7 +56,6 @@ export const findLengthAtDateRun = (array: Array<any>, targetDate: Date) => {
       Number(month) === targetDate.getMonth() + 1 &&
       Number(day) === targetDate.getDate()
 
-    console.log('td.get', targetDate.getMonth() + 1, targetDate.getDate())
     return match
   })
 }
