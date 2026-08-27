@@ -161,9 +161,8 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
               'Existing Mark',
               'Fish Conditions',
               'Adipose Clipped',
-              species.toLocaleLowerCase().includes('shrimp')
-                ? 'Eggs'
-                : 'Milting',
+              'Eggs',
+              'Milting',
             ].map(label => (
               <Text key={label} bold fontSize={18} mb={2}>
                 {label}:
@@ -191,13 +190,10 @@ export const FishDetailPopover: React.FC<FishDetailPopoverProps> = ({
               {adiposeClipped ? 'Yes' : 'No'}
             </Text>
             <Text fontSize={18} mb={2}>
-              {species.toLocaleLowerCase().includes('shrimp')
-                ? eggs
-                  ? 'Yes'
-                  : 'No'
-                : milting
-                  ? 'Yes'
-                  : 'No'}
+              {eggs ? 'Yes' : 'No'}
+            </Text>
+            <Text fontSize={18} mb={2}>
+              {milting ? 'Yes' : 'No'}
             </Text>
           </VStack>
         </HStack>

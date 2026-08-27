@@ -16,7 +16,7 @@ interface InitialStateI {
     | 'submission-failed'
     | 'submission-successful'
   trapVisitSubmissions: TrapVisitSubmissionI[]
-  previousTrapVisitSubmissions: TrapVisitSubmissionI[]
+  previousTrapVisitSubmissions: any[]
   catchRawSubmissions: CatchRawSubmissionI[]
   previousCatchRawSubmissions: CatchRawSubmissionI[]
   qcTrapVisitSubmissions: any[]
@@ -134,47 +134,78 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           catchSubmission => catchSubmission.uid === uuid
         )
 
+        let trapId: number | null = null
+
+        // Step 1: submit trap visit
         try {
           const response: any = await api.post('trap-visit/', trapSubmission)
-          let trapId = response?.data?.createdTrapVisitResponse?.id
-          // Save to payload
+          trapId = response?.data?.createdTrapVisitResponse?.id
           payload.trapVisitResponse.push(response.data)
+        } catch (error: any) {
+          console.log(
+            '🚀 ~ file: trapVisitFormPostBundler.ts ~ trap visit submission error:',
+            error
+          )
+          const { response } = error
+          const errorDetail = response?.data?.detail
 
+          if (errorDetail?.includes('already exists')) {
+            // Trap visit already on server from a previous partial submission —
+            // look up its server-assigned ID so we can still submit catch raw
+            const prevSubmission = state.trapVisitFormPostBundler.previousTrapVisitSubmissions
+              .find((t: any) => t.createdTrapVisitResponse?.trapVisitUid === uuid)
+            trapId = prevSubmission?.createdTrapVisitResponse?.id ?? null
+          } else {
+            // True failure — preserve both trap visit and catch raw for retry
+            showSlideAlert(
+              thunkAPI.dispatch,
+              generateErrorMessage(error.code || 'Error during trap visit submission'),
+              'error',
+              5000
+            )
+            payload.failedTrapVisitSubmissions.push(trapSubmission)
+            linkedCatchRawSubmissions.forEach((sub: any) => {
+              payload.failedCatchRawSubmissions.push(sub)
+            })
+            continue
+          }
+        }
+
+        // Step 2: submit catch raw using resolved trapId
+        if (trapId === null || linkedCatchRawSubmissions.length === 0) continue
+
+        try {
           const bulkSubmissions = linkedCatchRawSubmissions.map(
             ({ uid, ...rest }: { uid: string }) => ({
               ...rest,
               trapVisitId: trapId,
             })
           )
-
-          // send as one request of array of catch raw records
           const catchResponse = await api.post('catch-raw/', bulkSubmissions)
-
-          // handle response
           if (catchResponse?.data) {
             payload.catchRawResponse = [
               ...payload.catchRawResponse,
               ...catchResponse.data,
             ]
           }
-        } catch (error: any) {
+        } catch (catchError: any) {
           console.log(
-            '🚀 ~ file: trapVisitFormPostBundler.ts ~ submission error:',
-            error
+            '🚀 ~ file: trapVisitFormPostBundler.ts ~ catch raw submission error:',
+            catchError
           )
-
-          const errorMessage = generateErrorMessage(
-            error.code || 'Error during catch raw submission (ln 170)'
+          showSlideAlert(
+            thunkAPI.dispatch,
+            generateErrorMessage(catchError.code || 'Error during catch raw submission'),
+            'error',
+            5000
           )
-
-          showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
-          const { response } = error
-          const errorDetail = response?.data?.detail
-          if (!errorDetail?.includes('already exists')) {
-            payload.failedTrapVisitSubmissions.push(
-              trapVisitSubmissions.find(t => t.trapVisitUid === uuid)
-            )
-          }
+          // Trap visit succeeded but catch raw failed — preserve both for retry.
+          // On retry the trap visit will return "already exists" and we look up the
+          // trapId from previousTrapVisitSubmissions (populated by the fulfilled reducer).
+          payload.failedTrapVisitSubmissions.push(trapSubmission)
+          linkedCatchRawSubmissions.forEach((sub: any) => {
+            payload.failedCatchRawSubmissions.push(sub)
+          })
         }
       }
     } catch (err) {

@@ -10,6 +10,9 @@ export interface ReleaseMarkI {
   markColor: string
   markPosition?: string
   bodyPart?: string
+  releaseSiteId?: number | null
+  releaseSiteName?: string | null
+  fishCount?: number | null
 }
 
 const initialState: InitialStateI = {
@@ -18,6 +21,9 @@ const initialState: InitialStateI = {
     markType: '',
     markColor: '',
     markPosition: '',
+    releaseSiteId: null,
+    releaseSiteName: null,
+    fishCount: null,
   },
 }
 

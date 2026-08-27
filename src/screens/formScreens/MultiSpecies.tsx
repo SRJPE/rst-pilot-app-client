@@ -469,13 +469,9 @@ const MultiSpecies = ({
     [speciesRadioValue, batchCountStore.forkLengths]
   )
 
-  const showMiltingToggle =
-    programFormFieldsObj?.['milting'] &&
-    !speciesRadioValue.toLocaleLowerCase().includes('shrimp')
+  const showMiltingToggle = programFormFieldsObj?.['milting']
 
-  const showEggsToggle =
-    programFormFieldsObj?.['eggs'] &&
-    speciesRadioValue.toLocaleLowerCase().includes('shrimp')
+  const showEggsToggle = !!programFormFieldsObj?.['eggs']
 
   const buttonNav = (screenName: string) => {
     // @ts-ignore

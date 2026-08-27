@@ -676,7 +676,7 @@ const TrapPostProcessing = ({
         }, [previouslyActiveTabId, activeTabId])
 
         useEffect(() => {
-          registerSaveHandler(() => onSubmit(values, activeTabId))
+          registerSaveHandler(() => onSubmit(values, activeTabId ?? ''))
           return () => registerSaveHandler(null)
         }, [values, activeTabId, startTime])
 

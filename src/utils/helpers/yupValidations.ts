@@ -616,6 +616,23 @@ export const addAnotherMarkSchema = yup.object().shape({
   markColor: yup.string().required('Mark color required'),
   markPosition: yup.string().required('Mark position required'),
 })
+
+export const addAnotherMarkMultiLocationSchema = yup.object().shape({
+  markType: yup.string().required('Mark type required'),
+  markColor: yup.string().required('Mark color required'),
+  markPosition: yup.string().required('Mark position required'),
+  fishCount: yup
+    .number()
+    .typeError('Fish count required')
+    .required('Fish count required')
+    .positive('Must be positive')
+    .integer('Must be a whole number'),
+  releaseSiteName: yup.string().required('Release location required'),
+})
+
+export const releaseTrialDataEntryMultiLocationSchema = yup.object().shape({
+  appliedMarks: yup.array(),
+})
 export const batchCharacteristicsSchema = yup.object().shape({
   species: yup.string().required('Species required'),
   // fishConditions: yup.any().required('Fish Condition required'),

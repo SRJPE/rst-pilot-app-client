@@ -8,13 +8,17 @@ import {
   Button,
   Divider,
   ScrollView,
+  Input,
 } from 'native-base'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { addMarkToAppliedMarks } from '../../redux/reducers/markRecaptureSlices/releaseTrialDataEntrySlice'
 import { addMarkToBatchCountExistingMarks } from '../../redux/reducers/formSlices/batchCountSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
-import { addAnotherMarkSchema } from '../../utils/helpers/yupValidations'
+import {
+  addAnotherMarkSchema,
+  addAnotherMarkMultiLocationSchema,
+} from '../../utils/helpers/yupValidations'
 import { QARanges } from '../../utils/utils'
 import CustomModalHeader from '../Shared/CustomModalHeader'
 import CustomSelect from '../Shared/CustomSelect'
@@ -37,6 +41,8 @@ const AddAnotherMarkModalContent = ({
   existingMarks,
   setExistingMarks,
   existingMarksArray,
+  multiLocation,
+  releaseSiteOptions,
 }: {
   handleMarkFishFormSubmit?: any
   closeModal: any
@@ -45,6 +51,8 @@ const AddAnotherMarkModalContent = ({
   existingMarks?: any
   setExistingMarks?: any
   existingMarksArray?: any
+  multiLocation?: boolean
+  releaseSiteOptions?: any[]
 }) => {
   const dispatch = useDispatch<AppDispatch>()
 
@@ -77,9 +85,13 @@ const AddAnotherMarkModalContent = ({
     showSlideAlert(dispatch, 'Mark or tag')
   }
 
+  const schema = multiLocation
+    ? addAnotherMarkMultiLocationSchema
+    : addAnotherMarkSchema
+
   return (
     <Formik
-      validationSchema={addAnotherMarkSchema}
+      validationSchema={schema}
       initialValues={addAnotherMarkValues}
       initialErrors={{ markType: '' }}
       onSubmit={values => {
@@ -147,6 +159,55 @@ const AddAnotherMarkModalContent = ({
                 camelName='markPosition'
                 label='Mark Position'
               />
+
+              {multiLocation && (
+                <>
+                  <FormControl
+                    isRequired
+                    isInvalid={touched.fishCount && !!errors.fishCount}
+                  >
+                    <FormControl.Label>
+                      <Text fontSize='md'>Fish Count</Text>
+                    </FormControl.Label>
+                    <Input
+                      size='xl'
+                      keyboardType='numeric'
+                      placeholder='0'
+                      value={values.fishCount != null ? String(values.fishCount) : ''}
+                      onChangeText={text => {
+                        const num = parseInt(text.replace(/[^0-9]/g, ''), 10)
+                        setFieldValue('fishCount', isNaN(num) ? null : num).then(
+                          () => setFieldTouched('fishCount', true)
+                        )
+                      }}
+                    />
+                    {touched.fishCount && errors.fishCount && (
+                      <FormControl.ErrorMessage>
+                        {errors.fishCount as string}
+                      </FormControl.ErrorMessage>
+                    )}
+                  </FormControl>
+
+                  <CustomSelect
+                    selectedValue={values.releaseSiteName || ''}
+                    placeholder='Select Release Location'
+                    onValueChange={(itemValue: string) => {
+                      setFieldValue('releaseSiteName', itemValue).then(() => {
+                        setFieldTouched('releaseSiteName', true)
+                      })
+                    }}
+                    selectOptions={(releaseSiteOptions || []).map((rs: any) => ({
+                      label: rs.releaseSiteName,
+                      value: rs.releaseSiteName,
+                    }))}
+                    errors={errors}
+                    touched={touched}
+                    camelName='releaseSiteName'
+                    label='Release Location'
+                  />
+                </>
+              )}
+
               <Button
                 bg='primary'
                 mx='2'

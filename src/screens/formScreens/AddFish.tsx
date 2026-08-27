@@ -530,7 +530,6 @@ const AddFishContent = ({
       take: values.take
         ? getDBValue(values.take, 'take', dropdownsStore)
         : null,
-      // Add any additional formatting logic here
     }
     setGeneticSamples({
       ...geneticSamples,
