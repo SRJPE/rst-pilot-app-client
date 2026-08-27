@@ -30,6 +30,7 @@ import {
   findTrapLocationIds,
   getCrewValue,
 } from '../../utils/utils'
+import { buildTrapVisitEnvironmentalForProgram } from '../../utils/helpers/trapVisitEnvironmental'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -222,47 +223,23 @@ const StartedTrapping = ({
           ? parseFloat(trapPostProcessingState?.[id]?.values.totalRevolutions)
           : null,
         rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
-        trapVisitEnvironmental: [
-          {
-            measureName: 'flow measure',
-            measureValueNumeric:
-              Number(trapOperationsState?.[id]?.values.flowMeasure) ||
-              undefined,
-            measureValueText:
-              trapOperationsState?.[id]?.values.flowMeasure?.toString() ||
-              undefined,
-            measureUnit: 5,
+        trapVisitEnvironmental: buildTrapVisitEnvironmentalForProgram({
+          // Merged, so environmental fields configured in either section resolve.
+          values: {
+            ...(trapOperationsState?.[id]?.values ?? {}),
+            ...(trapPostProcessingState?.[id]?.values ?? {}),
+            waterTurbidityIsPresent,
           },
-          {
-            measureName: 'water temperature',
-            measureValueNumeric:
-              Number(trapOperationsState?.[id]?.values.waterTemperature) ||
-              undefined,
-            measureValueText:
-              trapOperationsState?.[id]?.values.waterTemperature?.toString() ||
-              undefined,
-            measureUnit:
-              trapOperationsState?.[id]?.values.waterTemperatureUnit === '°F'
-                ? 1
-                : 2,
+          // The three legacy rows read from Trap Operations only, as they
+          // always have — a blank post-processing field must not overwrite a
+          // real operations reading.
+          baseValues: {
+            ...(trapOperationsState?.[id]?.values ?? {}),
+            waterTurbidityIsPresent,
           },
-          {
-            measureName: 'water turbidity',
-            measureValueNumeric: waterTurbidityIsPresent
-              ? trapOperationsState?.[id]?.values.waterTurbidity
-              : trapOperationsState?.[id]?.values
-                    ?.recordTurbidityInPostProcessing
-                ? null
-                : undefined,
-            measureValueText: waterTurbidityIsPresent
-              ? trapOperationsState?.[id]?.values.waterTurbidity?.toString()
-              : trapOperationsState?.[id]?.values
-                    ?.recordTurbidityInPostProcessing
-                ? ''
-                : 'undefined',
-            measureUnit: 25,
-          },
-        ],
+          programId: visitSetupState?.[id]?.values.programId,
+          programs: visitSetupDefaultState.programs,
+        }),
         trapCoordinates: {
           xCoord: trapPostProcessingState?.[id]?.values.trapLatitude,
           yCoord: trapPostProcessingState?.[id]?.values.trapLongitude,

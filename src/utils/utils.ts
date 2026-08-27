@@ -839,18 +839,8 @@ export const getCrewValue = ({
   return filteredCrewIds
 }
 
-export const calcAvgValue = (valuesArray: (string | null)[]) => {
-  const validValues = valuesArray.filter(n => n)
-  if (!validValues.length) {
-    return null
-  }
-  const numericValues = validValues.map((str: any) => parseFloat(str))
-  let counter = 0
-  numericValues.forEach((num: number) => {
-    counter += num
-  })
-  return counter / numericValues.length
-}
+// Moved to helpers/math so modules without RN deps can use it.
+export { calcAvgValue } from './helpers/math'
 
 export const groupBySpeciesForkLength = (data: Array<any>) => {
   const result = {} as any
@@ -1130,6 +1120,9 @@ export const getProgramFormFieldsLookup = (
     : {}
   return programFormFieldsObj
 }
+
+// Moved to helpers/coreLegacyProgram so modules without RN deps can use it.
+export { isCoreLegacyProgram } from './helpers/coreLegacyProgram'
 
 export const shouldRenderField = ({
   fieldName,
@@ -1420,3 +1413,20 @@ export function sumCountsWithFallback(protocol: any, counts: any): any {
 
   return result
 }
+
+/**
+ * Resolve the options for a select-type form field.
+ *
+ * A field's own user-authored options (form_field_option, delivered as
+ * `field.options`) win. Otherwise fall back to the fixed dropdown store keyed
+ * by fieldName, which is how every built-in select works today.
+ *
+ * The fallback is what keeps tideCode / weatherCode / gearStatus / conditionCode
+ * / vegetationCode / substrate / ysiNum / flowDirection rendering unchanged:
+ * those have no form_field_option rows, so the server sends `options: []` and
+ * they continue to read from dropdownValues exactly as before. Their legacy
+ * { id, code, description } shape is also why we never remap them server-side —
+ * FastSelect has a distinct `item.code` branch with different value semantics.
+ */
+export const resolveSelectOptions = (field: any, dropdownValues: any) =>
+  field?.options?.length ? field.options : dropdownValues?.[field?.fieldName]

@@ -47,6 +47,7 @@ import {
   navigateFlowLeftButton,
   showFishInputButton,
 } from '../../utils/utils'
+import { isCoreLegacyProgram } from '../../utils/helpers/coreLegacyProgram'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
 import { find } from 'lodash'
@@ -723,11 +724,12 @@ const TrapPostProcessing = ({
                 <VStack space={1}>
                   <Heading>Trap Post-Processing</Heading>
                   <HStack space={5}>
-                    {shouldRenderField({
-                      fieldName: 'debrisVolume',
-                      programFormFields,
-                      sectionFields,
-                    }) && (
+                    {(isCoreLegacyProgram(selectedProgramObj) ||
+                      shouldRenderField({
+                        fieldName: 'debrisVolume',
+                        programFormFields,
+                        sectionFields,
+                      })) && (
                       <Box
                         flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
                         minWidth='30%' // Prevents shrinking too much
@@ -812,11 +814,12 @@ const TrapPostProcessing = ({
                             value={values.waterTurbidity}
                           />
                         )} */}
-                    {shouldRenderField({
-                      fieldName: 'totalRevolutions',
-                      programFormFields,
-                      sectionFields,
-                    }) && (
+                    {(isCoreLegacyProgram(selectedProgramObj) ||
+                      shouldRenderField({
+                        fieldName: 'totalRevolutions',
+                        programFormFields,
+                        sectionFields,
+                      })) && (
                       <Box
                         flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
                         minWidth='30%' // Prevents shrinking too much
@@ -849,11 +852,12 @@ const TrapPostProcessing = ({
                           />
                         )} */}
                   </HStack>
-                  {shouldRenderField({
-                    fieldName: 'rpmAfter',
-                    programFormFields,
-                    sectionFields,
-                  }) && (
+                  {(isCoreLegacyProgram(selectedProgramObj) ||
+                    shouldRenderField({
+                      fieldName: 'rpmAfter',
+                      programFormFields,
+                      sectionFields,
+                    })) && (
                     <FormControl>
                       <HStack space={4} alignItems='center'>
                         <FormControl.Label>

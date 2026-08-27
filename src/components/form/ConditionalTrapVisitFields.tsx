@@ -16,7 +16,10 @@ import YSITurbidity from './YSITurbidity'
 import CustomModal from '../Shared/CustomModal'
 import RSTRLogSheet from './RSTRLogSheet'
 import CustomSelect from '../Shared/CustomSelect'
-import { renderRequiredOrOptionalLabel } from '../../utils/utils'
+import {
+  renderRequiredOrOptionalLabel,
+  resolveSelectOptions,
+} from '../../utils/utils'
 import RiverDepth from './RiverDepth'
 import SecchiInput from './SecchiInput'
 
@@ -30,8 +33,13 @@ interface FieldInterface {
   unitId: number | null
   unitDefinition: string | null
   fieldType: string
+  inputType?: string | null
+  isEnvironmentalField?: boolean
   formSection: string
   orderIndex: number
+  /** User-authored choices from form_field_option. Empty for built-in
+   *  selects, which fall back to the fixed dropdown store by fieldName. */
+  options?: Array<{ id: number; definition: string }>
 }
 
 const defaultValues: { [key: string]: any } = {
@@ -156,7 +164,7 @@ const ConditionalTrapVisitFields = ({
                 touched={touched}
                 onValueChange={handleChange(fieldName)}
                 setFieldTouched={() => setFieldTouched(fieldName)}
-                selectOptions={dropdownValues[fieldName]}
+                selectOptions={resolveSelectOptions(item, dropdownValues)}
                 validationSchema={validationSchema}
                 tooltip={
                   activeTabId ? (
@@ -419,7 +427,7 @@ const ConditionalTrapVisitFields = ({
             touched={touched}
             onValueChange={handleChange(fieldName)}
             setFieldTouched={() => setFieldTouched(fieldName)}
-            selectOptions={dropdownValues[fieldName]}
+            selectOptions={resolveSelectOptions(item, dropdownValues)}
             validationSchema={validationSchema}
           />
         </Box>

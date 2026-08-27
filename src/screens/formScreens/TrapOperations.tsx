@@ -45,6 +45,7 @@ import {
   checkOtherTabForms,
   shouldRenderField,
 } from '../../utils/utils'
+import { isCoreLegacyProgram } from '../../utils/helpers/coreLegacyProgram'
 import {
   TabStateI,
   setActiveTab,
@@ -1172,11 +1173,12 @@ const TrapOperations = ({
                       </HStack>
 
                       <HStack space={5} flex={'wrap'}>
-                        {shouldRenderField({
-                          fieldName: 'flowMeasure',
-                          programFormFields,
-                          sectionFields,
-                        }) && (
+                        {(isCoreLegacyProgram(selectedProgramObj) ||
+                          shouldRenderField({
+                            fieldName: 'flowMeasure',
+                            programFormFields,
+                            sectionFields,
+                          })) && (
                           <Box
                             flexBasis={'28%'}
                             minWidth={'28%'}
@@ -1201,11 +1203,12 @@ const TrapOperations = ({
                           </Box>
                         )}
 
-                        {shouldRenderField({
-                          fieldName: 'waterTemperature',
-                          programFormFields,
-                          sectionFields,
-                        }) && (
+                        {(isCoreLegacyProgram(selectedProgramObj) ||
+                          shouldRenderField({
+                            fieldName: 'waterTemperature',
+                            programFormFields,
+                            sectionFields,
+                          })) && (
                           <Box
                             flexBasis={'28%'}
                             minWidth={'28%'}
@@ -1253,7 +1256,8 @@ const TrapOperations = ({
                         )}
 
                         {values.recordTurbidityInPostProcessing === false &&
-                          (!programFormFields?.length ||
+                          (isCoreLegacyProgram(selectedProgramObj) ||
+                            !programFormFields?.length ||
                             find(programFormFields, {
                               fieldName: 'waterTurbidity',
                             })) && (
@@ -1279,7 +1283,8 @@ const TrapOperations = ({
                           )}
                       </HStack>
 
-                      {(!selectedProgramObj?.programFormFields?.length ||
+                      {(isCoreLegacyProgram(selectedProgramObj) ||
+                        !selectedProgramObj?.programFormFields?.length ||
                         find(selectedProgramObj?.programFormFields, {
                           fieldName: 'waterTurbidity',
                         })) &&

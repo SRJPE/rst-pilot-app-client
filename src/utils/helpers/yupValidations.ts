@@ -1,6 +1,6 @@
 import * as yup from 'yup'
 
-const getValidator = (field: any) => {
+export const getValidator = (field: any) => {
   let validator = yup.string() as any // Default to string validation
 
   if (field.fieldName === 'secchi') {
@@ -25,23 +25,30 @@ const getValidator = (field: any) => {
   if (field.fieldType === 'email') {
     validator = yup.string().email('Invalid email format')
   } else if (field.fieldType === 'input') {
-    if (field.inputType === 'float' || field.inputType === 'integer') {
+    if (field.inputType === 'text') {
+      validator = yup.string()
+    } else {
+      // Any non-text 'input' field is numeric — deliberately not gated on
+      // inputType === 'float'/'integer' alone, since dashboard-created custom
+      // fields don't collect inputType yet (it defaults to null) and would
+      // otherwise fall through to the default yup.string() validator above,
+      // silently skipping min/max threshold enforcement entirely.
       validator = yup.number()
       validator = validator.min(0, `Measurement required`)
-      if (field.minThreshold) {
+      // != null (not truthy) so a configured threshold of 0 — e.g. pH's
+      // minThreshold of 0 — still gets enforced instead of being skipped.
+      if (field.minThreshold != null) {
         validator = validator.min(
           field.minThreshold,
           `${field.displayName} must be >= ${field.minThreshold}`
         )
       }
-      if (field.maxThreshold) {
+      if (field.maxThreshold != null) {
         validator = validator.max(
           field.maxThreshold,
           `${field.displayName} must be at <= ${field.maxThreshold}`
         )
       }
-    } else if (field.inputType === 'text') {
-      validator = yup.string()
     }
     if (field.required) {
       validator = validator.typeError('Must be a number')

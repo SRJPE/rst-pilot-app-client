@@ -32,6 +32,7 @@ import {
   returnNullableTableId,
   findTrapLocationIds,
 } from '../../../utils/utils'
+import { buildTrapVisitEnvironmentalForProgram } from '../../../utils/helpers/trapVisitEnvironmental'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -221,40 +222,23 @@ const HighFlows = ({
         totalRevolutions: null,
         rpmAtStart: calcAvgValue([startRpm1, startRpm2, startRpm3]),
         // rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
-        trapVisitEnvironmental: [
-          {
-            measureName: 'flow measure',
-            measureValueNumeric: trapOperationsState?.[id]?.values?.flowMeasure,
-            measureValueText:
-              trapOperationsState?.[id]?.values?.flowMeasure?.toString(),
-            measureUnit: 5,
+        trapVisitEnvironmental: buildTrapVisitEnvironmentalForProgram({
+          // Merged, so environmental fields configured in either section resolve.
+          values: {
+            ...(trapOperationsState?.[id]?.values ?? {}),
+            ...(trapPostProcessingState?.[id]?.values ?? {}),
+            waterTurbidityIsPresent,
           },
-          {
-            measureName: 'water temperature',
-            measureValueNumeric:
-              trapOperationsState?.[id]?.values?.waterTemperature,
-            measureValueText:
-              trapOperationsState?.[id]?.values?.waterTemperature?.toString(),
-            measureUnit:
-              trapOperationsState?.[id]?.values?.waterTemperatureUnit === '°F'
-                ? 1
-                : 2,
+          // The three legacy rows read from Trap Operations only, as they
+          // always have — a blank post-processing field must not overwrite a
+          // real operations reading.
+          baseValues: {
+            ...(trapOperationsState?.[id]?.values ?? {}),
+            waterTurbidityIsPresent,
           },
-          {
-            measureName: 'water turbidity',
-            measureValueNumeric: waterTurbidityIsPresent
-              ? trapOperationsState[id].values.waterTurbidity
-              : trapOperationsState[id]?.values?.recordTurbidityInPostProcessing
-              ? null
-              : undefined,
-            measureValueText: waterTurbidityIsPresent
-              ? trapOperationsState[id].values.waterTurbidity?.toString()
-              : trapOperationsState[id]?.values?.recordTurbidityInPostProcessing
-              ? ''
-              : 'undefined',
-            measureUnit: 25,
-          },
-        ],
+          programId: visitSetupState?.[id]?.values.programId,
+          programs: visitSetupDefaultState.programs,
+        }),
         trapCoordinates: {
           xCoord: trapPostProcessingState?.[id]?.values?.trapLatitude || null,
           yCoord: trapPostProcessingState?.[id]?.values?.trapLongitude || null,

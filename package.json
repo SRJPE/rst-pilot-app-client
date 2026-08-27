@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start --dev-client",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "reset-cache": "expo start --clear",
     "android": "DARK_MODE=media expo run:android",
     "ios": "DARK_MODE=media expo run:ios",
@@ -114,7 +116,8 @@
     "@types/react-redux": "^7.1.24",
     "dotenv": "^16.0.3",
     "jscodeshift": "^0.15.2",
-    "react-devtools-core": "^4.27.1"
+    "react-devtools-core": "^4.27.1",
+    "vitest": "^1.6.1"
   },
   "private": true
 }

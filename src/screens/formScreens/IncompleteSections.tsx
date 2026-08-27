@@ -53,6 +53,7 @@ import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ReviewValuesModal from '../../components/form/ReviewValuesModal'
 import ReviewValuesButton from '../../components/form/ReviewValuesButton'
 import CustomSelect from '@/src/components/Shared/CustomSelect'
+import { buildTrapVisitEnvironmentalForProgram } from '../../utils/helpers/trapVisitEnvironmental'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -300,131 +301,6 @@ const IncompleteSections = ({
   //   return id
   // }
 
-  const formatTrapVisitEnvironmentalValues = (
-    values: any,
-    programId: number
-  ) => {
-    const selectedProgramObj = find(
-      visitSetupDefaultState.programs,
-      (program: any) => program.id === programId
-    )
-
-    const programFormFields = selectedProgramObj.programFormFields
-
-    const environmentalFieldsToIgnore = [
-      'flowMeasure',
-      'waterTemperature',
-      'waterTurbidity',
-    ]
-
-    const def = programFormFields
-      .filter(
-        (obj: any) =>
-          obj.isEnvironmentalField &&
-          !environmentalFieldsToIgnore.includes(obj.fieldName)
-      )
-      .map((obj: any) => obj.fieldName)
-
-    const formFieldsLookup = keyBy(programFormFields, 'fieldName')
-
-    let baseEnvValues = [
-      {
-        measureName: 'flow measure',
-        measureValueNumeric: values.flowMeasure
-          ? Number(values.flowMeasure)
-          : undefined,
-        measureValueText: values.flowMeasure
-          ? values.flowMeasure?.toString()
-          : undefined,
-        measureUnit: 5,
-      },
-      {
-        measureName: 'water temperature',
-        measureValueNumeric: values.waterTemperature
-          ? Number(values.waterTemperature)
-          : undefined,
-        measureValueText: values.waterTemperature
-          ? values.waterTemperature?.toString()
-          : undefined,
-        measureUnit: values.waterTemperatureUnit === '°F' ? 1 : 2,
-      },
-      {
-        measureName: 'water turbidity',
-        measureValueNumeric: values.waterTurbidityIsPresent
-          ? values.waterTurbidity
-          : values?.recordTurbidityInPostProcessing
-            ? null
-            : undefined,
-        measureValueText: values.waterTurbidityIsPresent
-          ? values.waterTurbidity?.toString()
-          : values?.recordTurbidityInPostProcessing
-            ? ''
-            : undefined,
-        measureUnit: 25,
-      },
-    ] as Array<any>
-
-    def.forEach((field: string) => {
-      if (values[field]) {
-        if (formFieldsLookup[field].fieldType === 'dropdown') {
-          baseEnvValues.push({
-            measureName: formFieldsLookup[field].fieldName,
-            measureValueNumeric: null,
-            measureValueText: values[field]?.toString(),
-            measureUnit: null,
-          })
-        } else {
-          const isTextOnly = isNaN(Number(values[field]))
-          baseEnvValues.push({
-            measureName: formFieldsLookup[field].fieldName,
-            measureValueNumeric: isTextOnly ? null : Number(values[field]),
-            measureValueText: values[field]?.toString(),
-            measureUnit: isTextOnly ? null : formFieldsLookup[field].unitId || null,
-          })
-        }
-      }
-    })
-
-    let meanFNU = null
-    if (values.turbidity1 && values.turbidity2 && values.turbidity3) {
-      meanFNU = calcAvgValue([
-        values.turbidity1,
-        values.turbidity2,
-        values.turbidity3,
-      ])
-      baseEnvValues.push({
-        measureName: 'meanFNU',
-        measureValueNumeric: meanFNU,
-        measureValueText: meanFNU?.toString(),
-        measureUnit: 38, //fnu
-      })
-    }
-
-    if (def.includes('riverDepth')) {
-      baseEnvValues = baseEnvValues.concat(
-        {
-          measureName: 'riverLeft',
-          measureValueNumeric: values.riverLeft,
-          measureValueText: values.riverLeft?.toString(),
-          measureUnit: 9,
-        },
-        {
-          measureName: 'riverCenter',
-          measureValueNumeric: values.riverCenter,
-          measureValueText: values.riverCenter?.toString(),
-          measureUnit: 9,
-        },
-        {
-          measureName: 'riverRight',
-          measureValueNumeric: values.riverRight,
-          measureValueText: values.riverRight?.toString(),
-          measureUnit: 9,
-        }
-      )
-    }
-
-    return baseEnvValues
-  }
 
   const saveTrapVisits = () => {
     const trapFunctioningValues = returnDefinitionArray(
@@ -549,12 +425,17 @@ const IncompleteSections = ({
           : null,
         rpmAtStart: calcAvgValue([startRpm1, startRpm2, startRpm3]),
         rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
-        trapVisitEnvironmental: formatTrapVisitEnvironmentalValues(
-          mergePreserveNonNull(opsValues, postValues, {
+        trapVisitEnvironmental: buildTrapVisitEnvironmentalForProgram({
+          values: mergePreserveNonNull(opsValues, postValues, {
             waterTurbidityIsPresent,
           }),
-          programId
-        ),
+          // Legacy rows from Trap Operations only, matching the other paths.
+          baseValues: mergePreserveNonNull(opsValues, {
+            waterTurbidityIsPresent,
+          }),
+          programId,
+          programs: visitSetupDefaultState.programs,
+        }),
         trapCoordinates: {
           xCoord: trapPostProcessingState[id].values.trapLatitude,
           yCoord: trapPostProcessingState[id].values.trapLongitude,
