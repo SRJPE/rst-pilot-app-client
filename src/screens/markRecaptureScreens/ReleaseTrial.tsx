@@ -104,7 +104,7 @@ const ReleaseTrial = ({
                 </Center>
                 <VStack py='2%' px='4%' space={4}>
                   <FormInputComponent
-                    label='# of wild fish used in release trial'
+                    label='# of Wild Fish released'
                     onChangeText={handleChange('wildCount')}
                     onBlur={handleBlur('wildCount')}
                     value={values.wildCount}
@@ -116,7 +116,7 @@ const ReleaseTrial = ({
                     // warningMessage='This value does not match the previously confirmed value.'
                   />
                   <FormInputComponent
-                    label='Dead Count (wild)'
+                    label='Dead/Not Used Count (wild)'
                     onChangeText={handleChange('deadWildCount')}
                     onBlur={handleBlur('deadWildCount')}
                     value={values.deadWildCount}
@@ -174,7 +174,7 @@ const ReleaseTrial = ({
                   </Center>
                   <VStack py='2%' px='4%' space={4}>
                     <FormInputComponent
-                      label='# of Hatchery Fish'
+                      label='# of Hatchery Fish Released'
                       onChangeText={handleChange('hatcheryCount')}
                       onBlur={handleBlur('hatcheryCount')}
                       value={values.hatcheryCount}
@@ -220,7 +220,7 @@ const ReleaseTrial = ({
                       RightElement={<TextInputAdornment text='mm' />}
                     />
                     <FormInputComponent
-                      label='Dead Count (hatchery)'
+                      label='Dead/Not Used Count (hatchery)'
                       onChangeText={handleChange('deadHatcheryCount')}
                       onBlur={handleBlur('deadHatcheryCount')}
                       value={values.deadHatcheryCount}
