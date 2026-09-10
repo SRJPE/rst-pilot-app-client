@@ -6,6 +6,8 @@ import {
   Button,
   Box,
   Radio,
+  ScrollView,
+  KeyboardAvoidingView,
   FormControl as NBFormControl,
 } from 'native-base'
 import { Input, InputField } from '@/components/ui/input'
@@ -13,6 +15,7 @@ import { reorderTaxon, findTaxonCode } from '../../utils/utils'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import CustomModalHeader from '../Shared/CustomModalHeader'
+import CustomSelect from '../Shared/CustomSelect'
 import { savePlusCount } from '../../redux/reducers/formSlices/fishInputSlice'
 import { addPlusCountToBatchStore } from '../../redux/reducers/formSlices/batchCountSlice'
 
@@ -42,6 +45,7 @@ const MeasureMetPlusCount = ({
   const dispatch = useDispatch<AppDispatch>()
   const [inputValue, setInputValue] = React.useState('')
   const [dead, setDead] = React.useState(false)
+  const [plusCountMethod, setPlusCountMethod] = React.useState('none')
 
   const handleSubmit = () => {
     let submittedRun = ''
@@ -61,7 +65,7 @@ const MeasureMetPlusCount = ({
           count: plusCount,
           dead,
           lifeStage: submittedLifeStage,
-          plusCountMethod: 'none',
+          plusCountMethod,
           run: submittedRun,
           species: species.value,
           taxonCode,
@@ -80,6 +84,7 @@ const MeasureMetPlusCount = ({
         if (onSaveCallback) onSaveCallback()
         setInputValue('')
         setDead(false)
+        setPlusCountMethod('none')
       }
     } catch (error) {
       console.error('Error in handleSubmit:', error)
@@ -95,108 +100,138 @@ const MeasureMetPlusCount = ({
         closeModal={closeModal}
       />
 
-      <Text fontSize='lg' color='gray.600' mt={4} mb={6}>
-        You have met the fish measure count requirement for{' '}
-        <Text bold color='black'>
-          {protocolKeyMet}
-        </Text>
-        . Enter the plus count for all remaining{' '}
-        <Text bold color='black'>
-          {protocolKeyMet}
-        </Text>
-        .
-      </Text>
+      <KeyboardAvoidingView flex={1} behavior='padding'>
+        <ScrollView flex={1} showsVerticalScrollIndicator={false}>
+          <Text fontSize='lg' color='gray.600' mt={4} mb={6}>
+            You have met the fish measure count requirement for{' '}
+            <Text bold color='black'>
+              {protocolKeyMet}
+            </Text>
+            . Enter the plus count for all remaining{' '}
+            <Text bold color='black'>
+              {protocolKeyMet}
+            </Text>
+            .
+          </Text>
 
-      <VStack space={4}>
-        <NBFormControl>
-          <NBFormControl.Label
-            _text={{ fontSize: 'xl', fontWeight: 'semibold', color: 'black' }}
-          >
-            Plus Count
-          </NBFormControl.Label>
-          <Input size='xl' style={{ height: 56 }}>
-            <InputField
-              keyboardType='number-pad'
-              placeholder='0'
-              value={inputValue}
-              onChangeText={text => setInputValue(text.replace(/[^0-9]/g, ''))}
-              style={{ fontSize: 22 }}
+          <VStack space={4}>
+            <NBFormControl>
+              <NBFormControl.Label
+                _text={{
+                  fontSize: 'xl',
+                  fontWeight: 'semibold',
+                  color: 'black',
+                }}
+              >
+                Plus Count
+              </NBFormControl.Label>
+              <Input size='xl' style={{ height: 56 }}>
+                <InputField
+                  keyboardType='number-pad'
+                  placeholder='0'
+                  value={inputValue}
+                  onChangeText={text =>
+                    setInputValue(text.replace(/[^0-9]/g, ''))
+                  }
+                  style={{ fontSize: 22 }}
+                />
+              </Input>
+            </NBFormControl>
+
+            <NBFormControl>
+              <NBFormControl.Label
+                _text={{
+                  fontSize: 'xl',
+                  fontWeight: 'semibold',
+                  color: 'black',
+                }}
+              >
+                Dead
+              </NBFormControl.Label>
+              <Radio.Group
+                name='dead'
+                accessibilityLabel='dead'
+                value={`${dead}`}
+                onChange={value => setDead(value === 'true')}
+              >
+                <HStack space={4}>
+                  <Radio
+                    colorScheme='primary'
+                    value='true'
+                    size='lg'
+                    _icon={{ color: 'primary' }}
+                  >
+                    <Text fontSize='xl' ml={2}>
+                      True
+                    </Text>
+                  </Radio>
+                  <Radio
+                    colorScheme='primary'
+                    value='false'
+                    size='lg'
+                    _icon={{ color: 'primary' }}
+                  >
+                    <Text fontSize='xl' ml={2}>
+                      False
+                    </Text>
+                  </Radio>
+                </HStack>
+              </Radio.Group>
+            </NBFormControl>
+
+            <CustomSelect
+              label='Plus Count Method'
+              camelName='plusCountMethod'
+              selectedValue={plusCountMethod}
+              placeholder={'Method'}
+              onValueChange={(itemValue: string) =>
+                setPlusCountMethod(itemValue)
+              }
+              selectOptions={(dropdownValues?.plusCountMethodology || []).map(
+                (item: any) => ({
+                  label: item.definition,
+                  value: item.definition,
+                })
+              )}
             />
-          </Input>
-        </NBFormControl>
 
-        <NBFormControl>
-          <NBFormControl.Label
-            _text={{ fontSize: 'xl', fontWeight: 'semibold', color: 'black' }}
-          >
-            Dead
-          </NBFormControl.Label>
-          <Radio.Group
-            name='dead'
-            accessibilityLabel='dead'
-            value={`${dead}`}
-            onChange={value => setDead(value === 'true')}
-          >
-            <HStack space={4}>
-              <Radio
-                colorScheme='primary'
-                value='true'
-                size='lg'
-                _icon={{ color: 'primary' }}
+            <Box flexDirection='row' mt={2}>
+              <Button
+                mx='auto'
+                minWidth={250}
+                bgColor='gray.400'
+                _pressed={{
+                  bg: 'gray.600',
+                }}
+                onPress={closeModal}
               >
-                <Text fontSize='xl' ml={2}>
-                  True
+                <Text fontSize='xl' color='white'>
+                  Close
                 </Text>
-              </Radio>
-              <Radio
-                colorScheme='primary'
-                value='false'
-                size='lg'
-                _icon={{ color: 'primary' }}
+              </Button>
+              <Button
+                mx='auto'
+                minWidth={250}
+                bgColor='primary'
+                colorScheme='coolGray'
+                onPress={handleSubmit}
+                _pressed={{
+                  bg: 'secondary',
+                }}
+                isDisabled={!inputValue || isNaN(Number(inputValue))}
+                disabled={!inputValue || isNaN(Number(inputValue))}
+                _disabled={{
+                  bg: 'gray.400',
+                }}
               >
-                <Text fontSize='xl' ml={2}>
-                  False
+                <Text fontSize='xl' color='white'>
+                  Save Plus Count
                 </Text>
-              </Radio>
-            </HStack>
-          </Radio.Group>
-        </NBFormControl>
-
-        <Box flexDirection='row' mt={2}>
-          <Button
-            mx='auto'
-            minWidth={250}
-            bgColor='gray.400'
-            _pressed={{
-              bg: 'gray.600',
-            }}
-            onPress={closeModal}
-          >
-            <Text fontSize='xl' color='white'>
-              Close
-            </Text>
-          </Button>
-          <Button
-            mx='auto'
-            minWidth={250}
-            bgColor='primary'
-            colorScheme='coolGray'
-            onPress={handleSubmit}
-            _pressed={{
-              bg: 'secondary',
-            }}
-            isDisabled={!inputValue || isNaN(Number(inputValue))}
-            disabled={!inputValue || isNaN(Number(inputValue))}
-            _disabled={{
-              bg: 'gray.400',
-            }}
-          >
-            <Text fontSize='xl' color='white'>
-              Save Plus Count
-            </Text>
-          </Button>
-        </Box>
-      </VStack>
+              </Button>
+            </Box>
+          </VStack>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Box>
   )
 }

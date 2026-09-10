@@ -871,7 +871,7 @@ const BatchCount = ({
       <CustomModal
         isOpen={fishMeasureMetModalOpen}
         closeModal={closeFishMeasureMetModal}
-        height='40%'
+        height='55%'
         width={'80%'}
       >
         <MeasureMetPlusCount
