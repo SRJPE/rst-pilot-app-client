@@ -24,6 +24,7 @@ const mapStateToProps = (state: RootState) => {
     trapVisitFormPostBundler: state.trapVisitFormPostBundler,
     visitSetup: state.visitSetup,
     visitSetupDefaults: state.visitSetupDefaults,
+    pendingVisitDrafts: state.pendingVisitDrafts,
   }
 }
 
@@ -44,6 +45,7 @@ interface DebugPropsI {
   trapVisitFormPostBundler?: any
   visitSetup?: any
   visitSetupDefaults?: any
+  pendingVisitDrafts?: any
 }
 
 interface RowComponentI {
@@ -63,6 +65,7 @@ interface RowComponentI {
     | 'trapPostProcessing'
     | 'visitSetup'
     | 'visitSetupDefaults'
+    | 'pendingVisitDrafts'
   marginBottom?: string
 }
 
@@ -85,6 +88,7 @@ const Debug = (props: DebugPropsI) => {
     trapVisitFormPostBundler: '',
     visitSetup: '',
     visitSetupDefaults: '',
+    pendingVisitDrafts: '',
   })
 
   const rowComponent = ({ name, marginBottom }: RowComponentI) => {

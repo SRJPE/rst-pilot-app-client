@@ -15,6 +15,7 @@ import MonitoringProgram from './roots/MonitoringProgramRoot'
 import QCForm from './roots/QCFormRoot'
 import TrapVisitForm from './roots/TrapVisitFormRoot'
 import InspectorWindow from '../screens/InspectorWindow'
+import PendingTrapVisits from '../screens/PendingTrapVisits'
 import { refreshUserToken } from '../utils/authUtils'
 import React, { useEffect } from 'react'
 import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
@@ -126,6 +127,10 @@ const DrawerNavigator = ({
           <Drawer.Screen name='Generate Report' component={GenerateReport} />
           <Drawer.Screen name='Quality Control' component={QCForm} />
           <Drawer.Screen name='Inspector' component={InspectorWindow} />
+          <Drawer.Screen
+            name='Pending Trap Visits'
+            component={PendingTrapVisits}
+          />
           <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
           <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
           <Drawer.Screen

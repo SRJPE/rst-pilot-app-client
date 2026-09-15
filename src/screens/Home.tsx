@@ -83,6 +83,13 @@ const Home = ({
   const dispatch = useDispatch<AppDispatch>()
 
   const connectivityState = useSelector((state: any) => state.connectivity)
+  // redux-persist injects a `_persist` metadata key alongside real tabId keys
+  // on this slice's bare { [tabId]: draft } state — filter it out.
+  const pendingVisitDrafts = useSelector((state: RootState) =>
+    Object.entries(state.pendingVisitDrafts || {}).filter(
+      ([tabId]) => tabId !== '_persist'
+    )
+  )
   const fetchStatus = useSelector(
     (state: RootState) => state.trapVisitFormPostBundler.fetchStatus
   )
@@ -162,7 +169,12 @@ const Home = ({
     if (geneticsRequiringLabData.length > 0) {
       count += 1
     }
-    return count === 1 ? '100%' : '50%'
+    if (pendingVisitDrafts.length > 0) {
+      count += 1
+    }
+    if (count <= 1) return '100%'
+    if (count === 2) return '50%'
+    return '33%'
   }
 
   const recentItemsCard = ({ text }: { text: string }) => {
@@ -247,6 +259,28 @@ const Home = ({
               } missing lab weight. Please add the missing data to complete your records.`}
               onPress={() => {
                 navigation.navigate('Genetics')
+                setStaggerOpen(false)
+              }}
+            />
+          </View>
+        )}
+        {pendingVisitDrafts.length > 0 && (
+          <View
+            style={[
+              { opacity: opacity },
+              styles.actionRequiredContainer,
+              { width: getCardWidth(), height: '100%' },
+            ]}
+          >
+            <AlertDialog
+              title='Pending Trap Visits'
+              description={`There ${
+                pendingVisitDrafts.length === 1
+                  ? 'is 1 trap visit'
+                  : `are ${pendingVisitDrafts.length} trap visits`
+              } that haven't been uploaded to the database yet. You may view, edit, and resave.`}
+              onPress={() => {
+                navigation.navigate('Pending Trap Visits')
                 setStaggerOpen(false)
               }}
             />

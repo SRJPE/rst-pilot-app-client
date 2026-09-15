@@ -13,6 +13,7 @@ import MultiSpeciesBatchChart from '@/src/components/form/batchCount/MultiSpecie
 import FishEntriesSummary from '@/src/components/form/FishEntriesSummary'
 import MeasureMetPlusCount from '@/src/components/form/MeasureMetPlusCount'
 import MultiSpeciesModalContent from '@/src/components/form/MultiSpeciesModalContent'
+import AddSpeciesTabModalContent from '@/src/components/form/batchCount/AddSpeciesTabModalContent'
 import CustomModal from '@/src/components/Shared/CustomModal'
 import {
   removeLastForkLengthEntered,
@@ -101,6 +102,9 @@ const MultiSpecies = ({
 
   const [multiSpeciesModalOpen, setMultiSpeciesModalOpen] = useState(
     true as boolean
+  )
+  const [addSpeciesModalOpen, setAddSpeciesModalOpen] = useState(
+    false as boolean
   )
   const [modalInitialData, setModalInitialData] = useState({
     forkLength: '',
@@ -551,6 +555,7 @@ const MultiSpecies = ({
               fishMeasureProtocol={
                 route.params?.fishMeasureProtocol ?? EMPTY_FISH_MEASURE_PROTOCOL
               }
+              onAddSpeciesPress={() => setAddSpeciesModalOpen(true)}
             />
             <VStack space={3}>
               <>
@@ -918,6 +923,23 @@ const MultiSpecies = ({
         >
           <MultiSpeciesModalContent
             closeModal={() => setMultiSpeciesModalOpen(false)}
+          />
+        </CustomModal>
+      )}
+
+      {addSpeciesModalOpen && (
+        <CustomModal
+          isOpen={addSpeciesModalOpen}
+          closeModal={() => setAddSpeciesModalOpen(false)}
+          height='26%'
+          width={'55%'}
+        >
+          <AddSpeciesTabModalContent
+            closeModal={() => setAddSpeciesModalOpen(false)}
+            onAdded={(species: string) => {
+              setSpeciesRadioValue(species)
+              setTabIndex((batchCountStore.batchCharacteristics.multiSpecies || []).length)
+            }}
           />
         </CustomModal>
       )}

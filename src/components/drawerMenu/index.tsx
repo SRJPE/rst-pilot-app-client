@@ -245,6 +245,12 @@ const DrawerMenu = ({
           title='Inspector'
         />
         <MenuButton
+          active={currentRoute === 'Pending Trap Visits'}
+          onPress={() => handlePressMainNavButton('Pending Trap Visits')}
+          icon='time'
+          title='Pending Trap Visits'
+        />
+        <MenuButton
           active={currentRoute === 'Mark Recapture'}
           onPress={() => handlePressMainNavButton('Mark Recapture')}
           icon='clipboard'

@@ -83,6 +83,14 @@ export const batchCountSlice = createSlice({
       state.batchCharacteristics.fishConditions = fishConditions
       state.forkLengths = forkLengthsCopy
     },
+    addSpeciesToMultiSpecies: (state, action) => {
+      const { tabId, species } = action.payload
+      if (!species) return
+      const current = state.batchCharacteristics.multiSpecies || []
+      if (current.includes(species)) return
+      state.tabId = tabId
+      state.batchCharacteristics.multiSpecies = [...current, species]
+    },
     addMarkToBatchCountExistingMarks: (state, action) => {
       state.batchCharacteristics.existingMarks = [
         ...state.batchCharacteristics.existingMarks,
@@ -262,6 +270,7 @@ export const batchCountSlice = createSlice({
 export const {
   resetBatchCountSlice,
   saveBatchCharacteristics,
+  addSpeciesToMultiSpecies,
   addMarkToBatchCountExistingMarks,
   removeMarkFromBatchCountExistingMarks,
   removeLastForkLengthEntered,

@@ -77,6 +77,10 @@ export const trapOperationsSlice = createSlice({
       const { tabId, value } = action.payload
       state[tabId].completed = value
     },
+    restoreTabState: (state, action) => {
+      const { tabId, tabState } = action.payload
+      state[tabId] = tabState
+    },
   },
 })
 
@@ -84,6 +88,7 @@ export const {
   resetTrapOperationsSlice,
   saveTrapOperations,
   markTrapOperationsCompleted,
+  restoreTabState,
 } = trapOperationsSlice.actions
 
 export default trapOperationsSlice.reducer

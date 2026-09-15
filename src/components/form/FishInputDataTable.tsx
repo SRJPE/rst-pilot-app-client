@@ -16,7 +16,9 @@ const headers = [
   'Weight',
   'Life Stage',
   'Clipped',
-  'Marks',
+  'Mark Type',
+  'Mark Color',
+  'Mark Position',
   'Dead',
   // 'Recapture',
   '',
@@ -30,7 +32,9 @@ const sortedDataByHeaders = [
   'weight',
   'lifeStage',
   'adiposeClipped',
-  'existingMarks',
+  'markType',
+  'markColor',
+  'markPosition',
   'dead',
   // 'willBeUsedInRecapture',
 ]
@@ -43,9 +47,19 @@ const emptyTableData = {
   weight: '---',
   lifeStage: '---',
   adiposeClipped: '---',
-  existingMarks: '---',
+  markType: '---',
+  markColor: '---',
+  markPosition: '---',
   dead: '---',
   // willBeUsedInRecapture: '---',
+}
+
+const joinMarkField = (existingMarks: any, field: string) => {
+  if (!Array.isArray(existingMarks) || !existingMarks.length) return null
+  const values = existingMarks
+    .map((mark: any) => (field === 'markPosition' ? mark.markPosition || mark.bodyPart : mark[field]))
+    .filter(Boolean)
+  return values.length ? values.join(', ') : null
 }
 
 const FishInputDataTable = ({
@@ -91,12 +105,6 @@ const FishInputDataTable = ({
     if (`${obj[key]}` === 'not recorded') {
       return 'NR'
     }
-    if (key === 'existingMarks') {
-      if (Array.isArray(obj[key])) {
-        return obj[key].length ? 'True' : 'False'
-      }
-      return '---'
-    }
     if (`${obj[key]}`) {
       if (typeof obj[key] === 'string' || typeof obj[key] === 'boolean') {
         return `${`${obj[key]}`.charAt(0).toUpperCase()}${`${obj[key]}`.slice(
@@ -114,10 +122,14 @@ const FishInputDataTable = ({
 
     const keys = Object.keys(obj)
     keys.forEach(key => {
-      const dataObj = pick(
-        cloneDeep(obj[Number(key)]),
-        sortedDataByHeaders
-      ) as any
+      const rawFish = cloneDeep(obj[Number(key)]) as any
+      const fishWithMarkColumns = {
+        ...rawFish,
+        markType: joinMarkField(rawFish.existingMarks, 'markType'),
+        markColor: joinMarkField(rawFish.existingMarks, 'markColor'),
+        markPosition: joinMarkField(rawFish.existingMarks, 'markPosition'),
+      }
+      const dataObj = pick(fishWithMarkColumns, sortedDataByHeaders) as any
       let dataObjPadded = { ...emptyTableData, ...dataObj }
 
       const dataObjKeys = Object.keys(dataObjPadded)

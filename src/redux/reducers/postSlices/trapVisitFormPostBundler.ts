@@ -7,6 +7,7 @@ import { showSlideAlert } from '../slideAlertSlice'
 import { generateErrorMessage } from '../../../utils/helpers/helperFunctions'
 import { AxiosError } from 'axios'
 import { getVisitSetupDefaults } from '../visitSetupDefaults'
+import { removeDraftForTab } from '../formSlices/pendingVisitDraftsSlice'
 
 interface InitialStateI {
   fetchStatus: 'initial-state' | 'fetch-pending' | 'fetch-failed' | 'fetch-successful'
@@ -172,7 +173,14 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
         }
 
         // Step 2: submit catch raw using resolved trapId
-        if (trapId === null || linkedCatchRawSubmissions.length === 0) continue
+        if (trapId === null || linkedCatchRawSubmissions.length === 0) {
+          // No catch data to submit — the trap visit itself is fully synced,
+          // so any pending edit draft for it is no longer needed.
+          if (trapId !== null) {
+            thunkAPI.dispatch(removeDraftForTab(uuid))
+          }
+          continue
+        }
 
         try {
           const bulkSubmissions = linkedCatchRawSubmissions.map(
@@ -188,6 +196,8 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
               ...catchResponse.data,
             ]
           }
+          // Both the trap visit and its catch raw are fully synced now.
+          thunkAPI.dispatch(removeDraftForTab(uuid))
         } catch (catchError: any) {
           console.log(
             '🚀 ~ file: trapVisitFormPostBundler.ts ~ catch raw submission error:',
@@ -540,14 +550,22 @@ export const trapVisitPostBundler = createSlice({
   initialState: initialState,
   reducers: {
     saveTrapVisitSubmission: (state, action) => {
+      // Replace (not duplicate) any existing queued entry for this visit —
+      // matters when resubmitting an edited pending draft.
+      state.trapVisitSubmissions = state.trapVisitSubmissions.filter(
+        (submission: any) =>
+          submission.trapVisitUid !== action.payload.trapVisitUid
+      )
       state.trapVisitSubmissions.push({ ...action.payload })
       state.submissionStatus = 'not-submitted'
     },
     saveCatchRawSubmissions: (state, action) => {
-      state.catchRawSubmissions = [
-        ...state.catchRawSubmissions,
-        ...action.payload,
-      ]
+      const incomingUids = new Set(
+        action.payload.map((submission: any) => submission.uid)
+      )
+      state.catchRawSubmissions = state.catchRawSubmissions
+        .filter((submission: any) => !incomingUids.has(submission.uid))
+        .concat(action.payload)
       state.submissionStatus = 'not-submitted'
     },
     trapVisitQCSubmission: (state, action) => {

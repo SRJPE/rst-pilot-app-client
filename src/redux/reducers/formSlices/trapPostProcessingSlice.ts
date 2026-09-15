@@ -68,6 +68,10 @@ export const trapPostProcessingSlice = createSlice({
       const { tabId, value } = action.payload
       state[tabId].completed = value
     },
+    restoreTabState: (state, action) => {
+      const { tabId, tabState } = action.payload
+      state[tabId] = tabState
+    },
   },
 })
 
@@ -76,6 +80,7 @@ export const {
   saveTrapPostProcessing,
   updateTrapVisitStartTime,
   markTrapPostProcessingCompleted,
+  restoreTabState,
 } = trapPostProcessingSlice.actions
 
 export default trapPostProcessingSlice.reducer

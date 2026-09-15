@@ -7,12 +7,14 @@ import {
   Box,
   Center,
   HStack,
+  Icon,
   NativeBaseProvider,
   ScrollView,
   Text,
   useColorModeValue,
   Checkbox,
 } from 'native-base'
+import { MaterialIcons } from '@expo/vector-icons'
 import React, {
   ComponentType,
   memo,
@@ -65,6 +67,7 @@ const MultiSpeciesBatchChart = ({
   fishInputSlice,
   fishMeasureCounts = {},
   fishMeasureProtocol = {},
+  onAddSpeciesPress,
 }: {
   tabIndex: number
   setTabIndex: (index: number) => void
@@ -75,6 +78,7 @@ const MultiSpeciesBatchChart = ({
   fishInputSlice: InitialStateI
   fishMeasureCounts?: Record<string, any>
   fishMeasureProtocol?: Record<any, any>
+  onAddSpeciesPress?: () => void
 }) => {
   const activeTabId = tabSlice?.activeTabId || 'placeholderId'
 
@@ -190,8 +194,10 @@ const MultiSpeciesBatchChart = ({
                     borderBottomWidth='3'
                     borderColor={borderColor}
                     minWidth={200}
+                    h={44}
                     alignItems='center'
-                    p='3'
+                    justifyContent='center'
+                    px='3'
                   >
                     <Animated.Text style={{ color }}>
                       {route.title}
@@ -201,6 +207,26 @@ const MultiSpeciesBatchChart = ({
               )
             }
           )}
+          {onAddSpeciesPress && (
+            <Pressable onPress={onAddSpeciesPress}>
+              <Box
+                borderBottomWidth='3'
+                borderColor={inactiveBorderColor}
+                minWidth={60}
+                h={44}
+                alignItems='center'
+                justifyContent='center'
+                px='3'
+              >
+                <Icon
+                  as={MaterialIcons}
+                  name='add'
+                  size='md'
+                  color={inactiveTabColor}
+                />
+              </Box>
+            </Pressable>
+          )}
         </ScrollView>
       </Box>
     ),
@@ -208,6 +234,7 @@ const MultiSpeciesBatchChart = ({
       tabIndex,
       setTabIndex,
       setSpeciesRadioValue,
+      onAddSpeciesPress,
       activeTabColor,
       inactiveTabColor,
       inactiveBorderColor,
@@ -223,12 +250,32 @@ const MultiSpeciesBatchChart = ({
     setRoutes(newRoutes)
   }, [selectedSpecies])
 
+  // style={{height}} below sizes the whole TabView (tab bar + scene), so
+  // every one of these must match the actual rendered dimensions exactly:
+  // renderTabBar chip h={44}, MultiSpeciesChartTab's header cell h={41},
+  // data row cell h={50}, footer HStack h={56}, outer Box borderWidth={1}
+  // (2px total), outer Box my='4' (32px total).
+  const CHART_TAB_BAR_HEIGHT = 44
+  const CHART_HEADER_HEIGHT = 41
+  const CHART_ROW_HEIGHT = 50
+  const CHART_FOOTER_HEIGHT = 56
+  const CHART_BORDER_HEIGHT = 2
+  const CHART_MARGIN_HEIGHT = 32
+
   const getChartHeight = (activeSpeciesTab: string) => {
     const actualRows = getRows(activeSpeciesTab)
     const protocolRows = Math.ceil(
       (fishMeasureProtocol[activeSpeciesTab] || 50) / 10
     )
-    return 170 + Math.max(actualRows, protocolRows) * 50
+    const rows = Math.max(actualRows, protocolRows)
+    return (
+      CHART_TAB_BAR_HEIGHT +
+      CHART_HEADER_HEIGHT +
+      CHART_FOOTER_HEIGHT +
+      CHART_BORDER_HEIGHT +
+      CHART_MARGIN_HEIGHT +
+      rows * CHART_ROW_HEIGHT
+    )
   }
 
   const handleToggles = (toggleName: string) => {

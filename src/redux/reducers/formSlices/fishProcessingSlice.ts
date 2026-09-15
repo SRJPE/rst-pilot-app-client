@@ -41,6 +41,10 @@ export const fishProcessingSlice = createSlice({
       const { tabId, value } = action.payload
       state[tabId].completed = value
     },
+    restoreTabState: (state, action) => {
+      const { tabId, tabState } = action.payload
+      state[tabId] = tabState
+    },
   },
 })
 
@@ -48,6 +52,7 @@ export const {
   resetFishProcessingSlice,
   saveFishProcessing,
   markFishProcessingCompleted,
+  restoreTabState,
 } = fishProcessingSlice.actions
 
 export default fishProcessingSlice.reducer

@@ -54,6 +54,7 @@ import ReviewValuesModal from '../../components/form/ReviewValuesModal'
 import ReviewValuesButton from '../../components/form/ReviewValuesButton'
 import CustomSelect from '@/src/components/Shared/CustomSelect'
 import { buildTrapVisitEnvironmentalForProgram } from '../../utils/helpers/trapVisitEnvironmental'
+import { saveDraftForTab } from '../../redux/reducers/formSlices/pendingVisitDraftsSlice'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -188,11 +189,41 @@ const IncompleteSections = ({
     }, 1000)
   }
 
+  // Snapshot the untouched, per-screen wizard state for every open tab so it
+  // can be reopened/edited later if this submission doesn't sync (offline or
+  // a failed POST). Wrapped by the caller in try/catch so any failure here
+  // can never block the real submission below.
+  const snapshotPendingDrafts = () => {
+    const allTabIds = Object.keys(tabState?.tabs || {})
+    allTabIds.forEach(tabId => {
+      const tabInfo = tabState.tabs[tabId]
+      dispatch(
+        saveDraftForTab({
+          tabId,
+          tabName: tabInfo?.name,
+          trapSite: tabInfo?.trapSite,
+          groupId: tabInfo?.groupId,
+          timestamp: new Date().toISOString(),
+          visitSetupTab: visitSetupState[tabId],
+          trapOperationsTab: trapOperationsState[tabId],
+          fishProcessingTab: fishProcessingState[tabId],
+          trapPostProcessingTab: trapPostProcessingState[tabId],
+          fishInputTab: fishInputState[tabId],
+        })
+      )
+    })
+  }
+
   const handleSubmit = () => {
     if (hasSubmittedRef.current) return // If already submitted, return early
     try {
       saveTrapVisits()
       saveCatchRawSubmission()
+      try {
+        snapshotPendingDrafts()
+      } catch (draftError) {
+        console.log('snapshotPendingDrafts error (non-fatal): ', draftError)
+      }
       resetAllFormSlices()
 
       hasSubmittedRef.current = true // Set submitted state to true

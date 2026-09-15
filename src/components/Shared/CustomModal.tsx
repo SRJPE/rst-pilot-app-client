@@ -47,7 +47,7 @@ const CustomModal = (props: ModalPropsI) => {
             backgroundColor: 'white',
             height: props.height ? props.height : '100%',
             width: props.width ? props.width : '100%',
-            // justifyContent: 'center',
+            justifyContent: 'flex-start',
             // alignItems: 'center',
             alignSelf: 'center',
             // display: 'flex',

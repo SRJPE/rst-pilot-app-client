@@ -86,6 +86,7 @@ const MultiSpeciesChartTab = ({
       borderWidth={1}
       flexWrap={'wrap'}
       borderRadius={15}
+      overflow='hidden'
     >
       {Array.from({ length: 10 }).map((_, i) => {
         return (
@@ -141,6 +142,7 @@ const MultiSpeciesChartTab = ({
 
       <HStack
         w='full'
+        minH={56}
         background='gray.200'
         style={{ borderBottomLeftRadius: 15, borderBottomRightRadius: 15 }}
       >

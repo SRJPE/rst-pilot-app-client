@@ -23,6 +23,7 @@ import releaseTrialDataEntrySlice from './markRecaptureSlices/releaseTrialDataEn
 import addAnotherMarkSlice from './addAnotherMarkSlice'
 import tabSlice from './formSlices/tabSlice'
 import batchCountSlice from './formSlices/batchCountSlice'
+import pendingVisitDraftsSlice from './formSlices/pendingVisitDraftsSlice'
 import fishHoldingSlice from './markRecaptureSlices/fishHoldingSlice'
 import userCredentialsSlice from './userCredentialsSlice'
 import trappingSitesSlice from './createNewProgramSlices/trappingSitesSlice'
@@ -161,6 +162,12 @@ const trapVisitPostProcessingPersistConfig = {
   storage: AsyncStorage,
 }
 
+const pendingVisitDraftsPersistConfig = {
+  key: 'pendingVisitDraftsPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
 export default combineReducers({
   dropdowns: persistReducer(dropdownsPersistConfig, dropdownsSlice),
   visitSetupDefaults: persistReducer(
@@ -216,6 +223,10 @@ export default combineReducers({
   crewMembers: crewMembersSlice,
   tabSlice: persistReducer(trapVisitTabSlicePersistConfig, tabSlice),
   batchCount: persistReducer(trapVisitBatchCountPersistConfig, batchCountSlice),
+  pendingVisitDrafts: persistReducer(
+    pendingVisitDraftsPersistConfig,
+    pendingVisitDraftsSlice
+  ),
   createNewProgramHome: createNewProgramHomeSlice,
   trappingProtocols: trappingProtocolsSlice,
   efficiencyTrialProtocols: efficiencyTrialProtocolsSlice,

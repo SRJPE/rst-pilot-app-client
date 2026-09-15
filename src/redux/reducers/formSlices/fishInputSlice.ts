@@ -390,6 +390,10 @@ export const saveFishSlice = createSlice({
       const { tabId, bool } = action.payload
       state[tabId].modalOpen = bool
     },
+    restoreTabState: (state, action) => {
+      const { tabId, tabState } = action.payload
+      state[tabId] = tabState
+    },
   },
 })
 
@@ -403,6 +407,7 @@ export const {
   markFishInputCompleted,
   markFishInputModalOpen,
   saveBatchCount,
+  restoreTabState,
 } = saveFishSlice.actions
 
 export default saveFishSlice.reducer

@@ -51,6 +51,10 @@ export const visitSetupSlice = createSlice({
       const { tabId, isPaperEntry } = action.payload
       state[tabId].isPaperEntry = isPaperEntry
     },
+    restoreTabState: (state, action) => {
+      const { tabId, tabState } = action.payload
+      state[tabId] = tabState
+    },
   },
 })
 
@@ -59,6 +63,7 @@ export const {
   saveVisitSetup,
   markVisitSetupCompleted,
   markTrapVisitPaperEntry,
+  restoreTabState,
 } = visitSetupSlice.actions
 
 export default visitSetupSlice.reducer
