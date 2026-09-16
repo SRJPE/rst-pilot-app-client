@@ -129,8 +129,8 @@ const PendingTrapVisits = ({
       <Heading mb='2'>Pending Trap Visits</Heading>
       <Text mb='4' color='gray.600'>
         Trap visits that haven't been uploaded to the database yet - saved
-        locally while offline, or a submission that failed. Resume one to
-        review, fix, and resave it.
+        locally while offline, or a submission that failed. Edit to review, fix,
+        and resave it.
       </Text>
       {drafts.length === 0 && (
         <Text color='gray.500'>No pending trap visits.</Text>
