@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Button,
@@ -10,6 +10,8 @@ import {
 } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../redux/store'
+import CustomModal from '../components/Shared/CustomModal'
+import ConfirmationModalContent from '../components/Shared/ConfirmationModalContent'
 import {
   PendingVisitDraftI,
   removeDraftForTab,
@@ -40,6 +42,9 @@ const PendingTrapVisits = ({
   pendingVisitDraftsState: { [tabId: string]: PendingVisitDraftI }
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const [discardTarget, setDiscardTarget] = useState<PendingVisitDraftI | null>(
+    null
+  )
   // redux-persist injects a `_persist` metadata key at the top level of this
   // slice's state (since it's a bare { [tabId]: draft } map with no wrapper) —
   // filter it out so it's never mistaken for a real draft.
@@ -122,6 +127,7 @@ const PendingTrapVisits = ({
 
   const handleDiscard = (tabId: string) => {
     dispatch(removeDraftForTab(tabId))
+    setDiscardTarget(null)
   }
 
   return (
@@ -160,7 +166,7 @@ const PendingTrapVisits = ({
                 <Button bg='primary' onPress={() => handleResume(draft)}>
                   <Text color='white'>Edit</Text>
                 </Button>
-                <Button bg='error' onPress={() => handleDiscard(draft.tabId)}>
+                <Button bg='error' onPress={() => setDiscardTarget(draft)}>
                   <Text color='white'>Discard</Text>
                 </Button>
               </HStack>
@@ -168,6 +174,25 @@ const PendingTrapVisits = ({
           </Box>
         ))}
       </VStack>
+      {discardTarget && (
+        <CustomModal
+          isOpen={!!discardTarget}
+          closeModal={() => setDiscardTarget(null)}
+          height={200}
+          width={525}
+          style={{ borderRadius: 5 }}
+        >
+          <ConfirmationModalContent
+            modalHeader='Discard Pending Trap Visit?'
+            modalText={`This will permanently delete the locally saved data for ${
+              discardTarget.tabName || discardTarget.trapSite
+            }. This cannot be undone.`}
+            confirmButtonLabel='Discard'
+            handlePressCancel={() => setDiscardTarget(null)}
+            handlePressConfirm={() => handleDiscard(discardTarget.tabId)}
+          />
+        </CustomModal>
+      )}
     </ScrollView>
   )
 }
