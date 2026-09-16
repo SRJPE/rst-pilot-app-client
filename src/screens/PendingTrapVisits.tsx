@@ -47,7 +47,8 @@ const PendingTrapVisits = ({
     .filter(([tabId]) => tabId !== '_persist')
     .map(([, draft]) => draft as PendingVisitDraftI)
     .sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     )
 
   const handleResume = (draft: PendingVisitDraftI) => {
@@ -156,14 +157,11 @@ const PendingTrapVisits = ({
                 </Text>
               </VStack>
               <HStack space={3}>
-                <Button
-                  bg='gray.400'
-                  onPress={() => handleDiscard(draft.tabId)}
-                >
-                  <Text color='white'>Discard</Text>
-                </Button>
                 <Button bg='primary' onPress={() => handleResume(draft)}>
-                  <Text color='white'>Resume</Text>
+                  <Text color='white'>Edit</Text>
+                </Button>
+                <Button bg='error' onPress={() => handleDiscard(draft.tabId)}>
+                  <Text color='white'>Discard</Text>
                 </Button>
               </HStack>
             </HStack>

@@ -58,7 +58,7 @@ import {
   VStack,
 } from 'native-base'
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
-import { Keyboard } from 'react-native'
+import { Keyboard, useWindowDimensions } from 'react-native'
 import { connect, useDispatch } from 'react-redux'
 import { getLadObject } from '../../utils/helpers/helperFunctions'
 import ToggleLockButton from '@/src/components/Shared/ToggleLockButton'
@@ -89,6 +89,12 @@ const MultiSpecies = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation = useNavigation()
+  const { height: windowHeight } = useWindowDimensions()
+  // Fixed content (header + species dropdown + button) needs a roughly
+  // constant pixel height regardless of screen size, so a percentage of the
+  // window can come out too short on some devices — floor it, but still
+  // scale up on larger screens/orientations.
+  const addSpeciesModalHeight = Math.max(340, windowHeight * 0.32)
   const [firstButton, setFirstButton] = useState<number>(0)
   const [tabIndex, setTabIndex] = React.useState<number>(0)
 
@@ -931,7 +937,7 @@ const MultiSpecies = ({
         <CustomModal
           isOpen={addSpeciesModalOpen}
           closeModal={() => setAddSpeciesModalOpen(false)}
-          height='26%'
+          height={addSpeciesModalHeight}
           width={'55%'}
         >
           <AddSpeciesTabModalContent
