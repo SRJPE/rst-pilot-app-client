@@ -34,6 +34,7 @@ import {
 } from '../../../utils/utils'
 import { buildTrapVisitEnvironmentalForProgram } from '../../../utils/helpers/trapVisitEnvironmental'
 import { saveDraftForTab } from '../../../redux/reducers/formSlices/pendingVisitDraftsSlice'
+import { resolveSubmissionTrapLocationId } from '../../../utils/helpers/deriveTrapLocationId'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -223,7 +224,12 @@ const HighFlows = ({
         crew: selectedCrewIds,
         programId: visitSetupState[id].values.programId,
         visitTypeId: null,
-        trapLocationId: visitSetupState[id].values.trapLocationId,
+        trapLocationId: resolveSubmissionTrapLocationId({
+          storedTrapLocationId: visitSetupState[id].values.trapLocationId,
+          trapName: visitSetupState[id].values.trapName,
+          trapSite: visitSetupState[id].values.trapSite,
+          trapLocations: visitSetupDefaultState?.trapLocations,
+        }),
         isPaperEntry: visitSetupState[id].isPaperEntry,
         trapVisitTimeStart: null,
         trapVisitTimeEnd: trapOperationsState?.[id]?.values?.trapVisitStopTime,

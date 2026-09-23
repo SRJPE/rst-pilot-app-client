@@ -48,6 +48,10 @@ import {
   showFishInputButton,
 } from '../../utils/utils'
 import { isCoreLegacyProgram } from '../../utils/helpers/coreLegacyProgram'
+import {
+  FieldSlot,
+  fieldHasSavedValue,
+} from '../../utils/helpers/mergeOrderedFields'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVisitFields'
 import { find } from 'lodash'
@@ -196,6 +200,16 @@ const TrapPostProcessing = ({
     visitSetupDefaults.permitInfo,
     selectedTrapLocationId,
     activePage,
+    // Pre-existing bug: this effect reads selectedProgramId (via
+    // currentProgramInfo) but never re-ran when it changed on its own. On a
+    // cold rehydrate, selectedProgramId (from the persisted visitSetup slice)
+    // can resolve to its real value AFTER visitSetupDefaults.programs has
+    // already settled — the effect fired once against a stale/undefined
+    // selectedProgramId, found no matching program, and then never fired
+    // again, permanently stuck with programFormFields/sectionFields = null.
+    // That's what made counterStart/counterEnd/totalRevolutions vanish after
+    // an app reload despite working on first launch.
+    selectedProgramId,
   ])
 
   useEffect(() => {
@@ -409,6 +423,245 @@ const TrapPostProcessing = ({
       ></IconButton>
     )
   }
+
+  /**
+   * The fields this screen renders with its own widgets, handed to
+   * ConditionalTrapVisitFields as slots so an admin's configured order can
+   * position them. Previously these were hardcoded above the dynamic block
+   * and their config rows were discarded outright — Butte (program 9)
+   * configures all of rpmAfter/totalRevolutions/counterStart/counterEnd and
+   * none of it took effect.
+   *
+   * Visibility gates are copied verbatim from the old inline JSX — note
+   * counterStart/counterEnd use renderOnDefault: false (they do NOT show for
+   * an unconfigured program), unlike the others.
+   */
+  const buildPostProcessingSlots = ({
+    touched,
+    errors,
+    values,
+    initialValues,
+    handleChange,
+    handleBlur,
+    setFieldTouched,
+    setFieldValue,
+    validationSchema,
+  }: {
+    touched: any
+    errors: any
+    values: any
+    // Stable snapshot from the persisted redux slice — only updated on
+    // navigation/save, unlike `values` which changes on every keystroke. Used
+    // ONLY for fieldHasSavedValue below; see that function's doc for why live
+    // `values` must never be used there (it previously made a field vanish
+    // the instant its input was backspaced to empty).
+    initialValues: any
+    handleChange: any
+    handleBlur: any
+    setFieldTouched: any
+    setFieldValue: any
+    validationSchema: any
+  }): FieldSlot[] => [
+    {
+      fieldName: 'debrisVolume',
+      fieldType: 'input',
+      width: '30%',
+      visible:
+        isCoreLegacyProgram(selectedProgramObj) ||
+        shouldRenderField({
+          fieldName: 'debrisVolume',
+          programFormFields,
+          sectionFields,
+        }) ||
+        fieldHasSavedValue(initialValues, 'debrisVolume'),
+      render: () => (
+        <FormInputComponent
+          label='Debris Volume'
+          placeholder='0'
+          touched={touched}
+          errors={errors}
+          camelName='debrisVolume'
+          onChangeText={handleChange('debrisVolume')}
+          onBlur={() => setFieldTouched('debrisVolume')}
+          value={values.debrisVolume}
+          RightElement={<TextInputAdornment text='gal' />}
+          validationSchema={validationSchema}
+          keyboardType='number-pad'
+        />
+      ),
+    },
+    {
+      fieldName: 'counterStart',
+      fieldType: 'input',
+      width: '30%',
+      visible:
+        shouldRenderField({
+          fieldName: 'counterStart',
+          programFormFields,
+          sectionFields,
+          renderOnDefault: false,
+        }) || fieldHasSavedValue(initialValues, 'counterStart'),
+      render: () => (
+        <FormInputComponent
+          label='Counter Start'
+          placeholder='0'
+          touched={touched}
+          errors={errors}
+          camelName='counterStart'
+          onChangeText={handleChange('counterStart')}
+          onBlur={() => setFieldTouched('counterStart')}
+          value={values.counterStart}
+          validationSchema={validationSchema}
+          keyboardType='number-pad'
+        />
+      ),
+    },
+    {
+      fieldName: 'counterEnd',
+      fieldType: 'input',
+      width: '30%',
+      visible:
+        shouldRenderField({
+          fieldName: 'counterEnd',
+          programFormFields,
+          sectionFields,
+          renderOnDefault: false,
+        }) || fieldHasSavedValue(initialValues, 'counterEnd'),
+      render: () => (
+        <FormInputComponent
+          label='Counter End'
+          placeholder='0'
+          touched={touched}
+          errors={errors}
+          camelName='counterEnd'
+          onChangeText={handleChange('counterEnd')}
+          onBlur={() => setFieldTouched('counterEnd')}
+          value={values.counterEnd}
+          validationSchema={validationSchema}
+          keyboardType='number-pad'
+        />
+      ),
+    },
+    {
+      fieldName: 'totalRevolutions',
+      fieldType: 'input',
+      width: '30%',
+      visible:
+        isCoreLegacyProgram(selectedProgramObj) ||
+        shouldRenderField({
+          fieldName: 'totalRevolutions',
+          programFormFields,
+          sectionFields,
+        }) ||
+        fieldHasSavedValue(initialValues, 'totalRevolutions'),
+      render: () => (
+        <FormInputComponent
+          label='Total Revolutions'
+          placeholder='0'
+          touched={touched}
+          errors={errors}
+          camelName='totalRevolutions'
+          onChangeText={handleChange('totalRevolutions')}
+          onBlur={() => setFieldTouched('totalRevolutions')}
+          value={values.totalRevolutions}
+          validationSchema={validationSchema}
+          keyboardType='number-pad'
+        />
+      ),
+    },
+    {
+      // Composite: expands into rpm1/rpm2/rpm3, so it's full width and is
+      // skipped as a keyboard "next" target (matching previous behavior).
+      fieldName: 'rpmAfter',
+      fieldType: 'composite',
+      width: '100%',
+      visible:
+        isCoreLegacyProgram(selectedProgramObj) ||
+        shouldRenderField({
+          fieldName: 'rpmAfter',
+          programFormFields,
+          sectionFields,
+        }) ||
+        fieldHasSavedValue(initialValues, ['rpm1', 'rpm2', 'rpm3']),
+      render: () => (
+        <FormControl>
+          <HStack space={4} alignItems='center'>
+            <FormControl.Label>
+              <Text color='black' fontSize='xl'>
+                RPM After Cleaning
+              </Text>
+            </FormControl.Label>
+            <Popover placement='bottom left' trigger={popoverTrigger}>
+              <Popover.Content accessibilityLabel='RPM Info' w='600' mr='10'>
+                <Popover.Arrow />
+                <Popover.Header>
+                  Take up to three measurements of cone rotations. The averages
+                  of the entered values will be saved to the database.
+                </Popover.Header>
+              </Popover.Content>
+            </Popover>
+          </HStack>
+          <HStack space={5} justifyContent='space-between'>
+            <Box flex={1}>
+              <FormInputComponent
+                label={'Measure 1'}
+                placeholder='0'
+                touched={touched}
+                errors={errors}
+                value={values.rpm1 ? `${values.rpm1}` : ''}
+                camelName={'rpm1'}
+                onChangeText={(newValue: any) => {
+                  setFieldValue('rpm1', newValue)
+                  if (!newValue) {
+                    setFieldValue('rpm2', null)
+                    setFieldValue('rpm3', null)
+                  }
+                }}
+                onBlur={handleBlur('rpm1')}
+                validationSchema={validationSchema}
+                keyboardType='number-pad'
+              />
+            </Box>
+            <Box flex={1}>
+              <FormInputComponent
+                isDisabled={values.rpm1 ? false : true}
+                label={'Measure 2'}
+                placeholder='0'
+                touched={touched}
+                errors={errors}
+                value={values.rpm2 ? `${values.rpm2}` : ''}
+                camelName={'rpm2'}
+                onChangeText={(newValue: any) => {
+                  setFieldValue('rpm2', newValue)
+                  if (!newValue) {
+                    setFieldValue('rpm3', null)
+                  }
+                }}
+                onBlur={handleBlur('rpm2')}
+                validationSchema={validationSchema}
+                keyboardType='number-pad'
+              />
+            </Box>
+            <Box flex={1}>
+              <FormInputComponent
+                isDisabled={values.rpm1 && values.rpm2 ? false : true}
+                label={'Measure 3'}
+                placeholder='0'
+                touched={touched}
+                errors={errors}
+                value={values.rpm3 ? `${values.rpm3}` : ''}
+                camelName={'rpm3'}
+                onChangeText={handleChange('rpm3')}
+                onBlur={handleBlur('rpm3')}
+                validationSchema={validationSchema}
+                keyboardType='number-pad'
+              />
+            </Box>
+          </HStack>
+        </FormControl>
+      ),
+    },
+  ]
 
   const renderTrappingDateAndTime = (
     values: any,
@@ -636,6 +889,7 @@ const TrapPostProcessing = ({
         touched,
         errors,
         values,
+        initialValues,
         resetForm,
         isValid,
       }) => {
@@ -706,10 +960,7 @@ const TrapPostProcessing = ({
           ]
         )
         return (
-          <KeyboardAvoidingView
-            flex={1}
-            behavior='padding'
-          >
+          <KeyboardAvoidingView flex={1} behavior='padding'>
             <ScrollView>
               <Pressable
                 flex={1}
@@ -723,241 +974,6 @@ const TrapPostProcessing = ({
               >
                 <VStack space={1}>
                   <Heading>Trap Post-Processing</Heading>
-                  <HStack space={5}>
-                    {(isCoreLegacyProgram(selectedProgramObj) ||
-                      shouldRenderField({
-                        fieldName: 'debrisVolume',
-                        programFormFields,
-                        sectionFields,
-                      })) && (
-                      <Box
-                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-                        minWidth='30%' // Prevents shrinking too much
-                        maxWidth='30%' // Prevents growing beyond this size
-                      >
-                        <FormInputComponent
-                          label='Debris Volume'
-                          placeholder='0'
-                          touched={touched}
-                          errors={errors}
-                          camelName='debrisVolume'
-                          onChangeText={handleChange('debrisVolume')}
-                          onBlur={() => setFieldTouched('debrisVolume')}
-                          value={values.debrisVolume}
-                          RightElement={<TextInputAdornment text='gal' />}
-                          validationSchema={validationSchema}
-                          keyboardType='number-pad'
-                        />
-                      </Box>
-                    )}
-                  </HStack>
-                  <HStack space={5}>
-                    {shouldRenderField({
-                      fieldName: 'counterStart',
-                      programFormFields,
-                      sectionFields,
-                      renderOnDefault: false,
-                    }) && (
-                      <Box
-                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-                        minWidth='30%' // Prevents shrinking too much
-                        maxWidth='30%' // Prevents growing beyond this size
-                      >
-                        <FormInputComponent
-                          label='Counter Start'
-                          placeholder='0'
-                          touched={touched}
-                          errors={errors}
-                          camelName='counterStart'
-                          onChangeText={handleChange('counterStart')}
-                          onBlur={() => setFieldTouched('counterStart')}
-                          value={values.counterStart}
-                          validationSchema={validationSchema}
-                          keyboardType='number-pad'
-                        />
-                      </Box>
-                    )}
-                    {shouldRenderField({
-                      fieldName: 'counterEnd',
-                      programFormFields,
-                      sectionFields,
-                      renderOnDefault: false,
-                    }) && (
-                      <Box
-                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-                        minWidth='30%' // Prevents shrinking too much
-                        maxWidth='30%' // Prevents growing beyond this size
-                      >
-                        <FormInputComponent
-                          label='Counter End'
-                          placeholder='0'
-                          touched={touched}
-                          errors={errors}
-                          camelName='counterEnd'
-                          onChangeText={handleChange('counterEnd')}
-                          onBlur={() => setFieldTouched('counterEnd')}
-                          value={values.counterStart}
-                          validationSchema={validationSchema}
-                          keyboardType='number-pad'
-                        />
-                      </Box>
-                    )}
-                    {/* {recordTurbidityInPostProcessing && (
-                          <FormInputComponent
-                            label=' Water Turbidity (optional)'
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            camelName='waterTurbidity'
-                            onChangeText={handleChange('waterTurbidity')}
-                            onBlur={() => setFieldTouched('waterTurbidity')}
-                            value={values.waterTurbidity}
-                          />
-                        )} */}
-                    {(isCoreLegacyProgram(selectedProgramObj) ||
-                      shouldRenderField({
-                        fieldName: 'totalRevolutions',
-                        programFormFields,
-                        sectionFields,
-                      })) && (
-                      <Box
-                        flexBasis='30%' // Ensures 3 items per row (adjust for spacing)
-                        minWidth='30%' // Prevents shrinking too much
-                        maxWidth='30%' // Prevents growing beyond this size
-                      >
-                        <FormInputComponent
-                          label='Total Revolutions'
-                          placeholder='0'
-                          touched={touched}
-                          errors={errors}
-                          camelName='totalRevolutions'
-                          onChangeText={handleChange('totalRevolutions')}
-                          onBlur={() => setFieldTouched('totalRevolutions')}
-                          value={values.totalRevolutions}
-                          validationSchema={validationSchema}
-                          keyboardType='number-pad'
-                        />
-                      </Box>
-                    )}
-                    {/* {recordTurbidityInPostProcessing && (
-                          <FormInputComponent
-                            label=' Water Turbidity (optional)'
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            camelName='waterTurbidity'
-                            onChangeText={handleChange('waterTurbidity')}
-                            onBlur={() => setFieldTouched('waterTurbidity')}
-                            value={values.waterTurbidity}
-                          />
-                        )} */}
-                  </HStack>
-                  {(isCoreLegacyProgram(selectedProgramObj) ||
-                    shouldRenderField({
-                      fieldName: 'rpmAfter',
-                      programFormFields,
-                      sectionFields,
-                    })) && (
-                    <FormControl>
-                      <HStack space={4} alignItems='center'>
-                        <FormControl.Label>
-                          <Text color='black' fontSize='xl'>
-                            RPM After Cleaning
-                          </Text>
-                        </FormControl.Label>
-                        <Popover
-                          placement='bottom left'
-                          trigger={triggerProps => {
-                            return (
-                              <IconButton
-                                {...triggerProps}
-                                icon={
-                                  <Icon
-                                    as={MaterialIcons}
-                                    color='black'
-                                    name='info-outline'
-                                    size='lg'
-                                  />
-                                }
-                              ></IconButton>
-                            )
-                          }}
-                        >
-                          <Popover.Content
-                            accessibilityLabel='RPM Info'
-                            w='600'
-                            mr='10'
-                          >
-                            <Popover.Arrow />
-                            <Popover.Header>
-                              Take up to three measurements of cone rotations.
-                              The averages of the entered values will be saved
-                              to the database.
-                            </Popover.Header>
-                          </Popover.Content>
-                        </Popover>
-                      </HStack>
-                      <HStack space={5} justifyContent='space-between'>
-                        <Box flex={1}>
-                          <FormInputComponent
-                            label={'Measure 1'}
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            value={values.rpm1 ? `${values.rpm1}` : ''}
-                            camelName={'rpm1'}
-                            onChangeText={newValue => {
-                              setFieldValue('rpm1', newValue)
-                              if (!newValue) {
-                                setFieldValue('rpm2', null)
-                                setFieldValue('rpm3', null)
-                              }
-                            }}
-                            onBlur={handleBlur('rpm1')}
-                            validationSchema={validationSchema}
-                            keyboardType='number-pad'
-                          />
-                        </Box>
-                        <Box flex={1}>
-                          <FormInputComponent
-                            isDisabled={values.rpm1 ? false : true}
-                            label={'Measure 2'}
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            value={values.rpm2 ? `${values.rpm2}` : ''}
-                            camelName={'rpm2'}
-                            onChangeText={newValue => {
-                              setFieldValue('rpm2', newValue)
-                              if (!newValue) {
-                                setFieldValue('rpm3', null)
-                              }
-                            }}
-                            onBlur={handleBlur('rpm2')}
-                            validationSchema={validationSchema}
-                            keyboardType='number-pad'
-                          />
-                        </Box>
-                        <Box flex={1}>
-                          <FormInputComponent
-                            isDisabled={
-                              values.rpm1 && values.rpm2 ? false : true
-                            }
-                            label={'Measure 3'}
-                            placeholder='0'
-                            touched={touched}
-                            errors={errors}
-                            value={values.rpm3 ? `${values.rpm3}` : ''}
-                            camelName={'rpm3'}
-                            onChangeText={handleChange('rpm3')}
-                            onBlur={handleBlur('rpm3')}
-                            validationSchema={validationSchema}
-                            keyboardType='number-pad'
-                          />
-                        </Box>
-                      </HStack>
-                    </FormControl>
-                  )}
                   <ConditionalTrapVisitFields
                     touched={touched}
                     errors={errors}
@@ -972,6 +988,21 @@ const TrapPostProcessing = ({
                     activeTabId={activeTabId}
                     trapOperationsStore={trapOperationsStore}
                     validationSchema={validationSchema}
+                    slots={buildPostProcessingSlots({
+                      touched,
+                      errors,
+                      values,
+                      initialValues,
+                      handleChange,
+                      handleBlur,
+                      setFieldTouched,
+                      setFieldValue,
+                      validationSchema,
+                    })}
+                    // endingTrapStatus is rendered by renderEndingTrapStatus
+                    // further down, outside this grid, so it has no slot and
+                    // would otherwise render twice.
+                    suppressedFieldNames={['endingTrapStatus']}
                   />
                   {/* <HStack
                         space={5}

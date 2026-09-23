@@ -32,6 +32,7 @@ import {
 } from '../../utils/utils'
 import { buildTrapVisitEnvironmentalForProgram } from '../../utils/helpers/trapVisitEnvironmental'
 import { saveDraftForTab } from '../../redux/reducers/formSlices/pendingVisitDraftsSlice'
+import { resolveSubmissionTrapLocationId } from '../../utils/helpers/deriveTrapLocationId'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -222,7 +223,12 @@ const StartedTrapping = ({
         }),
         programId: visitSetupState?.[id]?.values.programId,
         visitTypeId: null,
-        trapLocationId: visitSetupState?.[id]?.values.trapLocationId,
+        trapLocationId: resolveSubmissionTrapLocationId({
+          storedTrapLocationId: visitSetupState?.[id]?.values.trapLocationId,
+          trapName: visitSetupState?.[id]?.values.trapName,
+          trapSite: visitSetupState?.[id]?.values.trapSite,
+          trapLocations: visitSetupDefaultState?.trapLocations,
+        }),
         isPaperEntry: visitSetupState?.[id].isPaperEntry,
         trapVisitTimeStart:
           trapOperationsState?.[id]?.values.trapVisitStopTime || new Date(), // time from trap operations will BE START TIME bc they are restarting the trap

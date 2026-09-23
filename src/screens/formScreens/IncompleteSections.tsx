@@ -55,6 +55,7 @@ import ReviewValuesButton from '../../components/form/ReviewValuesButton'
 import CustomSelect from '@/src/components/Shared/CustomSelect'
 import { buildTrapVisitEnvironmentalForProgram } from '../../utils/helpers/trapVisitEnvironmental'
 import { saveDraftForTab } from '../../redux/reducers/formSlices/pendingVisitDraftsSlice'
+import { resolveSubmissionTrapLocationId } from '../../utils/helpers/deriveTrapLocationId'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -402,7 +403,12 @@ const IncompleteSections = ({
         }),
         programId,
         visitTypeId: null,
-        trapLocationId: visitSetupState[id].values.trapLocationId,
+        trapLocationId: resolveSubmissionTrapLocationId({
+          storedTrapLocationId: visitSetupState[id].values.trapLocationId,
+          trapName: visitSetupState[id].values.trapName,
+          trapSite: visitSetupState[id].values.trapSite,
+          trapLocations: visitSetupDefaultState?.trapLocations,
+        }),
         isPaperEntry: visitSetupState[id].isPaperEntry,
         trapVisitTimeStart,
         trapVisitTimeEnd,

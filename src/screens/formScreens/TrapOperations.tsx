@@ -47,6 +47,10 @@ import {
 } from '../../utils/utils'
 import { isCoreLegacyProgram } from '../../utils/helpers/coreLegacyProgram'
 import {
+  FieldSlot,
+  fieldHasSavedValue,
+} from '../../utils/helpers/mergeOrderedFields'
+import {
   TabStateI,
   setActiveTab,
 } from '../../redux/reducers/formSlices/tabSlice'
@@ -227,6 +231,14 @@ const TrapOperations = ({
     visitSetupDefaults?.trapLocations,
     selectedTrapLocationId,
     conditionCode,
+    // Pre-existing bug: this effect reads selectedProgramId (via
+    // currentProgramInfo) but never re-ran when it changed on its own. On a
+    // cold rehydrate, selectedProgramId (from the persisted visitSetup slice)
+    // can resolve to its real value AFTER visitSetupDefaults.programs has
+    // already settled — the effect fired once against a stale/undefined
+    // selectedProgramId, found no matching program, and then never fired
+    // again, permanently stuck with programFormFields/sectionFields = null.
+    selectedProgramId,
   ])
 
   useEffect(() => {
@@ -685,6 +697,161 @@ const TrapOperations = ({
     ]
   )
 
+  /**
+   * The three environmental measurements this screen renders with bespoke
+   * widgets (unit toggle on temperature, warning thresholds on flow/temp).
+   *
+   * Handing them to ConditionalTrapVisitFields as slots — instead of
+   * rendering them above it — is what lets an admin's configured order
+   * actually position them. Previously the dynamic renderer discarded their
+   * config rows outright, so e.g. waterTemperature at order_index 0 (set for
+   * four programs) still rendered wherever this file happened to put it.
+   *
+   * Visibility gates are copied verbatim from the old inline JSX, including
+   * waterTurbidity's irregular recordTurbidityInPostProcessing condition.
+   * A program with no config keeps every slot visible via isCoreLegacyProgram
+   * / shouldRenderField's renderOnDefault, so its layout is unchanged.
+   */
+  const buildEnvironmentalSlots = ({
+    touched,
+    errors,
+    values,
+    initialValues,
+    handleChange,
+    handleBlur,
+    setFieldValue,
+    validationSchema,
+    warningResultFlow,
+    warningResultTemp,
+  }: {
+    touched: any
+    errors: any
+    values: any
+    // Stable snapshot from the persisted redux slice — only updated on
+    // navigation/save, unlike `values` which changes on every keystroke. Used
+    // ONLY for fieldHasSavedValue below; see that function's doc for why live
+    // `values` must never be used there (it previously made a field vanish
+    // the instant its input was backspaced to empty).
+    initialValues: any
+    handleChange: any
+    handleBlur: any
+    setFieldValue: any
+    validationSchema: any
+    warningResultFlow: boolean
+    warningResultTemp: boolean
+  }): FieldSlot[] => [
+    {
+      fieldName: 'flowMeasure',
+      fieldType: 'input',
+      width: '28%',
+      visible:
+        isCoreLegacyProgram(selectedProgramObj) ||
+        shouldRenderField({
+          fieldName: 'flowMeasure',
+          programFormFields,
+          sectionFields,
+        }) ||
+        fieldHasSavedValue(initialValues, 'flowMeasure'),
+      render: () => (
+        <FormInputComponent
+          showWarning={warningResultFlow}
+          label={'Flow Measure'}
+          placeholder='0'
+          touched={touched}
+          errors={errors}
+          value={values.flowMeasure || null}
+          camelName={'flowMeasure'}
+          onChangeText={handleChange('flowMeasure')}
+          onBlur={handleBlur('flowMeasure')}
+          RightElement={<TextInputAdornment text='cfs' />}
+          validationSchema={validationSchema}
+          keyboardType={'number-pad'}
+          inputRefs={inputRefs}
+          values={values}
+        />
+      ),
+    },
+    {
+      fieldName: 'waterTemperature',
+      fieldType: 'input',
+      width: '28%',
+      visible:
+        isCoreLegacyProgram(selectedProgramObj) ||
+        shouldRenderField({
+          fieldName: 'waterTemperature',
+          programFormFields,
+          sectionFields,
+        }) ||
+        fieldHasSavedValue(initialValues, 'waterTemperature'),
+      render: () => (
+        <FormInputComponent
+          key={`waterTemperature-${values.waterTemperatureUnit}`}
+          showWarning={warningResultTemp}
+          label={'Water Temperature'}
+          placeholder='0'
+          touched={touched}
+          errors={errors}
+          value={values.waterTemperature || null}
+          camelName={'waterTemperature'}
+          onChangeText={handleChange('waterTemperature')}
+          onBlur={handleBlur('waterTemperature')}
+          validationSchema={validationSchema}
+          keyboardType={'number-pad'}
+          inputRefs={inputRefs}
+          values={values}
+          RightElement={
+            <Button
+              bg='warmGray.200'
+              h={'full'}
+              w={50}
+              onPress={() => {
+                if (values.waterTemperatureUnit === '°C') {
+                  setFieldValue('waterTemperatureUnit', '°F')
+                } else {
+                  setFieldValue('waterTemperatureUnit', '°C')
+                }
+              }}
+            >
+              <Text>{values.waterTemperatureUnit}</Text>
+            </Button>
+          }
+        />
+      ),
+    },
+    {
+      fieldName: 'waterTurbidity',
+      fieldType: 'input',
+      width: '28%',
+      // The recordTurbidityInPostProcessing check is a deliberate UI mode
+      // switch (crew chose to record turbidity here vs. later), not a
+      // data-loading concern — fieldHasSavedValue only backstops the config
+      // lookup that follows it, never bypasses the toggle itself.
+      visible:
+        values.recordTurbidityInPostProcessing === false &&
+        Boolean(
+          isCoreLegacyProgram(selectedProgramObj) ||
+            !programFormFields?.length ||
+            find(programFormFields, { fieldName: 'waterTurbidity' }) ||
+            fieldHasSavedValue(initialValues, 'waterTurbidity')
+        ),
+      render: () => (
+        <FormInputComponent
+          label={'Turbidity'}
+          placeholder='0'
+          touched={touched}
+          errors={errors}
+          value={values.waterTurbidity}
+          camelName={'waterTurbidity'}
+          onChangeText={handleChange('waterTurbidity')}
+          onBlur={handleBlur('waterTurbidity')}
+          RightElement={<TextInputAdornment text='ntu' />}
+          validationSchema={validationSchema}
+          keyboardType={'number-pad'}
+        />
+      ),
+    },
+  ]
+
   const renderRPMBefore = ({
     touched,
     errors,
@@ -761,6 +928,7 @@ const TrapOperations = ({
         touched,
         errors,
         values,
+        initialValues,
         resetForm,
       }) => {
         resetNonExistentFields(values, setFieldValue)
@@ -1172,116 +1340,6 @@ const TrapOperations = ({
                         <Heading>Environmental Conditions</Heading>
                       </HStack>
 
-                      <HStack space={5} flex={'wrap'}>
-                        {(isCoreLegacyProgram(selectedProgramObj) ||
-                          shouldRenderField({
-                            fieldName: 'flowMeasure',
-                            programFormFields,
-                            sectionFields,
-                          })) && (
-                          <Box
-                            flexBasis={'28%'}
-                            minWidth={'28%'}
-                            maxWidth={'28%'}
-                          >
-                            <FormInputComponent
-                              showWarning={warningResultFlow}
-                              label={'Flow Measure'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.flowMeasure || null}
-                              camelName={'flowMeasure'}
-                              onChangeText={handleChange('flowMeasure')}
-                              onBlur={handleBlur('flowMeasure')}
-                              RightElement={<TextInputAdornment text='cfs' />}
-                              validationSchema={validationSchema}
-                              keyboardType={'number-pad'}
-                              inputRefs={inputRefs}
-                              values={values}
-                            />
-                          </Box>
-                        )}
-
-                        {(isCoreLegacyProgram(selectedProgramObj) ||
-                          shouldRenderField({
-                            fieldName: 'waterTemperature',
-                            programFormFields,
-                            sectionFields,
-                          })) && (
-                          <Box
-                            flexBasis={'28%'}
-                            minWidth={'28%'}
-                            maxWidth={'28%'}
-                          >
-                            <FormInputComponent
-                              key={`waterTemperature-${values.waterTemperatureUnit}`}
-                              showWarning={warningResultTemp}
-                              label={'Water Temperature'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.waterTemperature || null}
-                              camelName={'waterTemperature'}
-                              onChangeText={handleChange('waterTemperature')}
-                              onBlur={handleBlur('waterTemperature')}
-                              validationSchema={validationSchema}
-                              keyboardType={'number-pad'}
-                              inputRefs={inputRefs}
-                              values={values}
-                              RightElement={
-                                <Button
-                                  bg='warmGray.200'
-                                  h={'full'}
-                                  w={50}
-                                  onPress={() => {
-                                    if (values.waterTemperatureUnit === '°C') {
-                                      setFieldValue(
-                                        'waterTemperatureUnit',
-                                        '°F'
-                                      )
-                                    } else {
-                                      setFieldValue(
-                                        'waterTemperatureUnit',
-                                        '°C'
-                                      )
-                                    }
-                                  }}
-                                >
-                                  <Text>{values.waterTemperatureUnit}</Text>
-                                </Button>
-                              }
-                            />
-                          </Box>
-                        )}
-
-                        {values.recordTurbidityInPostProcessing === false &&
-                          (isCoreLegacyProgram(selectedProgramObj) ||
-                            !programFormFields?.length ||
-                            find(programFormFields, {
-                              fieldName: 'waterTurbidity',
-                            })) && (
-                            <Box
-                              flexBasis={'28%'}
-                              minWidth={'28%'}
-                              maxWidth={'28%'}
-                            >
-                              <FormInputComponent
-                                label={'Turbidity'}
-                                placeholder='0'
-                                touched={touched}
-                                errors={errors}
-                                value={values.waterTurbidity}
-                                camelName={'waterTurbidity'}
-                                onChangeText={handleChange('waterTurbidity')}
-                                onBlur={handleBlur('waterTurbidity')}
-                                RightElement={<TextInputAdornment text='ntu' />}
-                                validationSchema={validationSchema}
-                                keyboardType={'number-pad'}
-                              />
-                            </Box>
-                          )}
-                      </HStack>
 
                       {(isCoreLegacyProgram(selectedProgramObj) ||
                         !selectedProgramObj?.programFormFields?.length ||
@@ -1330,6 +1388,23 @@ const TrapOperations = ({
                         activeTabId={activeTabId}
                         validationSchema={validationSchema}
                         inputRefs={inputRefs}
+                        slots={buildEnvironmentalSlots({
+                          touched,
+                          errors,
+                          values,
+                          initialValues,
+                          handleChange,
+                          handleBlur,
+                          setFieldValue,
+                          validationSchema,
+                          warningResultFlow,
+                          warningResultTemp,
+                        })}
+                        // rpmBefore renders above the "Environmental
+                        // Conditions" heading, outside this grid, so it has no
+                        // slot and would otherwise render twice for programs
+                        // that configure it.
+                        suppressedFieldNames={['rpmBefore']}
                       />
                       {allTabIds.length > 1 && (
                         <CopyFormValuesDialog

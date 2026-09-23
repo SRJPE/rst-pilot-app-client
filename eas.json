@@ -12,14 +12,58 @@
     },
     "preview": {
       "distribution": "internal",
+      "environment": "preview",
       "ios": {
         "image": "latest"
       },
       "env": {
-        "EXPO_PUBLIC_BASE_URL": "EXPO_PUBLIC_BASE_URL",
-        "EXPO_PUBLIC_CLIENT_ID": "EXPO_PUBLIC_CLIENT_ID",
-        "EXPO_PUBLIC_CLIENT_SECRET_VALUE": "EXPO_PUBLIC_CLIENT_SECRET_VALUE",
-        "EXPO_PUBLIC_CLIENT_SECRET_ID": "EXPO_PUBLIC_CLIENT_SECRET_ID"
+        "EXPO_PUBLIC_BASE_URL": "https://jpe-app-server.azurewebsites.net"
+      }
+    },
+    "preview-production": {
+      "distribution": "internal",
+      "channel": "production",
+      "environment": "production",
+      "ios": {
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_BASE_URL": "https://jpe-app-server-production.azurewebsites.net"
+      }
+    },
+    "preview-testing": {
+      "distribution": "internal",
+      "channel": "testing",
+      "environment": "preview",
+      "ios": {
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_BASE_URL": "https://jpe-app-server.azurewebsites.net",
+        "APP_VARIANT": "testing"
+      }
+    },
+    "preview-yolo-testing": {
+      "distribution": "internal",
+      "channel": "yolo-testing",
+      "environment": "preview",
+      "ios": {
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_BASE_URL": "https://jpe-app-server-ybfmp.azurewebsites.net",
+        "APP_VARIANT": "yolo"
+      }
+    },
+    "preview-dev": {
+      "distribution": "internal",
+      "channel": "dev",
+      "environment": "development",
+      "ios": {
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_BASE_URL": "https://jpe-app-server.azurewebsites.net"
       }
     },
     "production": {},

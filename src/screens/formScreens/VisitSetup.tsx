@@ -54,6 +54,8 @@ import { InferType } from 'yup'
 import { resetFishInputSlice } from '@/src/redux/reducers/formSlices/fishInputSlice'
 import { resetBatchCountSlice } from '@/src/redux/reducers/formSlices/batchCountSlice'
 import { useFormSave } from '../../context/FormSaveContext'
+import { resolveTrapLocationId } from '../../utils/helpers/resolveTrapLocationId'
+import { deriveTrapLocationId } from '../../utils/helpers/deriveTrapLocationId'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -228,6 +230,7 @@ const VisitSetup = ({
                 trapLocationId: getTrapLocationId({
                   trapName,
                   trapSite: values.trapSite,
+                  tabId: newTabId,
                 }),
               },
               isPaperEntry,
@@ -257,6 +260,7 @@ const VisitSetup = ({
               ...payload,
               trapLocationId: getTrapLocationId({
                 trapSite: values.trapSite,
+                tabId: newTabId,
               }),
             },
           })
@@ -315,6 +319,7 @@ const VisitSetup = ({
                 ...payload,
                 trapLocationId: getTrapLocationId({
                   trapName: values.trapName,
+                  tabId,
                 }),
               },
               isPaperEntry,
@@ -359,7 +364,10 @@ const VisitSetup = ({
                   tabId: tabIdToUpdate,
                   values: {
                     ...payload,
-                    trapLocationId: getTrapLocationId({ trapName }),
+                    trapLocationId: getTrapLocationId({
+                      trapName,
+                      tabId: tabIdToUpdate,
+                    }),
                   },
                   isPaperEntry,
                 })
@@ -380,7 +388,7 @@ const VisitSetup = ({
                 tabId,
                 values: {
                   ...payload,
-                  trapLocationId: getTrapLocationId({ trapName }),
+                  trapLocationId: getTrapLocationId({ trapName, tabId }),
                 },
                 isPaperEntry,
               })
@@ -417,8 +425,8 @@ const VisitSetup = ({
               ...payload,
               trapLocationId: getTrapLocationId(
                 values.trapName
-                  ? { trapName: values.trapName }
-                  : { trapSite: values.trapSite }
+                  ? { trapName: values.trapName, tabId }
+                  : { trapSite: values.trapSite, tabId }
               ),
             },
             isPaperEntry,
@@ -463,47 +471,43 @@ const VisitSetup = ({
   const getTrapLocationId = ({
     trapSite,
     trapName,
+    tabId,
   }: {
     trapSite?: string
     trapName?: string
+    // The tab this resolved id will be saved onto, if it already exists.
+    // Used ONLY as a safety-net fallback below — see the comment there.
+    tabId?: string | null
   }) => {
-    let trapLocationId = null
+    const trapLocationId = deriveTrapLocationId({
+      trapLocations: visitSetupDefaultsState?.trapLocations,
+      trapName,
+      trapSite,
+    })
 
-    if (trapName) {
-      const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
-        (obj: any) => obj.trapName === trapName
-      )
-      if (trapLocations.length === 1) {
-        trapLocationId = trapLocations[0].id
-      }
-
-      if (trapLocationId === null) {
-        const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
-          (obj: any) => obj.trapSite === trapName
-        )
-        if (trapLocations.length === 1) {
-          trapLocationId = trapLocations[0].id
-        }
-      }
-    }
-
-    if (trapSite) {
-      const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
-        (obj: any) => obj.siteName === trapSite
-      )
-      if (trapLocations.length === 1) {
-        trapLocationId = trapLocations[0].id
-      } else if (!trapLocations.length) {
-        const trapLocationsAlt = visitSetupDefaultsState?.trapLocations?.filter(
-          (obj: any) => obj.siteName === trapName
-        )
-        if (trapLocationsAlt.length === 1) {
-          trapLocationId = trapLocationsAlt[0].id
-        }
-      }
-    }
-
-    return trapLocationId
+    // trap_location_id is NOT NULL on the server, and once a null gets saved
+    // here it's picked up verbatim by IncompleteSections.tsx's final
+    // submission builder — so a null baked in at this step means every
+    // subsequent submit/retry of that trap visit 400s forever with no
+    // self-healing. Confirmed in production logs and a captured payload: a
+    // fully-filled-out trap visit (real environmental readings, trap
+    // operations data, comments) submitted with trapLocationId: null.
+    //
+    // The lookups above resolve a name/site against
+    // visitSetupDefaultsState.trapLocations, which is fetched over the
+    // network (Home.tsx / SignIn.tsx dispatch getVisitSetupDefaults) and can
+    // still be empty for a moment right after an app reload — the crew's
+    // trapName/trapSite selection persisted fine, but the reference table to
+    // translate it into an id hadn't loaded yet when they hit Next.
+    // resolveTrapLocationId keeps this tab's previously saved id in that
+    // case, rather than overwriting a good value with null.
+    return resolveTrapLocationId({
+      resolvedId: trapLocationId,
+      trapLocationsLoaded: Boolean(
+        visitSetupDefaultsState?.trapLocations?.length
+      ),
+      existingId: tabId ? visitSetupState?.[tabId]?.values?.trapLocationId : null,
+    })
   }
 
   const shouldShowTrapNameField = (trapSite: string) => {

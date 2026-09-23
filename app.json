@@ -6,64 +6,12 @@
     "orientation": "portrait",
     "icon": "./assets/three_fish_app_icon.png",
     "userInterfaceStyle": "light",
-    "jsEngine": "hermes",
-    "plugins": [
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "Allow DataTackle to use your location."
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
-        }
-      ],
-      [
-        "expo-document-picker",
-        {
-          "iCloudContainerEnvironment": "Production"
-        }
-      ]
-    ],
-    "splash": {
-      "image": "./assets/fish_splash_screen_icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
     "assetBundlePatterns": [
       "**/*"
     ],
-    "ios": {
-      "supportsTablet": true,
-      "entitlements": {
-        "com.apple.developer.networking.wifi-info": true
-      },
-      "config": {
-        "usesNonExemptEncryption": false
-      },
-      "infoPlist": {
-        "UIBackgroundModes": [
-          "location",
-          "fetch",
-          "remote-notification"
-        ],
-        "NSLocationWhenInUseUsageDescription": "This app requires access to your location when open.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app requires access to your location even when closed.",
-        "NSLocationAlwaysUsageDescription": "This app requires access to your location when open.",
-        "deploymentTarget": "14"
-      }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      }
-    },
     "web": {
       "favicon": "./assets/favicon.png"
     }
