@@ -10,7 +10,11 @@ import { getVisitSetupDefaults } from '../visitSetupDefaults'
 import { removeDraftForTab } from '../formSlices/pendingVisitDraftsSlice'
 
 interface InitialStateI {
-  fetchStatus: 'initial-state' | 'fetch-pending' | 'fetch-failed' | 'fetch-successful'
+  fetchStatus:
+    | 'initial-state'
+    | 'fetch-pending'
+    | 'fetch-failed'
+    | 'fetch-successful'
   submissionStatus:
     | 'not-submitted'
     | 'submitting...'
@@ -151,16 +155,20 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           const errorDetail = response?.data?.detail
 
           if (errorDetail?.includes('already exists')) {
-            // Trap visit already on server from a previous partial submission —
+            // Trap visit already on server from a previous partial submission -
             // look up its server-assigned ID so we can still submit catch raw
-            const prevSubmission = state.trapVisitFormPostBundler.previousTrapVisitSubmissions
-              .find((t: any) => t.createdTrapVisitResponse?.trapVisitUid === uuid)
+            const prevSubmission =
+              state.trapVisitFormPostBundler.previousTrapVisitSubmissions.find(
+                (t: any) => t.createdTrapVisitResponse?.trapVisitUid === uuid
+              )
             trapId = prevSubmission?.createdTrapVisitResponse?.id ?? null
           } else {
-            // True failure — preserve both trap visit and catch raw for retry
+            // True failure - preserve both trap visit and catch raw for retry
             showSlideAlert(
               thunkAPI.dispatch,
-              generateErrorMessage(error.code || 'Error during trap visit submission'),
+              generateErrorMessage(
+                error.code || 'Error during trap visit submission'
+              ),
               'error',
               5000
             )
@@ -174,7 +182,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
 
         // Step 2: submit catch raw using resolved trapId
         if (trapId === null || linkedCatchRawSubmissions.length === 0) {
-          // No catch data to submit — the trap visit itself is fully synced,
+          // No catch data to submit - the trap visit itself is fully synced,
           // so any pending edit draft for it is no longer needed.
           if (trapId !== null) {
             thunkAPI.dispatch(removeDraftForTab(uuid))
@@ -205,11 +213,13 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           )
           showSlideAlert(
             thunkAPI.dispatch,
-            generateErrorMessage(catchError.code || 'Error during catch raw submission'),
+            generateErrorMessage(
+              catchError.code || 'Error during catch raw submission'
+            ),
             'error',
             5000
           )
-          // Trap visit succeeded but catch raw failed — preserve both for retry.
+          // Trap visit succeeded but catch raw failed - preserve both for retry.
           // On retry the trap visit will return "already exists" and we look up the
           // trapId from previousTrapVisitSubmissions (populated by the fulfilled reducer).
           payload.failedTrapVisitSubmissions.push(trapSubmission)
@@ -536,10 +546,7 @@ const getIndexOfDuplicateTrapVisit = ({
 
 export const catchRawQCDeletion = createAsyncThunk(
   'trapVisitPostBundler/catchRawQCDeletion',
-  async (
-    { catchRawId }: { catchRawId: number; userId: number },
-    thunkAPI
-  ) => {
+  async ({ catchRawId }: { catchRawId: number; userId: number }, thunkAPI) => {
     await api.delete(`catch-raw/${catchRawId}`)
     return catchRawId
   }
@@ -550,7 +557,7 @@ export const trapVisitPostBundler = createSlice({
   initialState: initialState,
   reducers: {
     saveTrapVisitSubmission: (state, action) => {
-      // Replace (not duplicate) any existing queued entry for this visit —
+      // Replace (not duplicate) any existing queued entry for this visit -
       // matters when resubmitting an edited pending draft.
       state.trapVisitSubmissions = state.trapVisitSubmissions.filter(
         (submission: any) =>
@@ -1048,7 +1055,6 @@ export const trapVisitPostBundler = createSlice({
       if (catchRawResponse.length) {
         state.previousCatchRawSubmissions.push(...catchRawResponse)
       }
-
     })
 
     builder.addCase(fetchPreviousTrapAndCatch.pending.type, state => {
@@ -1072,21 +1078,16 @@ export const trapVisitPostBundler = createSlice({
       }
     )
 
-    builder.addCase(
-      catchRawQCDeletion.fulfilled.type,
-      (state, action: any) => {
-        const catchRawId = action.payload
-        state.previousCatchRawSubmissions =
-          state.previousCatchRawSubmissions.filter(
-            (catchRaw: any) =>
-              catchRaw.createdCatchRawResponse.id !== catchRawId
-          )
-        state.qcCatchRawSubmissions = state.qcCatchRawSubmissions.filter(
-          (catchRaw: any) =>
-            catchRaw.createdCatchRawResponse.id !== catchRawId
+    builder.addCase(catchRawQCDeletion.fulfilled.type, (state, action: any) => {
+      const catchRawId = action.payload
+      state.previousCatchRawSubmissions =
+        state.previousCatchRawSubmissions.filter(
+          (catchRaw: any) => catchRaw.createdCatchRawResponse.id !== catchRawId
         )
-      }
-    )
+      state.qcCatchRawSubmissions = state.qcCatchRawSubmissions.filter(
+        (catchRaw: any) => catchRaw.createdCatchRawResponse.id !== catchRawId
+      )
+    })
   },
 })
 

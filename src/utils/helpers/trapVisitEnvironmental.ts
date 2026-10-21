@@ -1,5 +1,5 @@
 import { find, uniqBy } from 'lodash'
-// Leaf module on purpose — importing from ../utils would drag
+// Leaf module on purpose - importing from ../utils would drag
 // @react-navigation/native into a pure data-shaping helper.
 import { calcAvgValue } from './math'
 
@@ -15,12 +15,12 @@ import { calcAvgValue } from './math'
  *
  * 1. measureValueNumeric must be `null`, never `undefined`. The server drops
  *    rows where it is undefined (models/trapVisit/index.ts) with a 200 response
- *    — that is why a text/select value can look saved and not be.
+ *    - that is why a text/select value can look saved and not be.
  *
  * 2. ENVIRONMENTAL_FIELDS_TO_IGNORE must stay. `waterTurbidity` is seeded
  *    isEnvironmentalField: true, so without it we would emit both
  *    'water turbidity' (legacy, space-separated) and 'waterTurbidity'
- *    (camelCase) — and the dashboard's sanitizeFieldName maps BOTH to
+ *    (camelCase) - and the dashboard's sanitizeFieldName maps BOTH to
  *    `water_turbidity`, so they would silently collide last-wins.
  */
 
@@ -41,7 +41,7 @@ const TEXT_FIELD_TYPES = ['select', 'multi-select', 'radio', 'textarea']
  * True only for a genuinely absent value.
  *
  * The previous code tested truthiness (`values.x ? ... : undefined`), which
- * also caught 0 — and the server DROPS rows whose measureValueNumeric is
+ * also caught 0 - and the server DROPS rows whose measureValueNumeric is
  * undefined, silently, with a 200. So a recorded reading of 0 ("no flow")
  * vanished and became indistinguishable from "not measured".
  */
@@ -62,7 +62,7 @@ const toNumeric = (value: any) => {
 const toText = (value: any) => (isBlank(value) ? undefined : String(value))
 
 /**
- * The three legacy rows. Names are space-separated for backward compatibility —
+ * The three legacy rows. Names are space-separated for backward compatibility -
  * historical data uses them and the dashboard's sanitizeFieldName maps
  * 'water temperature' and 'waterTemperature' onto the same key either way.
  */
@@ -104,8 +104,8 @@ export const buildBaseEnvironmentalRows = (values: any) =>
 
 /**
  * One row per environmental form field the program has configured.
- * Multi-select values are comma-joined into a single row — NOT one row per
- * option — because the dashboard flattens by measureName into a single object
+ * Multi-select values are comma-joined into a single row - NOT one row per
+ * option - because the dashboard flattens by measureName into a single object
  * key, so duplicate names would overwrite each other.
  */
 export const buildDynamicEnvironmentalRows = (
@@ -219,7 +219,7 @@ const buildDerivedEnvironmentalRows = (
  * always read from Trap Operations specifically; environmental *form fields*
  * can live in either Trap Operations or Trap Post-Processing, so they need the
  * merged object. Feeding the merged object to the legacy rows lets a blank
- * post-processing field clobber a real operations reading — which is exactly
+ * post-processing field clobber a real operations reading - which is exactly
  * how a recorded turbidity of "1234" became the text "NaN".
  */
 export const buildTrapVisitEnvironmental = ({

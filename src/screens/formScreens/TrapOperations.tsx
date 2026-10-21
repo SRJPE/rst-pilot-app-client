@@ -47,6 +47,10 @@ import {
 } from '../../utils/utils'
 import { isCoreLegacyProgram } from '../../utils/helpers/coreLegacyProgram'
 import {
+  FieldSlot,
+  fieldHasSavedValue,
+} from '../../utils/helpers/mergeOrderedFields'
+import {
   TabStateI,
   setActiveTab,
 } from '../../redux/reducers/formSlices/tabSlice'
@@ -61,6 +65,11 @@ import TrapEndDateAndTime from '../../components/form/TrapEndDateAndTime'
 import RPMBefore from '../../components/form/RPMBefore'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useFormSave } from '../../context/FormSaveContext'
+import {
+  usePrefillFieldFromPreviousVisit,
+  useTotalRevolutionsAutoCalc,
+} from '../../utils/hooks/useCounterRevolutions'
+import { useRepairTrapLocationId } from '../../utils/hooks/useRepairTrapLocationId'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -87,6 +96,7 @@ const mapStateToProps = (state: RootState) => {
     visitSetupDefaults: state.visitSetupDefaults,
     previousTrapVisits:
       state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
+    trapPostProcessingStore: state.trapPostProcessing,
     conditionCode:
       (
         state.trapPostProcessing[state.tabSlice.activeTabId ?? 'placeholderId']
@@ -114,6 +124,7 @@ const TrapOperations = ({
   tabSlice,
   visitSetupDefaults,
   previousTrapVisits,
+  trapPostProcessingStore,
   conditionCode,
 }: {
   navigation: any
@@ -129,6 +140,7 @@ const TrapOperations = ({
   tabSlice: TabStateI
   visitSetupDefaults: any
   previousTrapVisits: any
+  trapPostProcessingStore: any
   conditionCode: string | null
 }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -136,6 +148,15 @@ const TrapOperations = ({
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
+
+  useRepairTrapLocationId({
+    activeTabId,
+    trapLocationId: selectedTrapLocationId,
+    trapName: selectedTrapName,
+    trapSite: selectedTrapSite,
+    trapLocations: visitSetupDefaults?.trapLocations,
+    dispatch,
+  })
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
@@ -211,7 +232,8 @@ const TrapOperations = ({
       setProgramFormFields(currentProgramInfo?.programFormFields)
       const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(
         sectionFields,
-        conditionCode
+        conditionCode,
+        isCoreLegacyProgram(currentProgramInfo)
       )
       setValidationSchema(dynamicTrapOpsSchema)
     } else {
@@ -227,6 +249,14 @@ const TrapOperations = ({
     visitSetupDefaults?.trapLocations,
     selectedTrapLocationId,
     conditionCode,
+    // Pre-existing bug: this effect reads selectedProgramId (via
+    // currentProgramInfo) but never re-ran when it changed on its own. On a
+    // cold rehydrate, selectedProgramId (from the persisted visitSetup slice)
+    // can resolve to its real value AFTER visitSetupDefaults.programs has
+    // already settled - the effect fired once against a stale/undefined
+    // selectedProgramId, found no matching program, and then never fired
+    // again, permanently stuck with programFormFields/sectionFields = null.
+    selectedProgramId,
   ])
 
   useEffect(() => {
@@ -381,7 +411,11 @@ const TrapOperations = ({
         dispatch(markStepCompleted({ propName: 'trapOperations' }))
       }
 
-      if (values.gearStatus === 'S' || values.conditionCode === '4' || conditionCode === '4') {
+      if (
+        values.gearStatus === 'S' ||
+        values.conditionCode === '4' ||
+        conditionCode === '4'
+      ) {
         dispatch(markStepCompleted({ propName: 'fishProcessing' }))
         dispatch(markStepCompleted({ propName: 'fishInput' }))
       }
@@ -685,6 +719,161 @@ const TrapOperations = ({
     ]
   )
 
+  /**
+   * The three environmental measurements this screen renders with bespoke
+   * widgets (unit toggle on temperature, warning thresholds on flow/temp).
+   *
+   * Handing them to ConditionalTrapVisitFields as slots - instead of
+   * rendering them above it - is what lets an admin's configured order
+   * actually position them. Previously the dynamic renderer discarded their
+   * config rows outright, so e.g. waterTemperature at order_index 0 (set for
+   * four programs) still rendered wherever this file happened to put it.
+   *
+   * Visibility gates are copied verbatim from the old inline JSX, including
+   * waterTurbidity's irregular recordTurbidityInPostProcessing condition.
+   * A program with no config keeps every slot visible via isCoreLegacyProgram
+   * / shouldRenderField's renderOnDefault, so its layout is unchanged.
+   */
+  const buildEnvironmentalSlots = ({
+    touched,
+    errors,
+    values,
+    initialValues,
+    handleChange,
+    handleBlur,
+    setFieldValue,
+    validationSchema,
+    warningResultFlow,
+    warningResultTemp,
+  }: {
+    touched: any
+    errors: any
+    values: any
+    // Stable snapshot from the persisted redux slice - only updated on
+    // navigation/save, unlike `values` which changes on every keystroke. Used
+    // ONLY for fieldHasSavedValue below; see that function's doc for why live
+    // `values` must never be used there (it previously made a field vanish
+    // the instant its input was backspaced to empty).
+    initialValues: any
+    handleChange: any
+    handleBlur: any
+    setFieldValue: any
+    validationSchema: any
+    warningResultFlow: boolean
+    warningResultTemp: boolean
+  }): FieldSlot[] => [
+    {
+      fieldName: 'flowMeasure',
+      fieldType: 'input',
+      width: '28%',
+      visible:
+        isCoreLegacyProgram(selectedProgramObj) ||
+        shouldRenderField({
+          fieldName: 'flowMeasure',
+          programFormFields,
+          sectionFields,
+        }) ||
+        fieldHasSavedValue(initialValues, 'flowMeasure'),
+      render: () => (
+        <FormInputComponent
+          showWarning={warningResultFlow}
+          label={'Flow Measure'}
+          placeholder='0'
+          touched={touched}
+          errors={errors}
+          value={values.flowMeasure || null}
+          camelName={'flowMeasure'}
+          onChangeText={handleChange('flowMeasure')}
+          onBlur={handleBlur('flowMeasure')}
+          RightElement={<TextInputAdornment text='cfs' />}
+          validationSchema={validationSchema}
+          keyboardType={'number-pad'}
+          inputRefs={inputRefs}
+          values={values}
+        />
+      ),
+    },
+    {
+      fieldName: 'waterTemperature',
+      fieldType: 'input',
+      width: '28%',
+      visible:
+        isCoreLegacyProgram(selectedProgramObj) ||
+        shouldRenderField({
+          fieldName: 'waterTemperature',
+          programFormFields,
+          sectionFields,
+        }) ||
+        fieldHasSavedValue(initialValues, 'waterTemperature'),
+      render: () => (
+        <FormInputComponent
+          key={`waterTemperature-${values.waterTemperatureUnit}`}
+          showWarning={warningResultTemp}
+          label={'Water Temperature'}
+          placeholder='0'
+          touched={touched}
+          errors={errors}
+          value={values.waterTemperature || null}
+          camelName={'waterTemperature'}
+          onChangeText={handleChange('waterTemperature')}
+          onBlur={handleBlur('waterTemperature')}
+          validationSchema={validationSchema}
+          keyboardType={'number-pad'}
+          inputRefs={inputRefs}
+          values={values}
+          RightElement={
+            <Button
+              bg='warmGray.200'
+              h={'full'}
+              w={50}
+              onPress={() => {
+                if (values.waterTemperatureUnit === '°C') {
+                  setFieldValue('waterTemperatureUnit', '°F')
+                } else {
+                  setFieldValue('waterTemperatureUnit', '°C')
+                }
+              }}
+            >
+              <Text>{values.waterTemperatureUnit}</Text>
+            </Button>
+          }
+        />
+      ),
+    },
+    {
+      fieldName: 'waterTurbidity',
+      fieldType: 'input',
+      width: '28%',
+      // The recordTurbidityInPostProcessing check is a deliberate UI mode
+      // switch (crew chose to record turbidity here vs. later), not a
+      // data-loading concern - fieldHasSavedValue only backstops the config
+      // lookup that follows it, never bypasses the toggle itself.
+      visible:
+        values.recordTurbidityInPostProcessing === false &&
+        Boolean(
+          isCoreLegacyProgram(selectedProgramObj) ||
+          !programFormFields?.length ||
+          find(programFormFields, { fieldName: 'waterTurbidity' }) ||
+          fieldHasSavedValue(initialValues, 'waterTurbidity')
+        ),
+      render: () => (
+        <FormInputComponent
+          label={'Turbidity'}
+          placeholder='0'
+          touched={touched}
+          errors={errors}
+          value={values.waterTurbidity}
+          camelName={'waterTurbidity'}
+          onChangeText={handleChange('waterTurbidity')}
+          onBlur={handleBlur('waterTurbidity')}
+          RightElement={<TextInputAdornment text='ntu' />}
+          validationSchema={validationSchema}
+          keyboardType={'number-pad'}
+        />
+      ),
+    },
+  ]
+
   const renderRPMBefore = ({
     touched,
     errors,
@@ -727,6 +916,10 @@ const TrapOperations = ({
 
   return (
     <Formik
+      // Forces a clean unmount/remount on every tab switch instead of
+      // relying on enableReinitialize to catch up after the fact - see the
+      // unmount-cleanup effect below for why.
+      key={activeTabId}
       validationSchema={validationSchema}
       enableReinitialize={true}
       validateOnMount={false}
@@ -761,7 +954,7 @@ const TrapOperations = ({
         touched,
         errors,
         values,
-        resetForm,
+        initialValues,
       }) => {
         resetNonExistentFields(values, setFieldValue)
 
@@ -883,12 +1076,39 @@ const TrapOperations = ({
           otherTabFormsValid,
         ])
 
+        // Formik is keyed by activeTabId (see below), so this render-prop
+        // instance only ever belongs to ONE tab for its whole lifetime -
+        // "switching tabs" means THIS instance unmounts and a fresh one
+        // mounts for the new tab, already initialized with that tab's own
+        // redux state (no reinit race to win). Saving the outgoing tab's
+        // values now happens from this unmount cleanup instead of a
+        // previouslyActiveTabId-watching effect: the old effect ran as a
+        // normal passive effect on every activeTabId change, in the same
+        // render pass as Formik's own enableReinitialize effect, so `values`
+        // and `activeTabId` could transiently disagree about which tab they
+        // belonged to - any save (this effect, or registerSaveHandler below)
+        // firing in that window could write one tab's values into another
+        // tab's redux slot. Refs (not the raw values/activeStep) are used
+        // here because a cleanup function's closure is fixed at mount time;
+        // reading `values`/`activeStep` directly would see this instance's
+        // FIRST values forever, not its latest.
+        const valuesRef = useRef(values)
         useEffect(() => {
-          if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
-            onSubmit(values, previouslyActiveTabId)
-            resetForm()
+          valuesRef.current = values
+        }, [values])
+
+        const activeStepRef = useRef(navigationSlice.activeStep)
+        useEffect(() => {
+          activeStepRef.current = navigationSlice.activeStep
+        }, [navigationSlice.activeStep])
+
+        useEffect(() => {
+          return () => {
+            if (activeStepRef.current === 2) {
+              onSubmit(valuesRef.current, activeTabId)
+            }
           }
-        }, [previouslyActiveTabId, activeTabId])
+        }, [])
 
         useEffect(() => {
           registerSaveHandler(() => onSubmit(values, activeTabId))
@@ -956,6 +1176,25 @@ const TrapOperations = ({
             )
           }
         }, [mostRecentTrapVisit, mostRecentTrapVisit])
+
+        usePrefillFieldFromPreviousVisit({
+          fieldName: 'counterStart',
+          sourceMeasureName: 'counterEnd',
+          sectionFields,
+          activePage,
+          values,
+          setFieldValue,
+          mostRecentTrapVisit,
+        })
+
+        useTotalRevolutionsAutoCalc({
+          sectionFields,
+          activePage,
+          values,
+          setFieldValue,
+          otherScreenValues:
+            trapPostProcessingStore?.[activeTabId ?? 'placeholderId']?.values,
+        })
 
         const handleTurbidityToggle = (newValue: boolean) => {
           if (newValue === true) {
@@ -1172,117 +1411,6 @@ const TrapOperations = ({
                         <Heading>Environmental Conditions</Heading>
                       </HStack>
 
-                      <HStack space={5} flex={'wrap'}>
-                        {(isCoreLegacyProgram(selectedProgramObj) ||
-                          shouldRenderField({
-                            fieldName: 'flowMeasure',
-                            programFormFields,
-                            sectionFields,
-                          })) && (
-                          <Box
-                            flexBasis={'28%'}
-                            minWidth={'28%'}
-                            maxWidth={'28%'}
-                          >
-                            <FormInputComponent
-                              showWarning={warningResultFlow}
-                              label={'Flow Measure'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.flowMeasure || null}
-                              camelName={'flowMeasure'}
-                              onChangeText={handleChange('flowMeasure')}
-                              onBlur={handleBlur('flowMeasure')}
-                              RightElement={<TextInputAdornment text='cfs' />}
-                              validationSchema={validationSchema}
-                              keyboardType={'number-pad'}
-                              inputRefs={inputRefs}
-                              values={values}
-                            />
-                          </Box>
-                        )}
-
-                        {(isCoreLegacyProgram(selectedProgramObj) ||
-                          shouldRenderField({
-                            fieldName: 'waterTemperature',
-                            programFormFields,
-                            sectionFields,
-                          })) && (
-                          <Box
-                            flexBasis={'28%'}
-                            minWidth={'28%'}
-                            maxWidth={'28%'}
-                          >
-                            <FormInputComponent
-                              key={`waterTemperature-${values.waterTemperatureUnit}`}
-                              showWarning={warningResultTemp}
-                              label={'Water Temperature'}
-                              placeholder='0'
-                              touched={touched}
-                              errors={errors}
-                              value={values.waterTemperature || null}
-                              camelName={'waterTemperature'}
-                              onChangeText={handleChange('waterTemperature')}
-                              onBlur={handleBlur('waterTemperature')}
-                              validationSchema={validationSchema}
-                              keyboardType={'number-pad'}
-                              inputRefs={inputRefs}
-                              values={values}
-                              RightElement={
-                                <Button
-                                  bg='warmGray.200'
-                                  h={'full'}
-                                  w={50}
-                                  onPress={() => {
-                                    if (values.waterTemperatureUnit === '°C') {
-                                      setFieldValue(
-                                        'waterTemperatureUnit',
-                                        '°F'
-                                      )
-                                    } else {
-                                      setFieldValue(
-                                        'waterTemperatureUnit',
-                                        '°C'
-                                      )
-                                    }
-                                  }}
-                                >
-                                  <Text>{values.waterTemperatureUnit}</Text>
-                                </Button>
-                              }
-                            />
-                          </Box>
-                        )}
-
-                        {values.recordTurbidityInPostProcessing === false &&
-                          (isCoreLegacyProgram(selectedProgramObj) ||
-                            !programFormFields?.length ||
-                            find(programFormFields, {
-                              fieldName: 'waterTurbidity',
-                            })) && (
-                            <Box
-                              flexBasis={'28%'}
-                              minWidth={'28%'}
-                              maxWidth={'28%'}
-                            >
-                              <FormInputComponent
-                                label={'Turbidity'}
-                                placeholder='0'
-                                touched={touched}
-                                errors={errors}
-                                value={values.waterTurbidity}
-                                camelName={'waterTurbidity'}
-                                onChangeText={handleChange('waterTurbidity')}
-                                onBlur={handleBlur('waterTurbidity')}
-                                RightElement={<TextInputAdornment text='ntu' />}
-                                validationSchema={validationSchema}
-                                keyboardType={'number-pad'}
-                              />
-                            </Box>
-                          )}
-                      </HStack>
-
                       {(isCoreLegacyProgram(selectedProgramObj) ||
                         !selectedProgramObj?.programFormFields?.length ||
                         find(selectedProgramObj?.programFormFields, {
@@ -1330,6 +1458,23 @@ const TrapOperations = ({
                         activeTabId={activeTabId}
                         validationSchema={validationSchema}
                         inputRefs={inputRefs}
+                        slots={buildEnvironmentalSlots({
+                          touched,
+                          errors,
+                          values,
+                          initialValues,
+                          handleChange,
+                          handleBlur,
+                          setFieldValue,
+                          validationSchema,
+                          warningResultFlow,
+                          warningResultTemp,
+                        })}
+                        // rpmBefore renders above the "Environmental
+                        // Conditions" heading, outside this grid, so it has no
+                        // slot and would otherwise render twice for programs
+                        // that configure it.
+                        suppressedFieldNames={['rpmBefore']}
                       />
                       {allTabIds.length > 1 && (
                         <CopyFormValuesDialog

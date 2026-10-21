@@ -1,13 +1,6 @@
 import React, { JSX, memo } from 'react'
 
-import {
-  Modal as PaperModal,
-  Portal,
-  Text,
-  Button,
-  Provider,
-} from 'react-native-paper'
-import { Animated } from 'react-native'
+import { Animated, Modal as RNModal, Pressable, View } from 'react-native'
 
 interface ModalPropsI {
   isOpen: boolean
@@ -37,43 +30,47 @@ interface ModalPropsI {
 
 const CustomModal = (props: ModalPropsI) => {
   return (
-    <>
-      <Portal>
-        <PaperModal
-          visible={props.isOpen}
-          onDismiss={props.closeModal}
-          dismissable={true}
-          contentContainerStyle={{
-            backgroundColor: 'white',
-            height: props.height ? props.height : '100%',
-            width: props.width ? props.width : '100%',
-            justifyContent: 'flex-start',
-            // alignItems: 'center',
-            alignSelf: 'center',
-            // display: 'flex',
-            ...props.style,
+    <RNModal
+      visible={props.isOpen}
+      onRequestClose={props.closeModal}
+      transparent
+      animationType='fade'
+      statusBarTranslucent
+    >
+      <View style={{ flex: 1 }}>
+        <Pressable
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          }}
+          onPress={props.closeModal}
+        />
+        <View
+          pointerEvents='box-none'
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
-          {props.children}
-        </PaperModal>
-      </Portal>
-      {/* <Modal
-        useRNModal={true}
-        isOpen={props.isOpen}
-        onClose={props.closeModal}
-        avoidKeyboard
-        closeOnOverlayClick={false}
-        size={'full'}
-        // h={props.height ? props.height : 'full'}
-        style={
-          props.style
-            ? props.style
-            : { marginBottom: 0, marginTop: 'auto', height: '100%' }
-        }
-      >
-        <ModalContent>{props.children}</ModalContent>
-      </Modal> */}
-    </>
+          <View
+            style={{
+              backgroundColor: 'white',
+              height: props.height ? props.height : '100%',
+              width: props.width ? props.width : '100%',
+              justifyContent: 'flex-start',
+              ...props.style,
+            }}
+          >
+            {props.children}
+          </View>
+        </View>
+      </View>
+    </RNModal>
   )
 }
 

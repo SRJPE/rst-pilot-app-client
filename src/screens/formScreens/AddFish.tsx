@@ -139,7 +139,7 @@ const AddFishContent = ({
 
   useEffect(() => {
     if (!isFocused) {
-      console.log('🧹 Screen blurred — clearing form')
+      console.log('🧹 Screen blurred - clearing form')
       setFishMeasureMetModalOpen(false)
       setProtocolKeyMet(null)
       resetFormState('other')

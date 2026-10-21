@@ -55,6 +55,20 @@ export const visitSetupSlice = createSlice({
       const { tabId, tabState } = action.payload
       state[tabId] = tabState
     },
+    /**
+     * Self-heal for a `trapLocationId` baked in as null by a loading race in
+     * VisitSetup.tsx (see deriveTrapLocationId.ts / resolveTrapLocationId.ts),
+     * discovered because it also silently dropped equipment-scoped dynamic
+     * fields on Trap Operations/Trap Post-Processing. Only patches the one
+     * field - unlike saveVisitSetup, it doesn't touch completed/isPaperEntry
+     * or require the full values object.
+     */
+    repairTrapLocationId: (state, action) => {
+      const { tabId, trapLocationId } = action.payload
+      if (state[tabId]) {
+        state[tabId].values.trapLocationId = trapLocationId
+      }
+    },
   },
 })
 
@@ -64,6 +78,7 @@ export const {
   markVisitSetupCompleted,
   markTrapVisitPaperEntry,
   restoreTabState,
+  repairTrapLocationId,
 } = visitSetupSlice.actions
 
 export default visitSetupSlice.reducer

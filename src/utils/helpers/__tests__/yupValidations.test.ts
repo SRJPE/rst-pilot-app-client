@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { getValidator } from '../yupValidations'
 
-describe('getValidator — input field threshold enforcement', () => {
+describe('getValidator - input field threshold enforcement', () => {
   it('enforces min/max threshold for a numeric input field even when inputType is not set', () => {
     // Mirrors real form_field rows (e.g. shrCode/shrkCode) and every
     // dashboard-created custom field: fieldType 'input' with a configured

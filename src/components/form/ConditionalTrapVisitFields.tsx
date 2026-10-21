@@ -1,4 +1,4 @@
-import React, { act, useEffect, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Text, HStack, Box, Link, VStack, View, FormControl } from 'native-base'
 import {
   Radio,
@@ -22,6 +22,12 @@ import {
 } from '../../utils/utils'
 import RiverDepth from './RiverDepth'
 import SecchiInput from './SecchiInput'
+import {
+  mergeOrderedFields,
+  isLastInput,
+  FieldSlot,
+  OrderedEntry,
+} from '../../utils/helpers/mergeOrderedFields'
 
 interface FieldInterface {
   id: number
@@ -66,6 +72,8 @@ const ConditionalTrapVisitFields = ({
   onOpenCallback,
   visitSetupState,
   visitSetupDefaultsState,
+  slots = [],
+  suppressedFieldNames = [],
 }: {
   touched: any
   errors: any
@@ -84,57 +92,77 @@ const ConditionalTrapVisitFields = ({
   onOpenCallback?: () => void
   visitSetupState?: any
   visitSetupDefaultsState?: any
+  /**
+   * Fields the screen renders with its own bespoke widget. Passing them in
+   * (rather than the screen rendering them itself, above this block) is what
+   * lets a hardcoded field take its admin-configured position. The screen
+   * builds these so each renderer keeps closing over its own local state.
+   */
+  slots?: FieldSlot[]
+  /**
+   * Field names the screen still renders itself OUTSIDE this grid (e.g. above
+   * a section heading). They have no slot, so without this they'd render
+   * twice - once in their hardcoded spot, once via the generic branch below.
+   * Prefer converting a field to a slot; this is for ones whose position
+   * can't move yet.
+   */
+  suppressedFieldNames?: string[]
 }) => {
-  const [sortedFormFields, setSortedFormFields] = useState<
-    Array<FieldInterface>
-  >([])
   const [showLogSheet, setShowLogSheet] = useState(false)
 
   const handleLogSheetState = () => {
     setShowLogSheet(!showLogSheet)
   }
 
-  useEffect(() => {
-    if (formFields) {
-      const sortedFields = [...formFields].sort(
-        (a, b) => a.orderIndex - b.orderIndex
-      )
-      setSortedFormFields(sortedFields)
-    }
-  }, [formFields])
+  const merged = useMemo(
+    () => mergeOrderedFields({ configured: formFields ?? [], slots }),
+    [formFields, slots]
+  )
 
-  const renderFieldComponent = (item: FieldInterface, index: number) => {
-    const isLast = index === formFields.length - 1
+  /**
+   * FormInputComponent finds the next field to focus with
+   * `formFields.find(f => f.orderIndex === orderIndex + 1 && f.fieldType === 'input')`.
+   * Feed it the merged list re-keyed onto dense positions so "next" walks
+   * slots too, instead of skipping straight past them.
+   */
+  const focusList = useMemo(
+    () =>
+      merged.map(e => ({
+        fieldName: e.fieldName,
+        fieldType: e.fieldType,
+        orderIndex: e.position,
+      })),
+    [merged]
+  )
+
+  const renderEntry = (entry: OrderedEntry) => {
+    const isLast = isLastInput(merged, entry.position)
+
+    // A field the screen renders itself. The walker owns the grid wrapper so
+    // slot and config fields flow through the same layout; the slot returns
+    // only its inner control.
+    if (entry.kind === 'slot' && entry.slot) {
+      const { width, fieldName: slotName } = entry.slot
+      return (
+        <Box
+          key={slotName}
+          flexBasis={width}
+          minWidth={width}
+          maxWidth={width}
+          mr={8}
+        >
+          {entry.slot.render()}
+        </Box>
+      )
+    }
+
+    const item = entry.field as FieldInterface
+    if (!item) return null
 
     const { fieldName, displayName, unitDefinition, fieldType } = item
     const unitAbbrev = unitDefinition?.match(/\(([^)]+)\)/)?.[1] || undefined
 
-    // exisitng built in fields. prevents duplicate fields from being rendered
-    if (
-      activePage === 'Trap Post-Processing' &&
-      [
-        'debrisVolume',
-        'totalRevolutions',
-        'rpmAfter',
-        'counterStart',
-        'counterEnd',
-        'endingTrapStatus',
-      ].includes(fieldName)
-    ) {
-      return null
-    }
-
-    if (
-      activePage === 'Trap Operations' &&
-      [
-        'waterTemperature',
-        'waterTurbidity',
-        'flowMeasure',
-        'rpmBefore',
-      ].includes(fieldName)
-    ) {
-      return null
-    }
+    if (suppressedFieldNames.includes(fieldName)) return null
 
     if (
       defaultValues[fieldName] !== undefined &&
@@ -147,7 +175,7 @@ const ConditionalTrapVisitFields = ({
       return (
         <>
           <Box
-            key={index} // Always add a key when mapping
+            key={fieldName} // Stable across reorders; index would remount inputs
             flexBasis='45%' // Ensures 3 items per row (adjust for spacing)
             minWidth='45%' // Prevents shrinking too much
             maxWidth='45%' // Prevents growing beyond this size>
@@ -323,7 +351,7 @@ const ConditionalTrapVisitFields = ({
       return (
         <>
           <Box
-            key={index} // Always add a key when mapping
+            key={fieldName} // Stable across reorders; index would remount inputs
             flexBasis='100%' // Ensures 3 items per row (adjust for spacing)
             minWidth='100%' // Prevents shrinking too much
             maxWidth='100%' // Prevents growing beyond this size>
@@ -355,7 +383,13 @@ const ConditionalTrapVisitFields = ({
     }
     if (fieldName === 'secchi' && fieldType === 'input') {
       return (
-        <Box key={index} flexBasis='28%' minWidth='28%' maxWidth='28%' mr={8}>
+        <Box
+          key={fieldName}
+          flexBasis='28%'
+          minWidth='28%'
+          maxWidth='28%'
+          mr={8}
+        >
           <SecchiInput
             value={values[fieldName]}
             onChangeValue={val => {
@@ -381,7 +415,7 @@ const ConditionalTrapVisitFields = ({
       }
       return (
         <Box
-          key={index} // Always add a key when mapping
+          key={fieldName} // Stable across reorders; index would remount inputs
           flexBasis={inputWidth} // Ensures 3 items per row (adjust for spacing)
           minWidth={inputWidth} // Prevents shrinking too much
           maxWidth={inputWidth} // Prevents growing beyond this size>
@@ -400,8 +434,8 @@ const ConditionalTrapVisitFields = ({
             keyboardType={'number-pad'}
             inputRefs={inputRefs}
             isLast={isLast}
-            formFields={sortedFormFields}
-            orderIndex={item.orderIndex}
+            formFields={focusList}
+            orderIndex={entry.position}
             RightElement={
               unitAbbrev ? <TextInputAdornment text={unitAbbrev} /> : undefined
             }
@@ -411,7 +445,7 @@ const ConditionalTrapVisitFields = ({
     } else if (fieldType === 'select') {
       return (
         <Box
-          key={index} // Always add a key when mapping
+          key={fieldName} // Stable across reorders; index would remount inputs
           flexBasis='45%' // Ensures 3 items per row (adjust for spacing)
           minWidth='45%' // Prevents shrinking too much
           maxWidth='45%' // Prevents growing beyond this size>
@@ -435,7 +469,7 @@ const ConditionalTrapVisitFields = ({
     } else if (fieldType === 'radio') {
       return (
         <Box
-          key={index} // Always add a key when mapping
+          key={fieldName} // Stable across reorders; index would remount inputs
           flexBasis='100%' // Ensures 3 items per row (adjust for spacing)
           minWidth='100%' // Prevents shrinking too much
           maxWidth='100%' // Prevents growing beyond this size>
@@ -516,12 +550,12 @@ const ConditionalTrapVisitFields = ({
 
   return (
     <>
-      {formFields?.length > 0 && (
-        <HStack flexWrap={'wrap'}>
-          {sortedFormFields.map((item, index) =>
-            renderFieldComponent(item, index)
-          )}
-        </HStack>
+      {/* Gate on the MERGED list, not formFields. A program with zero
+          program_fields rows (Mill, Deer, Feather, Yuba) has an empty
+          formFields but a full set of slots - gating on formFields here would
+          render nothing at all for them. */}
+      {merged.length > 0 && (
+        <HStack flexWrap={'wrap'}>{merged.map(renderEntry)}</HStack>
       )}
     </>
   )

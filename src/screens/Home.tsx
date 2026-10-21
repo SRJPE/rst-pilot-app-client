@@ -84,7 +84,7 @@ const Home = ({
 
   const connectivityState = useSelector((state: any) => state.connectivity)
   // redux-persist injects a `_persist` metadata key alongside real tabId keys
-  // on this slice's bare { [tabId]: draft } state — filter it out.
+  // on this slice's bare { [tabId]: draft } state - filter it out.
   const pendingVisitDrafts = useSelector((state: RootState) =>
     Object.entries(state.pendingVisitDrafts || {}).filter(
       ([tabId]) => tabId !== '_persist'

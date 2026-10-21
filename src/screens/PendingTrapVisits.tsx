@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Button,
@@ -10,6 +10,8 @@ import {
 } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../redux/store'
+import CustomModal from '../components/Shared/CustomModal'
+import ConfirmationModalContent from '../components/Shared/ConfirmationModalContent'
 import {
   PendingVisitDraftI,
   removeDraftForTab,
@@ -40,14 +42,18 @@ const PendingTrapVisits = ({
   pendingVisitDraftsState: { [tabId: string]: PendingVisitDraftI }
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+  const [discardTarget, setDiscardTarget] = useState<PendingVisitDraftI | null>(
+    null
+  )
   // redux-persist injects a `_persist` metadata key at the top level of this
-  // slice's state (since it's a bare { [tabId]: draft } map with no wrapper) —
+  // slice's state (since it's a bare { [tabId]: draft } map with no wrapper) -
   // filter it out so it's never mistaken for a real draft.
   const drafts = Object.entries(pendingVisitDraftsState || {})
     .filter(([tabId]) => tabId !== '_persist')
     .map(([, draft]) => draft as PendingVisitDraftI)
     .sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     )
 
   const handleResume = (draft: PendingVisitDraftI) => {
@@ -101,7 +107,7 @@ const PendingTrapVisits = ({
       )
     }
 
-    // The visit was already deemed submit-ready once — mark the wizard's
+    // The visit was already deemed submit-ready once - mark the wizard's
     // first 5 steps complete and land on Incomplete Sections, matching the
     // review-screen state it was in right before it was originally submitted.
     ;[
@@ -121,6 +127,7 @@ const PendingTrapVisits = ({
 
   const handleDiscard = (tabId: string) => {
     dispatch(removeDraftForTab(tabId))
+    setDiscardTarget(null)
   }
 
   return (
@@ -128,8 +135,8 @@ const PendingTrapVisits = ({
       <Heading mb='2'>Pending Trap Visits</Heading>
       <Text mb='4' color='gray.600'>
         Trap visits that haven't been uploaded to the database yet - saved
-        locally while offline, or a submission that failed. Resume one to
-        review, fix, and resave it.
+        locally while offline, or a submission that failed. Edit to review, fix,
+        and resave it.
       </Text>
       {drafts.length === 0 && (
         <Text color='gray.500'>No pending trap visits.</Text>
@@ -156,20 +163,36 @@ const PendingTrapVisits = ({
                 </Text>
               </VStack>
               <HStack space={3}>
-                <Button
-                  bg='gray.400'
-                  onPress={() => handleDiscard(draft.tabId)}
-                >
-                  <Text color='white'>Discard</Text>
-                </Button>
                 <Button bg='primary' onPress={() => handleResume(draft)}>
-                  <Text color='white'>Resume</Text>
+                  <Text color='white'>Edit</Text>
+                </Button>
+                <Button bg='error' onPress={() => setDiscardTarget(draft)}>
+                  <Text color='white'>Discard</Text>
                 </Button>
               </HStack>
             </HStack>
           </Box>
         ))}
       </VStack>
+      {discardTarget && (
+        <CustomModal
+          isOpen={!!discardTarget}
+          closeModal={() => setDiscardTarget(null)}
+          height={200}
+          width={525}
+          style={{ borderRadius: 5 }}
+        >
+          <ConfirmationModalContent
+            modalHeader='Discard Pending Trap Visit?'
+            modalText={`This will permanently delete the locally saved data for ${
+              discardTarget.tabName || discardTarget.trapSite
+            }. This cannot be undone.`}
+            confirmButtonLabel='Discard'
+            handlePressCancel={() => setDiscardTarget(null)}
+            handlePressConfirm={() => handleDiscard(discardTarget.tabId)}
+          />
+        </CustomModal>
+      )}
     </ScrollView>
   )
 }

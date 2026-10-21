@@ -32,6 +32,7 @@ import {
 } from '../../utils/utils'
 import { buildTrapVisitEnvironmentalForProgram } from '../../utils/helpers/trapVisitEnvironmental'
 import { saveDraftForTab } from '../../redux/reducers/formSlices/pendingVisitDraftsSlice'
+import { resolveSubmissionTrapLocationId } from '../../utils/helpers/deriveTrapLocationId'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -222,7 +223,12 @@ const StartedTrapping = ({
         }),
         programId: visitSetupState?.[id]?.values.programId,
         visitTypeId: null,
-        trapLocationId: visitSetupState?.[id]?.values.trapLocationId,
+        trapLocationId: resolveSubmissionTrapLocationId({
+          storedTrapLocationId: visitSetupState?.[id]?.values.trapLocationId,
+          trapName: visitSetupState?.[id]?.values.trapName,
+          trapSite: visitSetupState?.[id]?.values.trapSite,
+          trapLocations: visitSetupDefaultState?.trapLocations,
+        }),
         isPaperEntry: visitSetupState?.[id].isPaperEntry,
         trapVisitTimeStart:
           trapOperationsState?.[id]?.values.trapVisitStopTime || new Date(), // time from trap operations will BE START TIME bc they are restarting the trap
@@ -252,9 +258,14 @@ const StartedTrapping = ({
         trapStatusAtEnd: returnNullableTableId(
           trapStatusAtEndValues.indexOf('restart trap')
         ),
-        totalRevolutions: trapPostProcessingState?.[id]?.values.totalRevolutions
-          ? parseFloat(trapPostProcessingState?.[id]?.values.totalRevolutions)
-          : null,
+        totalRevolutions:
+          (trapPostProcessingState?.[id]?.values.totalRevolutions ??
+          trapOperationsState?.[id]?.values.totalRevolutions)
+            ? parseFloat(
+                trapPostProcessingState?.[id]?.values.totalRevolutions ??
+                  trapOperationsState?.[id]?.values.totalRevolutions
+              )
+            : null,
         rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
         trapVisitEnvironmental: buildTrapVisitEnvironmentalForProgram({
           // Merged, so environmental fields configured in either section resolve.
@@ -264,7 +275,7 @@ const StartedTrapping = ({
             waterTurbidityIsPresent,
           },
           // The three legacy rows read from Trap Operations only, as they
-          // always have — a blank post-processing field must not overwrite a
+          // always have - a blank post-processing field must not overwrite a
           // real operations reading.
           baseValues: {
             ...(trapOperationsState?.[id]?.values ?? {}),

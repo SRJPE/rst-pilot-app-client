@@ -54,6 +54,8 @@ import { InferType } from 'yup'
 import { resetFishInputSlice } from '@/src/redux/reducers/formSlices/fishInputSlice'
 import { resetBatchCountSlice } from '@/src/redux/reducers/formSlices/batchCountSlice'
 import { useFormSave } from '../../context/FormSaveContext'
+import { resolveTrapLocationId } from '../../utils/helpers/resolveTrapLocationId'
+import { deriveTrapLocationId } from '../../utils/helpers/deriveTrapLocationId'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -228,6 +230,7 @@ const VisitSetup = ({
                 trapLocationId: getTrapLocationId({
                   trapName,
                   trapSite: values.trapSite,
+                  tabId: newTabId,
                 }),
               },
               isPaperEntry,
@@ -257,6 +260,7 @@ const VisitSetup = ({
               ...payload,
               trapLocationId: getTrapLocationId({
                 trapSite: values.trapSite,
+                tabId: newTabId,
               }),
             },
           })
@@ -313,8 +317,18 @@ const VisitSetup = ({
               tabId,
               values: {
                 ...payload,
+                // This tab now represents the whole site, not a single
+                // named trap - values.trapName is still the stale full
+                // array of every previously-selected trap name at this
+                // point, so it must be cleared (matching the "no trapName
+                // field" branch above) rather than stored as-is. Passing
+                // that array into getTrapLocationId as `trapName` would
+                // also fail to match any real trap location (it expects a
+                // single string), so resolve by trapSite alone too.
+                trapName: undefined,
                 trapLocationId: getTrapLocationId({
-                  trapName: values.trapName,
+                  trapSite: values.trapSite,
+                  tabId,
                 }),
               },
               isPaperEntry,
@@ -323,7 +337,7 @@ const VisitSetup = ({
           dispatch(
             createTab({
               tabId,
-              tabName: values.trapName ?? values.trapSite,
+              tabName: values.trapSite,
               trapSite: values.trapSite,
             })
           )
@@ -359,7 +373,17 @@ const VisitSetup = ({
                   tabId: tabIdToUpdate,
                   values: {
                     ...payload,
-                    trapLocationId: getTrapLocationId({ trapName }),
+                    // payload.trapName is the full array of every selected
+                    // trap name - must be re-narrowed to this tab's own
+                    // trapName (as the brand-new-tabs branch above already
+                    // does), or every tab in a multi-trap visit ends up
+                    // storing the same full array and reading each other's
+                    // trap name.
+                    trapName,
+                    trapLocationId: getTrapLocationId({
+                      trapName,
+                      tabId: tabIdToUpdate,
+                    }),
                   },
                   isPaperEntry,
                 })
@@ -380,7 +404,10 @@ const VisitSetup = ({
                 tabId,
                 values: {
                   ...payload,
-                  trapLocationId: getTrapLocationId({ trapName }),
+                  // Same re-narrowing as above - without this, this new
+                  // tab's stored trapName is the full multi-trap array.
+                  trapName,
+                  trapLocationId: getTrapLocationId({ trapName, tabId }),
                 },
                 isPaperEntry,
               })
@@ -417,8 +444,8 @@ const VisitSetup = ({
               ...payload,
               trapLocationId: getTrapLocationId(
                 values.trapName
-                  ? { trapName: values.trapName }
-                  : { trapSite: values.trapSite }
+                  ? { trapName: values.trapName, tabId }
+                  : { trapSite: values.trapSite, tabId }
               ),
             },
             isPaperEntry,
@@ -463,47 +490,45 @@ const VisitSetup = ({
   const getTrapLocationId = ({
     trapSite,
     trapName,
+    tabId,
   }: {
     trapSite?: string
     trapName?: string
+    // The tab this resolved id will be saved onto, if it already exists.
+    // Used ONLY as a safety-net fallback below - see the comment there.
+    tabId?: string | null
   }) => {
-    let trapLocationId = null
+    const trapLocationId = deriveTrapLocationId({
+      trapLocations: visitSetupDefaultsState?.trapLocations,
+      trapName,
+      trapSite,
+    })
 
-    if (trapName) {
-      const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
-        (obj: any) => obj.trapName === trapName
-      )
-      if (trapLocations.length === 1) {
-        trapLocationId = trapLocations[0].id
-      }
-
-      if (trapLocationId === null) {
-        const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
-          (obj: any) => obj.trapSite === trapName
-        )
-        if (trapLocations.length === 1) {
-          trapLocationId = trapLocations[0].id
-        }
-      }
-    }
-
-    if (trapSite) {
-      const trapLocations = visitSetupDefaultsState?.trapLocations?.filter(
-        (obj: any) => obj.siteName === trapSite
-      )
-      if (trapLocations.length === 1) {
-        trapLocationId = trapLocations[0].id
-      } else if (!trapLocations.length) {
-        const trapLocationsAlt = visitSetupDefaultsState?.trapLocations?.filter(
-          (obj: any) => obj.siteName === trapName
-        )
-        if (trapLocationsAlt.length === 1) {
-          trapLocationId = trapLocationsAlt[0].id
-        }
-      }
-    }
-
-    return trapLocationId
+    // trap_location_id is NOT NULL on the server, and once a null gets saved
+    // here it's picked up verbatim by IncompleteSections.tsx's final
+    // submission builder - so a null baked in at this step means every
+    // subsequent submit/retry of that trap visit 400s forever with no
+    // self-healing. Confirmed in production logs and a captured payload: a
+    // fully-filled-out trap visit (real environmental readings, trap
+    // operations data, comments) submitted with trapLocationId: null.
+    //
+    // The lookups above resolve a name/site against
+    // visitSetupDefaultsState.trapLocations, which is fetched over the
+    // network (Home.tsx / SignIn.tsx dispatch getVisitSetupDefaults) and can
+    // still be empty for a moment right after an app reload - the crew's
+    // trapName/trapSite selection persisted fine, but the reference table to
+    // translate it into an id hadn't loaded yet when they hit Next.
+    // resolveTrapLocationId keeps this tab's previously saved id in that
+    // case, rather than overwriting a good value with null.
+    return resolveTrapLocationId({
+      resolvedId: trapLocationId,
+      trapLocationsLoaded: Boolean(
+        visitSetupDefaultsState?.trapLocations?.length
+      ),
+      existingId: tabId
+        ? visitSetupState?.[tabId]?.values?.trapLocationId
+        : null,
+    })
   }
 
   const shouldShowTrapNameField = (trapSite: string) => {
@@ -558,10 +583,23 @@ const VisitSetup = ({
     let trapLocation = null
     let trapLocationDefinition = null
     if (showTrapNameField) {
-      if (values.trapName?.length > 1) {
+      // values.trapName is normally the multi-select's own array value, but
+      // on the very first render after loading/restoring a tab it comes
+      // straight from redux instead - which stores a single tab's trapName
+      // as a plain string, not a 1-element array (the effect below that
+      // normalizes it into an array hasn't run yet on this first render).
+      // Without this, a string here falls through to `.forEach`/`[0]`
+      // below as if it were an array - `.forEach` doesn't exist on a
+      // string (crashes), and `[0]` silently returns its first CHARACTER.
+      const trapNames: string[] = Array.isArray(values.trapName)
+        ? values.trapName
+        : values.trapName
+          ? [values.trapName]
+          : []
+      if (trapNames.length > 1) {
         let trapLocations = [] as any
         // for each trapName, find the corresponding trapLocation
-        values.trapName.forEach((name: string) => {
+        trapNames.forEach((name: string) => {
           const location = selectedProgramObj?.trappingSites?.find(
             (obj: any) => obj.trapName === name
           )
@@ -577,7 +615,7 @@ const VisitSetup = ({
           : ''
       } else {
         trapLocation = selectedProgramObj?.trappingSites?.find(
-          (obj: any) => obj.trapName === values.trapName[0]
+          (obj: any) => obj.trapName === trapNames[0]
         )
         trapLocationDefinition = trapLocation?.definition
       }
@@ -632,6 +670,16 @@ const VisitSetup = ({
 
   return (
     <Formik
+      // Forces a clean unmount/remount on every tab switch instead of
+      // relying on enableReinitialize to catch up after the fact. Without
+      // this, the effect below (watching [previouslyActiveTabId,
+      // activeTabId]) can run on the very first render after switching
+      // tabs, while `values` is still the OUTGOING tab's stale data - it
+      // then derives selectedProgramId/crew/trapSite for the newly-active
+      // tab from the wrong tab's trapLocationId. See the matching fix (and
+      // comment) in TrapOperations.tsx/FishProcessing.tsx/
+      // TrapPostProcessing.tsx for the full race-condition writeup.
+      key={tabSlice?.activeTabId}
       validationSchema={validationSchema}
       enableReinitialize={true}
       initialValues={
