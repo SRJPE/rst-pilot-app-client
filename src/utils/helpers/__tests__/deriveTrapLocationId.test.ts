@@ -11,9 +11,7 @@ const trapLocations = [
 
 describe('deriveTrapLocationId', () => {
   it('matches on trapName', () => {
-    expect(
-      deriveTrapLocationId({ trapLocations, trapName: 'RBDD-1' })
-    ).toBe(1)
+    expect(deriveTrapLocationId({ trapLocations, trapName: 'RBDD-1' })).toBe(1)
   })
 
   it('matches on siteName via trapSite', () => {
@@ -44,7 +42,7 @@ describe('resolveSubmissionTrapLocationId', () => {
   it('self-heals a null stored id once trapLocations has loaded by save time', () => {
     // The exact production scenario this fixes: VisitSetup.tsx baked in a
     // null trapLocationId during a loading race, but by the time the crew
-    // reaches Save the reference list has since loaded — re-derive from the
+    // reaches Save the reference list has since loaded - re-derive from the
     // tab's own trapName/trapSite instead of submitting the stale null.
     expect(
       resolveSubmissionTrapLocationId({

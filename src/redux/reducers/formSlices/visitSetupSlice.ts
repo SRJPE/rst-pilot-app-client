@@ -60,7 +60,7 @@ export const visitSetupSlice = createSlice({
      * VisitSetup.tsx (see deriveTrapLocationId.ts / resolveTrapLocationId.ts),
      * discovered because it also silently dropped equipment-scoped dynamic
      * fields on Trap Operations/Trap Post-Processing. Only patches the one
-     * field — unlike saveVisitSetup, it doesn't touch completed/isPaperEntry
+     * field - unlike saveVisitSetup, it doesn't touch completed/isPaperEntry
      * or require the full values object.
      */
     repairTrapLocationId: (state, action) => {

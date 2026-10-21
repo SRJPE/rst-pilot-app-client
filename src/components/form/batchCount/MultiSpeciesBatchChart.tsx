@@ -152,7 +152,7 @@ const MultiSpeciesBatchChart = ({
   const inactiveTabColor = useColorModeValue('#1f2937', '#a1a1aa')
   const inactiveBorderColor = useColorModeValue('coolGray.200', 'gray.400')
 
-  // ✅ Memoized renderScene — does NOT depend on speciesRadioValue or active tab,
+  // ✅ Memoized renderScene - does NOT depend on speciesRadioValue or active tab,
   // so switching tabs no longer invalidates all scenes.
   const renderScene = useCallback(
     ({ route }: { route: TabNavigationRoute }) => (

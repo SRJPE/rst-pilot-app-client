@@ -102,7 +102,7 @@ const ConditionalTrapVisitFields = ({
   /**
    * Field names the screen still renders itself OUTSIDE this grid (e.g. above
    * a section heading). They have no slot, so without this they'd render
-   * twice — once in their hardcoded spot, once via the generic branch below.
+   * twice - once in their hardcoded spot, once via the generic branch below.
    * Prefer converting a field to a slot; this is for ones whose position
    * can't move yet.
    */
@@ -383,7 +383,13 @@ const ConditionalTrapVisitFields = ({
     }
     if (fieldName === 'secchi' && fieldType === 'input') {
       return (
-        <Box key={fieldName} flexBasis='28%' minWidth='28%' maxWidth='28%' mr={8}>
+        <Box
+          key={fieldName}
+          flexBasis='28%'
+          minWidth='28%'
+          maxWidth='28%'
+          mr={8}
+        >
           <SecchiInput
             value={values[fieldName]}
             onChangeValue={val => {
@@ -546,7 +552,7 @@ const ConditionalTrapVisitFields = ({
     <>
       {/* Gate on the MERGED list, not formFields. A program with zero
           program_fields rows (Mill, Deer, Feather, Yuba) has an empty
-          formFields but a full set of slots — gating on formFields here would
+          formFields but a full set of slots - gating on formFields here would
           render nothing at all for them. */}
       {merged.length > 0 && (
         <HStack flexWrap={'wrap'}>{merged.map(renderEntry)}</HStack>

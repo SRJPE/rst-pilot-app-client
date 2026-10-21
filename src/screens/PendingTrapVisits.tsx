@@ -46,7 +46,7 @@ const PendingTrapVisits = ({
     null
   )
   // redux-persist injects a `_persist` metadata key at the top level of this
-  // slice's state (since it's a bare { [tabId]: draft } map with no wrapper) —
+  // slice's state (since it's a bare { [tabId]: draft } map with no wrapper) -
   // filter it out so it's never mistaken for a real draft.
   const drafts = Object.entries(pendingVisitDraftsState || {})
     .filter(([tabId]) => tabId !== '_persist')
@@ -107,7 +107,7 @@ const PendingTrapVisits = ({
       )
     }
 
-    // The visit was already deemed submit-ready once — mark the wizard's
+    // The visit was already deemed submit-ready once - mark the wizard's
     // first 5 steps complete and land on Incomplete Sections, matching the
     // review-screen state it was in right before it was originally submitted.
     ;[

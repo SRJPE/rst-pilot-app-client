@@ -271,7 +271,7 @@ const HighFlows = ({
             waterTurbidityIsPresent,
           },
           // The three legacy rows read from Trap Operations only, as they
-          // always have — a blank post-processing field must not overwrite a
+          // always have - a blank post-processing field must not overwrite a
           // real operations reading.
           baseValues: {
             ...(trapOperationsState?.[id]?.values ?? {}),

@@ -38,7 +38,7 @@ export const useMostRecentTrapVisitForLocation = (
  * Pre-fills `fieldName` with `sourceMeasureName`'s value from the previous
  * visit's recorded environmental readings, once, when `fieldName` is both
  * configured for the current screen and still blank. Never overwrites a
- * value the user has already entered — Counter Start at trap drop is not
+ * value the user has already entered - Counter Start at trap drop is not
  * guaranteed to match the previous visit's Counter End (the trap may have
  * been checked, bumped, or reset in between), so this is a starting default
  * the crew can freely correct, not an enforced value.
@@ -89,7 +89,7 @@ export const usePrefillFieldFromPreviousVisit = ({
  * both are present, only when `totalRevolutions` is configured for the
  * current screen. Counter Start/End may live on this screen's own `values`
  * or, if configured on the other screen, in that screen's already-saved
- * redux slice (`otherScreenValues`) — safe to read since it's only written
+ * redux slice (`otherScreenValues`) - safe to read since it's only written
  * when the user submits/leaves that screen, which always happens before
  * reaching a later step.
  *
@@ -114,7 +114,12 @@ export const useTotalRevolutionsAutoCalc = ({
   const lastAutoValue = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!find(sectionFields, { fieldName: 'totalRevolutions', formSection: activePage })) {
+    if (
+      !find(sectionFields, {
+        fieldName: 'totalRevolutions',
+        formSection: activePage,
+      })
+    ) {
       return
     }
 
@@ -151,7 +156,7 @@ export const useTotalRevolutionsAutoCalc = ({
 
     if (isBlank || matchesLastAutoValue) {
       // Every other field in this form sets its Formik value as a string
-      // (onChangeText always emits one) — the underlying FastField/Input
+      // (onChangeText always emits one) - the underlying FastField/Input
       // doesn't render a raw number, so a bare `computed` here silently
       // updates Formik's state while the input stays visually blank.
       setFieldValue('totalRevolutions', String(computed))

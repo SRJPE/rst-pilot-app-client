@@ -1425,7 +1425,7 @@ export function sumCountsWithFallback(protocol: any, counts: any): any {
  * / vegetationCode / substrate / ysiNum / flowDirection rendering unchanged:
  * those have no form_field_option rows, so the server sends `options: []` and
  * they continue to read from dropdownValues exactly as before. Their legacy
- * { id, code, description } shape is also why we never remap them server-side —
+ * { id, code, description } shape is also why we never remap them server-side -
  * FastSelect has a distinct `item.code` branch with different value semantics.
  */
 export const resolveSelectOptions = (field: any, dropdownValues: any) =>

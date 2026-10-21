@@ -24,7 +24,7 @@ import {
   trapPostProcessingSchema,
   generateDynamicTrapPostProcessingSchema,
 } from '../../utils/helpers/yupValidations'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DeviceEventEmitter, Keyboard } from 'react-native'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import FormInputComponent, {
@@ -239,7 +239,7 @@ const TrapPostProcessing = ({
     // effect after a cold rehydrate even once `programs` has arrived. Without
     // it as a dependency, trapEquimentType resolved to null and any field
     // configured with a specific (non-null) equipmentId was filtered out of
-    // sectionFields permanently for that mount — exactly what vanished
+    // sectionFields permanently for that mount - exactly what vanished
     // counterStart/counterEnd/totalRevolutions on reload. TrapOperations.tsx
     // already lists this dependency; this screen didn't.
     visitSetupDefaults?.trapLocations,
@@ -249,7 +249,7 @@ const TrapPostProcessing = ({
     // currentProgramInfo) but never re-ran when it changed on its own. On a
     // cold rehydrate, selectedProgramId (from the persisted visitSetup slice)
     // can resolve to its real value AFTER visitSetupDefaults.programs has
-    // already settled — the effect fired once against a stale/undefined
+    // already settled - the effect fired once against a stale/undefined
     // selectedProgramId, found no matching program, and then never fired
     // again, permanently stuck with programFormFields/sectionFields = null.
     // That's what made counterStart/counterEnd/totalRevolutions vanish after
@@ -473,11 +473,11 @@ const TrapPostProcessing = ({
    * The fields this screen renders with its own widgets, handed to
    * ConditionalTrapVisitFields as slots so an admin's configured order can
    * position them. Previously these were hardcoded above the dynamic block
-   * and their config rows were discarded outright — Butte (program 9)
+   * and their config rows were discarded outright - Butte (program 9)
    * configures all of rpmAfter/totalRevolutions/counterStart/counterEnd and
    * none of it took effect.
    *
-   * Visibility gates are copied verbatim from the old inline JSX — note
+   * Visibility gates are copied verbatim from the old inline JSX - note
    * counterStart/counterEnd use renderOnDefault: false (they do NOT show for
    * an unconfigured program), unlike the others.
    */
@@ -495,7 +495,7 @@ const TrapPostProcessing = ({
     touched: any
     errors: any
     values: any
-    // Stable snapshot from the persisted redux slice — only updated on
+    // Stable snapshot from the persisted redux slice - only updated on
     // navigation/save, unlike `values` which changes on every keystroke. Used
     // ONLY for fieldHasSavedValue below; see that function's doc for why live
     // `values` must never be used there (it previously made a field vanish
@@ -909,6 +909,10 @@ const TrapPostProcessing = ({
 
   return (
     <Formik
+      // Forces a clean unmount/remount on every tab switch instead of
+      // relying on enableReinitialize to catch up after the fact - see the
+      // unmount-cleanup effect below for why.
+      key={activeTabId}
       validationSchema={validationSchema}
       enableReinitialize={true}
       validateOnMount={false}
@@ -935,7 +939,6 @@ const TrapPostProcessing = ({
         errors,
         values,
         initialValues,
-        resetForm,
         isValid,
       }) => {
         const checkOtherTabForms = () => {
@@ -962,17 +965,35 @@ const TrapPostProcessing = ({
 
         const otherTabFormsValid = checkOtherTabForms()
 
+        // See the matching comment in TrapOperations.tsx: Formik is keyed by
+        // activeTabId, so this render-prop instance only ever belongs to one
+        // tab - saving the outgoing tab's values happens on unmount (via
+        // refs, since a cleanup closure is fixed at mount time) rather than
+        // a previouslyActiveTabId-watching effect, which could fire while
+        // `values` and `activeTabId` transiently disagreed about which tab
+        // they belonged to.
+        const valuesRef = useRef(values)
         useEffect(() => {
-          if (
-            Object.keys(tabSlice.tabs).length > 1 &&
-            previouslyActiveTabId &&
-            previouslyActiveTabId !== activeTabId &&
-            navigationSlice.activeStep === 5
-          ) {
-            onSubmit(values, previouslyActiveTabId)
-            resetForm()
+          valuesRef.current = values
+        }, [values])
+
+        const activeStepRef = useRef(navigationSlice.activeStep)
+        useEffect(() => {
+          activeStepRef.current = navigationSlice.activeStep
+        }, [navigationSlice.activeStep])
+
+        const tabCountRef = useRef(Object.keys(tabSlice.tabs).length)
+        useEffect(() => {
+          tabCountRef.current = Object.keys(tabSlice.tabs).length
+        }, [tabSlice.tabs])
+
+        useEffect(() => {
+          return () => {
+            if (tabCountRef.current > 1 && activeStepRef.current === 5) {
+              onSubmit(valuesRef.current, activeTabId ?? '')
+            }
           }
-        }, [previouslyActiveTabId, activeTabId])
+        }, [])
 
         useEffect(() => {
           registerSaveHandler(() => onSubmit(values, activeTabId ?? ''))

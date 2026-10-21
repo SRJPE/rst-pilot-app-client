@@ -22,7 +22,7 @@ import {
 } from '../../redux/reducers/formSlices/navigationSlice'
 import { AppDispatch, RootState } from '../../redux/store'
 import { fishProcessingSchema } from '../../utils/helpers/yupValidations'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { DeviceEventEmitter } from 'react-native'
 import {
   navigateHelper,
@@ -188,6 +188,10 @@ const FishProcessing = ({
 
   return (
     <Formik
+      // Forces a clean unmount/remount on every tab switch instead of
+      // relying on enableReinitialize to catch up after the fact - see the
+      // unmount-cleanup effect below for why.
+      key={activeTabId}
       validationSchema={fishProcessingSchema}
       enableReinitialize={true}
       initialValues={
@@ -213,20 +217,37 @@ const FishProcessing = ({
         touched,
         errors,
         values,
-        resetForm,
         isValid,
       }) => {
+        // See the matching comment in TrapOperations.tsx: Formik is keyed by
+        // activeTabId, so this render-prop instance only ever belongs to one
+        // tab - saving the outgoing tab's values happens on unmount (via
+        // refs, since a cleanup closure is fixed at mount time) rather than
+        // a previouslyActiveTabId-watching effect, which could fire while
+        // `values` and `activeTabId` transiently disagreed about which tab
+        // they belonged to.
+        const valuesRef = useRef(values)
         useEffect(() => {
-          if (
-            Object.keys(tabSlice.tabs).length > 1 &&
-            previouslyActiveTabId &&
-            previouslyActiveTabId !== activeTabId &&
-            navigationSlice.activeStep === 3
-          ) {
-            onSubmit(values, previouslyActiveTabId)
-            resetForm()
+          valuesRef.current = values
+        }, [values])
+
+        const activeStepRef = useRef(navigationSlice.activeStep)
+        useEffect(() => {
+          activeStepRef.current = navigationSlice.activeStep
+        }, [navigationSlice.activeStep])
+
+        const tabCountRef = useRef(Object.keys(tabSlice.tabs).length)
+        useEffect(() => {
+          tabCountRef.current = Object.keys(tabSlice.tabs).length
+        }, [tabSlice.tabs])
+
+        useEffect(() => {
+          return () => {
+            if (tabCountRef.current > 1 && activeStepRef.current === 3) {
+              onSubmit(valuesRef.current, activeTabId)
+            }
           }
-        }, [previouslyActiveTabId, activeTabId])
+        }, [])
 
         useEffect(() => {
           registerSaveHandler(() => onSubmit(values, activeTabId))

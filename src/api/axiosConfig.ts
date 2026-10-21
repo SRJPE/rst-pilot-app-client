@@ -89,7 +89,9 @@ api.interceptors.request.use(
       if (isConnected) {
         const accessToken = await SecureStore.getItemAsync('userAccessToken')
         const idToken = await SecureStore.getItemAsync('userIdToken')
-        const tokenExpiresAt = await SecureStore.getItemAsync('userAccessTokenExpiresAt')
+        const tokenExpiresAt = await SecureStore.getItemAsync(
+          'userAccessTokenExpiresAt'
+        )
         const tokenIsExpired = moment().isAfter(tokenExpiresAt)
 
         if (!tokenIsExpired && accessToken && idToken) {
@@ -112,13 +114,28 @@ api.interceptors.request.use(
 
         if (!refreshPromise) {
           refreshPromise = refreshAsync(
-            { clientId: EXPO_PUBLIC_CLIENT_ID, refreshToken: existingRefreshToken },
+            {
+              clientId: EXPO_PUBLIC_CLIENT_ID,
+              refreshToken: existingRefreshToken,
+            },
             { tokenEndpoint }
           )
             .then(async refreshResponse => {
               if (refreshResponse.accessToken) {
-                const { accessToken, refreshToken, idToken, issuedAt, expiresIn } = refreshResponse
-                await storeAccessTokens({ accessToken, refreshToken, idToken, expiresIn, issuedAt })
+                const {
+                  accessToken,
+                  refreshToken,
+                  idToken,
+                  issuedAt,
+                  expiresIn,
+                } = refreshResponse
+                await storeAccessTokens({
+                  accessToken,
+                  refreshToken,
+                  idToken,
+                  expiresIn,
+                  issuedAt,
+                })
               }
             })
             .catch(error => {
@@ -132,7 +149,8 @@ api.interceptors.request.use(
         try {
           await refreshPromise
 
-          const freshAccessToken = await SecureStore.getItemAsync('userAccessToken')
+          const freshAccessToken =
+            await SecureStore.getItemAsync('userAccessToken')
           const freshIdToken = await SecureStore.getItemAsync('userIdToken')
 
           if (freshAccessToken && freshIdToken) {
@@ -159,12 +177,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response: AxiosResponse) => {
     try {
-      const contentType = (response.headers && response.headers['content-type']) || ''
-      if (response.data && typeof contentType === 'string' && contentType.includes('application/json')) {
+      const contentType =
+        (response.headers && response.headers['content-type']) || ''
+      if (
+        response.data &&
+        typeof contentType === 'string' &&
+        contentType.includes('application/json')
+      ) {
         response.data = camelizeKeys(response.data)
       }
     } catch (err) {
-      // If headers are malformed, don't crash — just return response as-is
+      // If headers are malformed, don't crash - just return response as-is
       console.error('Error processing response headers:', err)
     }
     return response

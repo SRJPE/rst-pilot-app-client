@@ -72,7 +72,11 @@ describe('post-processing must not clobber trap operations', () => {
     waterTurbidity: '1234',
     recordTurbidityInPostProcessing: false,
   }
-  const postValues = { debrisVolume: 1, totalRevolutions: 12, waterTurbidity: NaN }
+  const postValues = {
+    debrisVolume: 1,
+    totalRevolutions: 12,
+    waterTurbidity: NaN,
+  }
   const waterTurbidityIsPresent = true
 
   it('keeps the operations turbidity when post-processing holds NaN', () => {
@@ -96,7 +100,7 @@ describe('post-processing must not clobber trap operations', () => {
   })
 
   it('still resolves environmental fields that live in post-processing', () => {
-    // This is why the merged object exists at all — don't "simplify" it away.
+    // This is why the merged object exists at all - don't "simplify" it away.
     const rows = buildTrapVisitEnvironmental({
       values: { ...opsValues, ...postValues, waterTurbidityIsPresent },
       baseValues: { ...opsValues, waterTurbidityIsPresent },
@@ -119,7 +123,7 @@ describe('the legacy-name exclusion list', () => {
 
   it('prevents waterTurbidity being emitted twice under two spellings', () => {
     // waterTurbidity is seeded isEnvironmentalField: true. Without the ignore
-    // list this emits both 'water turbidity' and 'waterTurbidity' — and the
+    // list this emits both 'water turbidity' and 'waterTurbidity' - and the
     // dashboard's sanitizeFieldName collapses BOTH onto `water_turbidity`,
     // so one silently overwrites the other.
     const rows = buildTrapVisitEnvironmental({
@@ -153,10 +157,13 @@ describe('zero, blank, and NaN handling', () => {
     expect(flow.measureValueText).toBe('0')
   })
 
-  it.each(['', null, undefined])('skips a genuinely blank value (%o)', value => {
-    const rows = buildBaseEnvironmentalRows({ flowMeasure: value })
-    expect(rowNamed(rows, 'flow measure').measureValueNumeric).toBeUndefined()
-  })
+  it.each(['', null, undefined])(
+    'skips a genuinely blank value (%o)',
+    value => {
+      const rows = buildBaseEnvironmentalRows({ flowMeasure: value })
+      expect(rowNamed(rows, 'flow measure').measureValueNumeric).toBeUndefined()
+    }
+  )
 
   it('skips an absent key entirely', () => {
     const rows = buildBaseEnvironmentalRows({})
@@ -190,7 +197,9 @@ describe('water turbidity branching', () => {
 
   it('skips the row when turbidity is not part of this visit', () => {
     const rows = buildBaseEnvironmentalRows({})
-    expect(rowNamed(rows, 'water turbidity').measureValueNumeric).toBeUndefined()
+    expect(
+      rowNamed(rows, 'water turbidity').measureValueNumeric
+    ).toBeUndefined()
   })
 
   it('stores a recorded turbidity of 0', () => {
@@ -299,7 +308,7 @@ describe('redux slice key collisions', () => {
    * These keys exist in BOTH trapOperationsSlice and trapPostProcessingSlice,
    * so post wins in `{...ops, ...post}`. If a future form field is named after
    * one of them AND marked environmental, a blank post-processing value will
-   * silently clobber a real operations reading — the exact shape of the
+   * silently clobber a real operations reading - the exact shape of the
    * original bug. waterTurbidity is the only current overlap and it is
    * excluded by ENVIRONMENTAL_FIELDS_TO_IGNORE.
    */
@@ -324,12 +333,7 @@ describe('redux slice key collisions', () => {
 
     // If this fails, a new environmental field collides with a post-processing
     // key: give the legacy/base rows a dedicated source or rename the field.
-    expect(unguarded).toEqual([
-      'rpm1',
-      'rpm2',
-      'rpm3',
-      'trapVisitStartTime',
-    ])
+    expect(unguarded).toEqual(['rpm1', 'rpm2', 'rpm3', 'trapVisitStartTime'])
   })
 
   it('waterTurbidity specifically cannot be clobbered', () => {

@@ -3,10 +3,10 @@
  * buildSubmissionPayloads.ts for how it's produced) before it's ever queued
  * for network submission. The server validates almost nothing on these
  * create routes, so this is the only thing standing between a corrupted or
- * hand-edited import file and a confusing raw Postgres error — or worse,
+ * hand-edited import file and a confusing raw Postgres error - or worse,
  * silently-wrong data landing on the server.
  *
- * Leaf module on purpose — no React/redux imports, plain-node testable.
+ * Leaf module on purpose - no React/redux imports, plain-node testable.
  */
 
 export interface ImportValidationResult {
@@ -16,7 +16,9 @@ export interface ImportValidationResult {
 
 const SUPPORTED_SCHEMA_VERSIONS = [1]
 
-export function validateImportedSubmission(envelope: any): ImportValidationResult {
+export function validateImportedSubmission(
+  envelope: any
+): ImportValidationResult {
   const errors: string[] = []
 
   if (!envelope || typeof envelope !== 'object') {
@@ -25,7 +27,7 @@ export function validateImportedSubmission(envelope: any): ImportValidationResul
 
   if (!SUPPORTED_SCHEMA_VERSIONS.includes(envelope.schemaVersion)) {
     errors.push(
-      `Unsupported schema version "${envelope.schemaVersion}" — this app only understands version(s) ${SUPPORTED_SCHEMA_VERSIONS.join(
+      `Unsupported schema version "${envelope.schemaVersion}" - this app only understands version(s) ${SUPPORTED_SCHEMA_VERSIONS.join(
         ', '
       )}. The file may have been exported by a newer or much older app version.`
     )
@@ -60,10 +62,12 @@ export function validateImportedSubmission(envelope: any): ImportValidationResul
       )
     }
     if (!Array.isArray(trapVisit.crew)) {
-      // The server dereferences `crew` unconditionally with no null guard —
+      // The server dereferences `crew` unconditionally with no null guard -
       // sending it without this key throws server-side instead of a clean
       // 400, so this must always be present (an empty array is fine).
-      errors.push('Trap visit is missing a crew array (can be empty, but must be present).')
+      errors.push(
+        'Trap visit is missing a crew array (can be empty, but must be present).'
+      )
     }
     if (
       trapVisit.trapVisitEnvironmental !== undefined &&
@@ -86,7 +90,7 @@ export function validateImportedSubmission(envelope: any): ImportValidationResul
       }
       if (expectedUid && record.uid !== expectedUid) {
         errors.push(
-          `catchRaw[${index}] has uid "${record.uid}" which doesn't match this file's trap visit (${expectedUid}) — the file may be corrupted or hand-edited.`
+          `catchRaw[${index}] has uid "${record.uid}" which doesn't match this file's trap visit (${expectedUid}) - the file may be corrupted or hand-edited.`
         )
       }
       if (record.taxonCode === undefined || record.taxonCode === null) {
@@ -94,7 +98,11 @@ export function validateImportedSubmission(envelope: any): ImportValidationResul
       }
       ;['forkLength', 'weight', 'numFishCaught'].forEach(field => {
         const value = record[field]
-        if (value !== undefined && value !== null && typeof value !== 'number') {
+        if (
+          value !== undefined &&
+          value !== null &&
+          typeof value !== 'number'
+        ) {
           errors.push(
             `catchRaw[${index}].${field} must be a number or null, got "${typeof value}".`
           )

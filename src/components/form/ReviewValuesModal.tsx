@@ -31,6 +31,7 @@ import {
   buildTrapVisitSubmission,
   buildAllCatchRawSubmissions,
 } from '../../utils/helpers/buildSubmissionPayloads'
+import { FishInputSpeciesTable } from './FishInputSpeciesTable'
 
 const initialLayout = { width: Dimensions.get('window').width }
 
@@ -174,7 +175,7 @@ function fishInputSpeciesTableHtml(fishInputState: any): string {
     `<td style="padding:6px 8px;border:1px solid #ddd;background:#e5e7eb;text-align:center;font-weight:bold;font-size:14px;${label ? 'width:110px;' : 'width:56px;'}">${content}</td>`
 
   const formatFlCell = (fish: any): string => {
-    const fl = fish.forkLength != null ? String(fish.forkLength) : '—'
+    const fl = fish.forkLength != null ? String(fish.forkLength) : '-'
     const sup = [
       fish.eggs
         ? '<sup style="font-size:8px;vertical-align:super;color:#555;">E</sup>'
@@ -294,7 +295,7 @@ function fishGeneticsTableHtml(
       : []
     const geneticIds = samples.length
       ? samples.map((s: any) => s.sampleId || '?').join(', ')
-      : '—'
+      : '-'
     const geneticTypes = samples.length
       ? samples
           .map((s: any) =>
@@ -303,19 +304,19 @@ function fishGeneticsTableHtml(
               .join('+')
           )
           .join(', ')
-      : '—'
+      : '-'
     const marks =
       Array.isArray(fish.appliedMarks) && fish.appliedMarks.length
         ? fish.appliedMarks.map(formatAppliedMark).join('; ')
-        : '—'
+        : '-'
 
     const capitalize = (v: any) =>
       typeof v === 'string' && v ? v.charAt(0).toUpperCase() + v.slice(1) : null
 
     const lookupCode = (table: string, id: any) => {
-      if (id == null) return '—'
+      if (id == null) return '-'
       const item = find(dropdownValues?.[table], { id })
-      return item?.code || item?.definition || item?.description || '—'
+      return item?.code || item?.definition || item?.description || '-'
     }
 
     const sampleCondition = samples.find(
@@ -326,28 +327,28 @@ function fishGeneticsTableHtml(
         ? lookupCode('condition', sampleCondition)
         : Array.isArray(fish.fishConditions) && fish.fishConditions.length
           ? fish.fishConditions.map(capitalize).filter(Boolean).join(', ')
-          : '—'
+          : '-'
 
     const sampleTake = samples.find((s: any) => s.take != null)?.take
-    const takeVal = sampleTake != null ? lookupCode('take', sampleTake) : '—'
+    const takeVal = sampleTake != null ? lookupCode('take', sampleTake) : '-'
 
     // Comments: aggregate from genetic samples, fall back to fish comments
     const sampleComments = samples
       .map((s: any) => s.comments)
       .filter(Boolean)
       .join('; ')
-    const commentsVal = sampleComments || fish.comments || '—'
+    const commentsVal = sampleComments || fish.comments || '-'
 
     const geneticYN = samples.some((s: any) => s.genetic)
       ? 'Y'
       : samples.length
         ? 'N'
-        : '—'
+        : '-'
 
     return `<tr style="background:${idx % 2 === 0 ? 'white' : '#f9f9f9'}">
       ${cell(String(idx + 1), '28px')}
       ${cell(geneticIds)}
-      ${cell(fish.adiposeClipped == null ? '—' : fish.adiposeClipped ? '+' : '−', '38px')}
+      ${cell(fish.adiposeClipped == null ? '-' : fish.adiposeClipped ? '+' : '−', '38px')}
       ${cell(fish.dead ? 'Y' : 'N', '32px')}
       ${cell(conditions)}
       ${cell(takeVal, '38px')}
@@ -554,484 +555,6 @@ const AccordionListItem = ({
   ) : null
 }
 
-const FishInputSpeciesTable = ({ fishList }: { fishList: any[] }) => {
-  if (!fishList.length) {
-    return (
-      <List.Item
-        title='No Fish Caught'
-        titleStyle={{ fontSize: 16, fontWeight: 'bold' }}
-        style={{ borderBottomColor: 'gray', borderBottomWidth: 1 }}
-      />
-    )
-  }
-
-  const bySpecies: Record<
-    string,
-    { individuals: (any | null)[]; plusCounts: any[] }
-  > = {}
-  fishList.forEach((fish: any) => {
-    const sp = fish.species || 'Unknown'
-    if (!bySpecies[sp]) bySpecies[sp] = { individuals: [], plusCounts: [] }
-    if (fish.plusCount) bySpecies[sp].plusCounts.push(fish)
-    else bySpecies[sp].individuals.push(fish)
-  })
-
-  const COLS = 10
-  const LABEL_W = 110
-  const HEADER_H = 41
-  const FL_H = 50
-  const SUB_H = 38
-
-  const FLCellContent = ({ fish }: { fish: any }) => {
-    const fl = fish.forkLength != null ? String(fish.forkLength) : '—'
-    const inner = (
-      <HStack alignItems='flex-start' space={0} justifyContent='center'>
-        <Text fontSize={18}>{fl}</Text>
-        {(fish.eggs || fish.milting) && (
-          <Text
-            fontSize={11}
-            color='gray.600'
-            style={{ lineHeight: 14, marginTop: 2 }}
-          >
-            {[fish.eggs ? 'E' : '', fish.milting ? 'M' : '']
-              .filter(Boolean)
-              .join('')}
-          </Text>
-        )}
-      </HStack>
-    )
-    if (fish.dead) {
-      return (
-        <View
-          style={{
-            borderWidth: 2,
-            borderRadius: 50,
-            paddingHorizontal: 5,
-            paddingVertical: 2,
-            borderColor: '#333',
-            alignItems: 'center',
-          }}
-        >
-          {inner}
-        </View>
-      )
-    }
-    return inner
-  }
-
-  return (
-    <View style={{ paddingHorizontal: 8, paddingVertical: 8 }}>
-      {Object.entries(bySpecies).map(
-        ([species, { individuals, plusCounts }]) => {
-          const has = (fn: (f: any) => boolean) =>
-            (individuals.filter(Boolean) as any[]).some(fn)
-          const hasRun = has(f => f.run && f.run !== 'not recorded')
-          const hasAdipose = has(f => f.adiposeClipped != null)
-          const hasGenetics = has(
-            f => Array.isArray(f.geneticSamples) && f.geneticSamples.length
-          )
-          const hasWeight = has(f => f.weight != null)
-          const hasStage = has(
-            f => f.lifeStage && f.lifeStage !== 'not recorded'
-          )
-          const hasComments = has(f => f.comments)
-
-          const plusLabel = plusCounts
-            .map((f: any) => `+${f.numFishCaught}`)
-            .join(', ')
-          const totalCount = individuals.filter(Boolean).length
-
-          const chunks: (any | null)[][] = []
-          for (let i = 0; i < Math.max(individuals.length, 1); i += COLS) {
-            const chunk = (individuals as any[]).slice(i, i + COLS)
-            while (chunk.length < COLS) chunk.push(null)
-            chunks.push(chunk)
-          }
-          if (!individuals.length) chunks[0] = Array(COLS).fill(null)
-
-          return (
-            <View
-              key={species}
-              style={{
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: '#d1d5db',
-                borderRadius: 15,
-                overflow: 'hidden',
-              }}
-            >
-              {/* Top info bar */}
-              <HStack
-                style={{
-                  backgroundColor: '#e5e7eb',
-                  borderBottomWidth: 1,
-                  borderBottomColor: '#d1d5db',
-                  paddingVertical: 8,
-                  paddingHorizontal: 12,
-                  flexWrap: 'wrap',
-                  gap: 8,
-                }}
-              >
-                <Text fontSize={16}>
-                  <Text fontWeight='bold'>Species: </Text>
-                  {species}
-                </Text>
-                <Text fontSize={16}>
-                  <Text fontWeight='bold'>Measured: </Text>
-                  {totalCount}
-                </Text>
-                {!!plusLabel && (
-                  <Text fontSize={16}>
-                    <Text fontWeight='bold'>Plus Count: </Text>
-                    {plusLabel}
-                  </Text>
-                )}
-              </HStack>
-
-              {chunks.map((chunk, ci) => (
-                <View key={ci}>
-                  {/* Number header row — first chunk only */}
-                  {ci === 0 && (
-                    <HStack>
-                      <View
-                        style={{
-                          width: LABEL_W,
-                          height: HEADER_H,
-                          backgroundColor: '#e5e7eb',
-                          justifyContent: 'center',
-                          paddingHorizontal: 8,
-                          borderBottomWidth: 1,
-                          borderBottomColor: '#d1d5db',
-                        }}
-                      >
-                        <Text fontSize={14} fontWeight='bold' color='gray.700'>
-                          FL (mm)
-                        </Text>
-                      </View>
-                      <HStack flex={1}>
-                        {chunk.map((_, i) => (
-                          <View
-                            key={i}
-                            style={{
-                              flex: 1,
-                              height: HEADER_H,
-                              backgroundColor: '#e5e7eb',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              borderLeftWidth: 1,
-                              borderBottomWidth: 1,
-                              borderColor: '#d1d5db',
-                            }}
-                          >
-                            <Text fontSize={18} fontWeight='bold'>
-                              {i + 1}
-                            </Text>
-                          </View>
-                        ))}
-                      </HStack>
-                    </HStack>
-                  )}
-
-                  {/* FL row */}
-                  <HStack>
-                    <View
-                      style={{
-                        width: LABEL_W,
-                        height: FL_H,
-                        backgroundColor: '#f0fffe',
-                        justifyContent: 'center',
-                        paddingHorizontal: 8,
-                        borderBottomWidth: 1,
-                        borderBottomColor: '#d1d5db',
-                      }}
-                    />
-                    <HStack flex={1}>
-                      {chunk.map((fish, i) => (
-                        <View
-                          key={i}
-                          style={{
-                            flex: 1,
-                            height: FL_H,
-                            backgroundColor: '#f0fffe',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            borderLeftWidth: 1,
-                            borderBottomWidth: 1,
-                            borderColor: '#d1d5db',
-                          }}
-                        >
-                          {fish ? <FLCellContent fish={fish} /> : null}
-                        </View>
-                      ))}
-                    </HStack>
-                  </HStack>
-
-                  {/* Sub-rows */}
-                  {hasRun && (
-                    <HStack>
-                      <View
-                        style={{
-                          width: LABEL_W,
-                          height: SUB_H,
-                          justifyContent: 'center',
-                          paddingHorizontal: 8,
-                          borderBottomWidth: 1,
-                          borderBottomColor: '#e5e7eb',
-                        }}
-                      >
-                        <Text fontSize={13} italic>
-                          Run
-                        </Text>
-                      </View>
-                      <HStack flex={1}>
-                        {chunk.map((fish, i) => (
-                          <View
-                            key={i}
-                            style={{
-                              flex: 1,
-                              height: SUB_H,
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              borderLeftWidth: 1,
-                              borderBottomWidth: 1,
-                              borderColor: '#e5e7eb',
-                            }}
-                          >
-                            <Text fontSize={13}>
-                              {fish && fish.run && fish.run !== 'not recorded'
-                                ? fish.run
-                                : ''}
-                            </Text>
-                          </View>
-                        ))}
-                      </HStack>
-                    </HStack>
-                  )}
-                  {hasAdipose && species.toLowerCase().includes('chinook') && (
-                    <HStack>
-                      <View
-                        style={{
-                          width: LABEL_W,
-                          height: SUB_H,
-                          justifyContent: 'center',
-                          paddingHorizontal: 8,
-                          borderBottomWidth: 1,
-                          borderBottomColor: '#e5e7eb',
-                        }}
-                      >
-                        <Text fontSize={13} italic>
-                          Ad +/-
-                        </Text>
-                      </View>
-                      <HStack flex={1}>
-                        {chunk.map((fish, i) => (
-                          <View
-                            key={i}
-                            style={{
-                              flex: 1,
-                              height: SUB_H,
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              borderLeftWidth: 1,
-                              borderBottomWidth: 1,
-                              borderColor: '#e5e7eb',
-                            }}
-                          >
-                            <Text fontSize={13}>
-                              {fish
-                                ? fish.adiposeClipped == null
-                                  ? ''
-                                  : fish.adiposeClipped
-                                    ? '+'
-                                    : '−'
-                                : ''}
-                            </Text>
-                          </View>
-                        ))}
-                      </HStack>
-                    </HStack>
-                  )}
-                  {hasWeight && (
-                    <HStack>
-                      <View
-                        style={{
-                          width: LABEL_W,
-                          height: SUB_H,
-                          justifyContent: 'center',
-                          paddingHorizontal: 8,
-                          borderBottomWidth: 1,
-                          borderBottomColor: '#e5e7eb',
-                        }}
-                      >
-                        <Text fontSize={13} italic>
-                          Wt. (g)
-                        </Text>
-                      </View>
-                      <HStack flex={1}>
-                        {chunk.map((fish, i) => (
-                          <View
-                            key={i}
-                            style={{
-                              flex: 1,
-                              height: SUB_H,
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              borderLeftWidth: 1,
-                              borderBottomWidth: 1,
-                              borderColor: '#e5e7eb',
-                            }}
-                          >
-                            <Text fontSize={13}>
-                              {fish && fish.weight != null
-                                ? String(fish.weight)
-                                : ''}
-                            </Text>
-                          </View>
-                        ))}
-                      </HStack>
-                    </HStack>
-                  )}
-                  {hasStage && (
-                    <HStack>
-                      <View
-                        style={{
-                          width: LABEL_W,
-                          height: SUB_H,
-                          justifyContent: 'center',
-                          paddingHorizontal: 8,
-                          borderBottomWidth: 1,
-                          borderBottomColor: '#e5e7eb',
-                        }}
-                      >
-                        <Text fontSize={13} italic>
-                          Stage
-                        </Text>
-                      </View>
-                      <HStack flex={1}>
-                        {chunk.map((fish, i) => (
-                          <View
-                            key={i}
-                            style={{
-                              flex: 1,
-                              height: SUB_H,
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              borderLeftWidth: 1,
-                              borderBottomWidth: 1,
-                              borderColor: '#e5e7eb',
-                            }}
-                          >
-                            <Text fontSize={13}>
-                              {fish &&
-                              fish.lifeStage &&
-                              fish.lifeStage !== 'not recorded'
-                                ? fish.lifeStage.charAt(0).toUpperCase()
-                                : ''}
-                            </Text>
-                          </View>
-                        ))}
-                      </HStack>
-                    </HStack>
-                  )}
-                  {hasComments && (
-                    <HStack>
-                      <View
-                        style={{
-                          width: LABEL_W,
-                          height: SUB_H,
-                          justifyContent: 'center',
-                          paddingHorizontal: 8,
-                          borderBottomWidth: 1,
-                          borderBottomColor: '#e5e7eb',
-                        }}
-                      >
-                        <Text fontSize={13} italic>
-                          Comments
-                        </Text>
-                      </View>
-                      <HStack flex={1}>
-                        {chunk.map((fish, i) => (
-                          <View
-                            key={i}
-                            style={{
-                              flex: 1,
-                              height: SUB_H,
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              borderLeftWidth: 1,
-                              borderBottomWidth: 1,
-                              borderColor: '#e5e7eb',
-                            }}
-                          >
-                            <Text
-                              fontSize={10}
-                              textAlign='center'
-                              numberOfLines={2}
-                            >
-                              {fish ? fish.comments || '' : ''}
-                            </Text>
-                          </View>
-                        ))}
-                      </HStack>
-                    </HStack>
-                  )}
-                  {hasGenetics && (
-                    <HStack>
-                      <View
-                        style={{
-                          width: LABEL_W,
-                          height: SUB_H,
-                          justifyContent: 'center',
-                          paddingHorizontal: 8,
-                          borderBottomWidth: 1,
-                          borderBottomColor: '#e5e7eb',
-                        }}
-                      >
-                        <Text fontSize={13} italic>
-                          Genetics
-                        </Text>
-                      </View>
-                      <HStack flex={1}>
-                        {chunk.map((fish, i) => (
-                          <View
-                            key={i}
-                            style={{
-                              flex: 1,
-                              height: SUB_H,
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              borderLeftWidth: 1,
-                              borderBottomWidth: 1,
-                              borderColor: '#e5e7eb',
-                            }}
-                          >
-                            <Text
-                              fontSize={12}
-                              textAlign='center'
-                              numberOfLines={2}
-                            >
-                              {fish &&
-                              Array.isArray(fish.geneticSamples) &&
-                              fish.geneticSamples.length
-                                ? fish.geneticSamples
-                                    .map((s: any) => s.sampleId || '?')
-                                    .join(', ')
-                                : ''}
-                            </Text>
-                          </View>
-                        ))}
-                      </HStack>
-                    </HStack>
-                  )}
-                </View>
-              ))}
-            </View>
-          )
-        }
-      )}
-    </View>
-  )
-}
 
 const FishGeneticsTable = ({
   fishList,
@@ -1066,7 +589,7 @@ const FishGeneticsTable = ({
       : []
     const geneticIds = samples.length
       ? samples.map((s: any) => s.sampleId || '?').join(', ')
-      : '—'
+      : '-'
     const geneticTypes = samples.length
       ? samples
           .map((s: any) =>
@@ -1075,19 +598,19 @@ const FishGeneticsTable = ({
               .join('+')
           )
           .join(', ')
-      : '—'
+      : '-'
     const marks =
       Array.isArray(fish.appliedMarks) && fish.appliedMarks.length
         ? fish.appliedMarks.map(formatAppliedMark).join('; ')
-        : '—'
+        : '-'
 
     const capitalize = (v: any) =>
       typeof v === 'string' && v ? v.charAt(0).toUpperCase() + v.slice(1) : null
 
     const lookupCode = (table: string, id: any) => {
-      if (id == null) return '—'
+      if (id == null) return '-'
       const item = find(dropdownValues?.[table], { id })
-      return item?.code || item?.definition || item?.description || '—'
+      return item?.code || item?.definition || item?.description || '-'
     }
 
     const sampleCondition = samples.find(
@@ -1098,28 +621,28 @@ const FishGeneticsTable = ({
         ? lookupCode('condition', sampleCondition)
         : Array.isArray(fish.fishConditions) && fish.fishConditions.length
           ? fish.fishConditions.map(capitalize).filter(Boolean).join(', ')
-          : '—'
+          : '-'
 
     const sampleTake = samples.find((s: any) => s.take != null)?.take
-    const takeVal = sampleTake != null ? lookupCode('take', sampleTake) : '—'
+    const takeVal = sampleTake != null ? lookupCode('take', sampleTake) : '-'
 
     // Comments: aggregate from genetic samples, fall back to fish comments
     const sampleComments = samples
       .map((s: any) => s.comments)
       .filter(Boolean)
       .join('; ')
-    const commentsVal = sampleComments || fish.comments || '—'
+    const commentsVal = sampleComments || fish.comments || '-'
 
     const geneticYN = samples.some((s: any) => s.genetic)
       ? 'Y'
       : samples.length
         ? 'N'
-        : '—'
+        : '-'
 
     return [
       String(idx + 1),
       geneticIds,
-      fish.adiposeClipped == null ? '—' : fish.adiposeClipped ? '+' : '−',
+      fish.adiposeClipped == null ? '-' : fish.adiposeClipped ? '+' : '−',
       fish.dead ? 'Y' : 'N',
       conditions,
       takeVal,
@@ -1484,7 +1007,7 @@ const ReviewValuesModal = ({
       const zip = new JSZip()
 
       // Built once across all tabs (matches how the real submit path
-      // combines plus-counts), then filtered per tab below by `uid` — same
+      // combines plus-counts), then filtered per tab below by `uid` - same
       // correlation trapVisitFormPostBundler.ts already uses when posting.
       const allCatchRawSubmissions = buildAllCatchRawSubmissions({
         fishInputState: formValues?.fishInputState,
@@ -1517,11 +1040,27 @@ const ReviewValuesModal = ({
         const formattedSampleTime = formatDateString_MM_DD_YY(
           timeProperty ? trapOperationsState[timeProperty] : new Date()
         )
+        // Disambiguates per-tab zip entries. Filenames used to be just
+        // `<site>_<date>` - fine for one trap per site, but multiple traps
+        // at the same site checked the same day produced IDENTICAL
+        // filenames, so each tab's zip.file() call silently overwrote the
+        // previous tab's submission JSON/CSVs (jszip replaces an existing
+        // path rather than erroring). route.key (the tab's uid()) is always
+        // unique per tab, so a short slice of it guarantees no collision
+        // regardless of naming; the trap name is added too when it's not
+        // just a repeat of the site name, for readability.
+        const formattedTrapName =
+          route.title && route.title !== visitSetupState.trapSite
+            ? `_${snakeCase(route.title)}`
+            : ''
+        const tabTag =
+          typeof route.key === 'string' ? route.key.slice(-6) : ''
+        const fileBase = `${formattedTrapSite}${formattedTrapName}_${formattedSampleTime}_${tabTag}`
 
         // --- machine-readable submission JSON (for re-import recovery) ---
         // Uses the full un-filtered state objects (not the display-filtered
         // `trapOperationsState`/`visitSetupState` locals above, which strip
-        // fields the CSVs don't need) — same inputs the real submit path
+        // fields the CSVs don't need) - same inputs the real submit path
         // uses, via the same builder, so this can never silently drift from
         // what would actually have been POSTed.
         try {
@@ -1543,6 +1082,32 @@ const ReviewValuesModal = ({
             userCredentialsStore?.displayName ||
             `${userCredentialsStore?.firstName ?? ''} ${userCredentialsStore?.lastName ?? ''}`.trim() ||
             null
+
+          // Raw, pre-transformation per-screen wizard state for this tab -
+          // same shape (and same source) as pendingVisitDraftsSlice's
+          // snapshot in IncompleteSections.tsx's snapshotPendingDrafts().
+          // Lets an import on another device offer "Edit in Form" via the
+          // exact same restoreTabState mechanism PendingTrapVisits.tsx uses
+          // for same-device resume, rather than trying to reverse-engineer
+          // wizard-editable values out of the submission-shaped payload
+          // above (which is already past the display-label→id conversion
+          // and has lost which UI mode each catch record was entered
+          // through). Purely additive/optional - older importers (and the
+          // dashboard, which has no wizard to rehydrate) just ignore it.
+          const tabInfo = tabState?.tabs?.[route.key]
+          const rawTabState = {
+            tabId: route.key,
+            tabName: tabInfo?.name ?? null,
+            trapSite: tabInfo?.trapSite ?? null,
+            groupId: tabInfo?.groupId ?? null,
+            visitSetupTab: formValues?.visitSetupState?.[route.key],
+            trapOperationsTab: formValues?.trapOperationsState?.[route.key],
+            fishProcessingTab: formValues?.fishProcessingState?.[route.key],
+            trapPostProcessingTab:
+              formValues?.trapPostProcessingState?.[route.key],
+            fishInputTab: formValues?.fishInputState?.[route.key],
+          }
+
           const submissionEnvelope = {
             schemaVersion: 1,
             exportedAt: new Date().toISOString(),
@@ -1553,15 +1118,19 @@ const ReviewValuesModal = ({
             appVersion: Constants.expoConfig?.version ?? null,
             trapVisit: trapVisitSubmissionPayload,
             catchRaw: catchRawForTab,
+            rawTabState,
           }
           zip.file(
-            `submission_${formattedTrapSite}_${formattedSampleTime}.json`,
+            `submission_${fileBase}.json`,
             JSON.stringify(submissionEnvelope, null, 2)
           )
         } catch (buildError) {
           // Never let a submission-JSON build failure block the human-
           // readable CSV/PDF export the user actually asked for.
-          console.error('Error building submission JSON for export:', buildError)
+          console.error(
+            'Error building submission JSON for export:',
+            buildError
+          )
         }
 
         // --- 1. visit_summary.csv ---
@@ -1572,10 +1141,7 @@ const ReviewValuesModal = ({
           ...flattenObject(trapPostProcessingState),
         }
         const visitCSV = arrayToCSV([wideRow])
-        zip.file(
-          `trap_visit_${formattedTrapSite}_${formattedSampleTime}.csv`,
-          visitCSV
-        )
+        zip.file(`trap_visit_${fileBase}.csv`, visitCSV)
 
         // --- 2. fish_input.csv ---
         if (fishInputState) {
@@ -1627,10 +1193,7 @@ const ReviewValuesModal = ({
           })
           if (fishRows.length) {
             const fishCSV = arrayToCSV(fishRows)
-            zip.file(
-              `catch_${formattedTrapSite}_${formattedSampleTime}.csv`,
-              fishCSV
-            )
+            zip.file(`catch_${fileBase}.csv`, fishCSV)
           }
         }
 
@@ -1703,10 +1266,7 @@ const ReviewValuesModal = ({
             if (!samples.length) return [makeRow(null)]
             return samples.map(makeRow)
           })
-          zip.file(
-            `genetics_${formattedTrapSite}_${formattedSampleTime}.csv`,
-            arrayToCSV(geneticsRows)
-          )
+          zip.file(`genetics_${fileBase}.csv`, arrayToCSV(geneticsRows))
         }
       })
 

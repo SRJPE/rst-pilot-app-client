@@ -4,16 +4,19 @@ export const getValidator = (field: any) => {
   let validator = yup.string() as any // Default to string validation
 
   if (field.fieldName === 'secchi') {
-    validator = yup.mixed().nullable().test(
-      'secchi-value',
-      'Must be a number or "Too Clear for Secchi"',
-      (value: any) => {
-        if (value === null || value === undefined || value === '') return true
-        if (value === 'Too Clear for Secchi') return true
-        const num = Number(value)
-        return !isNaN(num) && num >= 0
-      }
-    )
+    validator = yup
+      .mixed()
+      .nullable()
+      .test(
+        'secchi-value',
+        'Must be a number or "Too Clear for Secchi"',
+        (value: any) => {
+          if (value === null || value === undefined || value === '') return true
+          if (value === 'Too Clear for Secchi') return true
+          const num = Number(value)
+          return !isNaN(num) && num >= 0
+        }
+      )
     if (field.required) {
       validator = validator.required('Secchi is required')
     } else {
@@ -28,15 +31,15 @@ export const getValidator = (field: any) => {
     if (field.inputType === 'text') {
       validator = yup.string()
     } else {
-      // Any non-text 'input' field is numeric — deliberately not gated on
+      // Any non-text 'input' field is numeric - deliberately not gated on
       // inputType === 'float'/'integer' alone, since dashboard-created custom
       // fields don't collect inputType yet (it defaults to null) and would
       // otherwise fall through to the default yup.string() validator above,
       // silently skipping min/max threshold enforcement entirely.
       validator = yup.number()
       validator = validator.min(0, `Measurement required`)
-      // != null (not truthy) so a configured threshold of 0 — e.g. pH's
-      // minThreshold of 0 — still gets enforced instead of being skipped.
+      // != null (not truthy) so a configured threshold of 0 - e.g. pH's
+      // minThreshold of 0 - still gets enforced instead of being skipped.
       if (field.minThreshold != null) {
         validator = validator.min(
           field.minThreshold,
@@ -134,12 +137,13 @@ export const generateDynamicTrapOpsSchema = (
   // Mirrors the render-side gate in TrapOperations.tsx exactly
   // (isCoreLegacyProgram(...) || shouldRenderField(...)): a field hidden
   // because a program's config doesn't include it must not still be
-  // required, or the form becomes permanently unsubmittable — the field
+  // required, or the form becomes permanently unsubmittable - the field
   // needed to clear the error isn't even on screen. Confirmed with Butte
   // Creek (not a core-legacy program) missing waterTemperature from its
   // Trap Operations config.
   const isFieldConfigured = (fieldName: string) =>
-    isLegacyProgram || sectionFields.some(field => field.fieldName === fieldName)
+    isLegacyProgram ||
+    sectionFields.some(field => field.fieldName === fieldName)
 
   // always required
   let schema: { [key: string]: any } = {
@@ -180,7 +184,11 @@ export const generateDynamicTrapOpsSchema = (
       .number()
       .nullable()
       .transform((value, originalValue) => {
-        if (originalValue === '' || originalValue === null || originalValue === undefined)
+        if (
+          originalValue === '' ||
+          originalValue === null ||
+          originalValue === undefined
+        )
           return null
         return value
       })

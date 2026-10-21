@@ -3,7 +3,7 @@ import { isCoreLegacyProgram } from '../coreLegacyProgram'
 
 /**
  * stream_name values are the real production values (verified against the
- * database), not assumed names — this is exactly the field
+ * database), not assumed names - this is exactly the field
  * TrapOperations.tsx / TrapPostProcessing.tsx match against today at
  * selectedProgramObj.streamName.
  */

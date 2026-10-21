@@ -5,8 +5,8 @@
  * resolves it from the crew's trapName/trapSite selection by matching against
  * `visitSetupDefaultsState.trapLocations` (fetched over the network on login
  * / returning to Home). If that reference list is still empty when the crew
- * hits Next — most commonly right after an app reload, before the fetch has
- * completed — the lookup fails and returns null, which then gets saved onto
+ * hits Next - most commonly right after an app reload, before the fetch has
+ * completed - the lookup fails and returns null, which then gets saved onto
  * the tab and picked up VERBATIM by the final trap-visit submission builder.
  * Confirmed in production: this produces a queued submission that 400s on
  * every retry forever (a NOT NULL constraint violation), with no way for the
@@ -19,7 +19,7 @@
  * on an existing trap visit after a reload), keep the old id instead of
  * overwriting it with null.
  *
- * Leaf module on purpose — no React/redux imports, so it stays plain-node
+ * Leaf module on purpose - no React/redux imports, so it stays plain-node
  * testable (same rationale as coreLegacyProgram.ts / mergeOrderedFields.ts).
  */
 export function resolveTrapLocationId({

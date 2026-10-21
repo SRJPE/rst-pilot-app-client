@@ -258,13 +258,14 @@ const StartedTrapping = ({
         trapStatusAtEnd: returnNullableTableId(
           trapStatusAtEndValues.indexOf('restart trap')
         ),
-        totalRevolutions: (trapPostProcessingState?.[id]?.values.totalRevolutions ??
+        totalRevolutions:
+          (trapPostProcessingState?.[id]?.values.totalRevolutions ??
           trapOperationsState?.[id]?.values.totalRevolutions)
-          ? parseFloat(
-              trapPostProcessingState?.[id]?.values.totalRevolutions ??
-                trapOperationsState?.[id]?.values.totalRevolutions
-            )
-          : null,
+            ? parseFloat(
+                trapPostProcessingState?.[id]?.values.totalRevolutions ??
+                  trapOperationsState?.[id]?.values.totalRevolutions
+              )
+            : null,
         rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
         trapVisitEnvironmental: buildTrapVisitEnvironmentalForProgram({
           // Merged, so environmental fields configured in either section resolve.
@@ -274,7 +275,7 @@ const StartedTrapping = ({
             waterTurbidityIsPresent,
           },
           // The three legacy rows read from Trap Operations only, as they
-          // always have — a blank post-processing field must not overwrite a
+          // always have - a blank post-processing field must not overwrite a
           // real operations reading.
           baseValues: {
             ...(trapOperationsState?.[id]?.values ?? {}),

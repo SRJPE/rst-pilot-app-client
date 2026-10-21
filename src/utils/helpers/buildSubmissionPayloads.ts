@@ -12,14 +12,14 @@ import { buildTrapVisitEnvironmentalForProgram } from './trapVisitEnvironmental'
 import { resolveSubmissionTrapLocationId } from './deriveTrapLocationId'
 
 /**
- * Pure builders for the trap-visit and catch-raw submission payloads —
+ * Pure builders for the trap-visit and catch-raw submission payloads -
  * extracted verbatim from IncompleteSections.tsx's saveTrapVisits()/
  * saveCatchRawSubmission() closures so the same construction logic can be
  * called from both the real submit path (IncompleteSections.tsx) and the
  * export-to-JSON path (ReviewValuesModal.tsx) without the two drifting apart.
- * No redux dispatch happens here — callers own that.
+ * No redux dispatch happens here - callers own that.
  *
- * Leaf module on purpose — no React/navigation imports, plain-node testable.
+ * Leaf module on purpose - no React/navigation imports, plain-node testable.
  */
 
 /** Builds the exact `TrapVisitSubmissionI`-shaped object for one tab. */
@@ -157,13 +157,14 @@ export const buildTrapVisitSubmission = ({
         `${trapPostProcessingState[id].values.endingTrapStatus}`.toLowerCase()
       )
     ),
-    totalRevolutions: (trapPostProcessingState[id].values.totalRevolutions ??
+    totalRevolutions:
+      (trapPostProcessingState[id].values.totalRevolutions ??
       trapOperationsState[id].values.totalRevolutions)
-      ? parseFloat(
-          trapPostProcessingState[id].values.totalRevolutions ??
-            trapOperationsState[id].values.totalRevolutions
-        )
-      : null,
+        ? parseFloat(
+            trapPostProcessingState[id].values.totalRevolutions ??
+              trapOperationsState[id].values.totalRevolutions
+          )
+        : null,
     rpmAtStart: calcAvgValue([startRpm1, startRpm2, startRpm3]),
     rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
     trapVisitEnvironmental: buildTrapVisitEnvironmentalForProgram({
@@ -277,7 +278,7 @@ const findCrewIdsFromSelectedCrewNames = (
 
 /**
  * Builds every `CatchRawSubmissionI` across ALL open tabs in one pass (not
- * per-tab) — mirrors the original closure exactly, since `combinePlusCounts`
+ * per-tab) - mirrors the original closure exactly, since `combinePlusCounts`
  * is applied once across the full set before returning. Each record's `uid`
  * is the tabId it belongs to; callers filter by `uid` to get one tab's
  * records (same correlation trapVisitFormPostBundler.ts already uses).

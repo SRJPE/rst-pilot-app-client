@@ -47,13 +47,14 @@ This is a React Native / Expo tablet app for field data collection at Rotary Scr
 ### Entry Point & Providers
 
 `App.tsx` wraps the app in `GluestackUIProvider` -> `AppContainer` (`src/index.tsx`) which layers:
+
 - Redux `Provider` + `PersistGate` (redux-persist via AsyncStorage)
 - `NavigationContainer`
 - `NativeBaseProvider` (themed via `src/styles/theme.ts`)
 - `react-native-paper` Provider
 - `SlideAlertProvider` and `OnStartupProvider`
 
-The root navigator is `MainDrawerNavigator` — a drawer that gates all screens behind Azure AD B2C auth (`userCredentials.azureUid`). When no user is authenticated, only `SignIn` is shown.
+The root navigator is `MainDrawerNavigator` - a drawer that gates all screens behind Azure AD B2C auth (`userCredentials.azureUid`). When no user is authenticated, only `SignIn` is shown.
 
 ### Navigation Structure
 
@@ -87,15 +88,17 @@ MainDrawerNavigator (drawer)
 All state lives in `src/redux/`. The root reducer (`src/redux/reducers/index.ts`) combines slices grouped by feature. Many slices are persisted via `redux-persist` to AsyncStorage.
 
 Key slice groups:
+
 - **Form slices** (`formSlices/`): `visitSetup`, `trapOperations`, `fishProcessing`, `fishInput`, `trapPostProcessing`, `batchCount`, `addMarksOrTags`, `addGeneticSamples`, `navigation`, `tabSlice`, `paperEntry`
 - **Mark recapture slices** (`markRecaptureSlices/`): `releaseTrial`, `releaseTrialDataEntry`, `fishHolding`, `markRecaptureCache`, `markRecaptureNavigation`
-- **Post bundlers** (`postSlices/`): `trapVisitFormPostBundler`, `markRecapturePostBundler`, `monitoringProgramPostBundler` — these aggregate form data and handle async API submission via `createAsyncThunk`
+- **Post bundlers** (`postSlices/`): `trapVisitFormPostBundler`, `markRecapturePostBundler`, `monitoringProgramPostBundler` - these aggregate form data and handle async API submission via `createAsyncThunk`
 - **Create new program slices** (`createNewProgramSlices/`): `trappingSites`, `crewMembers`, `trappingProtocols`, `efficiencyTrialProtocols`, `permitInformation`, `multipleTraps`
 - **Global slices**: `dropdowns` (lookup values fetched from API), `userCredentials`, `userAuth`, `connectivity`, `personnel`, `visitSetupDefaults`, `slideAlert`
 
 ### API Layer
 
 `src/api/axiosConfig.ts` creates a single axios instance pointed at `EXPO_PUBLIC_BASE_URL`. The interceptor:
+
 1. Attaches `Authorization: Bearer <accessToken>` and `idToken` headers from `expo-secure-store`
 2. Auto-refreshes tokens against the Azure B2C token endpoint when expired
 3. Transforms responses: converts UTC strings to local time, camelizes keys via `humps`
@@ -112,9 +115,9 @@ Post bundler slices collect completed form data locally (persisted to AsyncStora
 
 ### UI Libraries
 
-- **NativeBase** — primary component library (legacy, being phased toward Gluestack)
-- **Gluestack UI v1** — newer components (`@gluestack-ui/*`), configured in `components/ui/`
-- **NativeWind / Tailwind** — utility classes
-- **react-native-paper** — some Material Design components
-- **victory-native** — charts in QC screens
-- **Formik + Yup** — form state and validation within screens
+- **NativeBase** - primary component library (legacy, being phased toward Gluestack)
+- **Gluestack UI v1** - newer components (`@gluestack-ui/*`), configured in `components/ui/`
+- **NativeWind / Tailwind** - utility classes
+- **react-native-paper** - some Material Design components
+- **victory-native** - charts in QC screens
+- **Formik + Yup** - form state and validation within screens

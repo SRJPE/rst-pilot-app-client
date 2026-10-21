@@ -92,7 +92,7 @@ const MultiSpecies = ({
   const { height: windowHeight } = useWindowDimensions()
   // Fixed content (header + species dropdown + button) needs a roughly
   // constant pixel height regardless of screen size, so a percentage of the
-  // window can come out too short on some devices — floor it, but still
+  // window can come out too short on some devices - floor it, but still
   // scale up on larger screens/orientations.
   const addSpeciesModalHeight = Math.max(340, windowHeight * 0.32)
   const [firstButton, setFirstButton] = useState<number>(0)
@@ -160,7 +160,7 @@ const MultiSpecies = ({
     [dropdownsStore.values.taxon]
   )
 
-  // Pre-compute combined fish store and measure counts once — independent of
+  // Pre-compute combined fish store and measure counts once - independent of
   // speciesRadioValue so switching species tabs doesn't trigger a full rebuild.
   const combinedFishData = useMemo(() => {
     const activeTabId = tabSlice.activeTabId
@@ -944,7 +944,9 @@ const MultiSpecies = ({
             closeModal={() => setAddSpeciesModalOpen(false)}
             onAdded={(species: string) => {
               setSpeciesRadioValue(species)
-              setTabIndex((batchCountStore.batchCharacteristics.multiSpecies || []).length)
+              setTabIndex(
+                (batchCountStore.batchCharacteristics.multiSpecies || []).length
+              )
             }}
           />
         </CustomModal>

@@ -18,11 +18,12 @@ const slot = (
   ...overrides,
 })
 
-const names = (entries: { fieldName: string }[]) => entries.map(e => e.fieldName)
+const names = (entries: { fieldName: string }[]) =>
+  entries.map(e => e.fieldName)
 
 /**
  * Slot sets and order_index values below are the real production ones,
- * verified against the database — not invented examples.
+ * verified against the database - not invented examples.
  */
 describe('mergeOrderedFields', () => {
   // Trap Operations' hardcoded fields, in current source order.
@@ -35,7 +36,7 @@ describe('mergeOrderedFields', () => {
 
   it('falls back to exact slot source order when the program has no config', () => {
     // Mill/Deer/Feather/Yuba: zero program_fields rows. This is the safety
-    // property — these programs must see no change at all.
+    // property - these programs must see no change at all.
     const merged = mergeOrderedFields({ configured: [], slots: trapOpsSlots })
     expect(names(merged)).toEqual([
       'rpmBefore',
@@ -47,7 +48,7 @@ describe('mergeOrderedFields', () => {
   })
 
   it('moves a configured slot to its configured position', () => {
-    // waterTemperature is order_index 0 for programs 5, 6, 7 and 8 — i.e.
+    // waterTemperature is order_index 0 for programs 5, 6, 7 and 8 - i.e.
     // deliberately dragged to first. It used to render buried mid-screen.
     const merged = mergeOrderedFields({
       configured: [{ fieldName: 'waterTemperature', orderIndex: 0 }],
@@ -103,7 +104,7 @@ describe('mergeOrderedFields', () => {
   })
 
   it('is deterministic with duplicate order_index values', () => {
-    // Program 5's Trap Operations has 23 rows across range 0-19 — duplicates
+    // Program 5's Trap Operations has 23 rows across range 0-19 - duplicates
     // are real. Equal indices must keep incoming (API) order, not shuffle.
     const configured = [
       { fieldName: 'a', orderIndex: 11 },
@@ -165,7 +166,10 @@ describe('mergeOrderedFields', () => {
   it('does not resurrect an invisible slot via its config row', () => {
     const merged = mergeOrderedFields({
       configured: [{ fieldName: 'flowMeasure', orderIndex: 1 }],
-      slots: [slot('flowMeasure', { visible: false }), slot('waterTemperature')],
+      slots: [
+        slot('flowMeasure', { visible: false }),
+        slot('waterTemperature'),
+      ],
     })
     // flowMeasure has no visible slot, so it falls through to generic
     // rendering rather than silently vanishing.
@@ -183,22 +187,16 @@ describe('fieldHasSavedValue', () => {
     expect(
       fieldHasSavedValue({ counterStart: undefined }, 'counterStart')
     ).toBe(false)
-    expect(fieldHasSavedValue({ counterStart: '' }, 'counterStart')).toBe(
-      false
-    )
+    expect(fieldHasSavedValue({ counterStart: '' }, 'counterStart')).toBe(false)
     expect(fieldHasSavedValue(null, 'counterStart')).toBe(false)
     expect(fieldHasSavedValue(undefined, 'counterStart')).toBe(false)
   })
 
-  it('is true once a real value — including 0 or false — has been entered', () => {
-    expect(fieldHasSavedValue({ counterStart: '5' }, 'counterStart')).toBe(
-      true
-    )
-    // '0'/0/false are real entered values, not "empty" — a crew recording a
+  it('is true once a real value - including 0 or false - has been entered', () => {
+    expect(fieldHasSavedValue({ counterStart: '5' }, 'counterStart')).toBe(true)
+    // '0'/0/false are real entered values, not "empty" - a crew recording a
     // literal zero must not be treated the same as never having answered.
-    expect(fieldHasSavedValue({ counterStart: '0' }, 'counterStart')).toBe(
-      true
-    )
+    expect(fieldHasSavedValue({ counterStart: '0' }, 'counterStart')).toBe(true)
     expect(fieldHasSavedValue({ counterStart: 0 }, 'counterStart')).toBe(true)
     expect(fieldHasSavedValue({ trapInThalweg: false }, 'trapInThalweg')).toBe(
       true
@@ -230,7 +228,7 @@ describe('fieldHasSavedValue', () => {
  * On a cold app reload, selectedProgramId could resolve to its real value
  * AFTER the effect's other dependencies had already settled, permanently
  * stranding programFormFields/sectionFields at null/empty even once the real
- * config was available — silently dropping counterStart/counterEnd/
+ * config was available - silently dropping counterStart/counterEnd/
  * totalRevolutions from a form the crew had already filled in on a previous
  * screen visit. The dependency array is fixed, but this asserts the
  * independent safety net (`visible: config || fieldHasSavedValue(...)`, wired
@@ -241,7 +239,7 @@ describe('regression: config going stale must not drop an already-entered value'
     // Simulates the exact stuck state: the effect's stale-selectedProgramId
     // race left these at their `null`/`[]` fallback, but the crew already
     // saved a value on a prior pass through this screen. `savedValues` here
-    // stands in for the screen's Formik `initialValues` — see the next
+    // stands in for the screen's Formik `initialValues` - see the next
     // describe block for why it must never be live `values`.
     const staleConfigured: Array<{ fieldName: string; orderIndex?: number }> =
       []
@@ -270,7 +268,7 @@ describe('regression: config going stale must not drop an already-entered value'
  * shipped with initially: it was wired to LIVE Formik `values` instead of the
  * screen's stable `initialValues`. For any field where the pure config check
  * is false, that ties the field's mount/unmount directly to its own live
- * value — so backspacing the input to empty flips fieldHasSavedValue false on
+ * value - so backspacing the input to empty flips fieldHasSavedValue false on
  * that very keystroke, `visible` goes false, and the input the crew is
  * actively editing disappears out from under them mid-edit. Fixed by having
  * every call site pass `initialValues` (only updated on navigation/save, per
@@ -282,7 +280,7 @@ describe('regression: clearing a live input must not unmount it', () => {
   it('stays visible through a full type-then-backspace-to-empty cycle when config is stuck (via stable initialValues)', () => {
     const staleConfigured: Array<{ fieldName: string; orderIndex?: number }> =
       []
-    // The screen's Formik initialValues — this is what must be passed to
+    // The screen's Formik initialValues - this is what must be passed to
     // fieldHasSavedValue, and it does NOT change as the crew types, since
     // TrapOperations.tsx/TrapPostProcessing.tsx only write back to the
     // persisted redux slice (which initialValues is sourced from) on
@@ -297,7 +295,7 @@ describe('regression: clearing a live input must not unmount it', () => {
     ]
 
     // Simulate the crew typing into the field, then deleting everything they
-    // typed — a live `values` object that goes '5' -> '55' -> '' within one
+    // typed - a live `values` object that goes '5' -> '55' -> '' within one
     // continuous edit, while `initialValues` (above) never moves.
     const keystrokes = [{ counterStart: '5' }, { counterStart: '55' }, {}]
 
@@ -316,11 +314,7 @@ describe('regression: clearing a live input must not unmount it', () => {
 describe('isLastInput', () => {
   const merged = mergeOrderedFields({
     configured: [],
-    slots: [
-      slot('a'),
-      slot('b'),
-      slot('c', { fieldType: 'select' }),
-    ],
+    slots: [slot('a'), slot('b'), slot('c', { fieldType: 'select' })],
   })
 
   it('is false while a later text input remains', () => {

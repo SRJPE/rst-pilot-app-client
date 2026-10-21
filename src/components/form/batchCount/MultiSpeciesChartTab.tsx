@@ -27,7 +27,7 @@ type Props = {
   fishMeasureCounts: Record<string, any>
   fishMeasureProtocol: Record<string, any>
   activeRuns: string[]
-  // legacy props — no longer used, kept so callers don't break at compile time
+  // legacy props - no longer used, kept so callers don't break at compile time
   currentSpeciesPlusCount?: string
   currentSpeciesMeasuredCount?: string
 }

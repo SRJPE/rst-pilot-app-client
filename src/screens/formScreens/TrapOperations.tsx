@@ -253,7 +253,7 @@ const TrapOperations = ({
     // currentProgramInfo) but never re-ran when it changed on its own. On a
     // cold rehydrate, selectedProgramId (from the persisted visitSetup slice)
     // can resolve to its real value AFTER visitSetupDefaults.programs has
-    // already settled — the effect fired once against a stale/undefined
+    // already settled - the effect fired once against a stale/undefined
     // selectedProgramId, found no matching program, and then never fired
     // again, permanently stuck with programFormFields/sectionFields = null.
     selectedProgramId,
@@ -723,8 +723,8 @@ const TrapOperations = ({
    * The three environmental measurements this screen renders with bespoke
    * widgets (unit toggle on temperature, warning thresholds on flow/temp).
    *
-   * Handing them to ConditionalTrapVisitFields as slots — instead of
-   * rendering them above it — is what lets an admin's configured order
+   * Handing them to ConditionalTrapVisitFields as slots - instead of
+   * rendering them above it - is what lets an admin's configured order
    * actually position them. Previously the dynamic renderer discarded their
    * config rows outright, so e.g. waterTemperature at order_index 0 (set for
    * four programs) still rendered wherever this file happened to put it.
@@ -749,7 +749,7 @@ const TrapOperations = ({
     touched: any
     errors: any
     values: any
-    // Stable snapshot from the persisted redux slice — only updated on
+    // Stable snapshot from the persisted redux slice - only updated on
     // navigation/save, unlike `values` which changes on every keystroke. Used
     // ONLY for fieldHasSavedValue below; see that function's doc for why live
     // `values` must never be used there (it previously made a field vanish
@@ -846,7 +846,7 @@ const TrapOperations = ({
       width: '28%',
       // The recordTurbidityInPostProcessing check is a deliberate UI mode
       // switch (crew chose to record turbidity here vs. later), not a
-      // data-loading concern — fieldHasSavedValue only backstops the config
+      // data-loading concern - fieldHasSavedValue only backstops the config
       // lookup that follows it, never bypasses the toggle itself.
       visible:
         values.recordTurbidityInPostProcessing === false &&
@@ -916,6 +916,10 @@ const TrapOperations = ({
 
   return (
     <Formik
+      // Forces a clean unmount/remount on every tab switch instead of
+      // relying on enableReinitialize to catch up after the fact - see the
+      // unmount-cleanup effect below for why.
+      key={activeTabId}
       validationSchema={validationSchema}
       enableReinitialize={true}
       validateOnMount={false}
@@ -951,7 +955,6 @@ const TrapOperations = ({
         errors,
         values,
         initialValues,
-        resetForm,
       }) => {
         resetNonExistentFields(values, setFieldValue)
 
@@ -1073,12 +1076,39 @@ const TrapOperations = ({
           otherTabFormsValid,
         ])
 
+        // Formik is keyed by activeTabId (see below), so this render-prop
+        // instance only ever belongs to ONE tab for its whole lifetime -
+        // "switching tabs" means THIS instance unmounts and a fresh one
+        // mounts for the new tab, already initialized with that tab's own
+        // redux state (no reinit race to win). Saving the outgoing tab's
+        // values now happens from this unmount cleanup instead of a
+        // previouslyActiveTabId-watching effect: the old effect ran as a
+        // normal passive effect on every activeTabId change, in the same
+        // render pass as Formik's own enableReinitialize effect, so `values`
+        // and `activeTabId` could transiently disagree about which tab they
+        // belonged to - any save (this effect, or registerSaveHandler below)
+        // firing in that window could write one tab's values into another
+        // tab's redux slot. Refs (not the raw values/activeStep) are used
+        // here because a cleanup function's closure is fixed at mount time;
+        // reading `values`/`activeStep` directly would see this instance's
+        // FIRST values forever, not its latest.
+        const valuesRef = useRef(values)
         useEffect(() => {
-          if (previouslyActiveTabId && navigationSlice.activeStep === 2) {
-            onSubmit(values, previouslyActiveTabId)
-            resetForm()
+          valuesRef.current = values
+        }, [values])
+
+        const activeStepRef = useRef(navigationSlice.activeStep)
+        useEffect(() => {
+          activeStepRef.current = navigationSlice.activeStep
+        }, [navigationSlice.activeStep])
+
+        useEffect(() => {
+          return () => {
+            if (activeStepRef.current === 2) {
+              onSubmit(valuesRef.current, activeTabId)
+            }
           }
-        }, [previouslyActiveTabId, activeTabId])
+        }, [])
 
         useEffect(() => {
           registerSaveHandler(() => onSubmit(values, activeTabId))

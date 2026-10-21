@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitest/config'
 
 /**
- * Unit tests for PURE logic only — no React Native, no Expo, no native modules.
+ * Unit tests for PURE logic only - no React Native, no Expo, no native modules.
  *
  * The app itself is bundled by Metro; this config exists solely so data-shaping
  * helpers (which have no RN imports) can be tested in plain node. Keep the

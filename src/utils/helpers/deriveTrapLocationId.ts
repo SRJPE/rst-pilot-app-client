@@ -5,13 +5,13 @@
  *
  * Extracted from VisitSetup.tsx's getTrapLocationId so the same matching
  * logic can also be used as a self-heal at final submission time (see
- * resolveSubmissionTrapLocationId) — before this, the 4 submission-builder
+ * resolveSubmissionTrapLocationId) - before this, the 4 submission-builder
  * sites (IncompleteSections.tsx, StartedTrapping.tsx,
  * navigationFlowWarnings/{HighFlows,NoFishCaught}.tsx) each read
  * visitSetupState[id].values.trapLocationId verbatim, with no way to recover
  * a null baked in earlier by a loading race (see resolveTrapLocationId.ts).
  *
- * Leaf module on purpose — no React/redux imports, plain-node testable.
+ * Leaf module on purpose - no React/redux imports, plain-node testable.
  */
 export function deriveTrapLocationId({
   trapLocations,
@@ -61,7 +61,7 @@ export function deriveTrapLocationId({
 /**
  * Self-heal for the 4 trap-visit submission builders: a tab's stored
  * trapLocationId can already be null from a loading-race in VisitSetup.tsx
- * (see resolveTrapLocationId.ts's documented residual case — a brand-new tab
+ * (see resolveTrapLocationId.ts's documented residual case - a brand-new tab
  * with nothing to fall back to at the time). By the time the crew actually
  * hits Save, the trapLocations reference list has almost always finished
  * loading, so re-deriving from the tab's stored trapName/trapSite here
