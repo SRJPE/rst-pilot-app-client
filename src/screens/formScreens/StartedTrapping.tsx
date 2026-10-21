@@ -258,8 +258,12 @@ const StartedTrapping = ({
         trapStatusAtEnd: returnNullableTableId(
           trapStatusAtEndValues.indexOf('restart trap')
         ),
-        totalRevolutions: trapPostProcessingState?.[id]?.values.totalRevolutions
-          ? parseFloat(trapPostProcessingState?.[id]?.values.totalRevolutions)
+        totalRevolutions: (trapPostProcessingState?.[id]?.values.totalRevolutions ??
+          trapOperationsState?.[id]?.values.totalRevolutions)
+          ? parseFloat(
+              trapPostProcessingState?.[id]?.values.totalRevolutions ??
+                trapOperationsState?.[id]?.values.totalRevolutions
+            )
           : null,
         rpmAtEnd: calcAvgValue([endRpm1, endRpm2, endRpm3]),
         trapVisitEnvironmental: buildTrapVisitEnvironmentalForProgram({
