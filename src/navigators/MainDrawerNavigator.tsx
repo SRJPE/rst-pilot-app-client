@@ -16,6 +16,7 @@ import QCForm from './roots/QCFormRoot'
 import TrapVisitForm from './roots/TrapVisitFormRoot'
 import InspectorWindow from '../screens/InspectorWindow'
 import PendingTrapVisits from '../screens/PendingTrapVisits'
+import ImportTrapVisit from '../screens/ImportTrapVisit'
 import { refreshUserToken } from '../utils/authUtils'
 import React, { useEffect } from 'react'
 import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
@@ -131,6 +132,7 @@ const DrawerNavigator = ({
             name='Pending Trap Visits'
             component={PendingTrapVisits}
           />
+          <Drawer.Screen name='Import Trap Visit' component={ImportTrapVisit} />
           <Drawer.Screen name='Mark Recapture' component={MarkRecaptureForm} />
           <Drawer.Screen name='Trap Visit Form' component={TrapVisitForm} />
           <Drawer.Screen

@@ -251,6 +251,12 @@ const DrawerMenu = ({
           title='Pending Trap Visits'
         />
         <MenuButton
+          active={currentRoute === 'Import Trap Visit'}
+          onPress={() => handlePressMainNavButton('Import Trap Visit')}
+          icon='cloud-upload'
+          title='Import Trap Visit'
+        />
+        <MenuButton
           active={currentRoute === 'Mark Recapture'}
           onPress={() => handlePressMainNavButton('Mark Recapture')}
           icon='clipboard'
