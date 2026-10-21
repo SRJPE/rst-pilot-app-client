@@ -124,11 +124,23 @@ export const generateTrapVisitSchema = (fields: Array<any>) => {
 
 export const generateDynamicTrapOpsSchema = (
   fields: Array<any>,
-  conditionCode?: string | null
+  conditionCode?: string | null,
+  isLegacyProgram?: boolean
 ) => {
   const sectionFields = fields.filter(
     (field: any) => field.formSection === 'Trap Operations'
   )
+
+  // Mirrors the render-side gate in TrapOperations.tsx exactly
+  // (isCoreLegacyProgram(...) || shouldRenderField(...)): a field hidden
+  // because a program's config doesn't include it must not still be
+  // required, or the form becomes permanently unsubmittable — the field
+  // needed to clear the error isn't even on screen. Confirmed with Butte
+  // Creek (not a core-legacy program) missing waterTemperature from its
+  // Trap Operations config.
+  const isFieldConfigured = (fieldName: string) =>
+    isLegacyProgram || sectionFields.some(field => field.fieldName === fieldName)
+
   // always required
   let schema: { [key: string]: any } = {
     trapStatus: yup.string().required('Trap status required'),
@@ -149,15 +161,21 @@ export const generateDynamicTrapOpsSchema = (
         otherwise: yup.number().nullable().transform(normalizeNumber),
         // .required('Flow measure is required'),
       }),
-    waterTemperature: yup
-      .number()
-      .nullable()
-      .transform(normalizeNumber)
-      .when('trapStatus', {
-        is: trapRestart,
-        then: yup.number().nullable().optional(),
-        otherwise: yup.number().required('Temperature is required'),
-      }),
+    waterTemperature: isFieldConfigured('waterTemperature')
+      ? yup
+          .number()
+          .nullable()
+          .transform(normalizeNumber)
+          .when('trapStatus', {
+            is: trapRestart,
+            then: yup.number().nullable().transform(normalizeNumber).optional(),
+            otherwise: yup
+              .number()
+              .nullable()
+              .transform(normalizeNumber)
+              .required('Temperature is required'),
+          })
+      : yup.number().nullable().transform(normalizeNumber),
     waterTurbidity: yup
       .number()
       .nullable()
