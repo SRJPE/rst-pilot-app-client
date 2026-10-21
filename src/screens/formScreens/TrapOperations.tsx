@@ -65,6 +65,11 @@ import TrapEndDateAndTime from '../../components/form/TrapEndDateAndTime'
 import RPMBefore from '../../components/form/RPMBefore'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useFormSave } from '../../context/FormSaveContext'
+import {
+  usePrefillFieldFromPreviousVisit,
+  useTotalRevolutionsAutoCalc,
+} from '../../utils/hooks/useCounterRevolutions'
+import { useRepairTrapLocationId } from '../../utils/hooks/useRepairTrapLocationId'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -91,6 +96,7 @@ const mapStateToProps = (state: RootState) => {
     visitSetupDefaults: state.visitSetupDefaults,
     previousTrapVisits:
       state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
+    trapPostProcessingStore: state.trapPostProcessing,
     conditionCode:
       (
         state.trapPostProcessing[state.tabSlice.activeTabId ?? 'placeholderId']
@@ -118,6 +124,7 @@ const TrapOperations = ({
   tabSlice,
   visitSetupDefaults,
   previousTrapVisits,
+  trapPostProcessingStore,
   conditionCode,
 }: {
   navigation: any
@@ -133,6 +140,7 @@ const TrapOperations = ({
   tabSlice: TabStateI
   visitSetupDefaults: any
   previousTrapVisits: any
+  trapPostProcessingStore: any
   conditionCode: string | null
 }) => {
   const dispatch = useDispatch<AppDispatch>()
@@ -140,6 +148,15 @@ const TrapOperations = ({
   const navigationState = useSelector((state: any) => state.navigation)
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
+
+  useRepairTrapLocationId({
+    activeTabId,
+    trapLocationId: selectedTrapLocationId,
+    trapName: selectedTrapName,
+    trapSite: selectedTrapSite,
+    trapLocations: visitSetupDefaults?.trapLocations,
+    dispatch,
+  })
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
@@ -215,7 +232,8 @@ const TrapOperations = ({
       setProgramFormFields(currentProgramInfo?.programFormFields)
       const dynamicTrapOpsSchema = generateDynamicTrapOpsSchema(
         sectionFields,
-        conditionCode
+        conditionCode,
+        isCoreLegacyProgram(currentProgramInfo)
       )
       setValidationSchema(dynamicTrapOpsSchema)
     } else {
@@ -393,7 +411,11 @@ const TrapOperations = ({
         dispatch(markStepCompleted({ propName: 'trapOperations' }))
       }
 
-      if (values.gearStatus === 'S' || values.conditionCode === '4' || conditionCode === '4') {
+      if (
+        values.gearStatus === 'S' ||
+        values.conditionCode === '4' ||
+        conditionCode === '4'
+      ) {
         dispatch(markStepCompleted({ propName: 'fishProcessing' }))
         dispatch(markStepCompleted({ propName: 'fishInput' }))
       }
@@ -830,9 +852,9 @@ const TrapOperations = ({
         values.recordTurbidityInPostProcessing === false &&
         Boolean(
           isCoreLegacyProgram(selectedProgramObj) ||
-            !programFormFields?.length ||
-            find(programFormFields, { fieldName: 'waterTurbidity' }) ||
-            fieldHasSavedValue(initialValues, 'waterTurbidity')
+          !programFormFields?.length ||
+          find(programFormFields, { fieldName: 'waterTurbidity' }) ||
+          fieldHasSavedValue(initialValues, 'waterTurbidity')
         ),
       render: () => (
         <FormInputComponent
@@ -1125,6 +1147,25 @@ const TrapOperations = ({
           }
         }, [mostRecentTrapVisit, mostRecentTrapVisit])
 
+        usePrefillFieldFromPreviousVisit({
+          fieldName: 'counterStart',
+          sourceMeasureName: 'counterEnd',
+          sectionFields,
+          activePage,
+          values,
+          setFieldValue,
+          mostRecentTrapVisit,
+        })
+
+        useTotalRevolutionsAutoCalc({
+          sectionFields,
+          activePage,
+          values,
+          setFieldValue,
+          otherScreenValues:
+            trapPostProcessingStore?.[activeTabId ?? 'placeholderId']?.values,
+        })
+
         const handleTurbidityToggle = (newValue: boolean) => {
           if (newValue === true) {
             setFieldValue('waterTurbidity', null)
@@ -1339,7 +1380,6 @@ const TrapOperations = ({
                       >
                         <Heading>Environmental Conditions</Heading>
                       </HStack>
-
 
                       {(isCoreLegacyProgram(selectedProgramObj) ||
                         !selectedProgramObj?.programFormFields?.length ||

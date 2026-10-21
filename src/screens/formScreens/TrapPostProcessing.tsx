@@ -57,6 +57,12 @@ import ConditionalTrapVisitFields from '../../components/form/ConditionalTrapVis
 import { find } from 'lodash'
 import { AppDispatch, RootState } from '../../redux/store'
 import { useFormSave } from '../../context/FormSaveContext'
+import {
+  useMostRecentTrapVisitForLocation,
+  usePrefillFieldFromPreviousVisit,
+  useTotalRevolutionsAutoCalc,
+} from '../../utils/hooks/useCounterRevolutions'
+import { useRepairTrapLocationId } from '../../utils/hooks/useRepairTrapLocationId'
 
 const mapStateToProps = (state: RootState) => {
   let activeTabId = state.tabSlice.activeTabId
@@ -87,6 +93,14 @@ const mapStateToProps = (state: RootState) => {
     selectedTrapLocationId:
       state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
         ?.trapLocationId,
+    selectedTrapSite:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.trapSite,
+    selectedTrapName:
+      state.visitSetup[state.tabSlice.activeTabId ?? 'placeholderId']?.values
+        ?.trapName,
+    previousTrapVisits:
+      state.trapVisitFormPostBundler.previousTrapVisitSubmissions,
   }
 }
 
@@ -104,6 +118,9 @@ const TrapPostProcessing = ({
   trapOperationsStore,
   fishProcessingSlice,
   selectedTrapLocationId,
+  selectedTrapSite,
+  selectedTrapName,
+  previousTrapVisits,
 }: {
   navigation: any
   reduxState: any
@@ -118,6 +135,9 @@ const TrapPostProcessing = ({
   selectedProgramId: any
   trapOperationsStore: any
   selectedTrapLocationId: any
+  selectedTrapSite: any
+  selectedTrapName: any
+  previousTrapVisits: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const { registerSaveHandler } = useFormSave()
@@ -127,6 +147,16 @@ const TrapPostProcessing = ({
   )
   const activeStep = navigationState.activeStep
   const activePage = navigationState.steps[activeStep]?.name
+
+  useRepairTrapLocationId({
+    activeTabId,
+    trapLocationId: selectedTrapLocationId,
+    trapName: selectedTrapName,
+    trapSite: selectedTrapSite,
+    trapLocations: visitSetupDefaults?.trapLocations,
+    dispatch,
+  })
+
   const recordTurbidityInPostProcessing = useSelector(
     (state: any) =>
       !state.trapOperations?.[tabSlice.activeTabId]?.values
@@ -141,6 +171,11 @@ const TrapPostProcessing = ({
   )
   const [sectionFields, setSectionFields] = useState<any>(null)
   const [programFormFields, setProgramFormFields] = useState<any>(null)
+
+  const mostRecentTrapVisit = useMostRecentTrapVisitForLocation(
+    previousTrapVisits,
+    selectedTrapLocationId
+  )
 
   const userPrograms = userCredentialsStore?.userPrograms || []
 
@@ -198,6 +233,16 @@ const TrapPostProcessing = ({
   }, [
     visitSetupDefaults.programs,
     visitSetupDefaults.permitInfo,
+    // Each redux slice persists/rehydrates independently and asynchronously
+    // (see VisitSetup.tsx's resolveTrapLocationId comment for the same race
+    // elsewhere), so trapLocations can still be [] on the first run of this
+    // effect after a cold rehydrate even once `programs` has arrived. Without
+    // it as a dependency, trapEquimentType resolved to null and any field
+    // configured with a specific (non-null) equipmentId was filtered out of
+    // sectionFields permanently for that mount — exactly what vanished
+    // counterStart/counterEnd/totalRevolutions on reload. TrapOperations.tsx
+    // already lists this dependency; this screen didn't.
+    visitSetupDefaults?.trapLocations,
     selectedTrapLocationId,
     activePage,
     // Pre-existing bug: this effect reads selectedProgramId (via
@@ -933,6 +978,25 @@ const TrapPostProcessing = ({
           registerSaveHandler(() => onSubmit(values, activeTabId ?? ''))
           return () => registerSaveHandler(null)
         }, [values, activeTabId, startTime])
+
+        usePrefillFieldFromPreviousVisit({
+          fieldName: 'counterStart',
+          sourceMeasureName: 'counterEnd',
+          sectionFields,
+          activePage,
+          values,
+          setFieldValue,
+          mostRecentTrapVisit,
+        })
+
+        useTotalRevolutionsAutoCalc({
+          sectionFields,
+          activePage,
+          values,
+          setFieldValue,
+          otherScreenValues:
+            trapOperationsStore?.[activeTabId ?? 'placeholderId']?.values,
+        })
 
         const navButtons = useMemo(
           () => (
