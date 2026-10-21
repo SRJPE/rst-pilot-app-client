@@ -22,10 +22,15 @@ import { shareAsync } from 'expo-sharing'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
 import JSZip from 'jszip'
+import Constants from 'expo-constants'
 import {
   formatDateString_MM_DD_YY,
   getTimeProperty,
 } from '../../utils/helpers/helperFunctions'
+import {
+  buildTrapVisitSubmission,
+  buildAllCatchRawSubmissions,
+} from '../../utils/helpers/buildSubmissionPayloads'
 
 const initialLayout = { width: Dimensions.get('window').width }
 
@@ -70,6 +75,8 @@ type Props = {
   tabState: any
   visitSetupDefaultState?: any
   fieldCheck?: any
+  dropdownsState?: any
+  userCredentialsStore?: any
 }
 
 const getFilteredTrapOperationsState = (trapOperationsState: any) => {
@@ -1342,6 +1349,8 @@ const ReviewValuesModal = ({
   tabState,
   visitSetupDefaultState,
   fieldCheck,
+  dropdownsState,
+  userCredentialsStore,
 }: Props) => {
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -1474,6 +1483,17 @@ const ReviewValuesModal = ({
     try {
       const zip = new JSZip()
 
+      // Built once across all tabs (matches how the real submit path
+      // combines plus-counts), then filtered per tab below by `uid` — same
+      // correlation trapVisitFormPostBundler.ts already uses when posting.
+      const allCatchRawSubmissions = buildAllCatchRawSubmissions({
+        fishInputState: formValues?.fishInputState,
+        visitSetupState: formValues?.visitSetupState,
+        visitSetupDefaultState,
+        dropdownsState,
+        userCredentialsStore,
+      })
+
       routes.forEach((route: any) => {
         const visitSetupState = {
           ...formValues?.visitSetupState?.[route.key]?.values,
@@ -1497,6 +1517,53 @@ const ReviewValuesModal = ({
         const formattedSampleTime = formatDateString_MM_DD_YY(
           timeProperty ? trapOperationsState[timeProperty] : new Date()
         )
+
+        // --- machine-readable submission JSON (for re-import recovery) ---
+        // Uses the full un-filtered state objects (not the display-filtered
+        // `trapOperationsState`/`visitSetupState` locals above, which strip
+        // fields the CSVs don't need) — same inputs the real submit path
+        // uses, via the same builder, so this can never silently drift from
+        // what would actually have been POSTed.
+        try {
+          const trapVisitSubmissionPayload = buildTrapVisitSubmission({
+            tabId: route.key,
+            visitSetupState: formValues?.visitSetupState,
+            visitSetupDefaultState,
+            trapOperationsState: formValues?.trapOperationsState,
+            trapPostProcessingState: formValues?.trapPostProcessingState,
+            fishProcessingState: formValues?.fishProcessingState,
+            dropdownsState,
+            userCredentialsStore,
+            fieldCheckValue: fieldCheck,
+          })
+          const catchRawForTab = allCatchRawSubmissions.filter(
+            (catchRaw: any) => catchRaw.uid === route.key
+          )
+          const exportedByName =
+            userCredentialsStore?.displayName ||
+            `${userCredentialsStore?.firstName ?? ''} ${userCredentialsStore?.lastName ?? ''}`.trim() ||
+            null
+          const submissionEnvelope = {
+            schemaVersion: 1,
+            exportedAt: new Date().toISOString(),
+            exportedBy: {
+              personnelId: userCredentialsStore?.id ?? null,
+              name: exportedByName,
+            },
+            appVersion: Constants.expoConfig?.version ?? null,
+            trapVisit: trapVisitSubmissionPayload,
+            catchRaw: catchRawForTab,
+          }
+          zip.file(
+            `submission_${formattedTrapSite}_${formattedSampleTime}.json`,
+            JSON.stringify(submissionEnvelope, null, 2)
+          )
+        } catch (buildError) {
+          // Never let a submission-JSON build failure block the human-
+          // readable CSV/PDF export the user actually asked for.
+          console.error('Error building submission JSON for export:', buildError)
+        }
+
         // --- 1. visit_summary.csv ---
         const wideRow = {
           ...flattenObject(visitSetupState),
