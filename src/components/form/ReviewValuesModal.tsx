@@ -865,6 +865,404 @@ const AccordionView = ({
   )
 }
 
+// helper: convert array of objects to CSV
+function arrayToCSV(rows: any[]) {
+  if (rows.length === 0) return ''
+  let headers = Object.keys(rows[0])
+  headers = headers.filter(h => !h.includes('Id') && !h.includes('Unit'))
+  const csv = [
+    headers.join(','), // header row
+    ...rows.map(row => headers.map(h => JSON.stringify(row[h] ?? '')).join(',')),
+  ]
+  return csv.join('\n')
+}
+
+// helper: flatten nested objects into single-level row, skip nulls
+function flattenObject(obj: any) {
+  if (obj == null) return {}
+  return Object.keys(obj).reduce((acc: any, key) => {
+    const value = obj[key]
+    const newKey = key
+
+    if (value === null || value === undefined || value === '') {
+      // skip null/undefined
+      return acc
+    }
+
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      // recurse into nested objects
+      Object.assign(acc, flattenObject(value))
+    } else if (Array.isArray(value)) {
+      // collapse array into comma-separated string
+      if (value.length > 0) {
+        acc[newKey] = value.join(', ')
+      }
+    } else {
+      acc[newKey] = value
+    }
+
+    return acc
+  }, {})
+}
+
+// Plain exported functions (not component-local closures) so both
+// ReviewValuesModal's own "Export as PDF"/"Export as CSV ZIP" buttons and
+// IncompleteSections.tsx's copies of the same buttons (surfaced on the main
+// page so a crew doesn't have to open the review modal first) can call the
+// exact same logic without duplicating it. `routes`/`dropdownValues` are
+// derived from the params here rather than passed in separately, since
+// they're cheap, pure derivations of `tabState`/`dropdownsState` that every
+// caller already has.
+export async function printTrapVisitToFile({
+  formValues,
+  tabState,
+  visitSetupDefaultState,
+  fieldCheck,
+  dropdownsState,
+  onSuccess,
+}: {
+  formValues: any
+  tabState: any
+  visitSetupDefaultState: any
+  fieldCheck?: any
+  dropdownsState: any
+  onSuccess?: () => void
+}) {
+  const routes = Object.keys(tabState.tabs).map((tabId: any) => ({
+    key: tabId,
+    title: tabState.tabs[tabId].name,
+  }))
+  const dropdownValues = dropdownsState?.values
+  const html = generateAccordionHtmlFromTabValues({
+    routes,
+    formValues,
+    visitSetupDefaultState,
+    fieldCheck,
+    dropdownValues,
+  })
+  const firstKey = routes?.[0]?.key
+  const visitSetupVals = formValues?.visitSetupState?.[firstKey]?.values
+  const trapOpsVals = formValues?.trapOperationsState?.[firstKey]?.values
+  const timeProperty = getTimeProperty(trapOpsVals)
+  const trapSite = visitSetupVals?.trapSite || 'trap'
+  const dateStr = formatDateString_MM_DD_YY(
+    timeProperty ? trapOpsVals?.[timeProperty] : new Date()
+  )
+  const filename = `${trapSite}_${dateStr}.pdf`
+  const { uri } = await Print.printToFileAsync({ html })
+  try {
+    const destUri = `${FileSystem.documentDirectory}${filename}`
+    await FileSystem.copyAsync({ from: uri, to: destUri })
+    await shareAsync(destUri, {
+      UTI: '.pdf',
+      mimeType: 'application/pdf',
+    })
+    onSuccess?.()
+  } catch (error) {
+    console.error('Error sharing file:', error)
+    alert('Error sharing file. Please try again.')
+  }
+}
+
+export async function exportTrapVisitDataZip({
+  formValues,
+  tabState,
+  visitSetupDefaultState,
+  fieldCheck,
+  dropdownsState,
+  userCredentialsStore,
+  fishHoldingState,
+}: {
+  formValues: any
+  tabState: any
+  visitSetupDefaultState: any
+  fieldCheck?: any
+  dropdownsState: any
+  userCredentialsStore: any
+  fishHoldingState: any
+}) {
+  const routes = Object.keys(tabState.tabs).map((tabId: any) => ({
+    key: tabId,
+    title: tabState.tabs[tabId].name,
+  }))
+  const dropdownValues = dropdownsState?.values
+  try {
+    const zip = new JSZip()
+
+    // Built once across all tabs (matches how the real submit path
+    // combines plus-counts), then filtered per tab below by `uid` - same
+    // correlation trapVisitFormPostBundler.ts already uses when posting.
+    const allCatchRawSubmissions = buildAllCatchRawSubmissions({
+      fishInputState: formValues?.fishInputState,
+      visitSetupState: formValues?.visitSetupState,
+      visitSetupDefaultState,
+      dropdownsState,
+      userCredentialsStore,
+    })
+
+    routes.forEach((route: any) => {
+      const visitSetupState = {
+        ...formValues?.visitSetupState?.[route.key]?.values,
+        fieldCheck,
+      }
+      const trapOperationsState = getFilteredTrapOperationsState(
+        formValues?.trapOperationsState?.[route.key]?.values
+      )
+      const fishProcessingState =
+        formValues?.fishProcessingState?.[route.key]?.values
+      const fishInputState =
+        formValues?.fishInputState?.[route.key]?.fishStore
+      const trapPostProcessingState = getFilteredPostProcessingState(
+        formValues?.trapPostProcessingState?.[route.key]?.values,
+        formValues?.visitSetupState?.[route.key]?.values
+      )
+
+      const timeProperty = getTimeProperty(trapOperationsState)
+
+      const formattedTrapSite = snakeCase(visitSetupState.trapSite)
+      const formattedSampleTime = formatDateString_MM_DD_YY(
+        timeProperty ? trapOperationsState[timeProperty] : new Date()
+      )
+      // Disambiguates per-tab zip entries. Filenames used to be just
+      // `<site>_<date>` - fine for one trap per site, but multiple traps
+      // at the same site checked the same day produced IDENTICAL
+      // filenames, so each tab's zip.file() call silently overwrote the
+      // previous tab's submission JSON/CSVs (jszip replaces an existing
+      // path rather than erroring). route.key (the tab's uid()) is always
+      // unique per tab, so a short slice of it guarantees no collision
+      // regardless of naming; the trap name is added too when it's not
+      // just a repeat of the site name, for readability.
+      const formattedTrapName =
+        route.title && route.title !== visitSetupState.trapSite
+          ? `_${snakeCase(route.title)}`
+          : ''
+      const tabTag = typeof route.key === 'string' ? route.key.slice(-6) : ''
+      const fileBase = `${formattedTrapSite}${formattedTrapName}_${formattedSampleTime}_${tabTag}`
+
+      // --- machine-readable submission JSON (for re-import recovery) ---
+      // Uses the full un-filtered state objects (not the display-filtered
+      // `trapOperationsState`/`visitSetupState` locals above, which strip
+      // fields the CSVs don't need) - same inputs the real submit path
+      // uses, via the same builder, so this can never silently drift from
+      // what would actually have been POSTed.
+      try {
+        const trapVisitSubmissionPayload = buildTrapVisitSubmission({
+          tabId: route.key,
+          visitSetupState: formValues?.visitSetupState,
+          visitSetupDefaultState,
+          trapOperationsState: formValues?.trapOperationsState,
+          trapPostProcessingState: formValues?.trapPostProcessingState,
+          fishProcessingState: formValues?.fishProcessingState,
+          dropdownsState,
+          userCredentialsStore,
+          fieldCheckValue: fieldCheck,
+        })
+        const catchRawForTab = allCatchRawSubmissions.filter(
+          (catchRaw: any) => catchRaw.uid === route.key
+        )
+        const exportedByName =
+          userCredentialsStore?.displayName ||
+          `${userCredentialsStore?.firstName ?? ''} ${userCredentialsStore?.lastName ?? ''}`.trim() ||
+          null
+
+        // Raw, pre-transformation per-screen wizard state for this tab -
+        // same shape (and same source) as pendingVisitDraftsSlice's
+        // snapshot in IncompleteSections.tsx's snapshotPendingDrafts().
+        // Lets an import on another device offer "Edit in Form" via the
+        // exact same restoreTabState mechanism PendingTrapVisits.tsx uses
+        // for same-device resume, rather than trying to reverse-engineer
+        // wizard-editable values out of the submission-shaped payload
+        // above (which is already past the display-label→id conversion
+        // and has lost which UI mode each catch record was entered
+        // through). Purely additive/optional - older importers (and the
+        // dashboard, which has no wizard to rehydrate) just ignore it.
+        const tabInfo = tabState?.tabs?.[route.key]
+        const rawTabState = {
+          tabId: route.key,
+          tabName: tabInfo?.name ?? null,
+          trapSite: tabInfo?.trapSite ?? null,
+          groupId: tabInfo?.groupId ?? null,
+          visitSetupTab: formValues?.visitSetupState?.[route.key],
+          trapOperationsTab: formValues?.trapOperationsState?.[route.key],
+          fishProcessingTab: formValues?.fishProcessingState?.[route.key],
+          trapPostProcessingTab:
+            formValues?.trapPostProcessingState?.[route.key],
+          fishInputTab: formValues?.fishInputState?.[route.key],
+        }
+
+        const hasFishHoldingData =
+          fishHoldingState?.values?.totalFishHolding != null ||
+          Object.keys(fishHoldingState?.values?.selectedFishStore ?? {})
+            .length > 0
+
+        const submissionEnvelope = {
+          schemaVersion: 1,
+          exportedAt: new Date().toISOString(),
+          exportedBy: {
+            personnelId: userCredentialsStore?.id ?? null,
+            name: exportedByName,
+          },
+          appVersion: Constants.expoConfig?.version ?? null,
+          trapVisit: trapVisitSubmissionPayload,
+          catchRaw: catchRawForTab,
+          rawTabState,
+          // Fish Holding has no backup path of its own (it's never
+          // submitted to the server from this screen - FishHolding.tsx
+          // writes it to redux only) - included here so it isn't
+          // permanently lost if this device is lost or wiped before the
+          // crew gets to a Mark Recapture submission.
+          fishHolding: hasFishHoldingData ? fishHoldingState.values : null,
+        }
+        zip.file(
+          `submission_${fileBase}.json`,
+          JSON.stringify(submissionEnvelope, null, 2)
+        )
+      } catch (buildError) {
+        // Never let a submission-JSON build failure block the human-
+        // readable CSV/PDF export the user actually asked for.
+        console.error('Error building submission JSON for export:', buildError)
+      }
+
+      // --- 1. visit_summary.csv ---
+      const wideRow = {
+        ...flattenObject(visitSetupState),
+        ...flattenObject(trapOperationsState),
+        ...flattenObject(fishProcessingState),
+        ...flattenObject(trapPostProcessingState),
+      }
+      const visitCSV = arrayToCSV([wideRow])
+      zip.file(`trap_visit_${fileBase}.csv`, visitCSV)
+
+      // --- 2. fish_input.csv ---
+      if (fishInputState) {
+        const fishRows = Object.values(fishInputState).map((fish: any) => {
+          const appliedMarksStr =
+            Array.isArray(fish.appliedMarks) && fish.appliedMarks.length
+              ? fish.appliedMarks.map(formatAppliedMark).join('; ')
+              : ''
+          const geneticSamplesStr =
+            Array.isArray(fish.geneticSamples) && fish.geneticSamples.length
+              ? fish.geneticSamples.map(formatGeneticSample).join('; ')
+              : ''
+          const existingMarksStr =
+            Array.isArray(fish.existingMarks) && fish.existingMarks.length
+              ? fish.existingMarks
+                  .map((m: any) =>
+                    typeof m === 'object'
+                      ? m.markCode || m.markType || JSON.stringify(m)
+                      : String(m)
+                  )
+                  .join('; ')
+              : ''
+          const fishConditionsStr =
+            Array.isArray(fish.fishConditions) && fish.fishConditions.length
+              ? fish.fishConditions.join(', ')
+              : ''
+
+          return {
+            trapSite: visitSetupState.trapSite,
+            species: fish.species,
+            forkLength: fish.forkLength,
+            run: fish.run,
+            lifeStage: fish.lifeStage,
+            weight: fish.weight,
+            adiposeClipped: fish.adiposeClipped,
+            dead: fish.dead,
+            eggs: fish.eggs,
+            milting: fish.milting,
+            fishConditions: fishConditionsStr,
+            existingMarks: existingMarksStr,
+            plusCount: fish.plusCount,
+            numFishCaught: fish.numFishCaught,
+            willBeUsedInRecapture: fish.willBeUsedInRecapture,
+            plusCountMethod: fish.plusCountMethod,
+            comments: fish.comments,
+            marksTagsApplied: appliedMarksStr,
+            geneticSamples: geneticSamplesStr,
+          }
+        })
+        if (fishRows.length) {
+          const fishCSV = arrayToCSV(fishRows)
+          zip.file(`catch_${fileBase}.csv`, fishCSV)
+        }
+      }
+
+      // --- 3. genetics_detailed.csv ---
+      const detailedFish = Object.values(fishInputState || {}).filter(
+        (fish: any) =>
+          (Array.isArray(fish.geneticSamples) &&
+            fish.geneticSamples.length > 0) ||
+          (Array.isArray(fish.appliedMarks) && fish.appliedMarks.length > 0) ||
+          fish.weight != null
+      )
+      if (detailedFish.length) {
+        const sampleDate = formatDateString_MM_DD_YY(
+          timeProperty ? trapOperationsState[timeProperty] : new Date()
+        )
+        const lookupCode = (table: string, id: any) => {
+          if (id == null) return ''
+          const item = find(dropdownValues?.[table], { id })
+          return item?.code || item?.definition || item?.description || ''
+        }
+        // Column order matches the genetics table in the review modal / PDF:
+        // context | Genetic ID | Ad+/- | Dead | Condition | Take | Sample Type | Marks/Tags | Comments
+        const geneticsRows = (detailedFish as any[]).flatMap((fish: any) => {
+          const samples: any[] = Array.isArray(fish.geneticSamples)
+            ? fish.geneticSamples
+            : []
+          const makeRow = (s: any | null) => ({
+            Date: sampleDate,
+            SiteCode: visitSetupState.trapSite || '',
+            Species: fish.species || '',
+            'FL (mm)': fish.forkLength ?? '',
+            'Field Wt (g)': fish.weight ?? '',
+            Run: fish.run && fish.run !== 'not recorded' ? fish.run : '',
+            Stage:
+              fish.lifeStage && fish.lifeStage !== 'not recorded'
+                ? fish.lifeStage
+                : '',
+            // genetics table column order starts here
+            'Genetic ID': s?.sampleId || '',
+            'Ad +/-':
+              fish.adiposeClipped == null ? '' : fish.adiposeClipped ? '+' : '-',
+            Dead: fish.dead ? 'Y' : 'N',
+            Condition: s ? lookupCode('condition', s.condition) : '',
+            Take: s ? lookupCode('take', s.take) : '',
+            Genetic: s ? (s.genetic ? 'Y' : 'N') : '',
+            'Mucus Swab': s ? (s.mucusSwab ? 'Y' : 'N') : '',
+            'Fin Clip': s ? (s.finClip ? 'Y' : 'N') : '',
+            'Crew Member': s?.crewMember || '',
+            Comments: s?.comments || fish.comments || '',
+          })
+          if (!samples.length) return [makeRow(null)]
+          return samples.map(makeRow)
+        })
+        zip.file(`genetics_${fileBase}.csv`, arrayToCSV(geneticsRows))
+      }
+    })
+
+    // --- 4. Generate zip ---
+    const base64zip = await zip.generateAsync({ type: 'base64' })
+    const zipUri = FileSystem.cacheDirectory + `visit_summary_${Date.now()}.zip`
+    await FileSystem.writeAsStringAsync(zipUri, base64zip, {
+      encoding: FileSystem.EncodingType.Base64,
+    })
+
+    // --- 5. Share zip ---
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(zipUri, {
+        mimeType: 'application/zip',
+        UTI: 'public.zip-archive',
+      })
+    } else {
+      alert('Sharing not available on this device')
+    }
+  } catch (err) {
+    console.error('Error exporting ZIP:', err)
+    alert('Error exporting data. Please try again.')
+  }
+}
+
 const ReviewValuesModal = ({
   handleCloseReviewValuesModal,
   formValues,
@@ -878,6 +1276,11 @@ const ReviewValuesModal = ({
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
   )
+  // Fish Holding is visit-level (aggregated across all tabs via
+  // combineFishStoreForAllTabs in FishHolding.tsx), not per-tab like the
+  // other wizard state above - included once per exported file below so an
+  // export of just one trap's JSON still carries it.
+  const fishHoldingState = useSelector((state: RootState) => state.fishHolding)
   const [index, setIndex] = useState(0)
   const [routes, setRoutes] = useState(
     [] as Array<{ key: string; title: string }>
@@ -928,370 +1331,26 @@ const ReviewValuesModal = ({
     />
   )
 
-  const printToFile = async () => {
-    const html = generateAccordionHtmlFromTabValues({
-      routes,
+  const printToFile = () =>
+    printTrapVisitToFile({
       formValues,
+      tabState,
       visitSetupDefaultState,
       fieldCheck,
-      dropdownValues,
+      dropdownsState,
+      onSuccess: handleCloseReviewValuesModal,
     })
-    const firstKey = routes?.[0]?.key
-    const visitSetupVals = formValues?.visitSetupState?.[firstKey]?.values
-    const trapOpsVals = formValues?.trapOperationsState?.[firstKey]?.values
-    const timeProperty = getTimeProperty(trapOpsVals)
-    const trapSite = visitSetupVals?.trapSite || 'trap'
-    const dateStr = formatDateString_MM_DD_YY(
-      timeProperty ? trapOpsVals?.[timeProperty] : new Date()
-    )
-    const filename = `${trapSite}_${dateStr}.pdf`
-    const { uri } = await Print.printToFileAsync({ html })
-    try {
-      const destUri = `${FileSystem.documentDirectory}${filename}`
-      await FileSystem.copyAsync({ from: uri, to: destUri })
-      await shareAsync(destUri, {
-        UTI: '.pdf',
-        mimeType: 'application/pdf',
-      })
-      handleCloseReviewValuesModal()
-    } catch (error) {
-      console.error('Error sharing file:', error)
-      alert('Error sharing file. Please try again.')
-    }
-  }
 
-  // helper: convert array of objects to CSV
-  function arrayToCSV(rows: any[]) {
-    if (rows.length === 0) return ''
-    let headers = Object.keys(rows[0])
-    headers = headers.filter(h => !h.includes('Id') && !h.includes('Unit'))
-    const csv = [
-      headers.join(','), // header row
-      ...rows.map(row =>
-        headers.map(h => JSON.stringify(row[h] ?? '')).join(',')
-      ),
-    ]
-    return csv.join('\n')
-  }
-
-  // helper: flatten nested objects into single-level row, skip nulls
-  function flattenObject(obj: any) {
-    if (obj == null) return {}
-    return Object.keys(obj).reduce((acc: any, key) => {
-      const value = obj[key]
-      const newKey = key
-
-      if (value === null || value === undefined || value === '') {
-        // skip null/undefined
-        return acc
-      }
-
-      if (typeof value === 'object' && !Array.isArray(value)) {
-        // recurse into nested objects
-        Object.assign(acc, flattenObject(value))
-      } else if (Array.isArray(value)) {
-        // collapse array into comma-separated string
-        if (value.length > 0) {
-          acc[newKey] = value.join(', ')
-        }
-      } else {
-        acc[newKey] = value
-      }
-
-      return acc
-    }, {})
-  }
-
-  const exportDataZip = async () => {
-    try {
-      const zip = new JSZip()
-
-      // Built once across all tabs (matches how the real submit path
-      // combines plus-counts), then filtered per tab below by `uid` - same
-      // correlation trapVisitFormPostBundler.ts already uses when posting.
-      const allCatchRawSubmissions = buildAllCatchRawSubmissions({
-        fishInputState: formValues?.fishInputState,
-        visitSetupState: formValues?.visitSetupState,
-        visitSetupDefaultState,
-        dropdownsState,
-        userCredentialsStore,
-      })
-
-      routes.forEach((route: any) => {
-        const visitSetupState = {
-          ...formValues?.visitSetupState?.[route.key]?.values,
-          fieldCheck,
-        }
-        const trapOperationsState = getFilteredTrapOperationsState(
-          formValues?.trapOperationsState?.[route.key]?.values
-        )
-        const fishProcessingState =
-          formValues?.fishProcessingState?.[route.key]?.values
-        const fishInputState =
-          formValues?.fishInputState?.[route.key]?.fishStore
-        const trapPostProcessingState = getFilteredPostProcessingState(
-          formValues?.trapPostProcessingState?.[route.key]?.values,
-          formValues?.visitSetupState?.[route.key]?.values
-        )
-
-        const timeProperty = getTimeProperty(trapOperationsState)
-
-        const formattedTrapSite = snakeCase(visitSetupState.trapSite)
-        const formattedSampleTime = formatDateString_MM_DD_YY(
-          timeProperty ? trapOperationsState[timeProperty] : new Date()
-        )
-        // Disambiguates per-tab zip entries. Filenames used to be just
-        // `<site>_<date>` - fine for one trap per site, but multiple traps
-        // at the same site checked the same day produced IDENTICAL
-        // filenames, so each tab's zip.file() call silently overwrote the
-        // previous tab's submission JSON/CSVs (jszip replaces an existing
-        // path rather than erroring). route.key (the tab's uid()) is always
-        // unique per tab, so a short slice of it guarantees no collision
-        // regardless of naming; the trap name is added too when it's not
-        // just a repeat of the site name, for readability.
-        const formattedTrapName =
-          route.title && route.title !== visitSetupState.trapSite
-            ? `_${snakeCase(route.title)}`
-            : ''
-        const tabTag =
-          typeof route.key === 'string' ? route.key.slice(-6) : ''
-        const fileBase = `${formattedTrapSite}${formattedTrapName}_${formattedSampleTime}_${tabTag}`
-
-        // --- machine-readable submission JSON (for re-import recovery) ---
-        // Uses the full un-filtered state objects (not the display-filtered
-        // `trapOperationsState`/`visitSetupState` locals above, which strip
-        // fields the CSVs don't need) - same inputs the real submit path
-        // uses, via the same builder, so this can never silently drift from
-        // what would actually have been POSTed.
-        try {
-          const trapVisitSubmissionPayload = buildTrapVisitSubmission({
-            tabId: route.key,
-            visitSetupState: formValues?.visitSetupState,
-            visitSetupDefaultState,
-            trapOperationsState: formValues?.trapOperationsState,
-            trapPostProcessingState: formValues?.trapPostProcessingState,
-            fishProcessingState: formValues?.fishProcessingState,
-            dropdownsState,
-            userCredentialsStore,
-            fieldCheckValue: fieldCheck,
-          })
-          const catchRawForTab = allCatchRawSubmissions.filter(
-            (catchRaw: any) => catchRaw.uid === route.key
-          )
-          const exportedByName =
-            userCredentialsStore?.displayName ||
-            `${userCredentialsStore?.firstName ?? ''} ${userCredentialsStore?.lastName ?? ''}`.trim() ||
-            null
-
-          // Raw, pre-transformation per-screen wizard state for this tab -
-          // same shape (and same source) as pendingVisitDraftsSlice's
-          // snapshot in IncompleteSections.tsx's snapshotPendingDrafts().
-          // Lets an import on another device offer "Edit in Form" via the
-          // exact same restoreTabState mechanism PendingTrapVisits.tsx uses
-          // for same-device resume, rather than trying to reverse-engineer
-          // wizard-editable values out of the submission-shaped payload
-          // above (which is already past the display-label→id conversion
-          // and has lost which UI mode each catch record was entered
-          // through). Purely additive/optional - older importers (and the
-          // dashboard, which has no wizard to rehydrate) just ignore it.
-          const tabInfo = tabState?.tabs?.[route.key]
-          const rawTabState = {
-            tabId: route.key,
-            tabName: tabInfo?.name ?? null,
-            trapSite: tabInfo?.trapSite ?? null,
-            groupId: tabInfo?.groupId ?? null,
-            visitSetupTab: formValues?.visitSetupState?.[route.key],
-            trapOperationsTab: formValues?.trapOperationsState?.[route.key],
-            fishProcessingTab: formValues?.fishProcessingState?.[route.key],
-            trapPostProcessingTab:
-              formValues?.trapPostProcessingState?.[route.key],
-            fishInputTab: formValues?.fishInputState?.[route.key],
-          }
-
-          const submissionEnvelope = {
-            schemaVersion: 1,
-            exportedAt: new Date().toISOString(),
-            exportedBy: {
-              personnelId: userCredentialsStore?.id ?? null,
-              name: exportedByName,
-            },
-            appVersion: Constants.expoConfig?.version ?? null,
-            trapVisit: trapVisitSubmissionPayload,
-            catchRaw: catchRawForTab,
-            rawTabState,
-          }
-          zip.file(
-            `submission_${fileBase}.json`,
-            JSON.stringify(submissionEnvelope, null, 2)
-          )
-        } catch (buildError) {
-          // Never let a submission-JSON build failure block the human-
-          // readable CSV/PDF export the user actually asked for.
-          console.error(
-            'Error building submission JSON for export:',
-            buildError
-          )
-        }
-
-        // --- 1. visit_summary.csv ---
-        const wideRow = {
-          ...flattenObject(visitSetupState),
-          ...flattenObject(trapOperationsState),
-          ...flattenObject(fishProcessingState),
-          ...flattenObject(trapPostProcessingState),
-        }
-        const visitCSV = arrayToCSV([wideRow])
-        zip.file(`trap_visit_${fileBase}.csv`, visitCSV)
-
-        // --- 2. fish_input.csv ---
-        if (fishInputState) {
-          const fishRows = Object.values(fishInputState).map((fish: any) => {
-            const appliedMarksStr =
-              Array.isArray(fish.appliedMarks) && fish.appliedMarks.length
-                ? fish.appliedMarks.map(formatAppliedMark).join('; ')
-                : ''
-            const geneticSamplesStr =
-              Array.isArray(fish.geneticSamples) && fish.geneticSamples.length
-                ? fish.geneticSamples.map(formatGeneticSample).join('; ')
-                : ''
-            const existingMarksStr =
-              Array.isArray(fish.existingMarks) && fish.existingMarks.length
-                ? fish.existingMarks
-                    .map((m: any) =>
-                      typeof m === 'object'
-                        ? m.markCode || m.markType || JSON.stringify(m)
-                        : String(m)
-                    )
-                    .join('; ')
-                : ''
-            const fishConditionsStr =
-              Array.isArray(fish.fishConditions) && fish.fishConditions.length
-                ? fish.fishConditions.join(', ')
-                : ''
-
-            return {
-              trapSite: visitSetupState.trapSite,
-              species: fish.species,
-              forkLength: fish.forkLength,
-              run: fish.run,
-              lifeStage: fish.lifeStage,
-              weight: fish.weight,
-              adiposeClipped: fish.adiposeClipped,
-              dead: fish.dead,
-              eggs: fish.eggs,
-              milting: fish.milting,
-              fishConditions: fishConditionsStr,
-              existingMarks: existingMarksStr,
-              plusCount: fish.plusCount,
-              numFishCaught: fish.numFishCaught,
-              willBeUsedInRecapture: fish.willBeUsedInRecapture,
-              plusCountMethod: fish.plusCountMethod,
-              comments: fish.comments,
-              marksTagsApplied: appliedMarksStr,
-              geneticSamples: geneticSamplesStr,
-            }
-          })
-          if (fishRows.length) {
-            const fishCSV = arrayToCSV(fishRows)
-            zip.file(`catch_${fileBase}.csv`, fishCSV)
-          }
-        }
-
-        // --- 3. genetics_detailed.csv ---
-        const detailedFish = Object.values(fishInputState || {}).filter(
-          (fish: any) =>
-            (Array.isArray(fish.geneticSamples) &&
-              fish.geneticSamples.length > 0) ||
-            (Array.isArray(fish.appliedMarks) &&
-              fish.appliedMarks.length > 0) ||
-            fish.weight != null
-        )
-        if (detailedFish.length) {
-          const sampleDate = formatDateString_MM_DD_YY(
-            timeProperty ? trapOperationsState[timeProperty] : new Date()
-          )
-          const lookupCode = (table: string, id: any) => {
-            if (id == null) return ''
-            const item = find(dropdownValues?.[table], { id })
-            return item?.code || item?.definition || item?.description || ''
-          }
-          const marksTagsApplied = (fish: any) =>
-            Array.isArray(fish.appliedMarks)
-              ? fish.appliedMarks.map(formatAppliedMark).join('; ')
-              : ''
-          const existingMarks = (fish: any) =>
-            Array.isArray(fish.existingMarks)
-              ? fish.existingMarks
-                  .map((m: any) =>
-                    typeof m === 'object'
-                      ? m.markCode || m.markType || JSON.stringify(m)
-                      : String(m)
-                  )
-                  .join('; ')
-              : ''
-          // Column order matches the genetics table in the review modal / PDF:
-          // context | Genetic ID | Ad+/- | Dead | Condition | Take | Sample Type | Marks/Tags | Comments
-          const geneticsRows = (detailedFish as any[]).flatMap((fish: any) => {
-            const samples: any[] = Array.isArray(fish.geneticSamples)
-              ? fish.geneticSamples
-              : []
-            const makeRow = (s: any | null) => ({
-              Date: sampleDate,
-              SiteCode: visitSetupState.trapSite || '',
-              Species: fish.species || '',
-              'FL (mm)': fish.forkLength ?? '',
-              'Field Wt (g)': fish.weight ?? '',
-              Run: fish.run && fish.run !== 'not recorded' ? fish.run : '',
-              Stage:
-                fish.lifeStage && fish.lifeStage !== 'not recorded'
-                  ? fish.lifeStage
-                  : '',
-              // genetics table column order starts here
-              'Genetic ID': s?.sampleId || '',
-              'Ad +/-':
-                fish.adiposeClipped == null
-                  ? ''
-                  : fish.adiposeClipped
-                    ? '+'
-                    : '-',
-              Dead: fish.dead ? 'Y' : 'N',
-              Condition: s ? lookupCode('condition', s.condition) : '',
-              Take: s ? lookupCode('take', s.take) : '',
-              Genetic: s ? (s.genetic ? 'Y' : 'N') : '',
-              'Mucus Swab': s ? (s.mucusSwab ? 'Y' : 'N') : '',
-              'Fin Clip': s ? (s.finClip ? 'Y' : 'N') : '',
-              'Crew Member': s?.crewMember || '',
-              Comments: s?.comments || fish.comments || '',
-            })
-            if (!samples.length) return [makeRow(null)]
-            return samples.map(makeRow)
-          })
-          zip.file(`genetics_${fileBase}.csv`, arrayToCSV(geneticsRows))
-        }
-      })
-
-      // --- 4. Generate zip ---
-      const base64zip = await zip.generateAsync({ type: 'base64' })
-      const zipUri =
-        FileSystem.cacheDirectory + `visit_summary_${Date.now()}.zip`
-      await FileSystem.writeAsStringAsync(zipUri, base64zip, {
-        encoding: FileSystem.EncodingType.Base64,
-      })
-
-      // --- 5. Share zip ---
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(zipUri, {
-          mimeType: 'application/zip',
-          UTI: 'public.zip-archive',
-        })
-      } else {
-        alert('Sharing not available on this device')
-      }
-    } catch (err) {
-      console.error('Error exporting ZIP:', err)
-      alert('Error exporting data. Please try again.')
-    }
-  }
+  const exportDataZip = () =>
+    exportTrapVisitDataZip({
+      formValues,
+      tabState,
+      visitSetupDefaultState,
+      fieldCheck,
+      dropdownsState,
+      userCredentialsStore,
+      fishHoldingState,
+    })
 
   return (
     <SafeAreaView style={{ height: '100%' }}>

@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { cloneDeep, get, isEqual } from 'lodash'
+import { uid } from 'uid'
 import { reformatBatchCountData } from '../../../utils/utils'
 import { ReleaseMarkI } from '../addAnotherMarkSlice'
 
@@ -226,6 +227,16 @@ export const saveFishSlice = createSlice({
         }
 
         const batchCountEntry = {
+          // Stable per-row id, generated once at the point this aggregated
+          // row is created (not per individual fork-length tap - those get
+          // grouped away by organizeFishEntries above, so a uid created at
+          // tap time wouldn't survive to here anyway). Same role as
+          // AddFish.tsx's fishUID: lets a retried catch-raw submission of
+          // this exact row be recognized server-side instead of inserted
+          // twice. This is the one place these grouped rows get created, so
+          // generating it here (rather than passing it through the action
+          // payload) keeps every caller of saveBatchCount covered for free.
+          UID: uid(),
           species: species,
           taxonCode: taxonCodeFromEntry || taxonCode,
           numFishCaught: value.count,
@@ -316,7 +327,8 @@ export const saveFishSlice = createSlice({
       } = action.payload
 
       const plusCountEntry = {
-        UID: null,
+        // See the matching comment in saveBatchCount above - same reasoning.
+        UID: uid(),
         species,
         numFishCaught: count || numFishCaught,
         forkLength: null,
@@ -368,7 +380,15 @@ export const saveFishSlice = createSlice({
       let actionPayloadCopy = action.payload
       delete actionPayloadCopy.id
       delete actionPayloadCopy.tabId
-      fishStoreCopy[id] = actionPayloadCopy
+      // Merge rather than replace - AddFish.tsx's "Update" button (edit an
+      // existing fish) builds its payload via returnFormValues(), which
+      // never included UID, so a full replace here silently wiped the
+      // idempotency key off any fish the crew edited after entering it.
+      // FishHolding.tsx's call already spreads the complete original fish
+      // object in its payload, so this is a no-op there - merge only
+      // changes behavior for fields the caller omits entirely, not fields
+      // explicitly set to null/empty.
+      fishStoreCopy[id] = { ...fishStoreCopy[id], ...actionPayloadCopy }
       state[tabId].fishStore = fishStoreCopy
 
       const fishMeasureCounts = getFishMeasureCounts(fishStoreCopy)

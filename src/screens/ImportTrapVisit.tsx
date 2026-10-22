@@ -42,6 +42,10 @@ import { restoreTabState as restoreFishProcessingTab } from '../redux/reducers/f
 import { restoreTabState as restoreTrapPostProcessingTab } from '../redux/reducers/formSlices/trapPostProcessingSlice'
 import { restoreTabState as restoreFishInputTab } from '../redux/reducers/formSlices/fishInputSlice'
 import {
+  saveFishHolding,
+  markFishHoldingCompleted,
+} from '../redux/reducers/markRecaptureSlices/fishHoldingSlice'
+import {
   checkIfFormIsComplete,
   markStepCompleted,
   updateActiveStep,
@@ -420,6 +424,14 @@ const ImportTrapVisit = ({
       dispatch(
         restoreFishInputTab({ tabId, tabState: rawTabState.fishInputTab })
       )
+    }
+
+    // Fish Holding is visit-level, not per-tab (see ReviewValuesModal.tsx's
+    // export) - restore it once alongside this tab rather than per-tab.
+    const fishHoldingValues = item?.envelope?.fishHolding
+    if (fishHoldingValues) {
+      dispatch(saveFishHolding(fishHoldingValues))
+      dispatch(markFishHoldingCompleted(true))
     }
 
     // The visit was already deemed submit-ready once (that's how it got

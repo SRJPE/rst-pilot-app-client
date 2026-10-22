@@ -408,6 +408,12 @@ export const buildAllCatchRawSubmissions = ({
 
         catchRawSubmissions.push({
           uid: tabId,
+          // Stable per-fish identifier (set once at AddFish.tsx entry time,
+          // never regenerated) sent to the server as clientUid so a retried
+          // submission of this same fish can be recognized as already
+          // synced instead of silently inserted twice - see
+          // jpe-app-server's models/catchRaw/index.ts createCatchRaw.
+          clientUid: fishValue.UID,
           programId,
           trapVisitId: null,
           taxonCode: fishValue.taxonCode,

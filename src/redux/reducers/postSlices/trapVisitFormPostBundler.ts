@@ -60,6 +60,11 @@ interface TrapVisitSubmissionI {
 
 interface CatchRawSubmissionI {
   uid: string
+  // Stable per-fish idempotency key (see buildSubmissionPayloads.ts) - lets
+  // the server recognize a retried submission of the same fish instead of
+  // inserting it twice. Null for fish entered via batch/multi-species flows,
+  // which don't generate one.
+  clientUid?: string | null
   id?: number
   programId?: number
   trapVisitId?: number
@@ -152,9 +157,19 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
             error
           )
           const { response } = error
-          const errorDetail = response?.data?.detail
+          // The server returns 409 specifically (and only) when trap-visit
+          // POST hits a uniqueness constraint (routes/trapVisit/index.ts) -
+          // i.e. this exact trap visit already exists, most likely because an
+          // earlier attempt actually succeeded before a timeout/disconnect
+          // made the client think it failed. This used to check
+          // response?.data?.detail?.includes('already exists'), but the
+          // server only ever sends a `.error` field, never `.detail` - that
+          // check never matched, so a resubmit-after-timeout was always
+          // misclassified as a true failure and retried forever instead of
+          // being recognized as already-saved.
+          const isDuplicateTrapVisit = response?.status === 409
 
-          if (errorDetail?.includes('already exists')) {
+          if (isDuplicateTrapVisit) {
             // Trap visit already on server from a previous partial submission -
             // look up its server-assigned ID so we can still submit catch raw
             const prevSubmission =

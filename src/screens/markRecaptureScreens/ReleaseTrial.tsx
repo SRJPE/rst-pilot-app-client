@@ -104,7 +104,7 @@ const ReleaseTrial = ({
                 </Center>
                 <VStack py='2%' px='4%' space={4}>
                   <FormInputComponent
-                    label='# of Wild Fish released'
+                    label='# of Wild Fish Released'
                     onChangeText={handleChange('wildCount')}
                     onBlur={handleBlur('wildCount')}
                     value={values.wildCount}

@@ -24,6 +24,7 @@ import addAnotherMarkSlice from './addAnotherMarkSlice'
 import tabSlice from './formSlices/tabSlice'
 import batchCountSlice from './formSlices/batchCountSlice'
 import pendingVisitDraftsSlice from './formSlices/pendingVisitDraftsSlice'
+import addFishDraftSlice from './formSlices/addFishDraftSlice'
 import fishHoldingSlice from './markRecaptureSlices/fishHoldingSlice'
 import userCredentialsSlice from './userCredentialsSlice'
 import trappingSitesSlice from './createNewProgramSlices/trappingSitesSlice'
@@ -168,6 +169,30 @@ const pendingVisitDraftsPersistConfig = {
   storage: AsyncStorage,
 }
 
+const fishHoldingPersistConfig = {
+  key: 'fishHoldingPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
+const addFishDraftPersistConfig = {
+  key: 'addFishDraftPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
+const releaseTrialPersistConfig = {
+  key: 'releaseTrialPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
+const releaseTrialDataEntryPersistConfig = {
+  key: 'releaseTrialDataEntryPersistConfig',
+  version: 1,
+  storage: AsyncStorage,
+}
+
 export default combineReducers({
   dropdowns: persistReducer(dropdownsPersistConfig, dropdownsSlice),
   visitSetupDefaults: persistReducer(
@@ -186,6 +211,7 @@ export default combineReducers({
     fishProcessingSlice
   ),
   fishInput: persistReducer(trapVisitFishInputPersistConfig, fishInputSlice),
+  addFishDraft: persistReducer(addFishDraftPersistConfig, addFishDraftSlice),
   addMarksOrTags: addMarksOrTagsSlice,
   addGeneticSamples: addGeneticSamplesSlice,
   trapPostProcessing: persistReducer(
@@ -211,9 +237,12 @@ export default combineReducers({
   ),
   connectivity: connectivitySlice,
   paperEntry: paperEntrySlice,
-  fishHolding: fishHoldingSlice,
-  releaseTrial: releaseTrialSlice,
-  releaseTrialDataEntry: releaseTrialDataEntrySlice,
+  fishHolding: persistReducer(fishHoldingPersistConfig, fishHoldingSlice),
+  releaseTrial: persistReducer(releaseTrialPersistConfig, releaseTrialSlice),
+  releaseTrialDataEntry: persistReducer(
+    releaseTrialDataEntryPersistConfig,
+    releaseTrialDataEntrySlice
+  ),
   addAnotherMark: addAnotherMarkSlice,
   userCredentials: persistReducer(
     userCredentialsPersistConfig,

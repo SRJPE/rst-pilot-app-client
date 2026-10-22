@@ -43,6 +43,12 @@ import {
   saveIndividualFish,
   updateFishEntry,
 } from '../../redux/reducers/formSlices/fishInputSlice'
+import {
+  AddFishDraftI,
+  AddFishDraftStateI,
+  clearAddFishDraft,
+  saveAddFishDraft,
+} from '../../redux/reducers/formSlices/addFishDraftSlice'
 import { TabStateI } from '../../redux/reducers/formSlices/tabSlice'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -61,7 +67,7 @@ import {
   getDBValue,
   fetchRecentlyUsedSpecies,
 } from '../../utils/utils'
-import { startCase, find, keyBy, partition } from 'lodash'
+import { startCase, find, keyBy, partition, debounce } from 'lodash'
 import MeasureMetPlusCount from '../../components/form/MeasureMetPlusCount'
 import FishEntriesSummary from '../../components/form/FishEntriesSummary'
 import {
@@ -82,6 +88,7 @@ const AddFishContent = ({
   fishInputSlice,
   dropdownsStore,
   trapOperationsStore,
+  addFishDraft,
 }: {
   route?: any
   saveIndividualFish: any
@@ -96,6 +103,7 @@ const AddFishContent = ({
   fishInputSlice: any
   dropdownsStore: any
   trapOperationsStore: any
+  addFishDraft: AddFishDraftStateI
 }) => {
   const dropdownValues = useSelector(
     (state: RootState) => state.dropdowns.values
@@ -383,6 +391,91 @@ const AddFishContent = ({
           required: false,
         })
   )
+
+  // In-progress new-fish entries (not edit mode) previously lived only in
+  // this screen's local state with no autosave - a crash, backgrounding, or
+  // navigating away mid-entry lost the whole record. Restore a persisted
+  // draft (see addFishDraftSlice) once per tab on mount, and debounce-save
+  // the current entry back to it below as the crew fills it out.
+  const restoredDraftTabIdRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (route.params?.editModeData) return
+    const activeTabId = tabSlice.activeTabId
+    if (!activeTabId) return
+    if (restoredDraftTabIdRef.current === activeTabId) return
+    const draft = addFishDraft?.[activeTabId]
+    if (!draft) return
+    restoredDraftTabIdRef.current = activeTabId
+    setFishUID(draft.fishUID)
+    setSpecies(draft.species)
+    setCount(draft.count)
+    setForkLength(draft.forkLength)
+    setRun(draft.run)
+    setFishConditions(draft.fishConditions)
+    setWeight(draft.weight)
+    setLifeStage(draft.lifeStage)
+    setAdiposeClipped(draft.adiposeClipped)
+    setExistingMarks(draft.existingMarks)
+    setAppliedMarks(draft.appliedMarks)
+    setGeneticSamples(draft.geneticSamples)
+    setDead(draft.dead)
+    setMilting(draft.milting)
+    setEggs(draft.eggs)
+    setPlusCountMethod(draft.plusCountMethod)
+    setComments(draft.comments)
+  }, [tabSlice.activeTabId])
+
+  const addFishDraftDebouncedSave = useRef(
+    debounce((tabId: string, draft: AddFishDraftI) => {
+      dispatch(saveAddFishDraft({ tabId, draft }))
+    }, 600)
+  ).current
+
+  useEffect(() => {
+    if (route.params?.editModeData) return
+    const activeTabId = tabSlice.activeTabId
+    if (!activeTabId) return
+    // Don't persist a draft for a blank, untouched form - avoids a no-op
+    // write (and AsyncStorage churn) every time this screen mounts.
+    if (species.value === '' || species.value === null) return
+    addFishDraftDebouncedSave(activeTabId, {
+      fishUID,
+      species,
+      count,
+      forkLength,
+      run,
+      fishConditions,
+      weight,
+      lifeStage,
+      adiposeClipped,
+      existingMarks,
+      appliedMarks,
+      geneticSamples,
+      dead,
+      milting,
+      eggs,
+      plusCountMethod,
+      comments,
+    })
+  }, [
+    fishUID,
+    species,
+    count,
+    forkLength,
+    run,
+    fishConditions,
+    weight,
+    lifeStage,
+    adiposeClipped,
+    existingMarks,
+    appliedMarks,
+    geneticSamples,
+    dead,
+    milting,
+    eggs,
+    plusCountMethod,
+    comments,
+  ])
 
   useEffect(() => {
     if (forkLength.value) checkForFormError()
@@ -1541,6 +1634,14 @@ const AddFishContent = ({
                       formValues: { ...payload, taxonCode: selectedTaxonCode },
                       UID: fishUID,
                     })
+                    // Cancel any debounced draft-save still in flight from a
+                    // keystroke in the last 600ms - without this, it could
+                    // fire after clearAddFishDraft and resurrect a draft for
+                    // a fish that was just successfully saved, which the
+                    // next "Add Fish" visit to this tab would then wrongly
+                    // restore as if it were still in progress.
+                    addFishDraftDebouncedSave.cancel()
+                    dispatch(clearAddFishDraft({ tabId: activeTabId }))
                     navigation.replace('Fish Input')
                     showSlideAlert(dispatch, 'Fish Input Saved')
                   }
@@ -1609,6 +1710,13 @@ const AddFishContent = ({
                         taxonCode: selectedTaxonCode,
                       },
                     })
+                    // Same reasoning as the "Save and Exit" button above -
+                    // this path doesn't even navigate away (resetFormState
+                    // below starts the next fish on the same mounted
+                    // screen), so a stale in-flight debounced save is even
+                    // more likely to land here if not cancelled.
+                    addFishDraftDebouncedSave.cancel()
+                    dispatch(clearAddFishDraft({ tabId: activeTabId }))
                     showSlideAlert(dispatch, 'Fish Input Saved')
                     if (
                       species.value &&
@@ -1729,6 +1837,7 @@ const mapStateToProps = (state: RootState) => {
     fishInputSlice: state.fishInput,
     dropdownsStore: state.dropdowns,
     trapOperationsStore: state.trapOperations,
+    addFishDraft: state.addFishDraft,
   }
 }
 

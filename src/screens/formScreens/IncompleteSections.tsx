@@ -1,5 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Box, Divider, Heading, ScrollView, View, VStack } from 'native-base'
+import {
+  Box,
+  Button,
+  Divider,
+  HStack,
+  Heading,
+  ScrollView,
+  Text,
+  View,
+  VStack,
+} from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
 import navigationSlice, {
@@ -40,7 +50,10 @@ import {
 } from '../../utils/utils'
 import { StackActions } from '@react-navigation/native'
 import { showSlideAlert } from '../../redux/reducers/slideAlertSlice'
-import ReviewValuesModal from '../../components/form/ReviewValuesModal'
+import ReviewValuesModal, {
+  printTrapVisitToFile,
+  exportTrapVisitDataZip,
+} from '../../components/form/ReviewValuesModal'
 import ReviewValuesButton from '../../components/form/ReviewValuesButton'
 import CustomSelect from '@/src/components/Shared/CustomSelect'
 import { saveDraftForTab } from '../../redux/reducers/formSlices/pendingVisitDraftsSlice'
@@ -64,6 +77,7 @@ const mapStateToProps = (state: RootState) => {
     addGeneticSamplesState: state.addGeneticSamples,
     appliedMarksState: state.addMarksOrTags,
     userCredentialsStore: state.userCredentials,
+    fishHoldingState: state.fishHolding,
   }
 }
 
@@ -82,6 +96,7 @@ const IncompleteSections = ({
   addGeneticSamplesState,
   appliedMarksState,
   userCredentialsStore,
+  fishHoldingState,
 }: {
   navigation: any
   navigationState: any
@@ -97,6 +112,7 @@ const IncompleteSections = ({
   addGeneticSamplesState: any
   appliedMarksState: any
   userCredentialsStore: any
+  fishHoldingState: any
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const stepsArray = Object.values(navigationState.steps).slice(
@@ -350,6 +366,42 @@ const IncompleteSections = ({
     setReviewValuesModalIsOpen(false)
   }
 
+  // Same "Export as PDF"/"Export as CSV ZIP" actions as the Review Values
+  // modal, surfaced here too so a crew can export without opening it first.
+  // Both call the shared functions exported from ReviewValuesModal.tsx
+  // rather than duplicating the export logic.
+  const handlePrintToFile = () =>
+    printTrapVisitToFile({
+      formValues: {
+        visitSetupState,
+        trapOperationsState,
+        fishProcessingState,
+        fishInputState,
+        trapPostProcessingState,
+      },
+      tabState,
+      visitSetupDefaultState,
+      fieldCheck: conditionalIncompleteSectionValues['fieldCheck'],
+      dropdownsState,
+    })
+
+  const handleExportDataZip = () =>
+    exportTrapVisitDataZip({
+      formValues: {
+        visitSetupState,
+        trapOperationsState,
+        fishProcessingState,
+        fishInputState,
+        trapPostProcessingState,
+      },
+      tabState,
+      visitSetupDefaultState,
+      fieldCheck: conditionalIncompleteSectionValues['fieldCheck'],
+      dropdownsState,
+      userCredentialsStore,
+      fishHoldingState,
+    })
+
   // console.log('visitSetupState', visitSetupState)
   // console.log('tabState', tabState)
   const renderFishInputButton = showFishInputButton({
@@ -368,7 +420,14 @@ const IncompleteSections = ({
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack space={8} p='15%' height={'100%'} flex={1}>
+        <VStack
+          space={8}
+          px='15%'
+          pb='15%'
+          pt='3%'
+          height={'100%'}
+          flex={1}
+        >
           <Heading textAlign='center' padding={0}>
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>
@@ -392,6 +451,32 @@ const IncompleteSections = ({
           <ReviewValuesButton
             handleOpenReviewValuesModal={handleOpenReviewValuesModal}
           />
+          <HStack space={4} justifyContent='center'>
+            <Button
+              flex={1}
+              rounded='xs'
+              borderRadius='5'
+              variant='outline'
+              bgColor='primary'
+              onPress={handlePrintToFile}
+            >
+              <Text fontSize='lg' fontWeight='bold' color='white'>
+                Export as PDF
+              </Text>
+            </Button>
+            <Button
+              flex={1}
+              rounded='xs'
+              borderRadius='5'
+              variant='outline'
+              bgColor='primary'
+              onPress={handleExportDataZip}
+            >
+              <Text fontSize='lg' fontWeight='bold' color='white'>
+                Export as CSV ZIP
+              </Text>
+            </Button>
+          </HStack>
           {conditionalIncompleteSectionFields['fieldCheck'] && (
             <Box
               key={'index'} // Always add a key when mapping

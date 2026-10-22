@@ -9,8 +9,9 @@ import {
   Box,
   ScrollView,
 } from 'native-base'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
+import { useFormSave } from '../../context/FormSaveContext'
 import { updateFishEntry } from '../../redux/reducers/formSlices/fishInputSlice'
 import { saveTotalFishHolding } from '../../redux/reducers/markRecaptureSlices/releaseTrialSlice'
 import { AppDispatch, RootState } from '../../redux/store'
@@ -59,6 +60,7 @@ const FishHolding = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const navigation: any = useNavigation()
+  const { registerSaveHandler } = useFormSave()
   const [selectedFishStore, setSelectedFishStore] = useState({} as any)
   const [selectedLifeStages, setSelectedLifeStages] = useState([] as Array<any>)
   const [selectedRuns, setSelectedRuns] = useState([] as Array<any>)
@@ -90,6 +92,46 @@ const FishHolding = ({
     setSelectedLifeStagesAndRuns()
     calculateTotalFish()
   }, [selectedFishStore])
+
+  // This screen holds the crew's holding/release selections (and a manual
+  // total-fish override) in local state with no autosave - previously only
+  // persisted on explicit Next/Prev. If the crew navigated away via the
+  // drawer, backgrounded the app, or it crashed mid-edit, those selections
+  // were silently lost. registerSaveHandler wires into the drawer's "save
+  // before leaving" hook; the unmount-cleanup below is a backstop for any
+  // other way this screen gets torn down. Refs (not state) are used in the
+  // cleanup since a cleanup closure is fixed at mount time.
+  const selectedFishStoreRef = useRef(selectedFishStore)
+  useEffect(() => {
+    selectedFishStoreRef.current = selectedFishStore
+  }, [selectedFishStore])
+
+  const totalFishRef = useRef(totalFish)
+  useEffect(() => {
+    totalFishRef.current = totalFish
+  }, [totalFish])
+
+  const activeTabIdRef = useRef(activeTabId)
+  useEffect(() => {
+    activeTabIdRef.current = activeTabId
+  }, [activeTabId])
+
+  useEffect(() => {
+    if (!activeTabId) return
+    registerSaveHandler(() => handleSubmit(activeTabId))
+    return () => registerSaveHandler(null)
+  }, [selectedFishStore, totalFish, activeTabId])
+
+  useEffect(() => {
+    return () => {
+      if (activeTabIdRef.current) {
+        handleSubmit(activeTabIdRef.current, undefined, {
+          selectedFishStore: selectedFishStoreRef.current,
+          totalFish: totalFishRef.current,
+        })
+      }
+    }
+  }, [])
 
   const combineFishStoreForAllTabs = () => {
     let combinedFishStore = {} as any
@@ -215,9 +257,16 @@ const FishHolding = ({
   }
 
   const tabIds = Object.keys(tabState.tabs)
-  const handleSubmit = (tabId: string, buttonDirection?: string) => {
+  const handleSubmit = (
+    tabId: string,
+    buttonDirection?: string,
+    overrides?: { selectedFishStore?: any; totalFish?: number | string }
+  ) => {
+    const effectiveSelectedFishStore =
+      overrides?.selectedFishStore ?? selectedFishStore
+    const effectiveTotalFish = overrides?.totalFish ?? totalFish
     if (tabId) {
-      const totalFishNumeric = parseInt(totalFish as string, 10)
+      const totalFishNumeric = parseInt(effectiveTotalFish as string, 10)
       //saves for release trial
       dispatch(saveTotalFishHolding(totalFishNumeric))
       //saves for releaseTrial data entry
@@ -229,17 +278,17 @@ const FishHolding = ({
         })
       )
       // saves to fish holding
-      for (let fish in selectedFishStore) {
-        selectedFishStore[fish] = {
-          ...selectedFishStore[fish],
+      for (let fish in effectiveSelectedFishStore) {
+        effectiveSelectedFishStore[fish] = {
+          ...effectiveSelectedFishStore[fish],
           willBeUsedInRecapture: true,
         }
 
         dispatch(
           updateFishEntry({
-            tabId: selectedFishStore[fish].tabId,
-            id: selectedFishStore[fish].fishObjId,
-            ...selectedFishStore[fish],
+            tabId: effectiveSelectedFishStore[fish].tabId,
+            id: effectiveSelectedFishStore[fish].fishObjId,
+            ...effectiveSelectedFishStore[fish],
             willBeUsedInRecapture: true,
           })
         )
@@ -247,7 +296,7 @@ const FishHolding = ({
       dispatch(
         saveFishHolding({
           totalFishHolding: totalFishNumeric,
-          selectedFishStore: selectedFishStore,
+          selectedFishStore: effectiveSelectedFishStore,
         })
       )
       dispatch(markFishHoldingCompleted(true))

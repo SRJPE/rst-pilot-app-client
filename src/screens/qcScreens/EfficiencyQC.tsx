@@ -269,24 +269,19 @@ function EfficiencyQC({
 
     switch (header) {
       case 'Release Date':
-        console.log('release date')
         let releaseDate = get(data, 'releaseResponse.releasedAt')
         if (releaseDate) parsedData = releaseDate
         break
       case 'Wild Fish Released':
-        console.log('wild fish released')
         parsedData = Number(release?.totalWildFishReleased)
         break
       case 'Hatchery Fish Released':
-        console.log('hatchery fish released')
         parsedData = Number(release?.totalHatcheryFishReleased)
         break
       case 'Number Recaptured':
-        console.log('number recaptured')
         parsedData = data?.createdCatchRawResponse?.numFishCaught
         break
       case 'Fork Length':
-        console.log('fork length')
         parsedData = data?.createdCatchRawResponse?.forkLength
         break
       default:
