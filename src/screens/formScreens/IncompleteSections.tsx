@@ -316,7 +316,6 @@ const IncompleteSections = ({
   //   return id
   // }
 
-
   const saveTrapVisits = () => {
     const tabIds = Object.keys(tabState.tabs)
     tabIds.forEach(id => {
@@ -420,14 +419,7 @@ const IncompleteSections = ({
         borderColor='themeGrey'
         borderWidth='15'
       >
-        <VStack
-          space={8}
-          px='15%'
-          pb='15%'
-          pt='3%'
-          height={'100%'}
-          flex={1}
-        >
+        <VStack space={8} px='15%' pb='15%' pt='3%' height={'100%'} flex={1}>
           <Heading textAlign='center' padding={0}>
             {'Please fill out any incomplete sections  \n before moving on:'}
           </Heading>
@@ -477,6 +469,8 @@ const IncompleteSections = ({
               </Text>
             </Button>
           </HStack>
+        </VStack>
+        <VStack space={8} px='15%' pb='15%' pt='3%' height={'100%'} flex={1}>
           {conditionalIncompleteSectionFields['fieldCheck'] && (
             <Box
               key={'index'} // Always add a key when mapping
@@ -485,7 +479,7 @@ const IncompleteSections = ({
               // maxWidth='100%' // Prevents growing beyond this size>
               // flexGrow={1}
               // mr={8} // Removes right margin from every 3rd item
-              mb={100} // Adds bottom margin to each item
+              // mb={100} // Adds bottom margin to each item
             >
               <CustomSelect
                 camelName={'fieldCheck'}

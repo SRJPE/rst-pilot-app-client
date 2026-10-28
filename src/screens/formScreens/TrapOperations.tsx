@@ -914,6 +914,16 @@ const TrapOperations = ({
     }
   }
 
+  // Beach seines are inherently always "in service" while being fished, so
+  // the Trap Status question doesn't apply - hide it and silently treat the
+  // trap as functioning normally. Equipment-type rows vary by database (e.g.
+  // 'beach seine (50 foot)', 'beach seine (100 foot)'), so match on the
+  // substring rather than an exact id/name - and specifically not on
+  // 'seine' alone, which would also catch the unrelated 'purse seine'.
+  const isBeachSeine = Boolean(
+    trapLocationInfo?.definition?.toLowerCase().includes('beach seine')
+  )
+
   return (
     <Formik
       // Forces a clean unmount/remount on every tab switch instead of
@@ -957,6 +967,10 @@ const TrapOperations = ({
         initialValues,
       }) => {
         resetNonExistentFields(values, setFieldValue)
+
+        if (isBeachSeine && !values.trapStatus) {
+          setFieldValue('trapStatus', 'trap functioning normally')
+        }
 
         const isValid = validationSchema?.isValidSync(values)
 
@@ -1248,92 +1262,94 @@ const TrapOperations = ({
               <Pressable onPress={Keyboard.dismiss}>
                 <VStack space={1}>
                   <Heading>Trap Operations</Heading>
-                  <FormControl>
-                    <HStack space={2} alignItems='center'>
-                      <FormControl.Label>
-                        <Text color='black' fontSize='xl'>
-                          Is the Trap functioning normally?
-                        </Text>
-                      </FormControl.Label>
-                      <Popover placement='bottom left' trigger={popoverTrigger}>
-                        <Popover.Content
-                          accessibilityLabel='Trap Stats Info'
-                          w='600'
-                          mr='10'
-                        >
-                          <Popover.Arrow />
-                          <Popover.CloseButton />
-                          <Popover.Header>
-                            Please select one of the trap functioning dropdowns
-                            based on a visual inspection of the trap.
-                          </Popover.Header>
-                          <Popover.Body p={4}>
-                            <VStack space={2}>
-                              <HStack space={2} alignItems='flex-start'>
-                                <Avatar size={'2'} mt={'2'} />
-                                <Text fontSize='md'>
-                                  Trap Functioning Normally: Trap rotating
-                                  normally in the expected location in river.
-                                </Text>
-                              </HStack>
-                              <HStack space={2} alignItems='flex-start'>
-                                <Avatar size={'2'} mt={'2'} />
-                                <Text fontSize='md'>
-                                  Trap Not Functioning: Trap not rotating or
-                                  displaced in the river.
-                                </Text>
-                              </HStack>
-                              <HStack space={2} alignItems='flex-start'>
-                                <Avatar size={'2'} mt={'2'} />
-                                <Text fontSize='md'>
-                                  Trap Functioning but not normally: The trap
-                                  appears to be rotating but not consistently.
-                                  There may be high flows or high debris levels
-                                  that are affecting the trap.
-                                </Text>
-                              </HStack>
-                              <HStack space={2} alignItems='flex-start'>
-                                <Avatar size={'2'} mt={'2'} />
-                                <Text fontSize='md'>
-                                  Trap Not in Service: Trap not set up for
-                                  fishing upon arrival.
-                                </Text>
-                              </HStack>
-                            </VStack>
-                          </Popover.Body>
-                        </Popover.Content>
-                      </Popover>
-                    </HStack>
-                    <CustomSelect
-                      selectedValue={values.trapStatus}
-                      label='Trap Status'
-                      placeholder='Select Trap Status'
-                      camelName='trapStatus'
-                      onValueChange={(itemValue: string) => {
-                        setFieldValue('trapStatus', itemValue).then(() => {
-                          setFieldTouched('trapStatus', true)
-                        })
-                      }}
-                      touched={touched}
-                      errors={errors}
-                      // setFieldTouched={() => setFieldTouched('trapStatus')}
-                      selectOptions={dropdownValues.trapFunctionality.map(
-                        (item: any) => {
-                          if (item.definition == 'trap not in service') {
-                            return {
-                              label: `${item.definition} ${trapNotInServiceLabel}`,
-                              value: `${item.definition} ${trapNotInServiceLabel}`,
-                            }
-                          } else {
-                            return {
-                              label: item.definition,
-                              value: item.definition,
+                  {!isBeachSeine && (
+                    <FormControl>
+                      <HStack space={2} alignItems='center'>
+                        <FormControl.Label>
+                          <Text color='black' fontSize='xl'>
+                            Is the Trap functioning normally?
+                          </Text>
+                        </FormControl.Label>
+                        <Popover placement='bottom left' trigger={popoverTrigger}>
+                          <Popover.Content
+                            accessibilityLabel='Trap Stats Info'
+                            w='600'
+                            mr='10'
+                          >
+                            <Popover.Arrow />
+                            <Popover.CloseButton />
+                            <Popover.Header>
+                              Please select one of the trap functioning dropdowns
+                              based on a visual inspection of the trap.
+                            </Popover.Header>
+                            <Popover.Body p={4}>
+                              <VStack space={2}>
+                                <HStack space={2} alignItems='flex-start'>
+                                  <Avatar size={'2'} mt={'2'} />
+                                  <Text fontSize='md'>
+                                    Trap Functioning Normally: Trap rotating
+                                    normally in the expected location in river.
+                                  </Text>
+                                </HStack>
+                                <HStack space={2} alignItems='flex-start'>
+                                  <Avatar size={'2'} mt={'2'} />
+                                  <Text fontSize='md'>
+                                    Trap Not Functioning: Trap not rotating or
+                                    displaced in the river.
+                                  </Text>
+                                </HStack>
+                                <HStack space={2} alignItems='flex-start'>
+                                  <Avatar size={'2'} mt={'2'} />
+                                  <Text fontSize='md'>
+                                    Trap Functioning but not normally: The trap
+                                    appears to be rotating but not consistently.
+                                    There may be high flows or high debris levels
+                                    that are affecting the trap.
+                                  </Text>
+                                </HStack>
+                                <HStack space={2} alignItems='flex-start'>
+                                  <Avatar size={'2'} mt={'2'} />
+                                  <Text fontSize='md'>
+                                    Trap Not in Service: Trap not set up for
+                                    fishing upon arrival.
+                                  </Text>
+                                </HStack>
+                              </VStack>
+                            </Popover.Body>
+                          </Popover.Content>
+                        </Popover>
+                      </HStack>
+                      <CustomSelect
+                        selectedValue={values.trapStatus}
+                        label='Trap Status'
+                        placeholder='Select Trap Status'
+                        camelName='trapStatus'
+                        onValueChange={(itemValue: string) => {
+                          setFieldValue('trapStatus', itemValue).then(() => {
+                            setFieldTouched('trapStatus', true)
+                          })
+                        }}
+                        touched={touched}
+                        errors={errors}
+                        // setFieldTouched={() => setFieldTouched('trapStatus')}
+                        selectOptions={dropdownValues.trapFunctionality.map(
+                          (item: any) => {
+                            if (item.definition == 'trap not in service') {
+                              return {
+                                label: `${item.definition} ${trapNotInServiceLabel}`,
+                                value: `${item.definition} ${trapNotInServiceLabel}`,
+                              }
+                            } else {
+                              return {
+                                label: item.definition,
+                                value: item.definition,
+                              }
                             }
                           }
-                        }
-                      )}
-                    />
-                  </FormControl>
+                        )}
+                      />
+                    </FormControl>
+                  )}
                   {values?.trapStatus?.length > 0 ? (
                     <>{renderTrappingDateAndTime(values, setFieldValue)}</>
                   ) : null}
