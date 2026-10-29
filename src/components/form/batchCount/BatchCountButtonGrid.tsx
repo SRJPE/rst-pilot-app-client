@@ -84,7 +84,19 @@ const BatchCountButtonGrid = ({
     setNumArray(createArray(firstButton, numberOfAdditionalButtons))
   }, [firstButton])
 
+  // RN's Pressable can fire onPress twice for a single physical tap when the
+  // JS thread is briefly busy (e.g. right after this dispatch re-renders the
+  // batch list), which read in the field as duplicate fish entries. Guard
+  // against any press repeated within 250ms rather than debouncing/buffering,
+  // so genuinely distinct taps are never dropped.
+  const lastPressRef = useRef<number>(0)
+  const DOUBLE_PRESS_GUARD_MS = 250
+
   const handlePress = useCallback((num: number) => {
+    const now = Date.now()
+    if (now - lastPressRef.current < DOUBLE_PRESS_GUARD_MS) return
+    lastPressRef.current = now
+
     let runDefinition = null as string | null | undefined
     if (species === 'Chinook salmon' && activeTabId && ladObject) {
       runDefinition = findRunDefinition({

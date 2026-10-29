@@ -1,5 +1,5 @@
 import { Button, Text } from 'native-base'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 import { getButtonLookup } from '../../../utils/utils'
 
 const ForkLengthButtonGroup = ({
@@ -20,8 +20,17 @@ const ForkLengthButtonGroup = ({
     [selectedProgramObj]
   )
 
+  // Guard against RN's Pressable double-firing onPress for a single tap
+  // (see BatchCountButtonGrid.tsx for the same pattern and rationale).
+  const lastPressRef = useRef<number>(0)
+  const DOUBLE_PRESS_GUARD_MS = 250
+
   const handlePressGroupButton = useCallback(
     (key: string) => {
+      const now = Date.now()
+      if (now - lastPressRef.current < DOUBLE_PRESS_GUARD_MS) return
+      lastPressRef.current = now
+
       setFirstButton(buttonLookup[key].firstButton)
       setNumberOfAdditionalButtons(buttonLookup[key].additionalButtons)
       if (selectedProgramObj.streamName.toLowerCase().includes('butte')) return
