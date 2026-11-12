@@ -262,6 +262,14 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
     }
 
     return payload
+  },
+  {
+    condition: (_, { getState }) => {
+      const state = getState() as RootState
+      return (
+        state.trapVisitFormPostBundler.submissionStatus !== 'submitting...'
+      )
+    },
   }
 )
 
@@ -274,8 +282,14 @@ export const postQCSubmissions = createAsyncThunk(
         state.trapVisitFormPostBundler.qcTrapVisitSubmissions
       const qcCatchRawSubmissions =
         state.trapVisitFormPostBundler.qcCatchRawSubmissions
+      const qcCatchRawDeletions =
+        state.trapVisitFormPostBundler.qcCatchRawDeletions
 
-      if (qcTrapVisitSubmissions.length || qcCatchRawSubmissions.length) {
+      if (
+        qcTrapVisitSubmissions.length ||
+        qcCatchRawSubmissions.length ||
+        qcCatchRawDeletions.length
+      ) {
         const trapPromises = qcTrapVisitSubmissions.map(
           (trapSubmission: any) => {
             const cloned = JSON.parse(JSON.stringify(trapSubmission))
@@ -283,30 +297,85 @@ export const postQCSubmissions = createAsyncThunk(
             delete cloned.createdTrapVisitResponse.id
             delete cloned.stagedForSubmission
 
+            // Optimistic concurrency: only attach expectedUpdatedAt when we
+            // actually know the pre-edit baseline. Queue entries staged
+            // before this field existed (already-persisted redux-persist
+            // state) won't have the key at all - omitting it tells the
+            // server to skip the staleness check entirely, i.e. today's
+            // behavior, rather than falsely treating "we never recorded a
+            // value" as "the server's updatedAt is literally null."
+            if ('updatedAt' in cloned.createdTrapVisitResponse) {
+              cloned.createdTrapVisitResponse.expectedUpdatedAt =
+                cloned.createdTrapVisitResponse.updatedAt ?? null
+            }
+
             return api.put(`trap-visit/${id}`, cloned).catch((error: any) => {
+              if (error?.response?.status === 409) {
+                // Someone else changed this record since we loaded it -
+                // don't keep retrying forever with a payload that will
+                // 409 every time.
+                return Promise.reject({
+                  isConflict: true,
+                  id,
+                  entity: 'trapVisit' as const,
+                })
+              }
               const errorMessage = generateErrorMessage(
                 error.code || 'Error during post qc submission (ln 230)'
               )
               showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
+              return Promise.reject(error)
             })
           }
         )
 
         const catchPromises = qcCatchRawSubmissions.map(
           (catchSubmission: any) => {
+            const id = catchSubmission.createdCatchRawResponse.id
             return Promise.resolve()
               .then(() => {
                 const cloned = JSON.parse(JSON.stringify(catchSubmission))
-                const id = cloned.createdCatchRawResponse.id
                 delete cloned.createdCatchRawResponse.id
                 delete cloned.createdGeneticSamplingDataResponse
                   ?.catchRawCreatedAt
                 delete cloned.createdFishConditionResponse?.catchRawCreatedAt
                 delete cloned.stagedForSubmission
+
+                if ('updatedAt' in cloned.createdCatchRawResponse) {
+                  cloned.createdCatchRawResponse.expectedUpdatedAt =
+                    cloned.createdCatchRawResponse.updatedAt ?? null
+                }
                 return api.put(`catch-raw/${id}`, cloned)
               })
               .catch(error => {
+                if (error?.response?.status === 409) {
+                  return Promise.reject({
+                    isConflict: true,
+                    id,
+                    entity: 'catchRaw' as const,
+                  })
+                }
                 console.log('error in catchPromises: ', error)
+                return Promise.reject(error)
+              })
+          }
+        )
+
+        const deletePromises = qcCatchRawDeletions.map(
+          (catchRawId: number) => {
+            return api
+              .delete(`catch-raw/${catchRawId}`)
+              .then(() => catchRawId)
+              .catch(error => {
+                console.log('error deleting qc catch raw: ', error)
+                showSlideAlert(
+                  thunkAPI.dispatch,
+                  generateErrorMessage(
+                    error.code || 'Error during QC catch raw deletion'
+                  ),
+                  'error',
+                  5000
+                )
                 return Promise.reject(error)
               })
           }
@@ -314,25 +383,60 @@ export const postQCSubmissions = createAsyncThunk(
 
         const trapResults = await Promise.allSettled(trapPromises)
         const catchResults = await Promise.allSettled(catchPromises)
+        const deleteResults = await Promise.allSettled(deletePromises)
 
         const trapVisitResponse = []
+        const conflictedTrapVisitIds: number[] = []
 
         for (const result of trapResults as any) {
           if (result.status === 'fulfilled') {
             trapVisitResponse.push(result?.value?.data)
+          } else if (result.reason?.isConflict) {
+            conflictedTrapVisitIds.push(result.reason.id)
           } else {
             console.log('trap qc submission fail: ', result)
           }
         }
 
         const catchRawResponse = []
+        const conflictedCatchRawIds: number[] = []
 
         for (const result of catchResults as any) {
           if (result.status === 'fulfilled') {
             catchRawResponse.push(result?.value?.data)
+          } else if (result.reason?.isConflict) {
+            conflictedCatchRawIds.push(result.reason.id)
           } else {
             console.log('catch qc submission fail: ', result)
           }
+        }
+
+        const deletedCatchRawIds: number[] = []
+
+        for (const result of deleteResults as any) {
+          if (result.status === 'fulfilled') {
+            deletedCatchRawIds.push(result.value)
+          } else {
+            console.log('catch qc deletion fail: ', result)
+          }
+        }
+
+        if (conflictedTrapVisitIds.length || conflictedCatchRawIds.length) {
+          thunkAPI.dispatch(
+            removeConflictedQCSubmissions({
+              conflictedTrapVisitIds,
+              conflictedCatchRawIds,
+            })
+          )
+          showSlideAlert(
+            thunkAPI.dispatch,
+            `${
+              conflictedTrapVisitIds.length + conflictedCatchRawIds.length
+            } QC edit(s) could not be saved because the record changed elsewhere since you started editing. It has been refreshed - please review and redo your edit.`,
+            'warning',
+            8000
+          )
+          await thunkAPI.dispatch(fetchPreviousTrapAndCatch())
         }
 
         showSlideAlert(
@@ -345,6 +449,7 @@ export const postQCSubmissions = createAsyncThunk(
         return {
           trapVisitResponse,
           catchRawResponse,
+          deletedCatchRawIds,
         }
       }
     } catch (error) {
@@ -559,14 +664,6 @@ const getIndexOfDuplicateTrapVisit = ({
   return index
 }
 
-export const catchRawQCDeletion = createAsyncThunk(
-  'trapVisitPostBundler/catchRawQCDeletion',
-  async ({ catchRawId }: { catchRawId: number; userId: number }, thunkAPI) => {
-    await api.delete(`catch-raw/${catchRawId}`)
-    return catchRawId
-  }
-)
-
 export const trapVisitPostBundler = createSlice({
   name: 'trapVisitPostBundler',
   initialState: initialState,
@@ -589,6 +686,64 @@ export const trapVisitPostBundler = createSlice({
         .filter((submission: any) => !incomingUids.has(submission.uid))
         .concat(action.payload)
       state.submissionStatus = 'not-submitted'
+    },
+    withdrawTrapVisitSubmission: (state, action) => {
+      // Removes a visit's queued-but-unsubmitted entries so a global auto-submit
+      // (triggered by a reconnect while the user is mid-edit on the resume screen)
+      // can't read/send the stale pre-edit payload. Same uid space as
+      // saveTrapVisitSubmission/saveCatchRawSubmissions: trapVisitUid === tabId
+      // === catchRawSubmission.uid. Re-added naturally next time the user reaches
+      // handleSubmit() in IncompleteSections.tsx for the same tabId.
+      const trapVisitUid = action.payload
+      state.trapVisitSubmissions = state.trapVisitSubmissions.filter(
+        (submission: any) => submission.trapVisitUid !== trapVisitUid
+      )
+      state.catchRawSubmissions = state.catchRawSubmissions.filter(
+        (submission: any) => submission.uid !== trapVisitUid
+      )
+    },
+    stageCatchRawQCDeletion: (state, action) => {
+      const { catchRawId } = action.payload
+
+      // Dedupe in case the same record is marked for deletion twice.
+      state.qcCatchRawDeletions = state.qcCatchRawDeletions.filter(
+        (id: number) => id !== catchRawId
+      )
+      state.qcCatchRawDeletions.push(catchRawId)
+
+      // An edit queued earlier this session for the same record is moot once
+      // it's marked for deletion - drop it so postQCSubmissions doesn't also
+      // PUT a record it's about to DELETE.
+      state.qcCatchRawSubmissions = state.qcCatchRawSubmissions.filter(
+        (catchRaw: any) => catchRaw.createdCatchRawResponse.id !== catchRawId
+      )
+
+      // Optimistic removal from the "not yet QC'd" view, same as a submitted
+      // edit disappearing from TrapQC/CatchMeasureQC's graphs - regardless of
+      // connectivity, so the UI never implies success it hasn't earned while
+      // also never looking like nothing happened.
+      state.previousCatchRawSubmissions = state.previousCatchRawSubmissions.filter(
+        (catchRaw: any) => catchRaw.createdCatchRawResponse.id !== catchRawId
+      )
+    },
+    removeConflictedQCSubmissions: (state, action) => {
+      const { conflictedTrapVisitIds, conflictedCatchRawIds } = action.payload
+      if (conflictedTrapVisitIds?.length) {
+        state.qcTrapVisitSubmissions = state.qcTrapVisitSubmissions.filter(
+          (qcTrapVisit: any) =>
+            !conflictedTrapVisitIds.includes(
+              qcTrapVisit.createdTrapVisitResponse.id
+            )
+        )
+      }
+      if (conflictedCatchRawIds?.length) {
+        state.qcCatchRawSubmissions = state.qcCatchRawSubmissions.filter(
+          (qcCatchRaw: any) =>
+            !conflictedCatchRawIds.includes(
+              qcCatchRaw.createdCatchRawResponse.id
+            )
+        )
+      }
     },
     trapVisitQCSubmission: (state, action) => {
       let { trapVisitId, userId, submission } = action.payload
@@ -1034,7 +1189,11 @@ export const trapVisitPostBundler = createSlice({
     )
 
     builder.addCase(postQCSubmissions.fulfilled.type, (state, action: any) => {
-      const { trapVisitResponse, catchRawResponse } = action.payload
+      const {
+        trapVisitResponse = [],
+        catchRawResponse = [],
+        deletedCatchRawIds = [],
+      } = action.payload || {}
 
       // remove all updated trap visit and catch raw in trapVisitResponse and catchRawResponse from qcTrapVisitSubmissions and qcCatchRawSubmissions
       if (trapVisitResponse.length) {
@@ -1070,6 +1229,12 @@ export const trapVisitPostBundler = createSlice({
       if (catchRawResponse.length) {
         state.previousCatchRawSubmissions.push(...catchRawResponse)
       }
+
+      if (deletedCatchRawIds.length) {
+        state.qcCatchRawDeletions = state.qcCatchRawDeletions.filter(
+          (id: number) => !deletedCatchRawIds.includes(id)
+        )
+      }
     })
 
     builder.addCase(fetchPreviousTrapAndCatch.pending.type, state => {
@@ -1093,22 +1258,15 @@ export const trapVisitPostBundler = createSlice({
       }
     )
 
-    builder.addCase(catchRawQCDeletion.fulfilled.type, (state, action: any) => {
-      const catchRawId = action.payload
-      state.previousCatchRawSubmissions =
-        state.previousCatchRawSubmissions.filter(
-          (catchRaw: any) => catchRaw.createdCatchRawResponse.id !== catchRawId
-        )
-      state.qcCatchRawSubmissions = state.qcCatchRawSubmissions.filter(
-        (catchRaw: any) => catchRaw.createdCatchRawResponse.id !== catchRawId
-      )
-    })
   },
 })
 
 export const {
   saveTrapVisitSubmission,
   saveCatchRawSubmissions,
+  withdrawTrapVisitSubmission,
+  stageCatchRawQCDeletion,
+  removeConflictedQCSubmissions,
   trapVisitQCSubmission,
   catchRawQCSubmission,
   resetTrapVisitFormPostBundler,

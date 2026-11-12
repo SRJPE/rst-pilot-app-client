@@ -23,6 +23,7 @@ import {
   saveTrapVisitSubmission,
   saveCatchRawSubmissions,
   postTrapVisitFormSubmissions,
+  withdrawTrapVisitSubmission,
 } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
 import {
   validateImportedSubmission,
@@ -377,6 +378,11 @@ const ImportTrapVisit = ({
     if (!rawTabState?.visitSetupTab) return
 
     const tabId = rawTabState.tabId || key
+
+    // Withdraw this visit from the auto-submit queue before restoring it for
+    // editing, so a reconnect mid-edit can't send the stale pre-edit payload
+    // (same fix as PendingTrapVisits.handleResume).
+    dispatch(withdrawTrapVisitSubmission(tabId))
 
     if (discardOtherTabs) {
       Object.keys(tabState?.tabs || {})

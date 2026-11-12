@@ -23,7 +23,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { RootState, AppDispatch } from '../../redux/store'
 import CustomSelect from '../../components/Shared/CustomSelect'
 import {
-  catchRawQCDeletion,
+  stageCatchRawQCDeletion,
   catchRawQCSubmission,
 } from '../../redux/reducers/postSlices/trapVisitFormPostBundler'
 
@@ -147,7 +147,7 @@ const QCFishModalContent = ({
   const handleDelete = () => {
     try {
       dispatch(
-        catchRawQCDeletion({
+        stageCatchRawQCDeletion({
           catchRawId: createdCatchRawResponse.id,
           userId: userCredentialsStore.id,
         })

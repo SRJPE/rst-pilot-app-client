@@ -27,6 +27,7 @@ import {
   markStepCompleted,
   updateActiveStep,
 } from '../redux/reducers/formSlices/navigationSlice'
+import { withdrawTrapVisitSubmission } from '../redux/reducers/postSlices/trapVisitFormPostBundler'
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -57,6 +58,10 @@ const PendingTrapVisits = ({
     )
 
   const handleResume = (draft: PendingVisitDraftI) => {
+    // Withdraw this visit from the auto-submit queue before restoring it for
+    // editing, so a reconnect mid-edit can't send the stale pre-edit payload.
+    dispatch(withdrawTrapVisitSubmission(draft.tabId))
+
     dispatch(
       createTab({
         tabId: draft.tabId,

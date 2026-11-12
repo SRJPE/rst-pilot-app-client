@@ -90,7 +90,15 @@ const GraphModalContent = ({
       }
     })
     setPayload(modalDataAtPointClicked)
-  }, [modalData, pointClicked])
+    // Deliberately NOT depending on `modalData`: this component stays mounted
+    // for the lifetime of one open point (see TrapQC/CatchMeasureQC - the modal
+    // fully unmounts/remounts on open/close). `modalData`'s identity can change
+    // out from under an open point (e.g. a background postQCSubmissions() sync
+    // removing/relocating *other* queued entries) - resyncing on every such
+    // change would silently overwrite whatever the user is actively typing.
+    // Resync only when the user opens a (possibly different) point.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pointClicked])
 
   return (
     <VStack flex={1}>
