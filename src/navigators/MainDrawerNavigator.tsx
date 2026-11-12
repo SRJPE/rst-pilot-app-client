@@ -1,9 +1,8 @@
 import { createDrawerNavigator } from '@react-navigation/drawer'
-import { useNavigationState } from '@react-navigation/native'
 import * as SecureStore from 'expo-secure-store'
-import { connect, useDispatch } from 'react-redux'
+import { connect } from 'react-redux'
 import DrawerMenu from '../components/drawerMenu'
-import { AppDispatch, RootState } from '../redux/store'
+import { RootState } from '../redux/store'
 import GenerateReport from '../screens/GenerateReport'
 import Home from '../screens/Home'
 import PermitInfo from '../screens/PermitInfo'
@@ -17,86 +16,23 @@ import TrapVisitForm from './roots/TrapVisitFormRoot'
 import InspectorWindow from '../screens/InspectorWindow'
 import PendingTrapVisits from '../screens/PendingTrapVisits'
 import ImportTrapVisit from '../screens/ImportTrapVisit'
-import { refreshUserToken } from '../utils/authUtils'
-import React, { useEffect } from 'react'
-import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
+import React from 'react'
 import type { InitialStateI as UserCredentialStopeProps } from '../redux/reducers/userCredentialsSlice'
-import type { InitialStateI as ConnectivityStoreProps } from '../redux/reducers/connectivitySlice'
 import Genetics from '../screens/miscScreens/Genetics'
-import { showSlideAlert } from '../redux/reducers/slideAlertSlice'
 const Drawer = createDrawerNavigator()
 
+// Proactive token refresh on reconnect used to live here, racing
+// independently against axiosConfig.ts's interceptor-level refresh (and
+// onStartupProvider.tsx's own now-removed copy of this same call) with no
+// shared lock. Removed: axiosConfig.ts's interceptor already refreshes
+// lazily on demand via the shared lock in authUtils.refreshUserToken, and
+// connectionChanged already guarantees a real API call fires on every
+// reconnect while a user is logged in.
 const DrawerNavigator = ({
   userCredentialsStore,
-  connectivityStore,
 }: {
   userCredentialsStore: UserCredentialStopeProps
-  connectivityStore: ConnectivityStoreProps
 }) => {
-  const dispatch = useDispatch<AppDispatch>()
-
-  // const currentRouteIndex = useNavigationState
-  //   ? useNavigationState(state => state?.index)
-  //   : 0
-
-  const isSignInScreen = !userCredentialsStore.azureUid
-
-  // const isSignInScreen = currentRouteIndex === 0
-
-  const { isConnected: connectivityStoreIsConnected, isInternetReachable } =
-    connectivityStore
-
-  const isConnected =
-    connectivityStoreIsConnected && isInternetReachable !== false
-
-  useEffect(() => {
-    if (isConnected && isInternetReachable && !isSignInScreen) {
-      refreshUserToken(dispatch)
-        .then(tokenRefreshResponse => {
-          if (
-            tokenRefreshResponse &&
-            [
-              'No refresh token found',
-              'Tokens could not be refreshed',
-            ].includes(tokenRefreshResponse)
-          ) {
-            dispatch(setForcedLogoutModalOpen(true))
-            showSlideAlert(
-              dispatch,
-              'Tokens could not be refreshed.',
-              'error',
-              5000
-            )
-            return
-          }
-
-          if (tokenRefreshResponse === 'Tokens refreshed') {
-            console.log(
-              '🚀 ~ file: MainDrawerNavigator.tsx:42 ~ Tokens refreshed from main drawer navigation provider'
-            )
-            return
-          }
-
-          if (tokenRefreshResponse === 'Tokens still valid') {
-            console.log(
-              '🚀 ~ file: MainDrawerNavigator.tsx:49 ~ Tokens still valid from main drawer navigation provider'
-            )
-          }
-        })
-        .catch(error => {
-          console.error('Error refreshing token:', error)
-          showSlideAlert(dispatch, 'Error refreshing token', 'error', 5000)
-          dispatch(setForcedLogoutModalOpen(true))
-          return
-        })
-    } else {
-      console.log(
-        '🚀 ~ file: MainDrawerNavigator.tsx:72 ~ useEffect ~ isConnected:',
-        isConnected
-      )
-    }
-  }, [isSignInScreen, isConnected, isInternetReachable])
-
   return (
     <Drawer.Navigator
       // initialRouteName='Sign In'
@@ -150,7 +86,6 @@ const DrawerNavigator = ({
 const mapStateToProps = (state: RootState) => {
   return {
     userCredentialsStore: state.userCredentials,
-    connectivityStore: state.connectivity,
   }
 }
 export default connect(mapStateToProps)(DrawerNavigator)

@@ -3,7 +3,6 @@ import NetInfo, { NetInfoSubscription } from '@react-native-community/netinfo'
 import { AlertDialog, Button, Center, HStack, Icon, Text } from 'native-base'
 import React, { useEffect, useRef } from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { refreshUserToken } from '../utils/authUtils'
 import { connectionChanged } from './reducers/connectivitySlice'
 import { setForcedLogoutModalOpen } from './reducers/userAuthSlice'
 import { clearUserCredentials } from './reducers/userCredentialsSlice'
@@ -26,38 +25,18 @@ const OnStartupProvider = (props: Props) => {
 
   useEffect(() => {
     unsubscribe = NetInfo.addEventListener(async connectionState => {
-      const { isConnected, isInternetReachable, userCredentialsStore } = props
+      const { isConnected, isInternetReachable } = props
       if (
         isConnected != connectionState.isConnected ||
         isInternetReachable != connectionState.isInternetReachable
       ) {
+        // connectionChanged itself fans out real API calls (e.g.
+        // fetchPreviousTrapAndCatch/fetchExistingMarks) whenever a user is
+        // logged in, which already go through axiosConfig.ts's interceptor -
+        // that lazily and safely refreshes the token on demand (via the
+        // shared lock in authUtils.refreshUserToken) without this listener
+        // needing its own separate, racing proactive refresh call.
         dispatch(connectionChanged(connectionState as any))
-      }
-
-      const userOnStart = userCredentialsStore.azureUid
-      if (userOnStart) {
-        try {
-          const tokenRefreshResponse = await refreshUserToken(dispatch)
-
-          if (
-            tokenRefreshResponse &&
-            [
-              'No refresh token found',
-              'Tokens could not be refreshed',
-            ].includes(tokenRefreshResponse) &&
-            isConnected &&
-            isInternetReachable
-          ) {
-            dispatch(setForcedLogoutModalOpen(true))
-            return
-          }
-
-          if (tokenRefreshResponse === 'Tokens refreshed') {
-            return
-          }
-        } catch (error) {
-          console.error('Error refreshing token:', error)
-        }
       }
     })
 
@@ -121,6 +100,7 @@ const OnStartupProvider = (props: Props) => {
 const mapStateToProps = (state: RootState) => {
   return {
     isConnected: state.connectivity.isConnected,
+    isInternetReachable: state.connectivity.isInternetReachable,
     userCredentialsStore: state.userCredentials,
   }
 }

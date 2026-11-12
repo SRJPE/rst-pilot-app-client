@@ -14,10 +14,35 @@ type TokenResponse =
   | 'No refresh token found'
   | 'No network connection'
 
+let inFlightRefresh: Promise<TokenResponse> | null = null
+
+// Single entry point for refreshing the session token. Safe to call from
+// multiple places concurrently (axios interceptor, startup/connectivity
+// listeners, etc.) - only one refreshAsync()/storeAccessTokens() sequence is
+// ever in flight at a time; concurrent callers await the same promise
+// instead of each independently racing Azure AD B2C with the same refresh
+// token.
 export const refreshUserToken = async (
   dispatch: AppDispatch
-): Promise<TokenResponse | null> => {
+): Promise<TokenResponse> => {
+  if (inFlightRefresh) {
+    return inFlightRefresh
+  }
+
+  inFlightRefresh = performTokenRefresh()
+
+  try {
+    return await inFlightRefresh
+  } finally {
+    inFlightRefresh = null
+  }
+}
+
+const performTokenRefresh = async (): Promise<TokenResponse> => {
   const isConnected = store.getState().connectivity.isConnected
+  if (!isConnected) {
+    return 'No network connection'
+  }
 
   const tokenExpiresAt = await SecureStore.getItemAsync(
     'userAccessTokenExpiresAt'
@@ -26,55 +51,52 @@ export const refreshUserToken = async (
     '🚀 ~ file: authUtils.ts:31 ~ current token expires/expired at: ',
     moment(tokenExpiresAt).format('MMMM Do YYYY, h:mm:ss a')
   )
-  if (isConnected) {
-    try {
-      const accessTokenIsExpired = moment().isAfter(tokenExpiresAt)
-      if (!accessTokenIsExpired) {
-        return 'Tokens still valid' as TokenResponse
-      }
 
-      //refreshAsync to exchave for new token
-      const existingRefreshToken = await SecureStore.getItemAsync(
-        'userRefreshToken'
-      )
-
-      const tokenEndpoint =
-        'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/b2c_1_signin/oauth2/v2.0/token'
-
-      const refreshResponse = await refreshAsync(
-        {
-          clientId: EXPO_PUBLIC_CLIENT_ID,
-          refreshToken: existingRefreshToken || undefined,
-        },
-        { tokenEndpoint }
-      )
-
-      if (refreshResponse.accessToken !== null) {
-        const { accessToken, refreshToken, idToken, issuedAt, expiresIn } =
-          refreshResponse
-
-        console.log('🚀 ~ file: authUtils.ts:58 ~ Token exchange successful')
-
-        await storeAccessTokens({
-          accessToken,
-          refreshToken: refreshToken,
-          idToken,
-          expiresIn,
-          issuedAt,
-        })
-        return 'Tokens refreshed'
-      } else {
-        throw new Error('No access token in refresh response')
-      }
-    } catch (responseError) {
-      if (responseError instanceof Error) {
-        throw new Error('Error during token refresh')
-      }
-    }
-  } else {
-    return 'No network connection' as TokenResponse
+  const accessTokenIsExpired = moment().isAfter(tokenExpiresAt)
+  if (!accessTokenIsExpired) {
+    return 'Tokens still valid'
   }
-  return null
+
+  const existingRefreshToken = await SecureStore.getItemAsync(
+    'userRefreshToken'
+  )
+  if (!existingRefreshToken) {
+    return 'No refresh token found'
+  }
+
+  const tokenEndpoint =
+    'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/b2c_1_signin/oauth2/v2.0/token'
+
+  try {
+    const refreshResponse = await refreshAsync(
+      {
+        clientId: EXPO_PUBLIC_CLIENT_ID,
+        refreshToken: existingRefreshToken,
+      },
+      { tokenEndpoint }
+    )
+
+    if (!refreshResponse.accessToken) {
+      return 'Tokens could not be refreshed'
+    }
+
+    const { accessToken, refreshToken, idToken, issuedAt, expiresIn } =
+      refreshResponse
+
+    console.log('🚀 ~ file: authUtils.ts:58 ~ Token exchange successful')
+
+    await storeAccessTokens({
+      accessToken,
+      refreshToken: refreshToken,
+      idToken,
+      expiresIn,
+      issuedAt,
+    })
+    return 'Tokens refreshed'
+  } catch (responseError) {
+    console.error('Error during token refresh:', responseError)
+    return 'Tokens could not be refreshed'
+  }
 }
 
 export const storeAccessTokens = async ({

@@ -6,16 +6,10 @@ import axios, {
 import { camelizeKeys } from 'humps'
 import Constants from 'expo-constants'
 import * as SecureStore from 'expo-secure-store'
-import { refreshAsync } from 'expo-auth-session'
 import moment from 'moment'
 import { store } from '../redux/store'
 import { setForcedLogoutModalOpen } from '../redux/reducers/userAuthSlice'
-
-import {
-  // @ts-ignore
-  EXPO_PUBLIC_CLIENT_ID,
-} from '@env'
-import { storeAccessTokens } from '../utils/authUtils'
+import { refreshUserToken } from '../utils/authUtils'
 
 const dateTransformer: AxiosRequestTransformer = (data: any) => {
   if (data instanceof Date) {
@@ -58,8 +52,6 @@ const convertUTCToLocal: any = (data: any) => {
 
 const controller = new AbortController()
 
-let refreshPromise: Promise<void> | null = null
-
 const baseURL = Constants.expoConfig?.extra?.EXPO_PUBLIC_BASE_URL
 const api = axios.create({
   baseURL,
@@ -101,53 +93,16 @@ api.interceptors.request.use(
           return newConfig
         }
 
-        const existingRefreshToken =
-          (await SecureStore.getItemAsync('userRefreshToken')) || undefined
-
-        if (!existingRefreshToken) {
-          store.dispatch(setForcedLogoutModalOpen(true))
-          return config
-        }
-
-        const tokenEndpoint =
-          'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/b2c_1_signin/oauth2/v2.0/token'
-
-        if (!refreshPromise) {
-          refreshPromise = refreshAsync(
-            {
-              clientId: EXPO_PUBLIC_CLIENT_ID,
-              refreshToken: existingRefreshToken,
-            },
-            { tokenEndpoint }
-          )
-            .then(async refreshResponse => {
-              if (refreshResponse.accessToken) {
-                const {
-                  accessToken,
-                  refreshToken,
-                  idToken,
-                  issuedAt,
-                  expiresIn,
-                } = refreshResponse
-                await storeAccessTokens({
-                  accessToken,
-                  refreshToken,
-                  idToken,
-                  expiresIn,
-                  issuedAt,
-                })
-              }
-            })
-            .catch(error => {
-              console.error('Error refreshing token:', error)
-            })
-            .finally(() => {
-              refreshPromise = null
-            })
-        }
-
         try {
-          await refreshPromise
+          const refreshResult = await refreshUserToken(store.dispatch)
+
+          if (
+            refreshResult === 'No refresh token found' ||
+            refreshResult === 'Tokens could not be refreshed'
+          ) {
+            store.dispatch(setForcedLogoutModalOpen(true))
+            return config
+          }
 
           const freshAccessToken =
             await SecureStore.getItemAsync('userAccessToken')

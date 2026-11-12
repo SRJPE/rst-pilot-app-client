@@ -1,13 +1,7 @@
-import * as SecureStore from 'expo-secure-store'
 import { AppState } from 'react-native'
 import { useEffect, useRef } from 'react'
-import moment from 'moment'
-import { refreshAsync } from 'expo-auth-session'
-import { storeAccessTokens } from '../authUtils'
+import { refreshUserToken } from '../authUtils'
 import { store } from '../../redux/store'
-
-const tokenEndpoint =
-  'https://rsttabletapp.b2clogin.com/rsttabletapp.onmicrosoft.com/oauth2/v2.0/token?p=b2c_1_signin'
 
 const REFRESH_INTERVAL_HOURS = 12
 
@@ -18,41 +12,13 @@ export function useTokenAutoRefresh() {
   useEffect(() => {
     const refreshTokenIfNeeded = async () => {
       try {
-        const { isConnected, isInternetReachable } =
-          store.getState().connectivity
-
-        if (!isConnected || !isInternetReachable) {
-          console.log('No network connection, skipping token refresh')
-          return
-        }
-
-        const expiresAt = await SecureStore.getItemAsync(
-          'userAccessTokenExpiresAt'
-        )
-        const refreshToken = await SecureStore.getItemAsync('userRefreshToken')
-        const clientId = process.env.EXPO_PUBLIC_CLIENT_ID
-
-        if (!expiresAt || !refreshToken) return
-
-        console.log('REFRESH TOKEN')
-        const response = await refreshAsync(
-          { clientId, refreshToken },
-          { tokenEndpoint }
-        )
-
-        if (response.accessToken !== null && response.refreshToken !== null) {
-          // Save new tokens
-          const { accessToken, refreshToken, idToken, issuedAt, expiresIn } =
-            response
-
-          await storeAccessTokens({
-            accessToken,
-            refreshToken: refreshToken,
-            idToken,
-            expiresIn,
-            issuedAt,
-          })
-        }
+        // Routes through authUtils's shared lock (inFlightRefresh) instead
+        // of refreshing inline - this used to call its own independent
+        // refreshAsync() on mount/every 12h/on app-foreground, racing
+        // against axiosConfig.ts's interceptor-driven refresh with no
+        // coordination between them whenever both fired for the same
+        // expired token.
+        await refreshUserToken(store.dispatch)
       } catch (err) {
         console.error('Error auto-refreshing token:', err)
       }
