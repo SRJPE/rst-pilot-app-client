@@ -1,5 +1,5 @@
 import { find, startCase } from 'lodash'
-import { Button, Heading, HStack, Icon, Text, View, VStack } from 'native-base'
+import { Heading, HStack, Icon, Text, View, VStack } from 'native-base'
 import React, { useCallback, useEffect, useState } from 'react'
 import { connect, useDispatch } from 'react-redux'
 import CreateNewProgramButton from '../../../components/createNewProgram/CreateNewProgramButton'
@@ -15,6 +15,8 @@ import {
   postMonitoringProgramSubmissions,
   saveMonitoringProgramSubmission,
 } from '../../../redux/reducers/postSlices/monitoringProgramPostBundler'
+import { setSubmissionUid } from '../../../redux/reducers/createNewProgramSlices/createNewProgramHomeSlice'
+import { uid } from 'uid'
 import {
   getUserPrograms,
   InitialStateI as UserCredentialsInitialState,
@@ -102,6 +104,11 @@ interface PermitInformationSubmissionI {
 }
 
 export interface MonitoringProgramSubmissionI {
+  // Client-generated uid for one wizard attempt - lets
+  // saveMonitoringProgramSubmission replace rather than duplicate a
+  // resubmission of the same attempt (e.g. after backing out of
+  // "Create New Program Complete" and resubmitting).
+  submissionUid: string
   metaData: ProgramMetaDataSubmissionI
   trappingSites: TrappingSitesSubmissionI[]
   crewMembers: CrewMembersSubmissionI[]
@@ -162,7 +169,13 @@ const CreateNewProgramHome = ({
       const trappingProtocols = handleSaveTrappingProtocols()
       const permittingInformation = handleSavePermittingInformation()
 
+      const submissionUid = createNewProgramHomeStore.submissionUid ?? uid()
+      if (!createNewProgramHomeStore.submissionUid) {
+        dispatch(setSubmissionUid(submissionUid))
+      }
+
       const monitoringProgramSubmission: MonitoringProgramSubmissionI = {
+        submissionUid,
         metaData: metaData,
         trappingSites: trappingSites,
         crewMembers: crewMembers,
@@ -415,19 +428,7 @@ const CreateNewProgramHome = ({
       <View flex={1} bg='#fff'>
         <VStack space={10} px='15%' py='5%'>
           <VStack space={4}>
-            <HStack space={5}>
-              <Heading mb='4'>Create New Program</Heading>
-              <Button
-                bg='primary'
-                w='40'
-                h='10'
-                onPress={() => {
-                  POSTMonitoringProgramSubmissionsHandler()
-                }}
-              >
-                TEST SAVE
-              </Button>
-            </HStack>
+            <Heading mb='4'>Create New Program</Heading>
             <HStack
               w='80%'
               padding='2'

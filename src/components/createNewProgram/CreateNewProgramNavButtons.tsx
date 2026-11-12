@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, HStack, Text, Button, Icon } from 'native-base'
 import { connect, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '../../redux/store'
-import { useRoute } from '@react-navigation/native'
+import { StackActions, useRoute } from '@react-navigation/native'
 import { markCreateNewProgramStepCompleted } from '../../redux/reducers/createNewProgramSlices/createNewProgramHomeSlice'
 import { TrappingProtocolsStoreI } from '../../redux/reducers/createNewProgramSlices/trappingProtocolsSlice'
 import { CrewMembersStoreI } from '../../redux/reducers/createNewProgramSlices/crewMembersSlice'
@@ -103,9 +103,12 @@ const CreateNewProgramNavButtons = ({
         //post submission
         if (POSTMonitoringProgramSubmissionsHandler) {
           POSTMonitoringProgramSubmissionsHandler()
-          navigation?.navigate('Create New Program', {
-            screen: 'Create New Program Complete',
-          })
+          // Replace (not push) so "Create New Program Home" - still fully
+          // populated at this point - isn't left reachable via hardware
+          // back/swipe-back, which would let the user resubmit and create a
+          // duplicate program record. Mirrors the pattern used throughout
+          // MarkRecaptureNavButtons.
+          navigation?.dispatch(StackActions.replace('Create New Program Complete'))
         }
         break
       case 'Create New Program Complete':

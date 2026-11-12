@@ -10,6 +10,11 @@ export interface CreateNewProgramInitialStateI {
     copyExistingProgram: 'true' | 'false'
   }
   steps: Array<{ name: string; completed: boolean }>
+  // Client-generated uid for one wizard attempt, used to dedupe the queued
+  // program submission (see saveMonitoringProgramSubmission) if the user
+  // resubmits after backing out of "Create New Program Complete." Cleared
+  // for free by resetCreateNewProgramHomeSlice.
+  submissionUid: string | null
 }
 export const initialState: CreateNewProgramInitialStateI = {
   values: {
@@ -19,6 +24,7 @@ export const initialState: CreateNewProgramInitialStateI = {
     copyExistingProgram: 'false',
     program: '',
   },
+  submissionUid: null,
   steps: [
     { name: 'trappingSites', completed: false },
     { name: 'crewMembers', completed: false },
@@ -59,6 +65,9 @@ export const createNewProgramHomeSlice = createSlice({
       stepsCopy[stepIndex].completed = false
       state.steps = stepsCopy
     },
+    setSubmissionUid: (state, action) => {
+      state.submissionUid = action.payload
+    },
   },
 })
 
@@ -67,6 +76,7 @@ export const {
   saveNewProgramValues,
   markCreateNewProgramStepCompleted,
   markCreateNewProgramStepIncomplete,
+  setSubmissionUid,
 } = createNewProgramHomeSlice.actions
 
 export default createNewProgramHomeSlice.reducer

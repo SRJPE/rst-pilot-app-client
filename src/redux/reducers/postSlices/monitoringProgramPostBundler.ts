@@ -118,6 +118,15 @@ export const monitoringProgramPostBundler = createSlice({
   initialState: initialState,
   reducers: {
     saveMonitoringProgramSubmission: (state, action) => {
+      // Replace (not duplicate) any existing queued entry for this
+      // submission attempt - matters if the user resubmits after backing
+      // out of "Create New Program Complete" (mirrors
+      // saveTrapVisitSubmission's replace-by-uid pattern).
+      state.monitoringProgramSubmissions =
+        state.monitoringProgramSubmissions.filter(
+          (submission: any) =>
+            submission.submissionUid !== action.payload.submissionUid
+        )
       state.monitoringProgramSubmissions.push({ ...action.payload })
       state.submissionStatus = 'not-submitted'
     },

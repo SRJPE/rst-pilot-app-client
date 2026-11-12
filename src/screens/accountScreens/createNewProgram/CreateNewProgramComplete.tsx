@@ -1,4 +1,5 @@
 import React from 'react'
+import { usePreventRemove } from '@react-navigation/native'
 import { Box, Center, Heading, Text, VStack } from 'native-base'
 import AppLogo from '../../../components/Shared/AppLogo'
 import CreateNewProgramNavButtons from '../../../components/createNewProgram/CreateNewProgramNavButtons'
@@ -30,6 +31,16 @@ const CreateNewProgramComplete = ({
     dispatch(resetTrappingProtocolsSlice())
     dispatch(resetPermitInformationSlice())
   }
+
+  // Defense-in-depth: if this screen is ever removed by a path other than
+  // its own "Return to Profile"/"Add Another Program" buttons (hardware
+  // back, iOS swipe-back, a future navigation change), clear the step
+  // slices first so the wizard can't be resumed in its stale, already-
+  // submitted state and resubmitted as a duplicate program.
+  usePreventRemove(true, ({ data }) => {
+    clearFormValues()
+    navigation.dispatch(data.action)
+  })
 
   return (
     <>
