@@ -33,9 +33,7 @@ Create a `.env` file with:
 
 ```
 EXPO_PUBLIC_BASE_URL=          # Server URL (local or Azure)
-EXPO_PUBLIC_CLIENT_ID=         # Azure AD B2C client ID
-EXPO_PUBLIC_CLIENT_SECRET_VALUE=
-EXPO_PUBLIC_CLIENT_SECRET_ID=
+EXPO_PUBLIC_CLIENT_ID=         # Azure AD B2C client ID (public client, no secret — this is a native app and authenticates via PKCE)
 ```
 
 The server URL is read via `Constants.expoConfig?.extra?.EXPO_PUBLIC_BASE_URL` at runtime (see `src/api/axiosConfig.ts`).

@@ -36,11 +36,7 @@ Current Azure B2C Configuration Environmental Variables:
 
 - `EXPO_PUBLIC_CLIENT_ID`
 
-- `EXPO_PUBLIC_CLIENT_SECRET_VALUE`
-
-- `EXPO_PUBLIC_CLIENT_SECRET_ID`
-
-- These environment variables, codebase, and logic may require changing if utilizing an authentication and authorization service other than Azure AD B2C
+- This is a public/native OAuth client — it authenticates via PKCE and must never have a client secret. These environment variables, codebase, and logic may require changing if utilizing an authentication and authorization service other than Azure AD B2C
 
 ## Setup
 
