@@ -181,9 +181,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
             // True failure - preserve both trap visit and catch raw for retry
             showSlideAlert(
               thunkAPI.dispatch,
-              generateErrorMessage(
-                error.code || 'Error during trap visit submission'
-              ),
+              generateErrorMessage(error, 'Error during trap visit submission'),
               'error',
               5000
             )
@@ -228,9 +226,7 @@ export const postTrapVisitFormSubmissions = createAsyncThunk(
           )
           showSlideAlert(
             thunkAPI.dispatch,
-            generateErrorMessage(
-              catchError.code || 'Error during catch raw submission'
-            ),
+            generateErrorMessage(catchError, 'Error during catch raw submission'),
             'error',
             5000
           )
@@ -321,7 +317,8 @@ export const postQCSubmissions = createAsyncThunk(
                 })
               }
               const errorMessage = generateErrorMessage(
-                error.code || 'Error during post qc submission (ln 230)'
+                error,
+                'Error during post qc submission (ln 230)'
               )
               showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
               return Promise.reject(error)
@@ -371,7 +368,8 @@ export const postQCSubmissions = createAsyncThunk(
                 showSlideAlert(
                   thunkAPI.dispatch,
                   generateErrorMessage(
-                    error.code || 'Error during QC catch raw deletion'
+                    error,
+                    'Error during QC catch raw deletion'
                   ),
                   'error',
                   5000
@@ -537,8 +535,8 @@ export const fetchPreviousTrapAndCatch = createAsyncThunk(
         const state = thunkAPI.getState() as RootState
         const connectivityState = state.connectivity
         const errorMessage = generateErrorMessage(
-          error.code ||
-            'Error fetching previous trap and catch records (ln 367)'
+          error,
+          'Error fetching previous trap and catch records (ln 367)'
         )
         const connectionError =
           !connectivityState.isConnected &&

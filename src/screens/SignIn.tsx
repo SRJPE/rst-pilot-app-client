@@ -170,7 +170,7 @@ const SignIn = ({
                   })
                 )
               } catch (error: any) {
-                const errorMessage = generateErrorMessage(error.code)
+                const errorMessage = generateErrorMessage(error)
                 showSlideAlert(dispatch, errorMessage, 'error', 5000)
               }
             })

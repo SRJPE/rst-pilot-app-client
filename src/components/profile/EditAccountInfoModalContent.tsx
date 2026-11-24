@@ -79,7 +79,8 @@ const EditAccountInfoModalContent = ({
               }, 1000)
             } catch (error: any) {
               const errorMessage = generateErrorMessage(
-                error.code || 'Error during request to edit user (ln 81)'
+                error,
+                'Error during request to edit user (ln 81)'
               )
 
               setSubmissionMessage({
@@ -120,7 +121,8 @@ const EditAccountInfoModalContent = ({
                 error.code
               )
               const errorMessage = generateErrorMessage(
-                error.code || 'Error during request to edit user (ln 81)'
+                error,
+                'Error during request to edit user (ln 81)'
               )
 
               setSubmissionMessage({

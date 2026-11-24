@@ -91,8 +91,8 @@ export const postMonitoringProgramSubmissions = createAsyncThunk(
             error
           )
           const errorMessage = generateErrorMessage(
-            error?.code ||
-              'An unknown error occurred during monitoring program submission (ln 67)'
+            error,
+            'An unknown error occurred during monitoring program submission (ln 67)'
           )
           showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
         }
@@ -104,8 +104,8 @@ export const postMonitoringProgramSubmissions = createAsyncThunk(
       )
 
       const errorMessage = generateErrorMessage(
-        error?.code ||
-          'An unknown error occurred during monitoring program submission (ln 67)'
+        error,
+        'An unknown error occurred during monitoring program submission (ln 67)'
       )
       showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
     }
