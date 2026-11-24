@@ -141,8 +141,8 @@ export const postMarkRecaptureSubmissions = createAsyncThunk(
       }
     } catch (error: any) {
       const errorMessage = generateErrorMessage(
-        error.code ||
-          'An error occurred while posting mark recapture submissions (ln 125)'
+        error,
+        'An error occurred while posting mark recapture submissions (ln 125)'
       )
       showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
       console.log('mark recap error', error?.response?.data)
@@ -182,7 +182,8 @@ export const fetchExistingMarks = createAsyncThunk(
       console.log('🚀 ~ file: markRecapturePostBundler.ts:170 ~ error:', error)
 
       const errorMessage = generateErrorMessage(
-        error?.code || 'An error occurred while fetching existing marks (ln 58)'
+        error,
+        'An error occurred while fetching existing marks (ln 58)'
       )
       showSlideAlert(thunkAPI.dispatch, errorMessage, 'error', 5000)
       thunkAPI.rejectWithValue({

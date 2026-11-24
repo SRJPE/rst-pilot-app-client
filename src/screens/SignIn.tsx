@@ -1,5 +1,6 @@
 import * as WebBrowser from 'expo-web-browser'
 import {
+  Box,
   Button,
   Heading,
   HStack,
@@ -170,7 +171,7 @@ const SignIn = ({
                   })
                 )
               } catch (error: any) {
-                const errorMessage = generateErrorMessage(error.code)
+                const errorMessage = generateErrorMessage(error)
                 showSlideAlert(dispatch, errorMessage, 'error', 5000)
               }
             })
@@ -186,13 +187,22 @@ const SignIn = ({
     <KeyboardAvoidingView flex='1' behavior='padding'>
       <ImageBackground
         style={[{ flex: 1 }]}
-        source={require('../../assets/background_image.png')}
+        source={require('../../assets/sign_in_background.png')}
         resizeMode='cover'
       >
+        <Box
+          position='absolute'
+          top={0}
+          bottom={0}
+          left={0}
+          right={0}
+          bg='black'
+          opacity={0.6}
+        />
         <VStack justifyContent='center' alignItems='center' mt='120' space={10}>
           <AppLogo imageSize={375} />
-          <Heading color='#FFF' fontWeight={300} fontSize='7xl' mb={16}>
-            Data Tackle{' '}
+          <Heading color='#FFF' fontWeight={300} fontSize='7xl'>
+            DataTackle{' '}
           </Heading>
           <Button
             borderRadius={10}

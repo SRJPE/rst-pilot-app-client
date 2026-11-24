@@ -1,25 +1,30 @@
 import { compact } from 'lodash'
 
-export const generateErrorMessage = (errorCode: string) => {
-  let errorMessage
-  switch (errorCode) {
+// Prefers the server's own error message (what the API actually sent) over
+// axios's generic error.code classification - axios maps essentially any
+// 4xx response to 'ERR_BAD_REQUEST', which used to render a hardcoded,
+// misleading "status code 400 (Bad Request)" even for e.g. a 403 from an
+// authorization check. `fallback` is shown only when there's neither a
+// server message nor a recognized network-level error code.
+export const generateErrorMessage = (
+  error: any,
+  fallback: string = 'An unknown error occurred. Please try again.'
+) => {
+  const serverMessage =
+    error?.response?.data?.message ?? error?.response?.data?.error
+  if (typeof serverMessage === 'string' && serverMessage.length > 0) {
+    return serverMessage
+  }
+
+  switch (error?.code) {
     case 'Network Error':
     case 'ERR_NETWORK':
-      errorMessage =
-        'A network error occurred, unable to reach server. Please try again.'
-      break
+      return 'A network error occurred, unable to reach server. Please try again.'
     case 'ECONNABORTED':
-      errorMessage =
-        'The server took too long to respond. Your request could not be completed at this time.'
-      break
-    case 'ERR_BAD_REQUEST':
-      errorMessage = 'Request failed with status code 400 (Bad Request)'
-      break
+      return 'The server took too long to respond. Your request could not be completed at this time.'
     default:
-      return errorCode
-    // errorMessage = 'An unknown error occurred. Please try again.'
+      return fallback
   }
-  return errorMessage
 }
 
 export const convertBytesToKB = (bytes: number): string => {

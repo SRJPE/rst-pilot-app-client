@@ -83,7 +83,8 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
               )
 
               const errorMessage = generateErrorMessage(
-                error.code || 'Error during request to create user (ln 88)'
+                error,
+                'Error during request to create user (ln 88)'
               )
               setSubmissionMessage({
                 success: false,
@@ -93,10 +94,16 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
               setSubmitting(false)
             })
 
+          // Graph never returns a password, and the server generates a
+          // random one-time password per account now instead of a fixed,
+          // source-visible constant - this is the only place it's ever
+          // shown, so there's no auto-close timeout here: the lead needs
+          // time to read/copy it and pass it along to the new user before
+          // dismissing this modal themselves.
           if (createdUserResponse && createdUserResponse?.status === 200) {
             setSubmissionMessage({
               success: true,
-              message: 'User successfully created',
+              message: `User successfully created. Temporary password: ${createdUserResponse.data.temporaryPassword}\n\nShare this with the new user now - it won't be shown again. They'll be required to set their own password on first sign-in.`,
             })
             await api.post(`/personnel`, {
               first_name: firstName,
@@ -107,9 +114,6 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
               role,
               azure_uid: createdUserResponse.data.id,
             })
-            setTimeout(() => {
-              closeModal()
-            }, 1000)
           } else {
             setSubmissionMessage({
               success: true,
@@ -274,6 +278,7 @@ const AddNewUserModalContent = ({ closeModal }: { closeModal: () => void }) => {
               {submissionMessage.message && (
                 <Text
                   color={submissionMessage.success ? 'green.700' : 'red.700'}
+                  selectable
                 >
                   {submissionMessage.message}
                 </Text>
